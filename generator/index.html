@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="dark" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generator Modul Ajar AI — PortalKimia Obsidian</title>
+  <base target="_top">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Konfigurasi Terpusat Multi-Device -->
+  <script src="../config.js"></script>
+  
+  <!-- Favicon & PWA Icons PortalKimia -->
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  
+  <!-- Obsidian Fonts: Geist & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       OBSIDIAN DESIGN SYSTEM — HIGH-CONTRAST DARK ("Precision in Darkness")
+       North Star: Developer-grade dark UI, near-black surfaces, zinc grays,
+       soft violet (#a78bfa) interactive primary, emerald (#34d399) tertiary.
+       ========================================================================== */
+    
+    :root {
+      --obs-bg: #09090b;
+      --obs-surface: #0c0c0f;
+      --obs-surface-low: #0f0f12;
+      --obs-surface-container: #121215;
+      --obs-surface-high: #18181b;
+      --obs-surface-highest: #1e1e22;
+      --obs-border: #27272a;
+      --obs-border-hover: #3f3f46;
+      --obs-outline: #52525b;
+      --obs-text-primary: #fafafa;
+      --obs-text-secondary: #a1a1aa;
+      --obs-text-muted: #71717a;
+      
+      --obs-primary: #a78bfa;
+      --obs-primary-container: #7c3aed;
+      --obs-primary-glow: rgba(167, 139, 250, 0.25);
+      
+      --obs-tertiary: #34d399;
+      --obs-tertiary-container: #065f46;
+      --obs-tertiary-glow: rgba(52, 211, 153, 0.25);
+      
+      --obs-error: #ef4444;
+      --obs-radius-sm: 6px;
+      --obs-radius-md: 10px;
+      --obs-radius-lg: 14px;
+      --obs-radius-xl: 18px;
+    }
+
+    /* BASE STYLES */
+    body {
+      background-color: var(--obs-bg);
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--obs-text-primary);
+      padding-top: 40px;
+      padding-bottom: 72px;
+      line-height: 1.5;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* AMBIENT GLOW EFFECTS (OBSIDIAN AESTHETIC) */
+    .ambient-glow-1 {
+      position: fixed;
+      top: -120px;
+      right: -80px;
+      width: 460px;
+      height: 460px;
+      background: radial-gradient(circle, rgba(167, 139, 250, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(40px);
+    }
+
+    .ambient-glow-2 {
+      position: fixed;
+      bottom: 10%;
+      left: -100px;
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(52, 211, 153, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(40px);
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--obs-bg); }
+    ::-webkit-scrollbar-thumb { background: var(--obs-border); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--obs-border-hover); }
+
+    /* UTILITY COLOR ACCENTS */
+    .text-emerald { color: var(--obs-tertiary) !important; }
+    .text-violet { color: var(--obs-primary) !important; }
+    .border-emerald { border-color: var(--obs-border) !important; }
+
+    /* CARDS */
+    .card {
+      background-color: var(--obs-surface-container) !important;
+      border: 1px solid var(--obs-border) !important;
+      border-radius: var(--obs-radius-lg) !important;
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45) !important;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card:hover {
+      border-color: rgba(167, 139, 250, 0.3) !important;
+    }
+
+    .card-header {
+      background-color: var(--obs-surface-high) !important;
+      border-bottom: 1px solid var(--obs-border) !important;
+      color: var(--obs-text-primary) !important;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+      padding: 1.1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-body {
+      padding: 1.65rem;
+      background-color: var(--obs-surface-container) !important;
+      color: var(--obs-text-primary);
+    }
+
+    /* KARTU AI GEMINI (OBSIDIAN GLOW CARD) */
+    .ai-card {
+      background: linear-gradient(135deg, rgba(167, 139, 250, 0.09) 0%, rgba(18, 18, 21, 0.95) 55%, rgba(52, 211, 153, 0.05) 100%) !important;
+      border: 1px solid rgba(167, 139, 250, 0.35) !important;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(167, 139, 250, 0.1) !important;
+    }
+
+    .ai-card:hover {
+      border-color: rgba(167, 139, 250, 0.55) !important;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(167, 139, 250, 0.18) !important;
+    }
+
+    .ai-card .card-title {
+      color: var(--obs-text-primary) !important;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* FORM CONTROLS & INPUTS */
+    .form-label {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: #d4d4d8;
+      margin-bottom: 0.45rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-label.text-emerald {
+      color: var(--obs-tertiary) !important;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    .form-control, .form-select {
+      background-color: var(--obs-surface-low) !important;
+      border: 1px solid var(--obs-border) !important;
+      color: var(--obs-text-primary) !important;
+      border-radius: var(--obs-radius-sm) !important;
+      padding: 0.65rem 0.95rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .form-control::placeholder {
+      color: var(--obs-outline) !important;
+      opacity: 0.85;
+      font-size: 0.875rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background-color: var(--obs-surface-high) !important;
+      border-color: var(--obs-primary) !important;
+      box-shadow: 0 0 0 3px var(--obs-primary-glow) !important;
+      color: var(--obs-text-primary) !important;
+      outline: none;
+    }
+
+    .form-select option {
+      background-color: var(--obs-surface-container);
+      color: var(--obs-text-primary);
+    }
+
+    /* ACCORDION (OBSIDIAN SPEC) */
+    .accordion-item {
+      background-color: var(--obs-surface-container) !important;
+      border: 1px solid var(--obs-border) !important;
+      border-radius: var(--obs-radius-md) !important;
+      margin-bottom: 10px;
+      overflow: hidden;
+      box-shadow: none !important;
+      transition: border-color 0.2s ease;
+    }
+
+    .accordion-item:hover {
+      border-color: var(--obs-border-hover) !important;
+    }
+
+    .accordion-button {
+      background-color: var(--obs-surface-container) !important;
+      color: var(--obs-text-primary) !important;
+      font-weight: 600;
+      font-size: 0.92rem;
+      padding: 0.9rem 1.25rem;
+      border: none;
+      box-shadow: none !important;
+      transition: all 0.2s ease;
+    }
+
+    .accordion-button:not(.collapsed) {
+      background-color: var(--obs-surface-high) !important;
+      color: var(--obs-primary) !important;
+      border-bottom: 1px solid var(--obs-border);
+      box-shadow: inset 0 -1px 0 var(--obs-border) !important;
+    }
+
+    .accordion-button::after {
+      filter: invert(1) brightness(0.6);
+      transition: transform 0.25s ease;
+    }
+
+    .accordion-button:not(.collapsed)::after {
+      filter: invert(72%) sepia(50%) saturate(1200%) hue-rotate(210deg) brightness(105%) contrast(100%);
+    }
+
+    .accordion-body {
+      background-color: var(--obs-surface) !important;
+      padding: 1.35rem;
+      color: var(--obs-text-primary);
+    }
+
+    /* CHECKBOXES & PROFIL LULUSAN */
+    .profil-box {
+      background-color: var(--obs-surface-low) !important;
+      border: 1px solid var(--obs-border) !important;
+      border-radius: var(--obs-radius-md);
+      padding: 1.2rem;
+    }
+
+    .form-check-input {
+      background-color: var(--obs-surface-high);
+      border: 1px solid var(--obs-border);
+      border-radius: 4px;
+      width: 1.15em;
+      height: 1.15em;
+      margin-top: 0.15em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .form-check-input:checked {
+      background-color: var(--obs-primary);
+      border-color: var(--obs-primary);
+      box-shadow: 0 0 8px var(--obs-primary-glow);
+    }
+
+    .form-check-input:focus {
+      border-color: var(--obs-primary);
+      box-shadow: 0 0 0 3px var(--obs-primary-glow);
+    }
+
+    .form-check-label {
+      color: #e4e4e7;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding-left: 0.2rem;
+    }
+
+    /* BUTTONS */
+    .btn-primary, #tombolAI {
+      background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%) !important;
+      border: none !important;
+      border-radius: var(--obs-radius-sm) !important;
+      padding: 0.75rem 1.5rem !important;
+      font-weight: 700 !important;
+      color: #0a0012 !important;
+      box-shadow: 0 4px 16px var(--obs-primary-glow) !important;
+      transition: all 0.2s ease;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-primary:hover, #tombolAI:hover {
+      background: linear-gradient(135deg, #8b5cf6 0%, #c4b5fd 100%) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(167, 139, 250, 0.4) !important;
+      color: #0a0012 !important;
+    }
+
+    .btn-success, #tombolSubmit {
+      background: linear-gradient(135deg, #059669 0%, #34d399 100%) !important;
+      border: none !important;
+      border-radius: var(--obs-radius-md) !important;
+      padding: 0.95rem 1.6rem !important;
+      font-weight: 700 !important;
+      font-size: 1.05rem !important;
+      color: #001a12 !important;
+      box-shadow: 0 4px 18px var(--obs-tertiary-glow) !important;
+      transition: all 0.2s ease;
+    }
+
+    .btn-success:hover, #tombolSubmit:hover {
+      background: linear-gradient(135deg, #10b981 0%, #6ee7b7 100%) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(52, 211, 153, 0.38) !important;
+      color: #001a12 !important;
+    }
+
+    .btn-outline-danger {
+      border: 1px solid rgba(239, 68, 68, 0.4) !important;
+      background: rgba(239, 68, 68, 0.06) !important;
+      color: #f87171 !important;
+      border-radius: var(--obs-radius-md) !important;
+      padding: 0.95rem 1.5rem !important;
+      font-weight: 700 !important;
+      font-size: 1.05rem !important;
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline-danger:hover {
+      background-color: var(--obs-error) !important;
+      border-color: var(--obs-error) !important;
+      color: #09090b !important;
+      box-shadow: 0 4px 18px rgba(239, 68, 68, 0.3) !important;
+      transform: translateY(-1px);
+    }
+
+    /* TOP BAR ACTION BUTTONS */
+    .top-action-btn {
+      border: 1px solid var(--obs-border);
+      color: var(--obs-text-secondary);
+      background-color: var(--obs-surface-high);
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.78rem;
+      padding: 0.4rem 0.85rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .top-action-btn:hover {
+      border-color: var(--obs-primary);
+      color: var(--obs-primary);
+      background-color: var(--obs-surface-highest);
+    }
+
+    .dot-status {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-online { background-color: var(--obs-tertiary); box-shadow: 0 0 6px var(--obs-tertiary); }
+    .dot-offline { background-color: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+
+    /* RESULT AREA */
+    .alert-obsidian {
+      background-color: var(--obs-surface-high) !important;
+      border: 1px solid var(--obs-tertiary) !important;
+      color: var(--obs-text-primary) !important;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45) !important;
+      border-radius: var(--obs-radius-lg);
+    }
+
+    /* BORDER ACCENT */
+    .border-start-tertiary {
+      border-left: 3px solid var(--obs-tertiary) !important;
+    }
+
+    /* MODAL OBSIDIAN STYLE */
+    .modal-content {
+      background-color: var(--obs-surface-container) !important;
+      border: 1px solid var(--obs-border) !important;
+      color: var(--obs-text-primary) !important;
+      border-radius: var(--obs-radius-lg);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    }
+
+    .modal-header {
+      background-color: var(--obs-surface-high);
+      border-bottom: 1px solid var(--obs-border);
+      padding: 1.1rem 1.4rem;
+    }
+
+    .modal-footer {
+      background-color: var(--obs-surface-high);
+      border-top: 1px solid var(--obs-border);
+      padding: 0.9rem 1.4rem;
+    }
+
+    /* LIGHT MODE COMPATIBILITY */
+    [data-bs-theme="light"] {
+      --obs-bg: #f4f4f5;
+      --obs-surface: #ffffff;
+      --obs-surface-low: #f8fafc;
+      --obs-surface-container: #ffffff;
+      --obs-surface-high: #f1f5f9;
+      --obs-surface-highest: #e2e8f0;
+      --obs-border: #e2e8f0;
+      --obs-border-hover: #cbd5e1;
+      --obs-outline: #94a3b8;
+      --obs-text-primary: #09090b;
+      --obs-text-secondary: #475569;
+      --obs-text-muted: #64748b;
+      --obs-primary: #7c3aed;
+      --obs-tertiary: #059669;
+    }
+
+    [data-bs-theme="light"] .ai-card {
+      background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 70%, #ecfdf5 100%) !important;
+      border: 1px solid rgba(124, 58, 237, 0.3) !important;
+    }
+
+    [data-bs-theme="light"] .accordion-button::after {
+      filter: none;
+    }
+    
+    [data-bs-theme="light"] .form-label {
+      color: #334155;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow -->
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+
+  <div class="container position-relative" style="max-width: 950px; z-index: 2;">
+    
+    <!-- TOP BAR NAVIGATION & CONFIG BUTTONS -->
+    <div class="d-flex justify-content-between align-items-center gap-2 mb-3" style="position: relative; z-index: 10;">
+      <!-- Tombol Kembali ke Portal Utama & Brand Logo -->
+      <div class="d-flex align-items-center gap-2">
+        <a href="../" class="top-action-btn text-decoration-none me-1" title="Kembali ke Beranda PortalKimia Suite">
+          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_back</span>
+          <span>Portal Utama</span>
+        </a>
+        <div class="d-flex align-items-center gap-2 px-2.5 py-1 rounded-3 d-none d-sm-flex" style="background: rgba(24, 24, 27, 0.75); border: 1px solid rgba(167, 139, 250, 0.35);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" style="width: 24px; height: 24px; border-radius: 6px;">
+            <rect width="100" height="100" rx="22" fill="#18181b"/>
+            <path d="M50 18 L50 36 M38 36 L62 36" stroke="#a78bfa" stroke-width="4" stroke-linecap="round"/>
+            <path d="M42 36 L25 72 C22 78 26 84 33 84 L67 84 C74 84 78 78 75 72 L58 36 Z" stroke="#a78bfa" stroke-width="4" stroke-linejoin="round" fill="none"/>
+            <path d="M30 68 Q50 62 70 68 L67 82 L33 82 Z" fill="#8b5cf6" fill-opacity="0.35"/>
+            <circle cx="45" cy="74" r="3" fill="#c084fc"/>
+            <circle cx="55" cy="66" r="2.5" fill="#e9d5ff"/>
+            <circle cx="50" cy="54" r="2" fill="#a78bfa"/>
+            <circle cx="68" cy="30" r="4" fill="#a78bfa" fill-opacity="0.8"/>
+            <circle cx="32" cy="24" r="3" fill="#c084fc" fill-opacity="0.6"/>
+          </svg>
+          <span style="font-weight: 700; font-size: 0.85rem; color: #fff;">Portal<span style="color: #a78bfa;">Kimia</span> <span style="font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: rgba(124, 58, 237, 0.2); color: #c4b5fd; border: 1px solid rgba(124, 58, 237, 0.3);">Modul AI</span></span>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <!-- Tombol Pengaturan Backend GAS (Untuk GitHub Hosting) -->
+        <button id="btnBackendConfig" onclick="bukaModalBackend()" class="top-action-btn" title="Atur URL Google Apps Script Backend">
+          <span class="dot-status dot-offline" id="backendDot"></span>
+          <span class="material-symbols-outlined" style="font-size: 16px;">cloud_sync</span>
+          <span id="backendStatusLabel">Backend GAS</span>
+        </button>
+
+        <!-- Tombol Sakelar Tema -->
+        <button id="btnThemeToggle" onclick="toggleTheme()" class="top-action-btn">
+          🌙 Mode Obsidian
+        </button>
+      </div>
+    </div>
+
+    <!-- HEADER / HERO SECTION (PORTALKIMIA OBSIDIAN) -->
+    <div class="text-center mb-5 mt-1">
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background-color: var(--obs-surface-high); border: 1px solid var(--obs-border);">
+        <span class="material-symbols-outlined text-violet" style="font-size: 16px;">auto_stories</span>
+        <span class="text-xs font-mono font-semibold text-violet" style="font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;">PortalKimia • Modul Ajar AI</span>
+        <span style="color: var(--obs-border);">|</span>
+        <span class="text-emerald font-mono" style="font-size: 0.75rem;">BSKAP No. 032/H/KR/2024</span>
+      </div>
+      <h2 style="font-weight: 800; letter-spacing: -0.03em; color: var(--obs-text-primary); font-size: 2.1rem; margin-bottom: 0.4rem;">
+        Generator Administrasi Kimia
+      </h2>
+      <p style="color: var(--obs-text-secondary); font-size: 0.95rem; max-width: 600px; margin: 0 auto;">
+        Otomatisasi Modul Ajar &amp; Lesson Plan Berbasis AI dengan Integrasi Pedagogis Terstruktur
+      </p>
+    </div>
+    
+    <!-- KOTAK KENDALI AI GEMINI -->
+    <div class="card ai-card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <div class="d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-violet" style="font-size: 24px;">psychology</span>
+            <h5 class="card-title m-0">Asisten AI Perancang Dokumen</h5>
+          </div>
+          <span class="badge" id="statusSimpan" style="display:none; font-size: 0.75rem; background-color: var(--obs-tertiary); color: #001a12; font-weight: 700; border-radius: 6px; padding: 0.35rem 0.65rem;">
+            Disimpan Otomatis ✓
+          </span>
+        </div>
+        <p class="small mb-4 mt-2" style="color: var(--obs-text-secondary);">
+          Tentukan parameter dan tempelkan referensi bahan ajar untuk hasil presisi berbasis model Gemini.
+        </p>
+        
+        <div class="row">
+          <div class="col-md-12 mb-3">
+            <label class="form-label" for="jenisDokumen">
+              <span class="material-symbols-outlined text-violet" style="font-size: 16px;">description</span>
+              Jenis Dokumen Administrasi
+            </label>
+            <select id="jenisDokumen" class="form-select border-emerald" onchange="aturTampilanDokumen()">
+              <option value="Modul Ajar">Modul Ajar (Berbasis Bab Lengkap - Max 9 Pertemuan)</option>
+              <option value="Lesson Plan">Lesson Plan (Harian - Max 2 Pertemuan)</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="aiKelas">
+              <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">school</span>
+              Jenjang / Kelas
+            </label>
+            <input type="text" id="aiKelas" class="form-control" placeholder="Contoh: 12">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="aiTopik">
+              <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">science</span>
+              Topik / Materi
+            </label>
+            <input type="text" id="aiTopik" class="form-control" placeholder="Contoh: Sifat Koligatif">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="aiPertemuan">
+              <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">calendar_today</span>
+              Jumlah Pertemuan
+            </label>
+            <select id="aiPertemuan" class="form-select">
+              <option value="1">1 Pertemuan</option>
+              <option value="2">2 Pertemuan</option>
+              <option value="3">3 Pertemuan</option>
+              <option value="4">4 Pertemuan</option>
+              <option value="5">5 Pertemuan</option>
+              <option value="6">6 Pertemuan</option>
+              <option value="7">7 Pertemuan</option>
+              <option value="8">8 Pertemuan</option>
+              <option value="9">9 Pertemuan</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" for="aiBahanAjar">
+            <span class="material-symbols-outlined text-violet" style="font-size: 16px;">menu_book</span>
+            Referensi Bahan Ajar (Opsional)
+          </label>
+          <textarea id="aiBahanAjar" class="form-control" rows="3" placeholder="Tempelkan ekstraksi materi dari Gem atau naskah bahan ajar di sini..."></textarea>
+        </div>
+        <button type="button" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" id="tombolAI" onclick="mintaBantuanAI()">
+          <span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span>
+          <span>Generate Kerangka Otomatis</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- FORM UTAMA DOKUMEN MODUL AJAR -->
+    <form id="formModul" onsubmit="event.preventDefault(); prosesData();">
+      
+      <!-- 1. IDENTITAS & PEDAGOGIS -->
+      <div class="card">
+        <div class="card-header">
+          <span class="material-symbols-outlined text-violet" style="font-size: 20px;">assignment_ind</span>
+          <span>1. Identitas &amp; Praktik Pedagogis</span>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Nama Penyusun</label>
+              <input type="text" class="form-control" name="nama" placeholder="Contoh: Tito Vanzal, S.Pd." required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Topik / Materi</label>
+              <input type="text" class="form-control" name="topik" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Fase / Kelas</label>
+              <input type="text" class="form-control" name="kelas" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Alokasi Waktu</label>
+              <input type="text" class="form-control" name="waktu">
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Tujuan Pembelajaran</label>
+            <textarea class="form-control" name="tujuan" rows="3"></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Model Pembelajaran</label>
+              <input type="text" class="form-control" name="model">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Strategi Pembelajaran</label>
+              <input type="text" class="form-control" name="strategi">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Metode Pembelajaran</label>
+              <input type="text" class="form-control" name="metode">
+            </div>
+          </div>
+          
+          <!-- DIMENSI PROFIL LULUSAN -->
+          <div class="mb-4 profil-box">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <label class="form-label m-0 text-emerald">
+                <span class="material-symbols-outlined" style="font-size: 16px;">verified_user</span>
+                Dimensi Profil Kelulusan (Kurikulum Merdeka)
+              </label>
+              <span class="text-xs font-mono" style="font-size: 0.75rem; color: var(--obs-text-muted);">8 Indikator Profil</span>
+            </div>
+            <div class="row px-2">
+              <div class="col-md-3 form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="keimanan" value="true" id="chk_keimanan">
+                <label class="form-check-label" for="chk_keimanan">Keimanan</label>
+              </div>
+              <div class="col-md-3 form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="penalaran" value="true" id="chk_penalaran">
+                <label class="form-check-label" for="chk_penalaran">Penalaran Kritis</label>
+              </div>
+              <div class="col-md-3 form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="kolaborasi" value="true" id="chk_kolaborasi">
+                <label class="form-check-label" for="chk_kolaborasi">Kolaborasi</label>
+              </div>
+              <div class="col-md-3 form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="kesehatan" value="true" id="chk_kesehatan">
+                <label class="form-check-label" for="chk_kesehatan">Kesehatan</label>
+              </div>
+              <div class="col-md-3 form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="kewargaan" value="true" id="chk_kewargaan">
+                <label class="form-check-label" for="chk_kewargaan">Kewargaan</label>
+              </div>
+              <div class="col-md-3 form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="kreativitas" value="true" id="chk_kreativitas">
+                <label class="form-check-label" for="chk_kreativitas">Kreativitas</label>
+              </div>
+              <div class="col-md-3 form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="kemandirian" value="true" id="chk_kemandirian">
+                <label class="form-check-label" for="chk_kemandirian">Kemandirian</label>
+              </div>
+              <div class="col-md-3 form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="komunikasi" value="true" id="chk_komunikasi">
+                <label class="form-check-label" for="chk_komunikasi">Komunikasi</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Kemitraan Pembelajaran</label>
+            <input type="text" class="form-control" name="kemitraan">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Lingkungan Pembelajaran</label>
+            <input type="text" class="form-control" name="lingkungan">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Pemanfaatan Digital</label>
+            <input type="text" class="form-control" name="digital">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. PEMETAAN ITP (AKORDEON) -->
+      <div class="card">
+        <div class="card-header">
+          <span class="material-symbols-outlined text-emerald" style="font-size: 20px;">checklist_rtl</span>
+          <span>2. Pemetaan Indikator Ketercapaian Tujuan Pembelajaran</span>
+        </div>
+        <div class="card-body" id="itpContainer"></div>
+      </div>
+
+      <!-- 3. LANGKAH PEMBELAJARAN (AKORDEON) -->
+      <div class="card">
+        <div class="card-header">
+          <span class="material-symbols-outlined text-violet" style="font-size: 20px;">timeline</span>
+          <span>3. Langkah - Langkah Pembelajaran</span>
+        </div>
+        <div class="card-body" id="pertemuanContainer"></div>
+      </div>
+      
+      <!-- 4. PENUTUP -->
+      <div class="card" id="kartuPenutup">
+        <div class="card-header">
+          <span class="material-symbols-outlined text-emerald" style="font-size: 20px;">library_books</span>
+          <span>4. Asesmen, Pustaka, &amp; Lampiran</span>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Asesmen Pembelajaran</label>
+            <textarea class="form-control" name="listAsesmen" rows="2"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Daftar Pustaka</label>
+            <textarea class="form-control" name="dapus" rows="2"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Lampiran</label>
+            <textarea class="form-control" name="lampiran" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOMBOL EKSEKUSI -->
+      <div class="row mt-4 mb-2">
+        <div class="col-md-4 mb-3">
+          <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2" onclick="resetFormulir()">
+            <span class="material-symbols-outlined" style="font-size: 20px;">delete_sweep</span>
+            <span>Kosongkan Form</span>
+          </button>
+        </div>
+        <div class="col-md-8 mb-3">
+          <button type="submit" class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2" id="tombolSubmit">
+            <span class="material-symbols-outlined" style="font-size: 22px;">print</span>
+            <span>Proses Cetak Dokumen</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- AREA HASIL CETAK -->
+      <div id="areaHasil" class="text-center mt-3 mb-5"></div>
+      
+    </form>
+  </div>
+
+  <!-- =========================================================================
+       MODAL PENGATURAN BACKEND GOOGLE APPS SCRIPT (GITHUB PAGES INTEGRATION)
+       ========================================================================= -->
+  <div class="modal fade" id="modalBackendConfig" tabindex="-1" aria-labelledby="modalBackendLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-violet" style="font-size: 22px;">settings_ethernet</span>
+            <h5 class="modal-title fs-6 font-bold m-0" id="modalBackendLabel">Koneksi Backend Google Apps Script</h5>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="small text-muted mb-3" style="color: var(--obs-text-secondary) !important;">
+            Karena antarmuka ini di-hosting di <strong>GitHub Pages</strong>, Anda perlu menghubungkannya ke Web App Google Apps Script backend agar proses AI Gemini dan pembuatan dokumen Drive dapat berjalan otomatis.
+          </p>
+
+          <div class="mb-3">
+            <label class="form-label" for="inputGasUrl">
+              <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">link</span>
+              URL Web App GAS (akhiran <code>/exec</code>)
+            </label>
+            <input type="url" id="inputGasUrl" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+            <div id="pingFeedback" class="small mt-2" style="display:none;"></div>
+          </div>
+
+          <div class="p-3 rounded-2" style="background-color: var(--obs-surface-low); border: 1px solid var(--obs-border);">
+            <div class="fw-bold mb-2 text-violet small d-flex align-items-center gap-1">
+              <span class="material-symbols-outlined" style="font-size: 16px;">help</span>
+              Langkah Singkat Mendapatkan URL Web App:
+            </div>
+            <ol class="small mb-0 ps-3" style="color: var(--obs-text-secondary); line-height: 1.6;">
+              <li>Buka file <code>Code.gs</code> di <a href="https://script.google.com" target="_blank" class="text-violet text-decoration-none">Google Apps Script</a>.</li>
+              <li>Klik tombol biru <strong>Deploy</strong> (Terapkan) &rarr; <strong>New deployment</strong>.</li>
+              <li>Pilih tipe <strong>Web app</strong>.</li>
+              <li>Set <strong>Execute as:</strong> <em>Me (email Anda)</em>.</li>
+              <li>Set <strong>Who has access:</strong> <strong class="text-emerald">Anyone (Siapa saja)</strong> &mdash; <em>PENTING untuk akses dari GitHub!</em></li>
+              <li>Salin URL Web App dan tempelkan di atas.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="btnPingGas" onclick="ujiKoneksiBackend()">
+            <span class="material-symbols-outlined align-middle" style="font-size: 16px;">network_ping</span>
+            Tes Koneksi
+          </button>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="simpanPengaturanBackend()">
+              Simpan &amp; Hubungkan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // =========================================================================
+    // 0. FITUR TEMA OBSIDIAN & SAKELAR THEME
+    // =========================================================================
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-bs-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-bs-theme', newTheme);
+      if (newTheme === 'dark') {
+        html.classList.add('dark');
+      } else {
+        html.classList.remove('dark');
+      }
+      localStorage.setItem('temaModulKimia', newTheme);
+      updateThemeIcon(newTheme);
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('temaModulKimia') || 'dark';
+      document.documentElement.setAttribute('data-bs-theme', savedTheme);
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      updateThemeIcon(savedTheme);
+    }
+
+    function updateThemeIcon(theme) {
+      const btn = document.getElementById('btnThemeToggle');
+      if (theme === 'dark') {
+        btn.innerHTML = '☀️ Mode Terang';
+      } else {
+        btn.innerHTML = '🌙 Mode Obsidian';
+      }
+    }
+
+    // =========================================================================
+    // 0.1 MANAJEMEN BACKEND GOOGLE APPS SCRIPT (GITHUB PAGES READY)
+    // =========================================================================
+    // Konfigurasi default URL Web App GAS (Diambil otomatis dari config.js)
+    const DEFAULT_GAS_URL = window.PORTALKIMIA_CONFIG?.GENERATOR_API || ""; 
+
+    function getGasBackendUrl() {
+      return localStorage.getItem('gasWebAppUrl') || DEFAULT_GAS_URL;
+    }
+
+    function updateBackendStatusUI() {
+      const url = getGasBackendUrl();
+      const dot = document.getElementById('backendDot');
+      const label = document.getElementById('backendStatusLabel');
+      
+      // Jika berjalan di dalam lingkungan asli Google Apps Script
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        if (dot) { dot.className = 'dot-status dot-online'; }
+        if (label) { label.innerText = 'GAS Internal'; }
+        return;
+      }
+      
+      if (url && url.startsWith('http')) {
+        if (dot) { dot.className = 'dot-status dot-online'; }
+        if (label) { label.innerText = 'GAS Terhubung'; }
+      } else {
+        if (dot) { dot.className = 'dot-status dot-offline'; }
+        if (label) { label.innerText = 'Hubungkan GAS'; }
+      }
+    }
+
+    function bukaModalBackend(pesanKhusus) {
+      const input = document.getElementById('inputGasUrl');
+      input.value = getGasBackendUrl();
+      const feedback = document.getElementById('pingFeedback');
+      if (pesanKhusus) {
+        feedback.style.display = 'block';
+        feedback.className = 'small mt-2 text-warning';
+        feedback.innerText = pesanKhusus;
+      } else {
+        feedback.style.display = 'none';
+      }
+      const modalEl = document.getElementById('modalBackendConfig');
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    }
+
+    function simpanPengaturanBackend() {
+      const input = document.getElementById('inputGasUrl');
+      const url = (input.value || '').trim();
+      if (url && !url.startsWith('https://script.google.com/macros/s/')) {
+        alert("Peringatan: URL Web App Google Apps Script umumnya diawali dengan 'https://script.google.com/macros/s/...' dan berakhiran '/exec'.");
+      }
+      localStorage.setItem('gasWebAppUrl', url);
+      updateBackendStatusUI();
+      const modalEl = document.getElementById('modalBackendConfig');
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+      alert("✅ URL Backend Google Apps Script berhasil disimpan!");
+    }
+
+    function ujiKoneksiBackend() {
+      const input = document.getElementById('inputGasUrl');
+      const url = (input.value || '').trim();
+      const feedback = document.getElementById('pingFeedback');
+      const btnPing = document.getElementById('btnPingGas');
+
+      if (!url) {
+        feedback.style.display = 'block';
+        feedback.className = 'small mt-2 text-danger';
+        feedback.innerText = 'Masukkan URL Web App terlebih dahulu.';
+        return;
+      }
+
+      feedback.style.display = 'block';
+      feedback.className = 'small mt-2 text-violet';
+      feedback.innerText = '⏳ Menguji koneksi ke backend GAS...';
+      btnPing.disabled = true;
+
+      const waktuMulai = Date.now();
+
+      // Gunakan Content-Type: text/plain agar browser TIDAK mengirim CORS preflight OPTIONS
+      fetch(url, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'ping' })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("HTTP Status " + res.status);
+        return res.json();
+      })
+      .then(data => {
+        btnPing.disabled = false;
+        const durasi = Date.now() - waktuMulai;
+        feedback.className = 'small mt-2 text-success fw-bold';
+        feedback.innerText = `✅ Terhubung! Latensi: ${durasi}ms. ${data.message || 'Backend siap!'}`;
+      })
+      .catch(err => {
+        btnPing.disabled = false;
+        feedback.className = 'small mt-2 text-danger';
+        feedback.innerText = `❌ Gagal menghubungi: ${err.message}. Pastikan deployment diset ke 'Who has access: Anyone'.`;
+      });
+    }
+
+    // =========================================================================
+    // 1. GENERATOR TAMPILAN AKORDEON DINAMIS (14 ITP & 9 Pertemuan)
+    //    Semua ID, NAME, dan hierarki DOM dipertahankan 100% untuk integrasi AI.
+    // =========================================================================
+    function bangunTampilanDinamsis() {
+      // Pemetaan 14 ITP
+      let htmlITP = '<div class="accordion" id="accordionITP">';
+      for (let i = 1; i <= 14; i++) {
+        let isExpanded = (i === 1) ? 'true' : 'false';
+        let isShow = (i === 1) ? 'show' : '';
+        let collapsedClass = (i === 1) ? '' : 'collapsed';
+
+        htmlITP += `
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingITP${i}">
+              <button class="accordion-button ${collapsedClass}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseITP${i}" aria-expanded="${isExpanded}" aria-controls="collapseITP${i}">
+                <span class="badge rounded-pill me-2 px-2.5 py-1" style="background:#18181b; border:1px solid #27272a; color:#a78bfa; font-size:0.75rem; font-family:monospace;">ITP ${i}</span>
+                Indikator Tujuan Pembelajaran ${i}
+              </button>
+            </h2>
+            <div id="collapseITP${i}" class="accordion-collapse collapse ${isShow}" aria-labelledby="headingITP${i}" data-bs-parent="#accordionITP">
+              <div class="accordion-body">
+                <div class="row">
+                  <div class="col-md-12 mb-3">
+                    <label class="form-label" style="font-size:0.78rem; color:#a1a1aa;">Rumusan Indikator</label>
+                    <input type="text" class="form-control" name="itp${i}" placeholder="Rumusan Indikator Tujuan Pembelajaran ${i}">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label" style="font-size:0.78rem; color:#a1a1aa;">Teknik Asesmen</label>
+                    <input type="text" class="form-control" name="asesmen${i}" placeholder="Teknik Asesmen">
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <label class="form-label" style="font-size:0.78rem; color:#a1a1aa;">Aktivitas Murid</label>
+                    <input type="text" class="form-control" name="aktivitas${i}" placeholder="Aktivitas Murid">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+      htmlITP += '</div>';
+      document.getElementById('itpContainer').innerHTML = htmlITP;
+
+      // Pemetaan 9 Pertemuan
+      let htmlPertemuan = '<div class="accordion" id="accordionPertemuan">';
+      for (let j = 1; j <= 9; j++) {
+        let isExpanded = (j === 1) ? 'true' : 'false';
+        let isShow = (j === 1) ? 'show' : '';
+        let collapsedClass = (j === 1) ? '' : 'collapsed';
+
+        htmlPertemuan += `
+          <div class="accordion-item" id="itemPertemuan${j}">
+            <h2 class="accordion-header" id="headingPertemuan${j}">
+              <button class="accordion-button ${collapsedClass}" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePertemuan${j}" aria-expanded="${isExpanded}" aria-controls="collapsePertemuan${j}">
+                <span class="badge rounded-pill me-2 px-2.5 py-1" style="background:#18181b; border:1px solid #27272a; color:#34d399; font-size:0.75rem; font-family:monospace;">P-${j}</span>
+                Pertemuan Ke-${j}
+              </button>
+            </h2>
+            <div id="collapsePertemuan${j}" class="accordion-collapse collapse ${isShow}" aria-labelledby="headingPertemuan${j}" data-bs-parent="#accordionPertemuan">
+              <div class="accordion-body">
+                <div class="row mb-2">
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label" style="font-size:0.78rem; color:#a1a1aa;">Subtopik</label>
+                    <input type="text" class="form-control" name="subTopik${j}" placeholder="Subtopik Pertemuan">
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label" style="font-size:0.78rem; color:#a1a1aa;">Integrasi Nilai Qur'ani/Hadith</label>
+                    <input type="text" class="form-control" name="ayat${j}" placeholder="Integrasi Ayat/Hadith">
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label" style="font-size:0.78rem; color:#a1a1aa;">Zona Alfa / Ice Breaking</label>
+                    <input type="text" class="form-control" name="zona${j}" placeholder="Zona Alfa (Ice Breaking)">
+                  </div>
+                </div>
+                
+                <label class="form-label text-emerald">Kegiatan Awal</label>
+                <textarea class="form-control mb-3" name="awal${j}" rows="2" placeholder="Deskripsi Kegiatan Awal..."></textarea>
+                
+                <label class="form-label text-emerald mt-2">Kegiatan Inti</label>
+                <div class="ms-2 border-start-tertiary ps-3 mb-3">
+                  <label class="form-label" style="font-size:0.76rem; color:#a1a1aa;">Fase 1: Memahami (Eksplorasi/Observasi)</label>
+                  <textarea class="form-control mb-2" name="memahami${j}" rows="2" placeholder="Fase Memahami (Eksplorasi/Observasi)"></textarea>
+                  
+                  <label class="form-label" style="font-size:0.76rem; color:#a1a1aa;">Fase 2: Mengaplikasi (Eksperimen/Diskusi/LKPD)</label>
+                  <textarea class="form-control mb-2" name="mengaplikasi${j}" rows="2" placeholder="Fase Mengaplikasi (Eksperimen/Diskusi/LKPD)"></textarea>
+                  
+                  <label class="form-label" style="font-size:0.76rem; color:#a1a1aa;">Fase 3: Merefleksi (Kesimpulan/Presentasi)</label>
+                  <textarea class="form-control" name="merefleksi${j}" rows="2" placeholder="Fase Merefleksi (Kesimpulan/Presentasi)"></textarea>
+                </div>
+                
+                <label class="form-label text-emerald">Kegiatan Penutup</label>
+                <textarea class="form-control mb-2" name="penutup${j}" rows="2" placeholder="Deskripsi Kegiatan Penutup..."></textarea>
+              </div>
+            </div>
+          </div>`;
+      }
+      htmlPertemuan += '</div>';
+      document.getElementById('pertemuanContainer').innerHTML = htmlPertemuan;
+    }
+
+    bangunTampilanDinamsis();
+
+    // =========================================================================
+    // 2. FITUR AUTO-SAVE DAN RESET
+    // =========================================================================
+    function simpanDraft() {
+      const form = document.getElementById('formModul');
+      if (!form) return;
+      
+      const formData = new FormData(form);
+      const draft = Object.fromEntries(formData.entries());
+      
+      draft.aiKelas = document.getElementById('aiKelas').value;
+      draft.aiTopik = document.getElementById('aiTopik').value;
+      draft.aiPertemuan = document.getElementById('aiPertemuan').value;
+      draft.jenisDokumen = document.getElementById('jenisDokumen').value;
+      draft.aiBahanAjar = document.getElementById('aiBahanAjar').value;
+      
+      const ceklisFields = ['keimanan', 'penalaran', 'kolaborasi', 'kesehatan', 'kewargaan', 'kreativitas', 'kemandirian', 'komunikasi'];
+      ceklisFields.forEach(item => {
+        const el = document.getElementsByName(item)[0];
+        if (el) draft[item] = el.checked;
+      });
+
+      localStorage.setItem('draftModulKimia', JSON.stringify(draft));
+      
+      const badge = document.getElementById('statusSimpan');
+      if (badge) {
+        badge.style.display = 'inline-block';
+        setTimeout(() => { badge.style.display = 'none'; }, 2000);
+      }
+    }
+
+    function muatDraft() {
+      const draft = localStorage.getItem('draftModulKimia');
+      if (draft) {
+        try {
+          const data = JSON.parse(draft);
+          if (data.aiKelas) document.getElementById('aiKelas').value = data.aiKelas;
+          if (data.aiTopik) document.getElementById('aiTopik').value = data.aiTopik;
+          if (data.aiPertemuan) document.getElementById('aiPertemuan').value = data.aiPertemuan;
+          if (data.jenisDokumen) document.getElementById('jenisDokumen').value = data.jenisDokumen;
+          if (data.aiBahanAjar) document.getElementById('aiBahanAjar').value = data.aiBahanAjar;
+          
+          for (let key in data) {
+            const elemen = document.getElementsByName(key)[0];
+            if (elemen) {
+              if (elemen.type === 'checkbox') elemen.checked = data[key];
+              else elemen.value = data[key];
+            }
+          }
+          aturTampilanDokumen(); 
+        } catch (e) {
+          console.log("Gagal memuat memori lokal draft.", e);
+        }
+      }
+    }
+
+    function resetFormulir() {
+      if (confirm("⚠️ PERHATIAN: Apakah Anda yakin ingin MENGHAPUS SELURUH isian dari form ini? Data yang dihapus tidak dapat dikembalikan.")) {
+        localStorage.removeItem('draftModulKimia'); 
+        document.getElementById('formModul').reset(); 
+        document.getElementById('aiKelas').value = '';
+        document.getElementById('aiTopik').value = '';
+        document.getElementById('aiPertemuan').value = '1';
+        document.getElementById('jenisDokumen').value = 'Modul Ajar';
+        document.getElementById('aiBahanAjar').value = '';
+        aturTampilanDokumen();
+        
+        const collapseITP1 = document.getElementById('collapseITP1');
+        if (collapseITP1) {
+          const bsCollapseITP = new bootstrap.Collapse(collapseITP1, { toggle: false });
+          bsCollapseITP.show();
+        }
+        
+        const collapsePertemuan1 = document.getElementById('collapsePertemuan1');
+        if (collapsePertemuan1) {
+          const bsCollapsePertemuan = new bootstrap.Collapse(collapsePertemuan1, { toggle: false });
+          bsCollapsePertemuan.show();
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+      }
+    }
+
+    document.addEventListener('input', simpanDraft);
+    document.addEventListener('change', simpanDraft);
+    
+    window.addEventListener('DOMContentLoaded', function() {
+      initTheme();
+      updateBackendStatusUI();
+      muatDraft();
+    });
+
+    // =========================================================================
+    // 3. FUNGSI SAKELAR DOKUMEN & LOGIKA PENGUNCI (SMART LOCK)
+    // =========================================================================
+    function aturTampilanDokumen() {
+      const jenis = document.getElementById('jenisDokumen').value;
+      const opsiPertemuan = document.getElementById('aiPertemuan');
+      const kartuPenutup = document.getElementById('kartuPenutup');
+      
+      if (jenis === 'Lesson Plan') { 
+        if (kartuPenutup) kartuPenutup.style.display = 'none'; 
+        // Kunci dropdown Max 2 jika Lesson Plan
+        for (let i = 0; i < opsiPertemuan.options.length; i++) {
+          opsiPertemuan.options[i].disabled = parseInt(opsiPertemuan.options[i].value) > 2;
+        }
+        if (parseInt(opsiPertemuan.value) > 2) opsiPertemuan.value = '1';
+      } else { 
+        if (kartuPenutup) kartuPenutup.style.display = 'block'; 
+        // Buka kunci semua jika Modul Ajar
+        for (let i = 0; i < opsiPertemuan.options.length; i++) {
+          opsiPertemuan.options[i].disabled = false;
+        }
+      }
+    }
+
+    // =========================================================================
+    // 4. PENGISIAN FORM OTOMATIS OLEH AI
+    // =========================================================================
+    function isiDataSecaraOtomatis(data, inputKelas) {
+      const teksFields = ['topik', 'waktu', 'tujuan', 'model', 'strategi', 'metode', 'kemitraan', 'lingkungan', 'digital', 'listAsesmen', 'dapus', 'lampiran'];
+      teksFields.forEach(field => {
+        if (data[field] && document.getElementsByName(field)[0]) {
+          document.getElementsByName(field)[0].value = data[field];
+        }
+      });
+      if (document.getElementsByName('kelas')[0]) {
+        document.getElementsByName('kelas')[0].value = inputKelas || data.kelas || '12';
+      }
+      
+      const ceklisFields = ['keimanan', 'penalaran', 'kolaborasi', 'kesehatan', 'kewargaan', 'kreativitas', 'kemandirian', 'komunikasi'];
+      ceklisFields.forEach(item => {
+        if (data[item] === true && document.getElementsByName(item)[0]) {
+          document.getElementsByName(item)[0].checked = true;
+        }
+      });
+      
+      // Loop Parse ITP hingga 14
+      for (let i = 1; i <= 14; i++) {
+        ['itp', 'asesmen', 'aktivitas'].forEach(prefix => {
+          const key = prefix + i;
+          if (data[key] && !data[key].includes("[Isi") && document.getElementsByName(key)[0]) {
+            document.getElementsByName(key)[0].value = data[key];
+          }
+        });
+      }
+      
+      // Loop Parse Pertemuan hingga 9
+      for (let j = 1; j <= 9; j++) {
+        ['subTopik', 'ayat', 'zona', 'awal', 'memahami', 'mengaplikasi', 'merefleksi', 'penutup'].forEach(prefix => {
+          const key = prefix + j;
+          if (data[key] && !data[key].includes("[Isi") && document.getElementsByName(key)[0]) {
+            document.getElementsByName(key)[0].value = data[key];
+          }
+        });
+      }
+      
+      simpanDraft();
+    }
+
+    // =========================================================================
+    // 4.1 FUNGSI ASISTEN AI GEMINI (HYBRID: GAS NATIVE + GITHUB FETCH API)
+    // =========================================================================
+    function mintaBantuanAI() {
+      const tombolAI = document.getElementById('tombolAI');
+      const inputJenis = document.getElementById('jenisDokumen').value;
+      const inputKelas = document.getElementById('aiKelas').value;
+      const inputTopik = document.getElementById('aiTopik').value;
+      const inputPertemuan = document.getElementById('aiPertemuan').value;
+      const inputBahanAjar = document.getElementById('aiBahanAjar').value;
+      
+      if (!inputKelas || !inputTopik) {
+        alert("Mohon lengkapi data Jenjang/Kelas dan Topik materi terlebih dahulu.");
+        return;
+      }
+      
+      const dataInstruksi = {
+        jenisDokumen: inputJenis,
+        kelas: inputKelas,
+        topik: inputTopik,
+        pertemuan: inputPertemuan,
+        bahanAjar: inputBahanAjar
+      };
+
+      tombolAI.disabled = true;
+      tombolAI.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Merancang Kerangka AI Gemini...';
+
+      // 1. JIKA BERJALAN DI LINGKUNGAN NATIVE GOOGLE APPS SCRIPT
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(hasilJSON) {
+            tombolAI.disabled = false;
+            tombolAI.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span><span>Generate Kerangka Otomatis</span>';
+            try {
+              const data = typeof hasilJSON === 'string' ? JSON.parse(hasilJSON) : hasilJSON;
+              if (data.error) { alert("Gagal dari AI: " + data.error); return; }
+              isiDataSecaraOtomatis(data, inputKelas);
+              alert("✅ Kerangka berhasil dirancang oleh Gemini AI! Silakan tinjau kembali isian form.");
+            } catch (e) {
+              alert("Kesalahan membaca data AI: " + e.message);
+            }
+          })
+          .withFailureHandler(function(error) {
+            tombolAI.disabled = false;
+            tombolAI.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span><span>Generate Kerangka Otomatis</span>';
+            alert("Terjadi kesalahan sistem Apps Script: " + error.message);
+          }).panggilGemini(dataInstruksi);
+      } 
+      // 2. JIKA BERJALAN DI GITHUB PAGES / HOSTING EKSTERNAL
+      else {
+        const gasUrl = getGasBackendUrl();
+        if (!gasUrl) {
+          tombolAI.disabled = false;
+          tombolAI.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span><span>Generate Kerangka Otomatis</span>';
+          bukaModalBackend("Silakan masukkan URL Web App Google Apps Script terlebih dahulu agar fitur AI dapat memproses materi.");
+          return;
+        }
+
+        // PENTING: Gunakan text/plain untuk bypass CORS preflight OPTIONS pada Apps Script
+        fetch(gasUrl, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'panggilGemini',
+            dataInstruksi: dataInstruksi
+          })
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("Status HTTP " + response.status);
+          return response.json();
+        })
+        .then(data => {
+          tombolAI.disabled = false;
+          tombolAI.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span><span>Generate Kerangka Otomatis</span>';
+          
+          if (data.error) {
+            alert("Respon Error dari Server: " + data.error);
+            return;
+          }
+          isiDataSecaraOtomatis(data, inputKelas);
+          alert("✅ Kerangka berhasil dirancang oleh Gemini AI via Backend GAS! Silakan tinjau form.");
+        })
+        .catch(err => {
+          tombolAI.disabled = false;
+          tombolAI.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span><span>Generate Kerangka Otomatis</span>';
+          alert("Gagal menghubungi Backend Google Apps Script:\n" + err.message + "\n\nPastikan Deployment GAS di-set ke 'Who has access: Anyone'.");
+        });
+      }
+    }
+
+    // =========================================================================
+    // 5. FUNGSI UNTUK MENCETAK DOKUMEN (HYBRID: GAS NATIVE + GITHUB FETCH API)
+    // =========================================================================
+    function tampilkanHasilCetak(hasil) {
+      const areaHasil = document.getElementById('areaHasil');
+      areaHasil.innerHTML = `
+        <div class="alert alert-obsidian p-4">
+          <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+            <span class="material-symbols-outlined text-emerald" style="font-size: 28px;">check_circle</span>
+            <strong class="fs-5 text-emerald">Dokumen Berhasil Dicetak ke Google Drive!</strong>
+          </div>
+          <p class="small text-muted mb-4" style="color: var(--obs-text-secondary) !important;">
+            Dokumen administrasi Anda telah selesai digenerate dan disimpan di Google Drive.
+          </p>
+          <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+            <a href="${hasil.docUrl}" target="_blank" class="btn btn-success fw-bold px-4 py-2 d-flex align-items-center justify-content-center gap-2" style="border-radius: 8px;">
+              <span class="material-symbols-outlined" style="font-size: 20px;">description</span>
+              <span>Buka Google Docs</span>
+            </a>
+            <a href="${hasil.pdfUrl}" target="_blank" class="btn btn-danger fw-bold px-4 py-2 d-flex align-items-center justify-content-center gap-2" style="border-radius: 8px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: none; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);">
+              <span class="material-symbols-outlined" style="font-size: 20px;">download</span>
+              <span>Unduh PDF</span>
+            </a>
+          </div>
+        </div>`;
+      areaHasil.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function prosesData() {
+      const tombol = document.getElementById('tombolSubmit');
+      const areaHasil = document.getElementById('areaHasil');
+      tombol.disabled = true;
+      tombol.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Memproses Dokumen di Server...';
+      areaHasil.innerHTML = '';
+
+      const formData = new FormData(document.getElementById('formModul'));
+      const objekForm = Object.fromEntries(formData.entries());
+      objekForm.jenisDokumen = document.getElementById('jenisDokumen').value;
+
+      // Ambil seluruh status checkbox
+      const ceklisFields = ['keimanan', 'penalaran', 'kolaborasi', 'kesehatan', 'kewargaan', 'kreativitas', 'kemandirian', 'komunikasi'];
+      ceklisFields.forEach(item => {
+        const el = document.getElementsByName(item)[0];
+        if (el) objekForm[item] = el.checked;
+      });
+
+      // 1. JIKA BERJALAN DI LINGKUNGAN NATIVE APPS SCRIPT
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(hasil) {
+            tombol.disabled = false;
+            tombol.innerHTML = `
+              <span class="material-symbols-outlined" style="font-size: 22px;">print</span>
+              <span>Proses Cetak Dokumen</span>`;
+            if (hasil.error) {
+              areaHasil.innerHTML = `<div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">${hasil.error}</div>`;
+              return;
+            }
+            tampilkanHasilCetak(hasil);
+          })
+          .withFailureHandler(function(error) {
+            tombol.disabled = false;
+            tombol.innerHTML = `
+              <span class="material-symbols-outlined" style="font-size: 22px;">print</span>
+              <span>Proses Cetak Dokumen</span>`;
+            areaHasil.innerHTML = `
+              <div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">
+                <span class="material-symbols-outlined align-middle me-2">error</span>
+                Terjadi kesalahan: ${error.message}
+              </div>`;
+          }).buatModul(objekForm);
+      } 
+      // 2. JIKA BERJALAN DI GITHUB PAGES / HOSTING EKSTERNAL
+      else {
+        const gasUrl = getGasBackendUrl();
+        if (!gasUrl) {
+          tombol.disabled = false;
+          tombol.innerHTML = `
+            <span class="material-symbols-outlined" style="font-size: 22px;">print</span>
+            <span>Proses Cetak Dokumen</span>`;
+          bukaModalBackend("Silakan masukkan URL Web App Google Apps Script Anda untuk memproses cetak dokumen.");
+          return;
+        }
+
+        fetch(gasUrl, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'buatModul',
+            dataForm: objekForm
+          })
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("Status HTTP " + response.status);
+          return response.json();
+        })
+        .then(hasil => {
+          tombol.disabled = false;
+          tombol.innerHTML = `
+            <span class="material-symbols-outlined" style="font-size: 22px;">print</span>
+            <span>Proses Cetak Dokumen</span>`;
+          
+          if (hasil.error) {
+            areaHasil.innerHTML = `
+              <div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">
+                <span class="material-symbols-outlined align-middle me-2">error</span>
+                ${hasil.error}
+              </div>`;
+            return;
+          }
+          tampilkanHasilCetak(hasil);
+        })
+        .catch(err => {
+          tombol.disabled = false;
+          tombol.innerHTML = `
+            <span class="material-symbols-outlined" style="font-size: 22px;">print</span>
+            <span>Proses Cetak Dokumen</span>`;
+          areaHasil.innerHTML = `
+            <div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">
+              <span class="material-symbols-outlined align-middle me-2">error</span>
+              Gagal menghubungi Backend Google Apps Script: ${err.message}
+            </div>`;
+        });
+      }
+    }
+  </script>
+</body>
+</html>

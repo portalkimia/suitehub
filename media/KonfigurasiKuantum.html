@@ -1,0 +1,2902 @@
+﻿<!DOCTYPE html>
+<html lang="id" class="scroll-smooth dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Konfigurasi Elektron Mekanika Kuantum - Portal Kimia SMA</title>
+
+  <!-- Google Fonts: Geist for UI/Science & Amiri for Arabic Quranic Verses -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Geist:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Google Material Symbols Outlined -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Tailwind Configuration with Google Stitch Design System Tokens -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            body: ['Geist', 'sans-serif'],
+            headline: ['Geist', 'sans-serif'],
+            arabic: ['Amiri', 'serif'],
+          },
+          colors: {
+            primary: '#a78bfa',
+            'primary-container': '#2e1065',
+            'on-primary': '#ffffff',
+            'on-primary-container': '#ddd6fe',
+            secondary: '#94a3b8',
+            'secondary-container': '#1e293b',
+            'on-secondary': '#ffffff',
+            'on-secondary-container': '#cbd5e1',
+            tertiary: '#34d399',
+            'tertiary-container': '#064e3b',
+            'on-tertiary': '#ffffff',
+            'on-tertiary-container': '#a7f3d0',
+            error: '#f87171',
+            'error-container': '#450a0a',
+            'on-error': '#ffffff',
+            'on-error-container': '#fecaca',
+            background: '#09090b',
+            'on-background': '#f4f4f5',
+            surface: '#121215',
+            'on-surface': '#f4f4f5',
+            'surface-container': '#18181b',
+            'surface-container-high': '#27272a',
+            'surface-container-highest': '#3f3f46',
+            'surface-container-low': '#0f0f12',
+            'surface-container-lowest': '#060608',
+            outline: '#3f3f46',
+            'outline-variant': '#27272a',
+            'on-surface-variant': '#a1a1aa',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Anti-FOUC Script for Theme Persistence -->
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('chemportal_theme') || localStorage.getItem('quantum_media_theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    body {
+      font-family: 'Geist', sans-serif;
+    }
+    .font-arabic {
+      font-family: 'Amiri', serif;
+      line-height: 2.2;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+    }
+
+    /* Stitch Card & Surface Styles */
+    .stitch-card {
+      background-color: #ffffff;
+      border: 1px solid #e4e4e7;
+    }
+    .dark .stitch-card {
+      background-color: #121215;
+      border: 1px solid #27272a;
+    }
+
+    /* Orbital Box Styling */
+    .orbital-box {
+      width: 44px;
+      height: 48px;
+      border: 2px solid #8b5cf6;
+      background: #f8fafc;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .dark .orbital-box {
+      background: #18181b;
+      border-color: #a78bfa;
+    }
+    .orbital-box.active-filling {
+      border-color: #f59e0b;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.6);
+      transform: scale(1.08);
+    }
+
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #27272a;
+    }
+
+    /* Print Document Styles */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-size: 11pt !important;
+      }
+      header, footer, nav, #scroll-progress, #btn-sound-toggle, #btn-theme-toggle, 
+      .no-print, button, input[type="range"], canvas, #section-quotes-islami {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .print-card {
+        border: 1px solid #cbd5e1 !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        margin-bottom: 12pt !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-background font-body text-slate-900 dark:text-on-surface antialiased min-h-screen flex flex-col transition-colors duration-200 selection:bg-primary/30 selection:text-primary">
+
+  <!-- ==================== TOP STICKY HEADER & NAVBAR ==================== -->
+  <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/85 dark:bg-[#09090b]/85 border-b border-slate-200/80 dark:border-outline-variant/80 transition-colors duration-200">
+    <!-- Reading Progress Bar -->
+    <div id="scroll-progress" class="h-0.5 bg-gradient-to-r from-violet-500 via-primary to-tertiary w-0 transition-all duration-150"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Back to Hub Link -->
+      <a href="index.html" class="flex items-center space-x-3 group text-decoration-none">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 to-primary flex items-center justify-center shadow-md shadow-violet-500/20 group-hover:scale-105 transition-transform duration-200">
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="2.5"></circle>
+            <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path>
+            <path d="M4.93 4.93c4.07 4.07 10.07 4.07 14.14 0"></path>
+            <path d="M4.93 19.07c4.07-4.07 10.07-4.07 14.14 0"></path>
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center space-x-2">
+            <span class="font-headline font-bold text-sm tracking-tight text-slate-900 dark:text-on-surface">Portal Kimia</span>
+            <span class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container">Fase E</span>
+          </div>
+          <span class="text-[11px] text-slate-500 dark:text-on-surface-variant">Konfigurasi Mekanika Kuantum</span>
+        </div>
+      </a>
+
+      <!-- Navigation Jump Links (Desktop) -->
+      <nav class="hidden lg:flex items-center space-x-1 text-xs font-semibold">
+        <a href="#section-tujuan" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-all">Tujuan</a>
+        <a href="#section-peta" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-all">Peta Konsep</a>
+        <a href="#section-fenomena" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-all">Fenomena Magnet</a>
+        <a href="#section-materi" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-all">Aturan Kuantum</a>
+        <a href="#section-simulasi" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-all">Simulator</a>
+        <a href="#section-penyelidikan" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-all">Penyelidikan</a>
+        <a href="#section-kuis" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-all">Kuis HOTS</a>
+        <a href="#section-pengumpulan" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-all">Tugas</a>
+      </nav>
+
+      <!-- Action Controls: Audio & Theme Switchers -->
+      <div class="flex items-center space-x-2">
+        <!-- Audio Synth Toggle Button -->
+        <button 
+          id="btn-sound-toggle" 
+          onclick="toggleAudio()" 
+          title="Toggle Efek Suara Web Audio" 
+          class="w-9 h-9 rounded-xl border border-slate-200 dark:border-outline-variant bg-slate-100 dark:bg-surface-container hover:bg-slate-200 dark:hover:bg-surface-container-high text-slate-700 dark:text-on-surface-variant flex items-center justify-center transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-[18px]" id="icon-sound-on">volume_up</span>
+          <span class="material-symbols-outlined text-[18px] hidden" id="icon-sound-off">volume_off</span>
+        </button>
+
+        <!-- Theme Mode Toggle Button -->
+        <button 
+          id="btn-theme-toggle" 
+          onclick="toggleAppTheme()" 
+          title="Ganti Mode Terang / Gelap" 
+          class="w-9 h-9 rounded-xl border border-slate-200 dark:border-outline-variant bg-slate-100 dark:bg-surface-container hover:bg-slate-200 dark:hover:bg-surface-container-high text-slate-700 dark:text-on-surface-variant flex items-center justify-center transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-[18px] hidden" id="icon-theme-sun">light_mode</span>
+          <span class="material-symbols-outlined text-[18px]" id="icon-theme-moon">dark_mode</span>
+        </button>
+
+        <!-- Portal Hub Quick Button -->
+        <a 
+          href="index.html" 
+          class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary/90 shadow-sm transition-all">
+          <span class="material-symbols-outlined text-[16px]">grid_view</span>
+          <span>Menu Utama</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+    <!-- ==================== 1. HERO BANNER & IDENTITAS SISWA ==================== -->
+    <section id="section-title" class="space-y-6 scroll-mt-24">
+      
+      <!-- Halaman Judul Media Pembelajaran -->
+      <div class="relative rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-outline-variant bg-gradient-to-br from-violet-950 via-[#100c1e] to-slate-950 text-white shadow-xl overflow-hidden">
+        <!-- Ambient Orbitals Background Elements -->
+        <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full border border-violet-500/10 pointer-events-none"></div>
+        <div class="absolute -right-8 -bottom-8 w-80 h-80 rounded-full border border-tertiary/10 pointer-events-none"></div>
+        <div class="absolute top-1/2 left-1/4 w-96 h-96 rounded-full bg-violet-600/5 blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-3xl">
+          <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-violet-500/20 border border-violet-400/30 text-xs font-semibold text-violet-200 mb-4 shadow-sm backdrop-blur-md">
+            <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+            <span>Media Pembelajaran Interaktif Kimia &bull; Kurikulum Merdeka</span>
+          </div>
+
+          <h1 class="text-2xl sm:text-4xl lg:text-5xl font-headline font-black tracking-tight leading-tight mb-3">
+            Konfigurasi Elektron <br class="hidden sm:inline">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-primary to-tertiary">
+              Model Mekanika Kuantum
+            </span>
+          </h1>
+
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal mb-6">
+            Menelusuri distribusi elektron dalam subkulit <i>s</i>, <i>p</i>, <i>d</i>, <i>f</i> berdasarkan 4 bilangan kuantum, keteraturan aturan Aufbau, kaidah Hund, asas larangan Pauli, serta fenomena magnetik dan anomali kestabilan subkulit <i>d</i>.
+          </p>
+
+          <div class="flex flex-wrap items-center gap-2.5 text-xs text-slate-300">
+            <span class="flex items-center space-x-1.5 bg-black/30 px-3 py-1.5 rounded-xl border border-white/10 backdrop-blur-sm">
+              <span class="material-symbols-outlined text-[15px] text-primary">person</span>
+              <span>Guru: Tito Vanzal, S.Pd. &bull; SMA Progresif Bumi Shalawat</span>
+            </span>
+            <span class="flex items-center space-x-1.5 bg-black/30 px-3 py-1.5 rounded-xl border border-white/10 backdrop-blur-sm">
+              <span class="material-symbols-outlined text-[15px] text-tertiary">school</span>
+              <span>Fase E / F &bull; Kelas 10 SMA</span>
+            </span>
+            <span class="flex items-center space-x-1.5 bg-black/30 px-3 py-1.5 rounded-xl border border-white/10 backdrop-blur-sm">
+              <span class="material-symbols-outlined text-[15px] text-amber-400">schedule</span>
+              <span>Estimasi: 3 &times; 45 Menit</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Basmalah & Integrasi Ayat Al-Qur'an -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-5">
+        
+        <!-- Kaligrafi Basmalah -->
+        <div class="text-center py-2 border-b border-slate-100 dark:border-outline-variant/60">
+          <p class="font-arabic text-2xl sm:text-3xl text-violet-700 dark:text-primary tracking-wide font-bold mb-1">
+            &#1576;&#1616;&#1587;&#1618;&#1605;&#1616; &#1575;&#1604;&#1604;&#1617;&#1614;&#1607;&#1616; &#1575;&#1604;&#1585;&#1617;&#1614;&#1581;&#1618;&#1605;&#1614;&#1648;&#1606;&#1616; &#1575;&#1604;&#1585;&#1617;&#1614;&#1581;&#1616;&#1610;&#1605;&#1616;
+          </p>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant italic">
+            "Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang"
+          </p>
+        </div>
+
+        <!-- Ayat Al-Qur'an Pilihan: Kehalusan Ukuran Partikel Zarrah (QS. Yunus: 61) -->
+        <div class="p-5 sm:p-6 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 space-y-3">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container border border-violet-300 dark:border-primary/40">
+              <span class="material-symbols-outlined text-[15px]">menu_book</span>
+              <span>Ayat Al-Qur'an Relevan &bull; QS. Yunus (10): 61</span>
+            </span>
+            <div class="flex items-center space-x-1.5 text-xs text-violet-700 dark:text-primary font-medium">
+              <span class="material-symbols-outlined text-[16px] text-emerald-500">scatter_plot</span>
+              <span>Partikel Zarrah &amp; Kuantisasi Probabilitas Orbital</span>
+            </div>
+          </div>
+
+          <div class="py-1">
+            <p class="font-arabic text-xl sm:text-2xl text-slate-800 dark:text-on-surface text-right font-medium leading-loose mb-2">
+              &#1608;&#1614;&#1605;&#1614;&#1575; &#1610;&#1614;&#1593;&#1618;&#1586;&#1615;&#1576;&#1615; &#1593;&#1614;&#1606; &#1585;&#1617;&#1614;&#1576;&#1617;&#1616;&#1603;&#1614; &#1605;&#1616;&#1606; &#1605;&#1617;&#1616;&#1579;&#1618;&#1602;&#1614;&#1575;&#1604;&#1616; &#1584;&#1614;&#1585;&#1617;&#1614;&#1577;&#1613; &#1601;&#1616;&#1610; &#1575;&#1604;&#1618;&#1571;&#1614;&#1585;&#1618;&#1590;&#1616; &#1608;&#1614;&#1604;&#1614;&#1575; &#1601;&#1616;&#1610; &#1575;&#1604;&#1587;&#1617;&#1614;&#1605;&#1614;&#1575;&#1569;&#1616; &#1608;&#1614;&#1604;&#1614;&#1575; &#1571;&#1614;&#1589;&#1618;&#1594;&#1614;&#1585;&#1614; &#1605;&#1616;&#1606; &#1584;&#1614;&#1648;&#1604;&#1616;&#1603;&#1614; &#1608;&#1614;&#1604;&#1614;&#1575; &#1571;&#1614;&#1603;&#1618;&#1576;&#1614;&#1585;&#1614; &#1573;&#1616;&#1604;&#1617;&#1614;&#1575; &#1601;&#1616;&#1610; &#1603;&#1616;&#1578;&#1614;&#1575;&#1576;&#1613; &#1605;&#1617;&#1615;&#1576;&#1616;&#1610;&#1606;&#1613;
+            </p>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed italic border-l-2 border-primary pl-3">
+              "Tidak luput dari pengetahuan Tuhanmu biarpun sebesar zarrah (partikel terkecil) di bumi ataupun di langit. Tidak ada yang lebih kecil dan tidak (pula) yang lebih besar dari itu, melainkan (semua tercatat) dalam Kitab yang nyata (Lauh Mahfuzh)." <span class="not-italic font-semibold text-slate-700 dark:text-on-surface">(QS. Yunus: 61)</span>
+            </p>
+          </div>
+
+          <div class="text-xs text-slate-700 dark:text-on-surface-variant pt-2 border-t border-slate-200 dark:border-outline-variant/60 flex items-start space-x-2">
+            <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">auto_awesome</span>
+            <div class="leading-relaxed">
+              <strong>Tadabbur Sains Kimia:</strong> Berbeda dengan model orbit lingkaran pasti pada model Bohr, teori mekanika kuantum (De Broglie, Heisenberg, dan SchrÃ¶dinger) membuktikan bahwa elektron bersifat gelombang materi dengan posisi yang tidak dapat dipastikan secara mutlak (asas ketidakpastian), melainkan berupa <strong>orbital</strong> (daerah awan kebolehjadian terbesar menemukan elektron). Hal yang bagi manusia tampak seperti ketidakpastian probabilitas partikel subatomik sekecil zarrah, di sisi Allah SWT telah diketahui, ditakar, dan diatur secara mutlak hingga tingkat energi, bilangan kuantum, dan orientasi spin terkecilnya.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== IDENTITAS SISWA & INDIKATOR AUTO-SAVE ==================== -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-6 shadow-sm space-y-4 no-print">
+        <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-100 dark:border-outline-variant/60">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-xl bg-violet-100 dark:bg-surface-container-high border border-violet-200 dark:border-outline-variant flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[18px]">badge</span>
+            </div>
+            <div>
+              <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-800 dark:text-on-surface">Lembar Kerja Siswa (LKS Digital)</h3>
+              <p class="text-[11px] text-slate-400">Isi data diri untuk merekam hasil penyelidikan lab simulasi dan kuis Anda</p>
+            </div>
+          </div>
+          <div id="save-status-badge" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-tertiary-container/30 text-emerald-800 dark:text-tertiary border border-emerald-300/60 dark:border-tertiary/30 transition-all">
+            <span class="material-symbols-outlined text-[15px]" id="save-status-icon">cloud_done</span>
+            <span id="save-status-text">Tersimpan Otomatis di Perangkat</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label for="student-name" class="block text-[11px] font-bold text-slate-600 dark:text-on-surface-variant mb-1 uppercase tracking-wider">Nama Lengkap Siswa:</label>
+            <input 
+              type="text" 
+              id="student-name" 
+              placeholder="Contoh: Siti Aisyah"
+              oninput="triggerAutoSave()"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-surface-container-lowest border border-slate-200 dark:border-outline-variant text-xs text-slate-800 dark:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+            >
+          </div>
+          <div>
+            <label for="student-class" class="block text-[11px] font-bold text-slate-600 dark:text-on-surface-variant mb-1 uppercase tracking-wider">Kelas / Fase:</label>
+            <input 
+              type="text" 
+              id="student-class" 
+              placeholder="Contoh: X-2 / Fase E"
+              oninput="triggerAutoSave()"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-surface-container-lowest border border-slate-200 dark:border-outline-variant text-xs text-slate-800 dark:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+            >
+          </div>
+          <div>
+            <label for="student-nis" class="block text-[11px] font-bold text-slate-600 dark:text-on-surface-variant mb-1 uppercase tracking-wider">Nomor Absen / NISN:</label>
+            <input 
+              type="text" 
+              id="student-nis" 
+              placeholder="Contoh: 24 / 202610024"
+              oninput="triggerAutoSave()"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-surface-container-lowest border border-slate-200 dark:border-outline-variant text-xs text-slate-800 dark:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+            >
+          </div>
+        </div>
+      </div>
+
+    </section>
+    <!-- ==================== 2. TUJUAN PEMBELAJARAN ==================== -->
+    <section id="section-tujuan" class="space-y-6 scroll-mt-24">
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          2
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">Tujuan Pembelajaran</h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">Target capaian kompetensi peserta didik pada materi Konfigurasi Mekanika Kuantum (Fase E & F)</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div class="stitch-card p-5 rounded-2xl shadow-sm flex flex-col justify-between hover:border-primary transition-all">
+          <div class="space-y-2">
+            <span class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container text-xs font-bold flex items-center justify-center">1</span>
+            <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">Empat Bilangan Kuantum</h3>
+            <p class="text-xs text-slate-500 dark:text-on-surface-variant leading-relaxed">Menjelaskan arti fisik dan aturan matematis bilangan kuantum utama (<i>n</i>), azimut (<i>l</i>), magnetik (<i>m</i>), dan spin (<i>s</i>).</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-outline-variant/60 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Konseptual</span>
+            <span class="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span>
+          </div>
+        </div>
+
+        <div class="stitch-card p-5 rounded-2xl shadow-sm flex flex-col justify-between hover:border-primary transition-all">
+          <div class="space-y-2">
+            <span class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container text-xs font-bold flex items-center justify-center">2</span>
+            <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">Tiga Asas Pengisian</h3>
+            <p class="text-xs text-slate-500 dark:text-on-surface-variant leading-relaxed">Menerapkan prinsip Aufbau, kaidah Hund, dan asas larangan Pauli dalam penataan elektron pada orbital atom.</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-outline-variant/60 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Prosedural</span>
+            <span class="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span>
+          </div>
+        </div>
+
+        <div class="stitch-card p-5 rounded-2xl shadow-sm flex flex-col justify-between hover:border-primary transition-all">
+          <div class="space-y-2">
+            <span class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container text-xs font-bold flex items-center justify-center">3</span>
+            <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">Notasi spdf &amp; Gas Mulia</h3>
+            <p class="text-xs text-slate-500 dark:text-on-surface-variant leading-relaxed">Menuliskan konfigurasi elektron lengkap dan bentuk ringkas gas mulia untuk atom netral maupun ion hingga <i>Z</i> = 36.</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-outline-variant/60 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Aplikasi</span>
+            <span class="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span>
+          </div>
+        </div>
+
+        <div class="stitch-card p-5 rounded-2xl shadow-sm flex flex-col justify-between hover:border-primary transition-all">
+          <div class="space-y-2">
+            <span class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container text-xs font-bold flex items-center justify-center">4</span>
+            <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">Anomali &amp; Kemagnetan</h3>
+            <p class="text-xs text-slate-500 dark:text-on-surface-variant leading-relaxed">Menganalisis anomali kestabilan subkulit <i>d</i> (Cr dan Cu) serta memprediksi sifat kemagnetan zat dari diagram orbital.</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-outline-variant/60 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Analisis</span>
+            <span class="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== 3. PETA KONSEP FLOWCHART NODUS (STITCH FORMAT) ==================== -->
+    <section id="section-peta" class="space-y-6 scroll-mt-24">
+      
+      <!-- Section Header -->
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          3
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Peta Konsep: Alur Mekanika Kuantum &amp; Distribusi Elektron
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Diagram flowchart nodus interaktif Google Stitch yang menghubungkan landasan teori, asas pengisian, dan aplikasi sifat atom.
+          </p>
+        </div>
+      </div>
+
+      <!-- Main Flowchart Nodus Container -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-6">
+        
+        <!-- Interactive Root Node -->
+        <div class="flex flex-col items-center">
+          <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg text-center max-w-xl border border-violet-400/30">
+            <span class="text-[10px] font-mono uppercase tracking-widest font-black text-violet-200">KONSEPSI PUSAT MEKANIKA KUANTUM</span>
+            <h3 class="text-base sm:text-lg font-headline font-bold mt-1">Konfigurasi Elektron Model Kuantum</h3>
+            <p class="text-xs text-violet-100 mt-1 leading-relaxed">
+              Distribusi elektron pada orbital-orbital atom berdasarkan fungsi gelombang SchrÃ¶dinger, tingkat energi subkulit, dan bilangan kuantum.
+            </p>
+          </div>
+
+          <!-- Vertical Connector Line -->
+          <div class="w-0.5 h-6 bg-violet-500/50"></div>
+          <div class="w-3 h-3 rounded-full bg-violet-500 ring-4 ring-violet-500/20"></div>
+          <div class="w-0.5 h-6 bg-violet-500/50"></div>
+        </div>
+
+        <!-- 4 Branch Nodus Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <!-- Nodus 1: 4 Bilangan Kuantum -->
+          <div 
+            onclick="showConceptInfo('kuantum')" 
+            class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border-2 border-slate-200 dark:border-outline-variant hover:border-primary dark:hover:border-primary transition-all cursor-pointer space-y-2 group shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container">Nodus 1: Landasan</span>
+              <span class="material-symbols-outlined text-[16px] text-primary group-hover:scale-110 transition-transform">pin</span>
+            </div>
+            <h4 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface group-hover:text-primary transition-colors">
+              4 Bilangan Kuantum
+            </h4>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              Alamat unik elektron di dalam atom: kulit utama (<i>n</i>), bentuk subkulit (<i>l</i>), orientasi orbital (<i>m</i>), dan putaran spin (<i>s</i>).
+            </p>
+            <div class="pt-2 border-t border-slate-200 dark:border-outline-variant/60 text-[11px] text-primary font-semibold flex items-center space-x-1">
+              <span>Klik untuk analisis &rarr;</span>
+            </div>
+          </div>
+
+          <!-- Nodus 2: Aturan Baku Pengisian -->
+          <div 
+            onclick="showConceptInfo('aturan')" 
+            class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border-2 border-slate-200 dark:border-outline-variant hover:border-primary dark:hover:border-primary transition-all cursor-pointer space-y-2 group shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 dark:bg-tertiary-container/30 text-emerald-800 dark:text-tertiary">Nodus 2: Aturan Baku</span>
+              <span class="material-symbols-outlined text-[16px] text-tertiary group-hover:scale-110 transition-transform">rule</span>
+            </div>
+            <h4 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface group-hover:text-primary transition-colors">
+              Aufbau, Hund, Pauli
+            </h4>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              3 hukum pengisian: tingkat energi terendah (Aufbau), spin paralel sebelum berpasangan (Hund), dan larangan elektron kembar (Pauli).
+            </p>
+            <div class="pt-2 border-t border-slate-200 dark:border-outline-variant/60 text-[11px] text-tertiary font-semibold flex items-center space-x-1">
+              <span>Klik untuk analisis &rarr;</span>
+            </div>
+          </div>
+
+          <!-- Nodus 3: Notasi Subkulit & Gas Mulia -->
+          <div 
+            onclick="showConceptInfo('notasi')" 
+            class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border-2 border-slate-200 dark:border-outline-variant hover:border-primary dark:hover:border-primary transition-all cursor-pointer space-y-2 group shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950/40 text-cyan-800 dark:text-cyan-300">Nodus 3: Penulisan</span>
+              <span class="material-symbols-outlined text-[16px] text-cyan-500 group-hover:scale-110 transition-transform">code</span>
+            </div>
+            <h4 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface group-hover:text-primary transition-colors">
+              Notasi spdf &amp; Gas Mulia
+            </h4>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              Teknik penulisan subkulit lengkap dan penyingkatan praktis menggunakan inti stabil gas mulia ([He], [Ne], [Ar], [Kr]).
+            </p>
+            <div class="pt-2 border-t border-slate-200 dark:border-outline-variant/60 text-[11px] text-cyan-500 font-semibold flex items-center space-x-1">
+              <span>Klik untuk analisis &rarr;</span>
+            </div>
+          </div>
+
+          <!-- Nodus 4: Anomali & Kemagnetan -->
+          <div 
+            onclick="showConceptInfo('sifat')" 
+            class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border-2 border-slate-200 dark:border-outline-variant hover:border-primary dark:hover:border-primary transition-all cursor-pointer space-y-2 group shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300">Nodus 4: Gejala</span>
+              <span class="material-symbols-outlined text-[16px] text-amber-500 group-hover:scale-110 transition-transform">magnet</span>
+            </div>
+            <h4 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface group-hover:text-primary transition-colors">
+              Anomali &amp; Kemagnetan
+            </h4>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              Kestabilan ekstra subkulit <i>d</i> setengah penuh/penuh (Cr, Cu) serta pengaruh elektron tak berpasangan pada gaya tarik magnet.
+            </p>
+            <div class="pt-2 border-t border-slate-200 dark:border-outline-variant/60 text-[11px] text-amber-500 font-semibold flex items-center space-x-1">
+              <span>Klik untuk analisis &rarr;</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Dynamic Concept Detail Box (Diperbarui saat Nodus Diklik) -->
+        <div id="concept-detail-box" class="p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 flex items-start space-x-3 transition-all">
+          <span class="material-symbols-outlined text-[22px] text-primary shrink-0 mt-0.5">info</span>
+          <div>
+            <h4 id="concept-detail-title" class="text-xs sm:text-sm font-headline font-bold text-slate-900 dark:text-on-surface">
+              Pilih salah satu simpul nodus di atas
+            </h4>
+            <p id="concept-detail-desc" class="text-xs text-slate-600 dark:text-on-surface-variant mt-1 leading-relaxed">
+              Rincian ilmiah mengenai hubungan antara bilangan kuantum, prinsip pengisian elektron, diagram orbital, serta sifat magnetik materi akan dijelaskan secara interaktif di panel ini.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+    <!-- ==================== 4. FENOMENA: KEMAGNETAN LOGAM & SPIN ELEKTRON ==================== -->
+    <section id="section-fenomena" class="space-y-6 scroll-mt-24">
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          4
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Fenomena Nyata: Mengapa Paku Besi Menempel Kuat pada Magnet?
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Keterkaitan antara elektron tak berpasangan pada subkulit <i>d</i> dengan sifat feromagnetik dan paramagnetik.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        
+        <!-- Interactive Magnet Simulator Box -->
+        <div class="lg:col-span-6 bg-gradient-to-b from-[#060608] via-[#0d0d14] to-[#12111d] rounded-2xl p-6 text-white border border-slate-800 shadow-xl relative overflow-hidden flex flex-col items-center justify-center min-h-[340px]">
+          
+          <!-- Ambient Glow of Magnet field -->
+          <div id="magnet-ambient" class="absolute w-56 h-56 rounded-full blur-3xl opacity-25 transition-all duration-500 bg-red-500 pointer-events-none"></div>
+
+          <!-- Graphic Magnet Demonstration -->
+          <div class="relative z-10 flex flex-col items-center space-y-4">
+            <!-- Horseshoe Magnet Graphic -->
+            <div class="flex items-center space-x-6">
+              <div class="flex flex-col items-center">
+                <div class="w-8 h-16 bg-rose-600 rounded-t-xl flex items-center justify-center font-black text-xs shadow-lg">N</div>
+                <div class="w-8 h-10 bg-slate-400 border-x-2 border-slate-500"></div>
+              </div>
+              <div class="w-16 h-8 border-t-8 border-slate-400 rounded-t-full"></div>
+              <div class="flex flex-col items-center">
+                <div class="w-8 h-16 bg-blue-600 rounded-t-xl flex items-center justify-center font-black text-xs shadow-lg">S</div>
+                <div class="w-8 h-10 bg-slate-400 border-x-2 border-slate-500"></div>
+              </div>
+            </div>
+
+            <!-- Tested Metal Object -->
+            <div id="metal-sample-target" class="transition-all duration-500 flex flex-col items-center p-3 rounded-xl bg-slate-900 border-2 border-slate-700 shadow-2xl">
+              <span class="material-symbols-outlined text-[24px] text-slate-300 mb-1" id="metal-icon">hardware</span>
+              <span id="metal-sample-name" class="font-bold text-xs sm:text-sm text-primary">Besi (Fe, Z = 26)</span>
+              <span id="metal-magnetic-status" class="text-[11px] text-tertiary font-black mt-0.5">Ditarik Sangat Kuat (Feromagnetik)</span>
+            </div>
+          </div>
+
+          <!-- Magnet Field Info -->
+          <div class="relative z-10 mt-6 text-center max-w-sm">
+            <p id="metal-magnetic-desc" class="text-xs text-slate-300 leading-relaxed">
+              Besi memiliki 4 elektron tak berpasangan pada orbital 3d. Spin searah elektron-elektron ini menghasilkan momen magnetik searah yang sangat kuat.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Explanation & Metal Selectors -->
+        <div class="lg:col-span-6 space-y-4">
+          <div class="stitch-card rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+            <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface flex items-center space-x-2">
+              <span class="material-symbols-outlined text-[18px] text-primary">science</span>
+              <span>Uji Karakter Magnetik Unsur Logam:</span>
+            </h3>
+
+            <!-- Metal Buttons -->
+            <div class="grid grid-cols-2 gap-2.5">
+              <button onclick="testMagnet('Fe')" id="btn-mag-Fe" class="mag-btn p-3 rounded-xl text-left border border-primary/50 bg-violet-50 dark:bg-primary-container/20 transition-all cursor-pointer">
+                <div class="font-bold text-xs text-slate-900 dark:text-on-surface">Besi (Fe, Z = 26)</div>
+                <div class="text-[11px] text-violet-700 dark:text-primary font-medium">[Ar] 3d<sup>6</sup> 4s<sup>2</sup> &bull; 4 e<sup>-</sup> tak berpasangan</div>
+              </button>
+
+              <button onclick="testMagnet('Zn')" id="btn-mag-Zn" class="mag-btn p-3 rounded-xl text-left border border-slate-200 dark:border-outline-variant hover:bg-slate-50 dark:hover:bg-surface-container transition-all cursor-pointer">
+                <div class="font-bold text-xs text-slate-900 dark:text-on-surface">Seng (Zn, Z = 30)</div>
+                <div class="text-[11px] text-slate-500 dark:text-on-surface-variant font-medium">[Ar] 3d<sup>10</sup> 4s<sup>2</sup> &bull; Semua e<sup>-</sup> berpasangan</div>
+              </button>
+
+              <button onclick="testMagnet('Mn')" id="btn-mag-Mn" class="mag-btn p-3 rounded-xl text-left border border-slate-200 dark:border-outline-variant hover:bg-slate-50 dark:hover:bg-surface-container transition-all cursor-pointer">
+                <div class="font-bold text-xs text-slate-900 dark:text-on-surface">Mangan (Mn, Z = 25)</div>
+                <div class="text-[11px] text-slate-500 dark:text-on-surface-variant font-medium">[Ar] 3d<sup>5</sup> 4s<sup>2</sup> &bull; 5 e<sup>-</sup> tak berpasangan</div>
+              </button>
+
+              <button onclick="testMagnet('Cu')" id="btn-mag-Cu" class="mag-btn p-3 rounded-xl text-left border border-slate-200 dark:border-outline-variant hover:bg-slate-50 dark:hover:bg-surface-container transition-all cursor-pointer">
+                <div class="font-bold text-xs text-slate-900 dark:text-on-surface">Tembaga (Cu, Z = 29)</div>
+                <div class="text-[11px] text-slate-500 dark:text-on-surface-variant font-medium">[Ar] 3d<sup>10</sup> 4s<sup>1</sup> &bull; 1 e<sup>-</sup> tak berpasangan</div>
+              </button>
+            </div>
+
+            <!-- Scientific Explanation of Magnetism & Spin -->
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 text-xs text-slate-700 dark:text-on-surface-variant space-y-2">
+              <p class="font-bold text-violet-700 dark:text-primary flex items-center space-x-1.5">
+                <span class="material-symbols-outlined text-[16px]">lightbulb</span>
+                <span>Penjelasan Mekanika Kuantum:</span>
+              </p>
+              <p class="leading-relaxed">
+                Elektron berotasi pada porosnya (spin kuantum) layaknya magnet mikroskopis. Menurut <strong>Kaidah Hund</strong> dan <strong>Larangan Pauli</strong>, jika semua orbital terisi penuh oleh pasangan elektron dengan spin berlawanan (&uarr;&darr;), medan magnetnya saling meniadakan (<strong>diamagnetik</strong>). Sebaliknya, adanya <strong>elektron tunggal (tak berpasangan)</strong> menghasilkan momen magnet total yang tertarik oleh medan magnet eksternal (<strong>paramagnetik/feromagnetik</strong>).
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== 5. MATERI INTI MEKANIKA KUANTUM ==================== -->
+    <section id="section-materi" class="space-y-6 scroll-mt-24">
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          5
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">Materi Inti: Aturan Konfigurasi Elektron Kuantum</h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">4 Bilangan kuantum, prinsip Aufbau, kaidah Hund, larangan Pauli, dan anomali kestabilan subkulit d</p>
+        </div>
+      </div>
+
+      <!-- 4 Bilangan Kuantum Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Bilangan Kuantum Utama (n) -->
+        <div class="stitch-card rounded-2xl p-5 shadow-sm space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-xl bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container font-black text-sm flex items-center justify-center">n</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-surface-container text-violet-700 dark:text-primary border border-slate-200 dark:border-outline-variant">Tingkat Energi</span>
+          </div>
+          <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">Kuantum Utama (n)</h3>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Menunjukkan nomor kulit utama atom serta ukuran rata-rata awan elektron (jarak rata-rata dari inti atom).
+          </p>
+          <div class="text-[11px] font-mono bg-slate-50 dark:bg-surface-container p-2 rounded-lg text-primary">
+            Nilai: n = 1, 2, 3, 4, 5, 6, 7
+          </div>
+        </div>
+
+        <!-- Bilangan Kuantum Azimut (l) -->
+        <div class="stitch-card rounded-2xl p-5 shadow-sm space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-xl bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container font-black text-sm flex items-center justify-center">l</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-surface-container text-violet-700 dark:text-primary border border-slate-200 dark:border-outline-variant">Bentuk Orbital</span>
+          </div>
+          <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">Kuantum Azimut (l)</h3>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Menunjukkan jenis subkulit dan bentuk geometris awan elektron di ruang tiga dimensi.
+          </p>
+          <div class="text-[11px] font-mono bg-slate-50 dark:bg-surface-container p-2 rounded-lg text-primary">
+            l = 0 (s), 1 (p), 2 (d), 3 (f)
+          </div>
+        </div>
+
+        <!-- Bilangan Kuantum Magnetik (m) -->
+        <div class="stitch-card rounded-2xl p-5 shadow-sm space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-xl bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container font-black text-sm flex items-center justify-center">m</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-surface-container text-violet-700 dark:text-primary border border-slate-200 dark:border-outline-variant">Orientasi Ruang</span>
+          </div>
+          <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">Kuantum Magnetik (m)</h3>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Menentukan orientasi spasial orbital khusus yang ditempati oleh elektron dalam subkulitnya.
+          </p>
+          <div class="text-[11px] font-mono bg-slate-50 dark:bg-surface-container p-2 rounded-lg text-primary">
+            Nilai: -l s.d. +l (misal p: -1, 0, +1)
+          </div>
+        </div>
+
+        <!-- Bilangan Kuantum Spin (s) -->
+        <div class="stitch-card rounded-2xl p-5 shadow-sm space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-xl bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container font-black text-sm flex items-center justify-center">s</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-surface-container text-violet-700 dark:text-primary border border-slate-200 dark:border-outline-variant">Arah Putaran</span>
+          </div>
+          <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">Kuantum Spin (s)</h3>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Menunjukkan arah perputaran intrinsik elektron pada porosnya sendiri (searah / berlawanan jarum jam).
+          </p>
+          <div class="text-[11px] font-mono bg-slate-50 dark:bg-surface-container p-2 rounded-lg text-primary">
+            s = +&frac12; (&uarr;) atau -&frac12; (&darr;)
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 3 Asas Utama Konfigurasi Kuantum -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        
+        <!-- Asas 1: Aufbau -->
+        <div class="stitch-card rounded-2xl p-5 sm:p-6 shadow-sm space-y-3">
+          <div class="flex items-center space-x-2 text-violet-700 dark:text-primary font-headline font-bold text-xs sm:text-sm">
+            <span class="material-symbols-outlined text-[18px]">trending_up</span>
+            <span>1. Prinsip Aufbau (Membangun)</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Elektron diisikan secara berurutan mulai dari subkulit yang memiliki <strong>tingkat energi terendah</strong> terlebih dahulu, baru kemudian mengisi tingkat energi yang lebih tinggi setelah subkulit sebelumnya terisi penuh.
+          </p>
+          <div class="p-3 bg-slate-50 dark:bg-surface-container rounded-xl text-[11px] font-mono text-primary border border-slate-200 dark:border-outline-variant/60 leading-relaxed">
+            1s &rarr; 2s &rarr; 2p &rarr; 3s &rarr; 3p &rarr; <strong>4s</strong> &rarr; <strong>3d</strong> &rarr; 4p &rarr; 5s...
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-on-surface-variant">
+            <em>Catatan: Subkulit 4s diisi sebelum 3d karena tingkat energi 4s lebih rendah daripada 3d.</em>
+          </p>
+        </div>
+
+        <!-- Asas 2: Kaidah Hund -->
+        <div class="stitch-card rounded-2xl p-5 sm:p-6 shadow-sm space-y-3">
+          <div class="flex items-center space-x-2 text-tertiary font-headline font-bold text-xs sm:text-sm">
+            <span class="material-symbols-outlined text-[18px]">groups</span>
+            <span>2. Kaidah Hund (Friedrich Hund)</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Pada pengisian orbital-orbital yang memiliki tingkat energi setara (degenerasi, misal subkulit p atau d), elektron akan mengisi orbital <strong>secara sendiri-sendiri dengan spin paralel (searah &uarr;)</strong> sebelum berpasangan (&darr;).
+          </p>
+          <div class="p-3 bg-slate-50 dark:bg-surface-container rounded-xl text-[11px] font-mono text-tertiary border border-slate-200 dark:border-outline-variant/60 leading-relaxed">
+            Contoh pada pÂ³: diisi <strong>[&uarr;][&uarr;][&uarr;]</strong> (bukan [&uarr;&darr;][&uarr;][ ]) agar gaya tolak-menolak minimal.
+          </div>
+        </div>
+
+        <!-- Asas 3: Larangan Pauli -->
+        <div class="stitch-card rounded-2xl p-5 sm:p-6 shadow-sm space-y-3">
+          <div class="flex items-center space-x-2 text-cyan-600 dark:text-cyan-400 font-headline font-bold text-xs sm:text-sm">
+            <span class="material-symbols-outlined text-[18px]">block</span>
+            <span>3. Asas Larangan Pauli</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Dalam suatu atom, <strong>tidak boleh ada dua elektron yang memiliki keempat bilangan kuantum (n, l, m, s) yang identik sama</strong>. Jika n, l, dan m sama, maka nilai s (spin) harus berlawanan.
+          </p>
+          <div class="p-3 bg-slate-50 dark:bg-surface-container rounded-xl text-[11px] font-mono text-cyan-500 border border-slate-200 dark:border-outline-variant/60 leading-relaxed">
+            Satu kotak orbital maksimal hanya boleh dihuni oleh <strong>2 elektron dengan spin antiparalel (&uarr;&darr;)</strong>.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Anomali Kestabilan Subkulit d (Cr dan Cu) Box -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-4 border border-amber-300/40 dark:border-amber-700/40 bg-gradient-to-r from-amber-500/5 via-violet-500/5 to-tertiary/5">
+        <div class="flex items-center space-x-2 text-amber-700 dark:text-amber-400 font-headline font-bold text-xs sm:text-sm">
+          <span class="material-symbols-outlined text-[18px]">warning</span>
+          <span>Pengecualian Khusus: Kestabilan Ekstra Subkulit Setengah Penuh (d<sup>5</sup>) dan Penuh (d<sup>10</sup>)</span>
+        </div>
+        <p class="text-xs text-slate-700 dark:text-on-surface-variant leading-relaxed">
+          Eksperimen spektroskopi membuktikan bahwa susunan elektron dengan subkulit d yang <strong>setengah penuh (d<sup>5</sup>)</strong> atau <strong>penuh (d<sup>10</sup>)</strong> memiliki tingkat simetri spasial tinggi dan kestabilan energi yang lebih disukai dibanding d<sup>4</sup> atau d<sup>9</sup>:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+          <!-- Kromium Cr -->
+          <div class="p-4 rounded-xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant shadow-sm">
+            <div class="font-bold text-slate-900 dark:text-on-surface mb-1">Kromium (Cr, Z = 24)</div>
+            <div class="text-rose-500 line-through">Teoretis: [Ar] 3d<sup>4</sup> 4s<sup>2</sup></div>
+            <div class="text-emerald-600 dark:text-tertiary font-bold text-sm mt-1">Fakta Eksperimen: [Ar] 3d<sup>5</sup> 4s<sup>1</sup></div>
+            <p class="text-[11px] font-sans text-slate-500 dark:text-on-surface-variant mt-2">1 elektron 4s berpindah ke 3d agar subkulit 3d menjadi setengah penuh (d<sup>5</sup>) yang sangat simetris dan stabil.</p>
+          </div>
+
+          <!-- Tembaga Cu -->
+          <div class="p-4 rounded-xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant shadow-sm">
+            <div class="font-bold text-slate-900 dark:text-on-surface mb-1">Tembaga (Cu, Z = 29)</div>
+            <div class="text-rose-500 line-through">Teoretis: [Ar] 3d<sup>9</sup> 4s<sup>2</sup></div>
+            <div class="text-emerald-600 dark:text-tertiary font-bold text-sm mt-1">Fakta Eksperimen: [Ar] 3d<sup>10</sup> 4s<sup>1</sup></div>
+            <p class="text-[11px] font-sans text-slate-500 dark:text-on-surface-variant mt-2">1 elektron 4s berpindah ke 3d agar subkulit 3d terisi penuh (d<sup>10</sup>) yang menghasilkan kestabilan maksimal.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Penyingkatan Gas Mulia Reference -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-6 shadow-sm space-y-3">
+        <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface flex items-center space-x-2">
+          <span class="material-symbols-outlined text-[18px] text-primary">auto_fix_high</span>
+          <span>Acuan Penyingkatan Konfigurasi Menggunakan Gas Mulia</span>
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60">
+            <span class="font-bold text-primary block text-xs sm:text-sm">[He] (Helium)</span>
+            <span class="font-mono text-slate-600 dark:text-on-surface-variant">Z = 2 &bull; 1sÂ²</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60">
+            <span class="font-bold text-tertiary block text-xs sm:text-sm">[Ne] (Neon)</span>
+            <span class="font-mono text-slate-600 dark:text-on-surface-variant">Z = 10 &bull; [He] 2s<sup>2</sup> 2p<sup>6</sup></span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60">
+            <span class="font-bold text-cyan-500 block text-xs sm:text-sm">[Ar] (Argon)</span>
+            <span class="font-mono text-slate-600 dark:text-on-surface-variant">Z = 18 &bull; [Ne] 3s<sup>2</sup> 3p<sup>6</sup></span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60">
+            <span class="font-bold text-indigo-400 block text-xs sm:text-sm">[Kr] (Kripton)</span>
+            <span class="font-mono text-slate-600 dark:text-on-surface-variant">Z = 36 &bull; [Ar] 3d<sup>10</sup> 4s<sup>2</sup> 4p<sup>6</sup></span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+    <!-- ==================== 6. LAB SIMULASI INTERAKTIF ORBITAL MEKANIKA KUANTUM ==================== -->
+    <section id="section-simulasi" class="space-y-6 scroll-mt-24">
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          6
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Laboratorium Virtual: Simulator Diagram Orbital Kuantum
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Amati penataan elektron pada kotak orbital 1s s.d. 3d secara visual, akurat, dan interaktif sesuai Kaidah Hund.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: Visual Orbital Boxes Board -->
+        <div class="lg:col-span-8 bg-gradient-to-b from-[#08070d] via-[#100d1c] to-[#12111d] rounded-2xl p-5 sm:p-7 border border-slate-800 shadow-xl text-white space-y-6">
+          
+          <!-- Board Header -->
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-4 flex-wrap gap-2">
+            <div>
+              <span id="sim-atom-badge" class="text-lg sm:text-xl font-headline font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-primary to-tertiary">
+                Natrium (Na, Z = 11)
+              </span>
+              <p id="sim-full-config" class="font-mono text-xs text-violet-300 mt-0.5">
+                1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>1</sup>
+              </p>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button 
+                onclick="runAutoFillingStep()" 
+                id="btn-auto-fill"
+                class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center space-x-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                <span>Animasi Isi Elektron</span>
+              </button>
+              <button 
+                onclick="resetSimulatorToDefault()" 
+                title="Reset Simulator"
+                class="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Orbital Containers Grid -->
+          <div class="space-y-4">
+            
+            <!-- Subkulit 1s -->
+            <div class="flex items-center space-x-4">
+              <div class="w-16 font-mono font-bold text-xs text-primary">1s:</div>
+              <div class="flex items-center space-x-2">
+                <div class="flex flex-col items-center">
+                  <div id="orb-1s-0" class="orbital-box"><span class="text-primary font-bold">&uarr;</span><span class="text-tertiary font-bold">&darr;</span></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subkulit 2s & 2p -->
+            <div class="flex items-center space-x-4">
+              <div class="w-16 font-mono font-bold text-xs text-primary">2s:</div>
+              <div class="flex items-center space-x-2">
+                <div class="flex flex-col items-center">
+                  <div id="orb-2s-0" class="orbital-box"><span class="text-primary font-bold">&uarr;</span><span class="text-tertiary font-bold">&darr;</span></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+              <div class="w-16 font-mono font-bold text-xs text-cyan-400">2p:</div>
+              <div class="flex items-center space-x-2">
+                <div class="flex flex-col items-center">
+                  <div id="orb-2p-0" class="orbital-box"><span class="text-primary font-bold">&uarr;</span><span class="text-tertiary font-bold">&darr;</span></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=-1</span>
+                </div>
+                <div class="flex flex-col items-center">
+                  <div id="orb-2p-1" class="orbital-box"><span class="text-primary font-bold">&uarr;</span><span class="text-tertiary font-bold">&darr;</span></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=0</span>
+                </div>
+                <div class="flex flex-col items-center">
+                  <div id="orb-2p-2" class="orbital-box"><span class="text-primary font-bold">&uarr;</span><span class="text-tertiary font-bold">&darr;</span></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=+1</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subkulit 3s & 3p -->
+            <div class="flex items-center space-x-4">
+              <div class="w-16 font-mono font-bold text-xs text-primary">3s:</div>
+              <div class="flex items-center space-x-2">
+                <div class="flex flex-col items-center">
+                  <div id="orb-3s-0" class="orbital-box"><span class="text-primary font-bold">&uarr;</span></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+              <div class="w-16 font-mono font-bold text-xs text-cyan-400">3p:</div>
+              <div class="flex items-center space-x-2">
+                <div class="flex flex-col items-center">
+                  <div id="orb-3p-0" class="orbital-box text-slate-600"></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=-1</span>
+                </div>
+                <div class="flex flex-col items-center">
+                  <div id="orb-3p-1" class="orbital-box text-slate-600"></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=0</span>
+                </div>
+                <div class="flex flex-col items-center">
+                  <div id="orb-3p-2" class="orbital-box text-slate-600"></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=+1</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subkulit 4s & 3d (Aufbau Level) -->
+            <div class="flex items-center space-x-4 pt-2 border-t border-slate-800/80">
+              <div class="w-16 font-mono font-bold text-xs text-amber-400">4s:</div>
+              <div class="flex items-center space-x-2">
+                <div class="flex flex-col items-center">
+                  <div id="orb-4s-0" class="orbital-box text-slate-600"></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="w-16 font-mono font-bold text-xs text-amber-400 mt-2">3d:</div>
+              <div class="flex items-center space-x-2 flex-wrap gap-y-2">
+                <div class="flex flex-col items-center">
+                  <div id="orb-3d-0" class="orbital-box text-slate-600"></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=-2</span>
+                </div>
+                <div class="flex flex-col items-center">
+                  <div id="orb-3d-1" class="orbital-box text-slate-600"></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=-1</span>
+                </div>
+                <div class="flex flex-col items-center">
+                  <div id="orb-3d-2" class="orbital-box text-slate-600"></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=0</span>
+                </div>
+                <div class="flex flex-col items-center">
+                  <div id="orb-3d-3" class="orbital-box text-slate-600"></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=+1</span>
+                </div>
+                <div class="flex flex-col items-center">
+                  <div id="orb-3d-4" class="orbital-box text-slate-600"></div>
+                  <span class="text-[9px] text-slate-400 font-mono mt-1">m=+2</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Board Footer Legend -->
+          <div class="flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-4 flex-wrap gap-2">
+            <div class="flex items-center space-x-4">
+              <span class="flex items-center space-x-1.5"><span class="text-primary font-bold text-base">&uarr;</span><span>Spin Up (+&frac12;)</span></span>
+              <span class="flex items-center space-x-1.5"><span class="text-tertiary font-bold text-base">&darr;</span><span>Spin Down (-&frac12;)</span></span>
+            </div>
+            <div class="text-[11px] text-primary font-mono" id="sim-filling-hint">
+              Kaidah Hund: Isi mandiri sebelum berpasangan
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Element Selector & Quantum Results Card -->
+        <div class="lg:col-span-4 space-y-4">
+          
+          <div class="stitch-card rounded-2xl p-5 shadow-sm space-y-4">
+            
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label for="sim-z-slider" class="text-xs font-bold text-slate-800 dark:text-on-surface">Pilih Nomor Atom (Z = 1 s.d. 30):</label>
+                <span id="sim-z-indicator" class="font-mono text-xs font-black px-2.5 py-0.5 rounded-lg bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container">Z = 11</span>
+              </div>
+              <input 
+                type="range" 
+                min="1" 
+                max="30" 
+                value="11" 
+                id="sim-z-slider" 
+                oninput="setAtomByNumber(this.value)"
+                class="w-full accent-violet-500 cursor-pointer"
+              >
+            </div>
+
+            <!-- Quick Element Badges Grid -->
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Pintasan Unsur Populer:</span>
+              <div class="grid grid-cols-5 gap-1.5 text-xs font-bold text-center" id="quick-element-container">
+                <!-- Injected by JavaScript -->
+              </div>
+            </div>
+
+            <!-- 4 Quantum Numbers of Last Electron Card -->
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 space-y-2.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-violet-700 dark:text-primary block">
+                4 Bilangan Kuantum Elektron Terakhir:
+              </span>
+
+              <div class="grid grid-cols-4 gap-2 text-center font-mono">
+                <div class="bg-white dark:bg-surface-container-high p-2 rounded-xl border border-slate-200 dark:border-outline-variant">
+                  <span class="text-[10px] text-slate-400 block">n</span>
+                  <span id="res-n" class="font-bold text-sm text-primary">3</span>
+                </div>
+                <div class="bg-white dark:bg-surface-container-high p-2 rounded-xl border border-slate-200 dark:border-outline-variant">
+                  <span class="text-[10px] text-slate-400 block">l</span>
+                  <span id="res-l" class="font-bold text-sm text-primary">0</span>
+                </div>
+                <div class="bg-white dark:bg-surface-container-high p-2 rounded-xl border border-slate-200 dark:border-outline-variant">
+                  <span class="text-[10px] text-slate-400 block">m</span>
+                  <span id="res-m" class="font-bold text-sm text-primary">0</span>
+                </div>
+                <div class="bg-white dark:bg-surface-container-high p-2 rounded-xl border border-slate-200 dark:border-outline-variant">
+                  <span class="text-[10px] text-slate-400 block">s</span>
+                  <span id="res-s" class="font-bold text-sm text-tertiary">+&frac12;</span>
+                </div>
+              </div>
+
+              <div class="text-[11px] text-slate-600 dark:text-on-surface-variant space-y-1 pt-1">
+                <div>Singkatan Gas Mulia: <strong id="res-gas-noble" class="text-primary font-mono">[Ne] 3sÂ¹</strong></div>
+                <div>Elektron Tak Berpasangan: <strong id="res-unpaired" class="text-amber-600 dark:text-amber-400">1 Elektron</strong></div>
+                <div>Sifat Magnetik: <strong id="res-magnetism" class="text-tertiary">Paramagnetik</strong></div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+    <!-- ==================== 7. LEMBAR PENYELIDIKAN LAB ESSAI (HOTS) ==================== -->
+    <section id="section-penyelidikan" class="space-y-6 scroll-mt-24">
+      <div class="flex items-center justify-between flex-wrap gap-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+            7
+          </div>
+          <div>
+            <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+              Lembar Penyelidikan Lab Simulasi (3 Misi Investigasi HOTS)
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+              Gunakan simulator diagram orbital di atas untuk memecahkan 3 misi eksplorasi dan analisis mekanika kuantum berikut.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2 no-print">
+          <button onclick="document.getElementById('section-simulasi').scrollIntoView({behavior:'smooth'})" class="px-3 py-1.5 rounded-xl bg-violet-50 dark:bg-surface-container border border-violet-200 dark:border-outline-variant text-primary text-xs font-semibold hover:bg-violet-100 dark:hover:bg-surface-container-high flex items-center space-x-1 cursor-pointer transition-colors">
+            <span class="material-symbols-outlined text-[15px]">arrow_upward</span>
+            <span>Buka Simulator Orbital</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        
+        <!-- Misi 1 -->
+        <div class="stitch-card rounded-2xl p-5 sm:p-6 shadow-sm space-y-3 print-card">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <div class="space-y-1">
+              <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container">
+                Misi Penyelidikan 1 &bull; Anomali Kestabilan Subkulit d
+              </span>
+              <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">
+                Menganalisis Kestabilan Konfigurasi Setengah Penuh pada Kromium (Z = 24)
+              </h3>
+            </div>
+            <div class="flex items-center space-x-1.5 no-print">
+              <button onclick="setAtomByNumber(23); document.getElementById('section-simulasi').scrollIntoView({behavior:'smooth'})" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container hover:bg-violet-100 dark:hover:bg-primary/20 text-[11px] font-semibold text-slate-700 dark:text-on-surface-variant transition-colors cursor-pointer">
+                Uji V (Z=23)
+              </button>
+              <button onclick="setAtomByNumber(24); document.getElementById('section-simulasi').scrollIntoView({behavior:'smooth'})" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container hover:bg-violet-100 dark:hover:bg-primary/20 text-[11px] font-semibold text-slate-700 dark:text-on-surface-variant transition-colors cursor-pointer">
+                Uji Cr (Z=24)
+              </button>
+            </div>
+          </div>
+          
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed bg-slate-50 dark:bg-surface-container p-3 rounded-xl border border-slate-200 dark:border-outline-variant/60">
+            <strong>Instruksi Investigasi:</strong> Buka simulator diagram orbital dan bandingkan susunan kotak elektron Vanadium (Z = 23) dengan Kromium (Z = 24). Mengapa pada atom Kromium 1 elektron dari 4s berpindah ke 3d sehingga konfigurasinya menjadi [Ar] 3d<sup>5</sup> 4s<sup>1</sup> bukannya [Ar] 3d<sup>4</sup> 4s<sup>2</sup>? Jelaskan keuntungan simetri energi setengah penuh (d<sup>5</sup>) berdasarkan pengamatan tampilan visual orbital!
+          </p>
+
+          <div>
+            <label for="lab-essay-1" class="block text-xs font-bold text-slate-700 dark:text-on-surface mb-1.5 flex items-center justify-between">
+              <span>Hasil Analisis &amp; Jawaban Essai Siswa:</span>
+              <span class="text-[10px] text-primary font-normal no-print">Tersimpan otomatis</span>
+            </label>
+            <textarea 
+              id="lab-essay-1" 
+              rows="3" 
+              placeholder="Tuliskan analisis penyelidikanmu di sini. Contoh: Berdasarkan tampilan diagram orbital pada simulator, susunan [Ar] 3d<sup>5</sup> 4s<sup>1</sup> menghasilkan 5 kotak orbital 3d yang terisi masing-masing 1 elektron secara simetris..."
+              oninput="triggerAutoSave()"
+              class="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-surface-container-lowest border border-slate-200 dark:border-outline-variant text-xs text-slate-800 dark:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all leading-relaxed"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Misi 2 -->
+        <div class="stitch-card rounded-2xl p-5 sm:p-6 shadow-sm space-y-3 print-card">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <div class="space-y-1">
+              <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-cyan-100 dark:bg-cyan-950/40 text-cyan-800 dark:text-cyan-300">
+                Misi Penyelidikan 2 &bull; Investigasi Sifat Kemagnetan Atom
+              </span>
+              <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">
+                Membedakan Sifat Magnetik Paku Besi (Z = 26) vs Kawat Seng (Z = 30)
+              </h3>
+            </div>
+            <div class="flex items-center space-x-1.5 no-print">
+              <button onclick="setAtomByNumber(26); document.getElementById('section-simulasi').scrollIntoView({behavior:'smooth'})" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container hover:bg-cyan-100 dark:hover:bg-cyan-900/30 text-[11px] font-semibold text-slate-700 dark:text-on-surface-variant transition-colors cursor-pointer">
+                Uji Fe (Z=26)
+              </button>
+              <button onclick="setAtomByNumber(30); document.getElementById('section-simulasi').scrollIntoView({behavior:'smooth'})" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container hover:bg-cyan-100 dark:hover:bg-cyan-900/30 text-[11px] font-semibold text-slate-700 dark:text-on-surface-variant transition-colors cursor-pointer">
+                Uji Zn (Z=30)
+              </button>
+            </div>
+          </div>
+          
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed bg-slate-50 dark:bg-surface-container p-3 rounded-xl border border-slate-200 dark:border-outline-variant/60">
+            <strong>Instruksi Investigasi:</strong> Atur slider simulator pada atom Besi (Z = 26) dan Seng (Z = 30). Amati kotak-kotak orbital subkulit 3d dan perhatikan indikator "Elektron Tak Berpasangan". Mengapa atom Besi dapat ditarik sangat kuat oleh medan magnet luar (feromagnetik), sedangkan atom Seng sama sekali tidak ditarik (diamagnetik)? Jelaskan hubungannya dengan momen magnet spin elektron!
+          </p>
+
+          <div>
+            <label for="lab-essay-2" class="block text-xs font-bold text-slate-700 dark:text-on-surface mb-1.5 flex items-center justify-between">
+              <span>Hasil Analisis &amp; Jawaban Essai Siswa:</span>
+              <span class="text-[10px] text-primary font-normal no-print">Tersimpan otomatis</span>
+            </label>
+            <textarea 
+              id="lab-essay-2" 
+              rows="3" 
+              placeholder="Tuliskan penjelasan kemagnetanmu di sini. Contoh: Pada atom Besi (Z = 26) konfigurasi 3d<sup>6</sup> memiliki 4 elektron tak berpasangan yang menghasilkan resultan spin searah..."
+              oninput="triggerAutoSave()"
+              class="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-surface-container-lowest border border-slate-200 dark:border-outline-variant text-xs text-slate-800 dark:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all leading-relaxed"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Misi 3 -->
+        <div class="stitch-card rounded-2xl p-5 sm:p-6 shadow-sm space-y-3 print-card">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <div class="space-y-1">
+              <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300">
+                Misi Penyelidikan 3 &bull; 4 Bilangan Kuantum &amp; Kaidah Hund
+              </span>
+              <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">
+                Menentukan 'Alamat Elektron' pada Aluminium (Z = 13) dan Klorin (Z = 17)
+              </h3>
+            </div>
+            <div class="flex items-center space-x-1.5 no-print">
+              <button onclick="setAtomByNumber(13); document.getElementById('section-simulasi').scrollIntoView({behavior:'smooth'})" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container hover:bg-amber-100 dark:hover:bg-amber-900/30 text-[11px] font-semibold text-slate-700 dark:text-on-surface-variant transition-colors cursor-pointer">
+                Uji Al (Z=13)
+              </button>
+              <button onclick="setAtomByNumber(17); document.getElementById('section-simulasi').scrollIntoView({behavior:'smooth'})" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container hover:bg-amber-100 dark:hover:bg-amber-900/30 text-[11px] font-semibold text-slate-700 dark:text-on-surface-variant transition-colors cursor-pointer">
+                Uji Cl (Z=17)
+              </button>
+            </div>
+          </div>
+          
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed bg-slate-50 dark:bg-surface-container p-3 rounded-xl border border-slate-200 dark:border-outline-variant/60">
+            <strong>Instruksi Investigasi:</strong> Amati panel "4 Bilangan Kuantum Elektron Terakhir" untuk atom Aluminium (Z = 13) dan Klorin (Z = 17). Tuliskan keempat nilai bilangan kuantum (n, l, m, s) untuk kedua atom tersebut. Jelaskan mengapa nilai m dan nilai s elektron terakhir Klorin berbeda dengan Aluminium saat menempati subkulit 3p!
+          </p>
+
+          <div>
+            <label for="lab-essay-3" class="block text-xs font-bold text-slate-700 dark:text-on-surface mb-1.5 flex items-center justify-between">
+              <span>Hasil Analisis &amp; Jawaban Essai Siswa:</span>
+              <span class="text-[10px] text-primary font-normal no-print">Tersimpan otomatis</span>
+            </label>
+            <textarea 
+              id="lab-essay-3" 
+              rows="3" 
+              placeholder="Tuliskan analisis bilangan kuantummu di sini. Contoh: Untuk Aluminium (Z=13), elektron terakhir di 3pÂ¹ memiliki n=3, l=1, m=-1, s=+1/2. Sedangkan Klorin (Z=17)..."
+              oninput="triggerAutoSave()"
+              class="w-full p-3.5 rounded-xl bg-slate-50 dark:bg-surface-container-lowest border border-slate-200 dark:border-outline-variant text-xs text-slate-800 dark:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all leading-relaxed"
+            ></textarea>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== 8. LATIHAN SOAL INTERAKTIF KOMPREHENSIF (12 SOAL) ==================== -->
+    <section id="section-kuis" class="space-y-6 scroll-mt-24">
+      <div class="flex items-center justify-between flex-wrap gap-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+            8
+          </div>
+          <div>
+            <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+              Latihan Soal Komprehensif (12 Soal Pilihan Ganda HOTS)
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+              Uji pemahaman bilangan kuantum, aturan Aufbau, kaidah Hund, larangan Pauli, dan anomali kestabilan subkulit d.
+            </p>
+          </div>
+        </div>
+
+        <!-- Live Score Counter -->
+        <div class="flex items-center space-x-2 stitch-card px-4 py-2 rounded-xl shadow-sm">
+          <span class="text-xs font-semibold text-slate-500 dark:text-on-surface-variant">Skor Kuis:</span>
+          <span id="quiz-live-score" class="text-base font-black text-emerald-600 dark:text-tertiary">0</span>
+          <span class="text-xs text-slate-400">/ 100</span>
+        </div>
+      </div>
+
+      <!-- Question Number Nav Bar (1 s.d 12) -->
+      <div class="stitch-card rounded-2xl p-3 sm:p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-slate-700 dark:text-on-surface">Navigasi Butir Soal:</span>
+          <span class="text-[11px] text-slate-400 font-mono" id="quiz-progress-label">Soal 1 dari 12</span>
+        </div>
+        <div class="grid grid-cols-6 sm:grid-cols-12 gap-1.5" id="quiz-number-buttons">
+          <!-- Populated by JS: Soal 1 s.d 12 -->
+        </div>
+      </div>
+
+      <!-- Active Question Card -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-5">
+        
+        <!-- Question Header & Badges -->
+        <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 dark:border-outline-variant/60 pb-3">
+          <div class="flex items-center space-x-2">
+            <span id="quiz-q-num-badge" class="px-3 py-1 rounded-lg text-xs font-black bg-primary text-on-primary shadow-sm">
+              Soal 1 dari 12
+            </span>
+            <span id="quiz-category-badge" class="text-[11px] font-semibold text-slate-400">
+              Kategori: Empat Bilangan Kuantum
+            </span>
+          </div>
+          <span class="text-xs text-primary font-bold" id="quiz-point-badge">+8.3 Poin</span>
+        </div>
+
+        <!-- Question Body Text -->
+        <div class="space-y-3">
+          <h3 id="quiz-q-text" class="text-xs sm:text-sm font-headline font-bold text-slate-900 dark:text-on-surface leading-relaxed">
+            Memuat soal...
+          </h3>
+
+          <!-- Options Container -->
+          <div id="quiz-options-container" class="space-y-2">
+            <!-- Populated by JS: Option A, B, C, D -->
+          </div>
+        </div>
+
+        <!-- Immediate Explanation Container -->
+        <div id="quiz-explanation-box" class="hidden p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 space-y-1.5">
+          <div class="flex items-center space-x-2 font-bold text-xs" id="quiz-status-header">
+            <span class="material-symbols-outlined text-[16px] text-emerald-500" id="quiz-status-icon">check_circle</span>
+            <span id="quiz-status-text">Jawaban Benar!</span>
+          </div>
+          <p id="quiz-explanation-text" class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Pembahasan ilmiah soal...
+          </p>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex items-center justify-between pt-2">
+          <button 
+            onclick="prevQuestion()" 
+            id="btn-prev-q" 
+            class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-outline-variant bg-white dark:bg-surface-container text-slate-700 dark:text-on-surface-variant hover:bg-slate-100 dark:hover:bg-surface-container-high text-xs font-semibold flex items-center space-x-1 transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[15px]">chevron_left</span>
+            <span>Sebelumnya</span>
+          </button>
+
+          <button 
+            onclick="nextQuestion()" 
+            id="btn-next-q" 
+            class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-violet-500/20 flex items-center space-x-1 transition-all active:scale-95 cursor-pointer">
+            <span>Selanjutnya</span>
+            <span class="material-symbols-outlined text-[15px]">chevron_right</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Quiz Final Summary Modal (Hidden by Default) -->
+      <div id="quiz-summary-modal" class="hidden stitch-card rounded-2xl p-6 sm:p-8 border-2 border-primary shadow-2xl space-y-5 text-center">
+        <div class="w-14 h-14 rounded-2xl bg-violet-100 dark:bg-primary-container text-primary mx-auto flex items-center justify-center shadow-inner">
+          <span class="material-symbols-outlined text-[28px]">emoji_events</span>
+        </div>
+        <h3 class="text-base sm:text-lg font-headline font-black text-slate-900 dark:text-on-surface">Hasil Latihan Soal Mekanika Kuantum</h3>
+        <p class="text-xs text-slate-500 dark:text-on-surface-variant" id="score-feedback-text">
+          Luar biasa! Anda telah menyelesaikan seluruh butir soal latihan.
+        </p>
+
+        <div class="grid grid-cols-3 gap-3 max-w-sm mx-auto">
+          <div class="p-3 bg-emerald-50 dark:bg-tertiary-container/20 rounded-xl border border-emerald-200 dark:border-tertiary/30">
+            <span class="block text-2xl font-black text-emerald-600 dark:text-tertiary" id="score-correct-cnt">0</span>
+            <span class="text-[11px] text-slate-500">Benar</span>
+          </div>
+          <div class="p-3 bg-rose-50 dark:bg-error-container/20 rounded-xl border border-rose-200 dark:border-error/30">
+            <span class="block text-2xl font-black text-rose-600 dark:text-error" id="score-wrong-cnt">0</span>
+            <span class="text-[11px] text-slate-500">Salah</span>
+          </div>
+          <div class="p-3 bg-violet-50 dark:bg-primary-container/20 rounded-xl border border-violet-200 dark:border-primary/30">
+            <span class="block text-2xl font-black text-violet-700 dark:text-primary" id="score-final-val">0</span>
+            <span class="text-[11px] text-slate-500">Nilai Akhir</span>
+          </div>
+        </div>
+
+        <button 
+          onclick="resetQuiz()" 
+          class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-xs shadow-md shadow-violet-500/20 active:scale-95 transition-all cursor-pointer">
+          Ulangi Latihan Soal
+        </button>
+      </div>
+
+    </section>
+    <!-- ==================== 9. REFLEKSI IMAJINATIF & PENERAPAN NYATA ==================== -->
+    <section id="section-refleksi" class="space-y-6 scroll-mt-24">
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          9
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Refleksi Imajinatif, Hikmah &amp; Penerapan Nyata
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Kenapa konsep mekanika kuantum perlu dipelajari? Mari menelusuri bagaimana rahasia orbital elektron mengubah teknologi dunia nyata.
+          </p>
+        </div>
+      </div>
+
+      <!-- Real-World Benefits Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <div class="stitch-card p-5 rounded-2xl shadow-sm space-y-2">
+          <div class="flex items-center space-x-2 text-violet-700 dark:text-primary font-headline font-bold text-xs sm:text-sm">
+            <span class="material-symbols-outlined text-[18px]">radiology</span>
+            <span>Mesin MRI Scanner Medis</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Teknologi pencitraan resonansi magnetik (MRI) di rumah sakit bekerja mendeteksi orientasi spin kuantum inti atom hidrogen di dalam tubuh pasien tanpa paparan radiasi berbahaya.
+          </p>
+        </div>
+
+        <div class="stitch-card p-5 rounded-2xl shadow-sm space-y-2">
+          <div class="flex items-center space-x-2 text-tertiary font-headline font-bold text-xs sm:text-sm">
+            <span class="material-symbols-outlined text-[18px]">bolt</span>
+            <span>Laser &amp; Telekomunikasi Optik</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Laser medis untuk operasi mata serta transmisi data serat optik internet berkecepatan tinggi bertumpu pada pemahaman eksitasi foton elektron antar orbital energi.
+          </p>
+        </div>
+
+        <div class="stitch-card p-5 rounded-2xl shadow-sm space-y-2">
+          <div class="flex items-center space-x-2 text-cyan-600 dark:text-cyan-400 font-headline font-bold text-xs sm:text-sm">
+            <span class="material-symbols-outlined text-[18px]">memory</span>
+            <span>Komputasi Kuantum (Quantum Qubit)</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Komputer masa depan memanfaatkan prinsip superposisi dan keterikatan kuantum (<i>entanglement</i>) pada spin elektron (qubit) untuk menyelesaikan komputasi super rumit dalam hitungan detik.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Ruang Diskusi & Pemantik Imajinasi Siswa -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-5">
+        <div>
+          <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface flex items-center space-x-2">
+            <span class="material-symbols-outlined text-[18px] text-primary">auto_awesome</span>
+            <span>Ruang Eksplorasi Imajinasi &amp; Nalar Kritis</span>
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant mt-0.5">Pilih salah satu pemantik imajinasi berikut atau tuangkan gagasan kritis dan kreatifmu di bawah ini:</p>
+        </div>
+
+        <!-- 3 Kartu Pertanyaan Pemantik Imajinasi -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          
+          <!-- Pemantik 1: Kenapa Perlu Dipelajari? -->
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container">
+                Pertanyaan Esensial
+              </span>
+              <h4 class="text-xs font-headline font-bold text-slate-900 dark:text-on-surface leading-snug">
+                Kenapa mekanika kuantum penting dipelajari padahal elektron tidak kasat mata?
+              </h4>
+              <p class="text-[11px] text-slate-600 dark:text-on-surface-variant leading-relaxed">
+                Bagaimana pemahaman alamat orbital elektron ini bisa melahirkan mikroelektronika, mikrokontroler, hingga mesin medis tercanggih?
+              </p>
+            </div>
+            <button onclick="insertPromptIntoReflection('Kenapa mekanika kuantum penting dipelajari: Meskipun elektron tak kasat mata, pemahaman bilangan kuantum dan orbital ini mendasari teknologi modern seperti... ')" class="text-[11px] font-semibold text-primary hover:underline flex items-center space-x-1 cursor-pointer">
+              <span>Tanggapi Pertanyaan Ini &rarr;</span>
+            </button>
+          </div>
+
+          <!-- Pemantik 2: Bayangkan Jika... -->
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-tertiary-container/30 text-emerald-800 dark:text-tertiary">
+                Ruang Imajinasi
+              </span>
+              <h4 class="text-xs font-headline font-bold text-slate-900 dark:text-on-surface leading-snug">
+                Bayangkan jika elektron tidak mematuhi Larangan Pauli dan semuanya menumpuk di 1s...
+              </h4>
+              <p class="text-[11px] text-slate-600 dark:text-on-surface-variant leading-relaxed">
+                Apa yang akan terjadi pada variasi unsur kimia di tabel periodik dan bentuk alam semesta jika subkulit p, d, f tak pernah terisi?
+              </p>
+            </div>
+            <button onclick="insertPromptIntoReflection('Bayangkan jika seluruh elektron menumpuk di orbital 1s tanpa larangan Pauli: Maka yang akan terjadi pada variasi materi dan ikatan kimia di alam semesta adalah... ')" class="text-[11px] font-semibold text-tertiary hover:underline flex items-center space-x-1 cursor-pointer">
+              <span>Tanggapi Imajinasi Ini &rarr;</span>
+            </button>
+          </div>
+
+          <!-- Pemantik 3: Jika Kamu... -->
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-100 dark:bg-cyan-950/40 text-cyan-800 dark:text-cyan-300">
+                Penerapan Fenomena
+              </span>
+              <h4 class="text-xs font-headline font-bold text-slate-900 dark:text-on-surface leading-snug">
+                Jika kamu merancang material magnet super kuat, konfigurasi orbital seperti apa yang dipilih?
+              </h4>
+              <p class="text-[11px] text-slate-600 dark:text-on-surface-variant leading-relaxed">
+                Bagaimana kamu memanfaatkan elektron tak berpasangan pada subkulit d agar menghasilkan medan magnet maksimum?
+              </p>
+            </div>
+            <button onclick="insertPromptIntoReflection('Jika saya merancang material magnet super kuat: Saya akan memilih unsur/ion dengan karakteristik diagram orbital... karena memiliki elektron tak berpasangan sebanyak... ')" class="text-[11px] font-semibold text-cyan-500 hover:underline flex items-center space-x-1 cursor-pointer">
+              <span>Tanggapi Kasus Ini &rarr;</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Student Free Note Area -->
+        <div class="space-y-2">
+          <label for="student-reflection-text" class="block text-xs font-bold text-slate-700 dark:text-on-surface flex items-center justify-between">
+            <span>Catatan Refleksi &amp; Ide Kreatifmu:</span>
+            <span class="text-[10px] text-primary font-normal">Ketik bebas gagasanmu atau klik salah satu pemantik di atas</span>
+          </label>
+          <textarea 
+            id="student-reflection-text" 
+            rows="4" 
+            placeholder="Tuliskan gagasan atau analisis kreatifmu di sini. Contoh: 'Menurut saya konsep orbital ini penting karena...' atau 'Bayangkan jika elektron tidak mengenal larangan Pauli...'"
+            class="w-full p-3.5 bg-slate-50 dark:bg-surface-container-lowest border border-slate-200 dark:border-outline-variant rounded-xl text-xs text-slate-800 dark:text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all leading-relaxed"
+          ></textarea>
+        </div>
+
+        <!-- Actions: Copy / Save Note -->
+        <div class="flex items-center justify-end space-x-3">
+          <button 
+            onclick="copyReflectionNote()" 
+            class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-outline-variant bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high text-slate-700 dark:text-on-surface text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">content_copy</span>
+            <span>Salin Catatan</span>
+          </button>
+          <button 
+            onclick="saveReflectionNote()" 
+            class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-sm transition-all active:scale-95 cursor-pointer">
+            Simpan Refleksi
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== 10. PUSAT PENGUMPULAN TUGAS & REKAPITULASI NILAI ==================== -->
+    <section id="section-pengumpulan" class="space-y-6 scroll-mt-24 no-print">
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-5">
+        
+        <div class="flex items-start justify-between flex-wrap gap-4 border-b border-slate-100 dark:border-outline-variant/60 pb-4">
+          <div class="space-y-1 max-w-2xl">
+            <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container text-xs font-semibold">
+              <span class="material-symbols-outlined text-[15px]">send</span>
+              <span>Pusat Pengumpulan Tugas &bull; LKS Digital Mekanika Kuantum</span>
+            </div>
+            <h2 class="text-base sm:text-lg font-headline font-black tracking-tight text-slate-900 dark:text-on-surface">
+              Selesai Belajar? Kumpulkan Laporan Lembar Kerja Anda
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-on-surface-variant leading-relaxed">
+              Seluruh jawaban kuis pilihan ganda, 3 analisis penyelidikan lab simulasi, dan refleksi Anda telah tersimpan aman di perangkat. Pilih cara pengumpulan tugas yang diminta oleh Bapak/Ibu Guru:
+            </p>
+          </div>
+
+          <!-- Status Ringkasan Nilai -->
+          <div class="bg-slate-50 dark:bg-surface-container px-4 py-3 rounded-xl border border-slate-200 dark:border-outline-variant/60 text-right">
+            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Skor Kuis Anda:</span>
+            <span id="submit-summary-score" class="text-2xl font-black text-primary">0</span>
+            <span class="text-xs text-slate-400"> / 100</span>
+          </div>
+        </div>
+
+        <!-- 3 Opsi Pengumpulan Tugas Modern -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          
+          <!-- Opsi 1: Unduh / Cetak PDF -->
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="w-8 h-8 rounded-lg bg-cyan-100 dark:bg-cyan-950/40 text-cyan-500 flex items-center justify-center font-bold">
+                <span class="material-symbols-outlined text-[18px]">print</span>
+              </div>
+              <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">1. Cetak / Unduh PDF</h3>
+              <p class="text-[11px] text-slate-500 dark:text-on-surface-variant leading-relaxed">
+                Mencetak atau menyimpan rapor lembar kerja digital dalam format dokumen PDF rapi untuk Google Classroom.
+              </p>
+            </div>
+            <button 
+              onclick="exportReportPDF()" 
+              class="w-full py-2 px-3 rounded-xl bg-white dark:bg-surface-container-high hover:bg-slate-100 dark:hover:bg-surface-container text-slate-800 dark:text-on-surface border border-slate-200 dark:border-outline-variant font-bold text-xs shadow-sm transition-all active:scale-95 cursor-pointer flex items-center justify-center space-x-1.5">
+              <span class="material-symbols-outlined text-[15px]">download</span>
+              <span>Cetak / Unduh PDF</span>
+            </button>
+          </div>
+
+          <!-- Opsi 2: Kirim via Email Guru -->
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-tertiary-container/30 text-tertiary flex items-center justify-center font-bold">
+                <span class="material-symbols-outlined text-[18px]">mail</span>
+              </div>
+              <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">2. Kirim via Email Guru</h3>
+              <p class="text-[11px] text-slate-500 dark:text-on-surface-variant leading-relaxed">
+                Mengirim laporan tugas ke email guru (<b>vanzaltito123@gmail.com</b>) atau menyalin ringkasan teks.
+              </p>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <button 
+                onclick="copyReportSummary()" 
+                class="py-2 px-2 rounded-xl bg-white dark:bg-surface-container-high hover:bg-slate-100 dark:hover:bg-surface-container text-slate-800 dark:text-on-surface border border-slate-200 dark:border-outline-variant font-semibold text-[11px] transition-all active:scale-95 cursor-pointer flex items-center justify-center space-x-1">
+                <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                <span>Salin Teks</span>
+              </button>
+              <button 
+                onclick="sendEmailToTeacher()" 
+                class="py-2 px-2 rounded-xl bg-white dark:bg-surface-container-high hover:bg-slate-100 dark:hover:bg-surface-container text-slate-800 dark:text-on-surface border border-slate-200 dark:border-outline-variant font-bold text-[11px] transition-all active:scale-95 cursor-pointer flex items-center justify-center space-x-1 shadow-sm">
+                <span class="material-symbols-outlined text-[14px] text-blue-500">send</span>
+                <span>Email Guru</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Opsi 3: Database Guru Langsung -->
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="w-8 h-8 rounded-lg bg-violet-100 dark:bg-primary-container text-primary flex items-center justify-center font-bold">
+                <span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+              </div>
+              <h3 class="font-headline font-bold text-xs sm:text-sm text-slate-900 dark:text-on-surface">3. Kirim ke Database Guru</h3>
+              <p class="text-[11px] text-slate-500 dark:text-on-surface-variant leading-relaxed">
+                Sinkronisasi otomatis nilai dan lembar jawaban langsung ke Google Spreadsheet guru secara instan.
+              </p>
+            </div>
+            <button 
+              onclick="submitToTeacherDatabase()" 
+              id="btn-submit-db" 
+              class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center space-x-1.5">
+              <span class="material-symbols-outlined text-[16px]">upload</span>
+              <span>Kirim ke Database Guru</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Danger Zone: Reset Progres -->
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-outline-variant/60 text-xs text-slate-400 relative z-10 flex-wrap gap-2">
+          <span class="flex items-center space-x-1">
+            <span class="material-symbols-outlined text-[15px] text-tertiary">verified_user</span>
+            <span>Data tersimpan di penyimpanan lokal browser Anda secara permanen.</span>
+          </span>
+          <button 
+            onclick="confirmResetTask()" 
+            class="text-rose-500 hover:text-rose-600 hover:underline flex items-center space-x-1 cursor-pointer">
+            <span class="material-symbols-outlined text-[15px]">delete</span>
+            <span>Reset Jawaban &amp; Mulai Ulang</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== 11. MUTIARA HIKMAH ISLAMI ==================== -->
+    <section id="section-quotes-islami" class="space-y-6 scroll-mt-24">
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          11
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Mutiara Hikmah Islami: Keutamaan Menuntut Ilmu
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Menuntut ilmu adalah ibadah mulia, lentera penuntun hidup, dan sarana mentadaburi keagungan Sang Pencipta.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Quote 1: HR. Muslim No. 2699 -->
+        <div class="stitch-card p-5 rounded-2xl shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-100 dark:bg-primary-container text-violet-800 dark:text-on-primary-container">
+                HR. Muslim No. 2699
+              </span>
+              <span class="material-symbols-outlined text-[16px] text-primary">explore</span>
+            </div>
+            <p class="font-arabic text-lg text-slate-800 dark:text-on-surface text-right font-medium leading-loose mb-2">
+              &#1605;&#1614;&#1606;&#1618; &#1587;&#1614;&#1604;&#1614;&#1603;&#1614; &#1591;&#1614;&#1585;&#1616;&#1610;&#1602;&#1611;&#1575; &#1610;&#1614;&#1604;&#1618;&#1578;&#1614;&#1605;&#1616;&#1587;&#1615; &#1601;&#1616;&#1610;&#1607;&#1616; &#1593;&#1616;&#1604;&#1618;&#1605;&#1611;&#1575; &#1587;&#1614;&#1607;&#1617;&#1614;&#1604;&#1614; &#1575;&#1604;&#1604;&#1617;&#1614;&#1607;&#1615; &#1604;&#1614;&#1607;&#1615; &#1576;&#1616;&#1607;&#1616; &#1591;&#1614;&#1585;&#1616;&#1610;&#1602;&#1611;&#1575; &#1573;&#1616;&#1604;&#1614;&#1609; &#1575;&#1604;&#1618;&#1580;&#1614;&#1606;&#1617;&#1614;&#1577;&#1616;
+            </p>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed italic border-l-2 border-primary pl-3">
+              "Barang siapa menempuh suatu jalan untuk mencari ilmu, maka Allah akan memudahkan baginya jalan menuju surga."
+            </p>
+          </div>
+          <div class="text-[11px] text-violet-700 dark:text-primary pt-2 border-t border-slate-100 dark:border-outline-variant/60 flex items-center space-x-1 font-medium">
+            <span class="material-symbols-outlined text-[14px]">check</span>
+            <span>Setiap waktu memahami rahasia alam kuantum bernilai pahala ibadah.</span>
+          </div>
+        </div>
+
+        <!-- Quote 2: QS. Al-Mujadilah (58): 11 -->
+        <div class="stitch-card p-5 rounded-2xl shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-100 dark:bg-cyan-950/40 text-cyan-800 dark:text-cyan-300">
+                QS. Al-Mujadilah (58): 11
+              </span>
+              <span class="material-symbols-outlined text-[16px] text-cyan-500">military_tech</span>
+            </div>
+            <p class="font-arabic text-lg text-slate-800 dark:text-on-surface text-right font-medium leading-loose mb-2">
+              &#1610;&#1614;&#1585;&#1618;&#1601;&#1614;&#1593;&#1616; &#1575;&#1604;&#1604;&#1617;&#1614;&#1607;&#1615; &#1575;&#1604;&#1617;&#1614;&#1584;&#1616;&#1610;&#1606;&#1614; &#1570;&#1605;&#1614;&#1606;&#1615;&#1608;&#1575; &#1605;&#1616;&#1606;&#1603;&#1615;&#1605;&#1618; &#1608;&#1614;&#1575;&#1604;&#1617;&#1614;&#1584;&#1616;&#1610;&#1606;&#1614; &#1571;&#1615;&#1608;&#1578;&#1615;&#1608;&#1575; &#1575;&#1604;&#1618;&#1593;&#1616;&#1604;&#1618;&#1605;&#1614; &#1583;&#1614;&#1585;&#1614;&#1580;&#1614;&#1575;&#1578;&#1613;
+            </p>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed italic border-l-2 border-cyan-500 pl-3">
+              "...Niscaya Allah akan mengangkat (derajat) orang-orang yang beriman di antaramu dan orang-orang yang diberi ilmu beberapa derajat..."
+            </p>
+          </div>
+          <div class="text-[11px] text-cyan-600 dark:text-cyan-400 pt-2 border-t border-slate-100 dark:border-outline-variant/60 flex items-center space-x-1 font-medium">
+            <span class="material-symbols-outlined text-[14px]">check</span>
+            <span>Kedalaman ilmu yang berlandaskan iman mengangkat derajat insan yang bermanfaat.</span>
+          </div>
+        </div>
+
+        <!-- Quote 3: Nasihat Imam Asy-Syafi'i -->
+        <div class="stitch-card p-5 rounded-2xl shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300">
+                Nasihat Ulama &bull; Imam Asy-Syafi'i
+              </span>
+              <span class="material-symbols-outlined text-[16px] text-amber-500">history_edu</span>
+            </div>
+            <p class="font-arabic text-lg text-slate-800 dark:text-on-surface text-right font-medium leading-loose mb-2">
+              &#1605;&#1614;&#1606;&#1618; &#1571;&#1614;&#1585;&#1614;&#1575;&#1583;&#1614; &#1575;&#1604;&#1583;&#1617;&#1615;&#1606;&#1618;&#1610;&#1614;&#1575; &#1601;&#1614;&#1593;&#1614;&#1604;&#1614;&#1610;&#1618;&#1607;&#1616; &#1576;&#1616;&#1575;&#1604;&#1618;&#1593;&#1616;&#1604;&#1618;&#1605;&#1616;&#1548; &#1608;&#1614;&#1605;&#1614;&#1606;&#1618; &#1571;&#1614;&#1585;&#1614;&#1575;&#1583;&#1614; &#1575;&#1604;&#1570;&#1582;&#1616;&#1585;&#1614;&#1577;&#1614; &#1601;&#1614;&#1593;&#1614;&#1604;&#1614;&#1610;&#1618;&#1607;&#1616; &#1576;&#1616;&#1575;&#1604;&#1618;&#1593;&#1616;&#1604;&#1618;&#1605;&#1616;&#1548; &#1608;&#1614;&#1605;&#1614;&#1606;&#1618; &#1571;&#1614;&#1585;&#1614;&#1575;&#1583;&#1614;&#1607;&#1615;&#1605;&#1614;&#1575; &#1605;&#1614;&#1593;&#1611;&#1575; &#1601;&#1614;&#1593;&#1614;&#1604;&#1614;&#1610;&#1618;&#1607;&#1616; &#1576;&#1616;&#1575;&#1604;&#1618;&#1593;&#1616;&#1604;&#1618;&#1605;&#1616;
+            </p>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed italic border-l-2 border-amber-500 pl-3">
+              "Barang siapa menginginkan kebahagiaan dunia, hendaklah ia berilmu. Barang siapa menginginkan kebahagiaan akhirat, hendaklah ia berilmu. Dan barang siapa menginginkan keduanya, hendaklah ia berilmu."
+            </p>
+          </div>
+          <div class="text-[11px] text-amber-600 dark:text-amber-400 pt-2 border-t border-slate-100 dark:border-outline-variant/60 flex items-center space-x-1 font-medium">
+            <span class="material-symbols-outlined text-[14px]">check</span>
+            <span>Sains dan teknologi memakmurkan peradaban dengan niat ikhlas lillah.</span>
+          </div>
+        </div>
+
+        <!-- Quote 4: Ali bin Abi Thalib ra -->
+        <div class="stitch-card p-5 rounded-2xl shadow-sm flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-tertiary-container/30 text-emerald-800 dark:text-tertiary">
+                Atsar Sahabat &bull; Ali bin Abi Thalib r.a.
+              </span>
+              <span class="material-symbols-outlined text-[16px] text-tertiary">shield</span>
+            </div>
+            <p class="font-arabic text-lg text-slate-800 dark:text-on-surface text-right font-medium leading-loose mb-2">
+              &#1575;&#1614;&#1604;&#1618;&#1593;&#1616;&#1604;&#1618;&#1605;&#1615; &#1582;&#1614;&#1610;&#1618;&#1585;&#1612; &#1605;&#1616;&#1606;&#1614; &#1575;&#1604;&#1618;&#1605;&#1614;&#1575;&#1604;&#1616;&#1563; &#1575;&#1614;&#1604;&#1618;&#1593;&#1616;&#1604;&#1618;&#1605;&#1615; &#1610;&#1614;&#1581;&#1618;&#1585;&#1615;&#1587;&#1615;&#1603;&#1614; &#1608;&#1614;&#1571;&#1614;&#1606;&#1618;&#1578;&#1614; &#1578;&#1614;&#1581;&#1618;&#1585;&#1615;&#1587;&#1615; &#1575;&#1604;&#1618;&#1605;&#1614;&#1575;&#1604;&#1614;
+            </p>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed italic border-l-2 border-tertiary pl-3">
+              "Ilmu itu lebih mulia daripada harta. Ilmu senantiasa menjagamu dari kesesatan, sedangkan harta kamulah yang harus menjaganya."
+            </p>
+          </div>
+          <div class="text-[11px] text-tertiary pt-2 border-t border-slate-100 dark:border-outline-variant/60 flex items-center space-x-1 font-medium">
+            <span class="material-symbols-outlined text-[14px]">check</span>
+            <span>Harta berkurang jika dinafkahkan, namun ilmu pengetahuan bertambah luas.</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-white dark:bg-surface border-t border-slate-200 dark:border-outline-variant mt-16 py-8 text-center text-xs text-slate-500 dark:text-on-surface-variant transition-colors">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <span class="material-symbols-outlined text-[18px] text-primary">science</span>
+        <span class="font-headline font-bold text-slate-800 dark:text-on-surface">Portal Kimia &bull; Konfigurasi Elektron Mekanika Kuantum</span>
+      </div>
+      <p>Dibuat oleh Tito Vanzal, S.Pd. &bull; SMA Progresif Bumi Shalawat</p>
+      <div class="flex items-center space-x-3">
+        <a href="index.html" class="text-primary hover:underline flex items-center space-x-1 font-semibold">
+          <span class="material-symbols-outlined text-[15px]">arrow_back</span>
+          <span>Kembali ke Portal Kimia</span>
+        </a>
+        <span>&bull;</span>
+        <a href="#section-title" class="text-primary hover:underline">Ke Atas &uarr;</a>
+      </div>
+    </div>
+  </footer>
+  <script>
+    // Inisialisasi Lucide Icons
+    lucide.createIcons();
+
+    // ==================== NAVIGASI KEMBALI KE PORTAL KIMIA ====================
+    function goToPortal() {
+      if (window.opener && !window.opener.closed) {
+        window.opener.focus();
+        window.close();
+        return;
+      }
+      if (window.location.search && window.location.search.includes('page=')) {
+        window.location.href = window.location.pathname;
+        return;
+      }
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '../Index.html';
+      }
+    }
+
+    // ==================== AUDIO FX SYNTHESIZER (WEB AUDIO API) ====================
+    let isAudioMuted = false;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function toggleAudio() {
+      isAudioMuted = !isAudioMuted;
+      document.getElementById('icon-sound-on').classList.toggle('hidden', isAudioMuted);
+      document.getElementById('icon-sound-off').classList.toggle('hidden', !isAudioMuted);
+      if (!isAudioMuted) playSound('click');
+    }
+
+    function playSound(type) {
+      if (isAudioMuted) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+          osc.frequency.setValueAtTime(480, now);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'correct') {
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.setValueAtTime(174.61, now + 0.15);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'fill') {
+          osc.frequency.setValueAtTime(600, now);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.start(now);
+          osc.stop(now + 0.06);
+        }
+      } catch(e) {}
+    }
+
+        // ==================== THEME CONTROLLER (STITCH DESIGN SYSTEM) ====================
+    function toggleAppTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+        localStorage.setItem('chemportal_theme', 'dark');
+      } else {
+        document.documentElement.classList.add('light');
+        localStorage.setItem('chemportal_theme', 'light');
+      }
+      updateThemeIcons();
+      playSound('click');
+    }
+
+    function toggleDarkMode() {
+      toggleAppTheme();
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem('chemportal_theme') || localStorage.getItem('quantum_media_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved === 'dark' || (!saved && prefersDark);
+      
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+      updateThemeIcons();
+    }
+
+    function updateThemeIcons() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const sun = document.getElementById('icon-theme-sun');
+      const moon = document.getElementById('icon-theme-moon');
+      if (sun && moon) {
+        sun.classList.toggle('hidden', !isDark);
+        moon.classList.toggle('hidden', isDark);
+      }
+      safeRenderIcons();
+    }
+
+    function safeRenderIcons() {
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+      }
+    }
+    }
+
+    // ==================== SCROLL PROGRESS BAR ====================
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      const bar = document.getElementById('scroll-progress');
+      if (bar) bar.style.width = scrolled + '%';
+    });
+
+    // ==================== CONCEPT MINDMAP INFO ====================
+    const conceptData = {
+      kuantum: {
+        title: "Empat Bilangan Kuantum (n, l, m, s)",
+        desc: "Mekanika kuantum menyatakan bahwa elektron berada dalam ruang orbital. Alamat lengkap elektron ditentukan oleh 4 bilangan kuantum: n (ukuran & energi kulit), l (bentuk subkulit s, p, d, f), m (orientasi orbital), dan s (arah rotasi spin elektron)."
+      },
+      aturan: {
+        title: "Tiga Asas Pengisian: Aufbau, Hund, dan Pauli",
+        desc: "Elektron wajib mengisi orbital dari energi terendah (Aufbau). Pada subkulit dengan orbital setara, elektron mengisi sendiri-sendiri dengan spin searah sebelum berpasangan (Hund). Satu orbital maksimal 2 elektron dengan spin berlawanan (Pauli)."
+      },
+      notasi: {
+        title: "Notasi Konfigurasi spdf & Singkatan Gas Mulia",
+        desc: "Notasi spdf menuliskan nomor kulit, lambang subkulit, dan pangkat jumlah elektron (misal: 1s² 2s² 2p⁶). Untuk menyederhanakan deret atom yang panjang, digunakan acuan penyingkatan gas mulia [He], [Ne], [Ar], atau [Kr]."
+      },
+      sifat: {
+        title: "Anomali Kestabilan Subkulit d & Kemagnetan",
+        desc: "Subkulit d memiliki kestabilan ekstra saat terisi setengah penuh (d⁵ pada Cr) atau penuh (d¹⁰ pada Cu). Jumlah elektron tak berpasangan pada diagram orbital menentukan apakah atom bersifat paramagnetik/feromagnetik atau diamagnetik."
+      }
+    };
+
+    function showConceptInfo(key) {
+      playSound('click');
+      const data = conceptData[key];
+      if (data) {
+        document.getElementById('concept-detail-title').textContent = data.title;
+        document.getElementById('concept-detail-desc').textContent = data.desc;
+      }
+    }
+
+    // ==================== FENOMENA MAGNETIK EXPERIMENT ====================
+    const magnetData = {
+      Fe: {
+        name: "Besi (Fe, Z = 26)",
+        status: "Ditarik Sangat Kuat (Feromagnetik)",
+        statusColor: "text-emerald-400",
+        ambient: "#ef4444",
+        desc: "Besi memiliki konfigurasi [Ar] 3d⁶ 4s². Pada subkulit 3d terdapat 4 elektron tak berpasangan (↑). Medan magnet spin yang searah ini saling menguatkan, menghasilkan sifat feromagnetik yang kuat.",
+        icon: "hammer"
+      },
+      Zn: {
+        name: "Seng (Zn, Z = 30)",
+        status: "Ditolak Sangat Lemah (Diamagnetik)",
+        statusColor: "text-slate-400",
+        ambient: "#64748b",
+        desc: "Seng memiliki konfigurasi [Ar] 3d¹⁰ 4s². Seluruh orbital 3d dan 4s telah terisi penuh oleh pasangan elektron berlawanan spin (↑↓). Momen magnetiknya saling meniadakan secara sempurna sehingga bersifat diamagnetik.",
+        icon: "shield"
+      },
+      Mn: {
+        name: "Mangan (Mn, Z = 25)",
+        status: "Ditarik Medan Magnet (Paramagnetik Kuat)",
+        statusColor: "text-amber-400",
+        ambient: "#f59e0b",
+        desc: "Mangan memiliki konfigurasi [Ar] 3d⁵ 4s² dengan 5 elektron tak berpasangan pada orbital 3d (masing-masing kotak orbital 3d terisi 1 elektron ↑). Hal ini menjadikannya memiliki momen magnet atomik yang tinggi.",
+        icon: "flame"
+      },
+      Cu: {
+        name: "Tembaga (Cu, Z = 29)",
+        status: "Paramagnetik Sangat Lemah",
+        statusColor: "text-cyan-400",
+        ambient: "#06b6d4",
+        desc: "Tembaga memiliki konfigurasi anomali [Ar] 3d¹⁰ 4s¹. Subkulit 3d terisi penuh (10 elektron), dan hanya menyisakan 1 elektron tunggal pada subkulit 4s, sehingga tarikan magnetiknya relatif sangat lemah.",
+        icon: "coins"
+      }
+    };
+
+    function testMagnet(symbol) {
+      playSound('click');
+      const item = magnetData[symbol];
+      if (!item) return;
+
+      document.getElementById('metal-sample-name').textContent = item.name;
+      document.getElementById('metal-magnetic-status').textContent = item.status;
+      document.getElementById('metal-magnetic-status').className = 'text-[11px] font-extrabold mt-0.5 ' + item.statusColor;
+      document.getElementById('metal-magnetic-desc').textContent = item.desc;
+      document.getElementById('magnet-ambient').style.backgroundColor = item.ambient;
+
+      document.querySelectorAll('.mag-btn').forEach(btn => {
+        btn.classList.remove('border-teal-500/50', 'bg-teal-50', 'dark:bg-teal-950/40');
+      });
+      const activeBtn = document.getElementById('btn-mag-' + symbol);
+      if (activeBtn) activeBtn.classList.add('border-teal-500/50', 'bg-teal-50', 'dark:bg-teal-950/40');
+    }
+
+    // ==================== QUANTUM SIMULATOR DATA (Z = 1 s.d 30) ====================
+    // Orbital order in Aufbau sequence:
+    // 1s(1), 2s(1), 2p(3), 3s(1), 3p(3), 4s(1), 3d(5) -> Total 15 orbital boxes
+    const orbitalIds = [
+      'orb-1s-0',
+      'orb-2s-0',
+      'orb-2p-0', 'orb-2p-1', 'orb-2p-2',
+      'orb-3s-0',
+      'orb-3p-0', 'orb-3p-1', 'orb-3p-2',
+      'orb-4s-0',
+      'orb-3d-0', 'orb-3d-1', 'orb-3d-2', 'orb-3d-3', 'orb-3d-4'
+    ];
+
+    const elementsData = [
+      { z: 1,  sym: 'H',  name: 'Hidrogen',   cfg: '1s¹', noble: '1s¹', unp: 1, mag: 'Paramagnetik', n:1, l:0, m:0, s:'+1/2' },
+      { z: 2,  sym: 'He', name: 'Helium',     cfg: '1s²', noble: '[He]', unp: 0, mag: 'Diamagnetik', n:1, l:0, m:0, s:'-1/2' },
+      { z: 3,  sym: 'Li', name: 'Litium',     cfg: '1s² 2s¹', noble: '[He] 2s¹', unp: 1, mag: 'Paramagnetik', n:2, l:0, m:0, s:'+1/2' },
+      { z: 4,  sym: 'Be', name: 'Berilium',   cfg: '1s² 2s²', noble: '[He] 2s²', unp: 0, mag: 'Diamagnetik', n:2, l:0, m:0, s:'-1/2' },
+      { z: 5,  sym: 'B',  name: 'Boron',      cfg: '1s² 2s² 2p¹', noble: '[He] 2s² 2p¹', unp: 1, mag: 'Paramagnetik', n:2, l:1, m:-1, s:'+1/2' },
+      { z: 6,  sym: 'C',  name: 'Karbon',     cfg: '1s² 2s² 2p²', noble: '[He] 2s² 2p²', unp: 2, mag: 'Paramagnetik', n:2, l:1, m:0, s:'+1/2' },
+      { z: 7,  sym: 'N',  name: 'Nitrogen',   cfg: '1s² 2s² 2p³', noble: '[He] 2s² 2p³', unp: 3, mag: 'Paramagnetik', n:2, l:1, m:1, s:'+1/2' },
+      { z: 8,  sym: 'O',  name: 'Oksigen',    cfg: '1s² 2s² 2p⁴', noble: '[He] 2s² 2p⁴', unp: 2, mag: 'Paramagnetik', n:2, l:1, m:-1, s:'-1/2' },
+      { z: 9,  sym: 'F',  name: 'Fluorin',    cfg: '1s² 2s² 2p⁵', noble: '[He] 2s² 2p⁵', unp: 1, mag: 'Paramagnetik', n:2, l:1, m:0, s:'-1/2' },
+      { z: 10, sym: 'Ne', name: 'Neon',       cfg: '1s² 2s² 2p⁶', noble: '[Ne]', unp: 0, mag: 'Diamagnetik', n:2, l:1, m:1, s:'-1/2' },
+      { z: 11, sym: 'Na', name: 'Natrium',    cfg: '1s² 2s² 2p⁶ 3s¹', noble: '[Ne] 3s¹', unp: 1, mag: 'Paramagnetik', n:3, l:0, m:0, s:'+1/2' },
+      { z: 12, sym: 'Mg', name: 'Magnesium',  cfg: '1s² 2s² 2p⁶ 3s²', noble: '[Ne] 3s²', unp: 0, mag: 'Diamagnetik', n:3, l:0, m:0, s:'-1/2' },
+      { z: 13, sym: 'Al', name: 'Aluminium',  cfg: '1s² 2s² 2p⁶ 3s² 3p¹', noble: '[Ne] 3s² 3p¹', unp: 1, mag: 'Paramagnetik', n:3, l:1, m:-1, s:'+1/2' },
+      { z: 14, sym: 'Si', name: 'Silikon',    cfg: '1s² 2s² 2p⁶ 3s² 3p²', noble: '[Ne] 3s² 3p²', unp: 2, mag: 'Paramagnetik', n:3, l:1, m:0, s:'+1/2' },
+      { z: 15, sym: 'P',  name: 'Fosfor',     cfg: '1s² 2s² 2p⁶ 3s² 3p³', noble: '[Ne] 3s² 3p³', unp: 3, mag: 'Paramagnetik', n:3, l:1, m:1, s:'+1/2' },
+      { z: 16, sym: 'S',  name: 'Belerang',   cfg: '1s² 2s² 2p⁶ 3s² 3p⁴', noble: '[Ne] 3s² 3p⁴', unp: 2, mag: 'Paramagnetik', n:3, l:1, m:-1, s:'-1/2' },
+      { z: 17, sym: 'Cl', name: 'Klorin',     cfg: '1s² 2s² 2p⁶ 3s² 3p⁵', noble: '[Ne] 3s² 3p⁵', unp: 1, mag: 'Paramagnetik', n:3, l:1, m:0, s:'-1/2' },
+      { z: 18, sym: 'Ar', name: 'Argon',      cfg: '1s² 2s² 2p⁶ 3s² 3p⁶', noble: '[Ar]', unp: 0, mag: 'Diamagnetik', n:3, l:1, m:1, s:'-1/2' },
+      { z: 19, sym: 'K',  name: 'Kalium',     cfg: '[Ar] 4s¹', noble: '[Ar] 4s¹', unp: 1, mag: 'Paramagnetik', n:4, l:0, m:0, s:'+1/2' },
+      { z: 20, sym: 'Ca', name: 'Kalsium',    cfg: '[Ar] 4s²', noble: '[Ar] 4s²', unp: 0, mag: 'Diamagnetik', n:4, l:0, m:0, s:'-1/2' },
+      { z: 21, sym: 'Sc', name: 'Skandium',   cfg: '[Ar] 3d¹ 4s²', noble: '[Ar] 3d¹ 4s²', unp: 1, mag: 'Paramagnetik', n:3, l:2, m:-2, s:'+1/2' },
+      { z: 22, sym: 'Ti', name: 'Titanium',   cfg: '[Ar] 3d² 4s²', noble: '[Ar] 3d² 4s²', unp: 2, mag: 'Paramagnetik', n:3, l:2, m:-1, s:'+1/2' },
+      { z: 23, sym: 'V',  name: 'Vanadium',   cfg: '[Ar] 3d³ 4s²', noble: '[Ar] 3d³ 4s²', unp: 3, mag: 'Paramagnetik', n:3, l:2, m:0, s:'+1/2' },
+      { z: 24, sym: 'Cr', name: 'Kromium (Anomali)', cfg: '[Ar] 3d⁵ 4s¹', noble: '[Ar] 3d⁵ 4s¹ (Stabil d⁵)', unp: 6, mag: 'Paramagnetik Kuat', n:3, l:2, m:2, s:'+1/2' },
+      { z: 25, sym: 'Mn', name: 'Mangan',     cfg: '[Ar] 3d⁵ 4s²', noble: '[Ar] 3d⁵ 4s²', unp: 5, mag: 'Paramagnetik Kuat', n:3, l:2, m:2, s:'+1/2' },
+      { z: 26, sym: 'Fe', name: 'Besi',       cfg: '[Ar] 3d⁶ 4s²', noble: '[Ar] 3d⁶ 4s²', unp: 4, mag: 'Feromagnetik', n:3, l:2, m:-2, s:'-1/2' },
+      { z: 27, sym: 'Co', name: 'Kobalt',     cfg: '[Ar] 3d⁷ 4s²', noble: '[Ar] 3d⁷ 4s²', unp: 3, mag: 'Feromagnetik', n:3, l:2, m:-1, s:'-1/2' },
+      { z: 28, sym: 'Ni', name: 'Nikel',      cfg: '[Ar] 3d⁸ 4s²', noble: '[Ar] 3d⁸ 4s²', unp: 2, mag: 'Feromagnetik', n:3, l:2, m:0, s:'-1/2' },
+      { z: 29, sym: 'Cu', name: 'Tembaga (Anomali)', cfg: '[Ar] 3d¹⁰ 4s¹', noble: '[Ar] 3d¹⁰ 4s¹ (Stabil d¹⁰)', unp: 1, mag: 'Paramagnetik Lemah', n:4, l:0, m:0, s:'+1/2' },
+      { z: 30, sym: 'Zn', name: 'Seng',       cfg: '[Ar] 3d¹⁰ 4s²', noble: '[Ar] 3d¹⁰ 4s²', unp: 0, mag: 'Diamagnetik', n:3, l:2, m:2, s:'-1/2' }
+    ];
+
+    let currentZ = 11; // Start with Natrium
+
+    function computeOrbitalOccupancies(z) {
+      // Return mapping of 15 orbital boxes: [count, spins]
+      // 0: 1s, 1: 2s, 2..4: 2p, 5: 3s, 6..8: 3p, 9: 4s, 10..14: 3d
+      const occupancies = Array(15).fill(0);
+
+      // Standard fill order:
+      // 1s (2) -> 2s (2) -> 2p (6) -> 3s (2) -> 3p (6) -> 4s (2) -> 3d (10)
+      if (z === 24) {
+        // Chromium anomaly: 4s1, 3d5
+        occupancies[0] = 2; // 1s
+        occupancies[1] = 2; // 2s
+        occupancies[2] = 2; occupancies[3] = 2; occupancies[4] = 2; // 2p
+        occupancies[5] = 2; // 3s
+        occupancies[6] = 2; occupancies[7] = 2; occupancies[8] = 2; // 3p
+        occupancies[9] = 1; // 4s1
+        for (let i = 10; i <= 14; i++) occupancies[i] = 1; // 3d5
+        return occupancies;
+      }
+      if (z === 29) {
+        // Copper anomaly: 4s1, 3d10
+        occupancies[0] = 2;
+        occupancies[1] = 2;
+        occupancies[2] = 2; occupancies[3] = 2; occupancies[4] = 2;
+        occupancies[5] = 2;
+        occupancies[6] = 2; occupancies[7] = 2; occupancies[8] = 2;
+        occupancies[9] = 1; // 4s1
+        for (let i = 10; i <= 14; i++) occupancies[i] = 2; // 3d10
+        return occupancies;
+      }
+
+      let rem = z;
+      // 1s
+      let f1s = Math.min(rem, 2); occupancies[0] = f1s; rem -= f1s;
+      // 2s
+      if (rem > 0) { let f = Math.min(rem, 2); occupancies[1] = f; rem -= f; }
+      // 2p (Hund's rule)
+      if (rem > 0) {
+        let f = Math.min(rem, 6);
+        for (let i = 0; i < f; i++) {
+          if (i < 3) occupancies[2 + i]++;
+          else occupancies[2 + (i - 3)]++;
+        }
+        rem -= f;
+      }
+      // 3s
+      if (rem > 0) { let f = Math.min(rem, 2); occupancies[5] = f; rem -= f; }
+      // 3p (Hund's rule)
+      if (rem > 0) {
+        let f = Math.min(rem, 6);
+        for (let i = 0; i < f; i++) {
+          if (i < 3) occupancies[6 + i]++;
+          else occupancies[6 + (i - 3)]++;
+        }
+        rem -= f;
+      }
+      // 4s
+      if (rem > 0) { let f = Math.min(rem, 2); occupancies[9] = f; rem -= f; }
+      // 3d (Hund's rule)
+      if (rem > 0) {
+        let f = Math.min(rem, 10);
+        for (let i = 0; i < f; i++) {
+          if (i < 5) occupancies[10 + i]++;
+          else occupancies[10 + (i - 5)]++;
+        }
+        rem -= f;
+      }
+
+      return occupancies;
+    }
+
+    function renderSimulator(z) {
+      z = parseInt(z);
+      currentZ = z;
+      const data = elementsData[z - 1];
+      if (!data) return;
+
+      // Update Header & Indicator
+      document.getElementById('sim-atom-badge').textContent = `${data.name} (${data.sym}, Z = ${data.z})`;
+      document.getElementById('sim-full-config').textContent = data.cfg;
+      document.getElementById('sim-z-indicator').textContent = `Z = ${data.z}`;
+      document.getElementById('sim-z-slider').value = data.z;
+
+      // Update 4 Quantum numbers & details
+      document.getElementById('res-n').textContent = data.n;
+      document.getElementById('res-l').textContent = data.l;
+      document.getElementById('res-m').textContent = (data.m > 0 ? '+' : '') + data.m;
+      document.getElementById('res-s').textContent = data.s;
+      document.getElementById('res-gas-noble').textContent = data.noble;
+      document.getElementById('res-unpaired').textContent = `${data.unp} Elektron`;
+      document.getElementById('res-magnetism').textContent = data.mag;
+
+      // Compute and draw electrons into orbital boxes
+      const occupancies = computeOrbitalOccupancies(z);
+      orbitalIds.forEach((id, index) => {
+        const box = document.getElementById(id);
+        if (!box) return;
+        const count = occupancies[index];
+        if (count === 0) {
+          box.innerHTML = '';
+          box.classList.remove('active-filling');
+        } else if (count === 1) {
+          box.innerHTML = '<span class="text-cyan-400 font-black">↑</span>';
+          box.classList.remove('active-filling');
+        } else if (count === 2) {
+          box.innerHTML = '<span class="text-cyan-400 font-black">↑</span><span class="text-amber-400 font-black">↓</span>';
+          box.classList.remove('active-filling');
+        }
+      });
+
+      // Update quick badge highlight
+      updateQuickElementButtons(z);
+    }
+
+    function setAtomByNumber(z) {
+      playSound('click');
+      renderSimulator(z);
+    }
+
+    function resetSimulatorToDefault() {
+      playSound('click');
+      setAtomByNumber(11);
+    }
+
+    // Step-by-step filling animation demo
+    let autoFillTimer = null;
+    function runAutoFillingStep() {
+      if (autoFillTimer) clearInterval(autoFillTimer);
+      playSound('click');
+
+      // Clear all boxes
+      orbitalIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+      });
+
+      let currentStep = 1;
+      const targetZ = currentZ;
+
+      autoFillTimer = setInterval(() => {
+        if (currentStep <= targetZ) {
+          playSound('fill');
+          const occ = computeOrbitalOccupancies(currentStep);
+          orbitalIds.forEach((id, idx) => {
+            const box = document.getElementById(id);
+            if (!box) return;
+            const cnt = occ[idx];
+            if (cnt === 0) box.innerHTML = '';
+            else if (cnt === 1) box.innerHTML = '<span class="text-cyan-400 font-black">↑</span>';
+            else if (cnt === 2) box.innerHTML = '<span class="text-cyan-400 font-black">↑</span><span class="text-amber-400 font-black">↓</span>';
+          });
+          document.getElementById('sim-filling-hint').textContent = `Mengisi elektron ke-${currentStep} dari ${targetZ}...`;
+          currentStep++;
+        } else {
+          clearInterval(autoFillTimer);
+          autoFillTimer = null;
+          document.getElementById('sim-filling-hint').textContent = `Selesai! Konfigurasi stabil untuk Z = ${targetZ}`;
+          playSound('correct');
+        }
+      }, 150);
+    }
+
+    const popularElements = [1, 6, 7, 8, 11, 13, 17, 18, 20, 24, 26, 29, 30];
+    function initQuickElements() {
+      const container = document.getElementById('quick-element-container');
+      if (!container) return;
+      container.innerHTML = popularElements.map(z => {
+        const el = elementsData[z - 1];
+        return `
+          <button 
+            onclick="setAtomByNumber(${el.z})" 
+            id="quick-el-${el.z}"
+            class="p-1.5 rounded-xl border transition-all cursor-pointer bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-teal-50 dark:hover:bg-slate-700">
+            ${el.sym}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function updateQuickElementButtons(currentZ) {
+      popularElements.forEach(z => {
+        const btn = document.getElementById('quick-el-' + z);
+        if (!btn) return;
+        if (z === currentZ) {
+          btn.className = 'p-1.5 rounded-xl border transition-all cursor-pointer bg-gradient-to-tr from-emerald-600 to-teal-500 text-white border-transparent shadow-md';
+        } else {
+          btn.className = 'p-1.5 rounded-xl border transition-all cursor-pointer bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-teal-50 dark:hover:bg-slate-700';
+        }
+      });
+    }
+
+    // ==================== 12 COMPREHENSIVE QUIZ QUESTIONS ====================
+    const quizQuestions = [
+      {
+        q: "Harga bilangan kuantum yang TIDAK DIPERBOLEHKAN menurut aturan mekanika kuantum adalah...",
+        options: [
+          "n = 3, l = 2, m = -1, s = +1/2",
+          "n = 2, l = 2, m = 0, s = -1/2",
+          "n = 4, l = 0, m = 0, s = +1/2",
+          "n = 3, l = 1, m = +1, s = -1/2"
+        ],
+        answer: 1,
+        cat: "Empat Bilangan Kuantum",
+        exp: "Nilai bilangan kuantum azimut (l) hanya boleh berkisar antara 0 sampai (n - 1). Jika n = 2, maka nilai l yang diizinkan hanyalah 0 (subkulit s) dan 1 (subkulit p). Nilai l = 2 (subkulit d) tidak mungkin ada pada kulit n = 2."
+      },
+      {
+        q: "Menurut prinsip Aufbau, urutan pengisian elektron pada subkulit berikut yang benar adalah...",
+        options: [
+          "1s, 2s, 2p, 3s, 3p, 3d, 4s",
+          "1s, 2s, 2p, 3s, 3p, 4s, 3d",
+          "1s, 2s, 3s, 2p, 3p, 4s, 3d",
+          "1s, 2s, 2p, 3s, 4s, 3p, 3d"
+        ],
+        answer: 1,
+        cat: "Prinsip Aufbau",
+        exp: "Pengisian elektron berpedoman pada tingkat energi (n + l). Subkulit 4s memiliki nilai (n + l = 4 + 0 = 4) yang lebih rendah dibandingkan subkulit 3d (n + l = 3 + 2 = 5). Oleh karena itu, subkulit 4s diisi penuh terlebih dahulu sebelum mengisi subkulit 3d."
+      },
+      {
+        q: "Kaidah Hund menyatakan bahwa pengisian elektron pada orbital-orbital degenerat (setingkat) harus...",
+        options: [
+          "Berpasangan terlebih dahulu sebelum mengisi orbital berikutnya",
+          "Mengisi orbital secara mandiri dengan spin paralel sebelum berpasangan",
+          "Mengisi orbital dengan spin acak baik ke atas maupun ke bawah",
+          "Hanya menempati orbital dengan bilangan kuantum magnetik positif"
+        ],
+        answer: 1,
+        cat: "Kaidah Hund",
+        exp: "Kaidah Hund mengatur bahwa elektron akan mengisi orbital-orbital yang energinya setara secara terpisah (sendiri-sendiri) dengan arah spin yang sama (paralel ↑) untuk meminimalkan gaya tolak-menolak antar elektron, baru kemudian berpasangan."
+      },
+      {
+        q: "Asas larangan Pauli menyatakan bahwa di dalam satu atom tidak boleh ada dua elektron yang...",
+        options: [
+          "Berada pada tingkat energi yang sama",
+          "Memiliki keempat bilangan kuantum yang persis sama",
+          "Memiliki muatan listrik yang sama",
+          "Berputar mengelilingi inti atom pada arah yang sama"
+        ],
+        answer: 1,
+        cat: "Asas Larangan Pauli",
+        exp: "Wolfgang Pauli merumuskan bahwa tidak ada dua elektron dalam satu atom yang memiliki keempat bilangan kuantum (n, l, m, s) yang identik. Akibatnya, dalam satu kotak orbital (n, l, m sama) maksimal hanya dapat dihuni 2 elektron dengan spin berlawanan (s = +1/2 dan s = -1/2)."
+      },
+      {
+        q: "Konfigurasi elektron atom Kromium (Cr, nomor atom 24) yang paling stabil dan sesuai eksperimen adalah...",
+        options: [
+          "[Ar] 3d⁴ 4s²",
+          "[Ar] 3d⁵ 4s¹",
+          "[Ar] 3d⁶",
+          "[Ne] 3s² 3p⁶ 3d⁴ 4s²"
+        ],
+        answer: 1,
+        cat: "Anomali Kestabilan Subkulit d",
+        exp: "Subkulit d memiliki kestabilan ekstra saat terisi setengah penuh (d⁵) atau terisi penuh (d¹⁰). Oleh sebab itu, 1 elektron dari 4s dipromosikan ke 3d sehingga konfigurasi Kromium menjadi [Ar] 3d⁵ 4s¹ yang jauh lebih simetris dan stabil dibanding [Ar] 3d⁴ 4s²."
+      },
+      {
+        q: "Empat bilangan kuantum untuk elektron terakhir pada atom Oksigen (O, Z = 8) adalah...",
+        options: [
+          "n = 2, l = 1, m = -1, s = -1/2",
+          "n = 2, l = 1, m = +1, s = +1/2",
+          "n = 2, l = 0, m = 0, s = -1/2",
+          "n = 2, l = 1, m = 0, s = +1/2"
+        ],
+        answer: 0,
+        cat: "Bilangan Kuantum Elektron Terakhir",
+        exp: "Konfigurasi O (Z = 8): 1s² 2s² 2p⁴. Subkulit terakhir adalah 2p (n = 2, l = 1). Kotak orbital 2p (m = -1, 0, +1): elektron ke-5 (m=-1, s=+1/2), ke-6 (m=0, s=+1/2), ke-7 (m=+1, s=+1/2), dan elektron ke-8 berpasangan di kotak pertama (m = -1, s = -1/2)."
+      },
+      {
+        q: "Ion Besi (Fe²⁺) berasal dari atom netral Fe (Z = 26). Konfigurasi elektron ion Fe²⁺ adalah...",
+        options: [
+          "[Ar] 3d⁴ 4s²",
+          "[Ar] 3d⁶",
+          "[Ar] 3d⁵ 4s¹",
+          "[Ar] 3d⁶ 4s²"
+        ],
+        answer: 1,
+        cat: "Konfigurasi Elektron Ion",
+        exp: "Konfigurasi atom netral Fe (Z = 26) adalah [Ar] 3d⁶ 4s². Ketika membentuk ion Fe²⁺, atom melepaskan 2 elektron dari kulit terluar terlebih dahulu, yaitu dari subkulit 4s, sehingga menyisakan konfigurasi [Ar] 3d⁶."
+      },
+      {
+        q: "Jumlah orbital yang telah terisi elektron (baik penuh maupun setengah penuh) pada atom Silikon (Si, Z = 14) adalah...",
+        options: [
+          "6 orbital",
+          "7 orbital",
+          "8 orbital",
+          "9 orbital"
+        ],
+        answer: 2,
+        cat: "Diagram Orbital",
+        exp: "Konfigurasi Si (Z = 14): 1s² (1 orbital), 2s² (1 orbital), 2p⁶ (3 orbital), 3s² (1 orbital), 3p² (2 orbital terisi masing-masing 1 elektron). Total orbital yang terisi = 1 + 1 + 3 + 1 + 2 = 8 orbital."
+      },
+      {
+        q: "Berapa jumlah elektron tak berpasangan pada atom Mangan (Mn, Z = 25)?",
+        options: [
+          "1 elektron",
+          "3 elektron",
+          "5 elektron",
+          "7 elektron"
+        ],
+        answer: 2,
+        cat: "Kaidah Hund & Diagram Orbital",
+        exp: "Konfigurasi Mn (Z = 25): [Ar] 3d⁵ 4s². Pada subkulit 3d terdapat 5 orbital dan terisi 5 elektron. Sesuai kaidah Hund, kelima elektron tersebut menempati kelima orbital secara sendiri-sendiri (spin tunggal ↑), sehingga terdapat 5 elektron tak berpasangan."
+      },
+      {
+        q: "Unsur dengan nomor atom Z = 30 (Seng / Zn) bersifat diamagnetik karena...",
+        options: [
+          "Memiliki elektron valensi ganjil",
+          "Semua orbitalnya telah terisi penuh oleh pasangan elektron",
+          "Mengandung subkulit 4p yang kosong",
+          "Dapat melepaskan elektron dengan sangat mudah"
+        ],
+        answer: 1,
+        cat: "Sifat Kemagnetan Atom",
+        exp: "Seng (Z = 30) memiliki konfigurasi [Ar] 3d¹⁰ 4s². Seluruh orbital terisi penuh oleh pasangan elektron dengan spin berlawanan (↑↓), sehingga momen magnetiknya saling meniadakan secara total dan bersifat diamagnetik (ditolak sangat lemah oleh magnet)."
+      },
+      {
+        q: "Subkulit f (l = 3) memiliki jumlah orbital dan kapasitas elektron maksimum berturut-turut sebesar...",
+        options: [
+          "5 orbital dan 10 elektron",
+          "7 orbital dan 14 elektron",
+          "9 orbital dan 18 elektron",
+          "3 orbital dan 6 elektron"
+        ],
+        answer: 1,
+        cat: "Kapasitas Orbital",
+        exp: "Untuk subkulit f, bilangan kuantum azimut l = 3. Nilai m yang diizinkan adalah -3, -2, -1, 0, +1, +2, +3 (total 7 nilai m = 7 orbital). Karena tiap orbital menampung 2 elektron, kapasitas maksimumnya adalah 7 × 2 = 14 elektron."
+      },
+      {
+        q: "Perbedaan mendasar antara teori atom Bohr dan mekanika kuantum dalam menggambarkan elektron adalah...",
+        options: [
+          "Bohr menganggap elektron bermuatan positif, kuantum menganggap negatif",
+          "Bohr menyatakan elektron pada lintasan melingkar beradius pasti, sedangkan kuantum berupa awan probabilitas orbital",
+          "Bohr tidak mengakui keberadaan inti atom, kuantum membuktikan adanya inti atom",
+          "Bohr menganggap elektron memiliki spin, sedangkan kuantum menganggap elektron diam"
+        ],
+        answer: 1,
+        cat: "Sejarah Teori Atom Kuantum",
+        exp: "Model atom Bohr mempostulatkan lintasan melingkar stasioner dengan radius yang pasti. Sementara mekanika kuantum membuktikan sifat dualisme gelombang-partikel elektron, sehingga elektron tidak bergerak pada orbit kaku melainkan berada pada orbital (daerah ruang dengan peluang terbesar menemukan elektron)."
+      }
+    ];
+
+    let userAnswers = new Array(quizQuestions.length).fill(null);
+    let currentQuizIndex = 0;
+
+    function initQuiz() {
+      const container = document.getElementById('quiz-number-buttons');
+      if (!container) return;
+      container.innerHTML = quizQuestions.map((_, i) => `
+        <button 
+          onclick="loadQuestion(${i})" 
+          id="btn-quiz-num-${i}" 
+          class="h-8 rounded-lg font-bold text-xs border transition-all cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-teal-50 dark:hover:bg-slate-700">
+          ${i + 1}
+        </button>
+      `).join('');
+
+      loadQuestion(0);
+    }
+
+    function loadQuestion(idx) {
+      playSound('click');
+      currentQuizIndex = idx;
+      const q = quizQuestions[idx];
+
+      document.getElementById('quiz-q-num-badge').textContent = `Soal ${idx + 1} dari ${quizQuestions.length}`;
+      document.getElementById('quiz-progress-label').textContent = `Soal ${idx + 1} dari ${quizQuestions.length}`;
+      document.getElementById('quiz-category-badge').textContent = `Kategori: ${q.cat}`;
+      document.getElementById('quiz-q-text').textContent = q.q;
+
+      const optsContainer = document.getElementById('quiz-options-container');
+      optsContainer.innerHTML = q.options.map((opt, oIdx) => {
+        const letters = ['A', 'B', 'C', 'D'];
+        let btnStyle = 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800';
+
+        const answered = userAnswers[idx];
+        if (answered !== null) {
+          if (oIdx === q.answer) {
+            btnStyle = 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 font-bold';
+          } else if (answered === oIdx) {
+            btnStyle = 'border-rose-500 bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 line-through';
+          }
+        }
+
+        return `
+          <button 
+            onclick="selectAnswer(${idx}, ${oIdx})" 
+            ${answered !== null ? 'disabled' : ''}
+            class="w-full text-left p-3.5 rounded-2xl border ${btnStyle} text-xs sm:text-sm transition-all flex items-start space-x-3 cursor-pointer">
+            <span class="w-6 h-6 rounded-lg bg-white dark:bg-slate-700 font-bold flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-600 text-xs shadow-sm">
+              ${letters[oIdx]}
+            </span>
+            <span class="pt-0.5 leading-relaxed">${opt}</span>
+          </button>
+        `;
+      }).join('');
+
+      // Explanation box
+      const expBox = document.getElementById('quiz-explanation-box');
+      if (userAnswers[idx] !== null) {
+        expBox.classList.remove('hidden');
+        const isCorrect = userAnswers[idx] === q.answer;
+        document.getElementById('quiz-status-icon').setAttribute('data-lucide', isCorrect ? 'check-circle' : 'x-circle');
+        document.getElementById('quiz-status-icon').className = isCorrect ? 'w-4 h-4 text-emerald-500' : 'w-4 h-4 text-rose-500';
+        document.getElementById('quiz-status-text').textContent = isCorrect ? 'Jawaban Benar!' : 'Jawaban Masih Kurang Tepat';
+        document.getElementById('quiz-status-text').className = isCorrect ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-rose-600 dark:text-rose-400 font-bold';
+        document.getElementById('quiz-explanation-text').textContent = q.exp;
+      } else {
+        expBox.classList.add('hidden');
+      }
+
+      // Prev/Next state
+      document.getElementById('btn-prev-q').disabled = (idx === 0);
+      document.getElementById('btn-prev-q').classList.toggle('opacity-50', idx === 0);
+      document.getElementById('btn-next-q').querySelector('span').textContent = (idx === quizQuestions.length - 1) ? 'Selesai' : 'Selanjutnya';
+
+      updateNumberButtonsStyle();
+      lucide.createIcons();
+    }
+
+    function selectAnswer(qIdx, optIdx) {
+      if (userAnswers[qIdx] !== null) return;
+      userAnswers[qIdx] = optIdx;
+
+      const q = quizQuestions[qIdx];
+      const isCorrect = (optIdx === q.answer);
+
+      if (isCorrect) {
+        playSound('correct');
+      } else {
+        playSound('wrong');
+      }
+
+      updateLiveScore();
+      loadQuestion(qIdx);
+      triggerAutoSave();
+
+      // Check if all answered
+      const allAnswered = userAnswers.every(a => a !== null);
+      if (allAnswered) {
+        setTimeout(showFinalSummary, 600);
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuizIndex > 0) {
+        loadQuestion(currentQuizIndex - 1);
+        triggerAutoSave();
+      }
+    }
+
+    function nextQuestion() {
+      if (currentQuizIndex < quizQuestions.length - 1) {
+        loadQuestion(currentQuizIndex + 1);
+        triggerAutoSave();
+      } else {
+        showFinalSummary();
+      }
+    }
+
+    function updateNumberButtonsStyle() {
+      quizQuestions.forEach((q, i) => {
+        const btn = document.getElementById('btn-quiz-num-' + i);
+        if (!btn) return;
+
+        const ans = userAnswers[i];
+        if (ans === null) {
+          if (i === currentQuizIndex) {
+            btn.className = 'h-8 rounded-lg font-bold text-xs border transition-all cursor-pointer bg-teal-500 text-white border-teal-600 shadow-sm';
+          } else {
+            btn.className = 'h-8 rounded-lg font-bold text-xs border transition-all cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-teal-50 dark:hover:bg-slate-700';
+          }
+        } else if (ans === q.answer) {
+          btn.className = 'h-8 rounded-lg font-bold text-xs border transition-all cursor-pointer bg-emerald-500 text-white border-emerald-600';
+        } else {
+          btn.className = 'h-8 rounded-lg font-bold text-xs border transition-all cursor-pointer bg-rose-500 text-white border-rose-600';
+        }
+      });
+    }
+
+    function updateLiveScore() {
+      let correct = 0;
+      quizQuestions.forEach((q, i) => {
+        if (userAnswers[i] === q.answer) correct++;
+      });
+      const score = Math.round((correct / quizQuestions.length) * 100);
+      document.getElementById('quiz-live-score').textContent = score;
+      const subScore = document.getElementById('submit-summary-score');
+      if (subScore) subScore.textContent = score;
+    }
+
+    function showFinalSummary() {
+      playSound('correct');
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      }
+
+      let correct = 0;
+      quizQuestions.forEach((q, i) => {
+        if (userAnswers[i] === q.answer) correct++;
+      });
+      const wrong = quizQuestions.length - correct;
+      const score = Math.round((correct / quizQuestions.length) * 100);
+
+      document.getElementById('score-correct-cnt').textContent = correct;
+      document.getElementById('score-wrong-cnt').textContent = wrong;
+      document.getElementById('score-final-val').textContent = score;
+
+      let feedback = "";
+      if (score === 100) {
+        feedback = "Luar biasa sempurna! Anda telah menguasai seluruh konsep konfigurasi mekanika kuantum, 4 bilangan kuantum, aturan Aufbau, kaidah Hund, larangan Pauli, dan anomali kestabilan subkulit d.";
+      } else if (score >= 80) {
+        feedback = "Sangat Baik! Pemahaman Anda mengenai konfigurasi kuantum sudah sangat solid. Terus pertahankan prestasi belajar Anda!";
+      } else if (score >= 60) {
+        feedback = "Cukup Baik! Anda sudah memahami dasar-dasar mekanika kuantum. Silakan pelajari kembali pembahasan pada nomor yang masih keliru.";
+      } else {
+        feedback = "Perlu Belajar Lagi. Coba ulangi membaca materi inti serta mencoba simulator diagram orbital di atas sebelum mencoba kuis kembali.";
+      }
+      document.getElementById('score-feedback-text').textContent = feedback;
+
+      const summaryModal = document.getElementById('quiz-summary-modal');
+      summaryModal.classList.remove('hidden');
+      summaryModal.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetQuiz() {
+      playSound('click');
+      userAnswers = new Array(quizQuestions.length).fill(null);
+      document.getElementById('quiz-live-score').textContent = '0';
+      const subScore = document.getElementById('submit-summary-score');
+      if (subScore) subScore.textContent = '0';
+      document.getElementById('quiz-summary-modal').classList.add('hidden');
+      loadQuestion(0);
+      triggerAutoSave();
+    }
+
+    // ==================== AUTO-SAVE SYSTEM & PERSISTENCE ====================
+    let autoSaveTimer = null;
+
+    function triggerAutoSave() {
+      const badge = document.getElementById('save-status-badge');
+      const icon = document.getElementById('save-status-icon');
+      const text = document.getElementById('save-status-text');
+
+      if (text) text.textContent = 'Menyimpan...';
+      if (badge) badge.className = 'inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/60 transition-all';
+
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => {
+        try {
+          const payload = {
+            materi: 'Konfigurasi Elektron Mekanika Kuantum (Fase E)',
+            name: (document.getElementById('student-name')?.value || '').trim(),
+            class: (document.getElementById('student-class')?.value || '').trim(),
+            nis: (document.getElementById('student-nis')?.value || '').trim(),
+            essay1: (document.getElementById('lab-essay-1')?.value || '').trim(),
+            essay2: (document.getElementById('lab-essay-2')?.value || '').trim(),
+            essay3: (document.getElementById('lab-essay-3')?.value || '').trim(),
+            reflection: (document.getElementById('student-reflection-text')?.value || '').trim(),
+            answers: userAnswers,
+            currentQIdx: currentQuizIndex,
+            lastSaved: new Date().toISOString()
+          };
+          localStorage.setItem('portal_quantum_task_data', JSON.stringify(payload));
+
+          if (text) text.textContent = 'Tersimpan Otomatis di Perangkat';
+          if (badge) badge.className = 'inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-700/60 transition-all';
+        } catch(e) {}
+      }, 400);
+    }
+
+    function restoreSavedTask() {
+      try {
+        const raw = localStorage.getItem('portal_quantum_task_data');
+        if (!raw) return;
+        const data = JSON.parse(raw);
+
+        if (data.name && document.getElementById('student-name')) document.getElementById('student-name').value = data.name;
+        if (data.class && document.getElementById('student-class')) document.getElementById('student-class').value = data.class;
+        if (data.nis && document.getElementById('student-nis')) document.getElementById('student-nis').value = data.nis;
+        if (data.essay1 && document.getElementById('lab-essay-1')) document.getElementById('lab-essay-1').value = data.essay1;
+        if (data.essay2 && document.getElementById('lab-essay-2')) document.getElementById('lab-essay-2').value = data.essay2;
+        if (data.essay3 && document.getElementById('lab-essay-3')) document.getElementById('lab-essay-3').value = data.essay3;
+        if (data.reflection && document.getElementById('student-reflection-text')) document.getElementById('student-reflection-text').value = data.reflection;
+
+        if (Array.isArray(data.answers)) {
+          userAnswers = data.answers;
+          updateLiveScore();
+          updateNumberButtonsStyle();
+        }
+
+        if (typeof data.currentQIdx === 'number' && data.currentQIdx >= 0 && data.currentQIdx < quizQuestions.length) {
+          currentQuizIndex = data.currentQIdx;
+        }
+      } catch(e) {}
+    }
+
+    // ==================== REFLECTION NOTE STORAGE ====================
+    function saveReflectionNote() {
+      playSound('correct');
+      const text = document.getElementById('student-reflection-text').value.trim();
+      if (!text) {
+        alert('Silakan tuliskan refleksi atau hal baru yang Anda pelajari terlebih dahulu.');
+        return;
+      }
+      triggerAutoSave();
+      alert('Catatan refleksi Anda berhasil disimpan di browser!');
+    }
+
+    function copyReflectionNote() {
+      playSound('click');
+      const text = document.getElementById('student-reflection-text').value.trim();
+      if (!text) {
+        alert('Belum ada catatan yang ditulis untuk disalin.');
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Catatan refleksi berhasil disalin ke clipboard!');
+      });
+    }
+
+    function insertPromptIntoReflection(promptText) {
+      playSound('click');
+      const textarea = document.getElementById('student-reflection-text');
+      if (textarea) {
+        textarea.value = promptText;
+        textarea.focus();
+        textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        triggerAutoSave();
+      }
+    }
+
+    // ==================== PUSAT PENGUMPULAN TUGAS (PDF, WA, APPS SCRIPT) ====================
+    function getStudentReportData() {
+      let correct = 0;
+      quizQuestions.forEach((q, i) => {
+        if (userAnswers[i] === q.answer) correct++;
+      });
+      const score = Math.round((correct / quizQuestions.length) * 100);
+
+      return {
+        materi: 'Konfigurasi Elektron Mekanika Kuantum (Fase E)',
+        nama: (document.getElementById('student-name')?.value || 'Anonim').trim(),
+        kelas: (document.getElementById('student-class')?.value || '-').trim(),
+        nis: (document.getElementById('student-nis')?.value || '-').trim(),
+        skor: score,
+        correctCount: correct,
+        totalCount: quizQuestions.length,
+        essay1: (document.getElementById('lab-essay-1')?.value || '-').trim(),
+        essay2: (document.getElementById('lab-essay-2')?.value || '-').trim(),
+        essay3: (document.getElementById('lab-essay-3')?.value || '-').trim(),
+        refleksi: (document.getElementById('student-reflection-text')?.value || '-').trim(),
+        kuis: userAnswers
+      };
+    }
+
+    function exportReportPDF() {
+      playSound('click');
+      const data = getStudentReportData();
+      if (!data.nama || data.nama === 'Anonim') {
+        const ask = confirm('Nama siswa belum diisi pada bagian atas LKS Digital. Apakah Anda ingin tetap mencetak sekarang?');
+        if (!ask) {
+          document.getElementById('student-name')?.focus();
+          document.getElementById('student-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+      }
+      window.print();
+    }
+
+    const TEACHER_EMAIL = 'vanzaltito123@gmail.com';
+    const DEFAULT_GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwobr0k-44HFrf3B5YUroeEK-_U13AGVe2urQYDAmL0U43arTQHTvKjUEeM6CuZQvOE/exec';
+    let GAS_SUBMISSION_ENDPOINT = DEFAULT_GAS_ENDPOINT;
+
+    function generateFormattedTextReport() {
+      const data = getStudentReportData();
+      return `📄 *LAPORAN TUGAS: PORTAL KIMIA*\n` +
+             `🔬 *Materi:* ${data.materi}\n` +
+             `👤 *Nama Siswa:* ${data.nama}\n` +
+             `🏫 *Kelas / Fase:* ${data.kelas}\n` +
+             `🔢 *No. Absen / NISN:* ${data.nis}\n` +
+             `------------------------------------\n` +
+             `📊 *Skor Kuis (12 Soal):* ${data.skor}/100 (${data.correctCount} Benar, ${data.totalCount - data.correctCount} Salah)\n\n` +
+             `🔬 *HASIL PENYELIDIKAN LAB SIMULASI:*\n` +
+             `1. Anomali Kestabilan Cr vs V:\n${data.essay1}\n\n` +
+             `2. Kemagnetan Paku Besi vs Seng:\n${data.essay2}\n\n` +
+             `3. 4 Bilangan Kuantum Al vs Cl:\n${data.essay3}\n\n` +
+             `💡 *CATATAN REFLEKSI IMAJINATIF:*\n` +
+             `${data.refleksi}\n` +
+             `------------------------------------\n` +
+             `⏰ *Waktu:* ${new Date().toLocaleString('id-ID')}`;
+    }
+
+    function copyReportSummary() {
+      playSound('click');
+      const text = generateFormattedTextReport();
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Ringkasan Laporan Tugas berhasil disalin ke clipboard! Siap ditempelkan ke Google Classroom, Form, atau Email Guru.');
+      });
+    }
+
+    function sendEmailToTeacher() {
+      playSound('click');
+      const data = getStudentReportData();
+      if (!data.nama || data.nama === 'Anonim' || !data.kelas || data.kelas === '-') {
+        alert('Mohon lengkapi Nama Siswa dan Kelas pada bagian Identitas Siswa sebelum mengirim email!');
+        document.getElementById('student-name')?.focus();
+        document.getElementById('student-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      // Format Subjek: Nama Tugas_Kelas_Nama Siswa
+      const emailSubject = `${data.materi}_${data.kelas}_${data.nama}`;
+      const emailBody = generateFormattedTextReport();
+
+      // Salin ke clipboard sebagai cadangan
+      try {
+        navigator.clipboard.writeText(emailBody);
+      } catch(e) {}
+
+      const mailtoUrl = `mailto:${TEACHER_EMAIL}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+      window.location.href = mailtoUrl;
+
+      setTimeout(() => {
+        alert(`Aplikasi email sedang dibuka untuk mengirim ke: ${TEACHER_EMAIL}\n\nSubjek: ${emailSubject}\n\n(Catatan: Seluruh teks isi tugas juga telah disalin ke clipboard Anda untuk memudahkan jika ingin menempelkannya langsung di webmail/Gmail).`);
+      }, 300);
+    }
+
+    function submitToTeacherDatabase() {
+      playSound('click');
+      const data = getStudentReportData();
+      const btn = document.getElementById('btn-submit-db');
+
+      if (!data.nama || data.nama === 'Anonim' || !data.kelas || data.kelas === '-') {
+        alert('Mohon lengkapi Nama Siswa dan Kelas pada bagian Identitas Siswa terlebih dahulu!');
+        document.getElementById('student-name')?.focus();
+        document.getElementById('student-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      // 1. Jika dibuka di dalam lingkungan Apps Script Web App
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<span>Mengirim ke Server...</span>';
+        }
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '<span>✓ Terkirim ke Spreadsheet</span>';
+            }
+            alert(res && res.message ? res.message : 'Tugas berhasil terkirim dan tercatat di Google Spreadsheet guru!');
+          })
+          .withFailureHandler((err) => {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '<span>Kirim ke Database Guru</span>';
+            }
+            alert('Gagal mengirim ke database: ' + err.toString());
+          })
+          .simpanTugasSiswa(data);
+        return;
+      }
+
+      // 2. Jika dibuka dari Google Drive / File Lokal / Standalone (Kirim via POST API ke Apps Script)
+      const endpointUrl = GAS_SUBMISSION_ENDPOINT || DEFAULT_GAS_ENDPOINT;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>Mengirim ke Spreadsheet...</span>';
+      }
+
+      fetch(endpointUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(() => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>✓ Terkirim ke Spreadsheet</span>';
+        }
+        alert('✓ Tugas berhasil terkirim dan tersimpan di Google Spreadsheet Guru!\n\nSpreadsheet Target:\nhttps://docs.google.com/spreadsheets/d/1fFEdFx-J7nYSUpNLIpZVwsO2HpWtM8cqBCF0vn_I9ZI\n\nTerima kasih telah belajar dan mengerjakan tugas dengan sungguh-sungguh.');
+      })
+      .catch((err) => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Kirim ke Database Guru</span>';
+        }
+        alert('Gagal terhubung ke endpoint spreadsheet. Membuka alternatif kirim via Email Guru...');
+        sendEmailToTeacher();
+      });
+    }
+
+    function confirmResetTask() {
+      playSound('click');
+      const sure = confirm('PERHATIAN: Apakah Anda yakin ingin mengosongkan seluruh identitas, jawaban kuis, hasil penyelidikan lab, dan catatan refleksi Anda untuk mulai dari awal?');
+      if (sure) {
+        try {
+          localStorage.removeItem('portal_quantum_task_data');
+          localStorage.removeItem('quantum_student_reflection');
+        } catch(e) {}
+
+        if (document.getElementById('student-name')) document.getElementById('student-name').value = '';
+        if (document.getElementById('student-class')) document.getElementById('student-class').value = '';
+        if (document.getElementById('student-nis')) document.getElementById('student-nis').value = '';
+        if (document.getElementById('lab-essay-1')) document.getElementById('lab-essay-1').value = '';
+        if (document.getElementById('lab-essay-2')) document.getElementById('lab-essay-2').value = '';
+        if (document.getElementById('lab-essay-3')) document.getElementById('lab-essay-3').value = '';
+        if (document.getElementById('student-reflection-text')) document.getElementById('student-reflection-text').value = '';
+
+        resetQuiz();
+        alert('Seluruh data tugas telah direset.');
+      }
+    }
+
+        // ==================== WINDOW INITIALIZATION ====================
+    function initApp() {
+      try { initTheme(); } catch(e) {}
+      try { safeRenderIcons(); } catch(e) {}
+      try { initQuickElements(); } catch(e) {}
+      try { renderSimulator(11); } catch(e) {}
+      try { initQuiz(); } catch(e) {}
+      try { restoreSavedTask(); } catch(e) {}
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>

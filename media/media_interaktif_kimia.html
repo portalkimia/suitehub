@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorium Virtual Kimia: Tabel Periodik & Struktur Atom</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0b1329;
+      color: #e2e8f0;
+    }
+    .orbit-canvas {
+      filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.25));
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #334155;
+      border-radius: 9999px;
+    }
+    .element-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .element-card:hover {
+      transform: translateY(-2px) scale(1.04);
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white pb-12">
+
+  <!-- ==================== HEADER APP ==================== -->
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <i data-lucide="flask-conical" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-base sm:text-lg font-extrabold text-white tracking-tight">ChemLab Interaktif</h1>
+            <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full">Media HTML5</span>
+          </div>
+          <p class="text-[11px] text-slate-400">Eksplorasi Unsur, Model Atom Bohr & Uji Asam-Basa</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 text-xs font-semibold">
+        <button onclick="switchTab('periodik')" id="nav-periodik" class="tab-btn active px-3 sm:px-4 py-1.5 rounded-lg transition-all bg-emerald-600 text-white shadow">
+          <span class="hidden sm:inline">1.</span> Tabel Periodik
+        </button>
+        <button onclick="switchTab('bohr')" id="nav-bohr" class="tab-btn px-3 sm:px-4 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
+          <span class="hidden sm:inline">2.</span> Simulasi Bohr
+        </button>
+        <button onclick="switchTab('asambasa')" id="nav-asambasa" class="tab-btn px-3 sm:px-4 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
+          <span class="hidden sm:inline">3.</span> Uji pH Lab
+        </button>
+        <button onclick="switchTab('kuis')" id="nav-kuis" class="tab-btn px-3 sm:px-4 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
+          <span class="hidden sm:inline">4.</span> Kuis Cepat
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT WRAPPER ==================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 flex-grow w-full">
+
+    <!-- ============================================================== -->
+    <!-- TAB 1: TABEL PERIODIK & DETAIL UNSUR INTERAKTIF -->
+    <!-- ============================================================== -->
+    <section id="tab-periodik" class="tab-content block space-y-6">
+      
+      <!-- Top Overview Bar -->
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-extrabold text-white flex items-center space-x-2">
+            <span>Eksplorasi Sistem Periodik Unsur</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Klik salah satu unsur kimia di bawah untuk mempelajari nomor atom, konfigurasi elektron, sifat, dan kegunaannya.
+          </p>
+        </div>
+
+        <!-- Filter Golongan Unsur -->
+        <div class="flex items-center flex-wrap gap-1.5 text-[11px]">
+          <button onclick="filterElementGroup('all')" class="group-btn active px-2.5 py-1 rounded-md bg-emerald-600 text-white font-medium">Semua</button>
+          <button onclick="filterElementGroup('alkali')" class="group-btn px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700">Logam Alkali</button>
+          <button onclick="filterElementGroup('alkali-tanah')" class="group-btn px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700">Alkali Tanah</button>
+          <button onclick="filterElementGroup('transisi')" class="group-btn px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700">Transisi</button>
+          <button onclick="filterElementGroup('nonlogam')" class="group-btn px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700">Nonlogam</button>
+          <button onclick="filterElementGroup('halogen')" class="group-btn px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700">Halogen</button>
+          <button onclick="filterElementGroup('gas-mulia')" class="group-btn px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700">Gas Mulia</button>
+        </div>
+      </div>
+
+      <!-- Layout: Periodic Grid + Element Detail Panel -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Element Cards Grid (Left 7 Cols) -->
+        <div class="lg:col-span-7 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 sm:p-5">
+          <div class="flex items-center justify-between mb-3 text-xs text-slate-400 font-semibold">
+            <span>Daftar Unsur Pilihan (Periode 1 - 4 & Logam Populer)</span>
+            <span id="element-count-hint" class="text-emerald-400">24 Unsur</span>
+          </div>
+
+          <div id="elements-container" class="grid grid-cols-4 sm:grid-cols-6 gap-2.5 custom-scrollbar max-h-[520px] overflow-y-auto pr-1">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Element Details Inspector (Right 5 Cols) -->
+        <div id="inspector-panel" class="lg:col-span-5 bg-gradient-to-b from-slate-900 to-slate-950 border border-emerald-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+          
+          <!-- Background Glow -->
+          <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <!-- Header Unsur -->
+          <div class="flex items-start justify-between border-b border-slate-800 pb-4 mb-5">
+            <div class="flex items-center space-x-4">
+              <!-- Big Atomic Symbol Box -->
+              <div id="inspect-symbol-box" class="w-16 h-16 rounded-2xl bg-emerald-500/20 border-2 border-emerald-500 flex flex-col items-center justify-center text-white shadow-lg">
+                <span id="inspect-number" class="text-[10px] font-bold text-emerald-400">1</span>
+                <span id="inspect-symbol" class="text-2xl font-black">H</span>
+              </div>
+              <div>
+                <h3 id="inspect-name" class="text-xl font-bold text-white">Hidrogen</h3>
+                <span id="inspect-group-name" class="inline-block text-xs font-semibold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">
+                  Nonlogam Reaktif
+                </span>
+              </div>
+            </div>
+            
+            <button onclick="goToBohrSimulation()" title="Lihat di Simulasi Bohr" class="px-3 py-1.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 text-xs font-semibold transition-all flex items-center space-x-1.5">
+              <i data-lucide="orbit" class="w-3.5 h-3.5"></i>
+              <span>Simulasi Bohr</span>
+            </button>
+          </div>
+
+          <!-- Quick Stats Grid -->
+          <div class="grid grid-cols-2 gap-3 mb-5 text-xs">
+            <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-800">
+              <span class="text-slate-400 block mb-0.5">Massa Atom Relatif (\(A_r\))</span>
+              <span id="inspect-mass" class="font-bold text-slate-200 text-sm">1.008 u</span>
+            </div>
+            <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-800">
+              <span class="text-slate-400 block mb-0.5">Wujud Suhu Kamar</span>
+              <span id="inspect-phase" class="font-bold text-slate-200 text-sm">Gas</span>
+            </div>
+            <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-800">
+              <span class="text-slate-400 block mb-0.5">Golongan & Periode</span>
+              <span id="inspect-position" class="font-bold text-slate-200 text-sm">Golongan IA, Periode 1</span>
+            </div>
+            <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-800">
+              <span class="text-slate-400 block mb-0.5">Elektron Valensi</span>
+              <span id="inspect-valence" class="font-bold text-emerald-400 text-sm">1</span>
+            </div>
+          </div>
+
+          <!-- Konfigurasi Elektron Kulit Bohr -->
+          <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800 mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-300">Konfigurasi Elektron (Kulit K, L, M, N)</span>
+              <span id="inspect-config-code" class="text-xs font-mono text-emerald-400 font-semibold">1</span>
+            </div>
+            <div id="inspect-shells-bar" class="flex items-center space-x-2 pt-1">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Deskripsi & Kegunaan -->
+          <div class="space-y-3 text-xs">
+            <div class="bg-slate-800/20 p-3.5 rounded-xl border border-slate-800">
+              <h4 class="font-bold text-slate-300 mb-1 flex items-center space-x-1.5">
+                <i data-lucide="info" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Karakteristik Kimia:</span>
+              </h4>
+              <p id="inspect-desc" class="text-slate-400 leading-relaxed">
+                Unsur paling ringan dan paling melimpah di alam semesta. Memiliki 1 proton dan 1 elektron.
+              </p>
+            </div>
+
+            <div class="bg-slate-800/20 p-3.5 rounded-xl border border-slate-800">
+              <h4 class="font-bold text-slate-300 mb-1 flex items-center space-x-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Aplikasi di Kehidupan Nyata:</span>
+              </h4>
+              <p id="inspect-uses" class="text-slate-400 leading-relaxed">
+                Bahan bakar roket masa depan, sel bahan bakar hidrogen (fuel cell), dan sintesis amonia untuk pupuk.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 2: SIMULASI MODEL ATOM BOHR INTERAKTIF -->
+    <!-- ============================================================== -->
+    <section id="tab-bohr" class="tab-content hidden space-y-6">
+      
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-extrabold text-white flex items-center space-x-2">
+            <span>Simulasi Interaktif Model Atom Bohr</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Visualisasi dinamis perputaran elektron pada kulit atom K, L, M, N mengelilingi inti atom (proton & neutron).
+          </p>
+        </div>
+
+        <div class="flex items-center space-x-3 text-xs">
+          <label class="font-medium text-slate-300">Pilih Nomor Atom (Z):</label>
+          <select id="bohr-element-select" onchange="onBohrSelectChange()" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-emerald-300 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Simulation Container -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        
+        <!-- Live HTML5 Canvas (Left 7 Cols) -->
+        <div class="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center relative overflow-hidden min-h-[440px]">
+          
+          <div class="absolute top-4 left-4 text-xs font-semibold text-slate-400 flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>Simulasi Real-Time</span>
+          </div>
+
+          <canvas id="bohrCanvas" width="420" height="420" class="orbit-canvas max-w-full"></canvas>
+
+          <!-- Legend -->
+          <div class="mt-2 flex items-center space-x-4 text-[11px] text-slate-400">
+            <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> <span>Proton (+)</span></span>
+            <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span> <span>Neutron (0)</span></span>
+            <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span> <span>Elektron (-)</span></span>
+          </div>
+        </div>
+
+        <!-- Controls & Physics Explanations (Right 5 Cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          
+          <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <h3 id="bohr-element-title" class="text-lg font-bold text-white mb-3 flex items-center space-x-2">
+              <span id="bohr-badge" class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs">Z = 6</span>
+              <span id="bohr-name">Karbon (C)</span>
+            </h3>
+
+            <!-- Slider Kontrol Cepat -->
+            <div class="space-y-2 mb-4">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span>Geser Nomor Atom:</span>
+                <span id="bohr-slider-val" class="font-bold text-emerald-400">6</span>
+              </div>
+              <input 
+                type="range" 
+                id="bohr-slider" 
+                min="1" 
+                max="20" 
+                value="6" 
+                oninput="onBohrSliderChange(this.value)"
+                class="w-full accent-emerald-500 cursor-pointer"
+              >
+              <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                <span>1 (H)</span>
+                <span>10 (Ne)</span>
+                <span>20 (Ca)</span>
+              </div>
+            </div>
+
+            <!-- Rincian Partikel Subatom -->
+            <div class="grid grid-cols-3 gap-2 text-center text-xs mb-4">
+              <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-800">
+                <span class="text-rose-400 font-bold block text-base" id="bohr-protons">6</span>
+                <span class="text-[10px] text-slate-400">Proton</span>
+              </div>
+              <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-800">
+                <span class="text-slate-300 font-bold block text-base" id="bohr-neutrons">6</span>
+                <span class="text-[10px] text-slate-400">Neutron</span>
+              </div>
+              <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-800">
+                <span class="text-cyan-400 font-bold block text-base" id="bohr-electrons">6</span>
+                <span class="text-[10px] text-slate-400">Elektron</span>
+              </div>
+            </div>
+
+            <!-- Kulit Elektron Detail -->
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs space-y-2">
+              <div class="text-slate-400 font-semibold text-[11px]">Distribusi Elektron per Kulit:</div>
+              <div id="bohr-shells-distribution" class="space-y-1.5 font-mono">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Kestabilan Oktet / Sifat Pembentukan Ikatan -->
+          <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl text-xs">
+            <h4 class="font-bold text-emerald-400 mb-1 flex items-center space-x-1.5">
+              <i data-lucide="shield-alert" class="w-4 h-4"></i>
+              <span>Kecenderungan Kestabilan (Aturan Oktet/Duplet):</span>
+            </h4>
+            <p id="bohr-stability-note" class="text-slate-400 leading-relaxed">
+              Memiliki 4 elektron valensi. Cenderung berbagi (sharing) 4 elektron membentuk 4 ikatan kovalen untuk mencapai konfigurasi stabil oktet (8 elektron seperti Gas Mulia Ne).
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 3: MINI LAB UJI ASAM-BASA & INDIKATOR pH -->
+    <!-- ============================================================== -->
+    <section id="tab-asambasa" class="tab-content hidden space-y-6">
+      
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-extrabold text-white flex items-center space-x-2">
+            <span>Laboratorium Virtual: Uji Asam-Basa & Derajat pH</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Uji berbagai sampel larutan kimia dengan Indikator Universal, Lakmus Merah, Lakmus Biru, dan pH meter digital.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Interactive Beaker & Lab Bench (Left 7 Cols) -->
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-between min-h-[460px] relative">
+          
+          <!-- Sample Selector Strip -->
+          <div class="w-full flex items-center justify-between gap-2 mb-6">
+            <span class="text-xs font-semibold text-slate-400">Pilih Sampel Larutan:</span>
+            <select id="solution-select" onchange="changeSolution()" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-emerald-400 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="hcl">Asam Klorida (HCl 0.1 M)</option>
+              <option value="cuka">Asam Cuka / Asam Asetat (CH3COOH)</option>
+              <option value="jeruk">Air Perasan Lemon / Jeruk</option>
+              <option value="air" selected>Air Murni (H2O Akuades)</option>
+              <option value="sabun">Air Sabun / Baking Soda (NaHCO3)</option>
+              <option value="naoh">Natrium Hidroksida (NaOH 0.1 M)</option>
+            </select>
+          </div>
+
+          <!-- Virtual Beaker Visual -->
+          <div class="relative w-64 h-72 border-4 border-slate-500 border-t-0 rounded-b-3xl bg-slate-950/40 p-2 flex flex-col justify-end overflow-hidden shadow-2xl">
+            <!-- Measurement ticks -->
+            <div class="absolute right-2 top-8 text-[10px] text-slate-500 font-mono">250 mL —</div>
+            <div class="absolute right-2 top-24 text-[10px] text-slate-500 font-mono">150 mL —</div>
+            <div class="absolute right-2 top-40 text-[10px] text-slate-500 font-mono">50 mL —</div>
+
+            <!-- Test Strips inside Beaker (Animated Dip) -->
+            <div id="test-strip-lakmus-merah" class="absolute left-10 -top-8 w-6 h-48 bg-rose-400 border border-slate-700 rounded-b-md shadow-md transition-all duration-500 flex flex-col justify-end items-center pb-2">
+              <span class="text-[8px] font-bold text-slate-900 rotate-90">L. Merah</span>
+            </div>
+
+            <div id="test-strip-lakmus-biru" class="absolute left-20 -top-8 w-6 h-48 bg-blue-400 border border-slate-700 rounded-b-md shadow-md transition-all duration-500 flex flex-col justify-end items-center pb-2">
+              <span class="text-[8px] font-bold text-slate-900 rotate-90">L. Biru</span>
+            </div>
+
+            <div id="test-strip-universal" class="absolute left-32 -top-8 w-8 h-48 bg-amber-200 border border-slate-700 rounded-b-md shadow-md transition-all duration-500 flex flex-col justify-end items-center pb-2">
+              <span class="text-[8px] font-bold text-slate-900 rotate-90">Universal</span>
+            </div>
+
+            <!-- Liquid in Beaker -->
+            <div id="beaker-liquid" class="w-full h-44 rounded-b-2xl bg-cyan-500/30 transition-all duration-700 relative overflow-hidden backdrop-blur-xs flex items-center justify-center">
+              <!-- Liquid wave effect -->
+              <div class="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-transparent animate-pulse"></div>
+              <span id="liquid-formula-label" class="text-xs font-mono font-bold text-white/70 bg-black/30 px-2 py-1 rounded-md">H2O</span>
+            </div>
+          </div>
+
+          <!-- Dip Action Buttons -->
+          <div class="w-full flex items-center justify-center gap-3 mt-6">
+            <button onclick="dipStrips()" id="btn-dip" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg transition-all active:scale-95 flex items-center space-x-2">
+              <i data-lucide="test-tube" class="w-4 h-4"></i>
+              <span>Celupkan Kertas Indikator</span>
+            </button>
+            <button onclick="resetLab()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-all">
+              Angkat / Reset
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Measurement & Theory Results (Right 5 Cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          
+          <!-- pH Meter Digital Display -->
+          <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-slate-400">PENGUKURAN pH DIGITAL</span>
+              <span id="ph-status-badge" class="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-slate-800 text-slate-300">Netral</span>
+            </div>
+
+            <div class="flex items-baseline space-x-3 my-2">
+              <span class="text-xs text-slate-400 font-medium">Nilai pH:</span>
+              <span id="ph-digital-value" class="text-4xl font-black text-emerald-400 font-mono">7.0</span>
+              <span id="ph-concentration" class="text-xs font-mono text-slate-400">[H⁺] = 1.0 × 10⁻⁷ M</span>
+            </div>
+
+            <!-- pH Color Bar Scale (1 to 14) -->
+            <div class="mt-4">
+              <div class="flex justify-between text-[10px] text-slate-400 font-bold mb-1">
+                <span class="text-rose-400">1 (Asam Kuat)</span>
+                <span class="text-emerald-400">7 (Netral)</span>
+                <span class="text-purple-400">14 (Basa Kuat)</span>
+              </div>
+              <div class="h-3 w-full rounded-full bg-gradient-to-r from-red-600 via-yellow-400 via-emerald-500 via-blue-500 to-purple-800 relative">
+                <!-- Pin marker -->
+                <div id="ph-pointer" class="absolute -top-1 w-5 h-5 bg-white border-2 border-slate-900 rounded-full shadow transition-all duration-500 -translate-x-1/2" style="left: 50%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lakmus Test Observation Table -->
+          <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl text-xs space-y-3">
+            <h4 class="font-bold text-slate-200 flex items-center space-x-1.5">
+              <i data-lucide="eye" class="w-4 h-4 text-emerald-400"></i>
+              <span>Hasil Pengamatan Indikator:</span>
+            </h4>
+
+            <div class="space-y-2">
+              <div class="flex items-center justify-between p-2 rounded-lg bg-slate-800/60 border border-slate-800">
+                <span class="text-slate-300">Lakmus Merah:</span>
+                <span id="obs-lakmus-merah" class="font-bold text-rose-400">Tetap Merah</span>
+              </div>
+              <div class="flex items-center justify-between p-2 rounded-lg bg-slate-800/60 border border-slate-800">
+                <span class="text-slate-300">Lakmus Biru:</span>
+                <span id="obs-lakmus-biru" class="font-bold text-blue-400">Tetap Biru</span>
+              </div>
+              <div class="flex items-center justify-between p-2 rounded-lg bg-slate-800/60 border border-slate-800">
+                <span class="text-slate-300">Indikator Universal:</span>
+                <span id="obs-universal" class="font-bold text-emerald-400">Kuning Kehijauan (pH 7)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Penjelasan Teori Kimia -->
+          <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl text-xs">
+            <h4 class="font-bold text-emerald-400 mb-1">Reaksi Ionisasi & Penjelasan:</h4>
+            <p id="solution-explanation" class="text-slate-400 leading-relaxed">
+              Air murni mengalami ionisasi parsial: H2O ⇌ H⁺ + OH⁻ dengan [H⁺] = [OH⁻] = 10⁻⁷ M, sehingga larutan bersifat netral dengan pH = 7.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 4: KUIS EVALUASI CEPAT KIMIA -->
+    <!-- ============================================================== -->
+    <section id="tab-kuis" class="tab-content hidden space-y-6 max-w-3xl mx-auto">
+      
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-extrabold text-white flex items-center space-x-2">
+            <span>Tantangan Kuis Kimia Dasar</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Uji pemahaman Anda tentang sistem periodik, konfigurasi elektron, dan asam-basa.</p>
+        </div>
+        <div class="text-right">
+          <span class="text-xs text-slate-400 block">Skor Anda</span>
+          <span id="quiz-score-badge" class="text-2xl font-black text-emerald-400">0 / 5</span>
+        </div>
+      </div>
+
+      <!-- Quiz Questions Container -->
+      <div id="quiz-container" class="space-y-4">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Final Quiz Result Banner (Hidden initially) -->
+      <div id="quiz-final-banner" class="hidden bg-gradient-to-r from-emerald-950 to-slate-900 border border-emerald-500/40 rounded-2xl p-6 text-center space-y-3">
+        <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
+          <i data-lucide="award" class="w-6 h-6"></i>
+        </div>
+        <h3 id="quiz-result-title" class="text-lg font-bold text-white">Luar Biasa!</h3>
+        <p id="quiz-result-desc" class="text-xs text-slate-300 max-w-md mx-auto"></p>
+        <button onclick="resetQuiz()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md">
+          Ulangi Kuis
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== LOGIKA JAVASCRIPT ==================== -->
+  <script>
+    lucide.createIcons();
+
+    // Data Unsur Kimia Lengkap untuk Eksplorasi
+    const elementsData = [
+      { z: 1, s: 'H', n: 'Hidrogen', mass: '1.008 u', grp: 'nonlogam', grpName: 'Nonlogam Reaktif', phase: 'Gas', col: 'IA, Periode 1', val: 1, shells: [1], config: '1s¹', desc: 'Unsur paling ringan dan paling melimpah di alam semesta. Memiliki 1 proton dan 1 elektron.', uses: 'Bahan bakar roket, sel bahan bakar (fuel cell), dan sintesis amonia untuk pupuk.' },
+      { z: 2, s: 'He', n: 'Helium', mass: '4.0026 u', grp: 'gas-mulia', grpName: 'Gas Mulia', phase: 'Gas', col: 'VIIIA, Periode 1', val: 2, shells: [2], config: '1s²', desc: 'Gas mulia kedua paling melimpah, tidak berwarna, tidak berbau, dan sangat stabil (duplet).', uses: 'Pengisi balon udara, pendingin magnet superkonduktor MRI di rumah sakit.' },
+      { z: 3, s: 'Li', n: 'Litium', mass: '6.94 u', grp: 'alkali', grpName: 'Logam Alkali', phase: 'Padat', col: 'IA, Periode 2', val: 1, shells: [2, 1], config: '[He] 2s¹', desc: 'Logam paling ringan dengan densitas terendah, sangat reaktif terhadap air.', uses: 'Baterai lithium-ion pada smartphone, laptop, dan kendaraan listrik modern.' },
+      { z: 4, s: 'Be', n: 'Berilium', mass: '9.0122 u', grp: 'alkali-tanah', grpName: 'Logam Alkali Tanah', phase: 'Padat', col: 'IIA, Periode 2', val: 2, shells: [2, 2], config: '[He] 2s²', desc: 'Logam abu-abu yang kuat, ringan namun getas dengan titik leleh tinggi.', uses: 'Komponen pesawat antariksa, satelit, dan cermin teleskop luar angkasa James Webb.' },
+      { z: 5, s: 'B', n: 'Boron', mass: '10.81 u', grp: 'metaloid', grpName: 'Metaloid', phase: 'Padat', col: 'IIIA, Periode 2', val: 3, shells: [2, 3], config: '[He] 2s² 2p¹', desc: 'Metaloid semi-logam yang memiliki sifat antara logam dan nonlogam.', uses: 'Kaca borosilikat tahan panas (Pyrex), pengatur batang kendali reaktor nuklir.' },
+      { z: 6, s: 'C', n: 'Karbon', mass: '12.011 u', grp: 'nonlogam', grpName: 'Nonlogam Utama', phase: 'Padat', col: 'IVA, Periode 2', val: 4, shells: [2, 4], config: '[He] 2s² 2p²', desc: 'Dasar kimia organik dan seluruh kehidupan di bumi. Membentuk intan, grafit, dan grafena.', uses: 'Grafit pensil, baterai grafit, baja karbon, senyawa hidrokarbon dan biomolekul.' },
+      { z: 7, s: 'N', n: 'Nitrogen', mass: '14.007 u', grp: 'nonlogam', grpName: 'Nonlogam Reaktif', phase: 'Gas', col: 'VA, Periode 2', val: 5, shells: [2, 5], config: '[He] 2s² 2p³', desc: 'Penyusun sekitar 78% atmosfer bumi. Berikatan rangkap tiga kovalen yang sangat kokoh.', uses: 'Pupuk urea pertanian, nitrogen cair kriogenik untuk pengawetan sampel biologis.' },
+      { z: 8, s: 'O', n: 'Oksigen', mass: '15.999 u', grp: 'nonlogam', grpName: 'Nonlogam Reaktif', phase: 'Gas', col: 'VIA, Periode 2', val: 6, shells: [2, 6], config: '[He] 2s² 2p⁴', desc: 'Sangat elektronegatif, berperan esensial dalam respirasi aerobik makhluk hidup dan pembakaran.', uses: 'Pernapasan medis di rumah sakit, reaksi pembakaran, pemurnian bijih logam.' },
+      { z: 9, s: 'F', n: 'Fluorin', mass: '18.998 u', grp: 'halogen', grpName: 'Halogen', phase: 'Gas', col: 'VIIA, Periode 2', val: 7, shells: [2, 7], config: '[He] 2s² 2p⁵', desc: 'Unsur paling elektronegatif di tabel periodik, sangat reaktif terhadap hampir semua zat.', uses: 'Fluorida pasta gigi untuk mencegah karies gigi, senyawa teflon anti lengket.' },
+      { z: 10, s: 'Ne', n: 'Neon', mass: '20.180 u', grp: 'gas-mulia', grpName: 'Gas Mulia', phase: 'Gas', col: 'VIIIA, Periode 2', val: 8, shells: [2, 8], config: '[He] 2s² 2p⁶', desc: 'Gas mulia yang sangat inert dengan konfigurasi oktet sempurna.', uses: 'Lampu neon reklame iklan jalanan (memancarkan cahaya jingga-kemerahan terang).' },
+      { z: 11, s: 'Na', n: 'Natrium', mass: '22.990 u', grp: 'alkali', grpName: 'Logam Alkali', phase: 'Padat', col: 'IA, Periode 3', val: 1, shells: [2, 8, 1], config: '[Ne] 3s¹', desc: 'Logam lunak yang dapat dipotong dengan pisau, bereaksi kuat dengan air menghasilkan gas H2.', uses: 'Garam dapur (NaCl), pengatur potensial aksi impuls saraf, lampu jalan uap natrium.' },
+      { z: 12, s: 'Mg', n: 'Magnesium', mass: '24.305 u', grp: 'alkali-tanah', grpName: 'Logam Alkali Tanah', phase: 'Padat', col: 'IIA, Periode 3', val: 2, shells: [2, 8, 2], config: '[Ne] 3s²', desc: 'Logam ringan berwarna keperakan yang terbakar di udara dengan nyala putih sangat terang.', uses: 'Paduan aluminium bodi pesawat, kembang api putih, obat maag antasida (Mg(OH)2).' },
+      { z: 13, s: 'Al', n: 'Aluminium', mass: '26.982 u', grp: 'transisi', grpName: 'Logam Pascamasal', phase: 'Padat', col: 'IIIA, Periode 3', val: 3, shells: [2, 8, 3], config: '[Ne] 3s² 3p¹', desc: 'Logam paling berlimpah di kerak bumi, tahan karat karena lapisan pasif oksida.', uses: 'Aluminium foil dapur, kusen bangunan, rangka sepeda, sayap pesawat terbang.' },
+      { z: 14, s: 'Si', n: 'Silikon', mass: '28.085 u', grp: 'metaloid', grpName: 'Metaloid', phase: 'Padat', col: 'IVA, Periode 3', val: 4, shells: [2, 8, 4], config: '[Ne] 3s² 3p²', desc: 'Semikonduktor paling penting dalam revolusi elektronik modern.', uses: 'Microchip komputer/prosesor smartphone, panel surya photovoltaic, kaca pasir silika.' },
+      { z: 15, s: 'P', n: 'Fosfor', mass: '30.974 u', grp: 'nonlogam', grpName: 'Nonlogam Reaktif', phase: 'Padat', col: 'VA, Periode 3', val: 5, shells: [2, 8, 5], config: '[Ne] 3s² 3p³', desc: 'Penyusun materi genetik DNA/RNA dan molekul penyimpan energi sel (ATP).', uses: 'Korek api, pupuk fosfat untuk fotosintesis tanaman, detergen fosfat.' },
+      { z: 16, s: 'S', n: 'Belerang', mass: '32.06 u', grp: 'nonlogam', grpName: 'Nonlogam Reaktif', phase: 'Padat', col: 'VIA, Periode 3', val: 6, shells: [2, 8, 6], config: '[Ne] 3s² 3p⁴', desc: 'Zat padat berwarna kuning terang yang banyak ditemukan di kawasan vulkanik gunung berapi.', uses: 'Pembuatan asam sulfat (H2SO4), vulkanisasi karet ban kendaraan agar elastis dan kuat.' },
+      { z: 17, s: 'Cl', n: 'Klorin', mass: '35.45 u', grp: 'halogen', grpName: 'Halogen', phase: 'Gas', col: 'VIIA, Periode 3', val: 7, shells: [2, 8, 7], config: '[Ne] 3s² 3p⁵', desc: 'Gas halogen berwarna kuning kehijauan yang merupakan agen pengoksidasi kuat.', uses: 'Disinfektan kaporit air kolam renang/PDAM, pemutih pakaian, plastik pipa PVC.' },
+      { z: 18, s: 'Ar', n: 'Argon', mass: '39.948 u', grp: 'gas-mulia', grpName: 'Gas Mulia', phase: 'Gas', col: 'VIIIA, Periode 3', val: 8, shells: [2, 8, 8], config: '[Ne] 3s² 3p⁶', desc: 'Gas mulia yang membentuk sekitar 0.93% atmosfer bumi, sangat tidak reaktif.', uses: 'Gas pelindung saat pengelasan logam listrik (TIG welding) dan pengisi bola lampu pijar.' },
+      { z: 19, s: 'K', n: 'Kalium', mass: '39.098 u', grp: 'alkali', grpName: 'Logam Alkali', phase: 'Padat', col: 'IA, Periode 4', val: 1, shells: [2, 8, 8, 1], config: '[Ar] 4s¹', desc: 'Logam alkali yang sangat reaktif dan terbakar dengan nyala khas berwarna ungu.', uses: 'Pupuk NPK kalium, garam diet rendah natrium, pengatur ritme detak jantung manusia.' },
+      { z: 20, s: 'Ca', n: 'Kalsium', mass: '40.078 u', grp: 'alkali-tanah', grpName: 'Logam Alkali Tanah', phase: 'Padat', col: 'IIA, Periode 4', val: 2, shells: [2, 8, 8, 2], config: '[Ar] 4s²', desc: 'Logam esensial penyusun tulang dan gigi pada manusia dan hewan vertebrata.', uses: 'Semen bangunan, batu kapur (CaCO3), suplemen kalsium pencegah osteoporosis.' },
+      { z: 26, s: 'Fe', n: 'Besi', mass: '55.845 u', grp: 'transisi', grpName: 'Logam Transisi', phase: 'Padat', col: 'VIIIB, Periode 4', val: 2, shells: [2, 8, 14, 2], config: '[Ar] 3d⁶ 4s²', desc: 'Logam feromagnetik paling banyak digunakan dalam peradaban manusia. Inti hemoglobin darah.', uses: 'Konstruksi jembatan, baja gedung pencakar langit, pengangkut oksigen sel darah merah.' },
+      { z: 29, s: 'Cu', n: 'Tembaga', mass: '63.546 u', grp: 'transisi', grpName: 'Logam Transisi', phase: 'Padat', col: 'IB, Periode 4', val: 1, shells: [2, 8, 18, 1], config: '[Ar] 3d¹⁰ 4s¹', desc: 'Konduktor listrik dan panas terbaik setelah perak, berwarna kemerahan mengkilap.', uses: 'Kabel kawat instalasi listrik, pipa air pendingin AC, komponen elektronik PCB.' },
+      { z: 47, s: 'Ag', n: 'Perak', mass: '107.87 u', grp: 'transisi', grpName: 'Logam Transisi', phase: 'Padat', col: 'IB, Periode 5', val: 1, shells: [2, 8, 18, 18, 1], config: '[Kr] 4d¹⁰ 5s¹', desc: 'Logam mulia dengan daya hantar listrik dan reflektivitas cahaya tertinggi.', uses: 'Perhiasan perak, cermin berkualitas tinggi, lapisan konduktor panel surya.' },
+      { z: 79, s: 'Au', n: 'Emas', mass: '196.97 u', grp: 'transisi', grpName: 'Logam Transisi', phase: 'Padat', col: 'IB, Periode 6', val: 1, shells: [2, 8, 18, 32, 18, 1], config: '[Xe] 4f¹⁴ 5d¹⁰ 6s¹', desc: 'Logam mulia yang sangat tahan korosi, tidak bereaksi dengan asam tunggal biasa.', uses: 'Cadangan devisa moneter emas batangan, perhiasan mewah, konektor mikroprosesor.' }
+    ];
+
+    let currentSelectedElement = elementsData[0]; // Hidrogen default
+    let currentFilterGroup = 'all';
+
+    // Inisialisasi Aplikasi saat Load
+    document.addEventListener('DOMContentLoaded', () => {
+      renderElementsGrid();
+      inspectElement(currentSelectedElement);
+      initBohrSelector();
+      initBohrSimulation();
+      initQuiz();
+    });
+
+    // ==========================================
+    // TAB CONTROLLER
+    // ==========================================
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.className = 'tab-btn px-3 sm:px-4 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white';
+      });
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+
+      const activeBtn = document.getElementById('nav-' + tabId);
+      const activeContent = document.getElementById('tab-' + tabId);
+
+      if (activeBtn) activeBtn.className = 'tab-btn active px-3 sm:px-4 py-1.5 rounded-lg transition-all bg-emerald-600 text-white shadow';
+      if (activeContent) activeContent.classList.remove('hidden');
+
+      if (tabId === 'bohr') {
+        startBohrAnimation();
+      } else {
+        stopBohrAnimation();
+      }
+    }
+
+    // ==========================================
+    // TAB 1: TABEL PERIODIK LOGIC
+    // ==========================================
+    function renderElementsGrid() {
+      const container = document.getElementById('elements-container');
+      const filtered = elementsData.filter(el => {
+        if (currentFilterGroup === 'all') return true;
+        return el.grp === currentFilterGroup;
+      });
+
+      document.getElementById('element-count-hint').textContent = `${filtered.length} Unsur`;
+
+      container.innerHTML = filtered.map(el => {
+        const isSelected = el.z === currentSelectedElement.z;
+        const colorClass = getGroupColorClass(el.grp);
+        
+        return `
+          <button 
+            onclick="selectElement(${el.z})"
+            class="element-card p-2 rounded-xl border text-center relative flex flex-col justify-between h-20 ${colorClass} ${isSelected ? 'ring-2 ring-emerald-400 scale-105' : 'opacity-90 hover:opacity-100'}">
+            <span class="text-[9px] font-mono text-left font-bold opacity-75">${el.z}</span>
+            <span class="text-xl font-black">${el.s}</span>
+            <span class="text-[9px] truncate font-medium">${el.n}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function getGroupColorClass(grp) {
+      switch(grp) {
+        case 'alkali': return 'bg-rose-950/70 border-rose-600/60 text-rose-200';
+        case 'alkali-tanah': return 'bg-amber-950/70 border-amber-600/60 text-amber-200';
+        case 'transisi': return 'bg-blue-950/70 border-blue-600/60 text-blue-200';
+        case 'metaloid': return 'bg-teal-950/70 border-teal-600/60 text-teal-200';
+        case 'nonlogam': return 'bg-emerald-950/70 border-emerald-600/60 text-emerald-200';
+        case 'halogen': return 'bg-cyan-950/70 border-cyan-600/60 text-cyan-200';
+        case 'gas-mulia': return 'bg-purple-950/70 border-purple-600/60 text-purple-200';
+        default: return 'bg-slate-800 border-slate-700 text-slate-200';
+      }
+    }
+
+    function filterElementGroup(group) {
+      currentFilterGroup = group;
+      document.querySelectorAll('.group-btn').forEach(btn => {
+        btn.className = 'group-btn px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700';
+      });
+      event.target.className = 'group-btn active px-2.5 py-1 rounded-md bg-emerald-600 text-white font-medium';
+      renderElementsGrid();
+    }
+
+    function selectElement(atomicNumber) {
+      const el = elementsData.find(e => e.z === atomicNumber);
+      if (!el) return;
+      currentSelectedElement = el;
+      renderElementsGrid();
+      inspectElement(el);
+      playClickChime();
+    }
+
+    function inspectElement(el) {
+      document.getElementById('inspect-number').textContent = el.z;
+      document.getElementById('inspect-symbol').textContent = el.s;
+      document.getElementById('inspect-name').textContent = el.n;
+      document.getElementById('inspect-group-name').textContent = el.grpName;
+      document.getElementById('inspect-mass').textContent = el.mass;
+      document.getElementById('inspect-phase').textContent = el.phase;
+      document.getElementById('inspect-position').textContent = el.col;
+      document.getElementById('inspect-valence').textContent = el.val;
+      document.getElementById('inspect-config-code').textContent = el.config;
+      document.getElementById('inspect-desc').textContent = el.desc;
+      document.getElementById('inspect-uses').textContent = el.uses;
+
+      // Render Kulit Visual Bar
+      const shellsBar = document.getElementById('inspect-shells-bar');
+      const shellNames = ['K', 'L', 'M', 'N', 'O', 'P'];
+      shellsBar.innerHTML = el.shells.map((count, idx) => `
+        <div class="flex-1 bg-slate-900 border border-slate-700/80 rounded-lg p-1.5 text-center">
+          <span class="text-[10px] text-slate-400 block font-semibold">Kulit ${shellNames[idx]}</span>
+          <span class="text-xs font-mono font-bold text-emerald-400">${count} e⁻</span>
+        </div>
+      `).join('');
+    }
+
+    function goToBohrSimulation() {
+      // Beralih ke tab Bohr dengan elemen yang sedang dipilih
+      const targetZ = currentSelectedElement.z <= 20 ? currentSelectedElement.z : 6;
+      updateBohrElement(targetZ);
+      switchTab('bohr');
+    }
+
+    // ==========================================
+    // TAB 2: SIMULASI ATOM BOHR LOGIC (CANVAS)
+    // ==========================================
+    let bohrCanvas, bohrCtx;
+    let bohrAnimationId = null;
+    let bohrAngle = 0;
+    let currentBohrZ = 6; // Default Karbon
+
+    function initBohrSelector() {
+      const select = document.getElementById('bohr-element-select');
+      // Hanya unsur Z = 1 s/d 20 untuk simulasi Bohr visual yang bersih
+      const bohrElements = elementsData.filter(e => e.z <= 20);
+      select.innerHTML = bohrElements.map(e => `
+        <option value="${e.z}" ${e.z === 6 ? 'selected' : ''}>Z = ${e.z} • ${e.n} (${e.s})</option>
+      `).join('');
+    }
+
+    function initBohrSimulation() {
+      bohrCanvas = document.getElementById('bohrCanvas');
+      bohrCtx = bohrCanvas.getContext('2d');
+      updateBohrElement(6);
+    }
+
+    function onBohrSelectChange() {
+      const z = parseInt(document.getElementById('bohr-element-select').value);
+      updateBohrElement(z);
+    }
+
+    function onBohrSliderChange(val) {
+      const z = parseInt(val);
+      document.getElementById('bohr-slider-val').textContent = z;
+      document.getElementById('bohr-element-select').value = z;
+      updateBohrElement(z);
+    }
+
+    function updateBohrElement(z) {
+      currentBohrZ = z;
+      const el = elementsData.find(e => e.z === z) || elementsData[5]; // Karbon fallback
+
+      document.getElementById('bohr-slider').value = z;
+      document.getElementById('bohr-slider-val').textContent = z;
+      document.getElementById('bohr-element-select').value = z;
+      document.getElementById('bohr-badge').textContent = `Z = ${el.z}`;
+      document.getElementById('bohr-name').textContent = `${el.n} (${el.s})`;
+
+      // Subatom particles
+      const protons = el.z;
+      const massApprox = Math.round(parseFloat(el.mass));
+      const neutrons = Math.max(0, massApprox - protons);
+      const electrons = protons;
+
+      document.getElementById('bohr-protons').textContent = protons;
+      document.getElementById('bohr-neutrons').textContent = neutrons;
+      document.getElementById('bohr-electrons').textContent = electrons;
+
+      // Kulit distribution
+      const shellNames = ['K', 'L', 'M', 'N'];
+      const container = document.getElementById('bohr-shells-distribution');
+      container.innerHTML = el.shells.map((count, i) => `
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">Kulit ${shellNames[i]} (n = ${i+1}):</span>
+          <span class="text-emerald-400 font-bold">${count} elektron</span>
+        </div>
+      `).join('');
+
+      // Penjelasan Kestabilan
+      const valence = el.val;
+      let stabilityText = '';
+      if (el.grp === 'gas-mulia') {
+        stabilityText = `Konfigurasi elektron sudah stabil penuh (duplet/oktet) dengan ${valence} elektron valensi. Bersifat inert dan sukar bereaksi.`;
+      } else if (valence <= 3) {
+        stabilityText = `Memiliki ${valence} elektron valensi. Cenderung MELEPAS ${valence} elektron membentuk kation bermuatan +${valence} untuk mencapai kestabilan gas mulia.`;
+      } else if (valence === 4) {
+        stabilityText = `Memiliki 4 elektron valensi. Cenderung BERBAGI (sharing) 4 pasang elektron melalui ikatan kovalen untuk memenuhi kaidah oktet (8 elektron).`;
+      } else {
+        const need = 8 - valence;
+        stabilityText = `Memiliki ${valence} elektron valensi. Cenderung MENANGKAP ${need} elektron membentuk anion bermuatan -${need} agar susunan elektronnya stabil (oktet).`;
+      }
+      document.getElementById('bohr-stability-note').textContent = stabilityText;
+
+      drawBohrFrame();
+    }
+
+    function startBohrAnimation() {
+      if (bohrAnimationId) cancelAnimationFrame(bohrAnimationId);
+      function loop() {
+        bohrAngle += 0.015;
+        drawBohrFrame();
+        bohrAnimationId = requestAnimationFrame(loop);
+      }
+      loop();
+    }
+
+    function stopBohrAnimation() {
+      if (bohrAnimationId) {
+        cancelAnimationFrame(bohrAnimationId);
+        bohrAnimationId = null;
+      }
+    }
+
+    function drawBohrFrame() {
+      if (!bohrCtx) return;
+      const ctx = bohrCtx;
+      const w = bohrCanvas.width;
+      const h = bohrCanvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const el = elementsData.find(e => e.z === currentBohrZ) || elementsData[5];
+      const shells = el.shells; // Array misal [2, 4]
+
+      // Draw Kulit Orbits & Electrons
+      const shellRadii = [60, 105, 145, 180];
+
+      shells.forEach((electronCount, shellIdx) => {
+        const radius = shellRadii[shellIdx];
+
+        // Orbit Line
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(74, 222, 128, 0.25)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Orbit Label (K, L, M, N)
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.4)';
+        ctx.font = '10px "Plus Jakarta Sans", monospace';
+        const labels = ['K', 'L', 'M', 'N'];
+        ctx.fillText(`n=${shellIdx+1} (${labels[shellIdx]})`, cx + radius - 15, cy - 6);
+
+        // Draw Electrons on this shell
+        const direction = shellIdx % 2 === 0 ? 1 : -1;
+        const speed = (4 - shellIdx) * 0.7; // Outer shell moves slightly slower
+        const baseAngle = bohrAngle * speed * direction;
+
+        for (let i = 0; i < electronCount; i++) {
+          const theta = baseAngle + (i * (Math.PI * 2 / electronCount));
+          const ex = cx + Math.cos(theta) * radius;
+          const ey = cy + Math.sin(theta) * radius;
+
+          // Electron Glow
+          ctx.beginPath();
+          ctx.arc(ex, ey, 7, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(34, 211, 238, 0.3)';
+          ctx.fill();
+
+          // Electron Core
+          ctx.beginPath();
+          ctx.arc(ex, ey, 4.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#22d3ee';
+          ctx.fill();
+
+          // Minus sign
+          ctx.fillStyle = '#0f172a';
+          ctx.font = 'bold 9px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('-', ex, ey - 0.5);
+        }
+      });
+
+      // Draw Nucleus (Inti Atom)
+      ctx.beginPath();
+      ctx.arc(cx, cy, 26, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+      const grad = ctx.createRadialGradient(cx, cy, 4, cx, cy, 20);
+      grad.addColorStop(0, '#f87171');
+      grad.addColorStop(1, '#dc2626');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Nucleus Symbol & Protons Count
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(el.s, cx, cy - 2);
+
+      ctx.font = '9px monospace';
+      ctx.fillStyle = '#fecaca';
+      ctx.fillText(`${el.z}p`, cx, cy + 9);
+    }
+
+    // ==========================================
+    // TAB 3: MINI LAB UJI ASAM-BASA LOGIC
+    // ==========================================
+    const solutionsData = {
+      hcl: {
+        name: 'Asam Klorida (HCl 0.1 M)',
+        formula: 'HCl (aq)',
+        ph: 1.0,
+        conc: '[H⁺] = 1.0 × 10⁻¹ M',
+        type: 'Asam Kuat',
+        typeClass: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+        liquidColor: 'rgba(244, 63, 94, 0.4)',
+        lakmusMerah: 'Tetap Merah',
+        lakmusBiru: 'Berubah Menjadi Merah',
+        universal: 'Merah Terang (pH ~ 1)',
+        universalColor: '#ef4444',
+        explanation: 'HCl terionisasi sempurna dalam air: HCl → H⁺ + Cl⁻. Konsentrasi ion H⁺ tinggi sehingga larutan bersifat asam kuat dengan pH = -log[0.1] = 1.'
+      },
+      cuka: {
+        name: 'Asam Cuka (CH3COOH)',
+        formula: 'CH3COOH',
+        ph: 2.9,
+        conc: '[H⁺] = 1.3 × 10⁻³ M',
+        type: 'Asam Lemah',
+        typeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+        liquidColor: 'rgba(251, 191, 36, 0.35)',
+        lakmusMerah: 'Tetap Merah',
+        lakmusBiru: 'Berubah Menjadi Merah Muda',
+        universal: 'Jingga / Oranye (pH ~ 3)',
+        universalColor: '#f97316',
+        explanation: 'Asam cuka terionisasi sebagian: CH3COOH ⇌ CH3COO⁻ + H⁺ (Ka ≈ 1.8 × 10⁻⁵). Ion H⁺ yang terbentuk tidak sebanyak asam kuat.'
+      },
+      jeruk: {
+        name: 'Air Perasan Lemon / Jeruk',
+        formula: 'Asam Sitrat',
+        ph: 2.3,
+        conc: '[H⁺] = 5.0 × 10⁻³ M',
+        type: 'Asam Lemah Alami',
+        typeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+        liquidColor: 'rgba(234, 179, 8, 0.4)',
+        lakmusMerah: 'Tetap Merah',
+        lakmusBiru: 'Berubah Menjadi Merah',
+        universal: 'Jingga Kemerahan (pH ~ 2.3)',
+        universalColor: '#fb923c',
+        explanation: 'Kandungan asam sitrat (C6H8O7) dan asam askorbat (vitamin C) memberikan sifat asam alami dengan rasa masam yang khas.'
+      },
+      air: {
+        name: 'Air Murni (H2O Akuades)',
+        formula: 'H2O',
+        ph: 7.0,
+        conc: '[H⁺] = 1.0 × 10⁻⁷ M',
+        type: 'Netral',
+        typeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+        liquidColor: 'rgba(56, 189, 248, 0.3)',
+        lakmusMerah: 'Tetap Merah',
+        lakmusBiru: 'Tetap Biru',
+        universal: 'Kuning Kehijauan (pH 7)',
+        universalColor: '#10b981',
+        explanation: 'Air murni mengalami autoionisasi: H2O ⇌ H⁺ + OH⁻ di mana [H⁺] = [OH⁻] = 10⁻⁷ M, sehingga larutan bersifat netral seimbang.'
+      },
+      sabun: {
+        name: 'Air Sabun / Baking Soda (NaHCO3)',
+        formula: 'NaHCO3',
+        ph: 8.5,
+        conc: '[H⁺] = 3.2 × 10⁻⁹ M',
+        type: 'Basa Lemah',
+        typeClass: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+        liquidColor: 'rgba(96, 165, 250, 0.35)',
+        lakmusMerah: 'Berubah Menjadi Biru Muda',
+        lakmusBiru: 'Tetap Biru',
+        universal: 'Biru Kehijauan (pH ~ 8.5)',
+        universalColor: '#3b82f6',
+        explanation: 'Ion bikarbonat mengalami hidrolisis parsial menghasilkan ion OH⁻ berlebih: HCO3⁻ + H2O ⇌ H2CO3 + OH⁻, memberikan sifat basa licin pada sabun.'
+      },
+      naoh: {
+        name: 'Natrium Hidroksida (NaOH 0.1 M)',
+        formula: 'NaOH (aq)',
+        ph: 13.0,
+        conc: '[OH⁻] = 1.0 × 10⁻¹ M',
+        type: 'Basa Kuat',
+        typeClass: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+        liquidColor: 'rgba(168, 85, 247, 0.4)',
+        lakmusMerah: 'Berubah Menjadi Biru Tua',
+        lakmusBiru: 'Tetap Biru',
+        universal: 'Ungu Tua (pH ~ 13)',
+        universalColor: '#7e22ce',
+        explanation: 'NaOH terdisosiasi sempurna dalam air: NaOH → Na⁺ + OH⁻. Konsentrasi ion hidroksida sangat tinggi sehingga pOH = 1 dan pH = 14 - 1 = 13.'
+      }
+    };
+
+    let isStripsDipped = false;
+
+    function changeSolution() {
+      resetLab();
+      const solKey = document.getElementById('solution-select').value;
+      const sol = solutionsData[solKey];
+
+      document.getElementById('liquid-formula-label').textContent = sol.formula;
+      document.getElementById('beaker-liquid').style.backgroundColor = sol.liquidColor;
+      document.getElementById('solution-explanation').textContent = sol.explanation;
+    }
+
+    function dipStrips() {
+      isStripsDipped = true;
+      const solKey = document.getElementById('solution-select').value;
+      const sol = solutionsData[solKey];
+
+      // Animasi celup ke bawah
+      const sMerah = document.getElementById('test-strip-lakmus-merah');
+      const sBiru = document.getElementById('test-strip-lakmus-biru');
+      const sUniv = document.getElementById('test-strip-universal');
+
+      sMerah.style.top = '25px';
+      sBiru.style.top = '25px';
+      sUniv.style.top = '25px';
+
+      // Ubah warna strip sesuai hasil kimia
+      setTimeout(() => {
+        if (sol.ph < 7) {
+          sMerah.style.backgroundColor = '#f43f5e'; // Merah
+          sBiru.style.backgroundColor = '#f43f5e';  // Berubah merah
+        } else if (sol.ph > 7) {
+          sMerah.style.backgroundColor = '#3b82f6'; // Berubah biru
+          sBiru.style.backgroundColor = '#3b82f6';  // Biru
+        } else {
+          sMerah.style.backgroundColor = '#f43f5e'; // Tetap merah
+          sBiru.style.backgroundColor = '#3b82f6';  // Tetap biru
+        }
+        sUniv.style.backgroundColor = sol.universalColor;
+
+        // Update display data hasil
+        document.getElementById('ph-digital-value').textContent = sol.ph.toFixed(1);
+        document.getElementById('ph-concentration').textContent = sol.conc;
+        
+        const badge = document.getElementById('ph-status-badge');
+        badge.textContent = sol.type;
+        badge.className = `px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${sol.typeClass}`;
+
+        // Pointer posisi pH pada skala 1 - 14
+        const pointerPercent = ((sol.ph - 1) / (14 - 1)) * 100;
+        document.getElementById('ph-pointer').style.left = `${pointerPercent}%`;
+
+        // Update tabel observasi
+        document.getElementById('obs-lakmus-merah').textContent = sol.lakmusMerah;
+        document.getElementById('obs-lakmus-biru').textContent = sol.lakmusBiru;
+        document.getElementById('obs-universal').textContent = sol.universal;
+
+        playChimeSuccess();
+      }, 350);
+    }
+
+    function resetLab() {
+      isStripsDipped = false;
+      const sMerah = document.getElementById('test-strip-lakmus-merah');
+      const sBiru = document.getElementById('test-strip-lakmus-biru');
+      const sUniv = document.getElementById('test-strip-universal');
+
+      sMerah.style.top = '-32px';
+      sBiru.style.top = '-32px';
+      sUniv.style.top = '-32px';
+
+      sMerah.style.backgroundColor = '#fb7185';
+      sBiru.style.backgroundColor = '#60a5fa';
+      sUniv.style.backgroundColor = '#fde68a';
+
+      document.getElementById('obs-lakmus-merah').textContent = 'Belum dicelup';
+      document.getElementById('obs-lakmus-biru').textContent = 'Belum dicelup';
+      document.getElementById('obs-universal').textContent = 'Belum dicelup';
+    }
+
+    // ==========================================
+    // TAB 4: KUIS EVALUASI KIMIA LOGIC
+    // ==========================================
+    const quizQuestions = [
+      {
+        q: '1. Suatu unsur memiliki nomor atom Z = 17 (Klorin). Berapakah jumlah elektron valensi pada kulit terluarnya?',
+        opts: ['5 elektron', '7 elektron', '8 elektron', '17 elektron'],
+        correct: 1,
+        exp: 'Konfigurasi elektron Klorin (Z=17) adalah 2, 8, 7. Kulit terluar (kulit M) memiliki 7 elektron valensi.'
+      },
+      {
+        q: '2. Mengapa gas mulia seperti Helium dan Neon sangat stabil dan sukar bereaksi dengan unsur lain?',
+        opts: [
+          'Memiliki massa atom yang sangat besar',
+          'Konfigurasi elektronnya telah terisi penuh (memenuhi kaidah duplet/oktet)',
+          'Memiliki nomor atom yang ganjil',
+          'Tidak memiliki neutron di dalam inti atomnya'
+        ],
+        correct: 1,
+        exp: 'Gas mulia memiliki kulit terluar yang penuh (2 pada He, 8 pada Ne/Ar), sehingga energinya sangat rendah dan stabil.'
+      },
+      {
+        q: '3. Larutan yang mengubah warna kertas lakmus merah menjadi biru dan memiliki nilai pH di atas 7 adalah larutan bersifat...',
+        opts: ['Asam Kuat', 'Asam Lemah', 'Basa', 'Netral'],
+        correct: 2,
+        exp: 'Sifat khas larutan basa adalah membirukan lakmus merah dan memiliki nilai pH > 7 karena kelebihan ion hidroksida (OH⁻).'
+      },
+      {
+        q: '4. Jumlah maksimum elektron yang dapat ditampung pada kulit kedua (Kulit L, n = 2) menurut rumus 2n² adalah...',
+        opts: ['2 elektron', '8 elektron', '18 elektron', '32 elektron'],
+        correct: 1,
+        exp: 'Kapasitas maksimal kulit elektron = 2n². Untuk n = 2 (kulit L), kapasitasnya = 2 × (2)² = 2 × 4 = 8 elektron.'
+      },
+      {
+        q: '5. Unsur Natrium (Na) dengan konfigurasi 2, 8, 1 untuk mencapai kestabilan susunan oktet akan cenderung...',
+        opts: [
+          'Menangkap 7 elektron membentuk ion Na⁷⁻',
+          'Melepas 1 elektron terluarnya membentuk kation Na⁺',
+          'Membagi 1 elektron membentuk ikatan hidrogen',
+          'Menghancurkan proton dalam intinya'
+        ],
+        correct: 1,
+        exp: 'Secara energetika, melepaskan 1 elektron valensi jauh lebih mudah daripada menangkap 7 elektron, menghasilkan kation stabil Na⁺.'
+      }
+    ];
+
+    let quizAnswers = new Array(quizQuestions.length).fill(null);
+
+    function initQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = quizQuestions.map((item, qIdx) => `
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3" id="quiz-card-${qIdx}">
+          <h4 class="font-bold text-white text-sm leading-relaxed">${item.q}</h4>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            ${item.opts.map((opt, oIdx) => `
+              <button 
+                onclick="answerQuiz(${qIdx}, ${oIdx})"
+                id="opt-${qIdx}-${oIdx}"
+                class="quiz-opt-btn text-left p-3 rounded-xl border border-slate-700 bg-slate-800/60 hover:bg-slate-700/80 text-xs font-medium text-slate-300 transition-all flex items-center space-x-2">
+                <span class="w-5 h-5 rounded-md bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-300 shrink-0">${['A','B','C','D'][oIdx]}</span>
+                <span>${opt}</span>
+              </button>
+            `).join('')}
+          </div>
+
+          <!-- Pembahasan / Feedback per Soal -->
+          <div id="quiz-feedback-${qIdx}" class="hidden p-3 rounded-xl text-xs mt-2"></div>
+        </div>
+      `).join('');
+    }
+
+    function answerQuiz(qIdx, selectedOptIdx) {
+      if (quizAnswers[qIdx] !== null) return; // Sudah dijawab
+
+      quizAnswers[qIdx] = selectedOptIdx;
+      const q = quizQuestions[qIdx];
+      const isCorrect = selectedOptIdx === q.correct;
+
+      // Update button styling
+      const selectedBtn = document.getElementById(`opt-${qIdx}-${selectedOptIdx}`);
+      const correctBtn = document.getElementById(`opt-${qIdx}-${q.correct}`);
+
+      if (isCorrect) {
+        selectedBtn.className = 'quiz-opt-btn text-left p-3 rounded-xl border border-emerald-500 bg-emerald-950/80 text-xs font-semibold text-emerald-300 flex items-center space-x-2';
+        playChimeSuccess();
+      } else {
+        selectedBtn.className = 'quiz-opt-btn text-left p-3 rounded-xl border border-rose-500 bg-rose-950/80 text-xs font-semibold text-rose-300 flex items-center space-x-2';
+        correctBtn.className = 'quiz-opt-btn text-left p-3 rounded-xl border border-emerald-500/80 bg-emerald-950/50 text-xs font-semibold text-emerald-300 flex items-center space-x-2';
+      }
+
+      // Tampilkan pembahasan
+      const feedback = document.getElementById(`quiz-feedback-${qIdx}`);
+      feedback.classList.remove('hidden');
+      if (isCorrect) {
+        feedback.className = 'p-3 rounded-xl text-xs mt-2 bg-emerald-950/40 border border-emerald-800/50 text-emerald-300';
+        feedback.innerHTML = `<strong>Jawaban Benar!</strong> ${q.exp}`;
+      } else {
+        feedback.className = 'p-3 rounded-xl text-xs mt-2 bg-rose-950/40 border border-rose-800/50 text-rose-300';
+        feedback.innerHTML = `<strong>Kurang Tepat.</strong> ${q.exp}`;
+      }
+
+      // Hitung skor sementara
+      updateQuizScore();
+    }
+
+    function updateQuizScore() {
+      let score = 0;
+      let answeredCount = 0;
+      quizAnswers.forEach((ans, idx) => {
+        if (ans !== null) {
+          answeredCount++;
+          if (ans === quizQuestions[idx].correct) score++;
+        }
+      });
+
+      document.getElementById('quiz-score-badge').textContent = `${score} / ${quizQuestions.length}`;
+
+      if (answeredCount === quizQuestions.length) {
+        showFinalBanner(score);
+      }
+    }
+
+    function showFinalBanner(score) {
+      const banner = document.getElementById('quiz-final-banner');
+      const title = document.getElementById('quiz-result-title');
+      const desc = document.getElementById('quiz-result-desc');
+
+      banner.classList.remove('hidden');
+      if (score === 5) {
+        title.textContent = 'Luar Biasa! Skor Sempurna (100)';
+        desc.textContent = 'Pemahaman Anda mengenai sistem periodik, konfigurasi elektron, dan asam basa sangat mendalam. Pertahankan!';
+      } else if (score >= 3) {
+        title.textContent = `Bagus Sekali! Skor: ${score * 20}`;
+        desc.textContent = 'Sebagian besar konsep kimia telah Anda kuasai dengan baik. Pelajari lagi soal yang belum tepat melalui simulasi di atas.';
+      } else {
+        title.textContent = `Perlu Latihan Lagi (Skor: ${score * 20})`;
+        desc.textContent = 'Jangan menyerah! Coba kembali eksplorasi tabel periodik dan simulasi Bohr untuk memperkuat pemahaman Anda.';
+      }
+    }
+
+    function resetQuiz() {
+      quizAnswers = new Array(quizQuestions.length).fill(null);
+      document.getElementById('quiz-final-banner').classList.add('hidden');
+      document.getElementById('quiz-score-badge').textContent = '0 / 5';
+      initQuiz();
+    }
+
+    // ==========================================
+    // AUDIO SYNTHESIZER (WEB AUDIO API - NO EXTERNAL FILES)
+    // ==========================================
+    const audioCtx = (typeof window !== 'undefined') ? new (window.AudioContext || window.webkitAudioContext)() : null;
+
+    function playClickChime() {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
+    }
+
+    function playChimeSuccess() {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      [523.25, 659.25, 783.99].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + (i * 0.07));
+        gain.gain.setValueAtTime(0.05, now + (i * 0.07));
+        gain.gain.linearRampToValueAtTime(0.001, now + (i * 0.07) + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + (i * 0.07));
+        osc.stop(now + (i * 0.07) + 0.15);
+      });
+    }
+  </script>
+</body>
+</html>

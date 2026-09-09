@@ -1,0 +1,30 @@
+{
+  "name": "PortalKimia Suite — Ekosistem Pembelajaran Digital",
+  "short_name": "PortalKimia",
+  "description": "Gerbang terpadu ekosistem pembelajaran digital: LMS & Wali Kelas, Bank Media Kimia, dan Generator Modul Ajar AI.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07090e",
+  "theme_color": "#0b0f19",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

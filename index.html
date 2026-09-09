@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html class="dark" lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>PortalKimia Suite — Gerbang Ekosistem Pembelajaran Digital</title>
+  
+  <!-- PWA Manifest & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PortalKimia">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS v3 with Plugins -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: {
+              950: '#07090e',
+              900: '#0b0f19',
+              850: '#101626',
+              800: '#141d33',
+              750: '#19233e',
+              700: '#1e293b',
+            }
+          },
+          animation: {
+            'subtle-pulse': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'shake': 'shake 0.4s ease-in-out',
+          },
+          keyframes: {
+            shake: {
+              '0%, 100%': { transform: 'translateX(0)' },
+              '20%, 60%': { transform: 'translateX(-6px)' },
+              '40%, 80%': { transform: 'translateX(6px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Stylesheet -->
+  <style data-purpose="custom-layout">
+    /* Subtle Background Grid & Ambient Glow */
+    .bg-grid-pattern {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    }
+    
+    .glow-radial-violet {
+      background: radial-gradient(circle 600px at 50% 15%, rgba(139, 92, 246, 0.14), transparent 70%);
+    }
+
+    .glow-radial-emerald {
+      background: radial-gradient(circle 450px at 15% 85%, rgba(16, 185, 129, 0.09), transparent 70%);
+    }
+
+    .glow-radial-cyan {
+      background: radial-gradient(circle 450px at 85% 85%, rgba(6, 182, 212, 0.09), transparent 70%);
+    }
+
+    /* Glass Card Surface */
+    .glass-card {
+      background: rgba(16, 22, 38, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* Gradient Text */
+    .gradient-title {
+      background: linear-gradient(135deg, #ffffff 30%, #c4b5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(11, 15, 25, 0.8);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.6);
+    }
+  </style>
+</head>
+
+<body class="bg-obsidian-900 text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-purple-600 selection:text-white relative overflow-x-hidden">
+
+  <!-- Ambient Light Effects & Subtle Pattern Background -->
+  <div class="fixed inset-0 bg-grid-pattern pointer-events-none z-0"></div>
+  <div class="fixed inset-0 glow-radial-violet pointer-events-none z-0"></div>
+  <div class="fixed inset-0 glow-radial-emerald pointer-events-none z-0"></div>
+  <div class="fixed inset-0 glow-radial-cyan pointer-events-none z-0"></div>
+
+  <!-- ========================================================================= -->
+  <!-- BEGIN: MainHeader -->
+  <!-- ========================================================================= -->
+  <header class="relative z-30 border-b border-slate-800/80 bg-obsidian-950/80 backdrop-blur-md px-4 sm:px-6 lg:px-12 py-3 transition-all sticky top-0">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand & Version Tag -->
+      <div class="flex items-center space-x-3" data-purpose="brand-logo">
+        <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-cyan-400 p-[1px] shadow-lg shadow-purple-900/30">
+          <div class="w-full h-full bg-obsidian-900 rounded-[11px] flex items-center justify-center overflow-hidden">
+            <img src="https://lh3.googleusercontent.com/aida/AEtjO1X64Vrp874jLwJgW4s4ZY8fEe0CKX8pIojJBljzm3gT86mYccXqoqEa5q7v9JtYobNHMR2GBTNZIQiDXwR5zVvrXqjx9LOVfUfI995sP1DBDXUWOctSgKEQB5kmK8Fx48KYTvfOlbgqaBKpGedDiv01aKP36VgF8oY9bYwm88jqrEY4J3YSZPMfpnj15UuXAnoDYyJrbda1MQp0A3bGXqqOsyjYHNzS_jSzNGQGFnPWrek1nHXnuGNC3UIC" alt="PortalKimia Logo" class="w-9 h-9 object-contain">
+          </div>
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-tight text-white flex items-center gap-1.5 leading-tight">
+            PortalKimia<span class="font-light text-purple-400">Suite</span>
+          </span>
+          <p class="text-[10px] text-slate-400 font-medium leading-none mt-0.5 hidden sm:block">Ekosistem Pembelajaran Digital Terpadu</p>
+        </div>
+      </div>
+
+      <!-- Center: Role Switcher (Siswa | Guru | Admin) -->
+      <nav class="flex items-center" aria-label="Mode Peran Pengguna">
+        <div class="inline-flex p-1 rounded-xl bg-obsidian-850/90 border border-slate-700/70 shadow-inner">
+          <button id="role-btn-siswa" type="button" 
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">
+            <span>👨‍🎓</span>
+            <span class="hidden sm:inline">Mode</span>
+            <span>Siswa</span>
+          </button>
+          <button id="role-btn-guru" type="button" 
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">
+            <span>👨‍🏫</span>
+            <span class="hidden sm:inline">Mode</span>
+            <span>Guru</span>
+          </button>
+          <button id="role-btn-admin" type="button" 
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">
+            <span>⚙️</span>
+            <span>Admin</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Right Action Bar & Profile -->
+      <div class="flex items-center space-x-2 sm:space-x-3" data-purpose="user-profile-controls">
+        <!-- Quick Lock Button (Tampil saat Guru / Admin aktif untuk mengunci kembali ke Siswa) -->
+        <button id="quick-lock-btn" type="button" title="Kunci ke Mode Siswa (Aman untuk Proyektor/Kelas)"
+                class="hidden items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/50 border border-rose-500/30 text-rose-300 text-xs font-medium transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <span class="hidden md:inline">Kunci</span>
+        </button>
+
+        <!-- Server Status Indicator -->
+        <button id="server-status-btn" title="Status Koneksi Google Apps Script" 
+                class="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-500/20 text-[11px] text-emerald-400 font-medium hover:bg-emerald-900/40 transition-colors">
+          <span id="status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="status-text">Terkoneksi</span>
+        </button>
+
+        <!-- Refresh Data Button -->
+        <button id="refresh-btn" aria-label="Segarkan Data" title="Segarkan Data dari Spreadsheet & LMS" 
+                class="p-2 rounded-xl bg-obsidian-800/80 hover:bg-obsidian-750 text-slate-300 hover:text-white border border-slate-700/60 transition-colors" type="button">
+          <svg id="refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+
+        <!-- Dynamic Profile Badge -->
+        <div id="profile-container" class="flex items-center space-x-2.5 pl-2 border-l border-slate-800">
+          <div id="profile-avatar" class="w-8 h-8 rounded-full ring-2 ring-purple-500/30 overflow-hidden bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-white font-semibold text-xs shadow-inner">
+            <span id="profile-initial">TV</span>
+          </div>
+          <div class="hidden lg:flex flex-col text-left">
+            <span id="profile-name" class="text-xs font-semibold text-slate-100 leading-tight">Tito Vanzal, S.Pd.</span>
+            <span id="profile-sub" class="text-[11px] text-purple-400/90 font-medium leading-tight mt-0.5">Guru Kimia &amp; Wali Kelas</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+  <!-- END: MainHeader -->
+
+  <!-- ========================================================================= -->
+  <!-- BEGIN: MainContent -->
+  <!-- ========================================================================= -->
+  <main class="relative z-10 flex-grow px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl mx-auto w-full space-y-6">
+
+    <!-- 1. LIVE CLOCK, DATE & KBM SCHEDULE WIDGET -->
+    <section id="kbm-widget-card" class="rounded-2xl glass-card border border-slate-800/90 shadow-xl p-4 sm:p-5 relative overflow-hidden">
+      <!-- Glow ambient background inside widget -->
+      <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-10 -top-10 w-60 h-60 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+        <!-- Kolom Kiri: Jam Digital & Tanggal Hari Ini -->
+        <div class="md:col-span-4 flex flex-col justify-center border-b md:border-b-0 md:border-r border-slate-800/80 pb-3 md:pb-0 md:pr-4">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">WAKTU AKTIF REAL-TIME</span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="live-clock" class="font-mono text-3xl sm:text-4xl font-extrabold text-white tracking-tight">--:--:--</span>
+            <span class="font-mono text-xs font-semibold text-purple-400">WIB</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-xs text-slate-300 font-medium mt-1">
+            <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span id="live-date">Memuat tanggal...</span>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Status KBM Hari Ini (Ditarik Otomatis dari LMS) -->
+        <div class="md:col-span-8 flex flex-col justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <span id="kbm-status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-950/80 border border-purple-500/30 text-purple-300 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span>
+                <span id="kbm-status-label">Memeriksa KBM...</span>
+              </span>
+              <span id="kbm-period-info" class="text-xs text-slate-300 font-medium"></span>
+            </div>
+            <!-- Tombol Toggle Detail Jadwal Hari Ini -->
+            <button id="toggle-schedule-detail-btn" type="button" class="text-[11px] font-medium text-slate-400 hover:text-purple-300 flex items-center gap-1 transition-colors">
+              <span id="toggle-schedule-text">Lihat Seluruh Jadwal Hari Ini</span>
+              <svg id="toggle-schedule-arrow" class="w-3.5 h-3.5 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Highlight Konten KBM Saat Ini -->
+          <div id="kbm-highlight-box" class="p-3 rounded-xl bg-obsidian-850/70 border border-slate-800 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div id="kbm-icon-box" class="w-9 h-9 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-300 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 id="kbm-main-title" class="text-xs sm:text-sm font-bold text-white leading-tight">Menghubungkan ke LMS...</h4>
+                <p id="kbm-sub-title" class="text-[11px] text-slate-300 mt-0.5">Membaca jadwal mengajar dari basis data kelas.</p>
+              </div>
+            </div>
+            <!-- Quick Link to LMS -->
+            <a href="./lms/" target="_blank" rel="noopener noreferrer" 
+               class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 flex items-center gap-1.5 transition-all">
+              <span>Buka LMS</span>
+              <svg class="w-3 h-3 text-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+            </a>
+          </div>
+
+          <!-- Drawer Detail Jadwal Harian (Collapsible) -->
+          <div id="schedule-detail-drawer" class="hidden mt-3 pt-3 border-t border-slate-800">
+            <h5 class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+              <span>Agenda KBM Hari Ini</span>
+              <span id="schedule-count-label" class="text-purple-400 lowercase font-normal">0 sesi</span>
+            </h5>
+            <div id="schedule-timeline-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <!-- Item jadwal diisi dinamis via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. HERO GREETING & ROLE CONTEXT -->
+    <section class="text-center max-w-3xl mx-auto pt-2 pb-1" data-purpose="hero-greeting">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-900/30 border border-purple-500/30 text-purple-300 text-xs font-medium tracking-wide mb-3 shadow-sm">
+        <span id="hero-badge-icon">✦</span>
+        <span id="hero-badge-text">EKOSISTEM DIGITAL TERINTEGRASI</span>
+      </div>
+      <h1 id="hero-headline" class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-2 leading-tight">
+        Selamat datang di <span class="gradient-title">PortalKimia Suite</span>
+      </h1>
+      <p id="hero-subtitle" class="text-xs sm:text-sm text-slate-300/80 font-normal leading-relaxed max-w-2xl mx-auto">
+        Pusat gerbang terpadu seluruh aplikasi dan media pembelajaran kimia digital Anda. Pilih modul kerja di bawah untuk membuka ruang administrasi, lab media, atau generator pembelajaran.
+      </p>
+    </section>
+
+    <!-- 3. SEARCH & CATEGORY FILTER TOOLBAR -->
+    <section class="space-y-3" data-purpose="search-and-filters">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <!-- Quick Search Bar -->
+        <div class="relative flex-1 max-w-md">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </div>
+          <input type="text" id="search-input" placeholder="Cari modul, simulasi, LKPD, administrasi..." 
+                 class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-obsidian-850/90 border border-slate-700/80 text-slate-100 text-xs sm:text-sm placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all shadow-inner">
+          <!-- Clear Search Button -->
+          <button id="clear-search-btn" type="button" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <!-- Role Badge Info & Mode Switcher Hint -->
+        <div class="flex items-center justify-between sm:justify-end gap-2 text-xs">
+          <span id="filter-result-count" class="text-slate-400 font-medium">Menampilkan seluruh modul</span>
+          <button id="add-branch-top-btn" type="button" class="hidden px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs items-center gap-1.5 shadow-lg shadow-purple-900/30 transition-all">
+            <span>+ Tautkan Web</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div id="category-pills-container" class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+        <!-- Generated by JavaScript -->
+      </div>
+    </section>
+
+    <!-- 4. MAIN LAUNCHER CARDS GRID -->
+    <section id="launcher-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 pt-1" data-purpose="launcher-grid">
+      <!-- Cards rendered dynamically via JavaScript -->
+    </section>
+
+  </main>
+  <!-- END: MainContent -->
+
+  <!-- ========================================================================= -->
+  <!-- BEGIN: MainFooter -->
+  <!-- ========================================================================= -->
+  <footer class="relative z-20 border-t border-slate-800/80 bg-obsidian-950/80 backdrop-blur-md px-4 sm:px-6 lg:px-12 py-4 mt-8">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300">
+      <!-- Left Info -->
+      <div class="flex items-center gap-2">
+        <img src="https://lh3.googleusercontent.com/aida/AEtjO1X64Vrp874jLwJgW4s4ZY8fEe0CKX8pIojJBljzm3gT86mYccXqoqEa5q7v9JtYobNHMR2GBTNZIQiDXwR5zVvrXqjx9LOVfUfI995sP1DBDXUWOctSgKEQB5kmK8Fx48KYTvfOlbgqaBKpGedDiv01aKP36VgF8oY9bYwm88jqrEY4J3YSZPMfpnj15UuXAnoDYyJrbda1MQp0A3bGXqqOsyjYHNzS_jSzNGQGFnPWrek1nHXnuGNC3UIC" alt="PortalKimia Logo" class="w-4 h-4 object-contain rounded-sm">
+        <span class="font-medium text-slate-300">PortalKimia Suite</span>
+        <span class="text-slate-600">•</span>
+        <span class="text-slate-400">Ekosistem Pembelajaran Terpadu Kimia</span>
+      </div>
+      <!-- Right Copyright & Helper Link -->
+      <div class="flex items-center gap-3 sm:gap-4 text-slate-400">
+        <!-- Admin Settings Link (Only in Admin Mode) -->
+        <button id="open-config-btn" class="hidden hover:text-purple-400 transition-colors items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          Konfigurasi Backend
+        </button>
+        <span>© 2026 PortalKimia</span>
+      </div>
+    </div>
+  </footer>
+  <!-- END: MainFooter -->
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: AUTENTIKASI KATA SANDI GURU & ADMIN (ZERO-PASSWORD IN SOURCE CODE) -->
+  <!-- ========================================================================= -->
+  <div id="modal-auth" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/85 backdrop-blur-md hidden">
+    <div class="relative w-full max-w-sm rounded-2xl glass-card border border-slate-700/90 shadow-2xl p-6 sm:p-7">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div id="auth-modal-icon-bg" class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg">
+            🔐
+          </div>
+          <div>
+            <h3 id="auth-modal-title" class="text-base font-bold text-white">Autentikasi Akses</h3>
+            <p id="auth-modal-sub" class="text-xs text-slate-400">Verifikasi hak akses pengajar.</p>
+          </div>
+        </div>
+        <button id="close-auth-modal-btn" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Password Form -->
+      <form id="auth-form" class="mt-4 space-y-3.5">
+        <p class="text-xs text-slate-300">
+          Silakan masukkan kata sandi pengajar untuk membuka <span id="auth-target-role-label" class="font-bold text-purple-300">Mode Guru</span>:
+        </p>
+        
+        <div id="auth-input-wrap" class="relative">
+          <input type="password" id="auth-password-input" autofocus placeholder="Ketik kata sandi..." 
+                 class="w-full px-3.5 py-2.5 pr-10 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all">
+          <button type="button" id="toggle-auth-password-btn" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors" title="Lihat / Sembunyikan Kata Sandi">
+            <svg id="eye-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+          </button>
+        </div>
+        
+        <p id="auth-error-msg" class="text-xs text-rose-400 font-medium hidden text-center"></p>
+
+        <button type="submit" id="submit-auth-btn" class="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-lg shadow-purple-900/50 transition-all">
+          Buka Akses
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: HUBUNGKAN CABANG BARU (+ Tambah Web) (ADMIN MODE) -->
+  <!-- ========================================================================= -->
+  <div id="modal-add-branch" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/80 backdrop-blur-sm hidden">
+    <div class="relative w-full max-w-lg rounded-2xl glass-card border border-slate-700/80 shadow-2xl p-6 sm:p-7 overflow-y-auto max-h-[90vh]">
+      <!-- Header Modal -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm">
+            +
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Hubungkan Cabang Baru</h3>
+            <p class="text-xs text-slate-400">Tautkan website, modul praktikum, atau tool edukasi Anda.</p>
+          </div>
+        </div>
+        <button id="close-modal-btn" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Form Input -->
+      <form id="form-add-branch" class="mt-5 space-y-4">
+        <!-- Judul Cabang -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-200 mb-1">Judul Cabang Website <span class="text-rose-400">*</span></label>
+          <input type="text" id="branch-title" required placeholder="Contoh: Bank Soal &amp; CBT Kimia" 
+                 class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none transition-all">
+        </div>
+
+        <!-- Tag / Kategori & Teks Tombol -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-200 mb-1">Tag Kategori Atas</label>
+            <input type="text" id="branch-category" placeholder="Contoh: Media Pembelajaran" 
+                   class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none transition-all">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-200 mb-1">Teks Tombol Aksi</label>
+            <input type="text" id="branch-button-text" placeholder="Contoh: Buka Bank Soal" value="Buka Website"
+                   class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none transition-all">
+          </div>
+        </div>
+
+        <!-- Target Peran (Siapa yang bisa melihat modul ini) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-200 mb-1.5">Dapat Diakses Oleh Peran:</label>
+          <div class="flex items-center gap-4 text-xs">
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+              <input type="checkbox" id="branch-role-siswa" checked class="rounded bg-obsidian-800 border-slate-700 text-purple-600 focus:ring-0">
+              <span>Siswa</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+              <input type="checkbox" id="branch-role-guru" checked class="rounded bg-obsidian-800 border-slate-700 text-purple-600 focus:ring-0">
+              <span>Guru</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+              <input type="checkbox" id="branch-role-admin" checked class="rounded bg-obsidian-800 border-slate-700 text-purple-600 focus:ring-0">
+              <span>Admin</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- URL Link -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-200 mb-1">URL / Tautan Website <span class="text-rose-400">*</span></label>
+          <input type="url" id="branch-url" required placeholder="https://titovanzal.github.io/... atau URL GAS /exec" 
+                 class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none transition-all">
+        </div>
+
+        <!-- Deskripsi Singkat -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-200 mb-1">Deskripsi Singkat</label>
+          <textarea id="branch-description" rows="2.5" placeholder="Jelaskan secara singkat kegunaan web atau modul ini..." 
+                    class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none transition-all"></textarea>
+        </div>
+
+        <!-- Fitur Utama (Chips) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-200 mb-1">Fitur Utama (Pisahkan dengan koma)</label>
+          <input type="text" id="branch-chips" placeholder="Contoh: Pilihan Ganda, Soal HOTS, Nilai Instan" 
+                 class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none transition-all">
+        </div>
+
+        <!-- Pilihan Tema Warna & Ikon -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div>
+            <label class="block text-xs font-semibold text-slate-200 mb-1.5">Warna Tema</label>
+            <div class="grid grid-cols-3 gap-1.5 text-xs">
+              <label class="flex items-center gap-1.5 p-1.5 rounded-lg bg-obsidian-850 border border-slate-700 cursor-pointer hover:border-emerald-500">
+                <input type="radio" name="branch-theme" value="emerald" class="text-emerald-500 focus:ring-0">
+                <span class="text-emerald-400 text-[11px]">Emerald</span>
+              </label>
+              <label class="flex items-center gap-1.5 p-1.5 rounded-lg bg-obsidian-850 border border-slate-700 cursor-pointer hover:border-purple-500">
+                <input type="radio" name="branch-theme" value="purple" checked class="text-purple-500 focus:ring-0">
+                <span class="text-purple-400 text-[11px]">Purple</span>
+              </label>
+              <label class="flex items-center gap-1.5 p-1.5 rounded-lg bg-obsidian-850 border border-slate-700 cursor-pointer hover:border-cyan-500">
+                <input type="radio" name="branch-theme" value="cyan" class="text-cyan-400 text-[11px]">
+                <span class="text-cyan-400 text-[11px]">Cyan</span>
+              </label>
+              <label class="flex items-center gap-1.5 p-1.5 rounded-lg bg-obsidian-850 border border-slate-700 cursor-pointer hover:border-amber-500">
+                <input type="radio" name="branch-theme" value="amber" class="text-amber-400 text-[11px]">
+                <span class="text-amber-400 text-[11px]">Amber</span>
+              </label>
+              <label class="flex items-center gap-1.5 p-1.5 rounded-lg bg-obsidian-850 border border-slate-700 cursor-pointer hover:border-rose-500">
+                <input type="radio" name="branch-theme" value="rose" class="text-rose-400 text-[11px]">
+                <span class="text-rose-400 text-[11px]">Rose</span>
+              </label>
+              <label class="flex items-center gap-1.5 p-1.5 rounded-lg bg-obsidian-850 border border-slate-700 cursor-pointer hover:border-indigo-500">
+                <input type="radio" name="branch-theme" value="indigo" class="text-indigo-400 text-[11px]">
+                <span class="text-indigo-400 text-[11px]">Indigo</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-200 mb-1.5">Ikon Simbol</label>
+            <select id="branch-icon" class="w-full px-3 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none">
+              <option value="academic-cap">🎓 Topi Akademik (Kelas / LMS)</option>
+              <option value="flask">🧪 Tabung Reaksi (Lab / Media)</option>
+              <option value="sparkles">✨ AI / Sparkles (Generator Otomatis)</option>
+              <option value="book">📚 Buku / Modul Ajar</option>
+              <option value="calculator">🧮 Kalkulator / Rumus Kimia</option>
+              <option value="globe" selected>🌐 Globe / Website Eksternal</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tombol Aksi Form -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+          <button type="button" id="cancel-modal-btn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors">
+            Batal
+          </button>
+          <button type="submit" id="submit-branch-btn" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs flex items-center gap-2 shadow-lg shadow-purple-900/50 transition-all">
+            <span id="btn-submit-text">Simpan Cabang</span>
+            <svg id="btn-submit-spinner" class="animate-spin -ml-1 mr-1 h-3.5 w-3.5 text-white hidden" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: PENGATURAN URL API GOOGLE APPS SCRIPT (ADMIN ONLY) -->
+  <!-- ========================================================================= -->
+  <div id="modal-config" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/80 backdrop-blur-sm hidden">
+    <div class="relative w-full max-w-md rounded-2xl glass-card border border-slate-700/80 shadow-2xl p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>⚙️</span> Konfigurasi Backend GAS
+        </h3>
+        <button id="close-config-btn" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="mt-4 space-y-3 text-xs">
+        <p class="text-slate-300">
+          Masukkan URL Web App dari deployment Google Apps Script Portal Utama (berakhiran <code class="text-purple-400">/exec</code>):
+        </p>
+        <input type="url" id="config-gas-url" placeholder="https://script.google.com/macros/s/.../exec" 
+               class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none">
+        <p class="text-[11px] text-slate-400 italic">
+          *Pengaturan pusat utama tersimpan di file <code class="text-purple-300">config.js</code> yang otomatis sinkron ke seluruh perangkat.
+        </p>
+      </div>
+      <div class="flex justify-end gap-2 mt-5">
+        <button id="save-config-btn" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs">
+          Simpan &amp; Muat Ulang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifikasi Ringkas -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-xs font-medium"></div>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT: LOGIKA SUITE, SECURITY HASH, ROLE VIEWS & KBM SYNC -->
+  <!-- ========================================================================= -->
+  <!-- Konfigurasi Terpusat Multi-Device -->
+  <script src="config.js"></script>
+  <script>
+    /**
+     * KONFIGURASI UTAMA
+     */
+    const CONFIG = {
+      GAS_API_URL: window.PORTALKIMIA_CONFIG?.PORTAL_API || localStorage.getItem("PORTALKIMIA_GAS_URL") || "",
+      LMS_API_URL: window.PORTALKIMIA_CONFIG?.LMS_API || ""
+    };
+
+    /**
+     * KEAMANAN AKSES SATU ARAH (SHA-256 ENCRYPTED HASH - ZERO PLAIN TEXT IN CODE)
+     * Kata sandi tidak pernah disimpan dalam bentuk teks biasa.
+     * Hanya hash kriptografi SHA-256 yang tersimpan, sehingga 100% aman di GitHub publik.
+     */
+    const AUTH_HASH = {
+      // Hash SHA-256 terenkripsi untuk Mode Guru (Salted)
+      guru: "afbef11272ea5a39d3bf67a65a92385da38c73d09c8af9411ca57ad57194072c",
+      // Hash SHA-256 terenkripsi untuk Mode Admin (Salted)
+      admin: "6850ee69eceefebc71f736cdcaf0a30b11cbffaa137da98bb0e3490f25ba59b0"
+    };
+
+    const AUTH_SALT = "PORTALKIMIA_SALT_2026_";
+
+    async function hashPassword(str) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(AUTH_SALT + str);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function verifyAuth(inputPassword, targetRole) {
+      const inputHash = await hashPassword(inputPassword);
+      // Password admin dapat membuka baik Mode Admin maupun Mode Guru
+      if (inputHash === AUTH_HASH.admin) {
+        return true;
+      }
+      // Password guru membuka Mode Guru
+      if (targetRole === 'guru' && inputHash === AUTH_HASH.guru) {
+        return true;
+      }
+      return false;
+    }
+
+    /**
+     * DATA CABANG DEFAULT DENGAN ROLE-BASED ACCESS
+     */
+    const DEFAULT_BRANCHES = [
+      {
+        id: "branch_lms",
+        title: "LMS & Kelas Mandiri",
+        category: "Administrasi Guru",
+        description: "Presensi siswa harian, rekap nilai sumatif dan formatif, serta pendampingan perkembangan siswa perwalian.",
+        chips: ["Presensi", "Rekap Nilai", "Agenda Kelas"],
+        url: "./lms/",
+        buttonText: "Buka LMS Kelas",
+        theme: "emerald",
+        icon: "academic-cap",
+        roles: ["guru", "admin"]
+      },
+      {
+        id: "branch_media",
+        title: "PortalKimia Interaktif",
+        category: "Media Pembelajaran",
+        description: "Koleksi lengkap media pembelajaran interaktif kimia, laboratorium virtual reaksi, e-LKPD digital, dan slide presentasi.",
+        chips: ["Simulasi HTML5", "Slide PPTX", "LKPD Digital"],
+        url: "./media/",
+        buttonText: "Buka Portal Media",
+        theme: "purple",
+        icon: "flask",
+        roles: ["siswa", "guru", "admin"]
+      },
+      {
+        id: "branch_generator",
+        title: "Generator Modul Ajar AI",
+        category: "Otomatisasi AI",
+        description: "Susun otomatis Modul Ajar Kurikulum Merdeka, Capaian Pembelajaran (CP/TP), rubrik penilaian, dan instrumen asesmen.",
+        chips: ["Modul Ajar", "Kisi Asesmen", "Ekspor DOCX"],
+        url: "./generator/",
+        buttonText: "Buka Generator",
+        theme: "cyan",
+        icon: "sparkles",
+        roles: ["guru", "admin"]
+      }
+    ];
+
+    // State Aplikasi
+    let currentBranches = [...DEFAULT_BRANCHES];
+    let activeRole = sessionStorage.getItem("PORTALKIMIA_SESSION_ROLE") || "siswa";
+    let searchQuery = "";
+    let activeCategory = "Semua";
+    let pendingRoleSwitch = null;
+
+    // SVG Icons Map
+    const ICON_SVG = {
+      'academic-cap': `
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 14l9-5-9-5-9 5 9 5z" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>`,
+      'flask': `
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>`,
+      'sparkles': `
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>`,
+      'book': `
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>`,
+      'calculator': `
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>`,
+      'globe': `
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>`
+    };
+
+    // Color theme styling configuration
+    const THEME_STYLES = {
+      emerald: {
+        border: "border-slate-700/60 hover:border-emerald-500/50",
+        shadow: "hover:shadow-emerald-950/40",
+        glow: "from-emerald-500/5",
+        iconBox: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-obsidian-950",
+        tag: "bg-emerald-950/80 text-emerald-300 border-emerald-500/25",
+        titleHover: "group-hover:text-emerald-300",
+        btn: "bg-emerald-600 hover:bg-emerald-500 text-slate-950 shadow-emerald-900/30"
+      },
+      purple: {
+        border: "border-purple-500/40 hover:border-purple-400 ring-1 ring-purple-500/20",
+        shadow: "hover:shadow-purple-950/50",
+        glow: "from-purple-500/10",
+        iconBox: "bg-purple-500/15 border-purple-500/30 text-purple-300 group-hover:bg-purple-600 group-hover:text-white shadow-purple-900/40",
+        tag: "bg-purple-950/80 text-purple-200 border-purple-500/30",
+        titleHover: "group-hover:text-purple-300",
+        btn: "bg-purple-600 hover:bg-purple-500 text-white shadow-purple-900/50"
+      },
+      cyan: {
+        border: "border-slate-700/60 hover:border-cyan-500/50",
+        shadow: "hover:shadow-cyan-950/40",
+        glow: "from-cyan-500/5",
+        iconBox: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400 group-hover:bg-cyan-500 group-hover:text-obsidian-950",
+        tag: "bg-cyan-950/80 text-cyan-300 border-cyan-500/25",
+        titleHover: "group-hover:text-cyan-300",
+        btn: "bg-cyan-600 hover:bg-cyan-500 text-slate-950 shadow-cyan-900/30"
+      },
+      amber: {
+        border: "border-slate-700/60 hover:border-amber-500/50",
+        shadow: "hover:shadow-amber-950/40",
+        glow: "from-amber-500/5",
+        iconBox: "bg-amber-500/10 border-amber-500/20 text-amber-400 group-hover:bg-amber-500 group-hover:text-obsidian-950",
+        tag: "bg-amber-950/80 text-amber-300 border-amber-500/25",
+        titleHover: "group-hover:text-amber-300",
+        btn: "bg-amber-600 hover:bg-amber-500 text-slate-950 shadow-amber-900/30"
+      },
+      rose: {
+        border: "border-slate-700/60 hover:border-rose-500/50",
+        shadow: "hover:shadow-rose-950/40",
+        glow: "from-rose-500/5",
+        iconBox: "bg-rose-500/10 border-rose-500/20 text-rose-400 group-hover:bg-rose-500 group-hover:text-white",
+        tag: "bg-rose-950/80 text-rose-300 border-rose-500/25",
+        titleHover: "group-hover:text-rose-300",
+        btn: "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-900/30"
+      },
+      indigo: {
+        border: "border-slate-700/60 hover:border-indigo-500/50",
+        shadow: "hover:shadow-indigo-950/40",
+        glow: "from-indigo-500/5",
+        iconBox: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white",
+        tag: "bg-indigo-950/80 text-indigo-300 border-indigo-500/25",
+        titleHover: "group-hover:text-indigo-300",
+        btn: "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-900/30"
+      }
+    };
+
+    // Standard Fallback Jam Pelajaran
+    const STANDARD_JAM_SLOTS = {
+      'Senin': [
+        { type: 'kegiatan', label: 'Apel Pagi', mulai: '06:40', selesai: '07:00' },
+        { type: 'pelajaran', jam: 1, mulai: '07:00', selesai: '07:40' },
+        { type: 'pelajaran', jam: 2, mulai: '07:40', selesai: '08:20' },
+        { type: 'pelajaran', jam: 3, mulai: '08:20', selesai: '09:00' },
+        { type: 'pelajaran', jam: 4, mulai: '09:00', selesai: '09:40' },
+        { type: 'istirahat', label: 'Istirahat', mulai: '09:40', selesai: '10:00' },
+        { type: 'pelajaran', jam: 5, mulai: '10:00', selesai: '10:40' },
+        { type: 'pelajaran', jam: 6, mulai: '10:40', selesai: '11:20' },
+        { type: 'pelajaran', jam: 7, mulai: '11:20', selesai: '12:00' },
+        { type: 'pelajaran', jam: 8, mulai: '12:00', selesai: '12:30' },
+        { type: 'kegiatan', label: 'Family Time', mulai: '12:30', selesai: '12:45' }
+      ],
+      'Jumat': [
+        { type: 'kegiatan', label: 'Apel Pagi', mulai: '06:40', selesai: '07:00' },
+        { type: 'pelajaran', jam: 1, mulai: '07:00', selesai: '07:40' },
+        { type: 'pelajaran', jam: 2, mulai: '07:40', selesai: '08:20' },
+        { type: 'pelajaran', jam: 3, mulai: '08:20', selesai: '09:00' },
+        { type: 'pelajaran', jam: 4, mulai: '09:00', selesai: '09:40' },
+        { type: 'kegiatan', label: 'Family Time', mulai: '09:40', selesai: '09:55' }
+      ],
+      'Sabtu': [
+        { type: 'kegiatan', label: 'Apel Pagi', mulai: '07:30', selesai: '07:40' },
+        { type: 'pelajaran', jam: 1, mulai: '07:40', selesai: '08:20' },
+        { type: 'pelajaran', jam: 2, mulai: '08:20', selesai: '09:00' },
+        { type: 'pelajaran', jam: 3, mulai: '09:00', selesai: '09:40' },
+        { type: 'pelajaran', jam: 4, mulai: '09:40', selesai: '10:20' }
+      ]
+    };
+    STANDARD_JAM_SLOTS['Selasa'] = STANDARD_JAM_SLOTS['Senin'];
+    STANDARD_JAM_SLOTS['Rabu'] = STANDARD_JAM_SLOTS['Senin'];
+    STANDARD_JAM_SLOTS['Kamis'] = STANDARD_JAM_SLOTS['Senin'];
+
+    /**
+     * =========================================================================
+     * MANAJEMEN MODE PERAN (SISWA, GURU, ADMIN)
+     * =========================================================================
+     */
+    function updateRoleUI() {
+      // 1. Tombol Switcher Pill
+      const btnSiswa = document.getElementById("role-btn-siswa");
+      const btnGuru = document.getElementById("role-btn-guru");
+      const btnAdmin = document.getElementById("role-btn-admin");
+      const lockBtn = document.getElementById("quick-lock-btn");
+
+      const activeClass = "bg-purple-600 text-white shadow-md shadow-purple-900/50";
+      const inactiveClass = "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60";
+
+      btnSiswa.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${activeRole === 'siswa' ? activeClass : inactiveClass}`;
+      btnGuru.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${activeRole === 'guru' ? activeClass : inactiveClass}`;
+      btnAdmin.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${activeRole === 'admin' ? activeClass : inactiveClass}`;
+
+      // Lock Button (Tampil hanya saat Guru atau Admin aktif)
+      if (lockBtn) {
+        if (activeRole === 'guru' || activeRole === 'admin') {
+          lockBtn.classList.remove("hidden");
+          lockBtn.classList.add("flex");
+        } else {
+          lockBtn.classList.add("hidden");
+          lockBtn.classList.remove("flex");
+        }
+      }
+
+      // 2. Profile Header & Context Banner
+      const profileInitial = document.getElementById("profile-initial");
+      const profileName = document.getElementById("profile-name");
+      const profileSub = document.getElementById("profile-sub");
+      const heroHeadline = document.getElementById("hero-headline");
+      const heroSubtitle = document.getElementById("hero-subtitle");
+      const heroBadgeText = document.getElementById("hero-badge-text");
+      const addBranchTopBtn = document.getElementById("add-branch-top-btn");
+      const openConfigBtn = document.getElementById("open-config-btn");
+
+      if (activeRole === "siswa") {
+        if (profileInitial) profileInitial.innerText = "🎓";
+        if (profileName) profileName.innerText = "Siswa & Tamu";
+        if (profileSub) profileSub.innerText = "SMA Progresif Bumi Shalawat";
+        if (heroBadgeText) heroBadgeText.innerText = "RUANG BELAJAR KIMIA DIGITAL";
+        if (heroHeadline) heroHeadline.innerHTML = `Eksplorasi Pembelajaran di <span class="gradient-title">PortalKimia</span>`;
+        if (heroSubtitle) heroSubtitle.innerText = "Akses modul interaktif, laboratorium simulasi reaksi virtual, e-LKPD, dan materi pembelajaran kimia digital Anda.";
+        if (addBranchTopBtn) addBranchTopBtn.classList.add("hidden");
+        if (openConfigBtn) { openConfigBtn.classList.add("hidden"); openConfigBtn.classList.remove("flex"); }
+      } else if (activeRole === "guru") {
+        if (profileInitial) profileInitial.innerText = "TV";
+        if (profileName) profileName.innerText = "Tito Vanzal, S.Pd.";
+        if (profileSub) profileSub.innerText = "Guru Kimia & Wali Kelas";
+        if (heroBadgeText) heroBadgeText.innerText = "RUANG KERJA PENGAJAR";
+        if (heroHeadline) heroHeadline.innerHTML = `Selamat datang, <span class="gradient-title">Pak Tito</span>`;
+        if (heroSubtitle) heroSubtitle.innerText = "Akses terintegrasi administrasi wali kelas, rekap nilai & presensi LMS, lab media kimia, dan generator otomatis modul ajar.";
+        if (addBranchTopBtn) addBranchTopBtn.classList.add("hidden");
+        if (openConfigBtn) { openConfigBtn.classList.add("hidden"); openConfigBtn.classList.remove("flex"); }
+      } else if (activeRole === "admin") {
+        if (profileInitial) profileInitial.innerText = "⚙️";
+        if (profileName) profileName.innerText = "Administrator Suite";
+        if (profileSub) profileSub.innerText = "Pengelolaan Ekosistem Web";
+        if (heroBadgeText) heroBadgeText.innerText = "PANEL ADMINISTRASI PORTAL";
+        if (heroHeadline) heroHeadline.innerHTML = `Pengaturan <span class="gradient-title">PortalKimia Suite</span>`;
+        if (heroSubtitle) heroSubtitle.innerText = "Kelola tautan cabang website, integrasikan Google Spreadsheet baru, dan pantau sinkronisasi backend multi-perangkat.";
+        if (addBranchTopBtn) { addBranchTopBtn.classList.remove("hidden"); addBranchTopBtn.classList.add("flex"); }
+        if (openConfigBtn) { openConfigBtn.classList.remove("hidden"); openConfigBtn.classList.add("flex"); }
+      }
+
+      // Re-render Pills & Cards
+      renderCategoryPills();
+      renderGrid();
+    }
+
+    function requestRoleSwitch(targetRole) {
+      if (targetRole === activeRole) return;
+
+      // Mode Siswa selalu bebas akses tanpa kata sandi
+      if (targetRole === "siswa") {
+        activeRole = "siswa";
+        sessionStorage.removeItem("PORTALKIMIA_SESSION_ROLE");
+        updateRoleUI();
+        showToast("Beralih ke Mode Siswa (Tampilan Bebas)", "success");
+        return;
+      }
+
+      // Cek apakah sesi peramban sudah pernah terverifikasi untuk role ini
+      const savedAuth = sessionStorage.getItem("PORTALKIMIA_SESSION_ROLE");
+      if (savedAuth === "admin" || savedAuth === targetRole) {
+        activeRole = targetRole;
+        updateRoleUI();
+        showToast(`Beralih ke Mode ${targetRole === 'admin' ? 'Admin' : 'Guru'}`, "success");
+        return;
+      }
+
+      // Buka modal autentikasi kata sandi
+      pendingRoleSwitch = targetRole;
+      openAuthModal(targetRole);
+    }
+
+    function openAuthModal(targetRole) {
+      const modal = document.getElementById("modal-auth");
+      const title = document.getElementById("auth-modal-title");
+      const targetLabel = document.getElementById("auth-target-role-label");
+      const passwordInput = document.getElementById("auth-password-input");
+      const errMsg = document.getElementById("auth-error-msg");
+
+      errMsg.classList.add("hidden");
+      passwordInput.value = "";
+      passwordInput.type = "password";
+
+      const roleName = targetRole === 'admin' ? 'Mode Admin' : 'Mode Guru';
+      if (title) title.innerText = `Autentikasi ${roleName}`;
+      if (targetLabel) targetLabel.innerText = roleName;
+
+      modal.classList.remove("hidden");
+      setTimeout(() => passwordInput.focus(), 150);
+    }
+
+    function closeAuthModal() {
+      document.getElementById("modal-auth").classList.add("hidden");
+      pendingRoleSwitch = null;
+    }
+
+    /**
+     * =========================================================================
+     * WIDGET WAKTU, TANGGAL & STATUS KBM DARI LMS
+     * =========================================================================
+     */
+    function updateLiveClockAndDate() {
+      const now = new Date();
+
+      // Format Jam (HH:mm:ss)
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const clockEl = document.getElementById("live-clock");
+      if (clockEl) clockEl.innerText = `${hours}:${minutes}:${seconds}`;
+
+      // Format Tanggal Indonesia (contoh: Rabu, 9 September 2026)
+      const dateEl = document.getElementById("live-date");
+      if (dateEl) {
+        const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        dateEl.innerText = new Intl.DateTimeFormat('id-ID', options).format(now);
+      }
+
+      // Evaluasi KBM setiap detik
+      evaluateCurrentKbmStatus(now);
+    }
+
+    function getLmsStorageData() {
+      try {
+        const raw = localStorage.getItem("LMS_KIMIA_REAL_DATA_V6");
+        if (raw) return JSON.parse(raw);
+      } catch (e) {
+        console.warn("Gagal membaca LMS_KIMIA_REAL_DATA_V6:", e);
+      }
+      return null;
+    }
+
+    function evaluateCurrentKbmStatus(now) {
+      const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const today = dayNames[now.getDay()];
+      const nowStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+      const badgeLabel = document.getElementById("kbm-status-label");
+      const badge = document.getElementById("kbm-status-badge");
+      const periodInfo = document.getElementById("kbm-period-info");
+      const mainTitle = document.getElementById("kbm-main-title");
+      const subTitle = document.getElementById("kbm-sub-title");
+      const iconBox = document.getElementById("kbm-icon-box");
+      const scheduleCount = document.getElementById("schedule-count-label");
+
+      if (!badgeLabel || !mainTitle) return;
+
+      // Kasus 1: Hari Minggu (Libur)
+      if (today === 'Minggu') {
+        badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 flex items-center gap-1.5";
+        badgeLabel.innerText = "Libur Akhir Pekan";
+        periodInfo.innerText = "Minggu Tenang";
+        mainTitle.innerText = "Hari Libur — Persiapan KBM Pekan Depan";
+        subTitle.innerText = "Tidak ada agenda kegiatan belajar mengajar aktif hari ini.";
+        iconBox.innerHTML = `<span>🌴</span>`;
+        if (scheduleCount) scheduleCount.innerText = "libur";
+        return;
+      }
+
+      // Ambil data LMS
+      const lmsData = getLmsStorageData();
+      const slots = (lmsData?.jamPelajaran && lmsData.jamPelajaran[today]) ? lmsData.jamPelajaran[today] : (STANDARD_JAM_SLOTS[today] || []);
+      const jadwalMengajarToday = (lmsData?.jadwalMengajar || []).filter(j => j.hari === today);
+
+      if (scheduleCount) {
+        scheduleCount.innerText = `${jadwalMengajarToday.length} sesi mengajar`;
+      }
+
+      if (!slots || slots.length === 0) {
+        badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-800 text-slate-400 flex items-center gap-1.5";
+        badgeLabel.innerText = "Jadwal Belum Diset";
+        periodInfo.innerText = today;
+        mainTitle.innerText = "Belum ada master jam pelajaran hari " + today;
+        subTitle.innerText = "Buka LMS Kelas untuk mengatur jam pelajaran sekolah.";
+        return;
+      }
+
+      const firstSlot = slots[0];
+      const lastSlot = slots[slots.length - 1];
+
+      // Kasus 2: Sebelum Jam Sekolah Dimulai
+      if (nowStr < firstSlot.mulai) {
+        badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-950/80 border border-indigo-500/30 text-indigo-300 flex items-center gap-1.5";
+        badgeLabel.innerText = "Menjelang KBM";
+        periodInfo.innerText = `Mulai ${firstSlot.mulai} WIB`;
+        mainTitle.innerText = `KBM Hari ${today} Dimulai Pukul ${firstSlot.mulai}`;
+        
+        if (jadwalMengajarToday.length > 0) {
+          const firstClass = jadwalMengajarToday.sort((a,b) => a.jamKe - b.jamKe)[0];
+          subTitle.innerText = `Jadwal mengajar pertama Anda: Jam ke-${firstClass.jamKe} (${firstClass.mapel || 'Kimia'} - ${firstClass.kelas || 'X3 Atlet'}).`;
+        } else {
+          subTitle.innerText = `Persiapkan perangkat ajar dan modul laboratorium hari ini.`;
+        }
+        iconBox.innerHTML = `<span>🌅</span>`;
+        return;
+      }
+
+      // Kasus 3: Setelah Jam Sekolah Selesai
+      if (nowStr >= lastSlot.selesai) {
+        badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-800/90 border border-slate-700 text-slate-300 flex items-center gap-1.5";
+        badgeLabel.innerText = "KBM Selesai";
+        periodInfo.innerText = `Selesai ${lastSlot.selesai} WIB`;
+        mainTitle.innerText = `Seluruh Jam Pelajaran Hari ${today} Telah Selesai`;
+        subTitle.innerText = `Terima kasih atas dedikasi mengajar hari ini. Rekap nilai dan presensi tersimpan di LMS.`;
+        iconBox.innerHTML = `<span>✅</span>`;
+        return;
+      }
+
+      // Kasus 4: Sedang dalam jam KBM aktif
+      let currentSlot = null;
+      for (const s of slots) {
+        if (nowStr >= s.mulai && nowStr < s.selesai) {
+          currentSlot = s;
+          break;
+        }
+      }
+
+      if (currentSlot) {
+        // A. Istirahat
+        if (currentSlot.type === 'istirahat') {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-950/80 border border-amber-500/30 text-amber-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "Waktu Istirahat";
+          periodInfo.innerText = `${currentSlot.mulai} - ${currentSlot.selesai} WIB`;
+          mainTitle.innerText = `${currentSlot.label || 'Istirahat Sekolah'} Sedang Berlangsung`;
+          subTitle.innerText = `Waktu istirahat dan penyegaran sebelum sesi pembelajaran berikutnya.`;
+          iconBox.innerHTML = `<span>☕</span>`;
+          return;
+        }
+
+        // B. Kegiatan (Apel Pagi / Family Time)
+        if (currentSlot.type === 'kegiatan') {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 flex items-center gap-1.5";
+          badgeLabel.innerText = currentSlot.label || "Kegiatan Sekolah";
+          periodInfo.innerText = `${currentSlot.mulai} - ${currentSlot.selesai} WIB`;
+          mainTitle.innerText = `${currentSlot.label} (${currentSlot.mulai} - ${currentSlot.selesai})`;
+          subTitle.innerText = `Kegiatan pembinaan karakter dan kebersamaan satuan pendidikan.`;
+          iconBox.innerHTML = `<span>👥</span>`;
+          return;
+        }
+
+        // C. Jam Pelajaran
+        const activeEntry = jadwalMengajarToday.find(j => j.jamKe === currentSlot.jam);
+        if (activeEntry) {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/90 border border-emerald-500/40 text-emerald-300 flex items-center gap-1.5 animate-pulse";
+          badgeLabel.innerText = "🔴 Sedang Mengajar";
+          periodInfo.innerText = `Jam ${currentSlot.jam} (${currentSlot.mulai} - ${currentSlot.selesai})`;
+          mainTitle.innerText = `${activeEntry.mapel || 'Kimia'} — Kelas ${activeEntry.kelas || 'X3 Atlet'}`;
+          subTitle.innerText = `Lokasi: ${activeEntry.lantai || 'Lantai 2'} • Waktu: ${currentSlot.mulai} s.d. ${currentSlot.selesai} WIB.`;
+          iconBox.innerHTML = `<span>🧪</span>`;
+        } else {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-950/80 border border-purple-500/30 text-purple-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "Waktu Tugas / Mandiri";
+          periodInfo.innerText = `Jam ${currentSlot.jam} (${currentSlot.mulai} - ${currentSlot.selesai})`;
+          mainTitle.innerText = `Jam ke-${currentSlot.jam}: Tidak Ada Jadwal Mengajar Langsung`;
+          
+          // Cari jam mengajar berikutnya
+          const nextTeaching = jadwalMengajarToday.filter(j => j.jamKe > currentSlot.jam).sort((a,b) => a.jamKe - b.jamKe)[0];
+          if (nextTeaching) {
+            const nextSlot = slots.find(s => s.jam === nextTeaching.jamKe);
+            subTitle.innerText = `Jadwal mengajar berikutnya: Jam ke-${nextTeaching.jamKe} (${nextSlot ? nextSlot.mulai : ''}) di kelas ${nextTeaching.kelas}.`;
+          } else {
+            subTitle.innerText = `Waktu persiapan materi praktikum, modul ajar, dan administrasi wali kelas.`;
+          }
+          iconBox.innerHTML = `<span>📚</span>`;
+        }
+      }
+    }
+
+    function renderScheduleTimelineDrawer() {
+      const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const today = dayNames[new Date().getDay()];
+      const container = document.getElementById("schedule-timeline-list");
+      if (!container) return;
+
+      if (today === 'Minggu') {
+        container.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-slate-400">Hari Minggu adalah hari libur sekolah.</div>`;
+        return;
+      }
+
+      const lmsData = getLmsStorageData();
+      const slots = (lmsData?.jamPelajaran && lmsData.jamPelajaran[today]) ? lmsData.jamPelajaran[today] : (STANDARD_JAM_SLOTS[today] || []);
+      const teachingToday = (lmsData?.jadwalMengajar || []).filter(j => j.hari === today);
+
+      let html = "";
+      slots.forEach(slot => {
+        if (slot.type === 'istirahat' || slot.type === 'kegiatan') {
+          html += `
+            <div class="p-2 rounded-lg bg-obsidian-850/40 border border-slate-800/60 flex items-center justify-between text-xs">
+              <span class="text-slate-400 font-mono text-[11px]">${slot.mulai}-${slot.selesai}</span>
+              <span class="text-slate-300 italic font-medium">${slot.label}</span>
+            </div>
+          `;
+        } else {
+          const entry = teachingToday.find(t => t.jamKe === slot.jam);
+          if (entry) {
+            html += `
+              <div class="p-2 rounded-lg bg-purple-950/30 border border-purple-500/30 flex items-center justify-between text-xs">
+                <div>
+                  <span class="font-mono text-purple-400 font-bold text-[11px]">Jam ${slot.jam}</span>
+                  <span class="text-slate-400 text-[10px] ml-1">(${slot.mulai})</span>
+                </div>
+                <div class="text-right">
+                  <span class="font-semibold text-white text-[11px]">${entry.mapel || 'Kimia'}</span>
+                  <span class="text-purple-300 text-[10px] block font-medium">${entry.kelas || ''}</span>
+                </div>
+              </div>
+            `;
+          } else {
+            html += `
+              <div class="p-2 rounded-lg bg-obsidian-850/50 border border-slate-800/80 flex items-center justify-between text-xs opacity-75">
+                <div>
+                  <span class="font-mono text-slate-400 text-[11px]">Jam ${slot.jam}</span>
+                  <span class="text-slate-500 text-[10px] ml-1">(${slot.mulai})</span>
+                </div>
+                <span class="text-slate-400 text-[11px]">Mandiri / Kosong</span>
+              </div>
+            `;
+          }
+        }
+      });
+
+      container.innerHTML = html;
+    }
+
+    /**
+     * =========================================================================
+     * PENCARIAN CEPAT & FILTER KATEGORI
+     * =========================================================================
+     */
+    function getAvailableCategories() {
+      const set = new Set(["Semua"]);
+      currentBranches.forEach(b => {
+        // Hanya tambahkan kategori dari cabang yang diizinkan untuk peran saat ini
+        const bRoles = b.roles || ["guru", "admin"];
+        if (bRoles.includes(activeRole) && b.category) {
+          set.add(b.category.trim());
+        }
+      });
+      return Array.from(set);
+    }
+
+    function renderCategoryPills() {
+      const container = document.getElementById("category-pills-container");
+      if (!container) return;
+
+      const categories = getAvailableCategories();
+      // Pastikan activeCategory valid
+      if (!categories.includes(activeCategory)) activeCategory = "Semua";
+
+      let html = "";
+      categories.forEach(cat => {
+        const isActive = cat === activeCategory;
+        const activeStyles = "bg-purple-600 text-white font-semibold shadow-md shadow-purple-900/40 border-purple-500";
+        const inactiveStyles = "bg-obsidian-850/80 text-slate-300 hover:text-white hover:bg-slate-800/80 border-slate-700/60";
+
+        html += `
+          <button type="button" data-category="${cat}" 
+                  class="category-pill-btn shrink-0 px-3.5 py-1.5 rounded-xl border text-xs transition-all duration-200 ${isActive ? activeStyles : inactiveStyles}">
+            ${cat}
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+
+      // Event listener klik pill kategori
+      container.querySelectorAll(".category-pill-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeCategory = btn.getAttribute("data-category");
+          renderCategoryPills();
+          renderGrid();
+        });
+      });
+    }
+
+    function getFilteredBranches() {
+      return currentBranches.filter(branch => {
+        // 1. Role Filter
+        const bRoles = branch.roles || ["guru", "admin"];
+        if (!bRoles.includes(activeRole)) return false;
+
+        // 2. Category Filter
+        if (activeCategory !== "Semua") {
+          const bCat = (branch.category || "").toLowerCase().trim();
+          const targetCat = activeCategory.toLowerCase().trim();
+          if (bCat !== targetCat) return false;
+        }
+
+        // 3. Search Query Filter
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase().trim();
+          const titleMatch = (branch.title || "").toLowerCase().includes(q);
+          const descMatch = (branch.description || "").toLowerCase().includes(q);
+          const catMatch = (branch.category || "").toLowerCase().includes(q);
+          const chipsMatch = Array.isArray(branch.chips) && branch.chips.some(c => c.toLowerCase().includes(q));
+          if (!titleMatch && !descMatch && !catMatch && !chipsMatch) return false;
+        }
+
+        return true;
+      });
+    }
+
+    /**
+     * =========================================================================
+     * RENDER KARTU CABANG (LAUNCHER GRID)
+     * =========================================================================
+     */
+    function renderGrid() {
+      const container = document.getElementById("launcher-grid");
+      const countLabel = document.getElementById("filter-result-count");
+      if (!container) return;
+
+      const filtered = getFilteredBranches();
+
+      if (countLabel) {
+        countLabel.innerText = `Menampilkan ${filtered.length} modul (${activeRole === 'siswa' ? 'Mode Siswa' : activeRole === 'guru' ? 'Mode Guru' : 'Mode Admin'})`;
+      }
+
+      let html = "";
+
+      // Jika tidak ada hasil
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-16 text-center rounded-2xl glass-card border border-dashed border-slate-800 p-8">
+            <div class="w-14 h-14 rounded-2xl bg-slate-800/80 text-slate-400 flex items-center justify-center mx-auto mb-3 text-2xl">
+              🔍
+            </div>
+            <h3 class="text-base font-bold text-white mb-1">Modul Tidak Ditemukan</h3>
+            <p class="text-xs text-slate-400 max-w-sm mx-auto mb-4">
+              Tidak ada modul yang cocok dengan pencarian "${searchQuery}" pada kategori "${activeCategory}".
+            </p>
+            <button id="reset-filter-btn" type="button" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition-colors">
+              Reset Pencarian &amp; Filter
+            </button>
+          </div>
+        `;
+        const resetBtn = document.getElementById("reset-filter-btn");
+        if (resetBtn) {
+          resetBtn.addEventListener("click", () => {
+            searchQuery = "";
+            activeCategory = "Semua";
+            const searchInput = document.getElementById("search-input");
+            const clearBtn = document.getElementById("clear-search-btn");
+            if (searchInput) searchInput.value = "";
+            if (clearBtn) clearBtn.classList.add("hidden");
+            renderCategoryPills();
+            renderGrid();
+          });
+        }
+        return;
+      }
+
+      // Render kartu-kartu
+      filtered.forEach(branch => {
+        const theme = THEME_STYLES[branch.theme] || THEME_STYLES.purple;
+        const iconSvg = ICON_SVG[branch.icon] || ICON_SVG.globe;
+        const chipsHtml = (branch.chips || []).map(chip => 
+          `<span class="text-[11px] px-2 py-0.5 rounded-md bg-obsidian-850 text-slate-300 border border-slate-700/60 font-medium">${chip}</span>`
+        ).join("");
+
+        // Di Mode Admin, tampilkan tombol hapus/edit jika custom branch
+        const isAdminCustom = activeRole === 'admin' && !branch.id.startsWith("branch_");
+        const adminControls = isAdminCustom ? `
+          <button data-delete-id="${branch.id}" class="delete-branch-btn text-slate-500 hover:text-rose-400 p-1 rounded transition-colors" title="Hapus Tautan Ini">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          </button>
+        ` : '';
+
+        html += `
+          <article class="group relative rounded-2xl glass-card ${theme.border} p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl ${theme.shadow}">
+            <!-- Glow background -->
+            <div class="absolute inset-0 rounded-2xl bg-gradient-to-b ${theme.glow} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            
+            <div>
+              <!-- Top Row: Icon & Tag -->
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-11 h-11 rounded-xl border flex items-center justify-center transition-colors duration-300 ${theme.iconBox}">
+                  ${iconSvg}
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md border ${theme.tag}">
+                    ${branch.category || "UMUM"}
+                  </span>
+                  ${adminControls}
+                </div>
+              </div>
+
+              <!-- Header & Description -->
+              <h2 class="text-base sm:text-lg font-bold text-white mb-2 ${theme.titleHover} transition-colors">
+                ${branch.title}
+              </h2>
+              <p class="text-xs text-slate-300 leading-relaxed mb-4 line-clamp-3">
+                ${branch.description || "Akses modul dan layanan pembelajaran digital terintegrasi."}
+              </p>
+
+              <!-- Feature Chips -->
+              <div class="flex flex-wrap gap-1.5 mb-5">
+                ${chipsHtml}
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <a href="${branch.url}" target="_blank" rel="noopener noreferrer" 
+               class="w-full py-2.5 px-4 rounded-xl font-semibold text-xs tracking-wide flex items-center justify-center gap-2 shadow-lg transition-all duration-200 ${theme.btn}">
+              <span>${branch.buttonText || "Buka Website"}</span>
+              <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </a>
+          </article>
+        `;
+      });
+
+      // Kartu Tambah Cabang Baru (HANYA tampil di Mode Admin)
+      if (activeRole === "admin") {
+        html += `
+          <article class="group relative rounded-2xl glass-card border border-dashed border-slate-700 hover:border-purple-500/80 p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:bg-obsidian-850/50">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-11 h-11 rounded-xl bg-purple-950/40 border border-purple-500/30 text-purple-300 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                </div>
+                <span class="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md bg-purple-950/60 text-purple-300 border border-purple-500/25">
+                  ADMIN FITUR
+                </span>
+              </div>
+
+              <h2 class="text-base sm:text-lg font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">
+                Hubungkan Cabang Baru
+              </h2>
+              <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                Tautkan repositori GitHub Pages, situs modul praktikum, atau tautan alat edukasi baru langsung ke portal ini.
+              </p>
+
+              <div class="flex flex-wrap gap-1.5 mb-5">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-obsidian-850/60 text-slate-400 border border-slate-700/40 font-medium">Multi-Peran</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-obsidian-850/60 text-slate-400 border border-slate-700/40 font-medium">Auto Sync</span>
+              </div>
+            </div>
+
+            <button id="trigger-add-branch-card" type="button" 
+                    class="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-purple-600 text-slate-200 hover:text-white font-semibold text-xs tracking-wide flex items-center justify-center gap-2 border border-slate-700 hover:border-purple-500 transition-all duration-200 shadow-md">
+              <span>+ Tautkan Website</span>
+            </button>
+          </article>
+        `;
+      }
+
+      container.innerHTML = html;
+
+      // Event listener tombol tambah di kartu
+      const triggerBtn = document.getElementById("trigger-add-branch-card");
+      if (triggerBtn) {
+        triggerBtn.addEventListener("click", openAddModal);
+      }
+
+      // Event listener delete branch custom
+      container.querySelectorAll(".delete-branch-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const delId = btn.getAttribute("data-delete-id");
+          if (confirm("Hapus tautan cabang ini dari portal?")) {
+            currentBranches = currentBranches.filter(b => b.id !== delId);
+            renderGrid();
+            renderCategoryPills();
+            showToast("Tautan cabang telah dihapus", "warning");
+          }
+        });
+      });
+    }
+
+    /**
+     * Memperbarui Status Koneksi Server di Header
+     */
+    function updateServerStatus(status, text) {
+      const dot = document.getElementById("status-dot");
+      const label = document.getElementById("status-text");
+      const btn = document.getElementById("server-status-btn");
+      if (!dot || !label) return;
+
+      if (status === "online") {
+        dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+        label.innerText = text || "Terkoneksi";
+        label.className = "text-emerald-400";
+        if (btn) btn.className = "hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-500/20 text-[11px] font-medium hover:bg-emerald-900/40 transition-colors";
+      } else if (status === "offline") {
+        dot.className = "w-2 h-2 rounded-full bg-amber-400";
+        label.innerText = text || "Lokal";
+        label.className = "text-amber-300";
+        if (btn) btn.className = "hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-amber-950/40 border border-amber-500/20 text-[11px] font-medium hover:bg-amber-900/40 transition-colors";
+      }
+    }
+
+    /**
+     * Ambil Data Cabang dari Google Apps Script API
+     */
+    async function fetchBranches() {
+      const refreshIcon = document.getElementById("refresh-icon");
+      if (refreshIcon) refreshIcon.classList.add("animate-spin");
+
+      if (!CONFIG.GAS_API_URL) {
+        updateServerStatus("offline", "Mode Lokal");
+        renderCategoryPills();
+        renderGrid();
+        if (refreshIcon) refreshIcon.classList.remove("animate-spin");
+        return;
+      }
+
+      try {
+        const response = await fetch(CONFIG.GAS_API_URL + "?action=getBranches", {
+          method: "GET",
+          headers: { "Accept": "application/json" }
+        });
+        
+        if (!response.ok) throw new Error("HTTP Status: " + response.status);
+        
+        const result = await response.json();
+        if (result.status === "success" && Array.isArray(result.data)) {
+          currentBranches = result.data.length > 0 ? result.data : DEFAULT_BRANCHES;
+          renderCategoryPills();
+          renderGrid();
+          updateServerStatus("online", "Terkoneksi");
+          showToast("Data cabang disinkronkan dari Google Sheets!", "success");
+        } else {
+          throw new Error(result.message || "Format data tidak sesuai.");
+        }
+      } catch (err) {
+        console.warn("⚠️ Gagal sinkronisasi data cabang:", err);
+        updateServerStatus("offline", "Server Tak Terjangkau");
+        renderCategoryPills();
+        renderGrid();
+      } finally {
+        if (refreshIcon) refreshIcon.classList.remove("animate-spin");
+      }
+    }
+
+    /**
+     * Kirim Cabang Baru ke Backend GAS (doPost)
+     */
+    async function submitBranch(payload) {
+      if (!CONFIG.GAS_API_URL) {
+        const localBranch = {
+          id: "branch_" + Date.now(),
+          title: payload.title,
+          category: payload.category || "Media Pembelajaran",
+          description: payload.description,
+          chips: payload.chips.split(",").map(c => c.trim()).filter(Boolean),
+          url: payload.url,
+          buttonText: payload.buttonText || "Buka Website",
+          theme: payload.theme || "purple",
+          icon: payload.icon || "globe",
+          roles: payload.roles || ["siswa", "guru", "admin"]
+        };
+        currentBranches.push(localBranch);
+        renderCategoryPills();
+        renderGrid();
+        showToast("Cabang ditambahkan secara lokal! Pasang URL GAS untuk menyimpan permanen.", "warning");
+        closeAddModal();
+        return;
+      }
+
+      const btnText = document.getElementById("btn-submit-text");
+      const btnSpinner = document.getElementById("btn-submit-spinner");
+      const submitBtn = document.getElementById("submit-branch-btn");
+
+      if (btnText) btnText.innerText = "Menyimpan...";
+      if (btnSpinner) btnSpinner.classList.remove("hidden");
+      if (submitBtn) submitBtn.disabled = true;
+
+      try {
+        const response = await fetch(CONFIG.GAS_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "create",
+            ...payload
+          })
+        });
+
+        const result = await response.json();
+        if (result.status === "success") {
+          showToast("Berhasil! Cabang baru telah tersimpan di Spreadsheet.", "success");
+          closeAddModal();
+          fetchBranches();
+        } else {
+          throw new Error(result.message || "Gagal menyimpan.");
+        }
+      } catch (err) {
+        alert("Gagal menyimpan ke Google Spreadsheet: " + err.message);
+      } finally {
+        if (btnText) btnText.innerText = "Simpan Cabang";
+        if (btnSpinner) btnSpinner.classList.add("hidden");
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    }
+
+    /**
+     * Toast Notifikasi
+     */
+    function showToast(message, type = "success") {
+      const toast = document.getElementById("toast");
+      if (!toast) return;
+
+      toast.innerText = message;
+      if (type === "success") {
+        toast.className = "fixed bottom-5 right-5 z-50 transform translate-y-0 opacity-100 transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold bg-emerald-950 border border-emerald-500/50 text-emerald-300";
+      } else if (type === "warning") {
+        toast.className = "fixed bottom-5 right-5 z-50 transform translate-y-0 opacity-100 transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold bg-amber-950 border border-amber-500/50 text-amber-300";
+      } else {
+        toast.className = "fixed bottom-5 right-5 z-50 transform translate-y-0 opacity-100 transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold bg-rose-950 border border-rose-500/50 text-rose-300";
+      }
+
+      setTimeout(() => {
+        toast.className = "fixed bottom-5 right-5 z-50 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-xs font-medium";
+      }, 4000);
+    }
+
+    // Modal Control Functions
+    function openAddModal() {
+      document.getElementById("modal-add-branch").classList.remove("hidden");
+    }
+    function closeAddModal() {
+      document.getElementById("modal-add-branch").classList.add("hidden");
+      document.getElementById("form-add-branch").reset();
+    }
+
+    function openConfigModal() {
+      const input = document.getElementById("config-gas-url");
+      if (input) input.value = CONFIG.GAS_API_URL;
+      document.getElementById("modal-config").classList.remove("hidden");
+    }
+    function closeConfigModal() {
+      document.getElementById("modal-config").classList.add("hidden");
+    }
+
+    /**
+     * =========================================================================
+     * INISIALISASI EVENT LISTENERS
+     * =========================================================================
+     */
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Inisialisasi Jam & Evaluasi KBM (Per Detik)
+      updateLiveClockAndDate();
+      setInterval(updateLiveClockAndDate, 1000);
+
+      // 2. Render Awal UI Sesuai Peran Aktif
+      updateRoleUI();
+
+      // 3. Sinkronkan Data Cabang dari Spreadsheet Backend
+      fetchBranches();
+
+      // 4. Role Switcher Buttons
+      document.getElementById("role-btn-siswa").addEventListener("click", () => requestRoleSwitch("siswa"));
+      document.getElementById("role-btn-guru").addEventListener("click", () => requestRoleSwitch("guru"));
+      document.getElementById("role-btn-admin").addEventListener("click", () => requestRoleSwitch("admin"));
+
+      // 5. Quick Lock Button (Kembali ke Mode Siswa seketika)
+      document.getElementById("quick-lock-btn").addEventListener("click", () => {
+        sessionStorage.removeItem("PORTALKIMIA_SESSION_ROLE");
+        activeRole = "siswa";
+        updateRoleUI();
+        showToast("Portal berhasil dikunci kembali ke Mode Siswa", "warning");
+      });
+
+      // 6. Pencarian Cepat (Live Search)
+      const searchInput = document.getElementById("search-input");
+      const clearSearchBtn = document.getElementById("clear-search-btn");
+
+      searchInput.addEventListener("input", (e) => {
+        searchQuery = e.target.value;
+        if (searchQuery.trim().length > 0) {
+          clearSearchBtn.classList.remove("hidden");
+        } else {
+          clearSearchBtn.classList.add("hidden");
+        }
+        renderGrid();
+      });
+
+      clearSearchBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        searchQuery = "";
+        clearSearchBtn.classList.add("hidden");
+        renderGrid();
+        searchInput.focus();
+      });
+
+      // 7. Toggle Detail Agenda Jadwal KBM Harian
+      const toggleScheduleBtn = document.getElementById("toggle-schedule-detail-btn");
+      const scheduleDrawer = document.getElementById("schedule-detail-drawer");
+      const scheduleArrow = document.getElementById("toggle-schedule-arrow");
+      const toggleScheduleText = document.getElementById("toggle-schedule-text");
+
+      toggleScheduleBtn.addEventListener("click", () => {
+        const isHidden = scheduleDrawer.classList.contains("hidden");
+        if (isHidden) {
+          renderScheduleTimelineDrawer();
+          scheduleDrawer.classList.remove("hidden");
+          scheduleArrow.classList.add("rotate-180");
+          toggleScheduleText.innerText = "Tutup Agenda Jadwal";
+        } else {
+          scheduleDrawer.classList.add("hidden");
+          scheduleArrow.classList.remove("rotate-180");
+          toggleScheduleText.innerText = "Lihat Seluruh Jadwal Hari Ini";
+        }
+      });
+
+      // 8. Modal Autentikasi Kata Sandi (Guru & Admin)
+      document.getElementById("close-auth-modal-btn").addEventListener("click", closeAuthModal);
+
+      // Toggle lihat/sembunyikan kata sandi
+      const togglePwBtn = document.getElementById("toggle-auth-password-btn");
+      const pwInput = document.getElementById("auth-password-input");
+      togglePwBtn.addEventListener("click", () => {
+        if (pwInput.type === "password") {
+          pwInput.type = "text";
+        } else {
+          pwInput.type = "password";
+        }
+      });
+
+      // Form Submit Autentikasi
+      document.getElementById("auth-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const inputVal = pwInput.value.trim();
+        const errMsg = document.getElementById("auth-error-msg");
+        const inputWrap = document.getElementById("auth-input-wrap");
+
+        if (!inputVal) {
+          errMsg.innerText = "Silakan ketik kata sandi.";
+          errMsg.classList.remove("hidden");
+          return;
+        }
+
+        const isValid = await verifyAuth(inputVal, pendingRoleSwitch || "guru");
+        if (isValid) {
+          const unlockedRole = pendingRoleSwitch || "guru";
+          sessionStorage.setItem("PORTALKIMIA_SESSION_ROLE", unlockedRole);
+          activeRole = unlockedRole;
+          closeAuthModal();
+          updateRoleUI();
+          showToast(`Akses Mode ${unlockedRole === 'admin' ? 'Admin' : 'Guru'} Berhasil Dibuka!`, "success");
+        } else {
+          errMsg.innerText = "Kata sandi salah. Akses ditolak.";
+          errMsg.classList.remove("hidden");
+          inputWrap.classList.add("animate-shake");
+          setTimeout(() => inputWrap.classList.remove("animate-shake"), 500);
+        }
+      });
+
+      // 9. Modal Tambah Cabang Events (Admin Mode)
+      document.getElementById("close-modal-btn").addEventListener("click", closeAddModal);
+      document.getElementById("cancel-modal-btn").addEventListener("click", closeAddModal);
+      
+      const topAddBtn = document.getElementById("add-branch-top-btn");
+      if (topAddBtn) topAddBtn.addEventListener("click", openAddModal);
+
+      document.getElementById("form-add-branch").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const selectedTheme = document.querySelector('input[name="branch-theme"]:checked')?.value || "purple";
+        
+        // Roles yang dicentang
+        const roles = [];
+        if (document.getElementById("branch-role-siswa").checked) roles.push("siswa");
+        if (document.getElementById("branch-role-guru").checked) roles.push("guru");
+        if (document.getElementById("branch-role-admin").checked) roles.push("admin");
+        if (roles.length === 0) roles.push("admin");
+
+        const payload = {
+          title: document.getElementById("branch-title").value,
+          category: document.getElementById("branch-category").value || "Media Pembelajaran",
+          buttonText: document.getElementById("branch-button-text").value || "Buka Website",
+          url: document.getElementById("branch-url").value,
+          description: document.getElementById("branch-description").value,
+          chips: document.getElementById("branch-chips").value,
+          theme: selectedTheme,
+          icon: document.getElementById("branch-icon").value,
+          roles: roles
+        };
+        submitBranch(payload);
+      });
+
+      // 10. Modal Config GAS (Admin Mode)
+      document.getElementById("open-config-btn").addEventListener("click", openConfigModal);
+      document.getElementById("server-status-btn").addEventListener("click", openConfigModal);
+      document.getElementById("close-config-btn").addEventListener("click", closeConfigModal);
+      
+      document.getElementById("save-config-btn").addEventListener("click", () => {
+        const val = document.getElementById("config-gas-url").value.trim();
+        CONFIG.GAS_API_URL = val;
+        localStorage.setItem("PORTALKIMIA_GAS_URL", val);
+        closeConfigModal();
+        showToast("Konfigurasi API diperbarui!", "success");
+        fetchBranches();
+      });
+
+      // 11. Tombol Refresh
+      document.getElementById("refresh-btn").addEventListener("click", () => {
+        fetchBranches();
+        updateLiveClockAndDate();
+      });
+
+      // 12. PWA Service Worker Registration (Super App Scope)
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js', { scope: './' })
+            .then(reg => console.log('PWA ServiceWorker Aktif:', reg.scope))
+            .catch(err => console.log('PWA ServiceWorker error:', err));
+        });
+      }
+    });
+  </script>
+
+  <!-- Instant Page: Prefetch otomatis halaman dalam hitungan milidetik saat hover -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/instant.page/5.2.0/instantpage.min.js" type="module"></script>
+</body>
+</html>
