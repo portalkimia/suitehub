@@ -264,14 +264,21 @@
                 </svg>
               </div>
               <div>
-                <h4 id="kbm-main-title" class="text-xs sm:text-sm font-bold text-white leading-tight">Menghubungkan ke LMS...</h4>
-                <p id="kbm-sub-title" class="text-[11px] text-slate-300 mt-0.5">Membaca jadwal mengajar dari basis data kelas.</p>
+                <h4 id="kbm-main-title" class="text-xs sm:text-sm font-bold text-white leading-tight">Memuat Status Pembelajaran...</h4>
+                <p id="kbm-sub-title" class="text-[11px] text-slate-300 mt-0.5">Menyelaraskan jam aktif dan agenda KBM.</p>
               </div>
             </div>
-            <!-- Quick Link to LMS -->
-            <a href="./lms/" target="_blank" rel="noopener noreferrer" 
-               class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 flex items-center gap-1.5 transition-all">
+            <!-- Quick Link to LMS (Hanya Tampil di Mode Guru & Admin) -->
+            <a id="kbm-quick-lms-btn" href="./lms/" target="_blank" rel="noopener noreferrer" 
+               class="hidden shrink-0 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 items-center gap-1.5 transition-all" title="Buka LMS Kelas (Pengajar)">
               <span>Buka LMS</span>
+              <svg class="w-3 h-3 text-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+            </a>
+
+            <!-- Quick Link to Media (Khusus Mode Siswa) -->
+            <a id="kbm-student-explore-btn" href="./media/" 
+               class="hidden shrink-0 px-3 py-1.5 rounded-lg bg-purple-950/80 hover:bg-purple-900/90 text-purple-200 text-xs font-semibold border border-purple-500/40 items-center gap-1.5 transition-all" title="Buka Media Pembelajaran Interaktif">
+              <span>Buka Media</span>
               <svg class="w-3 h-3 text-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
             </a>
           </div>
@@ -364,6 +371,9 @@
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
           Konfigurasi Backend
         </button>
+        <button id="reset-default-branches-btn" class="hidden hover:text-amber-400 transition-colors items-center gap-1 text-[11px]">
+          <span>↺</span> Reset Default
+        </button>
         <span>© 2026 PortalKimia</span>
       </div>
     </div>
@@ -415,19 +425,19 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: HUBUNGKAN CABANG BARU (+ Tambah Web) (ADMIN MODE) -->
+  <!-- MODAL: HUBUNGKAN & EDIT CABANG WEB (ADMIN MODE) -->
   <!-- ========================================================================= -->
   <div id="modal-add-branch" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/80 backdrop-blur-sm hidden">
     <div class="relative w-full max-w-lg rounded-2xl glass-card border border-slate-700/80 shadow-2xl p-6 sm:p-7 overflow-y-auto max-h-[90vh]">
       <!-- Header Modal -->
       <div class="flex items-center justify-between pb-4 border-b border-slate-800">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm">
-            +
+          <div id="modal-branch-icon-wrap" class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm">
+            ⚙️
           </div>
           <div>
-            <h3 class="text-base font-bold text-white">Hubungkan Cabang Baru</h3>
-            <p class="text-xs text-slate-400">Tautkan website, modul praktikum, atau tool edukasi Anda.</p>
+            <h3 id="modal-branch-title" class="text-base font-bold text-white">Hubungkan Cabang Baru</h3>
+            <p id="modal-branch-sub" class="text-xs text-slate-400">Tautkan website, modul praktikum, atau tool edukasi Anda.</p>
           </div>
         </div>
         <button id="close-modal-btn" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
@@ -437,6 +447,9 @@
 
       <!-- Form Input -->
       <form id="form-add-branch" class="mt-5 space-y-4">
+        <!-- Hidden input untuk tracking ID saat Edit -->
+        <input type="hidden" id="branch-edit-id" value="">
+
         <!-- Judul Cabang -->
         <div>
           <label class="block text-xs font-semibold text-slate-200 mb-1">Judul Cabang Website <span class="text-rose-400">*</span></label>
@@ -447,54 +460,63 @@
         <!-- Tag / Kategori & Teks Tombol -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-200 mb-1">Tag Kategori Atas</label>
+            <label class="block text-xs font-semibold text-slate-200 mb-1">Tag Kategori</label>
             <input type="text" id="branch-category" placeholder="Contoh: Media Pembelajaran" 
                    class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none transition-all">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-200 mb-1">Teks Tombol Aksi</label>
-            <input type="text" id="branch-button-text" placeholder="Contoh: Buka Bank Soal" value="Buka Website"
+            <input type="text" id="branch-button-text" placeholder="Contoh: Buka Website" value="Buka Website"
                    class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none transition-all">
           </div>
         </div>
 
         <!-- Target Peran (Siapa yang bisa melihat modul ini) -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-200 mb-1.5">Dapat Diakses Oleh Peran:</label>
-          <div class="flex items-center gap-4 text-xs">
-            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
-              <input type="checkbox" id="branch-role-siswa" checked class="rounded bg-obsidian-800 border-slate-700 text-purple-600 focus:ring-0">
-              <span>Siswa</span>
+        <div class="p-3 rounded-xl bg-obsidian-850/90 border border-slate-800">
+          <label class="block text-xs font-semibold text-slate-200 mb-1.5 flex items-center justify-between">
+            <span>Dapat Diakses Oleh Peran:</span>
+            <span class="text-[11px] text-purple-400 font-normal">Centang peran yang diizinkan</span>
+          </label>
+          <div class="flex items-center gap-5 text-xs pt-1">
+            <label class="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white transition-colors">
+              <input type="checkbox" id="branch-role-siswa" class="rounded bg-obsidian-800 border-slate-700 text-purple-600 focus:ring-0">
+              <span class="font-medium">👨‍🎓 Siswa</span>
             </label>
-            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
-              <input type="checkbox" id="branch-role-guru" checked class="rounded bg-obsidian-800 border-slate-700 text-purple-600 focus:ring-0">
-              <span>Guru</span>
+            <label class="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white transition-colors">
+              <input type="checkbox" id="branch-role-guru" class="rounded bg-obsidian-800 border-slate-700 text-purple-600 focus:ring-0">
+              <span class="font-medium">👨‍🏫 Guru</span>
             </label>
-            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
-              <input type="checkbox" id="branch-role-admin" checked class="rounded bg-obsidian-800 border-slate-700 text-purple-600 focus:ring-0">
-              <span>Admin</span>
+            <label class="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white transition-colors">
+              <input type="checkbox" id="branch-role-admin" class="rounded bg-obsidian-800 border-slate-700 text-purple-600 focus:ring-0">
+              <span class="font-medium">⚙️ Admin</span>
             </label>
           </div>
         </div>
 
-        <!-- URL Link -->
+        <!-- URL / Path Link (BISA RELATIVE PATH ./folder/ ATAU FULL URL) -->
         <div>
-          <label class="block text-xs font-semibold text-slate-200 mb-1">URL / Tautan Website <span class="text-rose-400">*</span></label>
-          <input type="url" id="branch-url" required placeholder="https://titovanzal.github.io/... atau URL GAS /exec" 
+          <label class="block text-xs font-semibold text-slate-200 mb-1">
+            URL atau Lokasi Folder <span class="text-rose-400">*</span>
+          </label>
+          <!-- Menggunakan type="text" agar tidak memblokir path relatif seperti ./media/ -->
+          <input type="text" id="branch-url" required placeholder="Contoh: ./media/ atau ./lms/ atau https://..." 
                  class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none transition-all">
+          <p class="text-[11px] text-slate-400 mt-1">
+            💡 Mendukung folder internal (misal: <code class="text-purple-300">./media/</code> atau <code class="text-purple-300">./lms/</code>) maupun tautan eksternal (<code class="text-purple-300">https://...</code>).
+          </p>
         </div>
 
         <!-- Deskripsi Singkat -->
         <div>
           <label class="block text-xs font-semibold text-slate-200 mb-1">Deskripsi Singkat</label>
-          <textarea id="branch-description" rows="2.5" placeholder="Jelaskan secara singkat kegunaan web atau modul ini..." 
+          <textarea id="branch-description" rows="2.5" placeholder="Jelaskan secara singkat kegunaan modul ini..." 
                     class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none transition-all"></textarea>
         </div>
 
         <!-- Fitur Utama (Chips) -->
         <div>
           <label class="block text-xs font-semibold text-slate-200 mb-1">Fitur Utama (Pisahkan dengan koma)</label>
-          <input type="text" id="branch-chips" placeholder="Contoh: Pilihan Ganda, Soal HOTS, Nilai Instan" 
+          <input type="text" id="branch-chips" placeholder="Contoh: Simulasi HTML5, Praktikum, Soal HOTS" 
                  class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none transition-all">
         </div>
 
@@ -533,8 +555,8 @@
           <div>
             <label class="block text-xs font-semibold text-slate-200 mb-1.5">Ikon Simbol</label>
             <select id="branch-icon" class="w-full px-3 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none">
-              <option value="academic-cap">🎓 Topi Akademik (Kelas / LMS)</option>
               <option value="flask">🧪 Tabung Reaksi (Lab / Media)</option>
+              <option value="academic-cap">🎓 Topi Akademik (Kelas / LMS)</option>
               <option value="sparkles">✨ AI / Sparkles (Generator Otomatis)</option>
               <option value="book">📚 Buku / Modul Ajar</option>
               <option value="calculator">🧮 Kalkulator / Rumus Kimia</option>
@@ -577,7 +599,7 @@
         <p class="text-slate-300">
           Masukkan URL Web App dari deployment Google Apps Script Portal Utama (berakhiran <code class="text-purple-400">/exec</code>):
         </p>
-        <input type="url" id="config-gas-url" placeholder="https://script.google.com/macros/s/.../exec" 
+        <input type="text" id="config-gas-url" placeholder="https://script.google.com/macros/s/.../exec" 
                class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none">
         <p class="text-[11px] text-slate-400 italic">
           *Pengaturan pusat utama tersimpan di file <code class="text-purple-300">config.js</code> yang otomatis sinkron ke seluruh perangkat.
@@ -610,13 +632,9 @@
 
     /**
      * KEAMANAN AKSES SATU ARAH (SHA-256 ENCRYPTED HASH - ZERO PLAIN TEXT IN CODE)
-     * Kata sandi tidak pernah disimpan dalam bentuk teks biasa.
-     * Hanya hash kriptografi SHA-256 yang tersimpan, sehingga 100% aman di GitHub publik.
      */
     const AUTH_HASH = {
-      // Hash SHA-256 terenkripsi untuk Mode Guru (Salted)
       guru: "afbef11272ea5a39d3bf67a65a92385da38c73d09c8af9411ca57ad57194072c",
-      // Hash SHA-256 terenkripsi untuk Mode Admin (Salted)
       admin: "6850ee69eceefebc71f736cdcaf0a30b11cbffaa137da98bb0e3490f25ba59b0"
     };
 
@@ -632,15 +650,57 @@
 
     async function verifyAuth(inputPassword, targetRole) {
       const inputHash = await hashPassword(inputPassword);
-      // Password admin dapat membuka baik Mode Admin maupun Mode Guru
-      if (inputHash === AUTH_HASH.admin) {
-        return true;
-      }
-      // Password guru membuka Mode Guru
-      if (targetRole === 'guru' && inputHash === AUTH_HASH.guru) {
-        return true;
-      }
+      if (inputHash === AUTH_HASH.admin) return true;
+      if (targetRole === 'guru' && inputHash === AUTH_HASH.guru) return true;
       return false;
+    }
+
+    /**
+     * NORMALISASI DATA CABANG AGAR ROLES & STRUKTUR SELALU VALID
+     */
+    function normalizeBranch(b) {
+      let roles = b.roles;
+      if (typeof roles === "string") {
+        roles = roles.split(",").map(r => r.trim().toLowerCase()).filter(Boolean);
+      }
+      if (!Array.isArray(roles) || roles.length === 0) {
+        // Aturan bawaan jika roles belum pernah diset di Spreadsheet
+        const idLower = (b.id || "").toLowerCase();
+        const titleLower = (b.title || "").toLowerCase();
+        const catLower = (b.category || "").toLowerCase();
+        const urlLower = (b.url || "").toLowerCase();
+
+        if (idLower === "branch_media" || titleLower.includes("media") || catLower.includes("media") || urlLower.includes("media")) {
+          roles = ["siswa", "guru", "admin"];
+        } else if (idLower === "branch_lms" || urlLower.includes("lms")) {
+          roles = ["guru", "admin"];
+        } else if (idLower === "branch_generator" || urlLower.includes("generator")) {
+          roles = ["guru", "admin"];
+        } else {
+          // Cabang baru lainnya dapat diakses oleh semua peran secara default
+          roles = ["siswa", "guru", "admin"];
+        }
+      }
+
+      let chips = b.chips;
+      if (typeof chips === "string") {
+        chips = chips.split(",").map(c => c.trim()).filter(Boolean);
+      } else if (!Array.isArray(chips)) {
+        chips = [];
+      }
+
+      return {
+        id: b.id || "branch_" + Date.now(),
+        title: b.title || "Modul Belajar",
+        category: b.category || "Media Pembelajaran",
+        description: b.description || "",
+        chips: chips,
+        url: b.url || "#",
+        buttonText: b.buttonText || "Buka Website",
+        theme: b.theme || "purple",
+        icon: b.icon || "globe",
+        roles: roles
+      };
     }
 
     /**
@@ -685,12 +745,36 @@
       }
     ];
 
+    // Inisialisasi State Cabang dari Local Storage atau Default
+    function loadInitialBranches() {
+      try {
+        const saved = localStorage.getItem("PORTALKIMIA_CUSTOM_BRANCHES");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map(normalizeBranch);
+          }
+        }
+      } catch (e) {
+        console.warn("Gagal membaca PORTALKIMIA_CUSTOM_BRANCHES:", e);
+      }
+      return DEFAULT_BRANCHES.map(normalizeBranch);
+    }
+
     // State Aplikasi
-    let currentBranches = [...DEFAULT_BRANCHES];
+    let currentBranches = loadInitialBranches();
     let activeRole = sessionStorage.getItem("PORTALKIMIA_SESSION_ROLE") || "siswa";
     let searchQuery = "";
     let activeCategory = "Semua";
     let pendingRoleSwitch = null;
+
+    function saveBranchesToLocalStorage() {
+      try {
+        localStorage.setItem("PORTALKIMIA_CUSTOM_BRANCHES", JSON.stringify(currentBranches));
+      } catch (e) {
+        console.warn("Gagal menyimpan ke localStorage:", e);
+      }
+    }
 
     // SVG Icons Map
     const ICON_SVG = {
@@ -820,7 +904,6 @@
      * =========================================================================
      */
     function updateRoleUI() {
-      // 1. Tombol Switcher Pill
       const btnSiswa = document.getElementById("role-btn-siswa");
       const btnGuru = document.getElementById("role-btn-guru");
       const btnAdmin = document.getElementById("role-btn-admin");
@@ -833,7 +916,6 @@
       btnGuru.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${activeRole === 'guru' ? activeClass : inactiveClass}`;
       btnAdmin.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${activeRole === 'admin' ? activeClass : inactiveClass}`;
 
-      // Lock Button (Tampil hanya saat Guru atau Admin aktif)
       if (lockBtn) {
         if (activeRole === 'guru' || activeRole === 'admin') {
           lockBtn.classList.remove("hidden");
@@ -844,7 +926,6 @@
         }
       }
 
-      // 2. Profile Header & Context Banner
       const profileInitial = document.getElementById("profile-initial");
       const profileName = document.getElementById("profile-name");
       const profileSub = document.getElementById("profile-sub");
@@ -853,6 +934,12 @@
       const heroBadgeText = document.getElementById("hero-badge-text");
       const addBranchTopBtn = document.getElementById("add-branch-top-btn");
       const openConfigBtn = document.getElementById("open-config-btn");
+      const resetDefaultBtn = document.getElementById("reset-default-branches-btn");
+      const lmsBtn = document.getElementById("kbm-quick-lms-btn");
+      const studentExploreBtn = document.getElementById("kbm-student-explore-btn");
+      const toggleSchedBtn = document.getElementById("toggle-schedule-detail-btn");
+      const schedDrawer = document.getElementById("schedule-detail-drawer");
+      const refreshBtn = document.getElementById("refresh-btn");
 
       if (activeRole === "siswa") {
         if (profileInitial) profileInitial.innerText = "🎓";
@@ -863,6 +950,15 @@
         if (heroSubtitle) heroSubtitle.innerText = "Akses modul interaktif, laboratorium simulasi reaksi virtual, e-LKPD, dan materi pembelajaran kimia digital Anda.";
         if (addBranchTopBtn) addBranchTopBtn.classList.add("hidden");
         if (openConfigBtn) { openConfigBtn.classList.add("hidden"); openConfigBtn.classList.remove("flex"); }
+        if (resetDefaultBtn) { resetDefaultBtn.classList.add("hidden"); resetDefaultBtn.classList.remove("flex"); }
+        if (refreshBtn) refreshBtn.title = "Segarkan Data Portal";
+
+        // Mode Siswa: Sembunyikan tombol LMS & tombol detail jadwal mengajar guru
+        if (lmsBtn) { lmsBtn.classList.add("hidden"); lmsBtn.classList.remove("flex"); }
+        if (studentExploreBtn) { studentExploreBtn.classList.remove("hidden"); studentExploreBtn.classList.add("flex"); }
+        if (toggleSchedBtn) toggleSchedBtn.classList.add("hidden");
+        if (schedDrawer) schedDrawer.classList.add("hidden");
+
       } else if (activeRole === "guru") {
         if (profileInitial) profileInitial.innerText = "TV";
         if (profileName) profileName.innerText = "Tito Vanzal, S.Pd.";
@@ -872,18 +968,33 @@
         if (heroSubtitle) heroSubtitle.innerText = "Akses terintegrasi administrasi wali kelas, rekap nilai & presensi LMS, lab media kimia, dan generator otomatis modul ajar.";
         if (addBranchTopBtn) addBranchTopBtn.classList.add("hidden");
         if (openConfigBtn) { openConfigBtn.classList.add("hidden"); openConfigBtn.classList.remove("flex"); }
+        if (resetDefaultBtn) { resetDefaultBtn.classList.add("hidden"); resetDefaultBtn.classList.remove("flex"); }
+        if (refreshBtn) refreshBtn.title = "Segarkan Data dari Spreadsheet & LMS";
+
+        // Mode Guru: Tampilkan tombol LMS & tombol jadwal KBM guru
+        if (lmsBtn) { lmsBtn.classList.remove("hidden"); lmsBtn.classList.add("flex"); }
+        if (studentExploreBtn) { studentExploreBtn.classList.add("hidden"); studentExploreBtn.classList.remove("flex"); }
+        if (toggleSchedBtn) toggleSchedBtn.classList.remove("hidden");
+
       } else if (activeRole === "admin") {
         if (profileInitial) profileInitial.innerText = "⚙️";
         if (profileName) profileName.innerText = "Administrator Suite";
         if (profileSub) profileSub.innerText = "Pengelolaan Ekosistem Web";
         if (heroBadgeText) heroBadgeText.innerText = "PANEL ADMINISTRASI PORTAL";
         if (heroHeadline) heroHeadline.innerHTML = `Pengaturan <span class="gradient-title">PortalKimia Suite</span>`;
-        if (heroSubtitle) heroSubtitle.innerText = "Kelola tautan cabang website, integrasikan Google Spreadsheet baru, dan pantau sinkronisasi backend multi-perangkat.";
+        if (heroSubtitle) heroSubtitle.innerText = "Kelola tautan cabang website, integrasikan Google Spreadsheet baru, dan atur hak akses modul tiap peran.";
         if (addBranchTopBtn) { addBranchTopBtn.classList.remove("hidden"); addBranchTopBtn.classList.add("flex"); }
         if (openConfigBtn) { openConfigBtn.classList.remove("hidden"); openConfigBtn.classList.add("flex"); }
+        if (resetDefaultBtn) { resetDefaultBtn.classList.remove("hidden"); resetDefaultBtn.classList.add("flex"); }
+        if (refreshBtn) refreshBtn.title = "Segarkan Data dari Spreadsheet & LMS";
+
+        // Mode Admin: Tampilkan tombol LMS & tombol jadwal
+        if (lmsBtn) { lmsBtn.classList.remove("hidden"); lmsBtn.classList.add("flex"); }
+        if (studentExploreBtn) { studentExploreBtn.classList.add("hidden"); studentExploreBtn.classList.remove("flex"); }
+        if (toggleSchedBtn) toggleSchedBtn.classList.remove("hidden");
       }
 
-      // Re-render Pills & Cards
+      evaluateCurrentKbmStatus(new Date());
       renderCategoryPills();
       renderGrid();
     }
@@ -891,7 +1002,6 @@
     function requestRoleSwitch(targetRole) {
       if (targetRole === activeRole) return;
 
-      // Mode Siswa selalu bebas akses tanpa kata sandi
       if (targetRole === "siswa") {
         activeRole = "siswa";
         sessionStorage.removeItem("PORTALKIMIA_SESSION_ROLE");
@@ -900,7 +1010,6 @@
         return;
       }
 
-      // Cek apakah sesi peramban sudah pernah terverifikasi untuk role ini
       const savedAuth = sessionStorage.getItem("PORTALKIMIA_SESSION_ROLE");
       if (savedAuth === "admin" || savedAuth === targetRole) {
         activeRole = targetRole;
@@ -909,7 +1018,6 @@
         return;
       }
 
-      // Buka modal autentikasi kata sandi
       pendingRoleSwitch = targetRole;
       openAuthModal(targetRole);
     }
@@ -945,22 +1053,18 @@
      */
     function updateLiveClockAndDate() {
       const now = new Date();
-
-      // Format Jam (HH:mm:ss)
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const seconds = String(now.getSeconds()).padStart(2, '0');
       const clockEl = document.getElementById("live-clock");
       if (clockEl) clockEl.innerText = `${hours}:${minutes}:${seconds}`;
 
-      // Format Tanggal Indonesia (contoh: Rabu, 9 September 2026)
       const dateEl = document.getElementById("live-date");
       if (dateEl) {
         const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
         dateEl.innerText = new Intl.DateTimeFormat('id-ID', options).format(now);
       }
 
-      // Evaluasi KBM setiap detik
       evaluateCurrentKbmStatus(now);
     }
 
@@ -989,7 +1093,117 @@
 
       if (!badgeLabel || !mainTitle) return;
 
-      // Kasus 1: Hari Minggu (Libur)
+      // =========================================================================
+      // KHUSUS MODE SISWA:
+      // Tampilkan status umum KBM sekolah (tanpa jadwal mengajar guru & tanpa LMS)
+      // =========================================================================
+      if (activeRole === 'siswa') {
+        const lmsBtn = document.getElementById("kbm-quick-lms-btn");
+        const studentExploreBtn = document.getElementById("kbm-student-explore-btn");
+        const toggleSchedBtn = document.getElementById("toggle-schedule-detail-btn");
+        const schedDrawer = document.getElementById("schedule-detail-drawer");
+        if (lmsBtn) { lmsBtn.classList.add("hidden"); lmsBtn.classList.remove("flex"); }
+        if (studentExploreBtn) { studentExploreBtn.classList.remove("hidden"); studentExploreBtn.classList.add("flex"); }
+        if (toggleSchedBtn) toggleSchedBtn.classList.add("hidden");
+        if (schedDrawer) schedDrawer.classList.add("hidden");
+
+        if (today === 'Minggu') {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "Libur Akhir Pekan";
+          periodInfo.innerText = "Hari Libur";
+          mainTitle.innerText = "Hari Libur — Belajar Mandiri & Istirahat";
+          subTitle.innerText = "Tidak ada kegiatan KBM aktif hari ini. Selamat berlibur dan bereksplorasi secara santai.";
+          iconBox.innerHTML = `<span>🌴</span>`;
+          return;
+        }
+
+        const lmsData = getLmsStorageData();
+        const slots = (lmsData?.jamPelajaran && lmsData.jamPelajaran[today]) ? lmsData.jamPelajaran[today] : (STANDARD_JAM_SLOTS[today] || []);
+
+        if (!slots || slots.length === 0) {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-950/80 border border-purple-500/30 text-purple-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "Ruang Belajar Digital";
+          periodInfo.innerText = today;
+          mainTitle.innerText = "Selamat Datang di Portal Pembelajaran Kimia";
+          subTitle.innerText = "Silakan akses media pembelajaran interaktif, lab reaksi virtual, dan e-LKPD di bawah.";
+          iconBox.innerHTML = `<span>✨</span>`;
+          return;
+        }
+
+        const firstSlot = slots[0];
+        const lastSlot = slots[slots.length - 1];
+
+        if (nowStr < firstSlot.mulai) {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-950/80 border border-indigo-500/30 text-indigo-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "Menjelang KBM";
+          periodInfo.innerText = `Mulai ${firstSlot.mulai} WIB`;
+          mainTitle.innerText = `KBM Hari ${today} Dimulai Pukul ${firstSlot.mulai} WIB`;
+          subTitle.innerText = "Persiapkan modul pembelajaran dan materi praktikum Anda sebelum jam pelajaran pertama dimulai.";
+          iconBox.innerHTML = `<span>🌅</span>`;
+          return;
+        }
+
+        if (nowStr >= lastSlot.selesai) {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-800/90 border border-slate-700 text-slate-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "KBM Selesai";
+          periodInfo.innerText = `Selesai ${lastSlot.selesai} WIB`;
+          mainTitle.innerText = `Seluruh Jam Pembelajaran Hari ${today} Telah Selesai`;
+          subTitle.innerText = "Manfaatkan waktu luang untuk belajar mandiri dan mengulang simulasi kimia interaktif.";
+          iconBox.innerHTML = `<span>🏠</span>`;
+          return;
+        }
+
+        let currentSlot = null;
+        for (const s of slots) {
+          if (nowStr >= s.mulai && nowStr < s.selesai) {
+            currentSlot = s;
+            break;
+          }
+        }
+
+        if (currentSlot) {
+          if (currentSlot.type === 'istirahat') {
+            badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-950/80 border border-amber-500/30 text-amber-300 flex items-center gap-1.5";
+            badgeLabel.innerText = "Waktu Istirahat";
+            periodInfo.innerText = `${currentSlot.mulai} - ${currentSlot.selesai} WIB`;
+            mainTitle.innerText = `${currentSlot.label || 'Istirahat Sekolah'} Sedang Berlangsung`;
+            subTitle.innerText = "Waktu istirahat siswa sebelum memasuki jam pelajaran sekolah berikutnya.";
+            iconBox.innerHTML = `<span>☕</span>`;
+            return;
+          }
+
+          if (currentSlot.type === 'kegiatan') {
+            badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 flex items-center gap-1.5";
+            badgeLabel.innerText = currentSlot.label || "Kegiatan Sekolah";
+            periodInfo.innerText = `${currentSlot.mulai} - ${currentSlot.selesai} WIB`;
+            mainTitle.innerText = `${currentSlot.label} (${currentSlot.mulai} - ${currentSlot.selesai})`;
+            subTitle.innerText = "Kegiatan pembinaan karakter dan kebersamaan satuan pendidikan.";
+            iconBox.innerHTML = `<span>👥</span>`;
+            return;
+          }
+
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-950/90 border border-purple-500/40 text-purple-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "Jam Pelajaran Sekolah";
+          periodInfo.innerText = `Jam ${currentSlot.jam} (${currentSlot.mulai} - ${currentSlot.selesai} WIB)`;
+          mainTitle.innerText = `Jam Pelajaran ke-${currentSlot.jam} Sedang Berlangsung`;
+          subTitle.innerText = "Silakan ikuti instruksi KBM di kelas atau buka media simulasi interaktif di bawah.";
+          iconBox.innerHTML = `<span>🧪</span>`;
+          return;
+        } else {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-950/80 border border-purple-500/30 text-purple-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "KBM Berlangsung";
+          periodInfo.innerText = today;
+          mainTitle.innerText = "Kegiatan Belajar Mengajar Aktif";
+          subTitle.innerText = "Buka modul dan simulasi media pembelajaran kimia di bawah ini.";
+          iconBox.innerHTML = `<span>📚</span>`;
+          return;
+        }
+      }
+
+      // =========================================================================
+      // KHUSUS MODE GURU & ADMIN:
+      // Tampilkan status mengajar pribadi guru, agenda kelas, dan tombol LMS
+      // =========================================================================
       if (today === 'Minggu') {
         badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 flex items-center gap-1.5";
         badgeLabel.innerText = "Libur Akhir Pekan";
@@ -1001,7 +1215,6 @@
         return;
       }
 
-      // Ambil data LMS
       const lmsData = getLmsStorageData();
       const slots = (lmsData?.jamPelajaran && lmsData.jamPelajaran[today]) ? lmsData.jamPelajaran[today] : (STANDARD_JAM_SLOTS[today] || []);
       const jadwalMengajarToday = (lmsData?.jadwalMengajar || []).filter(j => j.hari === today);
@@ -1022,7 +1235,6 @@
       const firstSlot = slots[0];
       const lastSlot = slots[slots.length - 1];
 
-      // Kasus 2: Sebelum Jam Sekolah Dimulai
       if (nowStr < firstSlot.mulai) {
         badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-950/80 border border-indigo-500/30 text-indigo-300 flex items-center gap-1.5";
         badgeLabel.innerText = "Menjelang KBM";
@@ -1039,7 +1251,6 @@
         return;
       }
 
-      // Kasus 3: Setelah Jam Sekolah Selesai
       if (nowStr >= lastSlot.selesai) {
         badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-800/90 border border-slate-700 text-slate-300 flex items-center gap-1.5";
         badgeLabel.innerText = "KBM Selesai";
@@ -1050,7 +1261,6 @@
         return;
       }
 
-      // Kasus 4: Sedang dalam jam KBM aktif
       let currentSlot = null;
       for (const s of slots) {
         if (nowStr >= s.mulai && nowStr < s.selesai) {
@@ -1060,7 +1270,6 @@
       }
 
       if (currentSlot) {
-        // A. Istirahat
         if (currentSlot.type === 'istirahat') {
           badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-950/80 border border-amber-500/30 text-amber-300 flex items-center gap-1.5";
           badgeLabel.innerText = "Waktu Istirahat";
@@ -1071,7 +1280,6 @@
           return;
         }
 
-        // B. Kegiatan (Apel Pagi / Family Time)
         if (currentSlot.type === 'kegiatan') {
           badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 flex items-center gap-1.5";
           badgeLabel.innerText = currentSlot.label || "Kegiatan Sekolah";
@@ -1082,7 +1290,6 @@
           return;
         }
 
-        // C. Jam Pelajaran
         const activeEntry = jadwalMengajarToday.find(j => j.jamKe === currentSlot.jam);
         if (activeEntry) {
           badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/90 border border-emerald-500/40 text-emerald-300 flex items-center gap-1.5 animate-pulse";
@@ -1097,7 +1304,6 @@
           periodInfo.innerText = `Jam ${currentSlot.jam} (${currentSlot.mulai} - ${currentSlot.selesai})`;
           mainTitle.innerText = `Jam ke-${currentSlot.jam}: Tidak Ada Jadwal Mengajar Langsung`;
           
-          // Cari jam mengajar berikutnya
           const nextTeaching = jadwalMengajarToday.filter(j => j.jamKe > currentSlot.jam).sort((a,b) => a.jamKe - b.jamKe)[0];
           if (nextTeaching) {
             const nextSlot = slots.find(s => s.jam === nextTeaching.jamKe);
@@ -1111,10 +1317,16 @@
     }
 
     function renderScheduleTimelineDrawer() {
-      const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-      const today = dayNames[new Date().getDay()];
       const container = document.getElementById("schedule-timeline-list");
       if (!container) return;
+
+      if (activeRole === 'siswa') {
+        container.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-slate-400">Agenda mengajar hanya dapat diakses pada Mode Guru atau Admin.</div>`;
+        return;
+      }
+
+      const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const today = dayNames[new Date().getDay()];
 
       if (today === 'Minggu') {
         container.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-slate-400">Hari Minggu adalah hari libur sekolah.</div>`;
@@ -1174,7 +1386,6 @@
     function getAvailableCategories() {
       const set = new Set(["Semua"]);
       currentBranches.forEach(b => {
-        // Hanya tambahkan kategori dari cabang yang diizinkan untuk peran saat ini
         const bRoles = b.roles || ["guru", "admin"];
         if (bRoles.includes(activeRole) && b.category) {
           set.add(b.category.trim());
@@ -1188,7 +1399,6 @@
       if (!container) return;
 
       const categories = getAvailableCategories();
-      // Pastikan activeCategory valid
       if (!categories.includes(activeCategory)) activeCategory = "Semua";
 
       let html = "";
@@ -1207,7 +1417,6 @@
 
       container.innerHTML = html;
 
-      // Event listener klik pill kategori
       container.querySelectorAll(".category-pill-btn").forEach(btn => {
         btn.addEventListener("click", () => {
           activeCategory = btn.getAttribute("data-category");
@@ -1262,7 +1471,6 @@
 
       let html = "";
 
-      // Jika tidak ada hasil
       if (filtered.length === 0) {
         container.innerHTML = `
           <div class="col-span-full py-16 text-center rounded-2xl glass-card border border-dashed border-slate-800 p-8">
@@ -1271,7 +1479,7 @@
             </div>
             <h3 class="text-base font-bold text-white mb-1">Modul Tidak Ditemukan</h3>
             <p class="text-xs text-slate-400 max-w-sm mx-auto mb-4">
-              Tidak ada modul yang cocok dengan pencarian "${searchQuery}" pada kategori "${activeCategory}".
+              Tidak ada modul yang cocok dengan filter atau pencarian Anda.
             </p>
             <button id="reset-filter-btn" type="button" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition-colors">
               Reset Pencarian &amp; Filter
@@ -1294,7 +1502,6 @@
         return;
       }
 
-      // Render kartu-kartu
       filtered.forEach(branch => {
         const theme = THEME_STYLES[branch.theme] || THEME_STYLES.purple;
         const iconSvg = ICON_SVG[branch.icon] || ICON_SVG.globe;
@@ -1302,13 +1509,36 @@
           `<span class="text-[11px] px-2 py-0.5 rounded-md bg-obsidian-850 text-slate-300 border border-slate-700/60 font-medium">${chip}</span>`
         ).join("");
 
-        // Di Mode Admin, tampilkan tombol hapus/edit jika custom branch
-        const isAdminCustom = activeRole === 'admin' && !branch.id.startsWith("branch_");
-        const adminControls = isAdminCustom ? `
-          <button data-delete-id="${branch.id}" class="delete-branch-btn text-slate-500 hover:text-rose-400 p-1 rounded transition-colors" title="Hapus Tautan Ini">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-          </button>
-        ` : '';
+        // Di Mode Admin, tampilkan tombol Edit (✏️) pada SEMUA cabang, dan Delete (🗑️) pada cabang kustom
+        let adminControls = "";
+        let roleBadgeInfo = "";
+
+        if (activeRole === 'admin') {
+          const isCustom = !branch.id.startsWith("branch_");
+          const deleteBtn = isCustom ? `
+            <button data-delete-id="${branch.id}" class="delete-branch-btn p-1.5 rounded-lg bg-obsidian-800/80 hover:bg-rose-600/30 text-slate-400 hover:text-rose-400 border border-slate-700/60 transition-colors" title="Hapus Tautan Cabang Ini">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+          ` : '';
+
+          adminControls = `
+            <div class="flex items-center gap-1">
+              <button data-edit-id="${branch.id}" class="edit-branch-btn p-1.5 rounded-lg bg-obsidian-800/80 hover:bg-purple-600/30 text-slate-400 hover:text-purple-300 border border-slate-700/60 transition-colors" title="Edit Pengaturan &amp; Hak Akses Modul">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              </button>
+              ${deleteBtn}
+            </div>
+          `;
+
+          // Tampilkan badge peran yang bisa mengakses
+          const rolesText = (branch.roles || []).map(r => r.toUpperCase()).join(" • ");
+          roleBadgeInfo = `
+            <div class="text-[10px] text-purple-300/80 font-mono tracking-wide mb-2 flex items-center gap-1">
+              <span>Akses:</span>
+              <span class="font-bold text-purple-400">${rolesText || 'SEMUA'}</span>
+            </div>
+          `;
+        }
 
         html += `
           <article class="group relative rounded-2xl glass-card ${theme.border} p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl ${theme.shadow}">
@@ -1330,9 +1560,10 @@
               </div>
 
               <!-- Header & Description -->
-              <h2 class="text-base sm:text-lg font-bold text-white mb-2 ${theme.titleHover} transition-colors">
+              <h2 class="text-base sm:text-lg font-bold text-white mb-1.5 ${theme.titleHover} transition-colors">
                 ${branch.title}
               </h2>
+              ${roleBadgeInfo}
               <p class="text-xs text-slate-300 leading-relaxed mb-4 line-clamp-3">
                 ${branch.description || "Akses modul dan layanan pembelajaran digital terintegrasi."}
               </p>
@@ -1380,7 +1611,7 @@
 
               <div class="flex flex-wrap gap-1.5 mb-5">
                 <span class="text-[11px] px-2 py-0.5 rounded-md bg-obsidian-850/60 text-slate-400 border border-slate-700/40 font-medium">Multi-Peran</span>
-                <span class="text-[11px] px-2 py-0.5 rounded-md bg-obsidian-850/60 text-slate-400 border border-slate-700/40 font-medium">Auto Sync</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-obsidian-850/60 text-slate-400 border border-slate-700/40 font-medium">Path Relatif &amp; URL</span>
               </div>
             </div>
 
@@ -1397,19 +1628,30 @@
       // Event listener tombol tambah di kartu
       const triggerBtn = document.getElementById("trigger-add-branch-card");
       if (triggerBtn) {
-        triggerBtn.addEventListener("click", openAddModal);
+        triggerBtn.addEventListener("click", openAddBranchModal);
       }
 
-      // Event listener delete branch custom
+      // Event listener Edit Cabang
+      container.querySelectorAll(".edit-branch-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const branchId = btn.getAttribute("data-edit-id");
+          openEditBranchModal(branchId);
+        });
+      });
+
+      // Event listener Delete Cabang Kustom
       container.querySelectorAll(".delete-branch-btn").forEach(btn => {
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
           const delId = btn.getAttribute("data-delete-id");
           if (confirm("Hapus tautan cabang ini dari portal?")) {
             currentBranches = currentBranches.filter(b => b.id !== delId);
+            saveBranchesToLocalStorage();
             renderGrid();
             renderCategoryPills();
             showToast("Tautan cabang telah dihapus", "warning");
+            syncBranchToGas("delete", { id: delId });
           }
         });
       });
@@ -1462,7 +1704,19 @@
         
         const result = await response.json();
         if (result.status === "success" && Array.isArray(result.data)) {
-          currentBranches = result.data.length > 0 ? result.data : DEFAULT_BRANCHES;
+          const rawFetched = result.data.length > 0 ? result.data : DEFAULT_BRANCHES;
+          const normalized = rawFetched.map(normalizeBranch);
+
+          // Pertahankan pengaturan roles lokal yang sudah dimodifikasi Admin
+          currentBranches = normalized.map(nb => {
+            const localMatch = currentBranches.find(cb => cb.id === nb.id);
+            if (localMatch && Array.isArray(localMatch.roles) && localMatch.roles.length > 0) {
+              return { ...nb, roles: localMatch.roles };
+            }
+            return nb;
+          });
+
+          saveBranchesToLocalStorage();
           renderCategoryPills();
           renderGrid();
           updateServerStatus("online", "Terkoneksi");
@@ -1481,62 +1735,27 @@
     }
 
     /**
-     * Kirim Cabang Baru ke Backend GAS (doPost)
+     * Kirim/Update Cabang ke Backend GAS
      */
-    async function submitBranch(payload) {
-      if (!CONFIG.GAS_API_URL) {
-        const localBranch = {
-          id: "branch_" + Date.now(),
-          title: payload.title,
-          category: payload.category || "Media Pembelajaran",
-          description: payload.description,
-          chips: payload.chips.split(",").map(c => c.trim()).filter(Boolean),
-          url: payload.url,
-          buttonText: payload.buttonText || "Buka Website",
-          theme: payload.theme || "purple",
-          icon: payload.icon || "globe",
-          roles: payload.roles || ["siswa", "guru", "admin"]
-        };
-        currentBranches.push(localBranch);
-        renderCategoryPills();
-        renderGrid();
-        showToast("Cabang ditambahkan secara lokal! Pasang URL GAS untuk menyimpan permanen.", "warning");
-        closeAddModal();
-        return;
-      }
+    async function syncBranchToGas(actionType, payload) {
+      if (!CONFIG.GAS_API_URL) return;
 
-      const btnText = document.getElementById("btn-submit-text");
       const btnSpinner = document.getElementById("btn-submit-spinner");
-      const submitBtn = document.getElementById("submit-branch-btn");
-
-      if (btnText) btnText.innerText = "Menyimpan...";
       if (btnSpinner) btnSpinner.classList.remove("hidden");
-      if (submitBtn) submitBtn.disabled = true;
 
       try {
-        const response = await fetch(CONFIG.GAS_API_URL, {
+        await fetch(CONFIG.GAS_API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
-            action: "create",
+            action: actionType,
             ...payload
           })
         });
-
-        const result = await response.json();
-        if (result.status === "success") {
-          showToast("Berhasil! Cabang baru telah tersimpan di Spreadsheet.", "success");
-          closeAddModal();
-          fetchBranches();
-        } else {
-          throw new Error(result.message || "Gagal menyimpan.");
-        }
       } catch (err) {
-        alert("Gagal menyimpan ke Google Spreadsheet: " + err.message);
+        console.warn("Sinkronisasi GAS di latar belakang gagal:", err);
       } finally {
-        if (btnText) btnText.innerText = "Simpan Cabang";
         if (btnSpinner) btnSpinner.classList.add("hidden");
-        if (submitBtn) submitBtn.disabled = false;
       }
     }
 
@@ -1561,13 +1780,61 @@
       }, 4000);
     }
 
-    // Modal Control Functions
-    function openAddModal() {
+    // Modal Form Cabang (Buka Mode Tambah Baru)
+    function openAddBranchModal() {
+      document.getElementById("branch-edit-id").value = "";
+      document.getElementById("modal-branch-title").innerText = "Hubungkan Cabang Baru";
+      document.getElementById("modal-branch-sub").innerText = "Tautkan website, modul praktikum, atau tool edukasi Anda.";
+      document.getElementById("btn-submit-text").innerText = "Simpan Cabang";
+      document.getElementById("form-add-branch").reset();
+
+      // Default centang semua peran
+      document.getElementById("branch-role-siswa").checked = true;
+      document.getElementById("branch-role-guru").checked = true;
+      document.getElementById("branch-role-admin").checked = true;
+
       document.getElementById("modal-add-branch").classList.remove("hidden");
     }
+
+    // Modal Form Cabang (Buka Mode Edit)
+    function openEditBranchModal(branchId) {
+      const branch = currentBranches.find(b => b.id === branchId);
+      if (!branch) return;
+
+      document.getElementById("branch-edit-id").value = branch.id;
+      document.getElementById("modal-branch-title").innerText = "✏️ Edit Pengaturan Modul";
+      document.getElementById("modal-branch-sub").innerText = "Ubah judul, link, kategori, atau hak akses peran untuk modul ini.";
+      document.getElementById("btn-submit-text").innerText = "Simpan Perubahan";
+
+      // Pre-fill fields
+      document.getElementById("branch-title").value = branch.title || "";
+      document.getElementById("branch-category").value = branch.category || "";
+      document.getElementById("branch-button-text").value = branch.buttonText || "Buka Website";
+      document.getElementById("branch-url").value = branch.url || "";
+      document.getElementById("branch-description").value = branch.description || "";
+      document.getElementById("branch-chips").value = (branch.chips || []).join(", ");
+
+      // Pre-fill theme radio
+      const themeRadio = document.querySelector(`input[name="branch-theme"][value="${branch.theme || 'purple'}"]`);
+      if (themeRadio) themeRadio.checked = true;
+
+      // Pre-fill icon select
+      const iconSelect = document.getElementById("branch-icon");
+      if (iconSelect) iconSelect.value = branch.icon || "globe";
+
+      // Pre-fill roles checkboxes
+      const roles = branch.roles || ["guru", "admin"];
+      document.getElementById("branch-role-siswa").checked = roles.includes("siswa");
+      document.getElementById("branch-role-guru").checked = roles.includes("guru");
+      document.getElementById("branch-role-admin").checked = roles.includes("admin");
+
+      document.getElementById("modal-add-branch").classList.remove("hidden");
+    }
+
     function closeAddModal() {
       document.getElementById("modal-add-branch").classList.add("hidden");
       document.getElementById("form-add-branch").reset();
+      document.getElementById("branch-edit-id").value = "";
     }
 
     function openConfigModal() {
@@ -1657,11 +1924,7 @@
       const togglePwBtn = document.getElementById("toggle-auth-password-btn");
       const pwInput = document.getElementById("auth-password-input");
       togglePwBtn.addEventListener("click", () => {
-        if (pwInput.type === "password") {
-          pwInput.type = "text";
-        } else {
-          pwInput.type = "password";
-        }
+        pwInput.type = pwInput.type === "password" ? "text" : "password";
       });
 
       // Form Submit Autentikasi
@@ -1693,15 +1956,16 @@
         }
       });
 
-      // 9. Modal Tambah Cabang Events (Admin Mode)
+      // 9. Modal Tambah & Edit Cabang Events (Admin Mode)
       document.getElementById("close-modal-btn").addEventListener("click", closeAddModal);
       document.getElementById("cancel-modal-btn").addEventListener("click", closeAddModal);
       
       const topAddBtn = document.getElementById("add-branch-top-btn");
-      if (topAddBtn) topAddBtn.addEventListener("click", openAddModal);
+      if (topAddBtn) topAddBtn.addEventListener("click", openAddBranchModal);
 
       document.getElementById("form-add-branch").addEventListener("submit", (e) => {
         e.preventDefault();
+        const editId = document.getElementById("branch-edit-id").value;
         const selectedTheme = document.querySelector('input[name="branch-theme"]:checked')?.value || "purple";
         
         // Roles yang dicentang
@@ -1711,18 +1975,53 @@
         if (document.getElementById("branch-role-admin").checked) roles.push("admin");
         if (roles.length === 0) roles.push("admin");
 
+        const rawUrl = document.getElementById("branch-url").value.trim();
+        if (!rawUrl) {
+          alert("URL atau lokasi tautan website wajib diisi.");
+          return;
+        }
+
         const payload = {
-          title: document.getElementById("branch-title").value,
-          category: document.getElementById("branch-category").value || "Media Pembelajaran",
-          buttonText: document.getElementById("branch-button-text").value || "Buka Website",
-          url: document.getElementById("branch-url").value,
-          description: document.getElementById("branch-description").value,
-          chips: document.getElementById("branch-chips").value,
+          title: document.getElementById("branch-title").value.trim(),
+          category: document.getElementById("branch-category").value.trim() || "Media Pembelajaran",
+          buttonText: document.getElementById("branch-button-text").value.trim() || "Buka Website",
+          url: rawUrl,
+          description: document.getElementById("branch-description").value.trim(),
+          chips: document.getElementById("branch-chips").value.split(",").map(c => c.trim()).filter(Boolean),
           theme: selectedTheme,
-          icon: document.getElementById("branch-icon").value,
+          icon: document.getElementById("branch-icon").value || "globe",
           roles: roles
         };
-        submitBranch(payload);
+
+        if (editId) {
+          // Mode Update
+          const idx = currentBranches.findIndex(b => b.id === editId);
+          if (idx !== -1) {
+            currentBranches[idx] = {
+              ...currentBranches[idx],
+              ...payload
+            };
+            saveBranchesToLocalStorage();
+            renderCategoryPills();
+            renderGrid();
+            showToast(`Pengaturan "${payload.title}" berhasil diperbarui!`, "success");
+            closeAddModal();
+            syncBranchToGas("update", { id: editId, ...payload });
+          }
+        } else {
+          // Mode Create Baru
+          const newBranch = {
+            id: "branch_" + Date.now(),
+            ...payload
+          };
+          currentBranches.push(newBranch);
+          saveBranchesToLocalStorage();
+          renderCategoryPills();
+          renderGrid();
+          showToast(`Cabang "${payload.title}" berhasil ditambahkan!`, "success");
+          closeAddModal();
+          syncBranchToGas("create", newBranch);
+        }
       });
 
       // 10. Modal Config GAS (Admin Mode)
@@ -1738,6 +2037,21 @@
         showToast("Konfigurasi API diperbarui!", "success");
         fetchBranches();
       });
+
+      // Reset ke Default Branches
+      const resetDefaultBtn = document.getElementById("reset-default-branches-btn");
+      if (resetDefaultBtn) {
+        resetDefaultBtn.addEventListener("click", () => {
+          if (confirm("Kembalikan seluruh daftar modul ke pengaturan bawaan awal?")) {
+            localStorage.removeItem("PORTALKIMIA_CUSTOM_BRANCHES");
+            currentBranches = DEFAULT_BRANCHES.map(normalizeBranch);
+            saveBranchesToLocalStorage();
+            renderCategoryPills();
+            renderGrid();
+            showToast("Modul telah direset ke pengaturan awal", "warning");
+          }
+        });
+      }
 
       // 11. Tombol Refresh
       document.getElementById("refresh-btn").addEventListener("click", () => {
