@@ -1,0 +1,3280 @@
+﻿<!DOCTYPE html>
+<html lang="id" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bilangan Kuantum &amp; Bentuk Orbital &bull; PortalKimia</title>
+
+  <!-- Google Fonts: Geist & Amiri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Tailwind Configuration matching Google Stitch Obsidian & Light Mode -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#a78bfa",
+            "primary-container": "#7c3aed",
+            "primary-fixed": "#ede9fe",
+            "primary-fixed-dim": "#c4b5fd",
+            "on-primary": "#0a0012",
+            "on-primary-container": "#ede9fe",
+
+            "tertiary": "#34d399",
+            "tertiary-container": "#065f46",
+            "tertiary-fixed": "#bbf7d0",
+            "tertiary-fixed-dim": "#6ee7b7",
+            "on-tertiary": "#001a12",
+            "on-tertiary-container": "#bbf7d0",
+
+            "secondary": "#71717a",
+            "secondary-container": "#27272a",
+            "secondary-fixed": "#a1a1aa",
+            "secondary-fixed-dim": "#71717a",
+            "on-secondary": "#09090b",
+            "on-secondary-container": "#a1a1aa",
+
+            "background": "#09090b",
+            "surface": "#0c0c0f",
+            "surface-dim": "#0c0c0f",
+            "surface-bright": "#18181b",
+            "surface-container-lowest": "#09090b",
+            "surface-container-low": "#0f0f12",
+            "surface-container": "#121215",
+            "surface-container-high": "#18181b",
+            "surface-container-highest": "#1e1e22",
+
+            "outline": "#52525b",
+            "outline-variant": "#27272a",
+
+            "on-background": "#fafafa",
+            "on-surface": "#fafafa",
+            "on-surface-variant": "#a1a1aa",
+
+            "error": "#ef4444",
+            "error-container": "#3b1111",
+            "on-error": "#1a0000",
+            "on-error-container": "#fca5a5"
+          },
+          fontFamily: {
+            sans: ["Geist", "sans-serif"],
+            headline: ["Geist", "sans-serif"],
+            body: ["Geist", "sans-serif"],
+            arabic: ["Amiri", "serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Prevent FOUC Theme Script -->
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('chemportal_theme') || localStorage.getItem('quantum_media_theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    .font-arabic { font-family: 'Amiri', serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+    .light ::-webkit-scrollbar-thumb { background: #d4d4d8; }
+    .light ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    
+    /* Interactive Card Stitch Styling */
+    .stitch-card {
+      background-color: #ffffff;
+      border: 1px solid #e4e4e7;
+    }
+    .dark .stitch-card {
+      background-color: #121215;
+      border: 1px solid #27272a;
+    }
+
+    .stitch-subbox {
+      background-color: #f4f4f5;
+      border: 1px solid #e4e4e7;
+    }
+    .dark .stitch-subbox {
+      background-color: #18181b;
+      border: 1px solid #27272a;
+    }
+
+    /* Orbital Box Grid */
+    .orbital-box {
+      width: 48px;
+      height: 52px;
+      border: 2px solid #52525b;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(24, 24, 27, 0.6);
+      font-weight: 800;
+      font-size: 1.15rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .light .orbital-box {
+      background: #ffffff;
+      border: 2px solid #d4d4d8;
+    }
+    .orbital-box.active-last {
+      border-color: #a78bfa;
+      background: rgba(167, 139, 250, 0.15);
+      box-shadow: 0 0 15px rgba(167, 139, 250, 0.5);
+      transform: translateY(-2px);
+    }
+    .spin-up {
+      color: #34d399;
+    }
+    .spin-down {
+      color: #38bdf8;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-background font-body text-slate-900 dark:text-on-surface antialiased min-h-screen flex flex-col transition-colors duration-200 selection:bg-primary/30 selection:text-primary">
+
+  <!-- ==================== SCROLL PROGRESS BAR ==================== -->
+  <div id="scroll-progress" class="fixed top-0 left-0 h-1 bg-gradient-to-r from-violet-500 via-primary to-tertiary z-50 transition-all duration-150" style="width: 0%;"></div>
+
+  <!-- ==================== STICKY HEADER ==================== -->
+  <header class="sticky top-0 z-40 bg-white/85 dark:bg-surface/85 backdrop-blur-md border-b border-slate-200 dark:border-outline-variant shadow-sm transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Title with Logo PortalKimia SVG -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2.5 group" title="Kembali ke Beranda Portal Bahan Ajar">
+          <div class="w-10 h-10 rounded-xl bg-surface-container border border-outline-variant flex items-center justify-center text-primary group-hover:scale-105 transition-all shadow-sm">
+            <svg class="w-6 h-6" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4H20M14 4V10L8 22C7.17157 23.6569 8.37258 26 10.2361 26H21.7639C23.6274 26 24.8284 23.6569 24 22L18 10V4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9.5 19H22.5" stroke="#34d399" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="13" cy="22" r="1.5" fill="#34d399"/>
+              <circle cx="18" cy="23" r="1" fill="#34d399"/>
+              <circle cx="16" cy="20.5" r="1.2" fill="#a78bfa"/>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-headline font-bold text-slate-900 dark:text-on-surface tracking-tight">PortalKimia</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-violet-100 dark:bg-primary/20 text-violet-700 dark:text-primary border border-violet-200 dark:border-primary/30">
+                Fase E
+              </span>
+            </div>
+            <span class="text-[10px] text-slate-500 dark:text-on-surface-variant font-medium -mt-1 hidden xs:block">
+              &larr; Beranda Portal Bahan Ajar
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Quick Section Anchor Links (Desktop) -->
+      <nav class="hidden lg:flex items-center gap-1 text-xs font-medium">
+        <a href="#peta-konsep" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-colors">
+          Peta Konsep
+        </a>
+        <a href="#section-materi" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-colors">
+          1. 4 Bilangan
+        </a>
+        <a href="#section-simulator" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-colors">
+          2. Simulator
+        </a>
+        <a href="#section-validator" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-colors">
+          3. Validator
+        </a>
+        <a href="#section-orbital-3d" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-colors">
+          4. Orbital 3D
+        </a>
+        <a href="#section-penyelidikan" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-colors">
+          5. HOTS
+        </a>
+        <a href="#section-kuis" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-colors">
+          6. Kuis
+        </a>
+        <a href="#section-tugas" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-100 dark:hover:bg-surface-container transition-colors">
+          7. Tugas
+        </a>
+      </nav>
+
+      <!-- Right Actions: Audio Toggle & Theme Switcher -->
+      <div class="flex items-center gap-2">
+        <!-- Audio Synthesizer Toggle -->
+        <button 
+          id="sound-toggle-btn"
+          onclick="toggleAudio()" 
+          class="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 dark:bg-surface-container border border-slate-200 dark:border-outline-variant text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface transition-all cursor-pointer shadow-sm" 
+          title="Efek Suara Audio Aktif">
+          <i id="sound-icon" data-lucide="volume-2" class="w-4 h-4 text-violet-600 dark:text-primary"></i>
+        </button>
+
+        <!-- Theme Toggle (Dark / Light) -->
+        <button 
+          onclick="toggleAppTheme()" 
+          class="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 dark:bg-surface-container border border-slate-200 dark:border-outline-variant text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface transition-all cursor-pointer shadow-sm" 
+          title="Alihkan Mode Terang / Gelap">
+          <span class="material-symbols-outlined text-[19px] dark:hidden text-amber-500">light_mode</span>
+          <span class="material-symbols-outlined text-[19px] hidden dark:inline text-primary">dark_mode</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+  <!-- ==================== HERO SECTION & TADABBUR AL-QUR'AN ==================== -->
+  <section class="pt-10 pb-6 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <!-- Ambient Glow Effect -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[320px] bg-violet-500/10 dark:bg-primary/10 blur-[130px] pointer-events-none rounded-full"></div>
+
+    <div class="max-w-7xl mx-auto space-y-6 relative z-10">
+      
+      <!-- Stitch Hero Card -->
+      <div class="stitch-card rounded-2xl p-6 sm:p-8 shadow-sm space-y-5">
+        
+        <!-- Basmalah Calligraphy -->
+        <div class="text-center pb-4 border-b border-slate-200 dark:border-outline-variant/60">
+          <div class="inline-block px-4 py-1 rounded-full bg-slate-100 dark:bg-surface-bright border border-slate-200 dark:border-outline-variant">
+            <p class="font-arabic text-2xl sm:text-3xl text-violet-700 dark:text-primary font-normal text-center leading-relaxed">
+              &#1576;&#1616;&#1587;&#1618;&#1605;&#1616; &#1575;&#1649;&#1604;&#1604;&#1614;&#1617;&#1607;&#1616; &#1575;&#1649;&#1604;&#1585;&#1614;&#1617;&#1581;&#1618;&#1605;&#1614;&#1640;&#1606;&#1616; &#1575;&#1649;&#1604;&#1585;&#1614;&#1617;&#1581;&#1616;&#1610;&#1605;&#1616;
+            </p>
+          </div>
+          <p class="text-[11px] font-mono text-slate-500 dark:text-on-surface-variant italic mt-1">
+            "Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang"
+          </p>
+        </div>
+
+        <!-- Badges & Identity -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-tertiary-container/30 border border-emerald-200 dark:border-tertiary/30 text-emerald-700 dark:text-tertiary text-xs font-semibold">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-tertiary animate-pulse"></span>
+              <span>Fase E &bull; Kelas X SMA</span>
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-violet-50 dark:bg-surface-container-high text-violet-700 dark:text-primary text-xs font-semibold border border-violet-200 dark:border-outline-variant">
+              Kurikulum Merdeka
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-cyan-50 dark:bg-surface-container-high text-cyan-700 dark:text-cyan-300 text-xs font-semibold border border-cyan-200 dark:border-outline-variant">
+              Mekanika Kuantum
+            </span>
+          </div>
+
+          <div class="text-xs text-slate-600 dark:text-on-surface-variant">
+            Penyusun: <strong class="text-slate-800 dark:text-slate-200">Tito Vanzal, S.Pd.</strong> &bull; SMA Progresif Bumi Shalawat
+          </div>
+        </div>
+
+        <!-- Title & Description -->
+        <div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-headline font-extrabold tracking-tight text-slate-900 dark:text-on-surface">
+            Bilangan Kuantum &amp; Bentuk Orbital Atom
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-on-surface-variant mt-2 leading-relaxed">
+            Menyingkap kode kedudukan, tingkat energi, orientasi ruang 3D, dan arah rotasi elektron melalui 4 bilangan kuantum 
+            (<strong class="text-violet-700 dark:text-primary"><i>n</i>, <i>l</i>, <i>m</i>, <i>s</i></strong>), asas larangan Pauli, serta visualisasi bentuk orbital atom yang menakjubkan.
+          </p>
+        </div>
+
+        <!-- Al-Quran Tadabbur Card -->
+        <div class="stitch-subbox rounded-xl p-5 border border-slate-200 dark:border-outline-variant space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-200 dark:border-outline-variant/60 pb-2">
+            <div class="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-tertiary">
+              <span class="material-symbols-outlined text-[18px]">balance</span>
+              <span>Tadabbur Sains: Keteraturan &amp; Pengawasan Partikel Subatomik</span>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white dark:bg-surface-container text-slate-500 dark:text-on-surface-variant border border-slate-200 dark:border-outline-variant">
+              QS. Al-Qamar [54]: 49 &amp; Saba' [34]: 3
+            </span>
+          </div>
+
+          <!-- Ayat 1: Al-Qamar: 49 -->
+          <div class="space-y-1.5 pt-1">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-violet-100 dark:bg-primary/20 text-violet-700 dark:text-primary border border-violet-200 dark:border-primary/30">QS. Al-Qamar: 49</span>
+            </div>
+            <div class="font-arabic text-right text-lg sm:text-2xl text-slate-900 dark:text-on-surface font-normal leading-loose tracking-wide" dir="rtl">
+              &#1573;&#1616;&#1606;&#1617;&#1614;&#1575; &#1603;&#1615;&#1604;&#1617;&#1614; &#1588;&#1614;&#1610;&#1618;&#1569;&#1613; &#1582;&#1614;&#1604;&#1614;&#1602;&#1618;&#1606;&#1614;&#1575;&#1607;&#1615; &#1576;&#1616;&#1602;&#1614;&#1583;&#1614;&#1585;&#1613;
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-on-surface-variant italic leading-relaxed">
+              "Sungguh, Kami menciptakan segala sesuatu menurut ukuran (ketetapan dan hukum yang pasti)."
+            </p>
+          </div>
+
+          <!-- Ayat 2: Saba': 3 -->
+          <div class="space-y-1.5 pt-2 border-t border-slate-200 dark:border-outline-variant/60">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-tertiary-container/40 text-emerald-700 dark:text-tertiary border border-emerald-200 dark:border-tertiary/30">QS. Saba' [34]: 3</span>
+            </div>
+            <div class="font-arabic text-right text-lg sm:text-2xl text-slate-900 dark:text-on-surface font-normal leading-loose tracking-wide" dir="rtl">
+              &#1604;&#1614;&#1575; &#1610;&#1614;&#1593;&#1618;&#1586;&#1615;&#1576;&#1615; &#1593;&#1614;&#1606;&#1618;&#1607;&#1615; &#1605;&#1616;&#1578;&#1618;&#1602;&#1614;&#1575;&#1604;&#1615; &#1584;&#1614;&#1585;&#1617;&#1614;&#1578;&#1613; &#1601;&#1616;&#1610; &#1575;&#1604;&#1587;&#1617;&#1614;&#1605;&#1614;&#1575;&#1608;&#1614;&#1575;&#1578;&#1616; &#1608;&#1614;&#1604;&#1614;&#1575; &#1601;&#1616;&#1610; &#1575;&#1604;&#1618;&#1571;&#1614;&#1585;&#1618;&#1590;&#1616;
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-on-surface-variant italic leading-relaxed">
+              "...Tidak ada yang tersembunyi dari-Nya seberat zarrah (partikel terkecil) pun yang ada di langit maupun di bumi..."
+            </p>
+          </div>
+
+          <!-- Refleksi Sains -->
+          <div class="pt-2 border-t border-slate-200 dark:border-outline-variant/60">
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              <strong class="text-violet-700 dark:text-primary">Tadabbur Sains:</strong> Posisi zarrah terkecil seperti elektron diatur dalam ruang orbital (|&psi;|<sup>2</sup>) dengan kepastian hukum-Nya. Setiap elektron memiliki alamat kuantum unik (tingkat energi <i>n</i>, subkulit <i>l</i>, orientasi ruang <i>m</i>, dan spin <i>s</i>). Tak satu pun partikel subatomik yang luput dari ketelitian dan penciptaan Sang Maha Pencipta.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-12 flex-grow">
+
+    <!-- ============================================================== -->
+    <!-- PETA KONSEP FLOWCHART NODUS ALA STITCH                         -->
+    <!-- ============================================================== -->
+    <section id="peta-konsep" class="stitch-card rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-outline-variant/60 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="p-1.5 rounded-lg bg-violet-100 dark:bg-primary/15 text-violet-700 dark:text-primary">
+            <span class="material-symbols-outlined text-lg leading-none">account_tree</span>
+          </span>
+          <div>
+            <h2 class="text-sm uppercase tracking-wider font-bold text-slate-900 dark:text-on-surface">
+              Peta Konsep: Empat Bilangan Kuantum &amp; Alamat Elektron
+            </h2>
+            <p class="text-[11px] text-slate-500 dark:text-on-surface-variant">
+              Fungsi Gelombang Mekanika Kuantum Menentukan Keberadaan Elektron dalam Atom
+            </p>
+          </div>
+        </div>
+        <span class="text-[10px] font-mono px-2 py-1 rounded-md bg-slate-100 dark:bg-surface-container-high text-violet-700 dark:text-primary border border-violet-200 dark:border-primary/20">
+          Flowchart Nodus
+        </span>
+      </div>
+
+      <!-- Flowchart Canvas Area -->
+      <div class="bg-slate-50 dark:bg-surface-container-lowest rounded-xl p-4 sm:p-5 border border-slate-200 dark:border-outline-variant/40 overflow-x-auto">
+        <div class="min-w-[700px] flex flex-col items-center gap-3">
+          
+          <!-- Master Root Node -->
+          <div class="px-6 py-3 rounded-2xl bg-violet-100 dark:bg-primary/20 border-2 border-violet-500 dark:border-primary text-center shadow-lg shadow-primary/5 max-w-lg">
+            <div class="text-[10px] uppercase font-mono tracking-wider text-violet-700 dark:text-primary font-bold">
+              Alamat Gelombang Probabilitas Elektron (Schr&ouml;dinger)
+            </div>
+            <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-on-surface">
+              EMPAT BILANGAN KUANTUM (n, l, m, s)
+            </div>
+            <div class="text-[11px] font-mono text-slate-600 dark:text-on-surface-variant mt-0.5">
+              Identitas Kuantum Eksak Setiap Elektron dalam Ruang Atom 3D
+            </div>
+          </div>
+
+          <!-- Connecting vertical line -->
+          <div class="w-0.5 h-4 bg-slate-300 dark:bg-outline-variant"></div>
+
+          <!-- Level 2: 4 Branch Nodes (Grid 4 Columns) -->
+          <div class="grid grid-cols-4 gap-3 w-full">
+            
+            <!-- Nodus 1: Utama (n) -->
+            <div class="p-3.5 rounded-xl bg-white dark:bg-surface-container-high border border-slate-200 dark:border-outline-variant/60 flex flex-col gap-1.5 shadow-sm">
+              <div class="text-[10px] font-mono uppercase text-emerald-600 dark:text-tertiary font-bold tracking-wider">
+                1. Bilangan Utama
+              </div>
+              <div class="text-xs font-bold text-slate-900 dark:text-on-surface">
+                KULIT ATOM (n)
+              </div>
+              <p class="text-[11px] text-slate-600 dark:text-on-surface-variant leading-relaxed">
+                Menyatakan <strong>tingkat energi utama</strong> dan jarak rata-rata orbital dari inti atom.
+              </p>
+              <div class="mt-auto pt-2 border-t border-slate-100 dark:border-outline-variant/40 text-[10px] font-mono text-emerald-600 dark:text-tertiary">
+                n = 1, 2, 3, 4, 5, 6, 7 (K, L, M, N...)
+              </div>
+            </div>
+
+            <!-- Nodus 2: Azimut (l) -->
+            <div class="p-3.5 rounded-xl bg-white dark:bg-surface-container-high border border-slate-200 dark:border-outline-variant/60 flex flex-col gap-1.5 shadow-sm">
+              <div class="text-[10px] font-mono uppercase text-sky-600 dark:text-sky-400 font-bold tracking-wider">
+                2. Bilangan Azimut
+              </div>
+              <div class="text-xs font-bold text-slate-900 dark:text-on-surface">
+                SUBKULIT &amp; BENTUK (l)
+              </div>
+              <p class="text-[11px] text-slate-600 dark:text-on-surface-variant leading-relaxed">
+                Menyatakan <strong>bentuk geometri orbital</strong> dan subtingkat energi. Syarat: <em>l</em> &lt; <em>n</em>.
+              </p>
+              <div class="mt-auto pt-2 border-t border-slate-100 dark:border-outline-variant/40 text-[10px] font-mono text-sky-600 dark:text-sky-400">
+                l = 0 (s), 1 (p), 2 (d), 3 (f)
+              </div>
+            </div>
+
+            <!-- Nodus 3: Magnetik (m) -->
+            <div class="p-3.5 rounded-xl bg-white dark:bg-surface-container-high border border-slate-200 dark:border-outline-variant/60 flex flex-col gap-1.5 shadow-sm">
+              <div class="text-[10px] font-mono uppercase text-amber-600 dark:text-amber-400 font-bold tracking-wider">
+                3. Bilangan Magnetik
+              </div>
+              <div class="text-xs font-bold text-slate-900 dark:text-on-surface">
+                ORIENTASI RUANG 3D (m)
+              </div>
+              <p class="text-[11px] text-slate-600 dark:text-on-surface-variant leading-relaxed">
+                Menyatakan <strong>orientasi spasial</strong> orbital terhadap medan magnet luar.
+              </p>
+              <div class="mt-auto pt-2 border-t border-slate-100 dark:border-outline-variant/40 text-[10px] font-mono text-amber-600 dark:text-amber-400">
+                -l &le; m &le; +l (Total 2l + 1 orbital)
+              </div>
+            </div>
+
+            <!-- Nodus 4: Spin (s) -->
+            <div class="p-3.5 rounded-xl bg-white dark:bg-surface-container-high border border-slate-200 dark:border-outline-variant/60 flex flex-col gap-1.5 shadow-sm">
+              <div class="text-[10px] font-mono uppercase text-rose-500 font-bold tracking-wider">
+                4. Bilangan Spin
+              </div>
+              <div class="text-xs font-bold text-slate-900 dark:text-on-surface">
+                ROTASI ELEKTRON (s)
+              </div>
+              <p class="text-[11px] text-slate-600 dark:text-on-surface-variant leading-relaxed">
+                Menyatakan arah <strong>momentum sudut rotasi</strong> elektron pada porosnya sendiri.
+              </p>
+              <div class="mt-auto pt-2 border-t border-slate-100 dark:border-outline-variant/40 text-[10px] font-mono text-rose-500">
+                s = +&frac12; (&uarr;) atau -&frac12; (&darr;)
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Summary Note: Asas Larangan Pauli -->
+          <div class="w-full p-2.5 rounded-lg bg-white/60 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 flex items-center justify-between text-[11px] text-slate-600 dark:text-on-surface-variant">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[15px] text-violet-600 dark:text-primary">verified</span>
+              <span><strong>Asas Larangan Pauli (1925):</strong> Tiada dua elektron dalam satu atom yang boleh memiliki set keempat bilangan kuantum (<em>n, l, m, s</em>) identik sama persis.</span>
+            </div>
+            <span class="font-mono text-[10px] text-violet-700 dark:text-primary font-bold">1 Orbital &le; 2 Elektron</span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Sticky Anchor Nav for Mobile -->
+    <nav class="lg:hidden sticky top-16 z-30 bg-white/90 dark:bg-surface/90 backdrop-blur-md border-b border-slate-200 dark:border-outline-variant py-2 px-2 overflow-x-auto">
+      <div class="flex items-center space-x-1.5 text-xs font-semibold whitespace-nowrap">
+        <a href="#section-materi" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface hover:bg-primary/20">1. Materi</a>
+        <a href="#section-simulator" class="px-2.5 py-1 rounded-lg bg-primary text-on-primary font-bold shadow-sm">2. Simulator</a>
+        <a href="#section-validator" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface hover:bg-primary/20">3. Validator</a>
+        <a href="#section-orbital-3d" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface hover:bg-primary/20">4. Orbital 3D</a>
+        <a href="#section-penyelidikan" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface hover:bg-primary/20">5. HOTS</a>
+        <a href="#section-kuis" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface hover:bg-primary/20">6. Kuis</a>
+        <a href="#section-tugas" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface hover:bg-primary/20">7. Tugas</a>
+      </div>
+    </nav>
+    <!-- ==================== 1. KONSEP FUNDAMENTAL: 4 BILANGAN KUANTUM ==================== -->
+    <section id="section-materi" class="space-y-6 scroll-mt-24">
+      
+      <!-- Section Header -->
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          1
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Konsep Fundamental: 4 Bilangan Kuantum
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Mengenal koordinat "KTP Kuantum" untuk setiap elektron di dalam atom.
+          </p>
+        </div>
+      </div>
+
+      <!-- Apersepsi: Analogi Alamat Rumah Kuantum -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-4">
+        <div class="flex items-center space-x-2 text-violet-700 dark:text-primary font-bold text-xs uppercase tracking-wider">
+          <span class="material-symbols-outlined text-[18px]">home</span>
+          <span>Apersepsi: Mengapa Elektron Membutuhkan 4 Bilangan Kuantum?</span>
+        </div>
+
+        <p class="text-xs sm:text-sm text-slate-600 dark:text-on-surface-variant leading-relaxed">
+          Bayangkan Anda ingin mengirimkan surat penting kepada seorang teman di sebuah asrama raksasa. Agar surat tiba tepat di tangan teman Anda, 
+          Anda memerlukan <strong>4 informasi berurutan</strong>: Provinsi, Kota/Kecamatan, Nomor Kamar, dan Posisi Tempat Tidur. 
+          Demikian pula dengan elektron, kedudukan dan perilakunya di dalam atom ditentukan secara eksak oleh <strong>4 Bilangan Kuantum</strong>:
+        </p>
+
+        <!-- 4 Kolom Analogi -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          
+          <!-- Analogi 1: n -->
+          <div class="p-4 rounded-xl stitch-subbox relative space-y-1.5 border-t-2 border-t-blue-500">
+            <span class="absolute top-2.5 right-3 text-xl font-black text-slate-300 dark:text-slate-700">n</span>
+            <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Analogi 1 &bull; Kota</div>
+            <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-on-surface">Kulit Utama (<i>n</i>)</h4>
+            <p class="text-[11px] text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              Menunjukkan <strong>jarak rata-rata dan tingkat energi utama</strong> elektron dari inti atom. Semakin besar <i>n</i>, semakin tinggi energinya.
+            </p>
+          </div>
+
+          <!-- Analogi 2: l -->
+          <div class="p-4 rounded-xl stitch-subbox relative space-y-1.5 border-t-2 border-t-emerald-500">
+            <span class="absolute top-2.5 right-3 text-xl font-black text-slate-300 dark:text-slate-700">l</span>
+            <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-tertiary">Analogi 2 &bull; Blok Rumah</div>
+            <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-on-surface">Subkulit Azimut (<i>l</i>)</h4>
+            <p class="text-[11px] text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              Menunjukkan <strong>bentuk geometri ruang orbital</strong> (<i>s</i>, <i>p</i>, <i>d</i>, <i>f</i>) di mana kebolehjadian elektron paling besar.
+            </p>
+          </div>
+
+          <!-- Analogi 3: m -->
+          <div class="p-4 rounded-xl stitch-subbox relative space-y-1.5 border-t-2 border-t-amber-500">
+            <span class="absolute top-2.5 right-3 text-xl font-black text-slate-300 dark:text-slate-700">m</span>
+            <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Analogi 3 &bull; Nomor Kamar</div>
+            <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-on-surface">Orbital Magnetik (<i>m</i>)</h4>
+            <p class="text-[11px] text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              Menunjukkan <strong>orientasi spasial 3D</strong> orbital (<i>x</i>, <i>y</i>, <i>z</i>) terhadap medan magnet eksternal.
+            </p>
+          </div>
+
+          <!-- Analogi 4: s -->
+          <div class="p-4 rounded-xl stitch-subbox relative space-y-1.5 border-t-2 border-t-rose-500">
+            <span class="absolute top-2.5 right-3 text-xl font-black text-slate-300 dark:text-slate-700">s</span>
+            <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-500">Analogi 4 &bull; Ranjang</div>
+            <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-on-surface">Spin Elektron (<i>s</i>)</h4>
+            <p class="text-[11px] text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              Menunjukkan <strong>arah rotasi mandiri (spin)</strong> elektron pada porosnya: searah (+&frac12;) atau berlawanan (-&frac12;).
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 4 Kartu Edukasi Rinci Bilangan Kuantum -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <!-- Kuantum 1: Utama (n) -->
+        <div class="stitch-card rounded-2xl p-5 shadow-sm space-y-3 border-t-4 border-t-blue-500">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-outline-variant/60">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+                <i>n</i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-900 dark:text-on-surface">Bilangan Kuantum Utama (<i>n</i>)</h4>
+                <p class="text-[11px] text-blue-600 dark:text-blue-400 font-semibold">Principal Quantum Number</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">
+              Ukuran &amp; Energi
+            </span>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Menyatakan tingkat energi utama (kulit atom) tempat elektron berada dan ukuran rata-rata orbital dari inti atom.
+          </p>
+
+          <div class="p-3 rounded-xl stitch-subbox space-y-1.5 text-xs">
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Harga yang Diizinkan:</span>
+              <span class="font-mono font-bold text-blue-600 dark:text-blue-400"><i>n</i> = 1, 2, 3, 4, 5, 6, 7...</span>
+            </div>
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Notasi Kulit:</span>
+              <span class="font-semibold text-slate-800 dark:text-on-surface">K (<i>n</i>=1), L (<i>n</i>=2), M (<i>n</i>=3), N (<i>n</i>=4)</span>
+            </div>
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Jumlah Orbital per Kulit:</span>
+              <span class="font-mono font-bold text-emerald-600 dark:text-tertiary"><i>n</i><sup>2</sup></span>
+            </div>
+            <div class="flex justify-between items-center py-0.5">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Kapasitas Maksimum:</span>
+              <span class="font-mono font-bold text-violet-700 dark:text-primary">2<i>n</i><sup>2</sup> elektron</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kuantum 2: Azimut (l) -->
+        <div class="stitch-card rounded-2xl p-5 shadow-sm space-y-3 border-t-4 border-t-emerald-500">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-outline-variant/60">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+                <i>l</i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-900 dark:text-on-surface">Bilangan Kuantum Azimut (<i>l</i>)</h4>
+                <p class="text-[11px] text-emerald-600 dark:text-tertiary font-semibold">Angular Momentum Number</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-tertiary-container/40 text-emerald-700 dark:text-tertiary">
+              Bentuk Orbital
+            </span>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Menyatakan subtingkat energi (subkulit) dan menentukan bentuk 3 dimensi geometri orbital serta momentum sudut orbital elektron.
+          </p>
+
+          <div class="p-3 rounded-xl stitch-subbox space-y-1.5 text-xs">
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Harga yang Diizinkan:</span>
+              <span class="font-mono font-bold text-emerald-600 dark:text-tertiary"><i>l</i> = 0, 1, 2, ..., (<i>n</i> - 1)</span>
+            </div>
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Nilai <i>l</i> = 0:</span>
+              <span class="font-semibold text-slate-800 dark:text-on-surface">Subkulit <strong class="text-emerald-600 dark:text-tertiary"><i>s</i></strong> &bull; Bentuk Bola (Spherical)</span>
+            </div>
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Nilai <i>l</i> = 1:</span>
+              <span class="font-semibold text-slate-800 dark:text-on-surface">Subkulit <strong class="text-emerald-600 dark:text-tertiary"><i>p</i></strong> &bull; Balon Terpilin (Dumbbell)</span>
+            </div>
+            <div class="flex justify-between items-center py-0.5">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Nilai <i>l</i> = 2 &amp; <i>l</i> = 3:</span>
+              <span class="font-semibold text-slate-800 dark:text-on-surface">Subkulit <strong class="text-emerald-600 dark:text-tertiary"><i>d</i></strong> (5 orbital) &amp; <strong class="text-emerald-600 dark:text-tertiary"><i>f</i></strong> (7 orbital)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kuantum 3: Magnetik (m) -->
+        <div class="stitch-card rounded-2xl p-5 shadow-sm space-y-3 border-t-4 border-t-amber-500">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-outline-variant/60">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+                <i>m</i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-900 dark:text-on-surface">Bilangan Kuantum Magnetik (<i>m</i>)</h4>
+                <p class="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">Magnetic Quantum Number</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
+              Orientasi Spasial 3D
+            </span>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Menyatakan orientasi khusus orbital dalam ruang 3 dimensi terhadap medan magnet eksternal dan membedakan orbital dalam subkulit sejenis.
+          </p>
+
+          <div class="p-3 rounded-xl stitch-subbox space-y-1.5 text-xs">
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Harga yang Diizinkan:</span>
+              <span class="font-mono font-bold text-amber-600 dark:text-amber-400"><i>m</i> = -<i>l</i> sampai +<i>l</i></span>
+            </div>
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Jumlah Orbital per Subkulit:</span>
+              <span class="font-mono font-bold text-amber-600 dark:text-amber-400">2<i>l</i> + 1 orbital</span>
+            </div>
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Subkulit <i>p</i> (<i>l</i> = 1):</span>
+              <span class="font-mono text-slate-800 dark:text-on-surface"><i>m</i> = -1, 0, +1 (<i>p</i><sub>x</sub>, <i>p</i><sub>y</sub>, <i>p</i><sub>z</sub>)</span>
+            </div>
+            <div class="flex justify-between items-center py-0.5">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Subkulit <i>d</i> (<i>l</i> = 2):</span>
+              <span class="font-mono text-slate-800 dark:text-on-surface"><i>m</i> = -2, -1, 0, +1, +2 (5 orbital)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kuantum 4: Spin (s) -->
+        <div class="stitch-card rounded-2xl p-5 shadow-sm space-y-3 border-t-4 border-t-rose-500">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-outline-variant/60">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-9 h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+                <i>s</i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-900 dark:text-on-surface">Bilangan Kuantum Spin (<i>s</i>)</h4>
+                <p class="text-[11px] text-rose-600 dark:text-rose-400 font-semibold">Spin Magnetic Number</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300">
+              Rotasi Intrinsik
+            </span>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Menyatakan arah perputaran elektron pada porosnya sendiri (momentum sudut spin intrinsik) yang menghasilkan medan magnetik mikroskopis.
+          </p>
+
+          <div class="p-3 rounded-xl stitch-subbox space-y-1.5 text-xs">
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Harga yang Diizinkan:</span>
+              <span class="font-mono font-bold text-rose-500"><i>s</i> = +&frac12; atau <i>s</i> = -&frac12;</span>
+            </div>
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Panah Ke Atas (&uarr;):</span>
+              <span class="font-semibold text-emerald-600 dark:text-tertiary"><i>s</i> = +&frac12; (Spin Up / searah jarum jam)</span>
+            </div>
+            <div class="flex justify-between items-center py-0.5 border-b border-slate-200 dark:border-outline-variant/40">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Panah Ke Bawah (&darr;):</span>
+              <span class="font-semibold text-sky-600 dark:text-sky-400"><i>s</i> = -&frac12; (Spin Down / berlawanan jarum jam)</span>
+            </div>
+            <div class="flex justify-between items-center py-0.5">
+              <span class="font-bold text-slate-700 dark:text-on-surface">Asas Larangan Pauli:</span>
+              <span class="text-slate-600 dark:text-on-surface-variant">1 orbital maksimal diisi 2 elektron berlawanan spin.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tabel Komprehensif Hierarki Bilangan Kuantum (Kulit n=1 s.d. n=4) -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-6 shadow-sm space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-outline-variant/60">
+          <div>
+            <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-on-surface flex items-center space-x-2">
+              <span class="material-symbols-outlined text-[18px] text-violet-600 dark:text-primary">table_rows</span>
+              <span>Tabel Lengkap Hierarki Bilangan Kuantum (Kulit <i>n</i> = 1 hingga 4)</span>
+            </h3>
+            <p class="text-[11px] text-slate-500 dark:text-on-surface-variant">
+              Relasi matematis: batas nilai <i>l</i> selalu 0 &le; <i>l</i> &le; <i>n</i> - 1, dan nilai <i>m</i> selalu -<i>l</i> &le; <i>m</i> &le; +<i>l</i>.
+            </p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-violet-700 dark:bg-primary/20 text-white dark:text-primary font-bold">
+                <th class="py-2.5 px-3 rounded-tl-lg">Kulit (<i>n</i>)</th>
+                <th class="py-2.5 px-2">Azimut (<i>l</i>)</th>
+                <th class="py-2.5 px-2">Subkulit</th>
+                <th class="py-2.5 px-3">Nilai Magnetik (<i>m</i>)</th>
+                <th class="py-2.5 px-2 text-center">Jumlah Orbital</th>
+                <th class="py-2.5 px-2 text-center">Maks. Elektron</th>
+                <th class="py-2.5 px-3 text-center rounded-tr-lg">Total Kulit (2<i>n</i><sup>2</sup>)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-outline-variant/40 text-slate-700 dark:text-on-surface-variant font-medium">
+              <!-- n = 1 -->
+              <tr class="hover:bg-slate-50 dark:hover:bg-surface-container">
+                <td class="py-2 px-3 font-bold text-violet-700 dark:text-primary"><i>n</i> = 1 (Kulit K)</td>
+                <td class="py-2 px-2 font-mono">0</td>
+                <td class="py-2 px-2 font-bold text-slate-900 dark:text-on-surface">1s</td>
+                <td class="py-2 px-3 font-mono">0</td>
+                <td class="py-2 px-2 text-center font-bold">1</td>
+                <td class="py-2 px-2 text-center font-semibold text-emerald-600 dark:text-tertiary">2</td>
+                <td class="py-2 px-3 text-center font-bold text-violet-700 dark:text-primary bg-violet-50/50 dark:bg-primary/10">2</td>
+              </tr>
+              <!-- n = 2 -->
+              <tr class="hover:bg-slate-50 dark:hover:bg-surface-container">
+                <td rowspan="2" class="py-2 px-3 font-bold text-violet-700 dark:text-primary align-top border-r border-slate-100 dark:border-outline-variant/40"><i>n</i> = 2 (Kulit L)</td>
+                <td class="py-1.5 px-2 font-mono">0</td>
+                <td class="py-1.5 px-2 font-bold text-slate-900 dark:text-on-surface">2s</td>
+                <td class="py-1.5 px-3 font-mono">0</td>
+                <td class="py-1.5 px-2 text-center font-bold">1</td>
+                <td class="py-1.5 px-2 text-center font-semibold text-emerald-600 dark:text-tertiary">2</td>
+                <td rowspan="2" class="py-2 px-3 text-center font-bold text-violet-700 dark:text-primary bg-violet-50/50 dark:bg-primary/10 align-middle">8</td>
+              </tr>
+              <tr class="hover:bg-slate-50 dark:hover:bg-surface-container">
+                <td class="py-1.5 px-2 font-mono">1</td>
+                <td class="py-1.5 px-2 font-bold text-slate-900 dark:text-on-surface">2p</td>
+                <td class="py-1.5 px-3 font-mono">-1, 0, +1</td>
+                <td class="py-1.5 px-2 text-center font-bold">3</td>
+                <td class="py-1.5 px-2 text-center font-semibold text-emerald-600 dark:text-tertiary">6</td>
+              </tr>
+              <!-- n = 3 -->
+              <tr class="hover:bg-slate-50 dark:hover:bg-surface-container">
+                <td rowspan="3" class="py-2 px-3 font-bold text-violet-700 dark:text-primary align-top border-r border-slate-100 dark:border-outline-variant/40"><i>n</i> = 3 (Kulit M)</td>
+                <td class="py-1.5 px-2 font-mono">0</td>
+                <td class="py-1.5 px-2 font-bold text-slate-900 dark:text-on-surface">3s</td>
+                <td class="py-1.5 px-3 font-mono">0</td>
+                <td class="py-1.5 px-2 text-center font-bold">1</td>
+                <td class="py-1.5 px-2 text-center font-semibold text-emerald-600 dark:text-tertiary">2</td>
+                <td rowspan="3" class="py-2 px-3 text-center font-bold text-violet-700 dark:text-primary bg-violet-50/50 dark:bg-primary/10 align-middle">18</td>
+              </tr>
+              <tr class="hover:bg-slate-50 dark:hover:bg-surface-container">
+                <td class="py-1.5 px-2 font-mono">1</td>
+                <td class="py-1.5 px-2 font-bold text-slate-900 dark:text-on-surface">3p</td>
+                <td class="py-1.5 px-3 font-mono">-1, 0, +1</td>
+                <td class="py-1.5 px-2 text-center font-bold">3</td>
+                <td class="py-1.5 px-2 text-center font-semibold text-emerald-600 dark:text-tertiary">6</td>
+              </tr>
+              <tr class="hover:bg-slate-50 dark:hover:bg-surface-container">
+                <td class="py-1.5 px-2 font-mono">2</td>
+                <td class="py-1.5 px-2 font-bold text-slate-900 dark:text-on-surface">3d</td>
+                <td class="py-1.5 px-3 font-mono">-2, -1, 0, +1, +2</td>
+                <td class="py-1.5 px-2 text-center font-bold">5</td>
+                <td class="py-1.5 px-2 text-center font-semibold text-emerald-600 dark:text-tertiary">10</td>
+              </tr>
+              <!-- n = 4 -->
+              <tr class="hover:bg-slate-50 dark:hover:bg-surface-container">
+                <td rowspan="4" class="py-2 px-3 font-bold text-violet-700 dark:text-primary align-top border-r border-slate-100 dark:border-outline-variant/40"><i>n</i> = 4 (Kulit N)</td>
+                <td class="py-1.5 px-2 font-mono">0</td>
+                <td class="py-1.5 px-2 font-bold text-slate-900 dark:text-on-surface">4s</td>
+                <td class="py-1.5 px-3 font-mono">0</td>
+                <td class="py-1.5 px-2 text-center font-bold">1</td>
+                <td class="py-1.5 px-2 text-center font-semibold text-emerald-600 dark:text-tertiary">2</td>
+                <td rowspan="4" class="py-2 px-3 text-center font-bold text-violet-700 dark:text-primary bg-violet-50/50 dark:bg-primary/10 align-middle">32</td>
+              </tr>
+              <tr class="hover:bg-slate-50 dark:hover:bg-surface-container">
+                <td class="py-1.5 px-2 font-mono">1</td>
+                <td class="py-1.5 px-2 font-bold text-slate-900 dark:text-on-surface">4p</td>
+                <td class="py-1.5 px-3 font-mono">-1, 0, +1</td>
+                <td class="py-1.5 px-2 text-center font-bold">3</td>
+                <td class="py-1.5 px-2 text-center font-semibold text-emerald-600 dark:text-tertiary">6</td>
+              </tr>
+              <tr class="hover:bg-slate-50 dark:hover:bg-surface-container">
+                <td class="py-1.5 px-2 font-mono">2</td>
+                <td class="py-1.5 px-2 font-bold text-slate-900 dark:text-on-surface">4d</td>
+                <td class="py-1.5 px-3 font-mono">-2, -1, 0, +1, +2</td>
+                <td class="py-1.5 px-2 text-center font-bold">5</td>
+                <td class="py-1.5 px-2 text-center font-semibold text-emerald-600 dark:text-tertiary">10</td>
+              </tr>
+              <tr class="hover:bg-slate-50 dark:hover:bg-surface-container">
+                <td class="py-1.5 px-2 font-mono">3</td>
+                <td class="py-1.5 px-2 font-bold text-slate-900 dark:text-on-surface">4f</td>
+                <td class="py-1.5 px-3 font-mono">-3, -2, -1, 0, +1, +2, +3</td>
+                <td class="py-1.5 px-2 text-center font-bold">7</td>
+                <td class="py-1.5 px-2 text-center font-semibold text-emerald-600 dark:text-tertiary">14</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+    <!-- ==================== 2. SIMULATOR PENENTU 4 BILANGAN KUANTUM ==================== -->
+    <section id="section-simulator" class="space-y-6 scroll-mt-24">
+      
+      <!-- Section Header -->
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          2
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Simulator Penentu 4 Bilangan Kuantum
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Visualisasi interaktif diagram kotak orbital dan penetapan harga <i>n</i>, <i>l</i>, <i>m</i>, <i>s</i> untuk elektron terakhir.
+          </p>
+        </div>
+      </div>
+
+      <!-- Main Simulator Box -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-5">
+        
+        <!-- Mode Switcher & Selection Controls -->
+        <div class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-outline-variant/60">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider">Mode Input:</span>
+              <div class="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-surface-container border border-slate-200 dark:border-outline-variant text-xs">
+                <button 
+                  id="tab-mode-element" 
+                  onclick="switchSimulatorMode('element')" 
+                  class="px-3 py-1 rounded-lg font-bold transition-all bg-primary text-on-primary shadow-sm cursor-pointer">
+                  Pilih Unsur Kimia (Z = 1 - 36)
+                </button>
+                <button 
+                  id="tab-mode-custom" 
+                  onclick="switchSimulatorMode('custom')" 
+                  class="px-3 py-1 rounded-lg font-semibold text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface transition-all cursor-pointer">
+                  Kustom Subkulit
+                </button>
+              </div>
+            </div>
+
+            <!-- Indicator badge -->
+            <div class="flex items-center space-x-1.5 text-xs text-violet-700 dark:text-primary">
+              <span class="material-symbols-outlined text-[16px] text-amber-500">flare</span>
+              <span class="font-medium">Sorotan Violet/Emas: Elektron Terakhir</span>
+            </div>
+          </div>
+
+          <!-- Mode 1: Pilihan Unsur Dropdown & Quick Badges -->
+          <div id="sim-controls-element" class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+              <div class="sm:col-span-2 space-y-1">
+                <label for="select-element" class="block text-xs font-bold text-slate-700 dark:text-on-surface uppercase tracking-wider">
+                  Pilih Unsur Tabel Periodik (<i>Z</i> = 1 s.d. 36):
+                </label>
+                <select 
+                  id="select-element" 
+                  onchange="handleElementSelectChange()" 
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-outline-variant bg-white dark:bg-surface-container text-slate-900 dark:text-on-surface font-semibold text-xs sm:text-sm focus:ring-2 focus:ring-primary focus:outline-none transition-all cursor-pointer">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700 dark:text-on-surface uppercase tracking-wider">
+                  Acak Unsur Cepat:
+                </label>
+                <button 
+                  onclick="pickRandomElement()" 
+                  class="w-full py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-surface-container hover:bg-violet-50 hover:text-violet-700 dark:hover:bg-surface-container-high text-slate-700 dark:text-on-surface border border-slate-200 dark:border-outline-variant text-xs font-bold transition-all flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer active:scale-95">
+                  <span class="material-symbols-outlined text-[16px] text-violet-600 dark:text-primary">shuffle</span>
+                  <span>Pilih Unsur Acak</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick Badges Examples -->
+            <div class="space-y-1.5 pt-1">
+              <span class="text-[11px] font-bold text-slate-400 dark:text-on-surface-variant uppercase tracking-wider block">Unsur Contoh Pembelajaran Penting:</span>
+              <div class="flex flex-wrap gap-1.5">
+                <button onclick="setElementByZ(1)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>1</sub>H</button>
+                <button onclick="setElementByZ(6)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>6</sub>C</button>
+                <button onclick="setElementByZ(7)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>7</sub>N</button>
+                <button onclick="setElementByZ(8)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>8</sub>O</button>
+                <button onclick="setElementByZ(11)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 dark:bg-tertiary-container/50 text-emerald-700 dark:text-tertiary border border-emerald-300 dark:border-tertiary/30 transition-colors"><sub>11</sub>Na</button>
+                <button onclick="setElementByZ(13)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>13</sub>Al</button>
+                <button onclick="setElementByZ(17)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>17</sub>Cl</button>
+                <button onclick="setElementByZ(18)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>18</sub>Ar</button>
+                <button onclick="setElementByZ(21)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>21</sub>Sc</button>
+                <button onclick="setElementByZ(24)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 transition-colors" title="Anomali d5 kestabilan setengah penuh"><sub>24</sub>Cr (Anomali)</button>
+                <button onclick="setElementByZ(26)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>26</sub>Fe</button>
+                <button onclick="setElementByZ(29)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 transition-colors" title="Anomali d10 kestabilan penuh"><sub>29</sub>Cu (Anomali)</button>
+                <button onclick="setElementByZ(30)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>30</sub>Zn</button>
+                <button onclick="setElementByZ(35)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>35</sub>Br</button>
+                <button onclick="setElementByZ(36)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-surface-container hover:bg-primary/20 transition-colors"><sub>36</sub>Kr</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mode 2: Kustom Subkulit Input Controls -->
+          <div id="sim-controls-custom" class="hidden space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="space-y-1">
+                <label for="custom-n" class="block text-xs font-bold text-slate-700 dark:text-on-surface uppercase tracking-wider">
+                  Kulit (<i>n</i>):
+                </label>
+                <select id="custom-n" onchange="handleCustomSubshellChange()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-outline-variant bg-white dark:bg-surface-container text-slate-900 dark:text-on-surface font-semibold text-xs sm:text-sm focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3" selected>3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                </select>
+              </div>
+
+              <div class="space-y-1">
+                <label for="custom-subshell-type" class="block text-xs font-bold text-slate-700 dark:text-on-surface uppercase tracking-wider">
+                  Jenis Subkulit (<i>l</i>):
+                </label>
+                <select id="custom-subshell-type" onchange="handleCustomSubshellChange()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-outline-variant bg-white dark:bg-surface-container text-slate-900 dark:text-on-surface font-semibold text-xs sm:text-sm focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer">
+                  <option value="s">s (l = 0, maks 2 elektron)</option>
+                  <option value="p" selected>p (l = 1, maks 6 elektron)</option>
+                  <option value="d">d (l = 2, maks 10 elektron)</option>
+                </select>
+              </div>
+
+              <div class="space-y-1">
+                <label for="custom-electron-count" class="block text-xs font-bold text-slate-700 dark:text-on-surface uppercase tracking-wider">
+                  Jumlah Elektron di Subkulit:
+                </label>
+                <select id="custom-electron-count" onchange="handleCustomSubshellChange()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-outline-variant bg-white dark:bg-surface-container text-slate-900 dark:text-on-surface font-semibold text-xs sm:text-sm focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Simulator Result Display -->
+        <div class="space-y-5 pt-2">
+          
+          <!-- Element Identity & Configuration Card -->
+          <div class="stitch-subbox rounded-xl p-4 sm:p-5 border border-slate-200 dark:border-outline-variant/60 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-2xl shadow-sm" id="disp-elem-symbol">
+                  Na
+                </div>
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-on-surface" id="disp-elem-name">Natrium</h4>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-violet-100 dark:bg-primary/20 text-violet-700 dark:text-primary" id="disp-elem-z">Z=11</span>
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-on-surface-variant" id="disp-elem-period-group">Periode 3, Golongan IA</p>
+                </div>
+              </div>
+
+              <div class="text-right text-xs">
+                <span class="text-slate-400 dark:text-on-surface-variant block">Subkulit Elektron Terakhir:</span>
+                <span class="font-mono font-black text-base text-violet-700 dark:text-primary" id="disp-last-subshell-badge">3s<sup>1</sup></span>
+              </div>
+            </div>
+
+            <!-- Configuration breakdown -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-200 dark:border-outline-variant/40">
+              <div class="p-2.5 rounded-lg bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant">
+                <span class="text-[10px] font-semibold text-slate-400 dark:text-on-surface-variant block">Konfigurasi Elektron Lengkap:</span>
+                <span id="disp-conf-full" class="font-mono font-bold text-slate-800 dark:text-on-surface text-[11px] sm:text-xs">1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>1</sup></span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant">
+                <span class="text-[10px] font-semibold text-slate-400 dark:text-on-surface-variant block">Penyingkatan Gas Mulia:</span>
+                <span id="disp-conf-noble" class="font-mono font-bold text-emerald-600 dark:text-tertiary text-[11px] sm:text-xs">[Ne] 3s<sup>1</sup></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Orbital Box Diagram -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="text-xs font-bold text-slate-700 dark:text-on-surface flex items-center space-x-1.5 uppercase tracking-wider">
+                <span class="material-symbols-outlined text-[16px] text-violet-600 dark:text-primary">grid_3x3</span>
+                <span>Diagram Kotak Orbital Subkulit Terakhir (<span id="disp-diagram-subshell-label" class="text-violet-700 dark:text-primary font-mono font-bold">3s<sup>1</sup></span>):</span>
+              </div>
+              <span class="text-[11px] text-slate-500 dark:text-on-surface-variant">Sesuai Kaidah Hund &amp; Asas Pauli</span>
+            </div>
+
+            <!-- Boxes Container populated by JS -->
+            <div id="orbital-boxes-container" class="flex flex-wrap items-center justify-center gap-3 p-5 rounded-2xl stitch-subbox border border-slate-200 dark:border-outline-variant/60 min-h-[90px]">
+              <!-- Dynamic orbital boxes -->
+            </div>
+          </div>
+
+          <!-- 4 Quantum Numbers Result Cards Grid -->
+          <div class="space-y-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-on-surface-variant block">
+              Hasil 4 Bilangan Kuantum Elektron Terakhir:
+            </span>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              
+              <!-- Hasil n -->
+              <div class="stitch-card rounded-2xl p-4 shadow-sm text-center space-y-1 hover:border-blue-400 transition-all">
+                <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">Utama (<i>n</i>)</span>
+                <div id="disp-result-n" class="text-3xl font-black text-blue-600 dark:text-blue-400 font-mono">3</div>
+                <div id="disp-detail-n" class="text-[10px] text-slate-500 dark:text-on-surface-variant font-medium">Kulit M (n=3)</div>
+              </div>
+
+              <!-- Hasil l -->
+              <div class="stitch-card rounded-2xl p-4 shadow-sm text-center space-y-1 hover:border-emerald-400 transition-all">
+                <span class="text-[10px] font-bold text-emerald-600 dark:text-tertiary uppercase tracking-wider block">Azimut (<i>l</i>)</span>
+                <div id="disp-result-l" class="text-3xl font-black text-emerald-600 dark:text-tertiary font-mono">0</div>
+                <div id="disp-detail-l" class="text-[10px] text-slate-500 dark:text-on-surface-variant font-medium">Subkulit s</div>
+              </div>
+
+              <!-- Hasil m -->
+              <div class="stitch-card rounded-2xl p-4 shadow-sm text-center space-y-1 hover:border-amber-400 transition-all">
+                <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">Magnetik (<i>m</i>)</span>
+                <div id="disp-result-m" class="text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">0</div>
+                <div id="disp-detail-m" class="text-[10px] text-slate-500 dark:text-on-surface-variant font-medium">Kotak m = 0</div>
+              </div>
+
+              <!-- Hasil s -->
+              <div class="stitch-card rounded-2xl p-4 shadow-sm text-center space-y-1 hover:border-rose-400 transition-all">
+                <span class="text-[10px] font-bold text-rose-500 uppercase tracking-wider block">Spin (<i>s</i>)</span>
+                <div id="disp-result-s" class="text-3xl font-black text-rose-500 font-mono">+&frac12;</div>
+                <div id="disp-detail-s" class="text-[10px] text-slate-500 dark:text-on-surface-variant font-medium">Panah Atas (&uarr;)</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Step-by-Step Pedagogical Explanation -->
+          <div class="stitch-card rounded-2xl p-5 shadow-sm space-y-2 border-l-4 border-l-violet-500">
+            <div class="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-violet-700 dark:text-primary">
+              <span class="material-symbols-outlined text-[17px]">psychology</span>
+              <span>Langkah Penentuan Pedagogis:</span>
+            </div>
+            <div id="disp-step-by-step" class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed space-y-1.5">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ==================== 3. VALIDATOR KOMBINASI BILANGAN KUANTUM ==================== -->
+      <div id="section-validator" class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-5 scroll-mt-24">
+        
+        <div class="flex items-center space-x-3 pb-2 border-b border-slate-100 dark:border-outline-variant/60">
+          <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">verified</span>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-on-surface">
+              Validator Kombinasi Set Bilangan Kuantum
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+              Alat uji cepat untuk memeriksa apakah suatu set (<i>n, l, m, s</i>) diizinkan (*valid*) atau melanggar aturan kuantum fisika.
+            </p>
+          </div>
+        </div>
+
+        <!-- Form Input Validator -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="space-y-1">
+            <label for="val-input-n" class="block text-xs font-bold text-slate-700 dark:text-on-surface uppercase tracking-wider">
+              Nilai <i>n</i>:
+            </label>
+            <select id="val-input-n" onchange="runQuantumValidator()" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-outline-variant bg-white dark:bg-surface-container text-slate-800 dark:text-on-surface font-semibold text-xs sm:text-sm focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label for="val-input-l" class="block text-xs font-bold text-slate-700 dark:text-on-surface uppercase tracking-wider">
+              Nilai <i>l</i>:
+            </label>
+            <select id="val-input-l" onchange="runQuantumValidator()" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-outline-variant bg-white dark:bg-surface-container text-slate-800 dark:text-on-surface font-semibold text-xs sm:text-sm focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer">
+              <option value="0">0 (subkulit s)</option>
+              <option value="1" selected>1 (subkulit p)</option>
+              <option value="2">2 (subkulit d)</option>
+              <option value="3">3 (subkulit f)</option>
+              <option value="4">4 (subkulit g)</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label for="val-input-m" class="block text-xs font-bold text-slate-700 dark:text-on-surface uppercase tracking-wider">
+              Nilai <i>m</i>:
+            </label>
+            <select id="val-input-m" onchange="runQuantumValidator()" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-outline-variant bg-white dark:bg-surface-container text-slate-800 dark:text-on-surface font-semibold text-xs sm:text-sm focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer">
+              <option value="-3">-3</option>
+              <option value="-2">-2</option>
+              <option value="-1" selected>-1</option>
+              <option value="0">0</option>
+              <option value="1">+1</option>
+              <option value="2">+2</option>
+              <option value="3">+3</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label for="val-input-s" class="block text-xs font-bold text-slate-700 dark:text-on-surface uppercase tracking-wider">
+              Nilai <i>s</i>:
+            </label>
+            <select id="val-input-s" onchange="runQuantumValidator()" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-outline-variant bg-white dark:bg-surface-container text-slate-800 dark:text-on-surface font-semibold text-xs sm:text-sm focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer">
+              <option value="+1/2" selected>+&frac12; (&uarr;)</option>
+              <option value="-1/2">-&frac12; (&darr;)</option>
+              <option value="0">0 (Salah)</option>
+              <option value="+1">+1 (Salah)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tombol Preset Soal UTBK/Ujian -->
+        <div class="space-y-1.5">
+          <span class="text-[11px] font-bold text-slate-400 dark:text-on-surface-variant uppercase tracking-wider block">Contoh Soal Ujian (Klik untuk menguji):</span>
+          <div class="flex flex-wrap gap-1.5">
+            <button onclick="loadValidatorPreset(3, 1, -1, '+1/2')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-surface-container hover:bg-emerald-100 hover:text-emerald-800 dark:hover:bg-tertiary-container/30 transition-colors">
+              Set A: n=3, l=1, m=-1, s=+&frac12; (Valid)
+            </button>
+            <button onclick="loadValidatorPreset(2, 2, 0, '+1/2')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-surface-container hover:bg-rose-100 hover:text-rose-800 dark:hover:bg-rose-950/40 transition-colors">
+              Set B: n=2, l=2, m=0, s=+&frac12; (Invalid l)
+            </button>
+            <button onclick="loadValidatorPreset(3, 1, 2, '-1/2')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-surface-container hover:bg-rose-100 hover:text-rose-800 dark:hover:bg-rose-950/40 transition-colors">
+              Set C: n=3, l=1, m=+2, s=-&frac12; (Invalid m)
+            </button>
+            <button onclick="loadValidatorPreset(4, 0, 0, '-1/2')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-surface-container hover:bg-emerald-100 hover:text-emerald-800 dark:hover:bg-tertiary-container/30 transition-colors">
+              Set D: n=4, l=0, m=0, s=-&frac12; (Valid)
+            </button>
+          </div>
+        </div>
+
+        <!-- Hasil Validasi Box -->
+        <div id="val-result-box" class="p-4 rounded-xl bg-emerald-50 dark:bg-tertiary-container/20 border border-emerald-200 dark:border-tertiary/30 space-y-1.5 transition-all">
+          <div class="flex items-center space-x-2">
+            <span id="val-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-600 text-white">
+              &check; KOMBINASI VALID (DIIZINKAN)
+            </span>
+            <span id="val-subshell-label" class="font-mono font-bold text-xs sm:text-sm text-emerald-800 dark:text-tertiary">
+              Orbital 3p
+            </span>
+          </div>
+          <p id="val-explanation" class="text-xs text-slate-700 dark:text-on-surface-variant leading-relaxed">
+            Kombinasi ini memenuhi seluruh kaidah mekanika kuantum: <i>l</i> &lt; <i>n</i> (1 &lt; 3), nilai <i>m</i> berada dalam rentang -1 &le; <i>m</i> &le; +1, dan nilai <i>s</i> = +&frac12;. Set bilangan kuantum ini mewakili elektron nyata dalam atom.
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+    <!-- ==================== 4. VISUALISASI BENTUK ORBITAL 3D ==================== -->
+    <section id="section-orbital-3d" class="space-y-6 scroll-mt-24">
+      
+      <!-- Section Header -->
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          4
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Visualisasi Bentuk Orbital Atom 3 Dimensi
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Eksplorasi bentuk geometri dan ruang kebolehjadian elektron (|&psi;|<sup>2</sup>) dalam koordinat kartesius 3D.
+          </p>
+        </div>
+      </div>
+
+      <!-- Orbital 3D Interactive Canvas & Controls Container -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-5">
+        
+        <!-- Controls & Mode Selector -->
+        <div class="space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span class="text-xs font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider">
+              Pilih Geometri Orbital untuk Ditampilkan:
+            </span>
+            <span class="text-xs text-primary font-semibold flex items-center space-x-1">
+              <span class="material-symbols-outlined text-[15px]">touch_app</span>
+              <span>Klik & Tarik Kanvas untuk Memutar Sudut Pandang 3D</span>
+            </span>
+          </div>
+
+          <!-- Buttons Group for Orbital Selection -->
+          <div class="flex flex-wrap gap-2">
+            <!-- Orbital s -->
+            <button 
+              onclick="selectOrbitalShape('s')" 
+              id="btn-orb-s" 
+              class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-primary text-on-primary shadow-sm flex items-center space-x-1.5 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+              <span>Orbital s (Bola / Spherical)</span>
+            </button>
+
+            <!-- Orbital p -->
+            <button 
+              onclick="selectOrbitalShape('px')" 
+              id="btn-orb-px" 
+              class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface-variant hover:bg-violet-100 dark:hover:bg-primary/20 hover:text-primary cursor-pointer border border-transparent hover:border-violet-300 dark:hover:border-primary/40">
+              Orbital <i>p</i><sub>x</sub> (Sumbu X)
+            </button>
+            <button 
+              onclick="selectOrbitalShape('py')" 
+              id="btn-orb-py" 
+              class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface-variant hover:bg-violet-100 dark:hover:bg-primary/20 hover:text-primary cursor-pointer border border-transparent hover:border-violet-300 dark:hover:border-primary/40">
+              Orbital <i>p</i><sub>y</sub> (Sumbu Y)
+            </button>
+            <button 
+              onclick="selectOrbitalShape('pz')" 
+              id="btn-orb-pz" 
+              class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface-variant hover:bg-violet-100 dark:hover:bg-primary/20 hover:text-primary cursor-pointer border border-transparent hover:border-violet-300 dark:hover:border-primary/40">
+              Orbital <i>p</i><sub>z</sub> (Sumbu Z)
+            </button>
+
+            <!-- Orbital d -->
+            <button 
+              onclick="selectOrbitalShape('dxy')" 
+              id="btn-orb-dxy" 
+              class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface-variant hover:bg-violet-100 dark:hover:bg-primary/20 hover:text-primary cursor-pointer border border-transparent hover:border-violet-300 dark:hover:border-primary/40">
+              Orbital <i>d</i><sub>xy</sub> (Semanggi 4 Cuping)
+            </button>
+            <button 
+              onclick="selectOrbitalShape('dz2')" 
+              id="btn-orb-dz2" 
+              class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface-variant hover:bg-violet-100 dark:hover:bg-primary/20 hover:text-primary cursor-pointer border border-transparent hover:border-violet-300 dark:hover:border-primary/40">
+              Orbital <i>d</i><sub>z<sup>2</sup></sub> (Cuping & Donat)
+            </button>
+          </div>
+        </div>
+
+        <!-- Canvas Display Area -->
+        <div class="relative w-full h-[380px] sm:h-[430px] rounded-2xl bg-gradient-to-b from-[#060608] via-[#0d0d12] to-[#12111a] border border-slate-800 overflow-hidden shadow-inner">
+          
+          <canvas 
+            id="orbital-canvas" 
+            class="w-full h-full cursor-grab active:cursor-grabbing block"
+            style="width: 100%; height: 100%; display: block;">
+          </canvas>
+
+          <!-- Top-Left Floating Badge: Orbital Information -->
+          <div class="absolute top-4 left-4 pointer-events-none space-y-1">
+            <span id="canvas-orb-title" class="inline-block px-3 py-1 rounded-full text-xs font-black bg-violet-600/90 text-white backdrop-blur-md shadow-md border border-violet-400/30">
+              Orbital s (l = 0, m = 0)
+            </span>
+            <p id="canvas-orb-desc" class="text-[11px] text-violet-200/90 max-w-xs font-medium drop-shadow">
+              Simetri bola seragam di sekitar inti atom. Tidak memiliki bidang simpul sudut.
+            </p>
+          </div>
+
+          <!-- Bottom-Right Floating Controls -->
+          <div class="absolute bottom-4 right-4 flex items-center space-x-2 z-10">
+            <button 
+              onclick="toggleCanvasAutoRotate()" 
+              id="btn-canvas-rotate" 
+              class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer">
+              <span class="material-symbols-outlined text-[15px]">3d_rotation</span>
+              <span id="label-auto-rotate">Jeda Rotasi</span>
+            </button>
+            <button 
+              onclick="resetCanvasView()" 
+              class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer">
+              <span class="material-symbols-outlined text-[15px]">restart_alt</span>
+              <span>Reset Sudut</span>
+            </button>
+          </div>
+
+          <!-- Sumbu Kartesius Watermark -->
+          <div class="absolute bottom-4 left-4 text-[10px] font-mono text-slate-400/80 pointer-events-none flex items-center space-x-2 bg-black/40 px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/5">
+            <span class="text-rose-400 font-bold">&mdash; +X</span>
+            <span class="text-slate-600">|</span>
+            <span class="text-emerald-400 font-bold">&mdash; +Y</span>
+            <span class="text-slate-600">|</span>
+            <span class="text-sky-400 font-bold">&mdash; +Z</span>
+          </div>
+
+        </div>
+
+        <!-- Deskripsi Teori Geometri & Nodus Orbital -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+          
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 space-y-1.5">
+            <div class="flex items-center space-x-2 text-violet-700 dark:text-primary font-bold text-xs">
+              <span class="material-symbols-outlined text-[16px]">circle</span>
+              <span>Orbital s (<i>l</i> = 0)</span>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              Memiliki simetri bola (<i>spherical symmetry</i>). Peluang menemukan elektron sama besar ke segala arah dari inti atom. Memiliki 0 bidang simpul sudut.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 space-y-1.5">
+            <div class="flex items-center space-x-2 text-cyan-700 dark:text-cyan-400 font-bold text-xs">
+              <span class="material-symbols-outlined text-[16px]">all_inclusive</span>
+              <span>Orbital p (<i>l</i> = 1)</span>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              Terdiri dari dua cuping terpilin (<i>dumbbell</i>) yang terarah pada sumbu <i>X</i>, <i>Y</i>, atau <i>Z</i> (<i>p</i><sub>x</sub>, <i>p</i><sub>y</sub>, <i>p</i><sub>z</sub>). Memiliki 1 bidang simpul (<i>nodal plane</i>) di mana peluang elektron = 0.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 space-y-1.5">
+            <div class="flex items-center space-x-2 text-emerald-700 dark:text-tertiary font-bold text-xs">
+              <span class="material-symbols-outlined text-[16px]">spa</span>
+              <span>Orbital d (<i>l</i> = 2)</span>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+              Empat dari lima orbital <i>d</i> (<i>d</i><sub>xy</sub>, <i>d</i><sub>yz</sub>, <i>d</i><sub>xz</sub>, <i>d</i><sub>x<sup>2</sup>-y<sup>2</sup></sub>) berbentuk daun semanggi empat cuping, sedangkan orbital <i>d</i><sub>z<sup>2</sup></sub> berbentuk dua cuping berporos sumbu Z dengan cincin torus (<i>donut ring</i>). Memiliki 2 bidang simpul.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+    <!-- ==================== 5. KUIS INTERAKTIF & EVALUASI PEMAHAMAN ==================== -->
+    <section id="section-kuis" class="space-y-6 scroll-mt-24">
+      
+      <!-- Section Header -->
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          5
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Uji Pemahaman: Kuis 12 Soal Pilihan Ganda HOTS
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Latihan komprehensif menguji penentuan bilangan kuantum elektron terakhir, validasi set kuantum, dan bentuk orbital.
+          </p>
+        </div>
+      </div>
+
+      <!-- Quiz Wrapper Card -->
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-5">
+        
+        <!-- Score & Control Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-violet-600 text-white flex items-center justify-center font-black text-lg shadow-sm">
+              <span id="quiz-score-number">0</span>
+            </div>
+            <div>
+              <div class="text-[11px] font-bold text-slate-500 dark:text-on-surface-variant uppercase tracking-wider">Skor Kuis Anda</div>
+              <div class="text-sm sm:text-base font-headline font-bold text-slate-900 dark:text-on-surface">
+                <span id="quiz-correct-count">0</span> dari 12 Soal Terjawab Benar (<span id="quiz-score-percent">0%</span>)
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button 
+              onclick="resetQuiz()" 
+              class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-surface-container-high border border-slate-200 dark:border-outline-variant hover:bg-slate-50 dark:hover:bg-surface-container text-slate-700 dark:text-on-surface transition-all flex items-center space-x-1.5 shadow-sm cursor-pointer">
+              <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+              <span>Ulangi Kuis</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Container for 12 Questions (rendered by JavaScript) -->
+        <div id="quiz-container" class="space-y-4">
+          <!-- Populated by JS -->
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================== 6. LEMBAR PENYELIDIKAN LAB ESSAI (HOTS) ==================== -->
+    <section id="section-penyelidikan" class="space-y-6 scroll-mt-24">
+      
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          6
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Lembar Penyelidikan Analitis (Lab Essai HOTS)
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Tuliskan analisis penalaran Anda berdasarkan simulator dan teori kuantum yang telah dipelajari.
+          </p>
+        </div>
+      </div>
+
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-5">
+        
+        <!-- Soal Essai 1: Anomali Kromium -->
+        <div class="p-4 rounded-xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 space-y-2.5">
+          <div class="flex items-center space-x-2">
+            <span class="w-6 h-6 rounded-lg bg-violet-600 text-white flex items-center justify-center font-bold text-xs">1</span>
+            <h4 class="text-xs sm:text-sm font-headline font-bold text-slate-900 dark:text-on-surface">
+              Penyelidikan Kuantum Anomali Kromium (<sub>24</sub>Cr) vs Vanadium (<sub>23</sub>V)
+            </h4>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Secara aturan Aufbau biasa, konfigurasi elektron <sub>24</sub>Cr diperkirakan [Ar] 4s<sup>2</sup> 3d<sup>4</sup>. Namun secara eksperimental, konfigurasi yang stabil adalah [Ar] 4s<sup>1</sup> 3d<sup>5</sup>. Jelaskan mengapa fenomena orbital setengah penuh (<i>half-filled</i>) ini lebih stabil, dan tentukan keempat bilangan kuantum (<i>n</i>, <i>l</i>, <i>m</i>, <i>s</i>) untuk elektron terakhir dari atom Kromium tersebut!
+          </p>
+          <textarea 
+            id="lab-essay-1" 
+            rows="4" 
+            oninput="handleStudentInfoChange()" 
+            placeholder="Tuliskan analisis Anda mengenai kestabilan orbital setengah penuh dan harga 4 bilangan kuantum elektron terakhir Cr di sini..." 
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-outline-variant bg-slate-50 dark:bg-surface-container-lowest text-slate-900 dark:text-on-surface text-xs focus:ring-2 focus:ring-primary focus:outline-none transition-all leading-relaxed"></textarea>
+        </div>
+
+        <!-- Soal Essai 2: Sifat Kemagnetan Cl vs Ar -->
+        <div class="p-4 rounded-xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 space-y-2.5">
+          <div class="flex items-center space-x-2">
+            <span class="w-6 h-6 rounded-lg bg-violet-600 text-white flex items-center justify-center font-bold text-xs">2</span>
+            <h4 class="text-xs sm:text-sm font-headline font-bold text-slate-900 dark:text-on-surface">
+              Sifat Kemagnetan Atom: Klorin (<sub>17</sub>Cl) vs Argon (<sub>18</sub>Ar)
+            </h4>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Gambarkan/jelaskan susunan elektron pada subkulit 3p untuk atom Klorin (3p<sup>5</sup>) dan Argon (3p<sup>6</sup>) menggunakan Kaidah Hund. Mengapa Klorin bersifat paramagnetik (ditarik lemah oleh medan magnet), sedangkan Argon bersifat diamagnetik (ditolak medan magnet)? Hubungkan penjelasan Anda dengan keberadaan elektron tidak berpasangan dan bilangan kuantum spin!
+          </p>
+          <textarea 
+            id="lab-essay-2" 
+            rows="4" 
+            oninput="handleStudentInfoChange()" 
+            placeholder="Tuliskan analisis perbandingan konfigurasi subkulit 3p, elektron tidak berpasangan, dan sifat kemagnetan di sini..." 
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-outline-variant bg-slate-50 dark:bg-surface-container-lowest text-slate-900 dark:text-on-surface text-xs focus:ring-2 focus:ring-primary focus:outline-none transition-all leading-relaxed"></textarea>
+        </div>
+
+        <!-- Soal Essai 3: Analisis Kesalahan Konsep Orbital 2d -->
+        <div class="p-4 rounded-xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 space-y-2.5">
+          <div class="flex items-center space-x-2">
+            <span class="w-6 h-6 rounded-lg bg-violet-600 text-white flex items-center justify-center font-bold text-xs">3</span>
+            <h4 class="text-xs sm:text-sm font-headline font-bold text-slate-900 dark:text-on-surface">
+              Evaluasi Kritis Soal Ujian: Benarkah Elektron Berada pada Orbital 2d?
+            </h4>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Seorang peserta didik menuliskan dalam lembar jawabannya bahwa suatu elektron memiliki set bilangan kuantum: <i>n</i> = 2, <i>l</i> = 2, <i>m</i> = +1, <i>s</i> = +&frac12;. Berdasarkan prinsip mekanika kuantum, apakah jawaban peserta didik tersebut benar? Jelaskan batas-batas matematis harga bilangan kuantum yang dilanggar dan mengapa orbital 2d tidak pernah ada di alam semesta!
+          </p>
+          <textarea 
+            id="lab-essay-3" 
+            rows="4" 
+            oninput="handleStudentInfoChange()" 
+            placeholder="Tuliskan penjelasan kritis mengapa set bilangan kuantum tersebut tidak mungkin menurut aturan l < n..." 
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-outline-variant bg-slate-50 dark:bg-surface-container-lowest text-slate-900 dark:text-on-surface text-xs focus:ring-2 focus:ring-primary focus:outline-none transition-all leading-relaxed"></textarea>
+        </div>
+
+      </div>
+
+    </section>
+    <!-- ==================== 7. REFLEKSI DIRI SISWA ==================== -->
+    <section id="section-refleksi" class="space-y-6 scroll-mt-24">
+      
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-cyan-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          7
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Refleksi Diri & Pemahaman Maknawi
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Tuliskan pengalaman belajar, hal paling menakjubkan yang Anda temukan, atau pemahaman baru mengenai keteraturan kuantum.
+          </p>
+        </div>
+      </div>
+
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <label for="student-reflection-text" class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-on-surface">
+            Catatan Refleksi Mandiri Pembelajar:
+          </label>
+          <div class="flex items-center space-x-2">
+            <button 
+              onclick="copyReflectionNote()" 
+              class="text-xs text-primary hover:underline font-semibold flex items-center space-x-1 cursor-pointer">
+              <span class="material-symbols-outlined text-[15px]">content_copy</span>
+              <span>Salin Refleksi</span>
+            </button>
+          </div>
+        </div>
+
+        <textarea 
+          id="student-reflection-text" 
+          rows="4" 
+          oninput="handleStudentInfoChange()" 
+          placeholder="Setelah menelusuri materi 4 bilangan kuantum dan simulator ini, saya menyadari bahwa posisi elektron..." 
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-outline-variant bg-white dark:bg-surface-container-lowest text-slate-900 dark:text-on-surface text-xs focus:ring-2 focus:ring-primary focus:outline-none transition-all leading-relaxed"></textarea>
+
+        <!-- Inspirasi Pertanyaan Pemantik Refleksi -->
+        <div class="flex flex-wrap gap-2 pt-1 items-center">
+          <span class="text-[11px] font-bold text-slate-400 dark:text-on-surface-variant uppercase tracking-wider">Inspirasi Jawaban:</span>
+          <button 
+            onclick="insertPromptIntoReflection('Setelah mempelajari 4 bilangan kuantum, saya takjub betapa teraturnya alam mikroskopis ciptaan Allah SWT. Dari analogi alamat rumah hingga diagram Hund, saya kini paham bahwa tiap elektron memiliki KTP kuantum yang unik dan tidak mungkin kembar.')" 
+            class="px-2.5 py-1 rounded-lg text-xs bg-slate-100 dark:bg-surface-container text-slate-600 dark:text-on-surface-variant hover:bg-violet-100 hover:text-violet-800 dark:hover:bg-primary/20 dark:hover:text-primary transition-all cursor-pointer">
+            &#10024; Keteraturan KTP Elektron &amp; Alam Semesta
+          </button>
+          <button 
+            onclick="insertPromptIntoReflection('Bagian paling menarik bagi saya adalah visualisasi bentuk orbital 3D dan simulator Kaidah Hund. Melihat elektron terakhir disorot dengan warna emas sangat membantu saya memahami penentuan nilai m dan spin s.')" 
+            class="px-2.5 py-1 rounded-lg text-xs bg-slate-100 dark:bg-surface-container text-slate-600 dark:text-on-surface-variant hover:bg-violet-100 hover:text-violet-800 dark:hover:bg-primary/20 dark:hover:text-primary transition-all cursor-pointer">
+            &#129680; Visualisasi Simulator &amp; Kaidah Hund
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== 8. PUSAT PENGUMPULAN TUGAS (DATABASE GURU) ==================== -->
+    <section id="section-tugas" class="space-y-6 scroll-mt-24">
+      
+      <div class="flex items-center space-x-3 pb-2 border-b border-slate-200 dark:border-outline-variant">
+        <div class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+          8
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface">
+            Pusat Pengumpulan Tugas & Rekapitulasi Nilai
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-on-surface-variant">
+            Kirimkan hasil kerja Anda langsung ke Google Spreadsheet guru atau ekspor sebagai PDF Rapor Lembar Kerja.
+          </p>
+        </div>
+      </div>
+
+      <div class="stitch-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-5">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          
+          <!-- Ringkasan Nilai & Status Siswa -->
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 space-y-3">
+            <h4 class="text-xs sm:text-sm font-headline font-bold text-slate-900 dark:text-on-surface flex items-center space-x-2">
+              <span class="material-symbols-outlined text-[18px] text-primary">assignment_turned_in</span>
+              <span>Ringkasan Data yang Akan Dikirim:</span>
+            </h4>
+            <div class="space-y-2 text-xs text-slate-700 dark:text-on-surface-variant">
+              <div class="flex justify-between py-1 border-b border-slate-200 dark:border-outline-variant/60">
+                <span>Nama Pembelajar:</span>
+                <strong id="summary-student-name" class="text-primary">-</strong>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-200 dark:border-outline-variant/60">
+                <span>Kelas / Fase:</span>
+                <strong id="summary-student-class" class="text-primary">-</strong>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-200 dark:border-outline-variant/60">
+                <span>No. Absen / NISN:</span>
+                <strong id="summary-student-nis" class="text-primary">-</strong>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-200 dark:border-outline-variant/60">
+                <span>Skor Kuis (12 Soal):</span>
+                <strong id="summary-quiz-score" class="text-emerald-600 dark:text-tertiary font-bold">0 / 100</strong>
+              </div>
+              <div class="flex justify-between py-1">
+                <span>Status 3 Soal Lab Essai:</span>
+                <strong id="summary-essay-status" class="text-amber-600 dark:text-amber-400 font-bold">Belum Lengkap</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tindakan Pengiriman -->
+          <div class="space-y-3 flex flex-col justify-center">
+            
+            <!-- Tombol Utama: Kirim ke Database Spreadsheet Guru -->
+            <button 
+              id="btn-submit-db" 
+              onclick="submitToTeacherDatabase()" 
+              class="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-md shadow-violet-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer">
+              <span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+              <span>Kirim ke Database Guru (Spreadsheet)</span>
+            </button>
+
+            <!-- Tombol Cadangan 1: Kirim via Email Guru -->
+            <button 
+              onclick="sendEmailToTeacher()" 
+              class="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-surface-container hover:bg-slate-200 dark:hover:bg-surface-container-high text-slate-800 dark:text-on-surface font-bold text-xs flex items-center justify-center space-x-2 transition-all shadow-sm cursor-pointer border border-slate-200 dark:border-outline-variant/60">
+              <span class="material-symbols-outlined text-[16px] text-blue-500">mail</span>
+              <span>Kirim Cadangan via Email Guru (vanzaltito123@gmail.com)</span>
+            </button>
+
+            <!-- Tombol Cadangan 2: Salin Ringkasan Teks Laporan -->
+            <div class="grid grid-cols-2 gap-2 pt-0.5">
+              <button 
+                onclick="copyReportSummary()" 
+                class="py-2 px-3 rounded-xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant hover:border-primary text-slate-700 dark:text-on-surface font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-sm cursor-pointer">
+                <span class="material-symbols-outlined text-[16px] text-primary">content_copy</span>
+                <span>Salin Teks</span>
+              </button>
+
+              <button 
+                onclick="exportReportPDF()" 
+                class="py-2 px-3 rounded-xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant hover:border-indigo-500 text-slate-700 dark:text-on-surface font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-sm cursor-pointer">
+                <span class="material-symbols-outlined text-[16px] text-indigo-500">print</span>
+                <span>Cetak / PDF</span>
+              </button>
+            </div>
+
+            <!-- Tombol Reset Tugas -->
+            <div class="pt-1 text-center">
+              <button 
+                onclick="confirmResetTask()" 
+                class="text-[11px] text-rose-500 hover:text-rose-600 hover:underline font-semibold cursor-pointer">
+                Reset Seluruh Identitas & Lembar Jawaban
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================== MUTIARA HIKMAH & FOOTER ==================== -->
+    <section id="section-quotes-islami" class="p-6 sm:p-7 rounded-2xl bg-gradient-to-br from-[#13111c] to-[#1c1829] text-white shadow-xl space-y-3 border border-violet-500/20">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-lg bg-violet-500/20 border border-violet-400/30 flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined text-[18px]">format_quote</span>
+        </div>
+        <h4 class="text-xs sm:text-sm font-headline font-bold text-violet-200">
+          Mutiara Hikmah Kuantum & Adab Menuntut Ilmu
+        </h4>
+      </div>
+      <p class="text-xs text-violet-100/90 leading-relaxed italic">
+        "Pengetahuan tentang bilangan kuantum mengajarkan kita bahwa partikel terkecil pun hidup dalam keteraturan hukum-Nya yang amat presisi. Tiada satu zarrah pun yang bergerak di luar ketentuan Sang Pencipta. Jadikanlah setiap pemahaman rumus kimia sebagai jembatan untuk semakin mengagungkan kebesaran Allah SWT dan menebar manfaat bagi sesama."
+      </p>
+      <div class="text-right text-xs text-primary font-semibold">
+        &mdash; Tito Vanzal, S.Pd. &bull; Guru Kimia SMA Progresif Bumi Shalawat
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="mt-16 border-t border-slate-200 dark:border-outline-variant bg-white dark:bg-surface text-slate-600 dark:text-on-surface-variant py-8 text-center text-xs">
+    <div class="max-w-7xl mx-auto px-4 space-y-2">
+      <div class="flex items-center justify-center space-x-2">
+        <div class="w-6 h-6 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined text-[15px]">science</span>
+        </div>
+        <p class="font-headline font-bold text-slate-900 dark:text-on-surface">
+          Portal Bahan Ajar Kimia SMA &bull; Bilangan Kuantum & Bentuk Orbital Atom
+        </p>
+      </div>
+      <p class="text-[11px] text-slate-500 dark:text-on-surface-variant">
+        Dikembangkan untuk SMA Progresif Bumi Shalawat dengan standar Kurikulum Merdeka (Fase E & F). Hak Cipta &copy; 2026 Tito Vanzal, S.Pd. Seluruh Hak Dilindungi.
+      </p>
+    </div>
+  </footer>
+
+  <!-- ==================== JAVASCRIPT CODE LOGIC ==================== -->
+  <script>
+    /* ==============================================================================
+     * PORTAL KIMIA - MEDIA PEMBELAJARAN INTERAKTIF BILANGAN KUANTUM & BENTUK ORBITAL
+     * Pengajar: Tito Vanzal, S.Pd. (SMA Progresif Bumi Shalawat)
+     * ============================================================================== */
+
+    // 1. Safe Icon Rendering with Lucide (Anti-recursion)
+    function safeRenderIcons() {
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+      } else {
+        setTimeout(() => {
+          if (typeof lucide !== 'undefined' && lucide.createIcons) {
+            lucide.createIcons();
+          }
+        }, 300);
+      }
+    }
+
+    // 2. Web Audio API Sound Effects Synthesis
+    let audioCtx = null;
+    let isAudioEnabled = true;
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      if (!isAudioEnabled) return;
+      try {
+        initAudioContext();
+        if (!audioCtx) return;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        } else if (type === 'success') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === 'error') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(250, now);
+          osc.frequency.exponentialRampToValueAtTime(160, now + 0.15);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } else if (type === 'celebrate') {
+          // Chord fanfare
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(freq, now + idx * 0.06);
+            g.gain.setValueAtTime(0.1, now + idx * 0.06);
+            g.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+            o.start(now + idx * 0.06);
+            o.stop(now + 0.45);
+          });
+        }
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      isAudioEnabled = !isAudioEnabled;
+      const iconOn = document.getElementById('icon-sound-on');
+      const iconOff = document.getElementById('icon-sound-off');
+      if (isAudioEnabled) {
+        if (iconOn) iconOn.classList.remove('hidden');
+        if (iconOff) iconOff.classList.add('hidden');
+        playSound('click');
+      } else {
+        if (iconOn) iconOn.classList.add('hidden');
+        if (iconOff) iconOff.classList.remove('hidden');
+      }
+      safeRenderIcons();
+    }
+
+        // 3. Dark Mode Toggle & Persistence (Stitch Design System)
+    function toggleAppTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('light');
+        localStorage.setItem('chemportal_theme', 'dark');
+      } else {
+        document.documentElement.classList.add('light');
+        localStorage.setItem('chemportal_theme', 'light');
+      }
+      updateThemeIcons(isDark);
+      playSound('click');
+      if (typeof renderOrbitalCanvas === 'function') {
+        renderOrbitalCanvas();
+      }
+    }
+
+    function toggleDarkMode() {
+      toggleAppTheme();
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('chemportal_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+      updateThemeIcons(isDark);
+    }
+
+    function updateThemeIcons(isDark) {
+      const sun = document.getElementById('icon-theme-sun');
+      const moon = document.getElementById('icon-theme-moon');
+      if (sun && moon) {
+        if (isDark) {
+          sun.classList.remove('hidden');
+          moon.classList.add('hidden');
+        } else {
+          sun.classList.add('hidden');
+          moon.classList.remove('hidden');
+        }
+      }
+      safeRenderIcons();
+    }
+
+    // 4. Scroll Progress Bar Listener
+    window.addEventListener('scroll', () => {
+      const bar = document.getElementById('scroll-progress');
+      if (!bar) return;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (window.scrollY / (docHeight || 1)) * 100;
+      bar.style.width = Math.min(100, Math.max(0, progress)) + '%';
+    });
+
+    // ==============================================================================
+    // DATASET UNSUR TABEL PERIODIK (Z = 1 HINGGA 36)
+    // ==============================================================================
+    const elementsData = [
+      { z: 1, symbol: 'H', name: 'Hidrogen', mass: '1.008', category: 'Nonlogam', period: '1', group: 'IA', configFull: '1s\u00B9', configNoble: '1s\u00B9', last: { n: 1, l: 0, subshell: '1s', count: 1, max: 2 } },
+      { z: 2, symbol: 'He', name: 'Helium', mass: '4.003', category: 'Gas Mulia', period: '1', group: 'VIIIA', configFull: '1s\u00B2', configNoble: '1s\u00B2', last: { n: 1, l: 0, subshell: '1s', count: 2, max: 2 } },
+      { z: 3, symbol: 'Li', name: 'Litium', mass: '6.94', category: 'Logam Alkali', period: '2', group: 'IA', configFull: '1s\u00B2 2s\u00B9', configNoble: '[He] 2s\u00B9', last: { n: 2, l: 0, subshell: '2s', count: 1, max: 2 } },
+      { z: 4, symbol: 'Be', name: 'Berilium', mass: '9.012', category: 'Alkali Tanah', period: '2', group: 'IIA', configFull: '1s\u00B2 2s\u00B2', configNoble: '[He] 2s\u00B2', last: { n: 2, l: 0, subshell: '2s', count: 2, max: 2 } },
+      { z: 5, symbol: 'B', name: 'Boron', mass: '10.81', category: 'Metaloid', period: '2', group: 'IIIA', configFull: '1s\u00B2 2s\u00B2 2p\u00B9', configNoble: '[He] 2s\u00B2 2p\u00B9', last: { n: 2, l: 1, subshell: '2p', count: 1, max: 6 } },
+      { z: 6, symbol: 'C', name: 'Karbon', mass: '12.011', category: 'Nonlogam', period: '2', group: 'IVA', configFull: '1s\u00B2 2s\u00B2 2p\u00B2', configNoble: '[He] 2s\u00B2 2p\u00B2', last: { n: 2, l: 1, subshell: '2p', count: 2, max: 6 } },
+      { z: 7, symbol: 'N', name: 'Nitrogen', mass: '14.007', category: 'Nonlogam', period: '2', group: 'VA', configFull: '1s\u00B2 2s\u00B2 2p\u00B3', configNoble: '[He] 2s\u00B2 2p\u00B3', last: { n: 2, l: 1, subshell: '2p', count: 3, max: 6 } },
+      { z: 8, symbol: 'O', name: 'Oksigen', mass: '15.999', category: 'Nonlogam', period: '2', group: 'VIA', configFull: '1s\u00B2 2s\u00B2 2p\u2074', configNoble: '[He] 2s\u00B2 2p\u2074', last: { n: 2, l: 1, subshell: '2p', count: 4, max: 6 } },
+      { z: 9, symbol: 'F', name: 'Fluorin', mass: '18.998', category: 'Halogen', period: '2', group: 'VIIA', configFull: '1s\u00B2 2s\u00B2 2p\u2075', configNoble: '[He] 2s\u00B2 2p\u2075', last: { n: 2, l: 1, subshell: '2p', count: 5, max: 6 } },
+      { z: 10, symbol: 'Ne', name: 'Neon', mass: '20.180', category: 'Gas Mulia', period: '2', group: 'VIIIA', configFull: '1s\u00B2 2s\u00B2 2p\u2076', configNoble: '[He] 2s\u00B2 2p\u2076', last: { n: 2, l: 1, subshell: '2p', count: 6, max: 6 } },
+      { z: 11, symbol: 'Na', name: 'Natrium', mass: '22.990', category: 'Logam Alkali', period: '3', group: 'IA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B9', configNoble: '[Ne] 3s\u00B9', last: { n: 3, l: 0, subshell: '3s', count: 1, max: 2 } },
+      { z: 12, symbol: 'Mg', name: 'Magnesium', mass: '24.305', category: 'Alkali Tanah', period: '3', group: 'IIA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2', configNoble: '[Ne] 3s\u00B2', last: { n: 3, l: 0, subshell: '3s', count: 2, max: 2 } },
+      { z: 13, symbol: 'Al', name: 'Aluminium', mass: '26.982', category: 'Logam Pascatransisi', period: '3', group: 'IIIA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u00B9', configNoble: '[Ne] 3s\u00B2 3p\u00B9', last: { n: 3, l: 1, subshell: '3p', count: 1, max: 6 } },
+      { z: 14, symbol: 'Si', name: 'Silikon', mass: '28.085', category: 'Metaloid', period: '3', group: 'IVA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u00B2', configNoble: '[Ne] 3s\u00B2 3p\u00B2', last: { n: 3, l: 1, subshell: '3p', count: 2, max: 6 } },
+      { z: 15, symbol: 'P', name: 'Fosfor', mass: '30.974', category: 'Nonlogam', period: '3', group: 'VA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u00B3', configNoble: '[Ne] 3s\u00B2 3p\u00B3', last: { n: 3, l: 1, subshell: '3p', count: 3, max: 6 } },
+      { z: 16, symbol: 'S', name: 'Belerang', mass: '32.06', category: 'Nonlogam', period: '3', group: 'VIA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2074', configNoble: '[Ne] 3s\u00B2 3p\u2074', last: { n: 3, l: 1, subshell: '3p', count: 4, max: 6 } },
+      { z: 17, symbol: 'Cl', name: 'Klorin', mass: '35.45', category: 'Halogen', period: '3', group: 'VIIA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2075', configNoble: '[Ne] 3s\u00B2 3p\u2075', last: { n: 3, l: 1, subshell: '3p', count: 5, max: 6 } },
+      { z: 18, symbol: 'Ar', name: 'Argon', mass: '39.948', category: 'Gas Mulia', period: '3', group: 'VIIIA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076', configNoble: '[Ne] 3s\u00B2 3p\u2076', last: { n: 3, l: 1, subshell: '3p', count: 6, max: 6 } },
+      { z: 19, symbol: 'K', name: 'Kalium', mass: '39.098', category: 'Logam Alkali', period: '4', group: 'IA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B9', configNoble: '[Ar] 4s\u00B9', last: { n: 4, l: 0, subshell: '4s', count: 1, max: 2 } },
+      { z: 20, symbol: 'Ca', name: 'Kalsium', mass: '40.078', category: 'Alkali Tanah', period: '4', group: 'IIA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2', configNoble: '[Ar] 4s\u00B2', last: { n: 4, l: 0, subshell: '4s', count: 2, max: 2 } },
+      { z: 21, symbol: 'Sc', name: 'Skandium', mass: '44.956', category: 'Logam Transisi', period: '4', group: 'IIIB', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u00B9', configNoble: '[Ar] 4s\u00B2 3d\u00B9', last: { n: 3, l: 2, subshell: '3d', count: 1, max: 10 } },
+      { z: 22, symbol: 'Ti', name: 'Titanium', mass: '47.867', category: 'Logam Transisi', period: '4', group: 'IVB', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u00B2', configNoble: '[Ar] 4s\u00B2 3d\u00B2', last: { n: 3, l: 2, subshell: '3d', count: 2, max: 10 } },
+      { z: 23, symbol: 'V', name: 'Vanadium', mass: '50.942', category: 'Logam Transisi', period: '4', group: 'VB', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u00B3', configNoble: '[Ar] 4s\u00B2 3d\u00B3', last: { n: 3, l: 2, subshell: '3d', count: 3, max: 10 } },
+      { z: 24, symbol: 'Cr', name: 'Kromium', mass: '51.996', category: 'Logam Transisi', period: '4', group: 'VIB', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B9 3d\u2075', configNoble: '[Ar] 4s\u00B9 3d\u2075', last: { n: 3, l: 2, subshell: '3d', count: 5, max: 10 } },
+      { z: 25, symbol: 'Mn', name: 'Mangan', mass: '54.938', category: 'Logam Transisi', period: '4', group: 'VIIB', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u2075', configNoble: '[Ar] 4s\u00B2 3d\u2075', last: { n: 3, l: 2, subshell: '3d', count: 5, max: 10 } },
+      { z: 26, symbol: 'Fe', name: 'Besi (Ferrum)', mass: '55.845', category: 'Logam Transisi', period: '4', group: 'VIIIB', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u2076', configNoble: '[Ar] 4s\u00B2 3d\u2076', last: { n: 3, l: 2, subshell: '3d', count: 6, max: 10 } },
+      { z: 27, symbol: 'Co', name: 'Kobalt', mass: '58.933', category: 'Logam Transisi', period: '4', group: 'VIIIB', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u2077', configNoble: '[Ar] 4s\u00B2 3d\u2077', last: { n: 3, l: 2, subshell: '3d', count: 7, max: 10 } },
+      { z: 28, symbol: 'Ni', name: 'Nikel', mass: '58.693', category: 'Logam Transisi', period: '4', group: 'VIIIB', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u2078', configNoble: '[Ar] 4s\u00B2 3d\u2078', last: { n: 3, l: 2, subshell: '3d', count: 8, max: 10 } },
+      { z: 29, symbol: 'Cu', name: 'Tembaga (Cuprum)', mass: '63.546', category: 'Logam Transisi', period: '4', group: 'IB', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B9 3d\u00B9\u2070', configNoble: '[Ar] 4s\u00B9 3d\u00B9\u2070', last: { n: 3, l: 2, subshell: '3d', count: 10, max: 10 } },
+      { z: 30, symbol: 'Zn', name: 'Seng (Zinc)', mass: '65.38', category: 'Logam Transisi', period: '4', group: 'IIB', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u00B9\u2070', configNoble: '[Ar] 4s\u00B2 3d\u00B9\u2070', last: { n: 3, l: 2, subshell: '3d', count: 10, max: 10 } },
+      { z: 31, symbol: 'Ga', name: 'Galium', mass: '69.723', category: 'Logam Pascatransisi', period: '4', group: 'IIIA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u00B9\u2070 4p\u00B9', configNoble: '[Ar] 4s\u00B2 3d\u00B9\u2070 4p\u00B9', last: { n: 4, l: 1, subshell: '4p', count: 1, max: 6 } },
+      { z: 32, symbol: 'Ge', name: 'Germanium', mass: '72.630', category: 'Metaloid', period: '4', group: 'IVA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u00B9\u2070 4p\u00B2', configNoble: '[Ar] 4s\u00B2 3d\u00B9\u2070 4p\u00B2', last: { n: 4, l: 1, subshell: '4p', count: 2, max: 6 } },
+      { z: 33, symbol: 'As', name: 'Arsen', mass: '74.922', category: 'Metaloid', period: '4', group: 'VA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u00B9\u2070 4p\u00B3', configNoble: '[Ar] 4s\u00B2 3d\u00B9\u2070 4p\u00B3', last: { n: 4, l: 1, subshell: '4p', count: 3, max: 6 } },
+      { z: 34, symbol: 'Se', name: 'Selenium', mass: '78.971', category: 'Nonlogam', period: '4', group: 'VIA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u00B9\u2070 4p\u2074', configNoble: '[Ar] 4s\u00B2 3d\u00B9\u2070 4p\u2074', last: { n: 4, l: 1, subshell: '4p', count: 4, max: 6 } },
+      { z: 35, symbol: 'Br', name: 'Bromin', mass: '79.904', category: 'Halogen', period: '4', group: 'VIIA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u00B9\u2070 4p\u2075', configNoble: '[Ar] 4s\u00B2 3d\u00B9\u2070 4p\u2075', last: { n: 4, l: 1, subshell: '4p', count: 5, max: 6 } },
+      { z: 36, symbol: 'Kr', name: 'Kripton', mass: '83.798', category: 'Gas Mulia', period: '4', group: 'VIIIA', configFull: '1s\u00B2 2s\u00B2 2p\u2076 3s\u00B2 3p\u2076 4s\u00B2 3d\u00B9\u2070 4p\u2076', configNoble: '[Ar] 4s\u00B2 3d\u00B9\u2070 4p\u2076', last: { n: 4, l: 1, subshell: '4p', count: 6, max: 6 } }
+    ];
+
+    let currentSimulatorMode = 'element'; // 'element' | 'custom'
+    let currentSelectedZ = 11; // Default Na
+
+    function populateElementDropdown() {
+      const select = document.getElementById('select-element');
+      if (!select) return;
+      select.innerHTML = '';
+      elementsData.forEach(elem => {
+        const opt = document.createElement('option');
+        opt.value = elem.z;
+        opt.textContent = `${elem.z}. ${elem.name} (${elem.symbol}) - ${elem.last.subshell}${toSuperscript(elem.last.count)}`;
+        if (elem.z === currentSelectedZ) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function toSuperscript(num) {
+      const map = {
+        '0': '\u2070',
+        '1': '\u00B9',
+        '2': '\u00B2',
+        '3': '\u00B3',
+        '4': '\u2074',
+        '5': '\u2075',
+        '6': '\u2076',
+        '7': '\u2077',
+        '8': '\u2078',
+        '9': '\u2079'
+      };
+      return String(num).split('').map(c => map[c] || c).join('');
+    }
+
+    function switchSimulatorMode(mode) {
+      currentSimulatorMode = mode;
+      playSound('click');
+      const tabElem = document.getElementById('tab-mode-element');
+      const tabCust = document.getElementById('tab-mode-custom');
+      const ctrlElem = document.getElementById('sim-controls-element');
+      const ctrlCust = document.getElementById('sim-controls-custom');
+
+      if (mode === 'element') {
+        tabElem.className = 'px-3.5 py-1.5 rounded-xl font-bold transition-all bg-teal-600 text-white shadow-sm';
+        tabCust.className = 'px-3.5 py-1.5 rounded-xl font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all';
+        ctrlElem.classList.remove('hidden');
+        ctrlCust.classList.add('hidden');
+        updateSimulatorFromElement(currentSelectedZ);
+      } else {
+        tabCust.className = 'px-3.5 py-1.5 rounded-xl font-bold transition-all bg-teal-600 text-white shadow-sm';
+        tabElem.className = 'px-3.5 py-1.5 rounded-xl font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all';
+        ctrlCust.classList.remove('hidden');
+        ctrlElem.classList.add('hidden');
+        updateCustomElectronCountDropdown();
+        handleCustomSubshellChange();
+      }
+    }
+
+    function handleElementSelectChange() {
+      const sel = document.getElementById('select-element');
+      if (!sel) return;
+      const z = parseInt(sel.value, 10);
+      setElementByZ(z);
+    }
+
+    function setElementByZ(z) {
+      currentSelectedZ = z;
+      playSound('click');
+      const sel = document.getElementById('select-element');
+      if (sel) sel.value = z;
+      if (currentSimulatorMode !== 'element') {
+        switchSimulatorMode('element');
+      } else {
+        updateSimulatorFromElement(z);
+      }
+    }
+
+    function pickRandomElement() {
+      const randZ = Math.floor(Math.random() * elementsData.length) + 1;
+      setElementByZ(randZ);
+    }
+
+    function updateSimulatorFromElement(z) {
+      const elem = elementsData.find(e => e.z === z) || elementsData[10]; // Na default
+      
+      // Update Top Card Data
+      document.getElementById('disp-elem-symbol').textContent = elem.symbol;
+      document.getElementById('disp-elem-z').textContent = 'Z=' + elem.z;
+      document.getElementById('disp-elem-name').textContent = elem.name;
+      document.getElementById('disp-elem-category').textContent = elem.category;
+      document.getElementById('disp-elem-z-full').textContent = elem.z;
+      document.getElementById('disp-elem-mass').textContent = elem.mass;
+      document.getElementById('disp-elem-period-group').textContent = `Periode ${elem.period}, Golongan ${elem.group}`;
+      document.getElementById('disp-last-subshell-badge').textContent = `${elem.last.subshell}${toSuperscript(elem.last.count)}`;
+      document.getElementById('disp-conf-full').textContent = elem.configFull;
+      document.getElementById('disp-conf-noble').textContent = elem.configNoble;
+      document.getElementById('disp-diagram-subshell-label').textContent = `${elem.last.subshell}${toSuperscript(elem.last.count)}`;
+
+      // Render Orbital Diagram & Calculate 4 Quantum Numbers
+      renderSubshellDiagram(elem.last.n, elem.last.l, elem.last.count, elem.last.subshell);
+    }
+
+    function updateCustomElectronCountDropdown() {
+      const type = document.getElementById('custom-subshell-type').value;
+      const countSel = document.getElementById('custom-electron-count');
+      if (!countSel) return;
+      
+      let maxElectrons = 2;
+      if (type === 'p') maxElectrons = 6;
+      if (type === 'd') maxElectrons = 10;
+
+      const currentVal = parseInt(countSel.value, 10) || 1;
+      countSel.innerHTML = '';
+      for (let i = 1; i <= maxElectrons; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${i} elektron (${type}${toSuperscript(i)})`;
+        if (i === Math.min(currentVal, maxElectrons)) opt.selected = true;
+        countSel.appendChild(opt);
+      }
+    }
+
+    function handleCustomSubshellChange() {
+      const n = parseInt(document.getElementById('custom-n').value, 10);
+      const type = document.getElementById('custom-subshell-type').value;
+      let l = 0;
+      if (type === 'p') l = 1;
+      if (type === 'd') l = 2;
+
+      // Ensure l < n
+      if (l >= n) {
+        alert('Perhatian: Subkulit ' + type + ' tidak dapat berada pada kulit n = ' + n + ' karena nilai l harus lebih kecil dari n (l < n). Nilai disesuaikan ke subkulit s.');
+        document.getElementById('custom-subshell-type').value = 's';
+        updateCustomElectronCountDropdown();
+        return;
+      }
+
+      updateCustomElectronCountDropdown();
+      const count = parseInt(document.getElementById('custom-electron-count').value, 10) || 1;
+      const subshellStr = '' + n + type;
+
+      document.getElementById('disp-elem-symbol').textContent = type.toUpperCase();
+      document.getElementById('disp-elem-z').textContent = 'Kustom';
+      document.getElementById('disp-elem-name').textContent = 'Subkulit Kustom ' + subshellStr;
+      document.getElementById('disp-elem-category').textContent = 'Mode Kustom';
+      document.getElementById('disp-elem-z-full').textContent = '-';
+      document.getElementById('disp-elem-mass').textContent = '-';
+      document.getElementById('disp-elem-period-group').textContent = 'Tingkat energi n = ' + n;
+      document.getElementById('disp-last-subshell-badge').textContent = subshellStr + toSuperscript(count);
+      document.getElementById('disp-conf-full').textContent = '... ' + subshellStr + toSuperscript(count);
+      document.getElementById('disp-conf-noble').textContent = '... ' + subshellStr + toSuperscript(count);
+      document.getElementById('disp-diagram-subshell-label').textContent = subshellStr + toSuperscript(count);
+
+      renderSubshellDiagram(n, l, count, subshellStr);
+    }
+
+    // ==============================================================================
+    // ENGINE VISUALISASI DIAGRAM KOTAK ORBITAL & PERHITUNGAN 4 BILANGAN KUANTUM
+    // Sesuai Aturan Kaidah Hund & Prinsip Larangan Pauli
+    // ==============================================================================
+    function renderSubshellDiagram(n, l, electronCount, subshellLabel) {
+      const container = document.getElementById('orbital-boxes-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const numOrbitals = 2 * l + 1;
+      const mValues = [];
+      for (let i = -l; i <= l; i++) {
+        mValues.push(i);
+      }
+
+      const orbitals = [];
+      for (let i = 0; i < numOrbitals; i++) {
+        orbitals.push({ up: false, down: false });
+      }
+
+      let lastOrbitalIndex = 0;
+      let lastSpin = '+1/2';
+      let filled = 0;
+
+      for (let i = 0; i < numOrbitals && filled < electronCount; i++) {
+        orbitals[i].up = true;
+        lastOrbitalIndex = i;
+        lastSpin = '+1/2';
+        filled++;
+      }
+
+      for (let i = 0; i < numOrbitals && filled < electronCount; i++) {
+        orbitals[i].down = true;
+        lastOrbitalIndex = i;
+        lastSpin = '-1/2';
+        filled++;
+      }
+
+      const lastM = mValues[lastOrbitalIndex];
+
+      mValues.forEach((mVal, idx) => {
+        const orb = orbitals[idx];
+        const isLastBox = (idx === lastOrbitalIndex);
+
+        const boxWrapper = document.createElement('div');
+        boxWrapper.className = 'flex flex-col items-center space-y-1.5';
+
+        const box = document.createElement('div');
+        box.className = 'orbital-box ' + (isLastBox ? 'active-last' : '');
+        
+        let arrowHtml = '';
+        if (orb.up && orb.down) {
+          const downHighlight = isLastBox ? 'text-amber-500 scale-110 drop-shadow' : 'spin-down';
+          arrowHtml = '<span class="spin-up mr-0.5">&uarr;</span><span class="' + downHighlight + '">&darr;</span>';
+        } else if (orb.up) {
+          const upHighlight = isLastBox ? 'text-amber-500 scale-125 drop-shadow' : 'spin-up';
+          arrowHtml = '<span class="' + upHighlight + '">&uarr;</span>';
+        } else {
+          arrowHtml = '<span class="text-slate-300 dark:text-slate-700 text-sm font-normal">&mdash;</span>';
+        }
+        box.innerHTML = arrowHtml;
+
+        const labelM = document.createElement('div');
+        labelM.className = 'text-[11px] font-mono font-bold ' + (isLastBox ? 'text-amber-600 dark:text-amber-400 scale-110' : 'text-slate-500 dark:text-slate-400');
+        labelM.textContent = 'm = ' + (mVal >= 0 ? (mVal === 0 ? '0' : '+' + mVal) : '' + mVal);
+
+        boxWrapper.appendChild(box);
+        boxWrapper.appendChild(labelM);
+        container.appendChild(boxWrapper);
+      });
+
+      document.getElementById('disp-result-n').textContent = n;
+      document.getElementById('disp-detail-n').textContent = 'Kulit Utama ' + getShellLetter(n) + ' (Tingkat Energi ' + n + ')';
+
+      document.getElementById('disp-result-l').textContent = l;
+      document.getElementById('disp-detail-l').textContent = 'Subkulit ' + getSubshellLetter(l) + ' (' + (l === 0 ? 'Bola / Sharp' : l === 1 ? 'Balon / Principal' : 'Semanggi / Diffuse') + ')';
+
+      document.getElementById('disp-result-m').textContent = (lastM > 0 ? '+' + lastM : '' + lastM);
+      document.getElementById('disp-detail-m').textContent = 'Kotak Orientasi Spasial m = ' + lastM;
+
+      const spinHtml = (lastSpin === '+1/2' ? '+&frac12;' : '-&frac12;');
+      document.getElementById('disp-result-s').innerHTML = spinHtml;
+      document.getElementById('disp-detail-s').innerHTML = (lastSpin === '+1/2' ? 'Panah Ke Atas (&uarr; / Spin Up)' : 'Panah Ke Bawah (&darr; / Spin Down)');
+
+      const stepContainer = document.getElementById('disp-step-by-step');
+      if (stepContainer) {
+        const subLetter = getSubshellLetter(l);
+        const mDisplay = lastM > 0 ? '+' + lastM : '' + lastM;
+        const spinDisplay = lastSpin === '+1/2' ? '+&frac12;' : '-&frac12;';
+        stepContainer.innerHTML = 
+          '<p><strong>1. Bilangan Kuantum Utama (<i>n</i> = ' + n + '):</strong> Diperoleh langsung dari angka koefisien kulit subkulit terakhir yaitu <strong>' + n + '</strong>.</p>' +
+          '<p><strong>2. Bilangan Kuantum Azimut (<i>l</i> = ' + l + '):</strong> Karena elektron terakhir menempati subkulit <strong>' + subLetter + '</strong>, maka harga azimutnya adalah <strong><i>l</i> = ' + l + '</strong> (s=0, p=1, d=2, f=3).</p>' +
+          '<p><strong>3. Bilangan Kuantum Magnetik (<i>m</i> = ' + mDisplay + '):</strong> Subkulit ' + subLetter + ' memiliki ' + numOrbitals + ' kotak orbital dengan harga <i>m</i> dari -' + l + ' hingga +' + l + '. Setelah ' + electronCount + ' elektron diisi menurut Kaidah Hund, elektron terakhir (ke-' + electronCount + ') jatuh tepat di kotak orbital dengan indeks <strong><i>m</i> = ' + mDisplay + '</strong> (berbingkai emas).</p>' +
+          '<p><strong>4. Bilangan Kuantum Spin (<i>s</i> = ' + spinDisplay + '):</strong> Elektron terakhir digambarkan dengan arah <strong>' + (lastSpin === '+1/2' ? 'panah menghadap ke atas (&uarr;)' : 'panah menghadap ke bawah (&darr;) berpasangan') + '</strong>, sehingga nilai spinnya adalah <strong><i>s</i> = ' + spinDisplay + '</strong>.</p>';
+      }
+    }
+
+    function getShellLetter(n) {
+      const letters = ['', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
+      return letters[n] || 'Kulit ' + n;
+    }
+
+    function getSubshellLetter(l) {
+      const subs = ['s', 'p', 'd', 'f', 'g'];
+      return subs[l] || '?';
+    }
+
+    // ==============================================================================
+    // VALIDATOR KOMBINASI BILANGAN KUANTUM
+    // ==============================================================================
+    function runQuantumValidator() {
+      const n = parseInt(document.getElementById('val-input-n').value, 10);
+      const l = parseInt(document.getElementById('val-input-l').value, 10);
+      const m = parseInt(document.getElementById('val-input-m').value, 10);
+      const sVal = document.getElementById('val-input-s').value;
+
+      const resultBox = document.getElementById('val-result-box');
+      const badge = document.getElementById('val-badge');
+      const label = document.getElementById('val-subshell-label');
+      const exp = document.getElementById('val-explanation');
+
+      const sLetter = getSubshellLetter(l);
+
+      let isValid = true;
+      let reasons = [];
+
+      if (l >= n) {
+        isValid = false;
+        reasons.push('Nilai azimut <i>l</i> harus lebih kecil dari kulit utama <i>n</i> (<i>l</i> &lt; <i>n</i>). Jika <i>n</i> = ' + n + ', maka nilai <i>l</i> maksimal adalah <strong>' + (n - 1) + '</strong>. Tidak ada orbital <strong>' + n + sLetter + '</strong> di alam.');
+      }
+
+      if (Math.abs(m) > l) {
+        isValid = false;
+        reasons.push('Nilai magnetik <i>m</i> melampaui batas yang diizinkan (-<i>l</i> &le; <i>m</i> &le; +<i>l</i>). Untuk subkulit <i>l</i> = ' + l + ' (' + sLetter + '), rentang nilai <i>m</i> hanya boleh dari <strong>-' + l + '</strong> sampai <strong>+' + l + '</strong>. Nilai <i>m</i> = ' + (m > 0 ? '+' + m : '' + m) + ' tidak eksis.');
+      }
+
+      if (sVal !== '+1/2' && sVal !== '-1/2') {
+        isValid = false;
+        reasons.push('Nilai spin <i>s</i> hanya diperbolehkan bernilai <strong>+&frac12;</strong> atau <strong>-&frac12;</strong>. Nilai <i>s</i> = ' + sVal + ' dilarang.');
+      }
+
+      const spinChar = (sVal === '+1/2' ? '+&frac12;' : '-&frac12;');
+      const mStr = (m >= 0 ? (m === 0 ? '0' : '+' + m) : '' + m);
+
+      if (isValid) {
+        playSound('success');
+        resultBox.className = 'p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700 space-y-2 transition-all';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-black bg-emerald-600 text-white shadow-sm';
+        badge.textContent = '\u2713 KOMBINASI VALID (DIIZINKAN)';
+        label.innerHTML = 'Elektron pada Subkulit ' + n + sLetter + ' (<i>m</i> = ' + mStr + ', <i>s</i> = ' + spinChar + ')';
+        exp.innerHTML = 'Kombinasi ini memenuhi seluruh hukum mekanika kuantum: <i>l</i> &lt; <i>n</i> (' + l + ' &lt; ' + n + '), -' + l + ' &le; <i>m</i> &le; +' + l + ' (<i>m</i> = ' + mStr + '), dan spin bernilai ' + spinChar + '. Set bilangan kuantum ini dapat mewakili elektron nyata dalam atom.';
+      } else {
+        playSound('error');
+        resultBox.className = 'p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-700 space-y-2 transition-all';
+        badge.className = 'px-3 py-1 rounded-full text-xs font-black bg-rose-600 text-white shadow-sm';
+        badge.textContent = '\u2717 KOMBINASI TIDAK VALID (DILARANG)';
+        label.textContent = 'Pelanggaran Aturan Kuantum';
+        exp.innerHTML = 'Kombinasi ini <strong>MUSTAHIL / DILARANG</strong> karena:<br>&bull; ' + reasons.join('<br>&bull; ');
+      }
+    }
+
+    function loadValidatorPreset(n, l, m, s) {
+      playSound('click');
+      document.getElementById('val-input-n').value = n;
+      document.getElementById('val-input-l').value = l;
+      document.getElementById('val-input-m').value = m;
+      document.getElementById('val-input-s').value = s;
+      runQuantumValidator();
+    }
+
+    // ==============================================================================
+    // 3D ORBITAL CANVAS RENDERER & INTERACTION ENGINE
+    // ==============================================================================
+    let canvas, ctx;
+    let currentOrbitalShape = 's'; // 's', 'px', 'py', 'pz', 'dxy', 'dz2'
+    let angleX = 0.35;
+    let angleY = 0.45;
+    let isDragging = false;
+    let lastMouseX = 0, lastMouseY = 0;
+    let isAutoRotate = true;
+    let animFrameId = null;
+
+    function initOrbitalCanvas() {
+      canvas = document.getElementById('orbital-canvas');
+      if (!canvas) return;
+      ctx = canvas.getContext('2d');
+
+      function resizeCanvas() {
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const parent = canvas.parentElement;
+        const w = Math.round(rect.width || (parent ? parent.clientWidth : 700) || 700);
+        const h = Math.round(rect.height || (parent ? parent.clientHeight : 400) || 400);
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        renderOrbitalCanvas();
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+      setTimeout(resizeCanvas, 50);
+      setTimeout(resizeCanvas, 200);
+      setTimeout(resizeCanvas, 600);
+
+      // Mouse Drag Rotation
+      canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - lastMouseX;
+        const dy = e.clientY - lastMouseY;
+        angleY += dx * 0.008;
+        angleX += dy * 0.008;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        renderOrbitalCanvas();
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDragging = false;
+      });
+
+      // Touch Drag Rotation for Mobile
+      canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          isDragging = true;
+          lastMouseX = e.touches[0].clientX;
+          lastMouseY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      canvas.addEventListener('touchmove', (e) => {
+        if (!isDragging || e.touches.length !== 1) return;
+        const dx = e.touches[0].clientX - lastMouseX;
+        const dy = e.touches[0].clientY - lastMouseY;
+        angleY += dx * 0.01;
+        angleX += dy * 0.01;
+        lastMouseX = e.touches[0].clientX;
+        lastMouseY = e.touches[0].clientY;
+        renderOrbitalCanvas();
+      }, { passive: true });
+
+      canvas.addEventListener('touchend', () => {
+        isDragging = false;
+      });
+
+      startOrbitalAnimLoop();
+    }
+
+    function toggleCanvasAutoRotate() {
+      isAutoRotate = !isAutoRotate;
+      playSound('click');
+      const label = document.getElementById('label-auto-rotate');
+      if (label) {
+        label.textContent = isAutoRotate ? 'Jeda Rotasi' : 'Putar Otomatis';
+      }
+    }
+
+    function resetCanvasView() {
+      playSound('click');
+      angleX = 0.35;
+      angleY = 0.45;
+      renderOrbitalCanvas();
+    }
+
+    function startOrbitalAnimLoop() {
+      function loop() {
+        if (isAutoRotate && !isDragging) {
+          angleY += 0.006;
+          renderOrbitalCanvas();
+        }
+        animFrameId = requestAnimationFrame(loop);
+      }
+      if (!animFrameId) {
+        animFrameId = requestAnimationFrame(loop);
+      }
+    }
+
+    function selectOrbitalShape(shape) {
+      currentOrbitalShape = shape;
+      playSound('click');
+
+      const btnIds = ['s', 'px', 'py', 'pz', 'dxy', 'dz2'];
+      btnIds.forEach(id => {
+        const b = document.getElementById('btn-orb-' + id);
+        if (b) {
+          if (id === shape) {
+            b.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-primary text-on-primary shadow-sm flex items-center space-x-1.5 cursor-pointer';
+          } else {
+            b.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface-variant hover:bg-violet-100 dark:hover:bg-primary/20 hover:text-primary cursor-pointer border border-transparent hover:border-violet-300 dark:hover:border-primary/40';
+          }
+        }
+      });
+
+      const title = document.getElementById('canvas-orb-title');
+      const desc = document.getElementById('canvas-orb-desc');
+
+      if (shape === 's') {
+        title.innerHTML = 'Orbital <i>s</i> (<i>l</i> = 0, <i>m</i> = 0)';
+        desc.innerHTML = 'Simetri bola seragam di sekitar inti atom. Tidak memiliki bidang simpul sudut.';
+      } else if (shape === 'px') {
+        title.innerHTML = 'Orbital <i>p</i><sub>x</sub> (<i>l</i> = 1, <i>m</i> = -1)';
+        desc.innerHTML = 'Dua cuping berorientasi sepanjang sumbu X. Bidang simpul pada bidang YZ (di mana |&psi;|<sup>2</sup> = 0).';
+      } else if (shape === 'py') {
+        title.innerHTML = 'Orbital <i>p</i><sub>y</sub> (<i>l</i> = 1, <i>m</i> = 0)';
+        desc.innerHTML = 'Dua cuping berorientasi sepanjang sumbu Y. Bidang simpul pada bidang XZ.';
+      } else if (shape === 'pz') {
+        title.innerHTML = 'Orbital <i>p</i><sub>z</sub> (<i>l</i> = 1, <i>m</i> = +1)';
+        desc.innerHTML = 'Dua cuping berorientasi sepanjang sumbu Z vertikal. Bidang simpul pada bidang XY.';
+      } else if (shape === 'dxy') {
+        title.innerHTML = 'Orbital <i>d</i><sub>xy</sub> (<i>l</i> = 2, <i>m</i> = -2)';
+        desc.innerHTML = 'Empat cuping daun semanggi di antara sumbu X dan Y. Memiliki 2 bidang simpul tegak lurus.';
+      } else if (shape === 'dz2') {
+        title.innerHTML = 'Orbital <i>d</i><sub>z<sup>2</sup></sub> (<i>l</i> = 2, <i>m</i> = 0)';
+        desc.innerHTML = 'Dua cuping utama di sumbu Z dengan donat cincin torus probabilitas di bidang ekuator XY.';
+      }
+
+      renderOrbitalCanvas();
+    }
+
+    // 3D Projection Calculation
+    function project3D(x, y, z, cx, cy, scale) {
+      const cosY = Math.cos(angleY), sinY = Math.sin(angleY);
+      const x1 = x * cosY + z * sinY;
+      const z1 = -x * sinY + z * cosY;
+
+      const cosX = Math.cos(angleX), sinX = Math.sin(angleX);
+      const y2 = y * cosX - z1 * sinX;
+      const z2 = y * sinX + z1 * cosX;
+
+      const fov = 420;
+      const distance = 350;
+      const p = fov / (distance + z2);
+
+      return {
+        x: cx + x1 * p * scale,
+        y: cy - y2 * p * scale,
+        z: z2,
+        p: p
+      };
+    }
+
+    function renderOrbitalCanvas() {
+      if (!ctx || !canvas) return;
+      const w = canvas.width;
+      const h = canvas.height;
+      if (w === 0 || h === 0) return;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+      const scale = (Math.min(w, h) / 320);
+
+      // Draw 3D Cartesian Axes
+      drawAxes3D(cx, cy, scale);
+
+      // Draw Nucleus
+      const nucleusProj = project3D(0, 0, 0, cx, cy, scale);
+      ctx.beginPath();
+      ctx.arc(nucleusProj.x, nucleusProj.y, 7 * scale, 0, Math.PI * 2);
+      ctx.fillStyle = '#f59e0b';
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 14 * scale;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      if (currentOrbitalShape === 's') {
+        drawOrbitalS(cx, cy, scale);
+      } else if (currentOrbitalShape === 'px') {
+        drawOrbitalP(cx, cy, scale, 'x');
+      } else if (currentOrbitalShape === 'py') {
+        drawOrbitalP(cx, cy, scale, 'y');
+      } else if (currentOrbitalShape === 'pz') {
+        drawOrbitalP(cx, cy, scale, 'z');
+      } else if (currentOrbitalShape === 'dxy') {
+        drawOrbitalDxy(cx, cy, scale);
+      } else if (currentOrbitalShape === 'dz2') {
+        drawOrbitalDz2(cx, cy, scale);
+      }
+    }
+
+    function drawAxes3D(cx, cy, scale) {
+      const axisLen = 135;
+      const origin = project3D(0, 0, 0, cx, cy, scale);
+
+      // Axis X (Red)
+      const px = project3D(axisLen, 0, 0, cx, cy, scale);
+      ctx.strokeStyle = 'rgba(244, 63, 94, 0.7)';
+      ctx.lineWidth = 2 * scale;
+      ctx.beginPath();
+      ctx.moveTo(origin.x, origin.y);
+      ctx.lineTo(px.x, px.y);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f43f5e';
+      ctx.font = `bold ${Math.round(12 * scale)}px sans-serif`;
+      ctx.fillText('+X', px.x + 4, px.y - 4);
+
+      // Axis Y (Green)
+      const py = project3D(0, axisLen, 0, cx, cy, scale);
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.7)';
+      ctx.lineWidth = 2 * scale;
+      ctx.beginPath();
+      ctx.moveTo(origin.x, origin.y);
+      ctx.lineTo(py.x, py.y);
+      ctx.stroke();
+
+      ctx.fillStyle = '#10b981';
+      ctx.font = `bold ${Math.round(12 * scale)}px sans-serif`;
+      ctx.fillText('+Y', py.x + 4, py.y - 4);
+
+      // Axis Z (Blue)
+      const pz = project3D(0, 0, axisLen, cx, cy, scale);
+      ctx.strokeStyle = 'rgba(14, 165, 233, 0.7)';
+      ctx.lineWidth = 2 * scale;
+      ctx.beginPath();
+      ctx.moveTo(origin.x, origin.y);
+      ctx.lineTo(pz.x, pz.y);
+      ctx.stroke();
+
+      ctx.fillStyle = '#0ea5e9';
+      ctx.font = `bold ${Math.round(12 * scale)}px sans-serif`;
+      ctx.fillText('+Z', pz.x + 4, pz.y - 4);
+    }
+
+    function drawOrbitalS(cx, cy, scale) {
+      const radius = 70;
+      const numRings = 14;
+
+      ctx.strokeStyle = 'rgba(20, 184, 166, 0.8)';
+      ctx.lineWidth = 1.8 * scale;
+
+      for (let i = 0; i <= numRings; i++) {
+        const theta = (i / numRings) * Math.PI;
+        const rSub = radius * Math.sin(theta);
+        const zSub = radius * Math.cos(theta);
+
+        ctx.beginPath();
+        for (let j = 0; j <= 36; j++) {
+          const phi = (j / 36) * Math.PI * 2;
+          const x = rSub * Math.cos(phi);
+          const y = rSub * Math.sin(phi);
+          const p = project3D(x, y, zSub, cx, cy, scale);
+          if (j === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+      }
+
+      // Translucent inner sphere
+      const pCenter = project3D(0, 0, 0, cx, cy, scale);
+      const radGrad = ctx.createRadialGradient(pCenter.x, pCenter.y, 4 * scale, pCenter.x, pCenter.y, radius * scale * 1.25);
+      radGrad.addColorStop(0, 'rgba(45, 212, 191, 0.5)');
+      radGrad.addColorStop(0.7, 'rgba(13, 148, 136, 0.2)');
+      radGrad.addColorStop(1, 'rgba(13, 148, 136, 0)');
+      ctx.fillStyle = radGrad;
+      ctx.beginPath();
+      ctx.arc(pCenter.x, pCenter.y, radius * scale * 1.25, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawOrbitalP(cx, cy, scale, axis) {
+      // Positive Lobe (+) Cyan
+      drawLobe(cx, cy, scale, axis, +1, 'rgba(6, 182, 212, 0.95)', 'rgba(6, 182, 212, 0.35)');
+      // Negative Lobe (-) Rose
+      drawLobe(cx, cy, scale, axis, -1, 'rgba(244, 63, 94, 0.95)', 'rgba(244, 63, 94, 0.35)');
+    }
+
+    function drawLobe(cx, cy, scale, axis, sign, strokeCol, fillCol) {
+      const maxLen = 80;
+      const numSlices = 16;
+
+      ctx.strokeStyle = strokeCol;
+      ctx.lineWidth = 1.6 * scale;
+
+      for (let i = 1; i <= numSlices; i++) {
+        const u = i / numSlices;
+        const dist = sign * maxLen * u;
+        const radius = 32 * Math.sin(u * Math.PI) * Math.sqrt(u);
+
+        ctx.beginPath();
+        for (let j = 0; j <= 24; j++) {
+          const phi = (j / 24) * Math.PI * 2;
+          let x, y, z;
+          if (axis === 'x') {
+            x = dist;
+            y = radius * Math.cos(phi);
+            z = radius * Math.sin(phi);
+          } else if (axis === 'y') {
+            x = radius * Math.cos(phi);
+            y = dist;
+            z = radius * Math.sin(phi);
+          } else {
+            x = radius * Math.cos(phi);
+            y = radius * Math.sin(phi);
+            z = dist;
+          }
+
+          const p = project3D(x, y, z, cx, cy, scale);
+          if (j === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.fillStyle = fillCol;
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+
+    function drawOrbitalDxy(cx, cy, scale) {
+      const angles = [Math.PI / 4, 3 * Math.PI / 4, 5 * Math.PI / 4, 7 * Math.PI / 4];
+      const strokeColors = [
+        'rgba(16, 185, 129, 0.95)',
+        'rgba(245, 158, 11, 0.95)',
+        'rgba(16, 185, 129, 0.95)',
+        'rgba(245, 158, 11, 0.95)'
+      ];
+      const fillColors = [
+        'rgba(16, 185, 129, 0.3)',
+        'rgba(245, 158, 11, 0.3)',
+        'rgba(16, 185, 129, 0.3)',
+        'rgba(245, 158, 11, 0.3)'
+      ];
+
+      angles.forEach((ang, idx) => {
+        drawAngledLobe(cx, cy, scale, ang, strokeColors[idx], fillColors[idx]);
+      });
+    }
+
+    function drawAngledLobe(cx, cy, scale, phiAngle, strokeCol, fillCol) {
+      const maxLen = 75;
+      const numSlices = 14;
+      ctx.strokeStyle = strokeCol;
+      ctx.lineWidth = 1.5 * scale;
+
+      for (let i = 1; i <= numSlices; i++) {
+        const u = i / numSlices;
+        const dist = maxLen * u;
+        const r = 24 * Math.sin(u * Math.PI) * Math.sqrt(u);
+
+        ctx.beginPath();
+        for (let j = 0; j <= 20; j++) {
+          const t = (j / 20) * Math.PI * 2;
+          const cxBase = dist * Math.cos(phiAngle);
+          const cyBase = dist * Math.sin(phiAngle);
+
+          const dx = -r * Math.sin(phiAngle) * Math.cos(t);
+          const dy = r * Math.cos(phiAngle) * Math.cos(t);
+          const dz = r * Math.sin(t);
+
+          const p = project3D(cxBase + dx, cyBase + dy, dz, cx, cy, scale);
+          if (j === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.fillStyle = fillCol;
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+
+    function drawOrbitalDz2(cx, cy, scale) {
+      drawLobe(cx, cy, scale, 'z', +1, 'rgba(168, 85, 247, 0.95)', 'rgba(168, 85, 247, 0.35)');
+      drawLobe(cx, cy, scale, 'z', -1, 'rgba(168, 85, 247, 0.95)', 'rgba(168, 85, 247, 0.35)');
+
+      const majorR = 40;
+      const minorR = 14;
+      ctx.strokeStyle = 'rgba(236, 72, 153, 0.9)';
+      ctx.lineWidth = 1.5 * scale;
+
+      for (let i = 0; i < 24; i++) {
+        const u = (i / 24) * Math.PI * 2;
+        ctx.beginPath();
+        for (let j = 0; j <= 18; j++) {
+          const v = (j / 18) * Math.PI * 2;
+          const x = (majorR + minorR * Math.cos(v)) * Math.cos(u);
+          const y = (majorR + minorR * Math.cos(v)) * Math.sin(u);
+          const z = minorR * Math.sin(v);
+
+          const p = project3D(x, y, z, cx, cy, scale);
+          if (j === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.fillStyle = 'rgba(236, 72, 153, 0.2)';
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+
+    // ==============================================================================
+    // 12 SOAL KUIS KOMPREHENSIF & ENGINE EVALUASI
+    // ==============================================================================
+    const quizQuestions = [
+      {
+        question: "Bilangan kuantum utama (<i>n</i>) dalam model atom mekanika kuantum menyatakan...",
+        options: [
+          "Bentuk geometri 3 dimensi dari orbital elektron",
+          "Tingkat energi utama dan ukuran rata-rata orbital dari inti atom",
+          "Arah orientasi spasial orbital terhadap pengaruh medan magnet luar",
+          "Arah perputaran (rotasi mandiri) elektron pada porosnya sendiri"
+        ],
+        answer: 1,
+        explanation: "Bilangan kuantum utama (<i>n</i>) menyatakan tingkat energi utama (kulit atom) dan ukuran rata-rata orbital. Bentuk orbital ditentukan oleh azimut (<i>l</i>), orientasi oleh magnetik (<i>m</i>), dan rotasi oleh spin (<i>s</i>)."
+      },
+      {
+        question: "Jika suatu elektron memiliki bilangan kuantum utama <i>n</i> = 3, maka nilai bilangan kuantum azimut (<i>l</i>) yang diperbolehkan adalah...",
+        options: [
+          "<i>l</i> = 1, 2, 3",
+          "<i>l</i> = 0, 1, 2",
+          "<i>l</i> = 0, 1, 2, 3",
+          "<i>l</i> = -1, 0, +1"
+        ],
+        answer: 1,
+        explanation: "Nilai bilangan kuantum azimut yang diizinkan adalah dari 0 hingga <i>n</i> - 1. Untuk <i>n</i> = 3, nilai <i>l</i> yang mungkin adalah <i>l</i> = 0 (subkulit 3s), <i>l</i> = 1 (subkulit 3p), dan <i>l</i> = 2 (subkulit 3d)."
+      },
+      {
+        question: "Subkulit 3d memiliki bilangan kuantum azimut <i>l</i> = 2. Berapakah jumlah orbital dan rentang nilai bilangan kuantum magnetik (<i>m</i>) yang dimilikinya?",
+        options: [
+          "3 orbital dengan nilai <i>m</i> = -1, 0, +1",
+          "5 orbital dengan nilai <i>m</i> = -2, -1, 0, +1, +2",
+          "7 orbital dengan nilai <i>m</i> = -3, -2, -1, 0, +1, +2, +3",
+          "1 orbital dengan nilai <i>m</i> = 0"
+        ],
+        answer: 1,
+        explanation: "Jumlah orbital pada suatu subkulit dirumuskan dengan 2<i>l</i> + 1. Untuk <i>l</i> = 2, jumlah orbital = 2(2) + 1 = 5 orbital, dengan harga <i>m</i> berkisar dari -<i>l</i> hingga +<i>l</i>, yaitu <i>m</i> = -2, -1, 0, +1, +2."
+      },
+      {
+        question: "Prinsip yang menyatakan bahwa 'Tidak ada dua elektron dalam satu atom yang boleh memiliki keempat bilangan kuantum yang sama' dikemukakan oleh...",
+        options: [
+          "Friedrich Hund (Kaidah Hund)",
+          "Erwin Schrödinger (Persamaan Gelombang)",
+          "Wolfgang Pauli (Asas Larangan Pauli)",
+          "Niels Bohr (Postulat Tingkat Energi)"
+        ],
+        answer: 2,
+        explanation: "Asas Larangan Pauli (Wolfgang Pauli, 1925) menegaskan bahwa dalam satu atom tidak boleh ada dua elektron yang memiliki keempat bilangan kuantum (<i>n</i>, <i>l</i>, <i>m</i>, <i>s</i>) yang identik sama persis. Akibatnya, satu orbital maksimal hanya diisi oleh dua elektron dengan spin berlawanan."
+      },
+      {
+        question: "Harga keempat bilangan kuantum untuk elektron terakhir dari atom Natrium (<sup>11</sup>Na) adalah...",
+        options: [
+          "<i>n</i> = 3, <i>l</i> = 0, <i>m</i> = 0, <i>s</i> = +&frac12;",
+          "<i>n</i> = 3, <i>l</i> = 1, <i>m</i> = -1, <i>s</i> = +&frac12;",
+          "<i>n</i> = 2, <i>l</i> = 1, <i>m</i> = +1, <i>s</i> = -&frac12;",
+          "<i>n</i> = 3, <i>l</i> = 0, <i>m</i> = 0, <i>s</i> = -&frac12;"
+        ],
+        answer: 0,
+        explanation: "Konfigurasi elektron <sup>11</sup>Na = 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>1</sup>. Elektron terakhir berada pada subkulit 3s<sup>1</sup>, sehingga: <i>n</i> = 3, <i>l</i> = 0 (subkulit s), <i>m</i> = 0 (hanya 1 orbital), dan <i>s</i> = +&frac12; (panah ke atas &uarr;)."
+      },
+      {
+        question: "Konfigurasi elektron atom Klorin (<sup>17</sup>Cl) adalah 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>2</sup> 3p<sup>5</sup>. Harga keempat bilangan kuantum untuk elektron terakhir atom Cl adalah...",
+        options: [
+          "<i>n</i> = 3, <i>l</i> = 1, <i>m</i> = +1, <i>s</i> = +&frac12;",
+          "<i>n</i> = 3, <i>l</i> = 1, <i>m</i> = 0, <i>s</i> = -&frac12;",
+          "<i>n</i> = 3, <i>l</i> = 1, <i>m</i> = -1, <i>s</i> = -&frac12;",
+          "<i>n</i> = 3, <i>l</i> = 2, <i>m</i> = 0, <i>s</i> = -&frac12;"
+        ],
+        answer: 1,
+        explanation: "Subkulit terakhir adalah 3p<sup>5</sup> (nilai <i>n</i> = 3, <i>l</i> = 1). Kotak orbital p memiliki nilai <i>m</i> = -1, 0, +1. Pengisian 5 elektron menurut kaidah Hund: 3 elektron pertama mengisi <i>m</i> = -1 (&uarr;), 0 (&uarr;), +1 (&uarr;). Elektron ke-4 mengisi <i>m</i> = -1 (&darr;), dan elektron ke-5 (terakhir) mengisi <i>m</i> = 0 (&darr;). Maka: <i>n</i> = 3, <i>l</i> = 1, <i>m</i> = 0, <i>s</i> = -&frac12;."
+      },
+      {
+        question: "Atom Besi memiliki nomor atom <i>Z</i> = 26. Konfigurasi elektronnya adalah [Ar] 4s<sup>2</sup> 3d<sup>6</sup>. Keempat bilangan kuantum elektron terakhir atom Fe adalah...",
+        options: [
+          "<i>n</i> = 4, <i>l</i> = 0, <i>m</i> = 0, <i>s</i> = -&frac12;",
+          "<i>n</i> = 3, <i>l</i> = 2, <i>m</i> = -2, <i>s</i> = -&frac12;",
+          "<i>n</i> = 3, <i>l</i> = 2, <i>m</i> = +2, <i>s</i> = +&frac12;",
+          "<i>n</i> = 3, <i>l</i> = 1, <i>m</i> = -1, <i>s</i> = -&frac12;"
+        ],
+        answer: 1,
+        explanation: "Berdasarkan prinsip Aufbau, elektron terakhir yang ditambahkan menempati subkulit 3d<sup>6</sup>. Nilai <i>n</i> = 3, <i>l</i> = 2. Subkulit d memiliki 5 orbital: <i>m</i> = -2, -1, 0, +1, +2. Lima elektron pertama mengisi masing-masing kotak dengan spin up (&uarr;). Elektron ke-6 berpasangan masuk ke kotak pertama <i>m</i> = -2 dengan spin down (&darr;). Jadi: <i>n</i> = 3, <i>l</i> = 2, <i>m</i> = -2, <i>s</i> = -&frac12;."
+      },
+      {
+        question: "Suatu atom netral memiliki elektron terakhir dengan set bilangan kuantum: <i>n</i> = 4, <i>l</i> = 1, <i>m</i> = 0, <i>s</i> = -&frac12;. Nomor atom unsur tersebut adalah...",
+        options: [
+          "31 (Galium)",
+          "33 (Arsen)",
+          "35 (Bromin)",
+          "36 (Kripton)"
+        ],
+        answer: 2,
+        explanation: "<i>n</i> = 4, <i>l</i> = 1 menunjukkan subkulit 4p. Nilai <i>m</i> = 0 dengan <i>s</i> = -&frac12; berarti orbital 4p telah terisi 3 elektron spin up dan 2 elektron spin down (total 5 elektron), yaitu 4p<sup>5</sup>. Konfigurasi lengkap: 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>2</sup> 3p<sup>6</sup> 4s<sup>2</sup> 3d<sup>10</sup> 4p<sup>5</sup> dengan jumlah total elektron = 2+2+6+2+6+2+10+5 = 35 (Bromin, <i>Z</i> = 35)."
+      },
+      {
+        question: "Di antara kombinasi bilangan kuantum berikut, manakah kombinasi yang TIDAK MUNGKIN terjadi untuk suatu elektron?",
+        options: [
+          "<i>n</i> = 3, <i>l</i> = 2, <i>m</i> = -1, <i>s</i> = +&frac12;",
+          "<i>n</i> = 2, <i>l</i> = 2, <i>m</i> = 0, <i>s</i> = +&frac12;",
+          "<i>n</i> = 4, <i>l</i> = 0, <i>m</i> = 0, <i>s</i> = -&frac12;",
+          "<i>n</i> = 3, <i>l</i> = 1, <i>m</i> = +1, <i>s</i> = -&frac12;"
+        ],
+        answer: 1,
+        explanation: "Kombinasi <i>n</i> = 2, <i>l</i> = 2, <i>m</i> = 0, <i>s</i> = +&frac12; tidak mungkin karena nilai <i>l</i> harus lebih kecil dari <i>n</i> (syarat: <i>l</i> &le; <i>n</i> - 1). Jika <i>n</i> = 2, nilai <i>l</i> maksimal adalah 1. Oleh karena itu, subkulit 2d tidak pernah ada di alam semesta."
+      },
+      {
+        question: "Manakah di antara set bilangan kuantum berikut yang dilarang karena melanggar aturan nilai bilangan kuantum magnetik (<i>m</i>)?",
+        options: [
+          "<i>n</i> = 3, <i>l</i> = 1, <i>m</i> = +2, <i>s</i> = -&frac12;",
+          "<i>n</i> = 4, <i>l</i> = 3, <i>m</i> = -2, <i>s</i> = +&frac12;",
+          "<i>n</i> = 2, <i>l</i> = 1, <i>m</i> = 0, <i>s</i> = -&frac12;",
+          "<i>n</i> = 1, <i>l</i> = 0, <i>m</i> = 0, <i>s</i> = +&frac12;"
+        ],
+        answer: 0,
+        explanation: "Untuk subkulit dengan <i>l</i> = 1 (subkulit p), nilai <i>m</i> yang diizinkan hanya berkisar dari -<i>l</i> sampai +<i>l</i>, yaitu <i>m</i> = -1, 0, +1. Nilai <i>m</i> = +2 berada di luar batas yang diizinkan sehingga set ini dilarang."
+      },
+      {
+        question: "Berapakah jumlah total orbital yang terdapat pada tingkat energi kulit ketiga (kulit M, <i>n</i> = 3)?",
+        options: [
+          "3 orbital",
+          "6 orbital",
+          "9 orbital",
+          "18 orbital"
+        ],
+        answer: 2,
+        explanation: "Jumlah total orbital pada suatu kulit atom dirumuskan dengan <i>n</i><sup>2</sup>. Untuk kulit <i>n</i> = 3, jumlah orbital = 3<sup>2</sup> = 9 orbital (terdiri atas 1 orbital 3s, 3 orbital 3p, dan 5 orbital 3d). Catatan: kapasitas elektron maksimumnya adalah 2<i>n</i><sup>2</sup> = 18 elektron."
+      },
+      {
+        question: "Perhatikan pernyataan mengenai orbital atom berikut:<br>1) Memiliki bentuk bola simetris<br>2) Memiliki bentuk balon terpilin (*dumbbell*)<br>3) Memiliki satu bidang simpul (*nodal plane*) di mana kebolehjadian elektron sama dengan nol.<br>Pernyataan yang tepat untuk orbital <i>p</i> adalah...",
+        options: [
+          "1 dan 2",
+          "2 dan 3",
+          "1 dan 3",
+          "1, 2, dan 3"
+        ],
+        answer: 1,
+        explanation: "Orbital <i>p</i> (<i>l</i> = 1) memiliki bentuk balon terpilin (*dumbbell*) dengan 2 cuping berlawanan fase dan memiliki tepat 1 bidang simpul (*nodal plane*) di antara kedua cuping tempat nilai fungsi gelombang &psi; = 0. Bentuk bola simetris adalah ciri khas orbital <i>s</i>."
+      }
+    ];
+
+    let userAnswers = new Array(quizQuestions.length).fill(null);
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      quizQuestions.forEach((q, qIndex) => {
+        const qCard = document.createElement('div');
+        qCard.className = 'p-4 sm:p-5 rounded-xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant/60 space-y-3 shadow-sm';
+        qCard.id = `quiz-card-${qIndex}`;
+
+        // Question Title
+        const qTitle = document.createElement('div');
+        qTitle.className = 'flex items-start space-x-3';
+        qTitle.innerHTML = `
+          <span class="w-7 h-7 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">${qIndex + 1}</span>
+          <div class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 leading-relaxed">${q.question}</div>
+        `;
+        qCard.appendChild(qTitle);
+
+        // Options List
+        const optContainer = document.createElement('div');
+        optContainer.className = 'grid grid-cols-1 gap-2.5 pt-1 pl-10';
+
+        const letters = ['A', 'B', 'C', 'D'];
+        q.options.forEach((optText, optIndex) => {
+          const optBtn = document.createElement('button');
+          optBtn.id = `opt-${qIndex}-${optIndex}`;
+          optBtn.onclick = () => selectQuizOption(qIndex, optIndex);
+          optBtn.className = 'text-left p-3 rounded-xl border border-slate-200 dark:border-outline-variant bg-slate-50 dark:bg-surface-container-lowest hover:border-primary text-slate-800 dark:text-on-surface transition-all text-xs flex items-start space-x-2.5 cursor-pointer';
+          optBtn.innerHTML = `
+            <span class="w-5 h-5 rounded-lg bg-slate-200 dark:bg-surface-container text-slate-700 dark:text-on-surface-variant flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">${letters[optIndex]}</span>
+            <span class="leading-relaxed">${optText}</span>
+          `;
+          optContainer.appendChild(optBtn);
+        });
+        qCard.appendChild(optContainer);
+
+        // Explanation Box (Hidden until answered)
+        const expBox = document.createElement('div');
+        expBox.id = `exp-${qIndex}`;
+        expBox.className = 'hidden p-4 rounded-xl bg-slate-100 dark:bg-slate-950/80 border text-xs leading-relaxed ml-10 space-y-1';
+        expBox.innerHTML = `
+          <div class="font-bold flex items-center space-x-1.5 text-slate-800 dark:text-slate-200">
+            <i data-lucide="info" class="w-3.5 h-3.5 text-teal-600"></i>
+            <span>Pembahasan Soal Nomor ${qIndex + 1}:</span>
+          </div>
+          <p class="text-slate-600 dark:text-slate-400">${q.explanation}</p>
+        `;
+        qCard.appendChild(expBox);
+
+        container.appendChild(qCard);
+      });
+
+      
+      safeRenderIcons();
+    }
+
+    function selectQuizOption(qIndex, optIndex) {
+      if (userAnswers[qIndex] !== null) return; // Prevent changing after answered
+
+      userAnswers[qIndex] = optIndex;
+      const q = quizQuestions[qIndex];
+      const isCorrect = (optIndex === q.answer);
+
+      if (isCorrect) {
+        playSound('success');
+      } else {
+        playSound('error');
+      }
+
+      // Update Option Styles
+      for (let i = 0; i < q.options.length; i++) {
+        const btn = document.getElementById(`opt-${qIndex}-${i}`);
+        if (!btn) continue;
+        btn.disabled = true;
+        btn.classList.remove('hover:border-teal-500', 'dark:hover:border-teal-600');
+
+        if (i === q.answer) {
+          // Highlight Correct
+          btn.className = 'text-left p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 text-xs sm:text-sm flex items-start space-x-2.5 font-semibold';
+        } else if (i === optIndex && !isCorrect) {
+          // Highlight Wrong
+          btn.className = 'text-left p-3 rounded-xl border-2 border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200 text-xs sm:text-sm flex items-start space-x-2.5 font-semibold';
+        } else {
+          btn.className = 'text-left p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 text-slate-400 dark:text-slate-600 text-xs sm:text-sm flex items-start space-x-2.5 opacity-60';
+        }
+      }
+
+      // Show Explanation
+      const expBox = document.getElementById(`exp-${qIndex}`);
+      if (expBox) {
+        expBox.classList.remove('hidden');
+        expBox.className = `p-4 rounded-xl text-xs leading-relaxed ml-10 space-y-1 border ${
+          isCorrect 
+            ? 'bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50 text-emerald-950 dark:text-emerald-200' 
+            : 'bg-rose-50/60 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/50 text-rose-950 dark:text-rose-200'
+        }`;
+      }
+
+      updateQuizScore();
+      triggerAutoSave();
+    }
+
+    function updateQuizScore() {
+      let correct = 0;
+      let answeredCount = 0;
+
+      userAnswers.forEach((ans, idx) => {
+        if (ans !== null) {
+          answeredCount++;
+          if (ans === quizQuestions[idx].answer) correct++;
+        }
+      });
+
+      const scorePercent = Math.round((correct / quizQuestions.length) * 100);
+
+      const scoreNum = document.getElementById('quiz-score-number');
+      const correctCount = document.getElementById('quiz-correct-count');
+      const scorePct = document.getElementById('quiz-score-percent');
+      const sumScore = document.getElementById('summary-quiz-score');
+
+      if (scoreNum) scoreNum.textContent = scorePercent;
+      if (correctCount) correctCount.textContent = correct;
+      if (scorePct) scorePct.textContent = `${scorePercent}%`;
+      if (sumScore) sumScore.textContent = `${scorePercent} / 100 (${correct} Benar)`;
+
+      // If finished all 12 questions with perfect score, trigger celebration!
+      if (answeredCount === quizQuestions.length && correct === quizQuestions.length) {
+        playSound('celebrate');
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
+      }
+    }
+
+    function resetQuiz() {
+      playSound('click');
+      userAnswers = new Array(quizQuestions.length).fill(null);
+      renderQuiz();
+      updateQuizScore();
+      triggerAutoSave();
+    }
+
+    // ==============================================================================
+    // AUTO-SAVE LOGIC & IDENTITAS SISWA PERSISTENCE
+    // ==============================================================================
+    function handleStudentInfoChange() {
+      triggerAutoSave();
+      updateStudentSummary();
+    }
+
+    let saveTimeout = null;
+    function triggerAutoSave() {
+      const indicator = document.getElementById('save-status-text');
+      if (indicator) indicator.textContent = 'Menyimpan...';
+
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveStudentDataToStorage();
+        if (indicator) indicator.textContent = '\u2713 Tersimpan di Browser';
+      }, 500);
+    }
+
+    function saveStudentDataToStorage() {
+      try {
+        const payload = {
+          name: document.getElementById('student-name')?.value || '',
+          cls: document.getElementById('student-class')?.value || '',
+          nis: document.getElementById('student-nis')?.value || '',
+          essay1: document.getElementById('lab-essay-1')?.value || '',
+          essay2: document.getElementById('lab-essay-2')?.value || '',
+          essay3: document.getElementById('lab-essay-3')?.value || '',
+          reflection: document.getElementById('student-reflection-text')?.value || '',
+          answers: userAnswers
+        };
+        localStorage.setItem('chemportal_bk_task_data', JSON.stringify(payload));
+      } catch(e) {}
+    }
+
+    function loadSavedStudentData() {
+      try {
+        const raw = localStorage.getItem('chemportal_bk_task_data');
+        if (!raw) return;
+        const data = JSON.parse(raw);
+
+        if (data.name && document.getElementById('student-name')) document.getElementById('student-name').value = data.name;
+        if (data.cls && document.getElementById('student-class')) document.getElementById('student-class').value = data.cls;
+        if (data.nis && document.getElementById('student-nis')) document.getElementById('student-nis').value = data.nis;
+        if (data.essay1 && document.getElementById('lab-essay-1')) document.getElementById('lab-essay-1').value = data.essay1;
+        if (data.essay2 && document.getElementById('lab-essay-2')) document.getElementById('lab-essay-2').value = data.essay2;
+        if (data.essay3 && document.getElementById('lab-essay-3')) document.getElementById('lab-essay-3').value = data.essay3;
+        if (data.reflection && document.getElementById('student-reflection-text')) document.getElementById('student-reflection-text').value = data.reflection;
+
+        if (Array.isArray(data.answers)) {
+          data.answers.forEach((ans, qIdx) => {
+            if (ans !== null && qIdx < quizQuestions.length) {
+              selectQuizOption(qIdx, ans);
+            }
+          });
+        }
+        updateStudentSummary();
+      } catch(e) {}
+    }
+
+    function updateStudentSummary() {
+      const name = document.getElementById('student-name')?.value.trim() || '-';
+      const cls = document.getElementById('student-class')?.value.trim() || '-';
+      const nis = document.getElementById('student-nis')?.value.trim() || '-';
+
+      const sName = document.getElementById('summary-student-name');
+      const sCls = document.getElementById('summary-student-class');
+      const sNis = document.getElementById('summary-student-nis');
+      const sStatus = document.getElementById('summary-essay-status');
+
+      if (sName) sName.textContent = name;
+      if (sCls) sCls.textContent = cls;
+      if (sNis) sNis.textContent = nis;
+
+      const e1 = document.getElementById('lab-essay-1')?.value.trim();
+      const e2 = document.getElementById('lab-essay-2')?.value.trim();
+      const e3 = document.getElementById('lab-essay-3')?.value.trim();
+
+      if (sStatus) {
+        if (e1 && e2 && e3) {
+          sStatus.textContent = '\u2713 Lengkap (3 Soal Terisi)';
+          sStatus.className = 'text-emerald-600 dark:text-emerald-400 font-bold';
+        } else {
+          sStatus.textContent = 'Belum Lengkap';
+          sStatus.className = 'text-amber-600 dark:text-amber-400 font-bold';
+        }
+      }
+    }
+
+    function copyReflectionNote() {
+      playSound('click');
+      const text = document.getElementById('student-reflection-text')?.value.trim();
+      if (!text) {
+        alert('Belum ada catatan refleksi yang ditulis.');
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Catatan refleksi berhasil disalin ke clipboard!');
+      });
+    }
+
+    function insertPromptIntoReflection(txt) {
+      playSound('click');
+      const area = document.getElementById('student-reflection-text');
+      if (area) {
+        area.value = txt;
+        area.focus();
+        triggerAutoSave();
+      }
+    }
+
+    // ==============================================================================
+    // PUSAT PENGUMPULAN TUGAS (GAS SPREADSHEET & EMAIL)
+    // ==============================================================================
+    const TEACHER_EMAIL = 'vanzaltito123@gmail.com';
+    const DEFAULT_GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwobr0k-44HFrf3B5YUroeEK-_U13AGVe2urQYDAmL0U43arTQHTvKjUEeM6CuZQvOE/exec';
+
+    function getStudentReportData() {
+      let correct = 0;
+      quizQuestions.forEach((q, i) => {
+        if (userAnswers[i] === q.answer) correct++;
+      });
+      const score = Math.round((correct / quizQuestions.length) * 100);
+
+      return {
+        materi: 'Bilangan Kuantum & Bentuk Orbital (Fase E)',
+        nama: (document.getElementById('student-name')?.value || 'Anonim').trim(),
+        kelas: (document.getElementById('student-class')?.value || '-').trim(),
+        nis: (document.getElementById('student-nis')?.value || '-').trim(),
+        skor: score,
+        correctCount: correct,
+        totalCount: quizQuestions.length,
+        essay1: (document.getElementById('lab-essay-1')?.value || '-').trim(),
+        essay2: (document.getElementById('lab-essay-2')?.value || '-').trim(),
+        essay3: (document.getElementById('lab-essay-3')?.value || '-').trim(),
+        refleksi: (document.getElementById('student-reflection-text')?.value || '-').trim(),
+        kuis: userAnswers
+      };
+    }
+
+    function generateFormattedTextReport() {
+      const data = getStudentReportData();
+      return `📄 *LAPORAN TUGAS: PORTAL KIMIA*\n` +
+             `🔬 *Materi:* ${data.materi}\n` +
+             `👤 *Nama Siswa:* ${data.nama}\n` +
+             `🏫 *Kelas / Fase:* ${data.kelas}\n` +
+             `🔢 *No. Absen / NISN:* ${data.nis}\n` +
+             `------------------------------------\n` +
+             `📊 *Skor Kuis (12 Soal):* ${data.skor}/100 (${data.correctCount} Benar, ${data.totalCount - data.correctCount} Salah)\n\n` +
+             `🔬 *HASIL PENYELIDIKAN LAB ESSAI:*\n` +
+             `1. Anomali Kromium Cr vs V:\n${data.essay1}\n\n` +
+             `2. Sifat Kemagnetan Cl vs Ar:\n${data.essay2}\n\n` +
+             `3. Evaluasi Konsep Orbital 2d:\n${data.essay3}\n\n` +
+             `💡 *CATATAN REFLEKSI SISWA:*\n` +
+             `${data.refleksi}\n` +
+             `------------------------------------\n` +
+             `⏰ *Waktu Pengumpulan:* ${new Date().toLocaleString('id-ID')}`;
+    }
+
+    function copyReportSummary() {
+      playSound('click');
+      const text = generateFormattedTextReport();
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Ringkasan Laporan Tugas berhasil disalin ke clipboard! Siap ditempelkan ke Google Classroom, WhatsApp, atau Catatan Guru.');
+      });
+    }
+
+    function sendEmailToTeacher() {
+      playSound('click');
+      const data = getStudentReportData();
+      if (!data.nama || data.nama === 'Anonim' || !data.kelas || data.kelas === '-') {
+        alert('Mohon lengkapi Nama Siswa dan Kelas pada bagian Identitas Siswa sebelum mengirim email!');
+        document.getElementById('student-name')?.focus();
+        document.getElementById('student-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const emailSubject = `${data.materi}_${data.kelas}_${data.nama}`;
+      const emailBody = generateFormattedTextReport();
+
+      try {
+        navigator.clipboard.writeText(emailBody);
+      } catch(e) {}
+
+      const mailtoUrl = `mailto:${TEACHER_EMAIL}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+      window.location.href = mailtoUrl;
+
+      setTimeout(() => {
+        alert(`Aplikasi email sedang dibuka untuk mengirim ke: ${TEACHER_EMAIL}\n\nSubjek: ${emailSubject}\n\n(Catatan: Seluruh isi laporan tugas juga telah disalin ke clipboard Anda).`);
+      }, 300);
+    }
+
+    function exportReportPDF() {
+      playSound('click');
+      const data = getStudentReportData();
+      if (!data.nama || data.nama === 'Anonim') {
+        const ask = confirm('Nama siswa belum diisi pada bagian Identitas Pembelajar. Apakah ingin tetap mencetak sekarang?');
+        if (!ask) {
+          document.getElementById('student-name')?.focus();
+          document.getElementById('student-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+      }
+      window.print();
+    }
+
+    function submitToTeacherDatabase() {
+      playSound('click');
+      const data = getStudentReportData();
+      const btn = document.getElementById('btn-submit-db');
+
+      if (!data.nama || data.nama === 'Anonim' || !data.kelas || data.kelas === '-') {
+        alert('Mohon lengkapi Nama Siswa dan Kelas pada bagian Identitas Siswa terlebih dahulu!');
+        document.getElementById('student-name')?.focus();
+        document.getElementById('student-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      // 1. Jika dibuka di dalam lingkungan Apps Script Web App
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<span>Mengirim ke Server Spreadsheet...</span>';
+        }
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '<span>\u2713 Terkirim ke Spreadsheet</span>';
+            }
+            alert(res && res.message ? res.message : 'Tugas berhasil terkirim dan tercatat di Google Spreadsheet guru!');
+          })
+          .withFailureHandler((err) => {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '<span>Kirim ke Database Guru (Spreadsheet)</span>';
+            }
+            alert('Gagal mengirim ke database: ' + err.toString());
+          })
+          .simpanTugasSiswa(data);
+        return;
+      }
+
+      // 2. Jika dibuka dari Google Drive / File Lokal / Standalone (Kirim via POST API ke Apps Script)
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>Mengirim ke Spreadsheet...</span>';
+      }
+
+      fetch(DEFAULT_GAS_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(() => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>\u2713 Terkirim ke Spreadsheet</span>';
+        }
+        alert('\u2713 Tugas berhasil terkirim dan tersimpan di Google Spreadsheet Guru!\n\nSpreadsheet Target:\nhttps://docs.google.com/spreadsheets/d/1fFEdFx-J7nYSUpNLIpZVwsO2HpWtM8cqBCF0vn_I9ZI\n\nTerima kasih telah belajar dan menyelesaikan tugas dengan sungguh-sungguh!');
+      })
+      .catch((err) => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Kirim ke Database Guru (Spreadsheet)</span>';
+        }
+        alert('Gagal terhubung ke endpoint spreadsheet. Membuka opsi kirim cadangan via Email Guru...');
+        sendEmailToTeacher();
+      });
+    }
+
+    function confirmResetTask() {
+      playSound('click');
+      const sure = confirm('PERHATIAN: Apakah Anda yakin ingin mengosongkan seluruh identitas, jawaban kuis, hasil penyelidikan lab essai, dan catatan refleksi Anda untuk mulai dari awal?');
+      if (sure) {
+        try {
+          localStorage.removeItem('chemportal_bk_task_data');
+        } catch(e) {}
+
+        if (document.getElementById('student-name')) document.getElementById('student-name').value = '';
+        if (document.getElementById('student-class')) document.getElementById('student-class').value = '';
+        if (document.getElementById('student-nis')) document.getElementById('student-nis').value = '';
+        if (document.getElementById('lab-essay-1')) document.getElementById('lab-essay-1').value = '';
+        if (document.getElementById('lab-essay-2')) document.getElementById('lab-essay-2').value = '';
+        if (document.getElementById('lab-essay-3')) document.getElementById('lab-essay-3').value = '';
+        if (document.getElementById('student-reflection-text')) document.getElementById('student-reflection-text').value = '';
+
+        resetQuiz();
+        updateStudentSummary();
+        alert('Seluruh data tugas telah direset.');
+      }
+    }
+
+    // ==============================================================================
+    // INITIALIZATION LOGIC
+    // ==============================================================================
+    function initApp() {
+      try { initTheme(); } catch(e) {}
+      try { safeRenderIcons(); } catch(e) {}
+      try { populateElementDropdown(); } catch(e) {}
+      try { updateSimulatorFromElement(11); } catch(e) {}
+      try { runQuantumValidator(); } catch(e) {}
+      try { initOrbitalCanvas(); } catch(e) {}
+      try { renderQuiz(); } catch(e) {}
+      try { loadSavedStudentData(); } catch(e) {}
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
+
