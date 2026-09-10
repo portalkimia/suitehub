@@ -610,6 +610,12 @@ const safeStorage = {
   }
 };
 
+// Non-reactive storage for Chart.js instances to prevent Alpine Proxy interference
+const lmsChartInstances = {
+  kehadiran: null,
+  nilai: null
+};
+
 document.addEventListener('alpine:init', () => {
   Alpine.data('lmsApp', () => ({
     // Navigation State
@@ -1052,8 +1058,14 @@ document.addEventListener('alpine:init', () => {
       type: 'success'
     },
 
-    chartKehadiran: null,
-    chartNilai: null,
+    get chartKehadiran() {
+      const ctx = typeof document !== 'undefined' ? document.getElementById('chartKehadiran') : null;
+      return ctx && typeof Chart !== 'undefined' ? Chart.getChart(ctx) || lmsChartInstances.kehadiran : lmsChartInstances.kehadiran;
+    },
+    get chartNilai() {
+      const ctx = typeof document !== 'undefined' ? document.getElementById('chartNilai') : null;
+      return ctx && typeof Chart !== 'undefined' ? Chart.getChart(ctx) || lmsChartInstances.nilai : lmsChartInstances.nilai;
+    },
 
     // Initializer
     init() {
@@ -1497,7 +1509,11 @@ document.addEventListener('alpine:init', () => {
 
     handleFetchedCloudData(data, silent = false) {
       if (data) {
-        this.syncDataFromCloudPayload(data);
+        try {
+          this.syncDataFromCloudPayload(data);
+        } catch (err) {
+          console.error('Error saat sinkronisasi payload:', err);
+        }
         const countSiswa = (data.siswa && data.siswa.length) || 0;
         const countJurnal = (data.jurnalKimia && data.jurnalKimia.length) || 0;
         const countNilai = (data.nilai && data.nilai.length) || 0;
@@ -1679,7 +1695,9 @@ document.addEventListener('alpine:init', () => {
 
         this.presensiWali = Array.from(presensiMap.values());
         this.saveLocalData();
-        this.updateCharts();
+        this.$nextTick(() => {
+          this.updateCharts();
+        });
       }
       if (data.presensiKimia && Array.isArray(data.presensiKimia)) {
         this.presensiKimia = data.presensiKimia;
@@ -6562,98 +6580,128 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
     // CHARTS
     // =========================================================================
     initCharts() {
-      const isDark = this.darkMode;
-      const textColor = isDark ? '#a1a1aa' : '#475569';
-      const gridColor = isDark ? '#27272a' : '#e2e8f0';
+      try {
+        if (typeof Chart === 'undefined') return;
 
-      const ctx1 = document.getElementById('chartKehadiran');
-      if (ctx1 && typeof Chart !== 'undefined') {
-        const stats = this.getWaliRecapStats();
-        this.chartKehadiran = new Chart(ctx1, {
-          type: 'doughnut',
-          data: {
-            labels: ['Hadir', 'Tahfidz', 'PTV', 'Organtri', 'Terlambat', 'Sakit', 'Izin', 'Di Rumah', 'Tanpa Keterangan'],
-            datasets: [{
-              data: [stats.hadir, stats.tahfidz, stats.ptv, stats.organtri, stats.telat, stats.sakit, stats.izin, stats.dirumah, stats.tanpaket],
-              backgroundColor: ['#10b981', '#14b8a6', '#6366f1', '#f59e0b', '#eab308', '#3b82f6', '#8b5cf6', '#06b6d4', '#ef4444'],
-              borderWidth: 0
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 }, color: textColor } }
-            },
-            cutout: '65%'
+        const isDark = this.darkMode;
+        const textColor = isDark ? '#a1a1aa' : '#475569';
+        const gridColor = isDark ? '#27272a' : '#e2e8f0';
+
+        const ctx1 = document.getElementById('chartKehadiran');
+        if (ctx1) {
+          const old1 = Chart.getChart(ctx1) || lmsChartInstances.kehadiran;
+          if (old1 && typeof old1.destroy === 'function') {
+            old1.destroy();
           }
-        });
-      }
 
-      const ctx2 = document.getElementById('chartNilai');
-      if (ctx2 && typeof Chart !== 'undefined') {
-        const allNilai = this.nilai.map(n => Number(n.nilai)).filter(n => !isNaN(n) && n !== '');
-        const range1 = allNilai.filter(n => n >= 90).length;
-        const range2 = allNilai.filter(n => n >= 75 && n < 90).length;
-        const range3 = allNilai.filter(n => n < 75).length;
-
-        this.chartNilai = new Chart(ctx2, {
-          type: 'bar',
-          data: {
-            labels: ['Sangat Baik (90-100)', 'Tuntas (75-89)', 'Remedial (<75)'],
-            datasets: [{
-              label: 'Jumlah Nilai Siswa',
-              data: [range1, range2, range3],
-              backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
-              borderRadius: 6
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false }
+          const stats = this.getWaliRecapStats();
+          const chart1 = new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+              labels: ['Hadir', 'Tahfidz', 'PTV', 'Organtri', 'Terlambat', 'Sakit', 'Izin', 'Di Rumah', 'Tanpa Keterangan'],
+              datasets: [{
+                data: [stats.hadir, stats.tahfidz, stats.ptv, stats.organtri, stats.telat, stats.sakit, stats.izin, stats.dirumah, stats.tanpaket],
+                backgroundColor: ['#10b981', '#14b8a6', '#6366f1', '#f59e0b', '#eab308', '#3b82f6', '#8b5cf6', '#06b6d4', '#ef4444'],
+                borderWidth: 0
+              }]
             },
-            scales: {
-              x: { ticks: { color: textColor }, grid: { color: gridColor } },
-              y: { beginAtZero: true, ticks: { stepSize: 2, color: textColor }, grid: { color: gridColor } }
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 }, color: textColor } }
+              },
+              cutout: '65%'
             }
+          });
+          try { Object.seal(chart1); } catch (e) {}
+          lmsChartInstances.kehadiran = chart1;
+        }
+
+        const ctx2 = document.getElementById('chartNilai');
+        if (ctx2) {
+          const old2 = Chart.getChart(ctx2) || lmsChartInstances.nilai;
+          if (old2 && typeof old2.destroy === 'function') {
+            old2.destroy();
           }
-        });
+
+          const allNilai = this.nilai.map(n => Number(n.nilai)).filter(n => !isNaN(n) && n !== '');
+          const range1 = allNilai.filter(n => n >= 90).length;
+          const range2 = allNilai.filter(n => n >= 75 && n < 90).length;
+          const range3 = allNilai.filter(n => n < 75).length;
+
+          const chart2 = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+              labels: ['Sangat Baik (90-100)', 'Tuntas (75-89)', 'Remedial (<75)'],
+              datasets: [{
+                label: 'Jumlah Nilai Siswa',
+                data: [range1, range2, range3],
+                backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+                borderRadius: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false }
+              },
+              scales: {
+                x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                y: { beginAtZero: true, ticks: { stepSize: 2, color: textColor }, grid: { color: gridColor } }
+              }
+            }
+          });
+          try { Object.seal(chart2); } catch (e) {}
+          lmsChartInstances.nilai = chart2;
+        }
+      } catch (err) {
+        console.warn('Gagal inisialisasi chart:', err);
       }
     },
 
     updateCharts() {
-      const isDark = this.darkMode;
-      const textColor = isDark ? '#a1a1aa' : '#475569';
-      const gridColor = isDark ? '#27272a' : '#e2e8f0';
+      try {
+        if (typeof Chart === 'undefined') return;
 
-      if (this.chartKehadiran) {
-        const stats = this.getWaliRecapStats();
-        this.chartKehadiran.data.datasets[0].data = [stats.hadir, stats.tahfidz, stats.ptv, stats.organtri, stats.telat, stats.sakit, stats.izin, stats.dirumah, stats.tanpaket];
-        if (this.chartKehadiran.options && this.chartKehadiran.options.plugins && this.chartKehadiran.options.plugins.legend && this.chartKehadiran.options.plugins.legend.labels) {
-          this.chartKehadiran.options.plugins.legend.labels.color = textColor;
-        }
-        this.chartKehadiran.update();
-      }
+        const isDark = this.darkMode;
+        const textColor = isDark ? '#a1a1aa' : '#475569';
+        const gridColor = isDark ? '#27272a' : '#e2e8f0';
 
-      if (this.chartNilai) {
-        const allNilai = this.nilai.map(n => Number(n.nilai)).filter(n => !isNaN(n) && n !== '');
-        const range1 = allNilai.filter(n => n >= 90).length;
-        const range2 = allNilai.filter(n => n >= 75 && n < 90).length;
-        const range3 = allNilai.filter(n => n < 75).length;
-        this.chartNilai.data.datasets[0].data = [range1, range2, range3];
-        if (this.chartNilai.options && this.chartNilai.options.scales) {
-          if (this.chartNilai.options.scales.x && this.chartNilai.options.scales.x.ticks) {
-            this.chartNilai.options.scales.x.ticks.color = textColor;
-            this.chartNilai.options.scales.x.grid.color = gridColor;
+        const ctx1 = document.getElementById('chartKehadiran');
+        const chart1 = ctx1 ? (Chart.getChart(ctx1) || lmsChartInstances.kehadiran) : lmsChartInstances.kehadiran;
+        if (chart1 && chart1.data && chart1.data.datasets && chart1.data.datasets[0]) {
+          const stats = this.getWaliRecapStats();
+          chart1.data.datasets[0].data = [stats.hadir, stats.tahfidz, stats.ptv, stats.organtri, stats.telat, stats.sakit, stats.izin, stats.dirumah, stats.tanpaket];
+          if (chart1.options && chart1.options.plugins && chart1.options.plugins.legend && chart1.options.plugins.legend.labels) {
+            chart1.options.plugins.legend.labels.color = textColor;
           }
-          if (this.chartNilai.options.scales.y && this.chartNilai.options.scales.y.ticks) {
-            this.chartNilai.options.scales.y.ticks.color = textColor;
-            this.chartNilai.options.scales.y.grid.color = gridColor;
-          }
+          chart1.update();
         }
-        this.chartNilai.update();
+
+        const ctx2 = document.getElementById('chartNilai');
+        const chart2 = ctx2 ? (Chart.getChart(ctx2) || lmsChartInstances.nilai) : lmsChartInstances.nilai;
+        if (chart2 && chart2.data && chart2.data.datasets && chart2.data.datasets[0]) {
+          const allNilai = this.nilai.map(n => Number(n.nilai)).filter(n => !isNaN(n) && n !== '');
+          const range1 = allNilai.filter(n => n >= 90).length;
+          const range2 = allNilai.filter(n => n >= 75 && n < 90).length;
+          const range3 = allNilai.filter(n => n < 75).length;
+          chart2.data.datasets[0].data = [range1, range2, range3];
+          if (chart2.options && chart2.options.scales) {
+            if (chart2.options.scales.x && chart2.options.scales.x.ticks) {
+              chart2.options.scales.x.ticks.color = textColor;
+              chart2.options.scales.x.grid.color = gridColor;
+            }
+            if (chart2.options.scales.y && chart2.options.scales.y.ticks) {
+              chart2.options.scales.y.ticks.color = textColor;
+              chart2.options.scales.y.grid.color = gridColor;
+            }
+          }
+          chart2.update();
+        }
+      } catch (err) {
+        console.warn('Gagal update chart:', err);
       }
     }
   }));
