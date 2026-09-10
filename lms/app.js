@@ -36,6 +36,12 @@ const safeStorage = {
   }
 };
 
+// Non-reactive storage for Chart.js instances to prevent Alpine Proxy interference
+const lmsChartInstances = {
+  kehadiran: null,
+  nilai: null
+};
+
 document.addEventListener('alpine:init', () => {
   Alpine.data('lmsApp', () => ({
     // Navigation State
@@ -50,7 +56,7 @@ document.addEventListener('alpine:init', () => {
     syncMessage: 'Tersimpan lokal & siap sync Google Drive',
     lastSyncTime: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
     isGasEnvironment: typeof google !== 'undefined' && typeof google.script !== 'undefined',
-    gasWebAppUrl: '',
+    gasWebAppUrl: (typeof window !== 'undefined' && window.PORTALKIMIA_CONFIG && window.PORTALKIMIA_CONFIG.LMS_API) || 'https://script.google.com/macros/s/AKfycbwhHSF2V_rUkObqGcQ0aGfy58g2eIe73VPgAIbyEKn2Oxw8m7FVIyu2oVKHzyLGsu2q/exec',
     
     // Core Data
     guru: {
@@ -62,7 +68,7 @@ document.addEventListener('alpine:init', () => {
       tahunAjaran: "2026/2027",
       semester: "Ganjil",
       kkmDefault: 75,
-      gasWebAppUrl: ""
+      gasWebAppUrl: (typeof window !== 'undefined' && window.PORTALKIMIA_CONFIG && window.PORTALKIMIA_CONFIG.LMS_API) || 'https://script.google.com/macros/s/AKfycbwhHSF2V_rUkObqGcQ0aGfy58g2eIe73VPgAIbyEKn2Oxw8m7FVIyu2oVKHzyLGsu2q/exec'
     },
     kelasList: [
       { id: "KLS-01", nama: "X3 Atlet", isWaliKelas: true, deskripsi: "Kelas Binaan Wali Kelas" }
@@ -286,6 +292,28 @@ document.addEventListener('alpine:init', () => {
     modalSettingJamOpen: false,
     settingJamHari: 'Senin',
 
+    // IMPOR JADWAL aSc TIMETABLES & AI VISION SCANNER STATE
+    modalImporJadwalOpen: false,
+    formImporJadwal: {
+      target: 'mengajar',      // 'mengajar' | 'kelas'
+      targetKelas: 'X3 Atlet', // kelas target saat target === 'kelas'
+      inputMode: 'ai',         // 'ai' | 'paste' | 'file' | 'preset'
+      rawText: '',
+      fileName: '',
+      replaceAll: true
+    },
+    imporJadwalStep: 'input',  // 'input' | 'preview'
+    imporJadwalPreview: [],    // [{ hari, jamKe, waktu, mapel, guru, kelas, tipeTugas, lantai }]
+    geminiApiKey: '',
+    showApiKeyInput: false,
+    isTestingGeminiApi: false,
+    geminiApiTestStatus: null, // 'success' | 'error' | null
+    geminiApiTestMessage: '',
+    isScanningAi: false,
+    scanAiProgress: '',
+    scanAiFile: { name: '', size: '', base64: '', mimeType: '', previewUrl: '' },
+    scanAiError: '',
+
     // KALKULATOR CEPAT KIMIA STATE
     chemTab: 'molar', // 'molar' | 'koligatif' | 'stoikiometri' | 'ph'
     calcMr: { formula: 'H2SO4', result: null },
@@ -459,8 +487,14 @@ document.addEventListener('alpine:init', () => {
       type: 'success'
     },
 
-    chartKehadiran: null,
-    chartNilai: null,
+    get chartKehadiran() {
+      const ctx = typeof document !== 'undefined' ? document.getElementById('chartKehadiran') : null;
+      return ctx && typeof Chart !== 'undefined' ? Chart.getChart(ctx) || lmsChartInstances.kehadiran : lmsChartInstances.kehadiran;
+    },
+    get chartNilai() {
+      const ctx = typeof document !== 'undefined' ? document.getElementById('chartNilai') : null;
+      return ctx && typeof Chart !== 'undefined' ? Chart.getChart(ctx) || lmsChartInstances.nilai : lmsChartInstances.nilai;
+    },
 
     // Initializer
     init() {
@@ -502,13 +536,14 @@ document.addEventListener('alpine:init', () => {
         }
       }
 
-      if (!this.jamPelajaran || Object.keys(this.jamPelajaran).length === 0 || !this.jamPelajaran['Senin'] || this.jamPelajaran['Senin'].length < 11 || this.jamPelajaran['Senin'][0].label !== 'Apel Pagi') {
+      if (!this.jamPelajaran || Object.keys(this.jamPelajaran).length === 0 || !this.jamPelajaran['Senin'] || this.jamPelajaran['Senin'].length < 11 || this.jamPelajaran['Senin'][0].label !== 'Morning Roll Call') {
         this.jamPelajaran = this.getDefaultJamPelajaran();
         this.saveLocalData();
       }
       const todayName = this.getCurrentDayName();
       this.jadwalKelasHariFilter = todayName !== 'Minggu' ? todayName : 'Senin';
       this.jadwalMengajarHariFilter = todayName !== 'Minggu' ? todayName : 'Senin';
+      this.geminiApiKey = localStorage.getItem('LMS_GEMINI_API_KEY') || '';
 
       // Auto-load most recent active group project if available
       if (!this.activeDraftProject && this.kelompokProyek && this.kelompokProyek.length > 0) {
@@ -529,6 +564,21 @@ document.addEventListener('alpine:init', () => {
       this.$nextTick(() => {
         this.initCharts();
         this.checkGasEnvironment();
+      });
+
+      // Auto-sync multi-perangkat saat tab kembali aktif atau dibuka di perangkat lain (tablet/HP)
+      let lastAutoFetch = Date.now();
+      const triggerSilentSync = () => {
+        if (Date.now() - lastAutoFetch > 15000 && this.gasWebAppUrl && this.syncStatus !== 'syncing') {
+          lastAutoFetch = Date.now();
+          this.fetchDataFromGoogleDrive(true);
+        }
+      };
+      window.addEventListener('focus', triggerSilentSync);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          triggerSilentSync();
+        }
       });
 
       this.$watch('currentTab', () => {
@@ -663,13 +713,24 @@ document.addEventListener('alpine:init', () => {
             this.siswa = [];
           }
 
-          // DEDUPLIKASI KETAT PRESENSI WALI DARI LOCAL STORAGE
+          // DEDUPLIKASI KETAT PRESENSI WALI DARI LOCAL STORAGE (Data terbawah / terbaru selalu menang)
           if (parsed.presensiWali && Array.isArray(parsed.presensiWali)) {
             const presensiMap = new Map();
             parsed.presensiWali.forEach(p => {
-              const key = (p.tanggal || '') + '|||' + (p.sesi || '') + '|||' + (p.kelas || '') + '|||' + (p.namaSiswa || '').toLowerCase().trim();
-              if (p.namaSiswa && !presensiMap.has(key)) {
-                presensiMap.set(key, p);
+              const tgl = this.normalizeDateString(p.tanggal);
+              const nSesi = this.normalizeStr(p.sesi || '') || 'apelpagi';
+              const normSesi = nSesi.includes('family') ? 'familytime' : 'apelpagi';
+              const cleanName = this.normalizeStr(p.namaSiswa || p.nama || '');
+              const cleanId = this.normalizeStr(p.idSiswa || '');
+              const sIdent = cleanName || cleanId;
+              if (sIdent && tgl) {
+                const key = tgl + '|||' + normSesi + '|||' + sIdent;
+                presensiMap.set(key, {
+                  ...p,
+                  tanggal: tgl,
+                  sesi: p.sesi || (normSesi === 'familytime' ? 'Family Time' : 'Apel Pagi'),
+                  status: p.status || 'Hadir'
+                });
               }
             });
             this.presensiWali = Array.from(presensiMap.values());
@@ -719,7 +780,9 @@ document.addEventListener('alpine:init', () => {
           this.jadwalMengajar = parsed.jadwalMengajar || [];
           this.mediaPembelajaran = (parsed.mediaPembelajaran && parsed.mediaPembelajaran.length > 0) ? parsed.mediaPembelajaran : this.getDefaultMediaPembelajaran();
 
-          this.gasWebAppUrl = this.guru.gasWebAppUrl || '';
+          const centralApiUrl = (typeof window !== 'undefined' && window.PORTALKIMIA_CONFIG && window.PORTALKIMIA_CONFIG.LMS_API) || 'https://script.google.com/macros/s/AKfycbwhHSF2V_rUkObqGcQ0aGfy58g2eIe73VPgAIbyEKn2Oxw8m7FVIyu2oVKHzyLGsu2q/exec';
+          this.gasWebAppUrl = (this.guru.gasWebAppUrl && this.guru.gasWebAppUrl.trim()) ? this.guru.gasWebAppUrl.trim() : centralApiUrl;
+          this.guru.gasWebAppUrl = this.gasWebAppUrl;
           
           if (this.kelasList.length > 0) {
             this.waliKelasFilter.kelas = this.guru.kelasWali || this.kelasList[0].nama;
@@ -751,7 +814,9 @@ document.addEventListener('alpine:init', () => {
         this.kelompokProyek = [];
         this.quickLinks = JSON.parse(JSON.stringify(window.DEFAULT_SAMPLE_DATA.quickLinks || []));
         this.mediaPembelajaran = this.getDefaultMediaPembelajaran();
-        this.gasWebAppUrl = this.guru.gasWebAppUrl || '';
+        const centralApiUrl = (typeof window !== 'undefined' && window.PORTALKIMIA_CONFIG && window.PORTALKIMIA_CONFIG.LMS_API) || 'https://script.google.com/macros/s/AKfycbwhHSF2V_rUkObqGcQ0aGfy58g2eIe73VPgAIbyEKn2Oxw8m7FVIyu2oVKHzyLGsu2q/exec';
+        this.gasWebAppUrl = (this.guru.gasWebAppUrl && this.guru.gasWebAppUrl.trim()) ? this.guru.gasWebAppUrl.trim() : centralApiUrl;
+        this.guru.gasWebAppUrl = this.gasWebAppUrl;
         this.waliKelasFilter.kelas = 'X3 Atlet';
         this.nilaiFilter.kelas = 'X3 Atlet';
         this.bintangFilter.kelas = 'X3 Atlet';
@@ -809,15 +874,43 @@ document.addEventListener('alpine:init', () => {
       return String(s || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
     },
 
+    normalizeDateString(d) {
+      if (!d) return '';
+      const s = String(d).split('T')[0].trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      const parts = s.split(/[\/\-\.]/);
+      if (parts.length === 3) {
+        if (parts[0].length === 4) {
+          return parts[0] + '-' + parts[1].padStart(2, '0') + '-' + parts[2].padStart(2, '0');
+        }
+        if (parts[2].length === 4) {
+          return parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+        }
+      }
+      return s;
+    },
+
+    isSameDate(d1, d2) {
+      if (!d1 || !d2) return false;
+      return this.normalizeDateString(d1) === this.normalizeDateString(d2);
+    },
+
     isSameStudent(s1, s2) {
       if (!s1 || !s2) return false;
-      const id1 = s1.idSiswa || s1.id;
-      const id2 = s2.idSiswa || s2.id;
+      const id1 = String(s1.idSiswa || s1.id || '').trim().toLowerCase();
+      const id2 = String(s2.idSiswa || s2.id || '').trim().toLowerCase();
       if (id1 && id2 && id1 === id2) return true;
-      if (s1.nisn && s2.nisn && s1.nisn === s2.nisn && s1.nisn.length > 3) return true;
+      const nisn1 = String(s1.nisn || '').trim();
+      const nisn2 = String(s2.nisn || '').trim();
+      if (nisn1 && nisn2 && nisn1 === nisn2 && nisn1.length > 3) return true;
       const n1 = this.normalizeStr(s1.namaSiswa || s1.nama);
       const n2 = this.normalizeStr(s2.namaSiswa || s2.nama);
-      return n1 && n2 && (n1 === n2 || n1.includes(n2) || n2.includes(n1));
+      if (!n1 || !n2) return false;
+      if (n1 === n2) return true;
+      if ((n1.includes(n2) || n2.includes(n1)) && Math.min(n1.length, n2.length) >= 5) {
+        return true;
+      }
+      return false;
     },
 
     isSameTask(t1, t2) {
@@ -844,17 +937,18 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    fetchDataFromGoogleDrive() {
+    fetchDataFromGoogleDrive(silent = false) {
       this.syncStatus = 'syncing';
 
       if (this.isGasEnvironment) {
         google.script.run
           .withSuccessHandler((res) => {
-            this.handleFetchedCloudData(res);
+            this.handleFetchedCloudData(res, silent);
           })
           .withFailureHandler((err) => {
             this.syncStatus = 'error';
-            this.showToast('Gagal memuat data dari Spreadsheet: ' + err, 'error');
+            if (!silent) this.showToast('Gagal memuat data dari Spreadsheet: ' + err, 'error');
+            else console.warn('Silent sync error:', err);
           })
           .handleAction('getAllData', {});
       } else if (this.gasWebAppUrl) {
@@ -865,32 +959,39 @@ document.addEventListener('alpine:init', () => {
           .then(res => res.json())
           .then(data => {
             if (data && data.status === 'success' && data.data) {
-              this.handleFetchedCloudData(data.data);
+              this.handleFetchedCloudData(data.data, silent);
             } else {
               this.syncStatus = 'error';
-              this.showToast('Respon dari Google Web App: ' + (data ? data.message : ''), 'error');
+              if (!silent) this.showToast('Respon dari Google Web App: ' + (data ? data.message : ''), 'error');
             }
           })
           .catch(err => {
             this.syncStatus = 'error';
-            this.showToast('Gagal koneksi ke Web App Google: ' + err, 'error');
+            if (!silent) this.showToast('Gagal koneksi ke Web App Google: ' + err, 'error');
+            else console.warn('Silent sync connection error:', err);
           });
       } else {
         this.syncStatus = 'synced';
       }
     },
 
-    handleFetchedCloudData(data) {
+    handleFetchedCloudData(data, silent = false) {
       if (data) {
-        this.syncDataFromCloudPayload(data);
+        try {
+          this.syncDataFromCloudPayload(data);
+        } catch (err) {
+          console.error('Error saat sinkronisasi payload:', err);
+        }
         const countSiswa = (data.siswa && data.siswa.length) || 0;
         const countJurnal = (data.jurnalKimia && data.jurnalKimia.length) || 0;
         const countNilai = (data.nilai && data.nilai.length) || 0;
         
-        if (countSiswa > 0 || countJurnal > 0 || countNilai > 0) {
-          this.showToast(`Berhasil menarik ${countSiswa} siswa, ${this.kelasList.length} kelas, ${countNilai} data nilai dari Spreadsheet!`, 'success');
-        } else {
-          this.showToast('Spreadsheet terhubung. Belum ada baris data siswa yang ditemukan pada sheet.', 'info');
+        if (!silent) {
+          if (countSiswa > 0 || countJurnal > 0 || countNilai > 0) {
+            this.showToast(`Berhasil menarik ${countSiswa} siswa, ${this.kelasList.length} kelas, ${countNilai} data nilai dari Spreadsheet!`, 'success');
+          } else {
+            this.showToast('Spreadsheet terhubung. Belum ada baris data siswa yang ditemukan pada sheet.', 'info');
+          }
         }
       }
       this.syncStatus = 'synced';
@@ -902,6 +1003,11 @@ document.addEventListener('alpine:init', () => {
         this.guru.nama = "Tito Vanzal, S.Pd.";
         this.guru.sekolah = "SMA Progresif Bumi Shalawat";
         this.guru.kelasWali = data.guru.kelasWali || "X3 Atlet";
+      }
+
+      if (data.geminiApiKey && String(data.geminiApiKey).trim() !== '') {
+        this.geminiApiKey = String(data.geminiApiKey).trim();
+        localStorage.setItem('LMS_GEMINI_API_KEY', this.geminiApiKey);
       }
 
       if (data.siswa && Array.isArray(data.siswa) && data.siswa.length > 0) {
@@ -1024,22 +1130,54 @@ document.addEventListener('alpine:init', () => {
         this.jurnalKimia = data.jurnalKimia;
       }
       if (data.presensiWali && Array.isArray(data.presensiWali)) {
+        const normDate = (d) => this.normalizeDateString(d);
+        const normStr = (s) => this.normalizeStr(s);
         const presensiMap = new Map();
-        // 1. Muat data dari cloud spreadsheet
+
+        // 1. Muat data dari cloud spreadsheet (data terbawah / input terbaru selalu menimpa entri lama)
         data.presensiWali.forEach(p => {
-          const key = (p.tanggal || '') + '|||' + (p.sesi || '') + '|||' + (p.kelas || '').toLowerCase() + '|||' + (p.namaSiswa || '').toLowerCase().trim();
-          if (p.namaSiswa) {
-            presensiMap.set(key, p);
+          const tgl = normDate(p.tanggal);
+          const nSesi = normStr(p.sesi || '') || 'apelpagi';
+          const normSesi = nSesi.includes('family') ? 'familytime' : 'apelpagi';
+          
+          const matchedSiswa = this.siswa.find(s => this.isSameStudent(s, p));
+          const sIdent = matchedSiswa ? normStr(matchedSiswa.nama) : (normStr(p.namaSiswa || p.nama) || normStr(p.idSiswa));
+          
+          if (sIdent && tgl) {
+            const key = tgl + '|||' + normSesi + '|||' + sIdent;
+            presensiMap.set(key, {
+              ...p,
+              tanggal: tgl,
+              sesi: p.sesi || (normSesi === 'familytime' ? 'Family Time' : 'Apel Pagi'),
+              status: p.status || 'Hadir',
+              namaSiswa: matchedSiswa ? matchedSiswa.nama : (p.namaSiswa || p.nama),
+              idSiswa: matchedSiswa ? matchedSiswa.id : (p.idSiswa || ''),
+              kelas: (matchedSiswa ? matchedSiswa.kelas : p.kelas) || 'X3 Atlet'
+            });
           }
         });
-        // 2. Pertahankan entri lokal yang belum sempat tersinkron
+
+        // 2. Pertahankan entri lokal HANYA jika siswa tersebut belum ada sama sekali di cloud pada tanggal & sesi tersebut
         this.presensiWali.forEach(p => {
-          const key = (p.tanggal || '') + '|||' + (p.sesi || '') + '|||' + (p.kelas || '').toLowerCase() + '|||' + (p.namaSiswa || '').toLowerCase().trim();
-          if (p.namaSiswa && !presensiMap.has(key)) {
-            presensiMap.set(key, p);
+          const tgl = normDate(p.tanggal);
+          const nSesi = normStr(p.sesi || '') || 'apelpagi';
+          const normSesi = nSesi.includes('family') ? 'familytime' : 'apelpagi';
+          const matchedSiswa = this.siswa.find(s => this.isSameStudent(s, p));
+          const sIdent = matchedSiswa ? normStr(matchedSiswa.nama) : (normStr(p.namaSiswa || p.nama) || normStr(p.idSiswa));
+          
+          if (sIdent && tgl) {
+            const key = tgl + '|||' + normSesi + '|||' + sIdent;
+            if (!presensiMap.has(key)) {
+              presensiMap.set(key, p);
+            }
           }
         });
+
         this.presensiWali = Array.from(presensiMap.values());
+        this.saveLocalData();
+        this.$nextTick(() => {
+          this.updateCharts();
+        });
       }
       if (data.presensiKimia && Array.isArray(data.presensiKimia)) {
         this.presensiKimia = data.presensiKimia;
@@ -1244,27 +1382,22 @@ document.addEventListener('alpine:init', () => {
     // =========================================================================
     getDashboardStats() {
       const activeWaliKelas = (this.waliKelasFilter.kelas || this.guru.kelasWali || 'X3 Atlet').trim();
-      const waliSiswa = this.siswa.filter(s => s.kelas && s.kelas.trim().toLowerCase() === activeWaliKelas.toLowerCase());
-      const today = this.waliKelasFilter.tanggal || this.getTodayDateString();
-      
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => {
-        if (!d1 || !d2) return false;
-        return normalizeDate(d1) === normalizeDate(d2);
-      };
+      const waliSiswa = this.siswa.filter(s => s.kelas && this.isSameClass(s.kelas, activeWaliKelas));
+      const today = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
 
       let hadirApel = 0;
       let absenApel = 0;
       let telatApel = 0;
 
       waliSiswa.forEach(s => {
-        const found = this.presensiWali.find(p => 
-          isDateMatch(p.tanggal, today) &&
-          String(p.sesi || 'Apel Pagi').trim().toLowerCase() === 'apel pagi' &&
-          String(p.kelas || '').trim().toLowerCase() === activeWaliKelas.toLowerCase() &&
-          ((p.idSiswa && s.id && String(p.idSiswa).trim() === String(s.id).trim()) || 
-           (p.namaSiswa && s.nama && String(p.namaSiswa).trim().toLowerCase() === String(s.nama).trim().toLowerCase()))
-        );
+        const found = this.presensiWali.slice().reverse().find(p => {
+          if (!this.isSameDate(p.tanggal, today)) return false;
+          const nSesi = this.normalizeStr(p.sesi || '') || 'apelpagi';
+          if (nSesi.includes('family')) return false; // Bukan Apel Pagi
+          if (p.kelas && !this.isSameClass(p.kelas, activeWaliKelas)) return false;
+          return this.isSameStudent(s, p);
+        });
+
         if (found) {
           const st = String(found.status || '').trim();
           if (['Hadir', 'Tahfidz', 'PTV', 'Organtri'].includes(st)) {
@@ -1279,13 +1412,14 @@ document.addEventListener('alpine:init', () => {
 
       let hadirFamily = 0;
       waliSiswa.forEach(s => {
-        const found = this.presensiWali.find(p => 
-          isDateMatch(p.tanggal, today) &&
-          String(p.sesi || '').trim().toLowerCase() === 'family time' &&
-          String(p.kelas || '').trim().toLowerCase() === activeWaliKelas.toLowerCase() &&
-          ((p.idSiswa && s.id && String(p.idSiswa).trim() === String(s.id).trim()) || 
-           (p.namaSiswa && s.nama && String(p.namaSiswa).trim().toLowerCase() === String(s.nama).trim().toLowerCase()))
-        );
+        const found = this.presensiWali.slice().reverse().find(p => {
+          if (!this.isSameDate(p.tanggal, today)) return false;
+          const nSesi = this.normalizeStr(p.sesi || '');
+          if (!nSesi.includes('family')) return false; // Bukan Family Time
+          if (p.kelas && !this.isSameClass(p.kelas, activeWaliKelas)) return false;
+          return this.isSameStudent(s, p);
+        });
+
         if (found) {
           const st = String(found.status || '').trim();
           if (['Hadir', 'Tahfidz', 'PTV', 'Organtri', 'Terlambat'].includes(st)) {
@@ -1327,21 +1461,21 @@ document.addEventListener('alpine:init', () => {
 
     getSiswaWaliPresensiList() {
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
+      const isFamily = this.normalizeStr(sesi).includes('family');
 
-      const siswaKelas = this.siswa.filter(s => s.kelas && s.kelas.trim().toLowerCase() === kelas.toLowerCase());
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
+      const siswaKelas = this.siswa.filter(s => s.kelas && this.isSameClass(s.kelas, kelas));
 
       return siswaKelas.map(s => {
-        const found = this.presensiWali.find(p => 
-          ((p.idSiswa && s.id && String(p.idSiswa).trim() === String(s.id).trim()) || 
-           (p.namaSiswa && s.nama && String(p.namaSiswa).trim().toLowerCase() === String(s.nama).trim().toLowerCase())) && 
-          isDateMatch(p.tanggal, tgl) && 
-          String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-          String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
-        );
+        const found = this.presensiWali.slice().reverse().find(p => {
+          if (!this.isSameDate(p.tanggal, tgl)) return false;
+          const nSesi = this.normalizeStr(p.sesi || '') || 'apelpagi';
+          const pIsFamily = nSesi.includes('family');
+          if (isFamily !== pIsFamily) return false;
+          if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+          return this.isSameStudent(s, p);
+        });
         return {
           idSiswa: s.id,
           nisn: s.nisn,
@@ -1357,27 +1491,27 @@ document.addEventListener('alpine:init', () => {
     },
 
     setWaliStatus(idSiswa, status) {
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
+      const isFamily = this.normalizeStr(sesi).includes('family');
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
       const s = this.siswa.find(x => x.id === idSiswa);
       const namaSiswa = s ? s.nama : '';
 
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
-
-      let existingIndex = this.presensiWali.findIndex(p => 
-        ((p.idSiswa && idSiswa && String(p.idSiswa).trim() === String(idSiswa).trim()) || 
-         (p.namaSiswa && namaSiswa && String(p.namaSiswa).trim().toLowerCase() === String(namaSiswa).trim().toLowerCase())) && 
-        isDateMatch(p.tanggal, tgl) && 
-        String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-        String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
-      );
+      let existingIndex = this.presensiWali.findIndex(p => {
+        if (!this.isSameDate(p.tanggal, tgl)) return false;
+        const pIsFamily = this.normalizeStr(p.sesi || '').includes('family');
+        if (isFamily !== pIsFamily) return false;
+        if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+        return this.isSameStudent({ id: idSiswa, nama: namaSiswa }, p);
+      });
       
       if (existingIndex >= 0) {
         this.presensiWali[existingIndex].status = status;
         this.presensiWali[existingIndex].idSiswa = idSiswa;
         this.presensiWali[existingIndex].namaSiswa = namaSiswa;
+        this.presensiWali[existingIndex].kelas = kelas;
+        this.presensiWali[existingIndex].tanggal = tgl;
       } else {
         this.presensiWali.push({
           id: 'PW-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000),
@@ -1397,25 +1531,25 @@ document.addEventListener('alpine:init', () => {
     },
 
     updateWaliKeterangan(idSiswa, keterangan) {
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
+      const isFamily = this.normalizeStr(sesi).includes('family');
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
       const s = this.siswa.find(x => x.id === idSiswa);
       const namaSiswa = s ? s.nama : '';
 
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
-
-      let existingIndex = this.presensiWali.findIndex(p => 
-        ((p.idSiswa && idSiswa && String(p.idSiswa).trim() === String(idSiswa).trim()) || 
-         (p.namaSiswa && namaSiswa && String(p.namaSiswa).trim().toLowerCase() === String(namaSiswa).trim().toLowerCase())) && 
-        isDateMatch(p.tanggal, tgl) && 
-        String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-        String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
-      );
+      let existingIndex = this.presensiWali.findIndex(p => {
+        if (!this.isSameDate(p.tanggal, tgl)) return false;
+        const pIsFamily = this.normalizeStr(p.sesi || '').includes('family');
+        if (isFamily !== pIsFamily) return false;
+        if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+        return this.isSameStudent({ id: idSiswa, nama: namaSiswa }, p);
+      });
 
       if (existingIndex >= 0) {
         this.presensiWali[existingIndex].keterangan = keterangan;
+        this.presensiWali[existingIndex].kelas = kelas;
+        this.presensiWali[existingIndex].tanggal = tgl;
       } else {
         this.presensiWali.push({
           id: 'PW-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000),
@@ -1433,29 +1567,29 @@ document.addEventListener('alpine:init', () => {
     },
 
     markAllWaliPresent() {
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
+      const isFamily = this.normalizeStr(sesi).includes('family');
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
-      const siswaKelas = this.siswa.filter(s => s.kelas && s.kelas.trim().toLowerCase() === kelas.toLowerCase());
+      const siswaKelas = this.siswa.filter(s => s.kelas && this.isSameClass(s.kelas, kelas));
 
       if (siswaKelas.length === 0) {
         this.showToast(`Belum ada siswa di kelas ${kelas}. Silakan tarik data spreadsheet atau tambah siswa.`, 'info');
         return;
       }
 
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
-
       siswaKelas.forEach(s => {
-        let existing = this.presensiWali.find(p => 
-          ((p.idSiswa && s.id && String(p.idSiswa).trim() === String(s.id).trim()) || 
-           (p.namaSiswa && s.nama && String(p.namaSiswa).trim().toLowerCase() === String(s.nama).trim().toLowerCase())) && 
-          isDateMatch(p.tanggal, tgl) && 
-          String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-          String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
-        );
+        let existing = this.presensiWali.find(p => {
+          if (!this.isSameDate(p.tanggal, tgl)) return false;
+          const pIsFamily = this.normalizeStr(p.sesi || '').includes('family');
+          if (isFamily !== pIsFamily) return false;
+          if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+          return this.isSameStudent(s, p);
+        });
         if (existing) {
           existing.status = 'Hadir';
+          existing.kelas = kelas;
+          existing.tanggal = tgl;
         } else {
           this.presensiWali.push({
             id: 'PW-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000),
@@ -1477,15 +1611,13 @@ document.addEventListener('alpine:init', () => {
     },
 
     copyStatusFromApelPagi() {
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
 
       const apelRecords = this.presensiWali.filter(p => 
-        isDateMatch(p.tanggal, tgl) && 
-        String(p.sesi || 'Apel Pagi').trim().toLowerCase() === 'apel pagi' && 
-        String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
+        this.isSameDate(p.tanggal, tgl) && 
+        !this.normalizeStr(p.sesi || '').includes('family') && 
+        (!p.kelas || this.isSameClass(p.kelas, kelas))
       );
 
       if (apelRecords.length === 0) {
@@ -1494,13 +1626,14 @@ document.addEventListener('alpine:init', () => {
       }
 
       apelRecords.forEach(ar => {
-        let existingIndex = this.presensiWali.findIndex(p => 
-          ((p.idSiswa && ar.idSiswa && String(p.idSiswa).trim() === String(ar.idSiswa).trim()) || 
-           (p.namaSiswa && ar.namaSiswa && String(p.namaSiswa).trim().toLowerCase() === String(ar.namaSiswa).trim().toLowerCase())) && 
-          isDateMatch(p.tanggal, tgl) && 
-          String(p.sesi || '').trim().toLowerCase() === 'family time' && 
-          String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
-        );
+        let existingIndex = this.presensiWali.findIndex(p => {
+          if (!this.isSameDate(p.tanggal, tgl)) return false;
+          const pIsFamily = this.normalizeStr(p.sesi || '').includes('family');
+          if (!pIsFamily) return false;
+          if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+          return this.isSameStudent({ id: ar.idSiswa, nama: ar.namaSiswa }, p);
+        });
+
         if (existingIndex >= 0) {
           this.presensiWali[existingIndex].status = ar.status;
           this.presensiWali[existingIndex].keterangan = ar.keterangan;
@@ -1525,16 +1658,15 @@ document.addEventListener('alpine:init', () => {
     },
 
     saveAndSyncWaliPresensi() {
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
+      const isFamily = this.normalizeStr(sesi).includes('family');
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
 
       const currentList = this.presensiWali.filter(p => 
-        isDateMatch(p.tanggal, tgl) && 
-        String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-        String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
+        this.isSameDate(p.tanggal, tgl) && 
+        (this.normalizeStr(p.sesi || '').includes('family') === isFamily) && 
+        (!p.kelas || this.isSameClass(p.kelas, kelas))
       );
 
       if (currentList.length === 0) {
@@ -1549,27 +1681,23 @@ document.addEventListener('alpine:init', () => {
 
     getWaliRecapStats() {
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
-      const siswaKelas = this.siswa.filter(s => s.kelas && s.kelas.trim().toLowerCase() === kelas.toLowerCase());
+      const isFamily = this.normalizeStr(sesi).includes('family');
+      const siswaKelas = this.siswa.filter(s => s.kelas && this.isSameClass(s.kelas, kelas));
       const total = siswaKelas.length;
-      
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => {
-        if (!d1 || !d2) return false;
-        return normalizeDate(d1) === normalizeDate(d2);
-      };
 
       let hadir = 0, sakit = 0, izin = 0, tahfidz = 0, ptv = 0, organtri = 0, dirumah = 0, telat = 0, tanpaket = 0, belum = 0;
 
       siswaKelas.forEach(s => {
-        const found = this.presensiWali.find(p => 
-          isDateMatch(p.tanggal, tgl) && 
-          String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-          String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase() &&
-          ((p.idSiswa && s.id && String(p.idSiswa).trim() === String(s.id).trim()) || 
-           (p.namaSiswa && s.nama && String(p.namaSiswa).trim().toLowerCase() === String(s.nama).trim().toLowerCase()))
-        );
+        const found = this.presensiWali.slice().reverse().find(p => {
+          if (!this.isSameDate(p.tanggal, tgl)) return false;
+          const nSesi = this.normalizeStr(p.sesi || '') || 'apelpagi';
+          const pIsFamily = nSesi.includes('family');
+          if (isFamily !== pIsFamily) return false;
+          if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+          return this.isSameStudent(s, p);
+        });
         const st = found ? String(found.status || '').trim() : 'Belum Presensi';
         if (st === 'Hadir') hadir++;
         else if (st === 'Sakit') sakit++;
@@ -2513,32 +2641,35 @@ document.addEventListener('alpine:init', () => {
     // =========================================================================
     getDefaultJamPelajaran() {
       const senKam = [
-        { type: 'kegiatan', label: 'Apel Pagi', mulai: '06:40', selesai: '07:00' },
+        { type: 'kegiatan', label: 'Morning Roll Call', mulai: '06:45', selesai: '07:00' },
         { type: 'pelajaran', jam: 1, mulai: '07:00', selesai: '07:40' },
         { type: 'pelajaran', jam: 2, mulai: '07:40', selesai: '08:20' },
         { type: 'pelajaran', jam: 3, mulai: '08:20', selesai: '09:00' },
         { type: 'pelajaran', jam: 4, mulai: '09:00', selesai: '09:40' },
-        { type: 'istirahat', label: 'Istirahat', mulai: '09:40', selesai: '10:00' },
+        { type: 'istirahat', label: 'Break (R)', mulai: '09:40', selesai: '10:00' },
         { type: 'pelajaran', jam: 5, mulai: '10:00', selesai: '10:40' },
         { type: 'pelajaran', jam: 6, mulai: '10:40', selesai: '11:20' },
         { type: 'pelajaran', jam: 7, mulai: '11:20', selesai: '12:00' },
         { type: 'pelajaran', jam: 8, mulai: '12:00', selesai: '12:30' },
         { type: 'kegiatan', label: 'Family Time', mulai: '12:30', selesai: '12:45' },
+        { type: 'kegiatan', label: 'Jamaah Duhur', mulai: '12:45', selesai: '13:05' }
       ];
       const jumat = [
-        { type: 'kegiatan', label: 'Apel Pagi', mulai: '06:40', selesai: '07:00' },
+        { type: 'kegiatan', label: 'Morning Roll Call', mulai: '06:45', selesai: '07:00' },
         { type: 'pelajaran', jam: 1, mulai: '07:00', selesai: '07:40' },
         { type: 'pelajaran', jam: 2, mulai: '07:40', selesai: '08:20' },
         { type: 'pelajaran', jam: 3, mulai: '08:20', selesai: '09:00' },
         { type: 'pelajaran', jam: 4, mulai: '09:00', selesai: '09:40' },
-        { type: 'kegiatan', label: 'Family Time', mulai: '09:40', selesai: '09:55' },
+        { type: 'istirahat', label: 'Break (R)', mulai: '09:40', selesai: '10:00' },
+        { type: 'kegiatan', label: 'Sholat Jumat', mulai: '11:30', selesai: '12:30' }
       ];
       const sabtu = [
-        { type: 'kegiatan', label: 'Apel Pagi', mulai: '07:30', selesai: '07:40' },
-        { type: 'pelajaran', jam: 1, mulai: '07:40', selesai: '08:20' },
-        { type: 'pelajaran', jam: 2, mulai: '08:20', selesai: '09:00' },
-        { type: 'pelajaran', jam: 3, mulai: '09:00', selesai: '09:40' },
-        { type: 'pelajaran', jam: 4, mulai: '09:40', selesai: '10:20' },
+        { type: 'kegiatan', label: 'Morning Roll Call', mulai: '06:45', selesai: '07:00' },
+        { type: 'pelajaran', jam: 1, mulai: '07:00', selesai: '07:40' },
+        { type: 'pelajaran', jam: 2, mulai: '07:40', selesai: '08:20' },
+        { type: 'pelajaran', jam: 3, mulai: '08:20', selesai: '09:00' },
+        { type: 'pelajaran', jam: 4, mulai: '09:00', selesai: '09:40' },
+        { type: 'istirahat', label: 'Break (R)', mulai: '09:40', selesai: '10:00' }
       ];
       return {
         'Senin': JSON.parse(JSON.stringify(senKam)),
@@ -2785,6 +2916,840 @@ document.addEventListener('alpine:init', () => {
 
     countJadwalMengajarForDay(hari) {
       return this.jadwalMengajar.filter(j => j.hari === hari).length;
+    },
+
+    // =========================================================================
+    // 4A-2. aSc TIMETABLES IMPORT ENGINE (JADWAL GURU & JADWAL KELAS)
+    // =========================================================================
+    openModalImporJadwal(target) {
+      this.formImporJadwal.target = target || 'mengajar';
+      this.formImporJadwal.targetKelas = this.waliKelasFilter?.kelas || this.guru?.kelasWali || 'X3 Atlet';
+      this.formImporJadwal.inputMode = 'ai';
+      this.formImporJadwal.rawText = '';
+      this.formImporJadwal.fileName = '';
+      this.formImporJadwal.replaceAll = true;
+      this.isScanningAi = false;
+      this.scanAiProgress = '';
+      this.scanAiError = '';
+      this.scanAiFile = { name: '', size: '', base64: '', mimeType: '', previewUrl: '' };
+      this.imporJadwalStep = 'input';
+      this.imporJadwalPreview = [];
+      this.modalImporJadwalOpen = true;
+      this.$nextTick(() => this.initLucideIcons());
+    },
+
+    saveGeminiApiKey(key) {
+      if (key !== undefined) {
+        this.geminiApiKey = key.trim();
+      }
+      localStorage.setItem('LMS_GEMINI_API_KEY', this.geminiApiKey);
+      this.showApiKeyInput = false;
+      this.showToast('Kunci Gemini API berhasil disimpan!', 'success');
+    },
+
+    async testGeminiApiConnection() {
+      let apiKey = (this.geminiApiKey || '').trim();
+      
+      // Jika belum ada di state lokal, coba tarik otomatis dari Code.gs
+      if (!apiKey && this.gasWebAppUrl) {
+        try {
+          this.isTestingGeminiApi = true;
+          this.geminiApiTestMessage = 'Memeriksa kunci API dari server Spreadsheet...';
+          const cleanUrl = this.gasWebAppUrl.trim().replace(/\/+$/, '');
+          const configRes = await fetch(cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + 'action=getGeminiConfig&_t=' + new Date().getTime());
+          const configJson = await configRes.json();
+          if (configJson && configJson.data && configJson.data.geminiApiKey) {
+            apiKey = configJson.data.geminiApiKey.trim();
+            this.geminiApiKey = apiKey;
+            localStorage.setItem('LMS_GEMINI_API_KEY', apiKey);
+          }
+        } catch (e) {
+          console.warn('Gagal cek config dari gasWebAppUrl:', e);
+        }
+      }
+
+      if (!apiKey) {
+        this.isTestingGeminiApi = false;
+        this.geminiApiTestStatus = 'error';
+        this.geminiApiTestMessage = 'API Key belum diatur! Masukkan API Key di kotak bawah atau isi di Code.gs.';
+        this.showToast('Kunci Gemini API belum diisi!', 'error');
+        this.showApiKeyInput = true;
+        return;
+      }
+
+      this.isTestingGeminiApi = true;
+      this.geminiApiTestStatus = null;
+      this.geminiApiTestMessage = 'Menghubungi server Google Gemini AI...';
+
+      // Prioritas model resmi yang terverifikasi aktif untuk Vision & Multimodal
+      const models = ['gemini-3.5-flash', 'gemini-flash-lite-latest', 'gemini-flash-latest'];
+      let lastError = null;
+      let connectedModel = null;
+      const startTime = Date.now();
+
+      for (const model of models) {
+        try {
+          this.geminiApiTestMessage = `Menguji respon model ${model}...`;
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: "Ping test connection. Balas satu kata: SIAP" }] }]
+            })
+          });
+
+          if (!response.ok) {
+            const errBody = await response.json().catch(() => ({}));
+            throw new Error(errBody.error?.message || `HTTP ${response.status} ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (reply) {
+            connectedModel = model;
+            break;
+          }
+        } catch (err) {
+          lastError = err;
+          console.warn(`Pengujian model ${model} gagal:`, err);
+        }
+      }
+
+      const elapsed = Date.now() - startTime;
+      this.isTestingGeminiApi = false;
+
+      if (connectedModel) {
+        this.geminiApiTestStatus = 'success';
+        this.geminiApiTestMessage = `Koneksi Berhasil! Model aktif: ${connectedModel} (${elapsed}ms) • Siap memindai PDF & Foto Jadwal!`;
+        this.showToast(`🎉 Koneksi AI Gemini Sukses! (${connectedModel})`, 'success');
+      } else {
+        this.geminiApiTestStatus = 'error';
+        const msg = (lastError && lastError.message) || 'Tidak dapat terhubung ke Google AI';
+        this.geminiApiTestMessage = `Gagal terkoneksi ke AI Gemini: ${msg}`;
+        this.showToast(`Gagal koneksi AI: ${msg}`, 'error');
+      }
+    },
+
+    handleScheduleMediaUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const fileName = file.name.toLowerCase();
+      const isPdf = file.type === 'application/pdf' || fileName.endsWith('.pdf');
+      const isImg = file.type.startsWith('image/') || fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.webp');
+
+      if (!isPdf && !isImg) {
+        this.showToast('Mohon pilih berkas PDF (.pdf) atau gambar foto (.png, .jpg, .jpeg)', 'error');
+        return;
+      }
+
+      const mimeType = isPdf ? 'application/pdf' : (file.type || 'image/jpeg');
+      const sizeStr = file.size > 1024 * 1024 ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' : Math.round(file.size / 1024) + ' KB';
+
+      this.scanAiFile = {
+        name: file.name,
+        size: sizeStr,
+        base64: '',
+        mimeType: mimeType,
+        previewUrl: isImg ? URL.createObjectURL(file) : ''
+      };
+      this.scanAiError = '';
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        const base64Data = dataUrl.split(',')[1];
+        this.scanAiFile.base64 = base64Data;
+      };
+      reader.onerror = () => {
+        this.showToast('Gagal membaca file lokal', 'error');
+      };
+      reader.readAsDataURL(file);
+    },
+
+    async scanScheduleWithGemini() {
+      if (!this.scanAiFile.base64) {
+        this.showToast('Pilih berkas PDF atau foto jadwal terlebih dahulu', 'error');
+        return;
+      }
+
+      const target = this.formImporJadwal.target;
+      const targetKelas = this.formImporJadwal.targetKelas || 'X3 Atlet';
+      const teacherName = this.guru?.nama || 'Tito Vanzal, S.Pd.';
+
+      // 1. Cek apakah ada API key di state/localStorage, jika tidak coba tarik otomatis dari Code.gs via Google Web App
+      let apiKey = (this.geminiApiKey || '').trim();
+      if (!apiKey && this.gasWebAppUrl) {
+        try {
+          this.scanAiProgress = 'Menghubungkan ke Code.gs Google Drive untuk memeriksa API Key...';
+          const cleanUrl = this.gasWebAppUrl.trim().replace(/\/+$/, '');
+          const configRes = await fetch(cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + 'action=getGeminiConfig&_t=' + new Date().getTime());
+          const configJson = await configRes.json();
+          if (configJson && configJson.data && configJson.data.geminiApiKey) {
+            apiKey = configJson.data.geminiApiKey.trim();
+            this.geminiApiKey = apiKey;
+            localStorage.setItem('LMS_GEMINI_API_KEY', apiKey);
+          }
+        } catch (e) {
+          console.warn('Gagal cek config dari gasWebAppUrl:', e);
+        }
+      }
+
+      // 2. Jika di dalam lingkungan Google Apps Script bawaan (google.script.run), jalankan backend Code.gs langsung
+      if (this.isGasEnvironment) {
+        this.isScanningAi = true;
+        this.scanAiProgress = 'Menghubungi backend Code.gs untuk memindai dokumen dengan Gemini AI...';
+        this.scanAiError = '';
+        
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (res && res.items && Array.isArray(res.items)) {
+              this.processAiExtractedSchedule(res.items, target, targetKelas, teacherName);
+            } else {
+              this.scanAiError = 'Tidak ada sesi jadwal yang ditemukan.';
+              this.isScanningAi = false;
+            }
+          })
+          .withFailureHandler((err) => {
+            this.scanAiError = (err && err.message) || err.toString();
+            this.isScanningAi = false;
+            this.showToast('Gagal memindai: ' + this.scanAiError, 'error');
+          })
+          .handleAction('scanScheduleWithGemini', {
+            base64: this.scanAiFile.base64,
+            mimeType: this.scanAiFile.mimeType,
+            target: target,
+            targetKelas: targetKelas,
+            teacherName: teacherName,
+            apiKey: apiKey
+          });
+        return;
+      }
+
+      // 3. Jika API key belum ada di Code.gs maupun client
+      if (!apiKey) {
+        this.showToast('Mohon isi GEMINI_API_KEY di Code.gs atau masukkan API Key di kotak bawah', 'error');
+        this.showApiKeyInput = true;
+        return;
+      }
+
+      this.isScanningAi = true;
+      this.scanAiProgress = 'AI Gemini sedang memindai tabel dan membaca baris jadwal aSc Timetables...';
+      this.scanAiError = '';
+
+      const promptText = `Anda adalah asisten cerdas ahli pembaca data jadwal sekolah Indonesia dari sistem aSc Timetables.
+Tugas Anda adalah mengekstrak jadwal pelajaran mingguan dari dokumen/gambar aSc Timetables ini menjadi JSON ARRAY murni.
+
+Informasi Target:
+- Jenis Impor: "${target === 'mengajar' ? 'JADWAL MENGAJAR GURU & PIKET' : 'JADWAL KELAS SISWA'}"
+- Nama Guru Pengguna: "${teacherName}" (Kode Guru di aSc biasanya inisial seperti C9 atau serupa)
+- Kelas Target: "${targetKelas}"
+
+Aturan Pembacaan Kolom & Baris:
+1. Hari Sekolah: Cari kolom hari ("Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu").
+2. Jam Pelajaran: Cari nomor jam ke- 1 sampai 8 (abaikan Morning Roll Call, Istirahat / Break R, Family Time, dan Jamaah Duhur jika tidak ada KBM).
+3. Untuk Target "mengajar":
+   - Ekstrak seluruh jam mengajar guru kimia (${teacherName} / kode guru C9) di semua kelas.
+   - Deteksi Tugas Piket: jika ada sel berisi kata "Picket" atau "Piket" (misal: "Picket Kantin", "Picket Lantai 3", dsb), set tipeTugas: "Piket Lantai", mapel: "Picket", lantai: keterangan ruang/koridor/kantin, kelas: "".
+   - Jika mengajar biasa: set tipeTugas: "Mengajar", mapel: nama mata pelajaran (misal "Chemistry" atau "PISA" atau "Kimia"), kelas: nama kelas (misal "XII Cp", "XII ICP 2F", "X5 COC2", "X15 IUPP COC 1"), lantai: "".
+4. Untuk Target "kelas":
+   - Ekstrak seluruh mata pelajaran dan guru untuk kelas ${targetKelas}.
+   - set mapel: nama mata pelajaran, guru: nama atau inisial guru pengampu, kelas: "${targetKelas}".
+
+Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis seperti berikut (tanpa markdown blok pembungkus):
+[
+  {
+    "hari": "Senin",
+    "jamKe": 1,
+    "tipeTugas": "Mengajar",
+    "mapel": "PISA",
+    "kelas": "X5 COC2",
+    "guru": "${teacherName}",
+    "lantai": ""
+  },
+  {
+    "hari": "Senin",
+    "jamKe": 5,
+    "tipeTugas": "Piket Lantai",
+    "mapel": "Picket",
+    "kelas": "",
+    "guru": "${teacherName}",
+    "lantai": "Kantin"
+  }
+]`;
+
+      try {
+        const models = ['gemini-3.5-flash', 'gemini-flash-lite-latest', 'gemini-flash-latest'];
+        let resultData = null;
+        let lastError = null;
+
+        for (const model of models) {
+          try {
+            this.scanAiProgress = `AI Gemini (${model}) sedang menganalisis tata letak tabel...`;
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            
+            const payload = {
+              contents: [
+                {
+                  parts: [
+                    {
+                      inlineData: {
+                        mimeType: this.scanAiFile.mimeType,
+                        data: this.scanAiFile.base64
+                      }
+                    },
+                    {
+                      text: promptText
+                    }
+                  ]
+                }
+              ],
+              generationConfig: {
+                responseMimeType: "application/json",
+                temperature: 0.1
+              }
+            };
+
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+              const errBody = await response.json().catch(() => ({}));
+              throw new Error(errBody.error?.message || `HTTP ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!textOutput) {
+              throw new Error('Respons AI tidak mengandung teks hasil analisis.');
+            }
+
+            let parsed = null;
+            try {
+              parsed = JSON.parse(textOutput);
+            } catch (pErr) {
+              const jsonMatch = textOutput.match(/\[\s*\{[\s\S]*\}\s*\]/);
+              if (jsonMatch) {
+                parsed = JSON.parse(jsonMatch[0]);
+              } else {
+                throw new Error('Format JSON dari AI tidak valid: ' + pErr.message);
+              }
+            }
+
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              resultData = parsed;
+              break;
+            }
+          } catch (modelErr) {
+            lastError = modelErr;
+            console.warn(`Model ${model} gagal:`, modelErr);
+          }
+        }
+
+        if (!resultData || resultData.length === 0) {
+          throw lastError || new Error('Tidak ada data jadwal yang berhasil diekstrak dari berkas tersebut.');
+        }
+
+        this.processAiExtractedSchedule(resultData, target, targetKelas, teacherName);
+      } catch (err) {
+        this.scanAiError = err.message || 'Terjadi kesalahan saat memindai jadwal.';
+        this.showToast('Gagal memindai: ' + this.scanAiError, 'error');
+        this.isScanningAi = false;
+        this.scanAiProgress = '';
+      }
+    },
+
+    processAiExtractedSchedule(resultData, target, targetKelas, teacherName) {
+      const dayOrder = { 'Senin': 1, 'Selasa': 2, 'Rabu': 3, 'Kamis': 4, 'Jumat': 5, 'Sabtu': 6 };
+      this.imporJadwalPreview = resultData.map(item => {
+        const hari = item.hari || 'Senin';
+        const jamKe = parseInt(item.jamKe, 10) || 1;
+        const slot = (this.jamPelajaran[hari] || []).find(s => s.type === 'pelajaran' && s.jam === jamKe);
+        const waktuStr = slot ? `${slot.mulai} - ${slot.selesai}` : `Jam ke-${jamKe}`;
+        const isPiket = item.tipeTugas === 'Piket Lantai' || /picket|piket/i.test(item.mapel || '');
+
+        return {
+          hari: hari,
+          jamKe: jamKe,
+          waktu: waktuStr,
+          tipeTugas: isPiket ? 'Piket Lantai' : 'Mengajar',
+          mapel: isPiket ? 'Picket' : (item.mapel || (target === 'mengajar' ? 'Kimia' : 'Mapel')),
+          kelas: isPiket ? '' : (item.kelas || (target === 'mengajar' ? '-' : targetKelas)),
+          guru: item.guru || (target === 'mengajar' ? teacherName : '-'),
+          lantai: isPiket ? (item.lantai || 'Koridor / Kantin') : ''
+        };
+      }).sort((a, b) => {
+        return ((dayOrder[a.hari] || 99) - (dayOrder[b.hari] || 99)) || (a.jamKe - b.jamKe);
+      });
+
+      this.isScanningAi = false;
+      this.scanAiProgress = '';
+      this.imporJadwalStep = 'preview';
+      this.showToast(`✨ Hebat! AI Gemini berhasil mengekstrak ${this.imporJadwalPreview.length} sesi jadwal dari berkas PDF/Foto!`, 'success');
+      this.$nextTick(() => this.initLucideIcons());
+    },
+
+    handleScheduleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.formImporJadwal.fileName = file.name;
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          if (typeof XLSX === 'undefined') {
+            this.showToast('Pustaka SheetJS belum siap', 'error');
+            return;
+          }
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const matrix = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+          this.parseAscTimetable(matrix, this.formImporJadwal.target, this.formImporJadwal.targetKelas);
+        } catch (err) {
+          this.showToast('Gagal membaca file Excel/CSV: ' + err.message, 'error');
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    },
+
+    processPastedScheduleText() {
+      if (!this.formImporJadwal.rawText.trim()) {
+        this.showToast('Tempelkan teks atau salinan tabel jadwal terlebih dahulu', 'error');
+        return;
+      }
+      this.parseAscTimetable(this.formImporJadwal.rawText, this.formImporJadwal.target, this.formImporJadwal.targetKelas);
+    },
+
+    parseAscTimetable(rawInput, target, targetKelas) {
+      target = target || this.formImporJadwal.target || 'mengajar';
+      targetKelas = targetKelas || this.formImporJadwal.targetKelas || (this.waliKelasFilter?.kelas || 'X3 Atlet');
+
+      let matrix = [];
+      if (Array.isArray(rawInput)) {
+        matrix = rawInput;
+      } else if (typeof rawInput === 'string') {
+        const lines = rawInput.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+        matrix = lines.map(l => {
+          if (l.includes('\t')) return l.split('\t').map(c => c.trim());
+          if (l.includes(';')) return l.split(';').map(c => c.trim().replace(/^["']|["']$/g, ''));
+          if (l.includes(',')) return l.split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+          return [l];
+        });
+      }
+
+      if (!matrix || matrix.length === 0) {
+        this.showToast('Data jadwal tidak ditemukan / kosong', 'error');
+        return;
+      }
+
+      const dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const dayEnToId = { 'monday': 'Senin', 'tuesday': 'Selasa', 'wednesday': 'Rabu', 'thursday': 'Kamis', 'friday': 'Jumat', 'saturday': 'Sabtu' };
+
+      // 1. Cari baris header hari
+      let headerRowIdx = -1;
+      let dayColMap = {}; // { colIdx: 'Senin', ... }
+
+      for (let r = 0; r < Math.min(matrix.length, 12); r++) {
+        const row = matrix[r];
+        let foundDays = 0;
+        const tempMap = {};
+        for (let c = 0; c < row.length; c++) {
+          const val = String(row[c] || '').toLowerCase().trim();
+          for (const d of dayNames) {
+            if (val === d.toLowerCase() || val.startsWith(d.toLowerCase())) {
+              tempMap[c] = d;
+              foundDays++;
+              break;
+            }
+          }
+          for (const [en, id] of Object.entries(dayEnToId)) {
+            if (val === en || val.startsWith(en)) {
+              tempMap[c] = id;
+              foundDays++;
+              break;
+            }
+          }
+        }
+        if (foundDays >= 3) {
+          headerRowIdx = r;
+          dayColMap = tempMap;
+          break;
+        }
+      }
+
+      const parsedItems = [];
+
+      // A. Jika format matriks aSc Timetable terdeteksi
+      if (headerRowIdx >= 0 && Object.keys(dayColMap).length >= 3) {
+        for (let r = headerRowIdx + 1; r < matrix.length; r++) {
+          const row = matrix[r];
+          if (!row || row.length === 0) continue;
+
+          // Cek nomor jam dari kolom pertama atau kedua
+          let jamKe = null;
+          for (let c = 0; c < Math.min(row.length, 3); c++) {
+            if (dayColMap[c]) continue; // ini kolom hari
+            const cellVal = String(row[c] || '').trim();
+            const numMatch = cellVal.match(/^\b([1-8])\b/);
+            if (numMatch) {
+              jamKe = parseInt(numMatch[1], 10);
+              break;
+            }
+            if (cellVal.includes('07:00') || cellVal.includes('7:00')) { jamKe = 1; break; }
+            if (cellVal.includes('07:40') || cellVal.includes('7:40')) { jamKe = 2; break; }
+            if (cellVal.includes('08:20') || cellVal.includes('8:20')) { jamKe = 3; break; }
+            if (cellVal.includes('09:00') || cellVal.includes('9:00')) { jamKe = 4; break; }
+            if (cellVal.includes('10:00')) { jamKe = 5; break; }
+            if (cellVal.includes('10:40')) { jamKe = 6; break; }
+            if (cellVal.includes('11:20')) { jamKe = 7; break; }
+            if (cellVal.includes('12:00')) { jamKe = 8; break; }
+          }
+
+          if (jamKe === null || jamKe < 1 || jamKe > 8) continue; // baris jeda istirahat / roll call
+
+          // Ambil isi sel untuk setiap hari
+          for (const [colIdxStr, hari] of Object.entries(dayColMap)) {
+            const colIdx = parseInt(colIdxStr, 10);
+            const rawCell = String(row[colIdx] || '').trim();
+            if (!rawCell || rawCell === '-' || rawCell === '.') continue;
+
+            const lines = rawCell.split(/\r?\n|<br\s*\/?>/i).map(l => l.trim()).filter(l => l.length > 0 && l !== '-');
+            if (lines.length === 0) continue;
+
+            // Dapatkan rentang waktu dari jamPelajaran
+            const slotInfo = (this.jamPelajaran[hari] || []).find(s => s.type === 'pelajaran' && s.jam === jamKe);
+            const waktuStr = slotInfo ? `${slotInfo.mulai} - ${slotInfo.selesai}` : `Jam ke-${jamKe}`;
+
+            if (target === 'mengajar') {
+              const isPiket = lines.some(l => /picket|piket/i.test(l));
+              if (isPiket) {
+                const subDetail = lines.filter(l => !/picket|piket|c9/i.test(l)).join(' • ');
+                parsedItems.push({
+                  hari,
+                  jamKe,
+                  waktu: waktuStr,
+                  tipeTugas: 'Piket Lantai',
+                  mapel: 'Picket',
+                  kelas: '',
+                  lantai: subDetail || 'Piket Koridor',
+                  guru: this.guru.nama
+                });
+              } else {
+                const mapelName = lines[0];
+                const cleanLines = lines.slice(1).filter(l => !/^(c9)$/i.test(l));
+                const targetKelasStr = cleanLines.join(' ') || targetKelas;
+                parsedItems.push({
+                  hari,
+                  jamKe,
+                  waktu: waktuStr,
+                  tipeTugas: 'Mengajar',
+                  mapel: mapelName || 'Kimia',
+                  kelas: targetKelasStr,
+                  lantai: '',
+                  guru: this.guru.nama
+                });
+              }
+            } else {
+              // Target: Jadwal Kelas Siswa
+              const mapelName = lines[0];
+              let guruName = lines.length > 1 ? lines.slice(1).join(' ') : '-';
+              if (/athlete/i.test(mapelName)) guruName = 'Guru Olahraga / Tim Atlet';
+              parsedItems.push({
+                hari,
+                jamKe,
+                waktu: waktuStr,
+                mapel: mapelName,
+                guru: guruName,
+                kelas: targetKelas
+              });
+            }
+          }
+        }
+      } else {
+        // B. Fallback: Format baris demi baris (Hari, Jam, Mapel, Guru/Kelas)
+        for (const row of matrix) {
+          if (row.length < 3) continue;
+          let foundHari = null;
+          for (const d of dayNames) {
+            if (row.some(c => String(c).toLowerCase().includes(d.toLowerCase()))) {
+              foundHari = d;
+              break;
+            }
+          }
+          if (!foundHari) continue;
+
+          let jamKe = null;
+          for (const c of row) {
+            const m = String(c).match(/\b([1-8])\b/);
+            if (m) { jamKe = parseInt(m[1], 10); break; }
+          }
+          if (!jamKe) continue;
+
+          const nonHariJam = row.filter(c => !String(c).toLowerCase().includes(foundHari.toLowerCase()) && !String(c).match(/^\b[1-8]\b$/));
+          if (nonHariJam.length === 0) continue;
+
+          const slotInfo = (this.jamPelajaran[foundHari] || []).find(s => s.type === 'pelajaran' && s.jam === jamKe);
+          const waktuStr = slotInfo ? `${slotInfo.mulai} - ${slotInfo.selesai}` : `Jam ke-${jamKe}`;
+
+          if (target === 'mengajar') {
+            const isPiket = nonHariJam.some(c => /picket|piket/i.test(c));
+            parsedItems.push({
+              hari: foundHari,
+              jamKe,
+              waktu: waktuStr,
+              tipeTugas: isPiket ? 'Piket Lantai' : 'Mengajar',
+              mapel: isPiket ? 'Picket' : (nonHariJam[0] || 'Kimia'),
+              kelas: isPiket ? '' : (nonHariJam[1] || targetKelas),
+              lantai: isPiket ? (nonHariJam.filter(c => !/picket|piket/i.test(c)).join(' ') || 'Piket Koridor') : '',
+              guru: this.guru.nama
+            });
+          } else {
+            parsedItems.push({
+              hari: foundHari,
+              jamKe,
+              waktu: waktuStr,
+              mapel: nonHariJam[0] || 'Mapel',
+              guru: nonHariJam[1] || '-',
+              kelas: targetKelas
+            });
+          }
+        }
+      }
+
+      if (parsedItems.length === 0) {
+        this.showToast('Gagal mengenali format jadwal aSc. Pastikan tabel memiliki nama hari (Senin-Sabtu) dan jam ke-1 s.d. 8.', 'error');
+        return;
+      }
+
+      this.imporJadwalPreview = parsedItems.sort((a, b) => {
+        const order = { 'Senin': 1, 'Selasa': 2, 'Rabu': 3, 'Kamis': 4, 'Jumat': 5, 'Sabtu': 6 };
+        return (order[a.hari] - order[b.hari]) || (a.jamKe - b.jamKe);
+      });
+      this.imporJadwalStep = 'preview';
+      this.showToast(`✨ Berhasil mendeteksi ${parsedItems.length} sesi jadwal aSc Timetables!`, 'success');
+      this.$nextTick(() => this.initLucideIcons());
+    },
+
+    applyImportedSchedule() {
+      if (!this.imporJadwalPreview || this.imporJadwalPreview.length === 0) {
+        this.showToast('Tidak ada data jadwal untuk diterapkan', 'error');
+        return;
+      }
+
+      const target = this.formImporJadwal.target;
+      const replaceAll = this.formImporJadwal.replaceAll;
+
+      if (target === 'mengajar') {
+        if (replaceAll) {
+          const importedDays = new Set(this.imporJadwalPreview.map(p => p.hari));
+          this.jadwalMengajar = this.jadwalMengajar.filter(j => !importedDays.has(j.hari));
+        }
+        for (const item of this.imporJadwalPreview) {
+          const existIdx = this.jadwalMengajar.findIndex(j => j.hari === item.hari && j.jamKe === item.jamKe);
+          const record = {
+            hari: item.hari,
+            jamKe: item.jamKe,
+            tipeTugas: item.tipeTugas,
+            kelas: item.kelas,
+            mapel: item.mapel,
+            lantai: item.lantai
+          };
+          if (existIdx >= 0) {
+            this.jadwalMengajar[existIdx] = record;
+          } else {
+            this.jadwalMengajar.push(record);
+          }
+        }
+        this.saveLocalData();
+        this.syncToGoogleDrive('saveJadwalMengajar', this.jadwalMengajar);
+        this.showToast(`🎉 Berhasil mengimpor ${this.imporJadwalPreview.length} sesi Jadwal Mengajar Guru!`, 'success');
+      } else {
+        // Target: Jadwal Kelas Siswa
+        if (replaceAll) {
+          const importedDays = new Set(this.imporJadwalPreview.map(p => p.hari));
+          this.jadwalKelas = this.jadwalKelas.filter(j => !importedDays.has(j.hari));
+        }
+        for (const item of this.imporJadwalPreview) {
+          const existIdx = this.jadwalKelas.findIndex(j => j.hari === item.hari && j.jamKe === item.jamKe);
+          const record = {
+            hari: item.hari,
+            jamKe: item.jamKe,
+            mapel: item.mapel,
+            guru: item.guru
+          };
+          if (existIdx >= 0) {
+            this.jadwalKelas[existIdx] = record;
+          } else {
+            this.jadwalKelas.push(record);
+          }
+        }
+        this.saveLocalData();
+        this.syncToGoogleDrive('saveJadwalKelas', this.jadwalKelas);
+        this.showToast(`🎉 Berhasil mengimpor ${this.imporJadwalPreview.length} sesi Jadwal Kelas Siswa!`, 'success');
+      }
+
+      this.modalImporJadwalOpen = false;
+      this.imporJadwalStep = 'input';
+      this.imporJadwalPreview = [];
+      this.$nextTick(() => this.initLucideIcons());
+    },
+
+    loadSchedulePresetFromPhoto(target) {
+      target = target || this.formImporJadwal.target || 'mengajar';
+      let items = [];
+      if (target === 'mengajar') {
+        items = this.getPresetJadwalMengajarTito();
+      } else {
+        items = this.getPresetJadwalKelasX3();
+      }
+      this.imporJadwalPreview = items.map(item => {
+        const slot = (this.jamPelajaran[item.hari] || []).find(s => s.type === 'pelajaran' && s.jam === item.jamKe);
+        return {
+          ...item,
+          waktu: slot ? `${slot.mulai} - ${slot.selesai}` : `Jam ke-${item.jamKe}`,
+          kelas: item.kelas || this.formImporJadwal.targetKelas || 'X3 Atlet',
+          guru: item.guru || this.guru.nama
+        };
+      });
+      this.imporJadwalStep = 'preview';
+      this.showToast(`⚡ Jadwal sesuai foto aSc Timetables berhasil dimuat (${this.imporJadwalPreview.length} sesi)!`, 'info');
+      this.$nextTick(() => this.initLucideIcons());
+    },
+
+    downloadAscTemplateExcel(target) {
+      target = target || this.formImporJadwal.target || 'mengajar';
+      if (typeof XLSX === 'undefined') {
+        this.showToast('Pustaka SheetJS belum siap', 'error');
+        return;
+      }
+      const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const headers = ['JAM', 'WAKTU', ...days];
+      const rows = [headers];
+
+      const slots = [
+        { jam: 'MORNING ROLL CALL', waktu: '06:45 - 07:00' },
+        { jam: 1, waktu: '07:00 - 07:40' },
+        { jam: 2, waktu: '07:40 - 08:20' },
+        { jam: 3, waktu: '08:20 - 09:00' },
+        { jam: 4, waktu: '09:00 - 09:40' },
+        { jam: 'Break (R)', waktu: '09:40 - 10:00' },
+        { jam: 5, waktu: '10:00 - 10:40' },
+        { jam: 6, waktu: '10:40 - 11:20' },
+        { jam: 7, waktu: '11:20 - 12:00' },
+        { jam: 8, waktu: '12:00 - 12:30' },
+        { jam: 'FAMILY TIME', waktu: '12:30 - 12:45' },
+        { jam: 'JAMAAH DUHUR', waktu: '12:45 - 13:05' }
+      ];
+
+      slots.forEach(s => {
+        const row = [s.jam, s.waktu];
+        days.forEach(() => row.push(''));
+        rows.push(row);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Jadwal');
+      XLSX.writeFile(wb, `Template_aSc_Timetables_${target === 'mengajar' ? 'Guru' : 'Kelas'}.xlsx`);
+      this.showToast('📁 Template Excel aSc Timetables berhasil diunduh!', 'success');
+    },
+
+    getPresetJadwalMengajarTito() {
+      return [
+        // SENIN
+        { hari: 'Senin', jamKe: 1, tipeTugas: 'Mengajar', kelas: 'X5 COC2', mapel: 'PISA', lantai: '' },
+        { hari: 'Senin', jamKe: 2, tipeTugas: 'Mengajar', kelas: 'X5 COC2', mapel: 'PISA', lantai: '' },
+        { hari: 'Senin', jamKe: 5, tipeTugas: 'Mengajar', kelas: 'XII Cp', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Senin', jamKe: 6, tipeTugas: 'Mengajar', kelas: 'XII Cp', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Senin', jamKe: 7, tipeTugas: 'Mengajar', kelas: 'XII Cp', mapel: 'Chemistry', lantai: '' },
+        // SELASA
+        { hari: 'Selasa', jamKe: 1, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'XII IUPP CHINA / XI IUPP CHINA' },
+        { hari: 'Selasa', jamKe: 2, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'XII IUPP CHINA / XI IUPP CHINA' },
+        { hari: 'Selasa', jamKe: 3, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Piket C9' },
+        { hari: 'Selasa', jamKe: 4, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Piket C9' },
+        { hari: 'Selasa', jamKe: 5, tipeTugas: 'Mengajar', kelas: 'XII ICP 2F', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Selasa', jamKe: 6, tipeTugas: 'Mengajar', kelas: 'XII ICP 2F', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Selasa', jamKe: 7, tipeTugas: 'Mengajar', kelas: 'X3 ATLET', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Selasa', jamKe: 8, tipeTugas: 'Mengajar', kelas: 'X3 ATLET', mapel: 'Chemistry', lantai: '' },
+        // RABU
+        { hari: 'Rabu', jamKe: 1, tipeTugas: 'Mengajar', kelas: 'X15 IUPP COC 1', mapel: 'OSN/OPSI', lantai: '' },
+        { hari: 'Rabu', jamKe: 2, tipeTugas: 'Mengajar', kelas: 'X15 IUPP COC 1', mapel: 'OSN/OPSI', lantai: '' },
+        { hari: 'Rabu', jamKe: 3, tipeTugas: 'Mengajar', kelas: 'E2s / M7 / B1', mapel: 'OSN/OPSI', lantai: '' },
+        { hari: 'Rabu', jamKe: 4, tipeTugas: 'Mengajar', kelas: 'G5s / P5s / B2', mapel: 'OSN/OPSI', lantai: '' },
+        { hari: 'Rabu', jamKe: 5, tipeTugas: 'Mengajar', kelas: 'XII ICP 2F', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Rabu', jamKe: 6, tipeTugas: 'Mengajar', kelas: 'XII ICP 2F', mapel: 'Chemistry', lantai: '' },
+        // KAMIS
+        { hari: 'Kamis', jamKe: 1, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 4M' },
+        { hari: 'Kamis', jamKe: 2, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 4M' },
+        { hari: 'Kamis', jamKe: 3, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 1W' },
+        { hari: 'Kamis', jamKe: 4, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 1W' },
+        { hari: 'Kamis', jamKe: 8, tipeTugas: 'Mengajar', kelas: 'X3 ATLET', mapel: 'Chemistry', lantai: '' },
+        // JUMAT
+        { hari: 'Jumat', jamKe: 1, tipeTugas: 'Mengajar', kelas: 'XII Cp', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Jumat', jamKe: 2, tipeTugas: 'Mengajar', kelas: 'XII Cp', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Jumat', jamKe: 3, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 2M' },
+        { hari: 'Jumat', jamKe: 4, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 2M' }
+      ];
+    },
+
+    getPresetJadwalKelasX3() {
+      return [
+        // SENIN
+        { hari: 'Senin', jamKe: 1, mapel: 'PISA', guru: 'P2' },
+        { hari: 'Senin', jamKe: 2, mapel: 'PISA', guru: 'P2' },
+        { hari: 'Senin', jamKe: 3, mapel: 'Ins', guru: 'IN / BK7' },
+        { hari: 'Senin', jamKe: 4, mapel: 'Ins', guru: 'IN / BK7' },
+        { hari: 'Senin', jamKe: 5, mapel: 'Physics', guru: 'P7' },
+        { hari: 'Senin', jamKe: 6, mapel: 'Physics', guru: 'P7' },
+        { hari: 'Senin', jamKe: 7, mapel: 'Economics', guru: 'E5s' },
+        { hari: 'Senin', jamKe: 8, mapel: 'Economics', guru: 'E5s' },
+        // SELASA
+        { hari: 'Selasa', jamKe: 1, mapel: 'Sociology', guru: 'S2' },
+        { hari: 'Selasa', jamKe: 2, mapel: 'Sociology', guru: 'S2' },
+        { hari: 'Selasa', jamKe: 3, mapel: 'Biology', guru: 'B4s' },
+        { hari: 'Selasa', jamKe: 4, mapel: 'Biology', guru: 'B4s' },
+        { hari: 'Selasa', jamKe: 5, mapel: 'Geography', guru: 'G3s' },
+        { hari: 'Selasa', jamKe: 6, mapel: 'Geography', guru: 'G3s' },
+        { hari: 'Selasa', jamKe: 7, mapel: 'Chemistry', guru: 'Tito Vanzal S.Pd. (C9)' },
+        { hari: 'Selasa', jamKe: 8, mapel: 'Chemistry', guru: 'Tito Vanzal S.Pd. (C9)' },
+        // RABU
+        { hari: 'Rabu', jamKe: 1, mapel: 'General Maths', guru: 'M8' },
+        { hari: 'Rabu', jamKe: 2, mapel: 'General Maths', guru: 'M8' },
+        { hari: 'Rabu', jamKe: 3, mapel: 'General Maths', guru: 'M8' },
+        { hari: 'Rabu', jamKe: 4, mapel: 'English Reguler', guru: 'EN1s' },
+        { hari: 'Rabu', jamKe: 5, mapel: 'Fine Arts', guru: 'A1s' },
+        { hari: 'Rabu', jamKe: 6, mapel: 'Fine Arts', guru: 'A1s' },
+        { hari: 'Rabu', jamKe: 7, mapel: 'Nihongo', guru: 'N4' },
+        { hari: 'Rabu', jamKe: 8, mapel: 'Nihongo', guru: 'N4' },
+        // KAMIS
+        { hari: 'Kamis', jamKe: 1, mapel: 'English Reguler', guru: 'EN1s' },
+        { hari: 'Kamis', jamKe: 2, mapel: 'English Reguler', guru: 'EN1s' },
+        { hari: 'Kamis', jamKe: 3, mapel: 'Informatics/CAI', guru: 'IC1s' },
+        { hari: 'Kamis', jamKe: 4, mapel: 'Informatics/CAI', guru: 'IC1s' },
+        { hari: 'Kamis', jamKe: 5, mapel: 'Bahasa Indonesia', guru: 'BI4' },
+        { hari: 'Kamis', jamKe: 6, mapel: 'Bahasa Indonesia', guru: 'BI4' },
+        { hari: 'Kamis', jamKe: 7, mapel: 'Bahasa Indonesia', guru: 'BI4' },
+        { hari: 'Kamis', jamKe: 8, mapel: 'Chemistry', guru: 'Tito Vanzal S.Pd. (C9)' },
+        // JUMAT
+        { hari: 'Jumat', jamKe: 1, mapel: 'Sports', guru: 'SP5s' },
+        { hari: 'Jumat', jamKe: 2, mapel: 'Sports (Athlete)', guru: 'SP5s' },
+        { hari: 'Jumat', jamKe: 3, mapel: 'Pancasila TWK', guru: 'WK1s' },
+        { hari: 'Jumat', jamKe: 4, mapel: 'Pancasila TWK', guru: 'WK1s' },
+        // SABTU
+        { hari: 'Sabtu', jamKe: 1, mapel: 'History', guru: 'H3s' },
+        { hari: 'Sabtu', jamKe: 2, mapel: 'History', guru: 'H3s' },
+        { hari: 'Sabtu', jamKe: 3, mapel: 'SEP', guru: 'Tim SEP' },
+        { hari: 'Sabtu', jamKe: 4, mapel: 'SEP', guru: 'Tim SEP' }
+      ];
     },
 
     // =========================================================================
@@ -5169,76 +6134,128 @@ document.addEventListener('alpine:init', () => {
     // CHARTS
     // =========================================================================
     initCharts() {
-      const ctx1 = document.getElementById('chartKehadiran');
-      if (ctx1 && typeof Chart !== 'undefined') {
-        const stats = this.getWaliRecapStats();
-        this.chartKehadiran = new Chart(ctx1, {
-          type: 'doughnut',
-          data: {
-            labels: ['Hadir', 'Tahfidz', 'PTV', 'Organtri', 'Terlambat', 'Sakit', 'Izin', 'Di Rumah', 'Tanpa Keterangan'],
-            datasets: [{
-              data: [stats.hadir, stats.tahfidz, stats.ptv, stats.organtri, stats.telat, stats.sakit, stats.izin, stats.dirumah, stats.tanpaket],
-              backgroundColor: ['#10b981', '#14b8a6', '#6366f1', '#f59e0b', '#eab308', '#3b82f6', '#8b5cf6', '#06b6d4', '#ef4444'],
-              borderWidth: 0
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
-            },
-            cutout: '65%'
+      try {
+        if (typeof Chart === 'undefined') return;
+
+        const isDark = this.darkMode;
+        const textColor = isDark ? '#a1a1aa' : '#475569';
+        const gridColor = isDark ? '#27272a' : '#e2e8f0';
+
+        const ctx1 = document.getElementById('chartKehadiran');
+        if (ctx1) {
+          const old1 = Chart.getChart(ctx1) || lmsChartInstances.kehadiran;
+          if (old1 && typeof old1.destroy === 'function') {
+            old1.destroy();
           }
-        });
-      }
 
-      const ctx2 = document.getElementById('chartNilai');
-      if (ctx2 && typeof Chart !== 'undefined') {
-        const allNilai = this.nilai.map(n => Number(n.nilai)).filter(n => !isNaN(n) && n !== '');
-        const range1 = allNilai.filter(n => n >= 90).length;
-        const range2 = allNilai.filter(n => n >= 75 && n < 90).length;
-        const range3 = allNilai.filter(n => n < 75).length;
-
-        this.chartNilai = new Chart(ctx2, {
-          type: 'bar',
-          data: {
-            labels: ['Sangat Baik (90-100)', 'Tuntas (75-89)', 'Remedial (<75)'],
-            datasets: [{
-              label: 'Jumlah Nilai Siswa',
-              data: [range1, range2, range3],
-              backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
-              borderRadius: 6
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false }
+          const stats = this.getWaliRecapStats();
+          const chart1 = new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+              labels: ['Hadir', 'Tahfidz', 'PTV', 'Organtri', 'Terlambat', 'Sakit', 'Izin', 'Di Rumah', 'Tanpa Keterangan'],
+              datasets: [{
+                data: [stats.hadir, stats.tahfidz, stats.ptv, stats.organtri, stats.telat, stats.sakit, stats.izin, stats.dirumah, stats.tanpaket],
+                backgroundColor: ['#10b981', '#14b8a6', '#6366f1', '#f59e0b', '#eab308', '#3b82f6', '#8b5cf6', '#06b6d4', '#ef4444'],
+                borderWidth: 0
+              }]
             },
-            scales: {
-              y: { beginAtZero: true, ticks: { stepSize: 2 } }
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 }, color: textColor } }
+              },
+              cutout: '65%'
             }
+          });
+          try { Object.seal(chart1); } catch (e) {}
+          lmsChartInstances.kehadiran = chart1;
+        }
+
+        const ctx2 = document.getElementById('chartNilai');
+        if (ctx2) {
+          const old2 = Chart.getChart(ctx2) || lmsChartInstances.nilai;
+          if (old2 && typeof old2.destroy === 'function') {
+            old2.destroy();
           }
-        });
+
+          const allNilai = this.nilai.map(n => Number(n.nilai)).filter(n => !isNaN(n) && n !== '');
+          const range1 = allNilai.filter(n => n >= 90).length;
+          const range2 = allNilai.filter(n => n >= 75 && n < 90).length;
+          const range3 = allNilai.filter(n => n < 75).length;
+
+          const chart2 = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+              labels: ['Sangat Baik (90-100)', 'Tuntas (75-89)', 'Remedial (<75)'],
+              datasets: [{
+                label: 'Jumlah Nilai Siswa',
+                data: [range1, range2, range3],
+                backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+                borderRadius: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false }
+              },
+              scales: {
+                x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                y: { beginAtZero: true, ticks: { stepSize: 2, color: textColor }, grid: { color: gridColor } }
+              }
+            }
+          });
+          try { Object.seal(chart2); } catch (e) {}
+          lmsChartInstances.nilai = chart2;
+        }
+      } catch (err) {
+        console.warn('Gagal inisialisasi chart:', err);
       }
     },
 
     updateCharts() {
-      if (this.chartKehadiran) {
-        const stats = this.getWaliRecapStats();
-        this.chartKehadiran.data.datasets[0].data = [stats.hadir, stats.tahfidz, stats.ptv, stats.organtri, stats.telat, stats.sakit, stats.izin, stats.dirumah, stats.tanpaket];
-        this.chartKehadiran.update();
-      }
+      try {
+        if (typeof Chart === 'undefined') return;
 
-      if (this.chartNilai) {
-        const allNilai = this.nilai.map(n => Number(n.nilai)).filter(n => !isNaN(n) && n !== '');
-        const range1 = allNilai.filter(n => n >= 90).length;
-        const range2 = allNilai.filter(n => n >= 75 && n < 90).length;
-        const range3 = allNilai.filter(n => n < 75).length;
-        this.chartNilai.data.datasets[0].data = [range1, range2, range3];
-        this.chartNilai.update();
+        const isDark = this.darkMode;
+        const textColor = isDark ? '#a1a1aa' : '#475569';
+        const gridColor = isDark ? '#27272a' : '#e2e8f0';
+
+        const ctx1 = document.getElementById('chartKehadiran');
+        const chart1 = ctx1 ? (Chart.getChart(ctx1) || lmsChartInstances.kehadiran) : lmsChartInstances.kehadiran;
+        if (chart1 && chart1.data && chart1.data.datasets && chart1.data.datasets[0]) {
+          const stats = this.getWaliRecapStats();
+          chart1.data.datasets[0].data = [stats.hadir, stats.tahfidz, stats.ptv, stats.organtri, stats.telat, stats.sakit, stats.izin, stats.dirumah, stats.tanpaket];
+          if (chart1.options && chart1.options.plugins && chart1.options.plugins.legend && chart1.options.plugins.legend.labels) {
+            chart1.options.plugins.legend.labels.color = textColor;
+          }
+          chart1.update();
+        }
+
+        const ctx2 = document.getElementById('chartNilai');
+        const chart2 = ctx2 ? (Chart.getChart(ctx2) || lmsChartInstances.nilai) : lmsChartInstances.nilai;
+        if (chart2 && chart2.data && chart2.data.datasets && chart2.data.datasets[0]) {
+          const allNilai = this.nilai.map(n => Number(n.nilai)).filter(n => !isNaN(n) && n !== '');
+          const range1 = allNilai.filter(n => n >= 90).length;
+          const range2 = allNilai.filter(n => n >= 75 && n < 90).length;
+          const range3 = allNilai.filter(n => n < 75).length;
+          chart2.data.datasets[0].data = [range1, range2, range3];
+          if (chart2.options && chart2.options.scales) {
+            if (chart2.options.scales.x && chart2.options.scales.x.ticks) {
+              chart2.options.scales.x.ticks.color = textColor;
+              chart2.options.scales.x.grid.color = gridColor;
+            }
+            if (chart2.options.scales.y && chart2.options.scales.y.ticks) {
+              chart2.options.scales.y.ticks.color = textColor;
+              chart2.options.scales.y.grid.color = gridColor;
+            }
+          }
+          chart2.update();
+        }
+      } catch (err) {
+        console.warn('Gagal update chart:', err);
       }
     }
   }));
