@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="dark min-h-screen bg-[#09090b]">
+<html lang="id" class="dark min-h-screen">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -119,8 +119,16 @@
 
 html {
   min-height: 100%;
+}
+
+html.dark {
   background-color: #09090b !important;
   color-scheme: dark;
+}
+
+html:not(.dark) {
+  background-color: #f8fafc !important;
+  color-scheme: light;
 }
 
 body {
@@ -128,9 +136,17 @@ body {
   -webkit-tap-highlight-color: transparent;
   transition: background-color 0.2s ease, color 0.2s ease;
   min-height: 100vh;
+  letter-spacing: -0.01em;
+}
+
+html.dark body {
   background-color: #09090b !important;
   color: #fafafa !important;
-  letter-spacing: -0.01em;
+}
+
+html:not(.dark) body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
 }
 
 /* Headings Tight Tracking */
@@ -138,20 +154,35 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
-/* Custom Obsidian Scrollbar */
-::-webkit-scrollbar {
+/* Custom Scrollbars */
+html.dark ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-::-webkit-scrollbar-track {
+html.dark ::-webkit-scrollbar-track {
   background: #09090b;
 }
-::-webkit-scrollbar-thumb {
+html.dark ::-webkit-scrollbar-thumb {
   background: #27272a;
   border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb:hover {
+html.dark ::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
+}
+
+html:not(.dark) ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+html:not(.dark) ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Star Reward Animation */
@@ -209,32 +240,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================================================
-   OBSIDIAN SURFACE MAPPINGS (MAPPING STANDARD TAILWIND TO OBSIDIAN PALETTE)
+   1. OBSIDIAN HIGH-CONTRAST DARK SURFACE MAPPINGS (SCOPED TO html.dark)
    ========================================================================== */
-html, body,
-html.dark, html.dark body {
-  background-color: #09090b !important;
-  color: #fafafa !important;
-}
-
-/* Top Navigation & Headers */
-header,
 html.dark header {
   background-color: rgba(12, 12, 15, 0.85) !important;
   backdrop-filter: blur(12px) !important;
   border-color: #27272a !important;
 }
 
-/* Sidebar & Asides */
-aside,
-aside > div,
+html.dark aside,
 html.dark aside > div {
   background-color: #0c0c0f !important;
   border-color: #27272a !important;
 }
 
-/* Cards & Main Containers */
-.bg-white,
 html.dark .bg-white,
 html.dark .bg-slate-900 {
   background-color: #121215 !important;
@@ -242,9 +261,6 @@ html.dark .bg-slate-900 {
   border-color: #27272a !important;
 }
 
-/* Inner Sub-Cards & Panels */
-.bg-slate-50,
-.bg-slate-100,
 html.dark .bg-slate-50,
 html.dark .bg-slate-100,
 html.dark .bg-slate-800 {
@@ -253,32 +269,21 @@ html.dark .bg-slate-800 {
   border-color: #27272a !important;
 }
 
-/* Text Hierarchy */
-.text-slate-900,
-.text-slate-800,
 html.dark .text-slate-900,
 html.dark .text-slate-800 {
   color: #fafafa !important;
 }
 
-.text-slate-700,
-.text-slate-600,
 html.dark .text-slate-700,
 html.dark .text-slate-600 {
   color: #a1a1aa !important;
 }
 
-.text-slate-500,
-.text-slate-400,
 html.dark .text-slate-500,
 html.dark .text-slate-400 {
   color: #71717a !important;
 }
 
-/* Inputs, Selects & Textareas */
-input,
-select,
-textarea,
 html.dark input,
 html.dark select,
 html.dark textarea {
@@ -287,9 +292,6 @@ html.dark textarea {
   border-color: #27272a !important;
 }
 
-input:focus,
-select:focus,
-textarea:focus,
 html.dark input:focus,
 html.dark select:focus,
 html.dark textarea:focus {
@@ -299,15 +301,6 @@ html.dark textarea:focus {
   box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25) !important;
 }
 
-/* Dividers & Borders */
-.border-slate-200,
-.border-slate-100,
-.border-slate-700,
-.border-slate-800,
-.divide-slate-100,
-.divide-slate-200,
-.divide-slate-700,
-.divide-slate-800,
 html.dark .border-slate-200,
 html.dark .border-slate-100,
 html.dark .border-slate-700,
@@ -319,12 +312,6 @@ html.dark .divide-slate-800 {
   border-color: #27272a !important;
 }
 
-/* Hover States */
-.hover\:bg-slate-50\/80:hover,
-.hover\:bg-slate-50:hover,
-.hover\:bg-slate-100:hover,
-.hover\:bg-slate-700:hover,
-.hover\:bg-slate-800:hover,
 html.dark .hover\:bg-slate-50\/80:hover,
 html.dark .hover\:bg-slate-50:hover,
 html.dark .hover\:bg-slate-100:hover,
@@ -333,19 +320,60 @@ html.dark .hover\:bg-slate-800:hover {
   background-color: #27272a !important;
 }
 
-/* Modals Overlay & Container */
-.fixed.inset-0.bg-slate-900\/60,
-.fixed.inset-0.bg-slate-950\/80 {
+html.dark .fixed.inset-0.bg-slate-900\/60,
+html.dark .fixed.inset-0.bg-slate-950\/80 {
   background-color: rgba(9, 9, 11, 0.85) !important;
   backdrop-filter: blur(8px) !important;
 }
 
-/* Bottom Nav / Drawer on Mobile */
-nav.fixed,
 html.dark nav.fixed {
   background-color: rgba(12, 12, 15, 0.95) !important;
   backdrop-filter: blur(16px) !important;
   border-color: #27272a !important;
+}
+
+/* ==========================================================================
+   2. CLEAN HIGH-CONTRAST LIGHT SURFACE MAPPINGS (SCOPED TO html:not(.dark))
+   ========================================================================== */
+html:not(.dark) header {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(12px) !important;
+  border-color: #e2e8f0 !important;
+}
+
+html:not(.dark) aside > div {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+}
+
+html:not(.dark) .bg-white {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+html:not(.dark) input,
+html:not(.dark) select,
+html:not(.dark) textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) input:focus,
+html:not(.dark) select:focus,
+html:not(.dark) textarea:focus {
+  background-color: #ffffff !important;
+  border-color: #7c3aed !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15) !important;
+}
+
+html:not(.dark) nav.fixed {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(16px) !important;
+  border-color: #e2e8f0 !important;
 }
 
 /* ==========================================================================
@@ -403,7 +431,7 @@ const DEFAULT_SAMPLE_DATA = {
     tahunAjaran: "2026/2027",
     semester: "Ganjil",
     kkmDefault: 75,
-    gasWebAppUrl: ""
+    gasWebAppUrl: "https://script.google.com/macros/s/AKfycbwhHSF2V_rUkObqGcQ0aGfy58g2eIe73VPgAIbyEKn2Oxw8m7FVIyu2oVKHzyLGsu2q/exec"
   },
 
   // Daftar Kelas Default
@@ -596,7 +624,7 @@ document.addEventListener('alpine:init', () => {
     syncMessage: 'Tersimpan lokal & siap sync Google Drive',
     lastSyncTime: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
     isGasEnvironment: typeof google !== 'undefined' && typeof google.script !== 'undefined',
-    gasWebAppUrl: '',
+    gasWebAppUrl: (typeof window !== 'undefined' && window.PORTALKIMIA_CONFIG && window.PORTALKIMIA_CONFIG.LMS_API) || 'https://script.google.com/macros/s/AKfycbwhHSF2V_rUkObqGcQ0aGfy58g2eIe73VPgAIbyEKn2Oxw8m7FVIyu2oVKHzyLGsu2q/exec',
     
     // Core Data
     guru: {
@@ -608,7 +636,7 @@ document.addEventListener('alpine:init', () => {
       tahunAjaran: "2026/2027",
       semester: "Ganjil",
       kkmDefault: 75,
-      gasWebAppUrl: ""
+      gasWebAppUrl: (typeof window !== 'undefined' && window.PORTALKIMIA_CONFIG && window.PORTALKIMIA_CONFIG.LMS_API) || 'https://script.google.com/macros/s/AKfycbwhHSF2V_rUkObqGcQ0aGfy58g2eIe73VPgAIbyEKn2Oxw8m7FVIyu2oVKHzyLGsu2q/exec'
     },
     kelasList: [
       { id: "KLS-01", nama: "X3 Atlet", isWaliKelas: true, deskripsi: "Kelas Binaan Wali Kelas" }
@@ -1097,6 +1125,21 @@ document.addEventListener('alpine:init', () => {
         this.checkGasEnvironment();
       });
 
+      // Auto-sync multi-perangkat saat tab kembali aktif atau dibuka di perangkat lain (tablet/HP)
+      let lastAutoFetch = Date.now();
+      const triggerSilentSync = () => {
+        if (Date.now() - lastAutoFetch > 15000 && this.gasWebAppUrl && this.syncStatus !== 'syncing') {
+          lastAutoFetch = Date.now();
+          this.fetchDataFromGoogleDrive(true);
+        }
+      };
+      window.addEventListener('focus', triggerSilentSync);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          triggerSilentSync();
+        }
+      });
+
       this.$watch('currentTab', () => {
         this.$nextTick(() => {
           this.initLucideIcons();
@@ -1285,7 +1328,9 @@ document.addEventListener('alpine:init', () => {
           this.jadwalMengajar = parsed.jadwalMengajar || [];
           this.mediaPembelajaran = (parsed.mediaPembelajaran && parsed.mediaPembelajaran.length > 0) ? parsed.mediaPembelajaran : this.getDefaultMediaPembelajaran();
 
-          this.gasWebAppUrl = this.guru.gasWebAppUrl || '';
+          const centralApiUrl = (typeof window !== 'undefined' && window.PORTALKIMIA_CONFIG && window.PORTALKIMIA_CONFIG.LMS_API) || 'https://script.google.com/macros/s/AKfycbwhHSF2V_rUkObqGcQ0aGfy58g2eIe73VPgAIbyEKn2Oxw8m7FVIyu2oVKHzyLGsu2q/exec';
+          this.gasWebAppUrl = (this.guru.gasWebAppUrl && this.guru.gasWebAppUrl.trim()) ? this.guru.gasWebAppUrl.trim() : centralApiUrl;
+          this.guru.gasWebAppUrl = this.gasWebAppUrl;
           
           if (this.kelasList.length > 0) {
             this.waliKelasFilter.kelas = this.guru.kelasWali || this.kelasList[0].nama;
@@ -1317,7 +1362,9 @@ document.addEventListener('alpine:init', () => {
         this.kelompokProyek = [];
         this.quickLinks = JSON.parse(JSON.stringify(window.DEFAULT_SAMPLE_DATA.quickLinks || []));
         this.mediaPembelajaran = this.getDefaultMediaPembelajaran();
-        this.gasWebAppUrl = this.guru.gasWebAppUrl || '';
+        const centralApiUrl = (typeof window !== 'undefined' && window.PORTALKIMIA_CONFIG && window.PORTALKIMIA_CONFIG.LMS_API) || 'https://script.google.com/macros/s/AKfycbwhHSF2V_rUkObqGcQ0aGfy58g2eIe73VPgAIbyEKn2Oxw8m7FVIyu2oVKHzyLGsu2q/exec';
+        this.gasWebAppUrl = (this.guru.gasWebAppUrl && this.guru.gasWebAppUrl.trim()) ? this.guru.gasWebAppUrl.trim() : centralApiUrl;
+        this.guru.gasWebAppUrl = this.gasWebAppUrl;
         this.waliKelasFilter.kelas = 'X3 Atlet';
         this.nilaiFilter.kelas = 'X3 Atlet';
         this.bintangFilter.kelas = 'X3 Atlet';
@@ -1410,17 +1457,18 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    fetchDataFromGoogleDrive() {
+    fetchDataFromGoogleDrive(silent = false) {
       this.syncStatus = 'syncing';
 
       if (this.isGasEnvironment) {
         google.script.run
           .withSuccessHandler((res) => {
-            this.handleFetchedCloudData(res);
+            this.handleFetchedCloudData(res, silent);
           })
           .withFailureHandler((err) => {
             this.syncStatus = 'error';
-            this.showToast('Gagal memuat data dari Spreadsheet: ' + err, 'error');
+            if (!silent) this.showToast('Gagal memuat data dari Spreadsheet: ' + err, 'error');
+            else console.warn('Silent sync error:', err);
           })
           .handleAction('getAllData', {});
       } else if (this.gasWebAppUrl) {
@@ -1431,32 +1479,35 @@ document.addEventListener('alpine:init', () => {
           .then(res => res.json())
           .then(data => {
             if (data && data.status === 'success' && data.data) {
-              this.handleFetchedCloudData(data.data);
+              this.handleFetchedCloudData(data.data, silent);
             } else {
               this.syncStatus = 'error';
-              this.showToast('Respon dari Google Web App: ' + (data ? data.message : ''), 'error');
+              if (!silent) this.showToast('Respon dari Google Web App: ' + (data ? data.message : ''), 'error');
             }
           })
           .catch(err => {
             this.syncStatus = 'error';
-            this.showToast('Gagal koneksi ke Web App Google: ' + err, 'error');
+            if (!silent) this.showToast('Gagal koneksi ke Web App Google: ' + err, 'error');
+            else console.warn('Silent sync connection error:', err);
           });
       } else {
         this.syncStatus = 'synced';
       }
     },
 
-    handleFetchedCloudData(data) {
+    handleFetchedCloudData(data, silent = false) {
       if (data) {
         this.syncDataFromCloudPayload(data);
         const countSiswa = (data.siswa && data.siswa.length) || 0;
         const countJurnal = (data.jurnalKimia && data.jurnalKimia.length) || 0;
         const countNilai = (data.nilai && data.nilai.length) || 0;
         
-        if (countSiswa > 0 || countJurnal > 0 || countNilai > 0) {
-          this.showToast(`Berhasil menarik ${countSiswa} siswa, ${this.kelasList.length} kelas, ${countNilai} data nilai dari Spreadsheet!`, 'success');
-        } else {
-          this.showToast('Spreadsheet terhubung. Belum ada baris data siswa yang ditemukan pada sheet.', 'info');
+        if (!silent) {
+          if (countSiswa > 0 || countJurnal > 0 || countNilai > 0) {
+            this.showToast(`Berhasil menarik ${countSiswa} siswa, ${this.kelasList.length} kelas, ${countNilai} data nilai dari Spreadsheet!`, 'success');
+          } else {
+            this.showToast('Spreadsheet terhubung. Belum ada baris data siswa yang ditemukan pada sheet.', 'info');
+          }
         }
       }
       this.syncStatus = 'synced';
@@ -1595,22 +1646,40 @@ document.addEventListener('alpine:init', () => {
         this.jurnalKimia = data.jurnalKimia;
       }
       if (data.presensiWali && Array.isArray(data.presensiWali)) {
+        const normDate = (d) => String(d || '').split('T')[0].trim();
+        const normStr = (s) => String(s || '').trim().toLowerCase();
         const presensiMap = new Map();
-        // 1. Muat data dari cloud spreadsheet
+
+        // 1. Muat data dari cloud spreadsheet (cloud adalah source of truth untuk sinkronisasi antar perangkat)
         data.presensiWali.forEach(p => {
-          const key = (p.tanggal || '') + '|||' + (p.sesi || '') + '|||' + (p.kelas || '').toLowerCase() + '|||' + (p.namaSiswa || '').toLowerCase().trim();
-          if (p.namaSiswa) {
-            presensiMap.set(key, p);
+          const sName = normStr(p.namaSiswa || p.nama);
+          const sId = normStr(p.idSiswa);
+          const sIdent = sId || sName;
+          const key = normDate(p.tanggal) + '|||' + normStr(p.sesi || 'Apel Pagi') + '|||' + normStr(p.kelas) + '|||' + sIdent;
+          if (sIdent) {
+            presensiMap.set(key, {
+              ...p,
+              tanggal: normDate(p.tanggal),
+              sesi: p.sesi || 'Apel Pagi',
+              status: p.status || 'Hadir'
+            });
           }
         });
+
         // 2. Pertahankan entri lokal yang belum sempat tersinkron
         this.presensiWali.forEach(p => {
-          const key = (p.tanggal || '') + '|||' + (p.sesi || '') + '|||' + (p.kelas || '').toLowerCase() + '|||' + (p.namaSiswa || '').toLowerCase().trim();
-          if (p.namaSiswa && !presensiMap.has(key)) {
+          const sName = normStr(p.namaSiswa || p.nama);
+          const sId = normStr(p.idSiswa);
+          const sIdent = sId || sName;
+          const key = normDate(p.tanggal) + '|||' + normStr(p.sesi || 'Apel Pagi') + '|||' + normStr(p.kelas) + '|||' + sIdent;
+          if (sIdent && !presensiMap.has(key)) {
             presensiMap.set(key, p);
           }
         });
+
         this.presensiWali = Array.from(presensiMap.values());
+        this.saveLocalData();
+        this.updateCharts();
       }
       if (data.presensiKimia && Array.isArray(data.presensiKimia)) {
         this.presensiKimia = data.presensiKimia;
@@ -1829,7 +1898,7 @@ document.addEventListener('alpine:init', () => {
       let telatApel = 0;
 
       waliSiswa.forEach(s => {
-        const found = this.presensiWali.find(p => 
+        const found = this.presensiWali.slice().reverse().find(p => 
           isDateMatch(p.tanggal, today) &&
           String(p.sesi || 'Apel Pagi').trim().toLowerCase() === 'apel pagi' &&
           String(p.kelas || '').trim().toLowerCase() === activeWaliKelas.toLowerCase() &&
@@ -1850,7 +1919,7 @@ document.addEventListener('alpine:init', () => {
 
       let hadirFamily = 0;
       waliSiswa.forEach(s => {
-        const found = this.presensiWali.find(p => 
+        const found = this.presensiWali.slice().reverse().find(p => 
           isDateMatch(p.tanggal, today) &&
           String(p.sesi || '').trim().toLowerCase() === 'family time' &&
           String(p.kelas || '').trim().toLowerCase() === activeWaliKelas.toLowerCase() &&
@@ -1906,7 +1975,7 @@ document.addEventListener('alpine:init', () => {
       const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
 
       return siswaKelas.map(s => {
-        const found = this.presensiWali.find(p => 
+        const found = this.presensiWali.slice().reverse().find(p => 
           ((p.idSiswa && s.id && String(p.idSiswa).trim() === String(s.id).trim()) || 
            (p.namaSiswa && s.nama && String(p.namaSiswa).trim().toLowerCase() === String(s.nama).trim().toLowerCase())) && 
           isDateMatch(p.tanggal, tgl) && 
@@ -2134,7 +2203,7 @@ document.addEventListener('alpine:init', () => {
       let hadir = 0, sakit = 0, izin = 0, tahfidz = 0, ptv = 0, organtri = 0, dirumah = 0, telat = 0, tanpaket = 0, belum = 0;
 
       siswaKelas.forEach(s => {
-        const found = this.presensiWali.find(p => 
+        const found = this.presensiWali.slice().reverse().find(p => 
           isDateMatch(p.tanggal, tgl) && 
           String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
           String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase() &&
@@ -6493,6 +6562,10 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
     // CHARTS
     // =========================================================================
     initCharts() {
+      const isDark = this.darkMode;
+      const textColor = isDark ? '#a1a1aa' : '#475569';
+      const gridColor = isDark ? '#27272a' : '#e2e8f0';
+
       const ctx1 = document.getElementById('chartKehadiran');
       if (ctx1 && typeof Chart !== 'undefined') {
         const stats = this.getWaliRecapStats();
@@ -6510,7 +6583,7 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+              legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 }, color: textColor } }
             },
             cutout: '65%'
           }
@@ -6542,7 +6615,8 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
               legend: { display: false }
             },
             scales: {
-              y: { beginAtZero: true, ticks: { stepSize: 2 } }
+              x: { ticks: { color: textColor }, grid: { color: gridColor } },
+              y: { beginAtZero: true, ticks: { stepSize: 2, color: textColor }, grid: { color: gridColor } }
             }
           }
         });
@@ -6550,9 +6624,16 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
     },
 
     updateCharts() {
+      const isDark = this.darkMode;
+      const textColor = isDark ? '#a1a1aa' : '#475569';
+      const gridColor = isDark ? '#27272a' : '#e2e8f0';
+
       if (this.chartKehadiran) {
         const stats = this.getWaliRecapStats();
         this.chartKehadiran.data.datasets[0].data = [stats.hadir, stats.tahfidz, stats.ptv, stats.organtri, stats.telat, stats.sakit, stats.izin, stats.dirumah, stats.tanpaket];
+        if (this.chartKehadiran.options && this.chartKehadiran.options.plugins && this.chartKehadiran.options.plugins.legend && this.chartKehadiran.options.plugins.legend.labels) {
+          this.chartKehadiran.options.plugins.legend.labels.color = textColor;
+        }
         this.chartKehadiran.update();
       }
 
@@ -6562,6 +6643,16 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
         const range2 = allNilai.filter(n => n >= 75 && n < 90).length;
         const range3 = allNilai.filter(n => n < 75).length;
         this.chartNilai.data.datasets[0].data = [range1, range2, range3];
+        if (this.chartNilai.options && this.chartNilai.options.scales) {
+          if (this.chartNilai.options.scales.x && this.chartNilai.options.scales.x.ticks) {
+            this.chartNilai.options.scales.x.ticks.color = textColor;
+            this.chartNilai.options.scales.x.grid.color = gridColor;
+          }
+          if (this.chartNilai.options.scales.y && this.chartNilai.options.scales.y.ticks) {
+            this.chartNilai.options.scales.y.ticks.color = textColor;
+            this.chartNilai.options.scales.y.grid.color = gridColor;
+          }
+        }
         this.chartNilai.update();
       }
     }
@@ -6574,18 +6665,18 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="min-h-screen antialiased text-[#fafafa] bg-[#09090b] flex flex-col transition-colors duration-200" x-data="lmsApp()">
+<body class="min-h-screen antialiased text-slate-800 dark:text-[#fafafa] bg-slate-50 dark:bg-[#09090b] flex flex-col transition-colors duration-200" x-data="lmsApp()">
 
   <!-- ========================================================================
        TOP HEADER BAR (Desktop & Mobile) - OBSIDIAN PRECISION
        ======================================================================== -->
-  <header class="bg-[#0c0c0f]/85 backdrop-blur-md border-b border-[#27272a] sticky top-0 z-30 shadow-sm no-print">
+  <header class="bg-white/90 dark:bg-[#0c0c0f]/85 backdrop-blur-md border-b border-slate-200 dark:border-[#27272a] sticky top-0 z-30 shadow-sm no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         
         <!-- Left: Mobile Menu Button & PortalKimia Brand Title -->
         <div class="flex items-center space-x-3">
-          <button @click="mobileMenuOpen = true" class="lg:hidden p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-[#18181b] focus:outline-none">
+          <button @click="mobileMenuOpen = true" class="lg:hidden p-2 rounded-lg text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b] focus:outline-none">
             <i data-lucide="menu" class="w-6 h-6"></i>
           </button>
           
@@ -6604,10 +6695,10 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
             </svg>
             <div>
               <div class="flex items-center space-x-1.5">
-                <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">Portal<span class="text-[#a78bfa]">Kimia</span></h1>
-                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#7c3aed]/20 text-[#c4b5fd] border border-[#7c3aed]/30 uppercase tracking-wider">LMS Guru</span>
+                <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white leading-tight">Portal<span class="text-[#a78bfa]">Kimia</span></h1>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#7c3aed]/20 text-[#7c3aed] dark:text-[#c4b5fd] border border-[#7c3aed]/30 uppercase tracking-wider">LMS Guru</span>
               </div>
-              <p class="text-[11px] text-zinc-400 hidden sm:block" x-text="guru.sekolah + ' • ' + (guru.tahunAjaran || '2026/2027')"></p>
+              <p class="text-[11px] text-slate-500 dark:text-zinc-400 hidden sm:block" x-text="guru.sekolah + ' • ' + (guru.tahunAjaran || '2026/2027')"></p>
             </div>
           </div>
         </div>
@@ -6617,7 +6708,7 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
           
           <!-- RANDOM STUDENT PICKER BUTTON -->
           <button @click="openPickerModal()" 
-                  class="px-2.5 sm:px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition touch-btn flex items-center space-x-1.5 shadow-xs font-bold text-xs"
+                  class="px-2.5 sm:px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition touch-btn flex items-center space-x-1.5 shadow-xs font-bold text-xs"
                   title="Buka Acak Siswa (Random Student Picker)">
             <span class="text-sm">🎲</span>
             <span class="hidden md:inline">Acak Siswa</span>
@@ -6625,16 +6716,16 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
 
           <!-- DARK / LIGHT MODE TOGGLE BUTTON -->
           <button @click="toggleDarkMode()" 
-                  class="p-2 rounded-xl border border-[#27272a] bg-[#18181b] text-zinc-400 hover:text-amber-300 hover:bg-[#27272a] transition touch-btn flex items-center justify-center"
+                  class="p-2 rounded-xl border border-slate-200 dark:border-[#27272a] bg-slate-100 dark:bg-[#18181b] text-slate-600 dark:text-zinc-400 hover:text-amber-500 dark:hover:text-amber-300 hover:bg-slate-200 dark:hover:bg-[#27272a] transition touch-btn flex items-center justify-center"
                   :title="darkMode ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap (Obsidian)'">
-            <!-- Sun Icon -->
+            <!-- Sun Icon (show in dark mode to switch to light) -->
             <svg x-show="darkMode" class="w-4 h-4 text-amber-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="4"/>
               <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>
               <path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
             </svg>
-            <!-- Moon Icon -->
-            <svg x-show="!darkMode" class="w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Moon Icon (show in light mode to switch to dark) -->
+            <svg x-show="!darkMode" class="w-4 h-4 text-slate-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
             </svg>
           </button>
@@ -6642,30 +6733,30 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
           <!-- Cloud Sync Status Pill -->
           <div class="flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-medium border"
                :class="{
-                 'bg-[#34d399]/10 border-[#34d399]/30 text-[#34d399]': syncStatus === 'synced',
-                 'bg-amber-500/10 border-amber-500/30 text-amber-300': syncStatus === 'syncing',
-                 'bg-rose-500/10 border-rose-500/30 text-rose-300': syncStatus === 'error'
+                 'bg-emerald-50 dark:bg-[#34d399]/10 border-emerald-200 dark:border-[#34d399]/30 text-emerald-700 dark:text-[#34d399]': syncStatus === 'synced',
+                 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-300': syncStatus === 'syncing',
+                 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-300': syncStatus === 'error'
                }">
             <span class="w-2 h-2 rounded-full"
                   :class="{
-                    'bg-[#34d399] pulse-online': syncStatus === 'synced',
-                    'bg-amber-400 animate-spin': syncStatus === 'syncing',
+                    'bg-emerald-500 dark:bg-[#34d399] pulse-online': syncStatus === 'synced',
+                    'bg-amber-500 animate-spin': syncStatus === 'syncing',
                     'bg-rose-500': syncStatus === 'error'
                   }"></span>
             <span class="hidden md:inline" x-text="syncStatus === 'synced' ? 'Google Drive: Terhubung (' + lastSyncTime + ')' : (syncStatus === 'syncing' ? 'Menyinkronkan...' : 'Offline')"></span>
-            <button @click="fetchDataFromGoogleDrive()" title="Tarik Data Terbaru dari Google Sheets" class="text-zinc-400 hover:text-[#34d399] ml-1">
+            <button @click="fetchDataFromGoogleDrive()" title="Tarik Data Terbaru dari Google Sheets" class="text-slate-400 hover:text-emerald-600 dark:hover:text-[#34d399] ml-1">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5" :class="{'animate-spin': syncStatus === 'syncing'}"></i>
             </button>
           </div>
 
           <!-- Profile Badge -->
-          <div class="flex items-center space-x-2.5 pl-2 sm:border-l sm:border-[#27272a]">
-            <div class="w-9 h-9 rounded-full bg-[#7c3aed]/20 text-[#c4b5fd] font-bold flex items-center justify-center text-sm border border-[#7c3aed]/40">
+          <div class="flex items-center space-x-2.5 pl-2 sm:border-l sm:border-slate-200 dark:sm:border-[#27272a]">
+            <div class="w-9 h-9 rounded-full bg-[#7c3aed]/20 text-violet-700 dark:text-[#c4b5fd] font-bold flex items-center justify-center text-sm border border-[#7c3aed]/40">
               TV
             </div>
             <div class="hidden sm:block text-left">
-              <div class="text-xs font-bold text-white" x-text="guru.nama"></div>
-              <div class="text-[10px] text-[#a78bfa] font-semibold" x-text="'Wali: ' + (waliKelasFilter.kelas || guru.kelasWali)"></div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white" x-text="guru.nama"></div>
+              <div class="text-[10px] text-violet-600 dark:text-[#a78bfa] font-semibold" x-text="'Wali: ' + (waliKelasFilter.kelas || guru.kelasWali)"></div>
             </div>
           </div>
 
@@ -6680,19 +6771,19 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
   <div class="flex-1 flex max-w-7xl w-full mx-auto px-0 sm:px-4 lg:px-8 py-0 sm:py-6 gap-6">
 
     <!-- ======================================================================
-         DESKTOP SIDEBAR NAVIGATION (Left Column) - OBSIDIAN PALETTE
+         DESKTOP SIDEBAR NAVIGATION (Left Column) - DUAL THEME READY
          ====================================================================== -->
     <aside class="hidden lg:flex flex-col w-64 shrink-0 no-print">
-      <div class="bg-[#121215] rounded-2xl border border-[#27272a] p-4 space-y-5 sticky top-24">
+      <div class="bg-white dark:bg-[#121215] rounded-2xl border border-slate-200 dark:border-[#27272a] p-4 space-y-5 sticky top-24 shadow-sm">
         
         <!-- Navigation Menu Links -->
         <nav class="space-y-1.5">
-          <div class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider px-3 pb-1">Menu Utama</div>
+          <div class="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider px-3 pb-1">Menu Utama</div>
           
           <!-- 1. Dashboard -->
           <button @click="currentTab = 'dashboard'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'dashboard' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'dashboard' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
               <i data-lucide="layout-dashboard" class="w-4 h-4 text-[#a78bfa]"></i>
               <span>Dashboard</span>
@@ -6702,48 +6793,48 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
           <!-- 2. Wali Kelas -->
           <button @click="currentTab = 'walikelas'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'walikelas' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'walikelas' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
               <i data-lucide="user-check" class="w-4 h-4 text-[#34d399]"></i>
               <span>Wali Kelas</span>
             </div>
             <span class="text-[10px] px-2 py-0.5 rounded-full font-bold"
-                  :class="currentTab === 'walikelas' ? 'bg-[#7c3aed]/30 text-white' : 'bg-[#18181b] text-[#34d399] border border-[#27272a]'"
+                  :class="currentTab === 'walikelas' ? 'bg-violet-200 dark:bg-[#7c3aed]/30 text-violet-800 dark:text-white' : 'bg-slate-100 dark:bg-[#18181b] text-emerald-700 dark:text-[#34d399] border border-slate-200 dark:border-[#27272a]'"
                   x-text="waliKelasFilter.kelas || guru.kelasWali"></span>
           </button>
 
-          <div class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider px-3 pt-2 pb-1">Guru Kimia</div>
+          <div class="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider px-3 pt-2 pb-1">Guru Kimia</div>
 
           <!-- 3. Jurnal Pembelajaran Kimia -->
           <button @click="currentTab = 'jurnalkimia'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'jurnalkimia' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'jurnalkimia' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
-              <i data-lucide="book-open" class="w-4 h-4 text-violet-400"></i>
+              <i data-lucide="book-open" class="w-4 h-4 text-violet-500 dark:text-violet-400"></i>
               <span>Jurnal Mengajar</span>
             </div>
             <span class="text-[10px] px-2 py-0.5 rounded-full font-bold"
-                  :class="currentTab === 'jurnalkimia' ? 'bg-[#7c3aed]/30 text-white' : 'bg-[#18181b] text-zinc-300 border border-[#27272a]'"
+                  :class="currentTab === 'jurnalkimia' ? 'bg-violet-200 dark:bg-[#7c3aed]/30 text-violet-800 dark:text-white' : 'bg-slate-100 dark:bg-[#18181b] text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-[#27272a]'"
                   x-text="jurnalKimia.length"></span>
           </button>
 
           <!-- 3b. Jadwal Mengajar Guru Kimia -->
           <button @click="currentTab = 'jadwalmengajar'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'jadwalmengajar' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'jadwalmengajar' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
-              <i data-lucide="calendar-days" class="w-4 h-4 text-[#34d399]"></i>
+              <i data-lucide="calendar-days" class="w-4 h-4 text-emerald-600 dark:text-[#34d399]"></i>
               <span>Jadwal Mengajar</span>
             </div>
-            <span class="text-[10px] bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30 px-2 py-0.5 rounded-full font-bold" x-text="jadwalMengajar.length"></span>
+            <span class="text-[10px] bg-emerald-100 dark:bg-[#34d399]/15 text-emerald-800 dark:text-[#34d399] border border-emerald-200 dark:border-[#34d399]/30 px-2 py-0.5 rounded-full font-bold" x-text="jadwalMengajar.length"></span>
           </button>
 
           <!-- 4. Penilaian Tugas & UH -->
           <button @click="currentTab = 'penilaian'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'penilaian' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'penilaian' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
-              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-indigo-400"></i>
+              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-indigo-500 dark:text-indigo-400"></i>
               <span>Penilaian Nilai</span>
             </div>
           </button>
@@ -6751,104 +6842,104 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
           <!-- 5. Poin Keaktifan Bintang -->
           <button @click="currentTab = 'bintang'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'bintang' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'bintang' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
-              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 text-amber-500 fill-amber-500"></i>
               <span>Poin Bintang</span>
             </div>
-            <span class="text-[10px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">Top</span>
+            <span class="text-[10px] bg-amber-100 dark:bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold">Top</span>
           </button>
 
           <!-- 5b. Acak Siswa (Random Picker) -->
           <button @click="openPickerModal()"
-                  class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all touch-btn text-amber-300 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20">
+                  class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all touch-btn text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-transparent hover:bg-amber-100 dark:hover:bg-amber-500/10 border border-amber-200 dark:border-transparent dark:hover:border-amber-500/20">
             <div class="flex items-center space-x-3">
               <span class="text-base">🎲</span>
               <span class="font-bold">Acak Siswa</span>
             </div>
-            <span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">Spin</span>
+            <span class="text-[10px] bg-amber-200 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-bold">Spin</span>
           </button>
 
           <!-- 6. Kelompok Cerdas & Proyek Kimia -->
           <button @click="currentTab = 'kelompok'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'kelompok' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'kelompok' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
-              <i data-lucide="users-2" class="w-4 h-4 text-[#34d399]"></i>
+              <i data-lucide="users-2" class="w-4 h-4 text-emerald-600 dark:text-[#34d399]"></i>
               <span>Kelompok Cerdas</span>
             </div>
-            <span class="text-[10px] bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/30 px-2 py-0.5 rounded-full font-bold" x-text="kelompokProyek.length > 0 ? kelompokProyek.length : 'Baru'"></span>
+            <span class="text-[10px] bg-emerald-100 dark:bg-[#34d399]/15 text-emerald-800 dark:text-[#34d399] border border-emerald-200 dark:border-[#34d399]/30 px-2 py-0.5 rounded-full font-bold" x-text="kelompokProyek.length > 0 ? kelompokProyek.length : 'Baru'"></span>
           </button>
 
           <!-- 6b. Kalkulator Cepat Kimia -->
           <button @click="currentTab = 'kalkulatorkimia'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'kalkulatorkimia' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'kalkulatorkimia' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
-              <i data-lucide="calculator" class="w-4 h-4 text-purple-400"></i>
+              <i data-lucide="calculator" class="w-4 h-4 text-purple-500 dark:text-purple-400"></i>
               <span>Kalkulator Kimia</span>
             </div>
-            <span class="text-[10px] bg-purple-500/15 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full font-bold">Solver</span>
+            <span class="text-[10px] bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30 px-2 py-0.5 rounded-full font-bold">Solver</span>
           </button>
 
           <!-- 6c. Pusat Modul & Video Praktikum -->
           <button @click="currentTab = 'pusatmateri'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'pusatmateri' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'pusatmateri' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
-              <i data-lucide="tv" class="w-4 h-4 text-rose-400"></i>
+              <i data-lucide="tv" class="w-4 h-4 text-rose-500 dark:text-rose-400"></i>
               <span>Pusat Modul & Video</span>
             </div>
-            <span class="text-[10px] bg-rose-500/15 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full font-bold" x-text="mediaPembelajaran.length"></span>
+            <span class="text-[10px] bg-rose-100 dark:bg-rose-500/15 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 px-2 py-0.5 rounded-full font-bold" x-text="mediaPembelajaran.length"></span>
           </button>
 
-          <div class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider px-3 pt-2 pb-1">Koleksi & Data</div>
+          <div class="text-[11px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider px-3 pt-2 pb-1">Koleksi & Data</div>
 
           <!-- 6. Quick Links -->
           <button @click="currentTab = 'quicklinks'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'quicklinks' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'quicklinks' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
-              <i data-lucide="link" class="w-4 h-4 text-cyan-400"></i>
+              <i data-lucide="link" class="w-4 h-4 text-cyan-500 dark:text-cyan-400"></i>
               <span>Quick Link</span>
             </div>
             <span class="text-[10px] px-2 py-0.5 rounded-full font-bold"
-                  :class="currentTab === 'quicklinks' ? 'bg-[#7c3aed]/30 text-white' : 'bg-[#18181b] text-cyan-300 border border-[#27272a]'"
+                  :class="currentTab === 'quicklinks' ? 'bg-violet-200 dark:bg-[#7c3aed]/30 text-violet-800 dark:text-white' : 'bg-slate-100 dark:bg-[#18181b] text-cyan-700 dark:text-cyan-300 border border-slate-200 dark:border-[#27272a]'"
                   x-text="quickLinks.length"></span>
           </button>
 
           <!-- 7. Data Siswa & Kelas -->
           <button @click="currentTab = 'datasiswa'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'datasiswa' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'datasiswa' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
-              <i data-lucide="users" class="w-4 h-4 text-zinc-300"></i>
+              <i data-lucide="users" class="w-4 h-4 text-slate-500 dark:text-zinc-300"></i>
               <span>Data Siswa & Kelas</span>
             </div>
-            <span class="text-[10px] bg-[#18181b] text-zinc-400 border border-[#27272a] px-2 py-0.5 rounded-full font-bold" x-text="siswa.length"></span>
+            <span class="text-[10px] bg-slate-100 dark:bg-[#18181b] text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-[#27272a] px-2 py-0.5 rounded-full font-bold" x-text="siswa.length"></span>
           </button>
 
           <!-- 8. Pengaturan & Google Drive -->
           <button @click="currentTab = 'pengaturan'"
                   class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all touch-btn"
-                  :class="currentTab === 'pengaturan' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:bg-[#18181b] hover:text-[#fafafa] font-medium'">
+                  :class="currentTab === 'pengaturan' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-[#18181b] hover:text-slate-900 dark:hover:text-[#fafafa] font-medium'">
             <div class="flex items-center space-x-3">
-              <i data-lucide="settings" class="w-4 h-4 text-zinc-300"></i>
+              <i data-lucide="settings" class="w-4 h-4 text-slate-500 dark:text-zinc-300"></i>
               <span>Google Drive & Set</span>
             </div>
           </button>
         </nav>
 
         <!-- Quick Sync Action Box -->
-        <div class="bg-[#18181b] rounded-xl p-3.5 text-white space-y-2 border border-[#27272a]">
-          <div class="flex items-center space-x-2 text-xs font-semibold text-[#34d399]">
+        <div class="bg-slate-50 dark:bg-[#18181b] rounded-xl p-3.5 space-y-2 border border-slate-200 dark:border-[#27272a]">
+          <div class="flex items-center space-x-2 text-xs font-semibold text-emerald-600 dark:text-[#34d399]">
             <i data-lucide="database" class="w-3.5 h-3.5"></i>
             <span>Google Spreadsheet</span>
           </div>
-          <p class="text-[11px] text-zinc-400 leading-relaxed">
-            Data murni disinkronkan dari Google Sheets Anda.
+          <p class="text-[11px] text-slate-500 dark:text-zinc-400 leading-relaxed">
+            Data tersinkron otomatis antar perangkat via Google Sheets.
           </p>
-          <button @click="fetchDataFromGoogleDrive()" class="w-full py-2 px-2 bg-[#7c3aed] hover:bg-[#6d28d9] rounded-lg text-xs font-bold text-white flex items-center justify-center space-x-1.5 transition shadow-sm active:scale-95">
+          <button @click="fetchDataFromGoogleDrive()" class="w-full py-2 px-2 bg-violet-600 hover:bg-violet-700 dark:bg-[#7c3aed] dark:hover:bg-[#6d28d9] rounded-lg text-xs font-bold text-white flex items-center justify-center space-x-1.5 transition shadow-sm active:scale-95">
             <i data-lucide="refresh-cw" class="w-3 h-3"></i>
             <span>Tarik Data Spreadsheet</span>
           </button>
@@ -6858,7 +6949,7 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
     </aside>
 
     <!-- ======================================================================
-         MOBILE SLIDE-OVER DRAWER - OBSIDIAN
+         MOBILE SLIDE-OVER DRAWER - DUAL THEME READY
          ====================================================================== -->
     <div x-show="mobileMenuOpen" 
          x-transition:enter="transition ease-out duration-200"
@@ -6869,11 +6960,11 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
          x-transition:leave-end="opacity-0"
          class="fixed inset-0 z-40 lg:hidden flex no-print" style="display: none;">
       
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" @click="mobileMenuOpen = false"></div>
+      <div class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm" @click="mobileMenuOpen = false"></div>
       
-      <div class="relative w-4/5 max-w-xs bg-[#121215] h-full shadow-2xl p-5 flex flex-col justify-between z-50 border-r border-[#27272a]">
+      <div class="relative w-4/5 max-w-xs bg-white dark:bg-[#121215] h-full shadow-2xl p-5 flex flex-col justify-between z-50 border-r border-slate-200 dark:border-[#27272a]">
         <div>
-          <div class="flex items-center justify-between pb-4 border-b border-[#27272a]">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-[#27272a]">
             <div class="flex items-center space-x-2.5">
               <!-- Official PortalKimia SVG Logo -->
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" class="w-9 h-9 shrink-0 rounded-xl">
@@ -6888,72 +6979,72 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
                 <circle cx="32" cy="24" r="3" fill="#c084fc" fill-opacity="0.6"/>
               </svg>
               <div>
-                <div class="text-sm font-bold text-white">Portal<span class="text-[#a78bfa]">Kimia</span></div>
-                <div class="text-[10px] text-zinc-400" x-text="guru.sekolah"></div>
+                <div class="text-sm font-bold text-slate-900 dark:text-white">Portal<span class="text-[#a78bfa]">Kimia</span></div>
+                <div class="text-[10px] text-slate-500 dark:text-zinc-400" x-text="guru.sekolah"></div>
               </div>
             </div>
-            <button @click="mobileMenuOpen = false" class="p-1 rounded-lg text-zinc-400 hover:text-white">
+            <button @click="mobileMenuOpen = false" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-white">
               <i data-lucide="x" class="w-5 h-5"></i>
             </button>
           </div>
 
-          <nav class="mt-4 space-y-1.5">
-            <button @click="currentTab = 'dashboard'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'dashboard' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
+          <nav class="mt-4 space-y-1.5 overflow-y-auto max-h-[calc(100vh-180px)] pr-1">
+            <button @click="currentTab = 'dashboard'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'dashboard' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
               <i data-lucide="layout-dashboard" class="w-4 h-4 text-[#a78bfa]"></i>
               <span>Dashboard Rangkuman</span>
             </button>
-            <button @click="currentTab = 'walikelas'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'walikelas' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
+            <button @click="currentTab = 'walikelas'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'walikelas' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
               <i data-lucide="user-check" class="w-4 h-4 text-[#34d399]"></i>
               <span>Wali Kelas (9 Status)</span>
             </button>
-            <button @click="currentTab = 'jurnalkimia'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'jurnalkimia' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
-              <i data-lucide="book-open" class="w-4 h-4 text-violet-400"></i>
+            <button @click="currentTab = 'jurnalkimia'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'jurnalkimia' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
+              <i data-lucide="book-open" class="w-4 h-4 text-violet-500 dark:text-violet-400"></i>
               <span>Jurnal Pembelajaran Kimia</span>
             </button>
-            <button @click="currentTab = 'jadwalmengajar'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'jadwalmengajar' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
-              <i data-lucide="calendar-days" class="w-4 h-4 text-[#34d399]"></i>
+            <button @click="currentTab = 'jadwalmengajar'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'jadwalmengajar' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
+              <i data-lucide="calendar-days" class="w-4 h-4 text-emerald-600 dark:text-[#34d399]"></i>
               <span>Jadwal Mengajar Guru</span>
             </button>
-            <button @click="currentTab = 'penilaian'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'penilaian' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
-              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-indigo-400"></i>
+            <button @click="currentTab = 'penilaian'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'penilaian' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-indigo-500 dark:text-indigo-400"></i>
               <span>Penilaian Tugas & UH</span>
             </button>
-            <button @click="currentTab = 'bintang'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'bintang' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
-              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <button @click="currentTab = 'bintang'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'bintang' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
+              <i data-lucide="star" class="w-4 h-4 text-amber-500 fill-amber-500"></i>
               <span>Poin Bintang Keaktifan</span>
             </button>
-            <button @click="openPickerModal(); mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-bold text-sm bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 border border-amber-500/30">
+            <button @click="openPickerModal(); mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-bold text-sm bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30">
               <span class="text-base">🎲</span>
               <span>Acak Siswa (Picker)</span>
             </button>
-            <button @click="currentTab = 'kelompok'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'kelompok' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
-              <i data-lucide="users-2" class="w-4 h-4 text-[#34d399]"></i>
+            <button @click="currentTab = 'kelompok'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'kelompok' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
+              <i data-lucide="users-2" class="w-4 h-4 text-emerald-600 dark:text-[#34d399]"></i>
               <span>Kelompok Belajar & Proyek</span>
             </button>
-            <button @click="currentTab = 'kalkulatorkimia'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'kalkulatorkimia' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
-              <i data-lucide="calculator" class="w-4 h-4 text-purple-400"></i>
+            <button @click="currentTab = 'kalkulatorkimia'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'kalkulatorkimia' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
+              <i data-lucide="calculator" class="w-4 h-4 text-purple-500 dark:text-purple-400"></i>
               <span>Kalkulator Cepat Kimia</span>
             </button>
-            <button @click="currentTab = 'pusatmateri'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'pusatmateri' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
-              <i data-lucide="tv" class="w-4 h-4 text-rose-400"></i>
+            <button @click="currentTab = 'pusatmateri'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'pusatmateri' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
+              <i data-lucide="tv" class="w-4 h-4 text-rose-500 dark:text-rose-400"></i>
               <span>Pusat Modul & Video Lab</span>
             </button>
-            <button @click="currentTab = 'quicklinks'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'quicklinks' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
-              <i data-lucide="link" class="w-4 h-4 text-cyan-400"></i>
+            <button @click="currentTab = 'quicklinks'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'quicklinks' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
+              <i data-lucide="link" class="w-4 h-4 text-cyan-500 dark:text-cyan-400"></i>
               <span>Quick Link</span>
             </button>
-            <button @click="currentTab = 'datasiswa'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'datasiswa' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
-              <i data-lucide="users" class="w-4 h-4 text-zinc-300"></i>
+            <button @click="currentTab = 'datasiswa'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'datasiswa' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
+              <i data-lucide="users" class="w-4 h-4 text-slate-500 dark:text-zinc-300"></i>
               <span>Data Siswa & Kelas</span>
             </button>
-            <button @click="currentTab = 'pengaturan'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'pengaturan' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 font-bold' : 'text-zinc-400 hover:text-white hover:bg-[#18181b]'">
-              <i data-lucide="settings" class="w-4 h-4 text-zinc-300"></i>
+            <button @click="currentTab = 'pengaturan'; mobileMenuOpen = false" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm" :class="currentTab === 'pengaturan' ? 'bg-violet-50 dark:bg-[#7c3aed]/20 text-violet-700 dark:text-[#a78bfa] border border-violet-200 dark:border-[#7c3aed]/40 font-bold' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b]'">
+              <i data-lucide="settings" class="w-4 h-4 text-slate-500 dark:text-zinc-300"></i>
               <span>Google Drive & Pengaturan</span>
             </button>
           </nav>
         </div>
 
-        <div class="text-xs text-zinc-500 text-center py-2 border-t border-[#27272a]">
+        <div class="text-xs text-slate-400 dark:text-zinc-500 text-center py-2 border-t border-slate-200 dark:border-[#27272a]">
           v7.0 • PortalKimia • Tito Vanzal, S.Pd.
         </div>
       </div>
@@ -6969,8 +7060,8 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
            ==================================================================== -->
       <div x-show="currentTab === 'dashboard'" class="space-y-6">
         
-        <!-- Welcome Hero Banner - Obsidian Precision -->
-        <div class="bg-gradient-to-r from-[#18181b] via-[#201933] to-[#121215] rounded-2xl p-5 sm:p-6 text-white border border-[#27272a] shadow-xl relative overflow-hidden">
+        <!-- Welcome Hero Banner - Dual Obsidian / Light Mode -->
+        <div class="bg-gradient-to-r from-violet-900 via-indigo-950 to-slate-900 dark:from-[#18181b] dark:via-[#201933] dark:to-[#121215] rounded-2xl p-5 sm:p-6 text-white border border-violet-800/30 dark:border-[#27272a] shadow-xl relative overflow-hidden">
           <div class="absolute -right-6 -bottom-6 w-40 h-40 bg-[#7c3aed]/10 rounded-full blur-2xl pointer-events-none"></div>
           <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -6981,7 +7072,7 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
                 <span x-text="new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })"></span>
               </div>
               <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight">Selamat Datang di <span class="text-white">Portal<span class="text-[#a78bfa]">Kimia</span></span>, <span x-text="guru.nama"></span>!</h2>
-              <p class="text-zinc-400 text-xs sm:text-sm mt-1 max-w-xl">
+              <p class="text-zinc-300 dark:text-zinc-400 text-xs sm:text-sm mt-1 max-w-xl">
                 Dashboard monitoring terpadu pembelajaran Kimia dan perwalian kelas <span class="font-bold text-[#a78bfa] underline" x-text="waliKelasFilter.kelas || guru.kelasWali"></span> (T.A. <span x-text="guru.tahunAjaran || '2026/2027'"></span>).
               </p>
             </div>
@@ -6996,7 +7087,7 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
                 <i data-lucide="refresh-cw" class="w-4 h-4 text-white"></i>
                 <span>Tarik Spreadsheet</span>
               </button>
-              <button @click="openModalPaste()" class="px-3.5 py-2 rounded-xl bg-[#18181b] text-zinc-300 hover:text-white hover:bg-[#27272a] text-xs font-bold border border-[#27272a] flex items-center space-x-1.5 transition">
+              <button @click="openModalPaste()" class="px-3.5 py-2 rounded-xl bg-white/10 dark:bg-[#18181b] text-zinc-200 dark:text-zinc-300 hover:text-white hover:bg-white/20 dark:hover:bg-[#27272a] text-xs font-bold border border-white/10 dark:border-[#27272a] flex items-center space-x-1.5 transition">
                 <i data-lucide="clipboard" class="w-4 h-4 text-indigo-400"></i>
                 <span>Paste dari Sheets</span>
               </button>
@@ -7023,9 +7114,28 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
               <div class="text-2xl font-black text-slate-900 dark:text-white">
                 <span x-text="getDashboardStats().hadirApel"></span><span class="text-xs text-slate-400 font-normal"> / <span x-text="getDashboardStats().totalWaliSiswa"></span> Siswa</span>
               </div>
-              <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 flex items-center space-x-1">
-                <i data-lucide="check-circle" class="w-3 h-3"></i>
-                <span>Kelas: <strong x-text="getDashboardStats().activeKelasWali"></strong></span>
+              <div class="mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
+                <template x-if="getDashboardStats().absenApel > 0">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-md font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/40">
+                    <i data-lucide="alert-circle" class="w-3 h-3 mr-1 inline"></i>
+                    <span x-text="getDashboardStats().absenApel"></span> Absen (S/I/A)
+                  </span>
+                </template>
+                <template x-if="getDashboardStats().telatApel > 0">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-md font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40">
+                    <i data-lucide="clock" class="w-3 h-3 mr-1 inline"></i>
+                    <span x-text="getDashboardStats().telatApel"></span> Terlambat
+                  </span>
+                </template>
+                <template x-if="getDashboardStats().absenApel === 0 && getDashboardStats().telatApel === 0 && getDashboardStats().hadirApel > 0">
+                  <span class="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-semibold">
+                    <i data-lucide="check-circle" class="w-3 h-3 mr-1 inline"></i>
+                    <span>Semua Hadir 100%</span>
+                  </span>
+                </template>
+              </div>
+              <div class="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-1">
+                <span>Kelas: <strong class="text-slate-600 dark:text-slate-300" x-text="getDashboardStats().activeKelasWali"></strong></span>
               </div>
             </div>
           </div>
