@@ -880,6 +880,9 @@ document.addEventListener('alpine:init', () => {
     imporJadwalPreview: [],    // [{ hari, jamKe, waktu, mapel, guru, kelas, tipeTugas, lantai }]
     geminiApiKey: '',
     showApiKeyInput: false,
+    isTestingGeminiApi: false,
+    geminiApiTestStatus: null, // 'success' | 'error' | null
+    geminiApiTestMessage: '',
     isScanningAi: false,
     scanAiProgress: '',
     scanAiFile: { name: '', size: '', base64: '', mimeType: '', previewUrl: '' },
@@ -1284,13 +1287,24 @@ document.addEventListener('alpine:init', () => {
             this.siswa = [];
           }
 
-          // DEDUPLIKASI KETAT PRESENSI WALI DARI LOCAL STORAGE
+          // DEDUPLIKASI KETAT PRESENSI WALI DARI LOCAL STORAGE (Data terbawah / terbaru selalu menang)
           if (parsed.presensiWali && Array.isArray(parsed.presensiWali)) {
             const presensiMap = new Map();
             parsed.presensiWali.forEach(p => {
-              const key = (p.tanggal || '') + '|||' + (p.sesi || '') + '|||' + (p.kelas || '') + '|||' + (p.namaSiswa || '').toLowerCase().trim();
-              if (p.namaSiswa && !presensiMap.has(key)) {
-                presensiMap.set(key, p);
+              const tgl = this.normalizeDateString(p.tanggal);
+              const nSesi = this.normalizeStr(p.sesi || '') || 'apelpagi';
+              const normSesi = nSesi.includes('family') ? 'familytime' : 'apelpagi';
+              const cleanName = this.normalizeStr(p.namaSiswa || p.nama || '');
+              const cleanId = this.normalizeStr(p.idSiswa || '');
+              const sIdent = cleanName || cleanId;
+              if (sIdent && tgl) {
+                const key = tgl + '|||' + normSesi + '|||' + sIdent;
+                presensiMap.set(key, {
+                  ...p,
+                  tanggal: tgl,
+                  sesi: p.sesi || (normSesi === 'familytime' ? 'Family Time' : 'Apel Pagi'),
+                  status: p.status || 'Hadir'
+                });
               }
             });
             this.presensiWali = Array.from(presensiMap.values());
@@ -1434,15 +1448,43 @@ document.addEventListener('alpine:init', () => {
       return String(s || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
     },
 
+    normalizeDateString(d) {
+      if (!d) return '';
+      const s = String(d).split('T')[0].trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      const parts = s.split(/[\/\-\.]/);
+      if (parts.length === 3) {
+        if (parts[0].length === 4) {
+          return parts[0] + '-' + parts[1].padStart(2, '0') + '-' + parts[2].padStart(2, '0');
+        }
+        if (parts[2].length === 4) {
+          return parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+        }
+      }
+      return s;
+    },
+
+    isSameDate(d1, d2) {
+      if (!d1 || !d2) return false;
+      return this.normalizeDateString(d1) === this.normalizeDateString(d2);
+    },
+
     isSameStudent(s1, s2) {
       if (!s1 || !s2) return false;
-      const id1 = s1.idSiswa || s1.id;
-      const id2 = s2.idSiswa || s2.id;
+      const id1 = String(s1.idSiswa || s1.id || '').trim().toLowerCase();
+      const id2 = String(s2.idSiswa || s2.id || '').trim().toLowerCase();
       if (id1 && id2 && id1 === id2) return true;
-      if (s1.nisn && s2.nisn && s1.nisn === s2.nisn && s1.nisn.length > 3) return true;
+      const nisn1 = String(s1.nisn || '').trim();
+      const nisn2 = String(s2.nisn || '').trim();
+      if (nisn1 && nisn2 && nisn1 === nisn2 && nisn1.length > 3) return true;
       const n1 = this.normalizeStr(s1.namaSiswa || s1.nama);
       const n2 = this.normalizeStr(s2.namaSiswa || s2.nama);
-      return n1 && n2 && (n1 === n2 || n1.includes(n2) || n2.includes(n1));
+      if (!n1 || !n2) return false;
+      if (n1 === n2) return true;
+      if ((n1.includes(n2) || n2.includes(n1)) && Math.min(n1.length, n2.length) >= 5) {
+        return true;
+      }
+      return false;
     },
 
     isSameTask(t1, t2) {
@@ -1662,34 +1704,46 @@ document.addEventListener('alpine:init', () => {
         this.jurnalKimia = data.jurnalKimia;
       }
       if (data.presensiWali && Array.isArray(data.presensiWali)) {
-        const normDate = (d) => String(d || '').split('T')[0].trim();
-        const normStr = (s) => String(s || '').trim().toLowerCase();
+        const normDate = (d) => this.normalizeDateString(d);
+        const normStr = (s) => this.normalizeStr(s);
         const presensiMap = new Map();
 
-        // 1. Muat data dari cloud spreadsheet (cloud adalah source of truth untuk sinkronisasi antar perangkat)
+        // 1. Muat data dari cloud spreadsheet (data terbawah / input terbaru selalu menimpa entri lama)
         data.presensiWali.forEach(p => {
-          const sName = normStr(p.namaSiswa || p.nama);
-          const sId = normStr(p.idSiswa);
-          const sIdent = sId || sName;
-          const key = normDate(p.tanggal) + '|||' + normStr(p.sesi || 'Apel Pagi') + '|||' + normStr(p.kelas) + '|||' + sIdent;
-          if (sIdent) {
+          const tgl = normDate(p.tanggal);
+          const nSesi = normStr(p.sesi || '') || 'apelpagi';
+          const normSesi = nSesi.includes('family') ? 'familytime' : 'apelpagi';
+          
+          const matchedSiswa = this.siswa.find(s => this.isSameStudent(s, p));
+          const sIdent = matchedSiswa ? normStr(matchedSiswa.nama) : (normStr(p.namaSiswa || p.nama) || normStr(p.idSiswa));
+          
+          if (sIdent && tgl) {
+            const key = tgl + '|||' + normSesi + '|||' + sIdent;
             presensiMap.set(key, {
               ...p,
-              tanggal: normDate(p.tanggal),
-              sesi: p.sesi || 'Apel Pagi',
-              status: p.status || 'Hadir'
+              tanggal: tgl,
+              sesi: p.sesi || (normSesi === 'familytime' ? 'Family Time' : 'Apel Pagi'),
+              status: p.status || 'Hadir',
+              namaSiswa: matchedSiswa ? matchedSiswa.nama : (p.namaSiswa || p.nama),
+              idSiswa: matchedSiswa ? matchedSiswa.id : (p.idSiswa || ''),
+              kelas: (matchedSiswa ? matchedSiswa.kelas : p.kelas) || 'X3 Atlet'
             });
           }
         });
 
-        // 2. Pertahankan entri lokal yang belum sempat tersinkron
+        // 2. Pertahankan entri lokal HANYA jika siswa tersebut belum ada sama sekali di cloud pada tanggal & sesi tersebut
         this.presensiWali.forEach(p => {
-          const sName = normStr(p.namaSiswa || p.nama);
-          const sId = normStr(p.idSiswa);
-          const sIdent = sId || sName;
-          const key = normDate(p.tanggal) + '|||' + normStr(p.sesi || 'Apel Pagi') + '|||' + normStr(p.kelas) + '|||' + sIdent;
-          if (sIdent && !presensiMap.has(key)) {
-            presensiMap.set(key, p);
+          const tgl = normDate(p.tanggal);
+          const nSesi = normStr(p.sesi || '') || 'apelpagi';
+          const normSesi = nSesi.includes('family') ? 'familytime' : 'apelpagi';
+          const matchedSiswa = this.siswa.find(s => this.isSameStudent(s, p));
+          const sIdent = matchedSiswa ? normStr(matchedSiswa.nama) : (normStr(p.namaSiswa || p.nama) || normStr(p.idSiswa));
+          
+          if (sIdent && tgl) {
+            const key = tgl + '|||' + normSesi + '|||' + sIdent;
+            if (!presensiMap.has(key)) {
+              presensiMap.set(key, p);
+            }
           }
         });
 
@@ -1902,27 +1956,22 @@ document.addEventListener('alpine:init', () => {
     // =========================================================================
     getDashboardStats() {
       const activeWaliKelas = (this.waliKelasFilter.kelas || this.guru.kelasWali || 'X3 Atlet').trim();
-      const waliSiswa = this.siswa.filter(s => s.kelas && s.kelas.trim().toLowerCase() === activeWaliKelas.toLowerCase());
-      const today = this.waliKelasFilter.tanggal || this.getTodayDateString();
-      
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => {
-        if (!d1 || !d2) return false;
-        return normalizeDate(d1) === normalizeDate(d2);
-      };
+      const waliSiswa = this.siswa.filter(s => s.kelas && this.isSameClass(s.kelas, activeWaliKelas));
+      const today = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
 
       let hadirApel = 0;
       let absenApel = 0;
       let telatApel = 0;
 
       waliSiswa.forEach(s => {
-        const found = this.presensiWali.slice().reverse().find(p => 
-          isDateMatch(p.tanggal, today) &&
-          String(p.sesi || 'Apel Pagi').trim().toLowerCase() === 'apel pagi' &&
-          String(p.kelas || '').trim().toLowerCase() === activeWaliKelas.toLowerCase() &&
-          ((p.idSiswa && s.id && String(p.idSiswa).trim() === String(s.id).trim()) || 
-           (p.namaSiswa && s.nama && String(p.namaSiswa).trim().toLowerCase() === String(s.nama).trim().toLowerCase()))
-        );
+        const found = this.presensiWali.slice().reverse().find(p => {
+          if (!this.isSameDate(p.tanggal, today)) return false;
+          const nSesi = this.normalizeStr(p.sesi || '') || 'apelpagi';
+          if (nSesi.includes('family')) return false; // Bukan Apel Pagi
+          if (p.kelas && !this.isSameClass(p.kelas, activeWaliKelas)) return false;
+          return this.isSameStudent(s, p);
+        });
+
         if (found) {
           const st = String(found.status || '').trim();
           if (['Hadir', 'Tahfidz', 'PTV', 'Organtri'].includes(st)) {
@@ -1937,13 +1986,14 @@ document.addEventListener('alpine:init', () => {
 
       let hadirFamily = 0;
       waliSiswa.forEach(s => {
-        const found = this.presensiWali.slice().reverse().find(p => 
-          isDateMatch(p.tanggal, today) &&
-          String(p.sesi || '').trim().toLowerCase() === 'family time' &&
-          String(p.kelas || '').trim().toLowerCase() === activeWaliKelas.toLowerCase() &&
-          ((p.idSiswa && s.id && String(p.idSiswa).trim() === String(s.id).trim()) || 
-           (p.namaSiswa && s.nama && String(p.namaSiswa).trim().toLowerCase() === String(s.nama).trim().toLowerCase()))
-        );
+        const found = this.presensiWali.slice().reverse().find(p => {
+          if (!this.isSameDate(p.tanggal, today)) return false;
+          const nSesi = this.normalizeStr(p.sesi || '');
+          if (!nSesi.includes('family')) return false; // Bukan Family Time
+          if (p.kelas && !this.isSameClass(p.kelas, activeWaliKelas)) return false;
+          return this.isSameStudent(s, p);
+        });
+
         if (found) {
           const st = String(found.status || '').trim();
           if (['Hadir', 'Tahfidz', 'PTV', 'Organtri', 'Terlambat'].includes(st)) {
@@ -1985,21 +2035,21 @@ document.addEventListener('alpine:init', () => {
 
     getSiswaWaliPresensiList() {
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
+      const isFamily = this.normalizeStr(sesi).includes('family');
 
-      const siswaKelas = this.siswa.filter(s => s.kelas && s.kelas.trim().toLowerCase() === kelas.toLowerCase());
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
+      const siswaKelas = this.siswa.filter(s => s.kelas && this.isSameClass(s.kelas, kelas));
 
       return siswaKelas.map(s => {
-        const found = this.presensiWali.slice().reverse().find(p => 
-          ((p.idSiswa && s.id && String(p.idSiswa).trim() === String(s.id).trim()) || 
-           (p.namaSiswa && s.nama && String(p.namaSiswa).trim().toLowerCase() === String(s.nama).trim().toLowerCase())) && 
-          isDateMatch(p.tanggal, tgl) && 
-          String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-          String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
-        );
+        const found = this.presensiWali.slice().reverse().find(p => {
+          if (!this.isSameDate(p.tanggal, tgl)) return false;
+          const nSesi = this.normalizeStr(p.sesi || '') || 'apelpagi';
+          const pIsFamily = nSesi.includes('family');
+          if (isFamily !== pIsFamily) return false;
+          if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+          return this.isSameStudent(s, p);
+        });
         return {
           idSiswa: s.id,
           nisn: s.nisn,
@@ -2015,27 +2065,27 @@ document.addEventListener('alpine:init', () => {
     },
 
     setWaliStatus(idSiswa, status) {
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
+      const isFamily = this.normalizeStr(sesi).includes('family');
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
       const s = this.siswa.find(x => x.id === idSiswa);
       const namaSiswa = s ? s.nama : '';
 
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
-
-      let existingIndex = this.presensiWali.findIndex(p => 
-        ((p.idSiswa && idSiswa && String(p.idSiswa).trim() === String(idSiswa).trim()) || 
-         (p.namaSiswa && namaSiswa && String(p.namaSiswa).trim().toLowerCase() === String(namaSiswa).trim().toLowerCase())) && 
-        isDateMatch(p.tanggal, tgl) && 
-        String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-        String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
-      );
+      let existingIndex = this.presensiWali.findIndex(p => {
+        if (!this.isSameDate(p.tanggal, tgl)) return false;
+        const pIsFamily = this.normalizeStr(p.sesi || '').includes('family');
+        if (isFamily !== pIsFamily) return false;
+        if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+        return this.isSameStudent({ id: idSiswa, nama: namaSiswa }, p);
+      });
       
       if (existingIndex >= 0) {
         this.presensiWali[existingIndex].status = status;
         this.presensiWali[existingIndex].idSiswa = idSiswa;
         this.presensiWali[existingIndex].namaSiswa = namaSiswa;
+        this.presensiWali[existingIndex].kelas = kelas;
+        this.presensiWali[existingIndex].tanggal = tgl;
       } else {
         this.presensiWali.push({
           id: 'PW-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000),
@@ -2055,25 +2105,25 @@ document.addEventListener('alpine:init', () => {
     },
 
     updateWaliKeterangan(idSiswa, keterangan) {
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
+      const isFamily = this.normalizeStr(sesi).includes('family');
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
       const s = this.siswa.find(x => x.id === idSiswa);
       const namaSiswa = s ? s.nama : '';
 
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
-
-      let existingIndex = this.presensiWali.findIndex(p => 
-        ((p.idSiswa && idSiswa && String(p.idSiswa).trim() === String(idSiswa).trim()) || 
-         (p.namaSiswa && namaSiswa && String(p.namaSiswa).trim().toLowerCase() === String(namaSiswa).trim().toLowerCase())) && 
-        isDateMatch(p.tanggal, tgl) && 
-        String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-        String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
-      );
+      let existingIndex = this.presensiWali.findIndex(p => {
+        if (!this.isSameDate(p.tanggal, tgl)) return false;
+        const pIsFamily = this.normalizeStr(p.sesi || '').includes('family');
+        if (isFamily !== pIsFamily) return false;
+        if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+        return this.isSameStudent({ id: idSiswa, nama: namaSiswa }, p);
+      });
 
       if (existingIndex >= 0) {
         this.presensiWali[existingIndex].keterangan = keterangan;
+        this.presensiWali[existingIndex].kelas = kelas;
+        this.presensiWali[existingIndex].tanggal = tgl;
       } else {
         this.presensiWali.push({
           id: 'PW-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000),
@@ -2091,29 +2141,29 @@ document.addEventListener('alpine:init', () => {
     },
 
     markAllWaliPresent() {
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
+      const isFamily = this.normalizeStr(sesi).includes('family');
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
-      const siswaKelas = this.siswa.filter(s => s.kelas && s.kelas.trim().toLowerCase() === kelas.toLowerCase());
+      const siswaKelas = this.siswa.filter(s => s.kelas && this.isSameClass(s.kelas, kelas));
 
       if (siswaKelas.length === 0) {
         this.showToast(`Belum ada siswa di kelas ${kelas}. Silakan tarik data spreadsheet atau tambah siswa.`, 'info');
         return;
       }
 
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
-
       siswaKelas.forEach(s => {
-        let existing = this.presensiWali.find(p => 
-          ((p.idSiswa && s.id && String(p.idSiswa).trim() === String(s.id).trim()) || 
-           (p.namaSiswa && s.nama && String(p.namaSiswa).trim().toLowerCase() === String(s.nama).trim().toLowerCase())) && 
-          isDateMatch(p.tanggal, tgl) && 
-          String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-          String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
-        );
+        let existing = this.presensiWali.find(p => {
+          if (!this.isSameDate(p.tanggal, tgl)) return false;
+          const pIsFamily = this.normalizeStr(p.sesi || '').includes('family');
+          if (isFamily !== pIsFamily) return false;
+          if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+          return this.isSameStudent(s, p);
+        });
         if (existing) {
           existing.status = 'Hadir';
+          existing.kelas = kelas;
+          existing.tanggal = tgl;
         } else {
           this.presensiWali.push({
             id: 'PW-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000),
@@ -2135,15 +2185,13 @@ document.addEventListener('alpine:init', () => {
     },
 
     copyStatusFromApelPagi() {
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
 
       const apelRecords = this.presensiWali.filter(p => 
-        isDateMatch(p.tanggal, tgl) && 
-        String(p.sesi || 'Apel Pagi').trim().toLowerCase() === 'apel pagi' && 
-        String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
+        this.isSameDate(p.tanggal, tgl) && 
+        !this.normalizeStr(p.sesi || '').includes('family') && 
+        (!p.kelas || this.isSameClass(p.kelas, kelas))
       );
 
       if (apelRecords.length === 0) {
@@ -2152,13 +2200,14 @@ document.addEventListener('alpine:init', () => {
       }
 
       apelRecords.forEach(ar => {
-        let existingIndex = this.presensiWali.findIndex(p => 
-          ((p.idSiswa && ar.idSiswa && String(p.idSiswa).trim() === String(ar.idSiswa).trim()) || 
-           (p.namaSiswa && ar.namaSiswa && String(p.namaSiswa).trim().toLowerCase() === String(ar.namaSiswa).trim().toLowerCase())) && 
-          isDateMatch(p.tanggal, tgl) && 
-          String(p.sesi || '').trim().toLowerCase() === 'family time' && 
-          String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
-        );
+        let existingIndex = this.presensiWali.findIndex(p => {
+          if (!this.isSameDate(p.tanggal, tgl)) return false;
+          const pIsFamily = this.normalizeStr(p.sesi || '').includes('family');
+          if (!pIsFamily) return false;
+          if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+          return this.isSameStudent({ id: ar.idSiswa, nama: ar.namaSiswa }, p);
+        });
+
         if (existingIndex >= 0) {
           this.presensiWali[existingIndex].status = ar.status;
           this.presensiWali[existingIndex].keterangan = ar.keterangan;
@@ -2183,16 +2232,15 @@ document.addEventListener('alpine:init', () => {
     },
 
     saveAndSyncWaliPresensi() {
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
+      const isFamily = this.normalizeStr(sesi).includes('family');
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => normalizeDate(d1) === normalizeDate(d2);
 
       const currentList = this.presensiWali.filter(p => 
-        isDateMatch(p.tanggal, tgl) && 
-        String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-        String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase()
+        this.isSameDate(p.tanggal, tgl) && 
+        (this.normalizeStr(p.sesi || '').includes('family') === isFamily) && 
+        (!p.kelas || this.isSameClass(p.kelas, kelas))
       );
 
       if (currentList.length === 0) {
@@ -2207,27 +2255,23 @@ document.addEventListener('alpine:init', () => {
 
     getWaliRecapStats() {
       const kelas = (this.waliKelasFilter.kelas || 'X3 Atlet').trim();
-      const tgl = this.waliKelasFilter.tanggal || this.getTodayDateString();
+      const tgl = this.normalizeDateString(this.waliKelasFilter.tanggal || this.getTodayDateString());
       const sesi = (this.waliKelasFilter.sesi || 'Apel Pagi').trim();
-      const siswaKelas = this.siswa.filter(s => s.kelas && s.kelas.trim().toLowerCase() === kelas.toLowerCase());
+      const isFamily = this.normalizeStr(sesi).includes('family');
+      const siswaKelas = this.siswa.filter(s => s.kelas && this.isSameClass(s.kelas, kelas));
       const total = siswaKelas.length;
-      
-      const normalizeDate = (d) => String(d || '').split('T')[0].trim();
-      const isDateMatch = (d1, d2) => {
-        if (!d1 || !d2) return false;
-        return normalizeDate(d1) === normalizeDate(d2);
-      };
 
       let hadir = 0, sakit = 0, izin = 0, tahfidz = 0, ptv = 0, organtri = 0, dirumah = 0, telat = 0, tanpaket = 0, belum = 0;
 
       siswaKelas.forEach(s => {
-        const found = this.presensiWali.slice().reverse().find(p => 
-          isDateMatch(p.tanggal, tgl) && 
-          String(p.sesi || 'Apel Pagi').trim().toLowerCase() === sesi.toLowerCase() && 
-          String(p.kelas || '').trim().toLowerCase() === kelas.toLowerCase() &&
-          ((p.idSiswa && s.id && String(p.idSiswa).trim() === String(s.id).trim()) || 
-           (p.namaSiswa && s.nama && String(p.namaSiswa).trim().toLowerCase() === String(s.nama).trim().toLowerCase()))
-        );
+        const found = this.presensiWali.slice().reverse().find(p => {
+          if (!this.isSameDate(p.tanggal, tgl)) return false;
+          const nSesi = this.normalizeStr(p.sesi || '') || 'apelpagi';
+          const pIsFamily = nSesi.includes('family');
+          if (isFamily !== pIsFamily) return false;
+          if (p.kelas && !this.isSameClass(p.kelas, kelas)) return false;
+          return this.isSameStudent(s, p);
+        });
         const st = found ? String(found.status || '').trim() : 'Belum Presensi';
         if (st === 'Hadir') hadir++;
         else if (st === 'Sakit') sakit++;
@@ -3477,6 +3521,90 @@ document.addEventListener('alpine:init', () => {
       this.showToast('Kunci Gemini API berhasil disimpan!', 'success');
     },
 
+    async testGeminiApiConnection() {
+      let apiKey = (this.geminiApiKey || '').trim();
+      
+      // Jika belum ada di state lokal, coba tarik otomatis dari Code.gs
+      if (!apiKey && this.gasWebAppUrl) {
+        try {
+          this.isTestingGeminiApi = true;
+          this.geminiApiTestMessage = 'Memeriksa kunci API dari server Spreadsheet...';
+          const cleanUrl = this.gasWebAppUrl.trim().replace(/\/+$/, '');
+          const configRes = await fetch(cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + 'action=getGeminiConfig&_t=' + new Date().getTime());
+          const configJson = await configRes.json();
+          if (configJson && configJson.data && configJson.data.geminiApiKey) {
+            apiKey = configJson.data.geminiApiKey.trim();
+            this.geminiApiKey = apiKey;
+            localStorage.setItem('LMS_GEMINI_API_KEY', apiKey);
+          }
+        } catch (e) {
+          console.warn('Gagal cek config dari gasWebAppUrl:', e);
+        }
+      }
+
+      if (!apiKey) {
+        this.isTestingGeminiApi = false;
+        this.geminiApiTestStatus = 'error';
+        this.geminiApiTestMessage = 'API Key belum diatur! Masukkan API Key di kotak bawah atau isi di Code.gs.';
+        this.showToast('Kunci Gemini API belum diisi!', 'error');
+        this.showApiKeyInput = true;
+        return;
+      }
+
+      this.isTestingGeminiApi = true;
+      this.geminiApiTestStatus = null;
+      this.geminiApiTestMessage = 'Menghubungi server Google Gemini AI...';
+
+      // Prioritas model resmi yang terverifikasi aktif untuk Vision & Multimodal
+      const models = ['gemini-3.5-flash', 'gemini-flash-lite-latest', 'gemini-flash-latest'];
+      let lastError = null;
+      let connectedModel = null;
+      const startTime = Date.now();
+
+      for (const model of models) {
+        try {
+          this.geminiApiTestMessage = `Menguji respon model ${model}...`;
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: "Ping test connection. Balas satu kata: SIAP" }] }]
+            })
+          });
+
+          if (!response.ok) {
+            const errBody = await response.json().catch(() => ({}));
+            throw new Error(errBody.error?.message || `HTTP ${response.status} ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (reply) {
+            connectedModel = model;
+            break;
+          }
+        } catch (err) {
+          lastError = err;
+          console.warn(`Pengujian model ${model} gagal:`, err);
+        }
+      }
+
+      const elapsed = Date.now() - startTime;
+      this.isTestingGeminiApi = false;
+
+      if (connectedModel) {
+        this.geminiApiTestStatus = 'success';
+        this.geminiApiTestMessage = `Koneksi Berhasil! Model aktif: ${connectedModel} (${elapsed}ms) • Siap memindai PDF & Foto Jadwal!`;
+        this.showToast(`🎉 Koneksi AI Gemini Sukses! (${connectedModel})`, 'success');
+      } else {
+        this.geminiApiTestStatus = 'error';
+        const msg = (lastError && lastError.message) || 'Tidak dapat terhubung ke Google AI';
+        this.geminiApiTestMessage = `Gagal terkoneksi ke AI Gemini: ${msg}`;
+        this.showToast(`Gagal koneksi AI: ${msg}`, 'error');
+      }
+    },
+
     handleScheduleMediaUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -3626,7 +3754,7 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
 ]`;
 
       try {
-        const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        const models = ['gemini-3.5-flash', 'gemini-flash-lite-latest', 'gemini-flash-latest'];
         let resultData = null;
         let lastError = null;
 
@@ -12050,10 +12178,37 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
                     </div>
 
                     <div class="flex items-center space-x-2 shrink-0">
+                      <!-- Tombol Tes Koneksi AI -->
+                      <button type="button" @click="testGeminiApiConnection()" :disabled="isTestingGeminiApi"
+                              class="px-3 py-1 rounded-xl text-xs font-bold border transition flex items-center space-x-1.5 shadow-xs disabled:opacity-50"
+                              :class="geminiApiTestStatus === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600' : (geminiApiTestStatus === 'error' ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-600' : 'bg-teal-600 hover:bg-teal-700 text-white border-teal-600')">
+                        <template x-if="isTestingGeminiApi">
+                          <span class="inline-flex items-center space-x-1">
+                            <i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i>
+                            <span>Menguji...</span>
+                          </span>
+                        </template>
+                        <template x-if="!isTestingGeminiApi">
+                          <span class="inline-flex items-center space-x-1">
+                            <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+                            <span>⚡ Tes Koneksi AI</span>
+                          </span>
+                        </template>
+                      </button>
+
                       <button type="button" @click="showApiKeyInput = !showApiKeyInput"
                               class="px-3 py-1 rounded-xl text-xs font-bold border transition bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
                         <span x-text="showApiKeyInput ? 'Tutup' : (geminiApiKey ? '⚙️ Kelola Kunci' : '⚙️ Atur Kunci')"></span>
                       </button>
+                    </div>
+                  </div>
+
+                  <!-- Alert Hasil Tes Koneksi AI -->
+                  <div x-show="geminiApiTestMessage" class="mt-2.5 p-2.5 rounded-xl border text-xs flex items-start space-x-2 transition"
+                       :class="geminiApiTestStatus === 'success' ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200' : (geminiApiTestStatus === 'error' ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200' : 'bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-200')">
+                    <span class="text-sm shrink-0" x-text="geminiApiTestStatus === 'success' ? '✅' : (geminiApiTestStatus === 'error' ? '❌' : '⏳')"></span>
+                    <div class="flex-1">
+                      <p class="font-bold" x-text="geminiApiTestMessage"></p>
                     </div>
                   </div>
 
@@ -12073,11 +12228,16 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
                                 class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition shrink-0">
                           Simpan Lokal
                         </button>
+                        <button type="button" @click="testGeminiApiConnection()" :disabled="isTestingGeminiApi"
+                                class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shrink-0 flex items-center space-x-1 disabled:opacity-50">
+                          <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                          <span>Tes Kunci</span>
+                        </button>
                       </div>
                     </div>
 
                     <div class="flex flex-wrap items-center justify-between gap-1 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
-                      <span>Google Gemini API 100% Gratis dari Google AI Studio.</span>
+                      <span>✨ Model Vision: <strong>Gemini 3.5 Flash</strong> & <strong>Gemini Flash Latest</strong> (Versi 1.5 telah dipensiunkan oleh Google).</span>
                       <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer"
                          class="text-teal-600 dark:text-teal-400 font-bold hover:underline inline-flex items-center space-x-1">
                         <span>Dapatkan API Key Gratis di Google AI Studio</span>
