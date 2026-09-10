@@ -13,19 +13,11 @@
   <meta name="apple-mobile-web-app-title" content="PortalKimia">
   <link rel="manifest" href="manifest.json">
   
-  <!-- Favicon & PWA Icons PortalKimia -->
-  <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
-
   <!-- Google Fonts: Geist & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
-  <!-- Konfigurasi Terpusat Multi-Device -->
-  <script src="../config.js"></script>
-
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -840,6 +832,25 @@ document.addEventListener('alpine:init', () => {
     modalSettingJamOpen: false,
     settingJamHari: 'Senin',
 
+    // IMPOR JADWAL aSc TIMETABLES & AI VISION SCANNER STATE
+    modalImporJadwalOpen: false,
+    formImporJadwal: {
+      target: 'mengajar',      // 'mengajar' | 'kelas'
+      targetKelas: 'X3 Atlet', // kelas target saat target === 'kelas'
+      inputMode: 'ai',         // 'ai' | 'paste' | 'file' | 'preset'
+      rawText: '',
+      fileName: '',
+      replaceAll: true
+    },
+    imporJadwalStep: 'input',  // 'input' | 'preview'
+    imporJadwalPreview: [],    // [{ hari, jamKe, waktu, mapel, guru, kelas, tipeTugas, lantai }]
+    geminiApiKey: '',
+    showApiKeyInput: false,
+    isScanningAi: false,
+    scanAiProgress: '',
+    scanAiFile: { name: '', size: '', base64: '', mimeType: '', previewUrl: '' },
+    scanAiError: '',
+
     // KALKULATOR CEPAT KIMIA STATE
     chemTab: 'molar', // 'molar' | 'koligatif' | 'stoikiometri' | 'ph'
     calcMr: { formula: 'H2SO4', result: null },
@@ -1056,13 +1067,14 @@ document.addEventListener('alpine:init', () => {
         }
       }
 
-      if (!this.jamPelajaran || Object.keys(this.jamPelajaran).length === 0 || !this.jamPelajaran['Senin'] || this.jamPelajaran['Senin'].length < 11 || this.jamPelajaran['Senin'][0].label !== 'Apel Pagi') {
+      if (!this.jamPelajaran || Object.keys(this.jamPelajaran).length === 0 || !this.jamPelajaran['Senin'] || this.jamPelajaran['Senin'].length < 11 || this.jamPelajaran['Senin'][0].label !== 'Morning Roll Call') {
         this.jamPelajaran = this.getDefaultJamPelajaran();
         this.saveLocalData();
       }
       const todayName = this.getCurrentDayName();
       this.jadwalKelasHariFilter = todayName !== 'Minggu' ? todayName : 'Senin';
       this.jadwalMengajarHariFilter = todayName !== 'Minggu' ? todayName : 'Senin';
+      this.geminiApiKey = localStorage.getItem('LMS_GEMINI_API_KEY') || '';
 
       // Auto-load most recent active group project if available
       if (!this.activeDraftProject && this.kelompokProyek && this.kelompokProyek.length > 0) {
@@ -1273,7 +1285,7 @@ document.addEventListener('alpine:init', () => {
           this.jadwalMengajar = parsed.jadwalMengajar || [];
           this.mediaPembelajaran = (parsed.mediaPembelajaran && parsed.mediaPembelajaran.length > 0) ? parsed.mediaPembelajaran : this.getDefaultMediaPembelajaran();
 
-          this.gasWebAppUrl = window.PORTALKIMIA_CONFIG?.LMS_API || this.guru.gasWebAppUrl || '';
+          this.gasWebAppUrl = this.guru.gasWebAppUrl || '';
           
           if (this.kelasList.length > 0) {
             this.waliKelasFilter.kelas = this.guru.kelasWali || this.kelasList[0].nama;
@@ -1305,7 +1317,7 @@ document.addEventListener('alpine:init', () => {
         this.kelompokProyek = [];
         this.quickLinks = JSON.parse(JSON.stringify(window.DEFAULT_SAMPLE_DATA.quickLinks || []));
         this.mediaPembelajaran = this.getDefaultMediaPembelajaran();
-        this.gasWebAppUrl = window.PORTALKIMIA_CONFIG?.LMS_API || this.guru.gasWebAppUrl || '';
+        this.gasWebAppUrl = this.guru.gasWebAppUrl || '';
         this.waliKelasFilter.kelas = 'X3 Atlet';
         this.nilaiFilter.kelas = 'X3 Atlet';
         this.bintangFilter.kelas = 'X3 Atlet';
@@ -1456,6 +1468,11 @@ document.addEventListener('alpine:init', () => {
         this.guru.nama = "Tito Vanzal, S.Pd.";
         this.guru.sekolah = "SMA Progresif Bumi Shalawat";
         this.guru.kelasWali = data.guru.kelasWali || "X3 Atlet";
+      }
+
+      if (data.geminiApiKey && String(data.geminiApiKey).trim() !== '') {
+        this.geminiApiKey = String(data.geminiApiKey).trim();
+        localStorage.setItem('LMS_GEMINI_API_KEY', this.geminiApiKey);
       }
 
       if (data.siswa && Array.isArray(data.siswa) && data.siswa.length > 0) {
@@ -3067,32 +3084,35 @@ document.addEventListener('alpine:init', () => {
     // =========================================================================
     getDefaultJamPelajaran() {
       const senKam = [
-        { type: 'kegiatan', label: 'Apel Pagi', mulai: '06:40', selesai: '07:00' },
+        { type: 'kegiatan', label: 'Morning Roll Call', mulai: '06:45', selesai: '07:00' },
         { type: 'pelajaran', jam: 1, mulai: '07:00', selesai: '07:40' },
         { type: 'pelajaran', jam: 2, mulai: '07:40', selesai: '08:20' },
         { type: 'pelajaran', jam: 3, mulai: '08:20', selesai: '09:00' },
         { type: 'pelajaran', jam: 4, mulai: '09:00', selesai: '09:40' },
-        { type: 'istirahat', label: 'Istirahat', mulai: '09:40', selesai: '10:00' },
+        { type: 'istirahat', label: 'Break (R)', mulai: '09:40', selesai: '10:00' },
         { type: 'pelajaran', jam: 5, mulai: '10:00', selesai: '10:40' },
         { type: 'pelajaran', jam: 6, mulai: '10:40', selesai: '11:20' },
         { type: 'pelajaran', jam: 7, mulai: '11:20', selesai: '12:00' },
         { type: 'pelajaran', jam: 8, mulai: '12:00', selesai: '12:30' },
         { type: 'kegiatan', label: 'Family Time', mulai: '12:30', selesai: '12:45' },
+        { type: 'kegiatan', label: 'Jamaah Duhur', mulai: '12:45', selesai: '13:05' }
       ];
       const jumat = [
-        { type: 'kegiatan', label: 'Apel Pagi', mulai: '06:40', selesai: '07:00' },
+        { type: 'kegiatan', label: 'Morning Roll Call', mulai: '06:45', selesai: '07:00' },
         { type: 'pelajaran', jam: 1, mulai: '07:00', selesai: '07:40' },
         { type: 'pelajaran', jam: 2, mulai: '07:40', selesai: '08:20' },
         { type: 'pelajaran', jam: 3, mulai: '08:20', selesai: '09:00' },
         { type: 'pelajaran', jam: 4, mulai: '09:00', selesai: '09:40' },
-        { type: 'kegiatan', label: 'Family Time', mulai: '09:40', selesai: '09:55' },
+        { type: 'istirahat', label: 'Break (R)', mulai: '09:40', selesai: '10:00' },
+        { type: 'kegiatan', label: 'Sholat Jumat', mulai: '11:30', selesai: '12:30' }
       ];
       const sabtu = [
-        { type: 'kegiatan', label: 'Apel Pagi', mulai: '07:30', selesai: '07:40' },
-        { type: 'pelajaran', jam: 1, mulai: '07:40', selesai: '08:20' },
-        { type: 'pelajaran', jam: 2, mulai: '08:20', selesai: '09:00' },
-        { type: 'pelajaran', jam: 3, mulai: '09:00', selesai: '09:40' },
-        { type: 'pelajaran', jam: 4, mulai: '09:40', selesai: '10:20' },
+        { type: 'kegiatan', label: 'Morning Roll Call', mulai: '06:45', selesai: '07:00' },
+        { type: 'pelajaran', jam: 1, mulai: '07:00', selesai: '07:40' },
+        { type: 'pelajaran', jam: 2, mulai: '07:40', selesai: '08:20' },
+        { type: 'pelajaran', jam: 3, mulai: '08:20', selesai: '09:00' },
+        { type: 'pelajaran', jam: 4, mulai: '09:00', selesai: '09:40' },
+        { type: 'istirahat', label: 'Break (R)', mulai: '09:40', selesai: '10:00' }
       ];
       return {
         'Senin': JSON.parse(JSON.stringify(senKam)),
@@ -3339,6 +3359,756 @@ document.addEventListener('alpine:init', () => {
 
     countJadwalMengajarForDay(hari) {
       return this.jadwalMengajar.filter(j => j.hari === hari).length;
+    },
+
+    // =========================================================================
+    // 4A-2. aSc TIMETABLES IMPORT ENGINE (JADWAL GURU & JADWAL KELAS)
+    // =========================================================================
+    openModalImporJadwal(target) {
+      this.formImporJadwal.target = target || 'mengajar';
+      this.formImporJadwal.targetKelas = this.waliKelasFilter?.kelas || this.guru?.kelasWali || 'X3 Atlet';
+      this.formImporJadwal.inputMode = 'ai';
+      this.formImporJadwal.rawText = '';
+      this.formImporJadwal.fileName = '';
+      this.formImporJadwal.replaceAll = true;
+      this.isScanningAi = false;
+      this.scanAiProgress = '';
+      this.scanAiError = '';
+      this.scanAiFile = { name: '', size: '', base64: '', mimeType: '', previewUrl: '' };
+      this.imporJadwalStep = 'input';
+      this.imporJadwalPreview = [];
+      this.modalImporJadwalOpen = true;
+      this.$nextTick(() => this.initLucideIcons());
+    },
+
+    saveGeminiApiKey(key) {
+      if (key !== undefined) {
+        this.geminiApiKey = key.trim();
+      }
+      localStorage.setItem('LMS_GEMINI_API_KEY', this.geminiApiKey);
+      this.showApiKeyInput = false;
+      this.showToast('Kunci Gemini API berhasil disimpan!', 'success');
+    },
+
+    handleScheduleMediaUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const fileName = file.name.toLowerCase();
+      const isPdf = file.type === 'application/pdf' || fileName.endsWith('.pdf');
+      const isImg = file.type.startsWith('image/') || fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.webp');
+
+      if (!isPdf && !isImg) {
+        this.showToast('Mohon pilih berkas PDF (.pdf) atau gambar foto (.png, .jpg, .jpeg)', 'error');
+        return;
+      }
+
+      const mimeType = isPdf ? 'application/pdf' : (file.type || 'image/jpeg');
+      const sizeStr = file.size > 1024 * 1024 ? (file.size / (1024 * 1024)).toFixed(1) + ' MB' : Math.round(file.size / 1024) + ' KB';
+
+      this.scanAiFile = {
+        name: file.name,
+        size: sizeStr,
+        base64: '',
+        mimeType: mimeType,
+        previewUrl: isImg ? URL.createObjectURL(file) : ''
+      };
+      this.scanAiError = '';
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        const base64Data = dataUrl.split(',')[1];
+        this.scanAiFile.base64 = base64Data;
+      };
+      reader.onerror = () => {
+        this.showToast('Gagal membaca file lokal', 'error');
+      };
+      reader.readAsDataURL(file);
+    },
+
+    async scanScheduleWithGemini() {
+      if (!this.scanAiFile.base64) {
+        this.showToast('Pilih berkas PDF atau foto jadwal terlebih dahulu', 'error');
+        return;
+      }
+
+      const target = this.formImporJadwal.target;
+      const targetKelas = this.formImporJadwal.targetKelas || 'X3 Atlet';
+      const teacherName = this.guru?.nama || 'Tito Vanzal, S.Pd.';
+
+      // 1. Cek apakah ada API key di state/localStorage, jika tidak coba tarik otomatis dari Code.gs via Google Web App
+      let apiKey = (this.geminiApiKey || '').trim();
+      if (!apiKey && this.gasWebAppUrl) {
+        try {
+          this.scanAiProgress = 'Menghubungkan ke Code.gs Google Drive untuk memeriksa API Key...';
+          const cleanUrl = this.gasWebAppUrl.trim().replace(/\/+$/, '');
+          const configRes = await fetch(cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + 'action=getGeminiConfig&_t=' + new Date().getTime());
+          const configJson = await configRes.json();
+          if (configJson && configJson.data && configJson.data.geminiApiKey) {
+            apiKey = configJson.data.geminiApiKey.trim();
+            this.geminiApiKey = apiKey;
+            localStorage.setItem('LMS_GEMINI_API_KEY', apiKey);
+          }
+        } catch (e) {
+          console.warn('Gagal cek config dari gasWebAppUrl:', e);
+        }
+      }
+
+      // 2. Jika di dalam lingkungan Google Apps Script bawaan (google.script.run), jalankan backend Code.gs langsung
+      if (this.isGasEnvironment) {
+        this.isScanningAi = true;
+        this.scanAiProgress = 'Menghubungi backend Code.gs untuk memindai dokumen dengan Gemini AI...';
+        this.scanAiError = '';
+        
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (res && res.items && Array.isArray(res.items)) {
+              this.processAiExtractedSchedule(res.items, target, targetKelas, teacherName);
+            } else {
+              this.scanAiError = 'Tidak ada sesi jadwal yang ditemukan.';
+              this.isScanningAi = false;
+            }
+          })
+          .withFailureHandler((err) => {
+            this.scanAiError = (err && err.message) || err.toString();
+            this.isScanningAi = false;
+            this.showToast('Gagal memindai: ' + this.scanAiError, 'error');
+          })
+          .handleAction('scanScheduleWithGemini', {
+            base64: this.scanAiFile.base64,
+            mimeType: this.scanAiFile.mimeType,
+            target: target,
+            targetKelas: targetKelas,
+            teacherName: teacherName,
+            apiKey: apiKey
+          });
+        return;
+      }
+
+      // 3. Jika API key belum ada di Code.gs maupun client
+      if (!apiKey) {
+        this.showToast('Mohon isi GEMINI_API_KEY di Code.gs atau masukkan API Key di kotak bawah', 'error');
+        this.showApiKeyInput = true;
+        return;
+      }
+
+      this.isScanningAi = true;
+      this.scanAiProgress = 'AI Gemini sedang memindai tabel dan membaca baris jadwal aSc Timetables...';
+      this.scanAiError = '';
+
+      const promptText = `Anda adalah asisten cerdas ahli pembaca data jadwal sekolah Indonesia dari sistem aSc Timetables.
+Tugas Anda adalah mengekstrak jadwal pelajaran mingguan dari dokumen/gambar aSc Timetables ini menjadi JSON ARRAY murni.
+
+Informasi Target:
+- Jenis Impor: "${target === 'mengajar' ? 'JADWAL MENGAJAR GURU & PIKET' : 'JADWAL KELAS SISWA'}"
+- Nama Guru Pengguna: "${teacherName}" (Kode Guru di aSc biasanya inisial seperti C9 atau serupa)
+- Kelas Target: "${targetKelas}"
+
+Aturan Pembacaan Kolom & Baris:
+1. Hari Sekolah: Cari kolom hari ("Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu").
+2. Jam Pelajaran: Cari nomor jam ke- 1 sampai 8 (abaikan Morning Roll Call, Istirahat / Break R, Family Time, dan Jamaah Duhur jika tidak ada KBM).
+3. Untuk Target "mengajar":
+   - Ekstrak seluruh jam mengajar guru kimia (${teacherName} / kode guru C9) di semua kelas.
+   - Deteksi Tugas Piket: jika ada sel berisi kata "Picket" atau "Piket" (misal: "Picket Kantin", "Picket Lantai 3", dsb), set tipeTugas: "Piket Lantai", mapel: "Picket", lantai: keterangan ruang/koridor/kantin, kelas: "".
+   - Jika mengajar biasa: set tipeTugas: "Mengajar", mapel: nama mata pelajaran (misal "Chemistry" atau "PISA" atau "Kimia"), kelas: nama kelas (misal "XII Cp", "XII ICP 2F", "X5 COC2", "X15 IUPP COC 1"), lantai: "".
+4. Untuk Target "kelas":
+   - Ekstrak seluruh mata pelajaran dan guru untuk kelas ${targetKelas}.
+   - set mapel: nama mata pelajaran, guru: nama atau inisial guru pengampu, kelas: "${targetKelas}".
+
+Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis seperti berikut (tanpa markdown blok pembungkus):
+[
+  {
+    "hari": "Senin",
+    "jamKe": 1,
+    "tipeTugas": "Mengajar",
+    "mapel": "PISA",
+    "kelas": "X5 COC2",
+    "guru": "${teacherName}",
+    "lantai": ""
+  },
+  {
+    "hari": "Senin",
+    "jamKe": 5,
+    "tipeTugas": "Piket Lantai",
+    "mapel": "Picket",
+    "kelas": "",
+    "guru": "${teacherName}",
+    "lantai": "Kantin"
+  }
+]`;
+
+      try {
+        const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        let resultData = null;
+        let lastError = null;
+
+        for (const model of models) {
+          try {
+            this.scanAiProgress = `AI Gemini (${model}) sedang menganalisis tata letak tabel...`;
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            
+            const payload = {
+              contents: [
+                {
+                  parts: [
+                    {
+                      inlineData: {
+                        mimeType: this.scanAiFile.mimeType,
+                        data: this.scanAiFile.base64
+                      }
+                    },
+                    {
+                      text: promptText
+                    }
+                  ]
+                }
+              ],
+              generationConfig: {
+                responseMimeType: "application/json",
+                temperature: 0.1
+              }
+            };
+
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+              const errBody = await response.json().catch(() => ({}));
+              throw new Error(errBody.error?.message || `HTTP ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!textOutput) {
+              throw new Error('Respons AI tidak mengandung teks hasil analisis.');
+            }
+
+            let parsed = null;
+            try {
+              parsed = JSON.parse(textOutput);
+            } catch (pErr) {
+              const jsonMatch = textOutput.match(/\[\s*\{[\s\S]*\}\s*\]/);
+              if (jsonMatch) {
+                parsed = JSON.parse(jsonMatch[0]);
+              } else {
+                throw new Error('Format JSON dari AI tidak valid: ' + pErr.message);
+              }
+            }
+
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              resultData = parsed;
+              break;
+            }
+          } catch (modelErr) {
+            lastError = modelErr;
+            console.warn(`Model ${model} gagal:`, modelErr);
+          }
+        }
+
+        if (!resultData || resultData.length === 0) {
+          throw lastError || new Error('Tidak ada data jadwal yang berhasil diekstrak dari berkas tersebut.');
+        }
+
+        this.processAiExtractedSchedule(resultData, target, targetKelas, teacherName);
+      } catch (err) {
+        this.scanAiError = err.message || 'Terjadi kesalahan saat memindai jadwal.';
+        this.showToast('Gagal memindai: ' + this.scanAiError, 'error');
+        this.isScanningAi = false;
+        this.scanAiProgress = '';
+      }
+    },
+
+    processAiExtractedSchedule(resultData, target, targetKelas, teacherName) {
+      const dayOrder = { 'Senin': 1, 'Selasa': 2, 'Rabu': 3, 'Kamis': 4, 'Jumat': 5, 'Sabtu': 6 };
+      this.imporJadwalPreview = resultData.map(item => {
+        const hari = item.hari || 'Senin';
+        const jamKe = parseInt(item.jamKe, 10) || 1;
+        const slot = (this.jamPelajaran[hari] || []).find(s => s.type === 'pelajaran' && s.jam === jamKe);
+        const waktuStr = slot ? `${slot.mulai} - ${slot.selesai}` : `Jam ke-${jamKe}`;
+        const isPiket = item.tipeTugas === 'Piket Lantai' || /picket|piket/i.test(item.mapel || '');
+
+        return {
+          hari: hari,
+          jamKe: jamKe,
+          waktu: waktuStr,
+          tipeTugas: isPiket ? 'Piket Lantai' : 'Mengajar',
+          mapel: isPiket ? 'Picket' : (item.mapel || (target === 'mengajar' ? 'Kimia' : 'Mapel')),
+          kelas: isPiket ? '' : (item.kelas || (target === 'mengajar' ? '-' : targetKelas)),
+          guru: item.guru || (target === 'mengajar' ? teacherName : '-'),
+          lantai: isPiket ? (item.lantai || 'Koridor / Kantin') : ''
+        };
+      }).sort((a, b) => {
+        return ((dayOrder[a.hari] || 99) - (dayOrder[b.hari] || 99)) || (a.jamKe - b.jamKe);
+      });
+
+      this.isScanningAi = false;
+      this.scanAiProgress = '';
+      this.imporJadwalStep = 'preview';
+      this.showToast(`✨ Hebat! AI Gemini berhasil mengekstrak ${this.imporJadwalPreview.length} sesi jadwal dari berkas PDF/Foto!`, 'success');
+      this.$nextTick(() => this.initLucideIcons());
+    },
+
+    handleScheduleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.formImporJadwal.fileName = file.name;
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          if (typeof XLSX === 'undefined') {
+            this.showToast('Pustaka SheetJS belum siap', 'error');
+            return;
+          }
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const matrix = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+          this.parseAscTimetable(matrix, this.formImporJadwal.target, this.formImporJadwal.targetKelas);
+        } catch (err) {
+          this.showToast('Gagal membaca file Excel/CSV: ' + err.message, 'error');
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    },
+
+    processPastedScheduleText() {
+      if (!this.formImporJadwal.rawText.trim()) {
+        this.showToast('Tempelkan teks atau salinan tabel jadwal terlebih dahulu', 'error');
+        return;
+      }
+      this.parseAscTimetable(this.formImporJadwal.rawText, this.formImporJadwal.target, this.formImporJadwal.targetKelas);
+    },
+
+    parseAscTimetable(rawInput, target, targetKelas) {
+      target = target || this.formImporJadwal.target || 'mengajar';
+      targetKelas = targetKelas || this.formImporJadwal.targetKelas || (this.waliKelasFilter?.kelas || 'X3 Atlet');
+
+      let matrix = [];
+      if (Array.isArray(rawInput)) {
+        matrix = rawInput;
+      } else if (typeof rawInput === 'string') {
+        const lines = rawInput.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+        matrix = lines.map(l => {
+          if (l.includes('\t')) return l.split('\t').map(c => c.trim());
+          if (l.includes(';')) return l.split(';').map(c => c.trim().replace(/^["']|["']$/g, ''));
+          if (l.includes(',')) return l.split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+          return [l];
+        });
+      }
+
+      if (!matrix || matrix.length === 0) {
+        this.showToast('Data jadwal tidak ditemukan / kosong', 'error');
+        return;
+      }
+
+      const dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const dayEnToId = { 'monday': 'Senin', 'tuesday': 'Selasa', 'wednesday': 'Rabu', 'thursday': 'Kamis', 'friday': 'Jumat', 'saturday': 'Sabtu' };
+
+      // 1. Cari baris header hari
+      let headerRowIdx = -1;
+      let dayColMap = {}; // { colIdx: 'Senin', ... }
+
+      for (let r = 0; r < Math.min(matrix.length, 12); r++) {
+        const row = matrix[r];
+        let foundDays = 0;
+        const tempMap = {};
+        for (let c = 0; c < row.length; c++) {
+          const val = String(row[c] || '').toLowerCase().trim();
+          for (const d of dayNames) {
+            if (val === d.toLowerCase() || val.startsWith(d.toLowerCase())) {
+              tempMap[c] = d;
+              foundDays++;
+              break;
+            }
+          }
+          for (const [en, id] of Object.entries(dayEnToId)) {
+            if (val === en || val.startsWith(en)) {
+              tempMap[c] = id;
+              foundDays++;
+              break;
+            }
+          }
+        }
+        if (foundDays >= 3) {
+          headerRowIdx = r;
+          dayColMap = tempMap;
+          break;
+        }
+      }
+
+      const parsedItems = [];
+
+      // A. Jika format matriks aSc Timetable terdeteksi
+      if (headerRowIdx >= 0 && Object.keys(dayColMap).length >= 3) {
+        for (let r = headerRowIdx + 1; r < matrix.length; r++) {
+          const row = matrix[r];
+          if (!row || row.length === 0) continue;
+
+          // Cek nomor jam dari kolom pertama atau kedua
+          let jamKe = null;
+          for (let c = 0; c < Math.min(row.length, 3); c++) {
+            if (dayColMap[c]) continue; // ini kolom hari
+            const cellVal = String(row[c] || '').trim();
+            const numMatch = cellVal.match(/^\b([1-8])\b/);
+            if (numMatch) {
+              jamKe = parseInt(numMatch[1], 10);
+              break;
+            }
+            if (cellVal.includes('07:00') || cellVal.includes('7:00')) { jamKe = 1; break; }
+            if (cellVal.includes('07:40') || cellVal.includes('7:40')) { jamKe = 2; break; }
+            if (cellVal.includes('08:20') || cellVal.includes('8:20')) { jamKe = 3; break; }
+            if (cellVal.includes('09:00') || cellVal.includes('9:00')) { jamKe = 4; break; }
+            if (cellVal.includes('10:00')) { jamKe = 5; break; }
+            if (cellVal.includes('10:40')) { jamKe = 6; break; }
+            if (cellVal.includes('11:20')) { jamKe = 7; break; }
+            if (cellVal.includes('12:00')) { jamKe = 8; break; }
+          }
+
+          if (jamKe === null || jamKe < 1 || jamKe > 8) continue; // baris jeda istirahat / roll call
+
+          // Ambil isi sel untuk setiap hari
+          for (const [colIdxStr, hari] of Object.entries(dayColMap)) {
+            const colIdx = parseInt(colIdxStr, 10);
+            const rawCell = String(row[colIdx] || '').trim();
+            if (!rawCell || rawCell === '-' || rawCell === '.') continue;
+
+            const lines = rawCell.split(/\r?\n|<br\s*\/?>/i).map(l => l.trim()).filter(l => l.length > 0 && l !== '-');
+            if (lines.length === 0) continue;
+
+            // Dapatkan rentang waktu dari jamPelajaran
+            const slotInfo = (this.jamPelajaran[hari] || []).find(s => s.type === 'pelajaran' && s.jam === jamKe);
+            const waktuStr = slotInfo ? `${slotInfo.mulai} - ${slotInfo.selesai}` : `Jam ke-${jamKe}`;
+
+            if (target === 'mengajar') {
+              const isPiket = lines.some(l => /picket|piket/i.test(l));
+              if (isPiket) {
+                const subDetail = lines.filter(l => !/picket|piket|c9/i.test(l)).join(' • ');
+                parsedItems.push({
+                  hari,
+                  jamKe,
+                  waktu: waktuStr,
+                  tipeTugas: 'Piket Lantai',
+                  mapel: 'Picket',
+                  kelas: '',
+                  lantai: subDetail || 'Piket Koridor',
+                  guru: this.guru.nama
+                });
+              } else {
+                const mapelName = lines[0];
+                const cleanLines = lines.slice(1).filter(l => !/^(c9)$/i.test(l));
+                const targetKelasStr = cleanLines.join(' ') || targetKelas;
+                parsedItems.push({
+                  hari,
+                  jamKe,
+                  waktu: waktuStr,
+                  tipeTugas: 'Mengajar',
+                  mapel: mapelName || 'Kimia',
+                  kelas: targetKelasStr,
+                  lantai: '',
+                  guru: this.guru.nama
+                });
+              }
+            } else {
+              // Target: Jadwal Kelas Siswa
+              const mapelName = lines[0];
+              let guruName = lines.length > 1 ? lines.slice(1).join(' ') : '-';
+              if (/athlete/i.test(mapelName)) guruName = 'Guru Olahraga / Tim Atlet';
+              parsedItems.push({
+                hari,
+                jamKe,
+                waktu: waktuStr,
+                mapel: mapelName,
+                guru: guruName,
+                kelas: targetKelas
+              });
+            }
+          }
+        }
+      } else {
+        // B. Fallback: Format baris demi baris (Hari, Jam, Mapel, Guru/Kelas)
+        for (const row of matrix) {
+          if (row.length < 3) continue;
+          let foundHari = null;
+          for (const d of dayNames) {
+            if (row.some(c => String(c).toLowerCase().includes(d.toLowerCase()))) {
+              foundHari = d;
+              break;
+            }
+          }
+          if (!foundHari) continue;
+
+          let jamKe = null;
+          for (const c of row) {
+            const m = String(c).match(/\b([1-8])\b/);
+            if (m) { jamKe = parseInt(m[1], 10); break; }
+          }
+          if (!jamKe) continue;
+
+          const nonHariJam = row.filter(c => !String(c).toLowerCase().includes(foundHari.toLowerCase()) && !String(c).match(/^\b[1-8]\b$/));
+          if (nonHariJam.length === 0) continue;
+
+          const slotInfo = (this.jamPelajaran[foundHari] || []).find(s => s.type === 'pelajaran' && s.jam === jamKe);
+          const waktuStr = slotInfo ? `${slotInfo.mulai} - ${slotInfo.selesai}` : `Jam ke-${jamKe}`;
+
+          if (target === 'mengajar') {
+            const isPiket = nonHariJam.some(c => /picket|piket/i.test(c));
+            parsedItems.push({
+              hari: foundHari,
+              jamKe,
+              waktu: waktuStr,
+              tipeTugas: isPiket ? 'Piket Lantai' : 'Mengajar',
+              mapel: isPiket ? 'Picket' : (nonHariJam[0] || 'Kimia'),
+              kelas: isPiket ? '' : (nonHariJam[1] || targetKelas),
+              lantai: isPiket ? (nonHariJam.filter(c => !/picket|piket/i.test(c)).join(' ') || 'Piket Koridor') : '',
+              guru: this.guru.nama
+            });
+          } else {
+            parsedItems.push({
+              hari: foundHari,
+              jamKe,
+              waktu: waktuStr,
+              mapel: nonHariJam[0] || 'Mapel',
+              guru: nonHariJam[1] || '-',
+              kelas: targetKelas
+            });
+          }
+        }
+      }
+
+      if (parsedItems.length === 0) {
+        this.showToast('Gagal mengenali format jadwal aSc. Pastikan tabel memiliki nama hari (Senin-Sabtu) dan jam ke-1 s.d. 8.', 'error');
+        return;
+      }
+
+      this.imporJadwalPreview = parsedItems.sort((a, b) => {
+        const order = { 'Senin': 1, 'Selasa': 2, 'Rabu': 3, 'Kamis': 4, 'Jumat': 5, 'Sabtu': 6 };
+        return (order[a.hari] - order[b.hari]) || (a.jamKe - b.jamKe);
+      });
+      this.imporJadwalStep = 'preview';
+      this.showToast(`✨ Berhasil mendeteksi ${parsedItems.length} sesi jadwal aSc Timetables!`, 'success');
+      this.$nextTick(() => this.initLucideIcons());
+    },
+
+    applyImportedSchedule() {
+      if (!this.imporJadwalPreview || this.imporJadwalPreview.length === 0) {
+        this.showToast('Tidak ada data jadwal untuk diterapkan', 'error');
+        return;
+      }
+
+      const target = this.formImporJadwal.target;
+      const replaceAll = this.formImporJadwal.replaceAll;
+
+      if (target === 'mengajar') {
+        if (replaceAll) {
+          const importedDays = new Set(this.imporJadwalPreview.map(p => p.hari));
+          this.jadwalMengajar = this.jadwalMengajar.filter(j => !importedDays.has(j.hari));
+        }
+        for (const item of this.imporJadwalPreview) {
+          const existIdx = this.jadwalMengajar.findIndex(j => j.hari === item.hari && j.jamKe === item.jamKe);
+          const record = {
+            hari: item.hari,
+            jamKe: item.jamKe,
+            tipeTugas: item.tipeTugas,
+            kelas: item.kelas,
+            mapel: item.mapel,
+            lantai: item.lantai
+          };
+          if (existIdx >= 0) {
+            this.jadwalMengajar[existIdx] = record;
+          } else {
+            this.jadwalMengajar.push(record);
+          }
+        }
+        this.saveLocalData();
+        this.syncToGoogleDrive('saveJadwalMengajar', this.jadwalMengajar);
+        this.showToast(`🎉 Berhasil mengimpor ${this.imporJadwalPreview.length} sesi Jadwal Mengajar Guru!`, 'success');
+      } else {
+        // Target: Jadwal Kelas Siswa
+        if (replaceAll) {
+          const importedDays = new Set(this.imporJadwalPreview.map(p => p.hari));
+          this.jadwalKelas = this.jadwalKelas.filter(j => !importedDays.has(j.hari));
+        }
+        for (const item of this.imporJadwalPreview) {
+          const existIdx = this.jadwalKelas.findIndex(j => j.hari === item.hari && j.jamKe === item.jamKe);
+          const record = {
+            hari: item.hari,
+            jamKe: item.jamKe,
+            mapel: item.mapel,
+            guru: item.guru
+          };
+          if (existIdx >= 0) {
+            this.jadwalKelas[existIdx] = record;
+          } else {
+            this.jadwalKelas.push(record);
+          }
+        }
+        this.saveLocalData();
+        this.syncToGoogleDrive('saveJadwalKelas', this.jadwalKelas);
+        this.showToast(`🎉 Berhasil mengimpor ${this.imporJadwalPreview.length} sesi Jadwal Kelas Siswa!`, 'success');
+      }
+
+      this.modalImporJadwalOpen = false;
+      this.imporJadwalStep = 'input';
+      this.imporJadwalPreview = [];
+      this.$nextTick(() => this.initLucideIcons());
+    },
+
+    loadSchedulePresetFromPhoto(target) {
+      target = target || this.formImporJadwal.target || 'mengajar';
+      let items = [];
+      if (target === 'mengajar') {
+        items = this.getPresetJadwalMengajarTito();
+      } else {
+        items = this.getPresetJadwalKelasX3();
+      }
+      this.imporJadwalPreview = items.map(item => {
+        const slot = (this.jamPelajaran[item.hari] || []).find(s => s.type === 'pelajaran' && s.jam === item.jamKe);
+        return {
+          ...item,
+          waktu: slot ? `${slot.mulai} - ${slot.selesai}` : `Jam ke-${item.jamKe}`,
+          kelas: item.kelas || this.formImporJadwal.targetKelas || 'X3 Atlet',
+          guru: item.guru || this.guru.nama
+        };
+      });
+      this.imporJadwalStep = 'preview';
+      this.showToast(`⚡ Jadwal sesuai foto aSc Timetables berhasil dimuat (${this.imporJadwalPreview.length} sesi)!`, 'info');
+      this.$nextTick(() => this.initLucideIcons());
+    },
+
+    downloadAscTemplateExcel(target) {
+      target = target || this.formImporJadwal.target || 'mengajar';
+      if (typeof XLSX === 'undefined') {
+        this.showToast('Pustaka SheetJS belum siap', 'error');
+        return;
+      }
+      const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const headers = ['JAM', 'WAKTU', ...days];
+      const rows = [headers];
+
+      const slots = [
+        { jam: 'MORNING ROLL CALL', waktu: '06:45 - 07:00' },
+        { jam: 1, waktu: '07:00 - 07:40' },
+        { jam: 2, waktu: '07:40 - 08:20' },
+        { jam: 3, waktu: '08:20 - 09:00' },
+        { jam: 4, waktu: '09:00 - 09:40' },
+        { jam: 'Break (R)', waktu: '09:40 - 10:00' },
+        { jam: 5, waktu: '10:00 - 10:40' },
+        { jam: 6, waktu: '10:40 - 11:20' },
+        { jam: 7, waktu: '11:20 - 12:00' },
+        { jam: 8, waktu: '12:00 - 12:30' },
+        { jam: 'FAMILY TIME', waktu: '12:30 - 12:45' },
+        { jam: 'JAMAAH DUHUR', waktu: '12:45 - 13:05' }
+      ];
+
+      slots.forEach(s => {
+        const row = [s.jam, s.waktu];
+        days.forEach(() => row.push(''));
+        rows.push(row);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Jadwal');
+      XLSX.writeFile(wb, `Template_aSc_Timetables_${target === 'mengajar' ? 'Guru' : 'Kelas'}.xlsx`);
+      this.showToast('📁 Template Excel aSc Timetables berhasil diunduh!', 'success');
+    },
+
+    getPresetJadwalMengajarTito() {
+      return [
+        // SENIN
+        { hari: 'Senin', jamKe: 1, tipeTugas: 'Mengajar', kelas: 'X5 COC2', mapel: 'PISA', lantai: '' },
+        { hari: 'Senin', jamKe: 2, tipeTugas: 'Mengajar', kelas: 'X5 COC2', mapel: 'PISA', lantai: '' },
+        { hari: 'Senin', jamKe: 5, tipeTugas: 'Mengajar', kelas: 'XII Cp', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Senin', jamKe: 6, tipeTugas: 'Mengajar', kelas: 'XII Cp', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Senin', jamKe: 7, tipeTugas: 'Mengajar', kelas: 'XII Cp', mapel: 'Chemistry', lantai: '' },
+        // SELASA
+        { hari: 'Selasa', jamKe: 1, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'XII IUPP CHINA / XI IUPP CHINA' },
+        { hari: 'Selasa', jamKe: 2, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'XII IUPP CHINA / XI IUPP CHINA' },
+        { hari: 'Selasa', jamKe: 3, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Piket C9' },
+        { hari: 'Selasa', jamKe: 4, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Piket C9' },
+        { hari: 'Selasa', jamKe: 5, tipeTugas: 'Mengajar', kelas: 'XII ICP 2F', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Selasa', jamKe: 6, tipeTugas: 'Mengajar', kelas: 'XII ICP 2F', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Selasa', jamKe: 7, tipeTugas: 'Mengajar', kelas: 'X3 ATLET', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Selasa', jamKe: 8, tipeTugas: 'Mengajar', kelas: 'X3 ATLET', mapel: 'Chemistry', lantai: '' },
+        // RABU
+        { hari: 'Rabu', jamKe: 1, tipeTugas: 'Mengajar', kelas: 'X15 IUPP COC 1', mapel: 'OSN/OPSI', lantai: '' },
+        { hari: 'Rabu', jamKe: 2, tipeTugas: 'Mengajar', kelas: 'X15 IUPP COC 1', mapel: 'OSN/OPSI', lantai: '' },
+        { hari: 'Rabu', jamKe: 3, tipeTugas: 'Mengajar', kelas: 'E2s / M7 / B1', mapel: 'OSN/OPSI', lantai: '' },
+        { hari: 'Rabu', jamKe: 4, tipeTugas: 'Mengajar', kelas: 'G5s / P5s / B2', mapel: 'OSN/OPSI', lantai: '' },
+        { hari: 'Rabu', jamKe: 5, tipeTugas: 'Mengajar', kelas: 'XII ICP 2F', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Rabu', jamKe: 6, tipeTugas: 'Mengajar', kelas: 'XII ICP 2F', mapel: 'Chemistry', lantai: '' },
+        // KAMIS
+        { hari: 'Kamis', jamKe: 1, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 4M' },
+        { hari: 'Kamis', jamKe: 2, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 4M' },
+        { hari: 'Kamis', jamKe: 3, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 1W' },
+        { hari: 'Kamis', jamKe: 4, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 1W' },
+        { hari: 'Kamis', jamKe: 8, tipeTugas: 'Mengajar', kelas: 'X3 ATLET', mapel: 'Chemistry', lantai: '' },
+        // JUMAT
+        { hari: 'Jumat', jamKe: 1, tipeTugas: 'Mengajar', kelas: 'XII Cp', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Jumat', jamKe: 2, tipeTugas: 'Mengajar', kelas: 'XII Cp', mapel: 'Chemistry', lantai: '' },
+        { hari: 'Jumat', jamKe: 3, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 2M' },
+        { hari: 'Jumat', jamKe: 4, tipeTugas: 'Piket Lantai', kelas: '', mapel: 'Picket', lantai: 'Koridor 2M' }
+      ];
+    },
+
+    getPresetJadwalKelasX3() {
+      return [
+        // SENIN
+        { hari: 'Senin', jamKe: 1, mapel: 'PISA', guru: 'P2' },
+        { hari: 'Senin', jamKe: 2, mapel: 'PISA', guru: 'P2' },
+        { hari: 'Senin', jamKe: 3, mapel: 'Ins', guru: 'IN / BK7' },
+        { hari: 'Senin', jamKe: 4, mapel: 'Ins', guru: 'IN / BK7' },
+        { hari: 'Senin', jamKe: 5, mapel: 'Physics', guru: 'P7' },
+        { hari: 'Senin', jamKe: 6, mapel: 'Physics', guru: 'P7' },
+        { hari: 'Senin', jamKe: 7, mapel: 'Economics', guru: 'E5s' },
+        { hari: 'Senin', jamKe: 8, mapel: 'Economics', guru: 'E5s' },
+        // SELASA
+        { hari: 'Selasa', jamKe: 1, mapel: 'Sociology', guru: 'S2' },
+        { hari: 'Selasa', jamKe: 2, mapel: 'Sociology', guru: 'S2' },
+        { hari: 'Selasa', jamKe: 3, mapel: 'Biology', guru: 'B4s' },
+        { hari: 'Selasa', jamKe: 4, mapel: 'Biology', guru: 'B4s' },
+        { hari: 'Selasa', jamKe: 5, mapel: 'Geography', guru: 'G3s' },
+        { hari: 'Selasa', jamKe: 6, mapel: 'Geography', guru: 'G3s' },
+        { hari: 'Selasa', jamKe: 7, mapel: 'Chemistry', guru: 'Tito Vanzal S.Pd. (C9)' },
+        { hari: 'Selasa', jamKe: 8, mapel: 'Chemistry', guru: 'Tito Vanzal S.Pd. (C9)' },
+        // RABU
+        { hari: 'Rabu', jamKe: 1, mapel: 'General Maths', guru: 'M8' },
+        { hari: 'Rabu', jamKe: 2, mapel: 'General Maths', guru: 'M8' },
+        { hari: 'Rabu', jamKe: 3, mapel: 'General Maths', guru: 'M8' },
+        { hari: 'Rabu', jamKe: 4, mapel: 'English Reguler', guru: 'EN1s' },
+        { hari: 'Rabu', jamKe: 5, mapel: 'Fine Arts', guru: 'A1s' },
+        { hari: 'Rabu', jamKe: 6, mapel: 'Fine Arts', guru: 'A1s' },
+        { hari: 'Rabu', jamKe: 7, mapel: 'Nihongo', guru: 'N4' },
+        { hari: 'Rabu', jamKe: 8, mapel: 'Nihongo', guru: 'N4' },
+        // KAMIS
+        { hari: 'Kamis', jamKe: 1, mapel: 'English Reguler', guru: 'EN1s' },
+        { hari: 'Kamis', jamKe: 2, mapel: 'English Reguler', guru: 'EN1s' },
+        { hari: 'Kamis', jamKe: 3, mapel: 'Informatics/CAI', guru: 'IC1s' },
+        { hari: 'Kamis', jamKe: 4, mapel: 'Informatics/CAI', guru: 'IC1s' },
+        { hari: 'Kamis', jamKe: 5, mapel: 'Bahasa Indonesia', guru: 'BI4' },
+        { hari: 'Kamis', jamKe: 6, mapel: 'Bahasa Indonesia', guru: 'BI4' },
+        { hari: 'Kamis', jamKe: 7, mapel: 'Bahasa Indonesia', guru: 'BI4' },
+        { hari: 'Kamis', jamKe: 8, mapel: 'Chemistry', guru: 'Tito Vanzal S.Pd. (C9)' },
+        // JUMAT
+        { hari: 'Jumat', jamKe: 1, mapel: 'Sports', guru: 'SP5s' },
+        { hari: 'Jumat', jamKe: 2, mapel: 'Sports (Athlete)', guru: 'SP5s' },
+        { hari: 'Jumat', jamKe: 3, mapel: 'Pancasila TWK', guru: 'WK1s' },
+        { hari: 'Jumat', jamKe: 4, mapel: 'Pancasila TWK', guru: 'WK1s' },
+        // SABTU
+        { hari: 'Sabtu', jamKe: 1, mapel: 'History', guru: 'H3s' },
+        { hari: 'Sabtu', jamKe: 2, mapel: 'History', guru: 'H3s' },
+        { hari: 'Sabtu', jamKe: 3, mapel: 'SEP', guru: 'Tim SEP' },
+        { hari: 'Sabtu', jamKe: 4, mapel: 'SEP', guru: 'Tim SEP' }
+      ];
     },
 
     // =========================================================================
@@ -5845,14 +6615,6 @@ document.addEventListener('alpine:init', () => {
         <!-- Right: Dark Mode Toggle, Google Drive Status & User Profile -->
         <div class="flex items-center space-x-2 sm:space-x-3">
           
-          <!-- TOMBOL KEMBALI KE PORTAL UTAMA -->
-          <a href="../" 
-             class="px-2.5 sm:px-3 py-1.5 rounded-xl border border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 hover:text-white transition touch-btn flex items-center space-x-1.5 shadow-xs font-bold text-xs" 
-             title="Kembali ke Beranda PortalKimia Suite">
-            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-            <span class="hidden sm:inline">Portal Utama</span>
-          </a>
-
           <!-- RANDOM STUDENT PICKER BUTTON -->
           <button @click="openPickerModal()" 
                   class="px-2.5 sm:px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition touch-btn flex items-center space-x-1.5 shadow-xs font-bold text-xs"
@@ -7292,6 +8054,11 @@ document.addEventListener('alpine:init', () => {
               </div>
 
               <div class="flex flex-wrap items-center gap-2">
+                <button @click="openModalImporJadwal('kelas')" 
+                        class="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center space-x-1.5 transition shadow-sm">
+                  <i data-lucide="file-up" class="w-4 h-4"></i>
+                  <span>📥 Impor Jadwal aSc</span>
+                </button>
                 <button @click="modalSettingJamOpen = true; settingJamHari = jadwalKelasHariFilter" 
                         class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center space-x-1.5 transition">
                   <i data-lucide="settings" class="w-4 h-4 text-slate-500"></i>
@@ -7551,6 +8318,11 @@ document.addEventListener('alpine:init', () => {
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
+              <button @click="openModalImporJadwal('mengajar')" 
+                      class="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center space-x-1.5 transition shadow-sm">
+                <i data-lucide="file-up" class="w-4 h-4"></i>
+                <span>📥 Impor Jadwal aSc</span>
+              </button>
               <button @click="modalSettingJamOpen = true; settingJamHari = jadwalMengajarHariFilter" 
                       class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center space-x-1.5 transition">
                 <i data-lucide="settings" class="w-4 h-4 text-slate-500"></i>
@@ -11001,6 +11773,467 @@ document.addEventListener('alpine:init', () => {
   </div>
 
   <!-- ========================================================================
+       MODAL: IMPOR JADWAL ASC TIMETABLES (EXCEL / PASTE / PRESET)
+       ======================================================================== -->
+  <div x-show="modalImporJadwalOpen" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+    <div class="min-h-full sm:min-h-screen px-3 sm:px-4 text-center flex items-center justify-center py-3 sm:py-6">
+      <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity" @click="modalImporJadwalOpen = false"></div>
+      
+      <div class="inline-block w-full max-w-4xl transition-all text-left align-middle bg-white dark:bg-slate-900 shadow-2xl rounded-3xl relative z-10 border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col my-auto max-h-[94vh]">
+        
+        <!-- Header -->
+        <div class="p-4 sm:p-5 pb-3 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 shrink-0">
+          <div class="flex items-center space-x-3 min-w-0">
+            <div class="w-10 h-10 rounded-2xl bg-teal-500/10 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center text-xl shrink-0 border border-teal-500/20">
+              <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+            </div>
+            <div class="min-w-0">
+              <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <span>Impor Jadwal aSc Timetables</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider"
+                      :class="formImporJadwal.target === 'mengajar' ? 'bg-teal-100 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300' : 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300'"
+                      x-text="formImporJadwal.target === 'mengajar' ? 'Jadwal Mengajar Guru' : 'Jadwal Kelas Siswa'"></span>
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Salin-tempel dari Excel/Web, unggah file .xlsx/.csv, atau gunakan preset foto.</p>
+            </div>
+          </div>
+          <button @click="modalImporJadwalOpen = false" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-4 sm:p-6 overflow-y-auto space-y-5 flex-1">
+          
+          <!-- Step 1: Input Options -->
+          <template x-if="imporJadwalStep === 'input'">
+            <div class="space-y-4">
+              
+              <!-- 1. Target & Class Configuration -->
+              <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">PILIH TARGET IMPOR</label>
+                  <div class="inline-flex rounded-xl p-1 bg-slate-200 dark:bg-slate-700">
+                    <button type="button" @click="formImporJadwal.target = 'mengajar'" 
+                            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5"
+                            :class="formImporJadwal.target === 'mengajar' ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'">
+                      <span>👨‍🏫 Jadwal Mengajar Guru</span>
+                    </button>
+                    <button type="button" @click="formImporJadwal.target = 'kelas'" 
+                            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5"
+                            :class="formImporJadwal.target === 'kelas' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'">
+                      <span>🏫 Jadwal Kelas Siswa</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Class Dropdown (only when target is 'kelas') -->
+                <div x-show="formImporJadwal.target === 'kelas'" class="sm:text-right">
+                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">KELAS SASARAN</label>
+                  <select x-model="formImporJadwal.targetKelas" class="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-teal-500">
+                    <template x-for="kls in kelasList" :key="kls.id">
+                      <option :value="kls.nama" x-text="kls.nama + (kls.isWaliKelas ? ' (Kelas Binaan)' : '')"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 2. Method Tabs -->
+              <div class="flex border-b border-slate-200 dark:border-slate-800 gap-2 overflow-x-auto pb-0.5">
+                <button type="button" @click="formImporJadwal.inputMode = 'ai'"
+                        class="pb-2.5 px-3 text-xs font-bold transition border-b-2 flex items-center space-x-1.5 shrink-0"
+                        :class="formImporJadwal.inputMode === 'ai' ? 'border-teal-500 text-teal-600 dark:text-teal-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-teal-500"></i>
+                  <span>📷 Scan PDF & Foto (AI Vision)</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded-full bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 font-extrabold">Auto</span>
+                </button>
+                <button type="button" @click="formImporJadwal.inputMode = 'paste'"
+                        class="pb-2.5 px-3 text-xs font-bold transition border-b-2 flex items-center space-x-1.5 shrink-0"
+                        :class="formImporJadwal.inputMode === 'paste' ? 'border-teal-500 text-teal-600 dark:text-teal-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'">
+                  <i data-lucide="clipboard-copy" class="w-4 h-4"></i>
+                  <span>Salin-Tempel (Text)</span>
+                </button>
+                <button type="button" @click="formImporJadwal.inputMode = 'file'"
+                        class="pb-2.5 px-3 text-xs font-bold transition border-b-2 flex items-center space-x-1.5 shrink-0"
+                        :class="formImporJadwal.inputMode === 'file' ? 'border-teal-500 text-teal-600 dark:text-teal-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'">
+                  <i data-lucide="upload" class="w-4 h-4"></i>
+                  <span>Unggah Excel / CSV</span>
+                </button>
+                <button type="button" @click="formImporJadwal.inputMode = 'preset'"
+                        class="pb-2.5 px-3 text-xs font-bold transition border-b-2 flex items-center space-x-1.5 shrink-0"
+                        :class="formImporJadwal.inputMode === 'preset' ? 'border-amber-500 text-amber-600 dark:text-amber-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'">
+                  <i data-lucide="zap" class="w-4 h-4"></i>
+                  <span>⚡ 1-Klik Preset Foto</span>
+                </button>
+              </div>
+
+              <!-- 3-AI. TAB: SCAN PDF & FOTO AI VISION -->
+              <div x-show="formImporJadwal.inputMode === 'ai'" class="space-y-4">
+                
+                <!-- Gemini API Key Setup Box -->
+                <div class="p-3.5 sm:p-4 rounded-2xl border transition"
+                     :class="geminiApiKey ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800/60' : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/80'">
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div class="flex items-center space-x-2.5 min-w-0">
+                      <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                           :class="geminiApiKey ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300' : 'bg-teal-100 dark:bg-teal-950 text-teal-600 dark:text-teal-300'">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="flex items-center space-x-2">
+                          <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">Google Gemini AI Vision</h5>
+                          <span class="text-[10px] px-2 py-0.2 rounded-full font-extrabold"
+                                :class="geminiApiKey ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'"
+                                x-text="geminiApiKey ? '✓ Siap Digunakan' : 'Bisa Diisi di Code.gs'"></span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate"
+                           x-text="geminiApiKey ? 'Kunci aktif: ' + geminiApiKey.slice(0, 8) + '...' + geminiApiKey.slice(-4) + ' (Tersinkron otomatis lintas perangkat)' : 'Tips: Cukup masukkan di Code.gs sekali, otomatis aktif di semua HP/laptop!'"></p>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2 shrink-0">
+                      <button type="button" @click="showApiKeyInput = !showApiKeyInput"
+                              class="px-3 py-1 rounded-xl text-xs font-bold border transition bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
+                        <span x-text="showApiKeyInput ? 'Tutup' : (geminiApiKey ? '⚙️ Kelola Kunci' : '⚙️ Atur Kunci')"></span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Expanded API Key Instructions & Input Form -->
+                  <div x-show="showApiKeyInput || !geminiApiKey" class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/80 space-y-2.5 text-xs">
+                    <div class="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-900/60 text-[11px] text-teal-800 dark:text-teal-200 leading-relaxed">
+                      <strong>💡 Rekomendasi Praktis (Cukup 1x untuk Semua Perangkat):</strong>
+                      <p class="mt-0.5">Buka file <code>Code.gs</code> di Apps Script Google Spreadsheet Anda, cari variabel <code>var GEMINI_API_KEY = "...";</code> di bagian paling atas, lalu tempelkan kunci Anda di sana. Maka <strong>seluruh laptop, HP, dan komputer kelas akan otomatis aktif</strong> tanpa perlu memasukkan satu per satu!</p>
+                    </div>
+
+                    <div class="pt-1">
+                      <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">ATAU MASUKKAN MANUAL KHUSUS PERANGKAT INI:</label>
+                      <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="password" x-model="geminiApiKey" placeholder="Tempel Google Gemini API Key di sini (contoh: AIzaSy...)"
+                               class="flex-1 px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        <button type="button" @click="saveGeminiApiKey(geminiApiKey)"
+                                class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition shrink-0">
+                          Simpan Lokal
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-1 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
+                      <span>Google Gemini API 100% Gratis dari Google AI Studio.</span>
+                      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer"
+                         class="text-teal-600 dark:text-teal-400 font-bold hover:underline inline-flex items-center space-x-1">
+                        <span>Dapatkan API Key Gratis di Google AI Studio</span>
+                        <i data-lucide="external-link" class="w-3 h-3"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Dropzone for PDF / Photo -->
+                <div class="p-6 sm:p-8 border-2 border-dashed rounded-3xl text-center transition flex flex-col items-center justify-center relative"
+                     :class="scanAiFile.name ? 'border-teal-500 bg-teal-50/20 dark:bg-teal-950/20' : 'border-slate-300 dark:border-slate-700 hover:border-teal-500 dark:hover:border-teal-500 bg-slate-50/40 dark:bg-slate-800/30'">
+                  
+                  <template x-if="!scanAiFile.name">
+                    <div>
+                      <div class="w-14 h-14 rounded-2xl bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center text-2xl mb-3 mx-auto shadow-sm">
+                        <i data-lucide="file-up" class="w-7 h-7"></i>
+                      </div>
+                      <h4 class="text-sm font-black text-slate-800 dark:text-slate-200 mb-1">Pilih Dokumen PDF Kurikulum atau Foto Jadwal</h4>
+                      <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-4">
+                        Mendukung file dokumen <strong>.pdf</strong> resmi dari kurikulum sekolah, screenshot layar, maupun foto kamera HP (<strong>.png, .jpg, .jpeg, .webp</strong>).
+                      </p>
+                      
+                      <label class="cursor-pointer px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold inline-flex items-center space-x-2 shadow-md shadow-teal-600/20 transition">
+                        <i data-lucide="folder-search" class="w-4 h-4"></i>
+                        <span>Pilih Berkas PDF / Foto Jadwal</span>
+                        <input type="file" @change="handleScheduleMediaUpload($event)" accept=".pdf,image/png,image/jpeg,image/jpg,image/webp" class="hidden">
+                      </label>
+                    </div>
+                  </template>
+
+                  <template x-if="scanAiFile.name">
+                    <div class="w-full flex flex-col items-center space-y-3">
+                      <!-- File Info Card -->
+                      <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 w-full max-w-md shadow-sm">
+                        <div class="flex items-center space-x-3 min-w-0">
+                          <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                               :class="scanAiFile.mimeType === 'application/pdf' ? 'bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400' : 'bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400'">
+                            <span class="font-black text-xs" x-text="scanAiFile.mimeType === 'application/pdf' ? 'PDF' : 'IMG'"></span>
+                          </div>
+                          <div class="min-w-0 text-left">
+                            <h5 class="text-xs font-bold text-slate-900 dark:text-white truncate" x-text="scanAiFile.name"></h5>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400" x-text="scanAiFile.size"></p>
+                          </div>
+                        </div>
+
+                        <label class="cursor-pointer p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition" title="Ganti File">
+                          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                          <input type="file" @change="handleScheduleMediaUpload($event)" accept=".pdf,image/png,image/jpeg,image/jpg,image/webp" class="hidden">
+                        </label>
+                      </div>
+
+                      <!-- Image preview thumbnail if available -->
+                      <template x-if="scanAiFile.previewUrl">
+                        <div class="max-h-36 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
+                          <img :src="scanAiFile.previewUrl" alt="Preview Jadwal" class="max-h-36 object-contain">
+                        </div>
+                      </template>
+
+                      <!-- Action Button or Progress -->
+                      <div class="pt-2">
+                        <template x-if="!isScanningAi">
+                          <button type="button" @click="scanScheduleWithGemini()"
+                                  class="px-6 py-3 rounded-2xl bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-700 hover:from-teal-700 hover:to-emerald-800 text-white text-xs font-black shadow-lg shadow-teal-600/30 flex items-center space-x-2 transition transform hover:scale-[1.02]">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                            <span>Mulai Pindai Tabel dengan AI Gemini ➔</span>
+                          </button>
+                        </template>
+
+                        <template x-if="isScanningAi">
+                          <div class="flex flex-col items-center space-y-2 py-2">
+                            <div class="flex items-center space-x-3 text-teal-600 dark:text-teal-400">
+                              <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                              </svg>
+                              <span class="text-xs font-bold animate-pulse" x-text="scanAiProgress"></span>
+                            </div>
+                            <span class="text-[11px] text-slate-400">Mohon tunggu beberapa detik, AI sedang menganalisis baris jam dan kolom hari...</span>
+                          </div>
+                        </template>
+                      </div>
+
+                    </div>
+                  </template>
+
+                </div>
+
+                <!-- Error Alert if any -->
+                <template x-if="scanAiError">
+                  <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-700 dark:text-rose-300 flex items-start space-x-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                    <div>
+                      <strong class="font-bold">Gagal memindai:</strong> <span x-text="scanAiError"></span>
+                      <p class="text-[11px] mt-1 text-rose-600 dark:text-rose-400">Pastikan API Key sudah benar dan koneksi internet stabil.</p>
+                    </div>
+                  </div>
+                </template>
+
+              </div>
+
+              <!-- 3A. TAB: PASTE TEXT -->
+              <div x-show="formImporJadwal.inputMode === 'paste'" class="space-y-3">
+                <div class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-teal-50/60 dark:bg-teal-950/30 p-3 rounded-xl border border-teal-200 dark:border-teal-900/60 flex items-start space-x-2">
+                  <span class="text-base">💡</span>
+                  <div>
+                    <strong>Cara mudah:</strong> Buka jadwal di Excel atau spreadsheet web aSc, blok seluruh tabel (<kbd class="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border text-[10px]">Ctrl+A</kbd>), salin (<kbd class="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border text-[10px]">Ctrl+C</kbd>), lalu tempelkan di kotak bawah ini. Otomatis mengenali kolom hari, jam, mapel, kelas, dan tugas piket!
+                  </div>
+                </div>
+
+                <div>
+                  <textarea x-model="formImporJadwal.rawText" rows="7" 
+                            placeholder="Tempel tabel aSc Timetables di sini (dari Excel atau text)...&#10;Contoh format matriks:&#10;JAM&#9;WAKTU&#9;Senin&#9;Selasa&#9;Rabu&#9;Kamis&#9;Jumat&#9;Sabtu&#10;1&#9;07:00 - 07:40&#9;PISA X5 COC2&#9;Kimia XII ICP&#9;...&#10;5&#9;10:00 - 10:40&#9;Chemistry XII Cp&#9;Picket Kantin&#9;..."
+                            class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                  <button type="button" @click="downloadAscTemplateExcel(formImporJadwal.target)"
+                          class="text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 flex items-center space-x-1">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    <span>Unduh Format Template Excel</span>
+                  </button>
+                  <button type="button" @click="processPastedScheduleText()"
+                          class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center space-x-2 shadow-md shadow-teal-600/20 transition">
+                    <span>Pratinjau Jadwal</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 3B. TAB: FILE UPLOAD -->
+              <div x-show="formImporJadwal.inputMode === 'file'" class="space-y-4">
+                <div class="p-8 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-3xl text-center hover:border-teal-500 dark:hover:border-teal-500 transition group flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-800/30">
+                  <div class="w-14 h-14 rounded-2xl bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition">
+                    <i data-lucide="file-spreadsheet" class="w-8 h-8"></i>
+                  </div>
+                  <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Pilih File Excel Jadwal aSc (.xlsx, .xls, .csv)</h4>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mb-4">Export langsung file jadwal dari aSc Timetables atau gunakan template standar.</p>
+                  
+                  <label class="cursor-pointer px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold inline-flex items-center space-x-2 shadow-md shadow-teal-600/20 transition">
+                    <i data-lucide="folder-open" class="w-4 h-4"></i>
+                    <span>Cari File di Komputer</span>
+                    <input type="file" @change="handleScheduleFileUpload($event)" accept=".xlsx, .xls, .csv" class="hidden">
+                  </label>
+
+                  <template x-if="formImporJadwal.fileName">
+                    <p class="text-xs font-bold text-teal-600 dark:text-teal-400 mt-3 flex items-center space-x-1">
+                      <i data-lucide="check-circle" class="w-4 h-4"></i>
+                      <span x-text="'File terpilih: ' + formImporJadwal.fileName"></span>
+                    </p>
+                  </template>
+                </div>
+
+                <div class="flex justify-end">
+                  <button type="button" @click="downloadAscTemplateExcel(formImporJadwal.target)"
+                          class="text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 flex items-center space-x-1">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    <span>Unduh Template Format Excel aSc</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 3C. TAB: 1-CLICK PRESET DARI FOTO -->
+              <div x-show="formImporJadwal.inputMode === 'preset'" class="space-y-4">
+                <div class="p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-amber-500/10 border border-amber-500/20 space-y-3">
+                  <div class="flex items-start space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
+                      <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <h4 class="text-sm font-black text-slate-900 dark:text-white">Preset Resmi Sesuai Foto Jadwal Sekolah</h4>
+                      <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">
+                        Sistem telah menyalin seluruh data akurat langsung dari foto jadwal aSc Timetables yang Anda kirimkan. Anda dapat langsung menerapkannya dengan 1-klik!
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div class="p-3.5 rounded-xl border bg-white dark:bg-slate-900"
+                         :class="formImporJadwal.target === 'mengajar' ? 'border-teal-500 ring-2 ring-teal-500/20' : 'border-slate-200 dark:border-slate-800'">
+                      <span class="text-[10px] font-black uppercase text-teal-600 dark:text-teal-400">Jadwal Guru (Foto 1)</span>
+                      <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5">Tito Vanzal, S.Pd. (C9)</h5>
+                      <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">21 Sesi: Mengajar Kimia (XII Cp, XII ICP 2F, X5 COC2, X15 IUPP COC 1) & Tugas Piket Koridor/Kantin.</p>
+                      <button type="button" @click="formImporJadwal.target = 'mengajar'; loadSchedulePresetFromPhoto('mengajar')"
+                              class="w-full mt-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition">
+                        Gunakan Jadwal Guru Ini ➔
+                      </button>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl border bg-white dark:bg-slate-900"
+                         :class="formImporJadwal.target === 'kelas' ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200 dark:border-slate-800'">
+                      <span class="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400">Jadwal Siswa (Foto 2)</span>
+                      <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5">Kelas X3 Atlet</h5>
+                      <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">36 Sesi: Lengkap seluruh mapel (Athlete Coaching, Agama, Sejarah, Kimia, Matematika, PJOK, dll).</p>
+                      <button type="button" @click="formImporJadwal.target = 'kelas'; loadSchedulePresetFromPhoto('kelas')"
+                              class="w-full mt-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition">
+                        Gunakan Jadwal Siswa Ini ➔
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </template>
+
+          <!-- Step 2: Interactive Visual Preview Table -->
+          <template x-if="imporJadwalStep === 'preview'">
+            <div class="space-y-4">
+              
+              <!-- Summary Toolbar -->
+              <div class="p-4 rounded-2xl bg-teal-50/60 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center space-x-3">
+                  <div class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                    <span x-text="imporJadwalPreview.length"></span>
+                  </div>
+                  <div>
+                    <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <span>Sesi Jadwal Terdeteksi</span>
+                      <span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-200 dark:bg-teal-900 text-teal-800 dark:text-teal-200"
+                            x-text="formImporJadwal.target === 'mengajar' ? 'Jadwal Mengajar' : ('Kelas: ' + formImporJadwal.targetKelas)"></span>
+                    </h4>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Silakan periksa detail baris jadwal di bawah sebelum disimpan ke sistem.</p>
+                  </div>
+                </div>
+
+                <!-- Replace All Toggle -->
+                <label class="flex items-center space-x-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                  <input type="checkbox" x-model="formImporJadwal.replaceAll" class="rounded text-teal-600 focus:ring-teal-500 w-4 h-4">
+                  <span>Timpa jadwal lama pada hari yang sama</span>
+                </label>
+              </div>
+
+              <!-- Preview Table -->
+              <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 max-h-[50vh]">
+                <table class="w-full text-left text-xs">
+                  <thead class="bg-slate-100 dark:bg-slate-800/80 sticky top-0 z-10 text-[11px] font-black uppercase text-slate-500 dark:text-slate-400">
+                    <tr>
+                      <th class="p-3">Hari & Jam</th>
+                      <th class="p-3">Waktu</th>
+                      <th class="p-3">Mapel / Tugas</th>
+                      <th class="p-3">Kelas / Ruang / Koridor</th>
+                      <th class="p-3">Guru</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                    <template x-for="(item, pIdx) in imporJadwalPreview" :key="pIdx">
+                      <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                        <td class="p-3 font-bold text-slate-900 dark:text-white">
+                          <span x-text="item.hari"></span>
+                          <span class="text-[10px] text-slate-500 ml-1" x-text="'(Jam ' + item.jamKe + ')'"></span>
+                        </td>
+                        <td class="p-3 text-slate-600 dark:text-slate-400 font-mono text-[11px]" x-text="item.waktu"></td>
+                        <td class="p-3">
+                          <template x-if="item.tipeTugas === 'Piket Lantai'">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                              <i data-lucide="shield-alert" class="w-3 h-3 mr-1"></i>
+                              <span>Piket Lantai</span>
+                            </span>
+                          </template>
+                          <template x-if="item.tipeTugas !== 'Piket Lantai'">
+                            <span class="font-bold text-slate-800 dark:text-slate-200" x-text="item.mapel"></span>
+                          </template>
+                        </td>
+                        <td class="p-3">
+                          <template x-if="item.tipeTugas === 'Piket Lantai'">
+                            <span class="text-amber-700 dark:text-amber-400 font-bold" x-text="item.lantai || 'Koridor / Kantin'"></span>
+                          </template>
+                          <template x-if="item.tipeTugas !== 'Piket Lantai'">
+                            <span class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-300 text-[11px]" x-text="item.kelas || '-'"></span>
+                          </template>
+                        </td>
+                        <td class="p-3 text-slate-600 dark:text-slate-400 truncate max-w-[140px]" x-text="item.guru || '-'"></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </template>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between shrink-0">
+          <template x-if="imporJadwalStep === 'input'">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-[11px] text-slate-500">Mendukung format aSc Timetables Indonesia & Internasional.</span>
+              <button type="button" @click="modalImporJadwalOpen = false" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+                Tutup
+              </button>
+            </div>
+          </template>
+
+          <template x-if="imporJadwalStep === 'preview'">
+            <div class="flex items-center justify-between w-full">
+              <button type="button" @click="imporJadwalStep = 'input'" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition flex items-center space-x-1.5">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                <span>Kembali / Ubah</span>
+              </button>
+              <button type="button" @click="applyImportedSchedule()" class="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-lg shadow-teal-600/25 flex items-center space-x-2 transition">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>Terapkan & Simpan Jadwal</span>
+              </button>
+            </div>
+          </template>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
        MODAL: RANDOM STUDENT PICKER (SPIN & PICK IN CLASSROOM)
        ======================================================================== -->
   <div x-show="modalPickerOpen" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
@@ -11722,16 +12955,6 @@ document.addEventListener('alpine:init', () => {
       <span x-text="toast.message"></span>
     </div>
   </div>
-
-  <!-- Tombol Navigasi Mengambang Kembali ke Portal Utama (Mobile & Desktop) -->
-  <a href="../" 
-     class="fixed bottom-6 left-6 z-50 flex items-center gap-2 px-3.5 py-2 rounded-full bg-slate-900/95 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700 shadow-xl backdrop-blur-md text-xs font-semibold transition-all hover:scale-105 no-print"
-     title="Kembali ke Beranda PortalKimia Suite">
-    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"></path>
-    </svg>
-    <span>Portal Utama</span>
-  </a>
 
 </body>
 </html>
