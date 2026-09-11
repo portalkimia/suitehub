@@ -496,6 +496,20 @@ window.OlympiadApp = {
       };
     });
 
+    // 9. Riwayat Ploting
+    data.riwayatPloting = Array.isArray(data.riwayatPloting) ? data.riwayatPloting : [];
+    data.riwayatPloting = data.riwayatPloting.map((rp, idx) => {
+      const rpObj = (rp && typeof rp === 'object') ? rp : {};
+      return {
+        id: String(rpObj.id || ('rp-' + (idx + 1))),
+        tahun: parseInt(rpObj.tahun) || 2026,
+        namaTim: String(rpObj.namaTim || 'Tim Olimpiade'),
+        lomba: String(rpObj.lomba || 'Kompetisi Sains'),
+        capaian: String(rpObj.capaian || 'Delegasi'),
+        anggota: Array.isArray(rpObj.anggota) ? rpObj.anggota.map(String) : []
+      };
+    });
+
     return data;
   },
 
@@ -747,6 +761,11 @@ window.OlympiadApp = {
         if (Array.isArray(normalized.jadwalIntensif)) this.data.jadwalIntensif = normalized.jadwalIntensif;
         if (Array.isArray(normalized.pengumuman)) this.data.pengumuman = normalized.pengumuman;
         if (Array.isArray(normalized.pembimbing)) this.data.pembimbing = normalized.pembimbing;
+        if (Array.isArray(normalized.riwayatPloting) && normalized.riwayatPloting.length > 0) {
+          this.data.riwayatPloting = normalized.riwayatPloting;
+        } else if (!Array.isArray(this.data.riwayatPloting)) {
+          this.data.riwayatPloting = [];
+        }
         if (normalized.settings && typeof normalized.settings === 'object' && Object.keys(normalized.settings).length > 0) {
           this.data.settings = { ...this.data.settings, ...normalized.settings };
         }
@@ -790,6 +809,7 @@ window.OlympiadApp = {
         jadwalIntensif: this.data.jadwalIntensif || [],
         pengumuman: this.data.pengumuman || [],
         pembimbing: this.data.pembimbing || [],
+        riwayatPloting: this.data.riwayatPloting || [],
         settings: this.data.settings || {}
       };
 
@@ -2081,18 +2101,20 @@ OlympiadApp.renderDashboard = function() {
           <h3 class="text-base font-bold text-zinc-100 flex items-center gap-2">
             <i data-lucide="user-check" class="w-4 h-4 text-emerald-400"></i> Dewan Pembimbing &amp; Pelatih
           </h3>
-          <span class="text-xs text-zinc-400">${this.data.pembimbing.length} Pembimbing</span>
+          <span class="text-xs text-zinc-400">${(this.data.pembimbing || []).length} Pembimbing</span>
         </div>
         <div class="space-y-3">
-          ${this.data.pembimbing.map(m => `
+          ${(this.data.pembimbing || []).length === 0 ? `
+            <div class="p-4 text-center text-zinc-500 text-xs">Belum ada data dewan pembimbing.</div>
+          ` : (this.data.pembimbing || []).map(m => `
             <div class="p-3 rounded-xl bg-zinc-900/50 border border-zinc-800 flex items-center justify-between">
               <div>
-                <h4 class="text-xs font-bold text-zinc-100">${m.nama}</h4>
-                <p class="text-[11px] text-violet-400 font-semibold">${m.spesialisasi}</p>
-                <p class="text-[10px] text-zinc-400 mt-0.5"><i data-lucide="clock" class="inline w-3 h-3"></i> ${m.jadwal}</p>
+                <h4 class="text-xs font-bold text-zinc-100">${m.nama || 'Pembimbing'}</h4>
+                <p class="text-[11px] text-violet-400 font-semibold">${m.spesialisasi || 'Kimia'}</p>
+                <p class="text-[10px] text-zinc-400 mt-0.5"><i data-lucide="clock" class="inline w-3 h-3"></i> ${m.jadwal || '-'}</p>
               </div>
               <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold">
-                ${m.totalSesi} Sesi
+                ${m.totalSesi || 0} Sesi
               </span>
             </div>
           `).join('')}
@@ -5804,7 +5826,18 @@ OlympiadApp.renderPlotingModule = function() {
   const container = document.getElementById('panel-ploting');
   if (!container) return;
 
-  if (!this.data.lomba || this.data.lomba.length === 0) {
+  if (!this.plotingState) {
+    this.plotingState = { lombaId: '', selectedStudentIds: [], analysisResult: null };
+  }
+  if (!Array.isArray(this.plotingState.selectedStudentIds)) {
+    this.plotingState.selectedStudentIds = [];
+  }
+
+  const lombaList = (this.data && Array.isArray(this.data.lomba)) ? this.data.lomba : [];
+  const siswaList = (this.data && Array.isArray(this.data.siswa)) ? this.data.siswa : [];
+  const riwayatPlotingList = (this.data && Array.isArray(this.data.riwayatPloting)) ? this.data.riwayatPloting : [];
+
+  if (lombaList.length === 0) {
     container.innerHTML = `
       <div class="glass-card rounded-2xl p-12 text-center border border-zinc-800 space-y-3">
         <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
@@ -5823,11 +5856,11 @@ OlympiadApp.renderPlotingModule = function() {
     return;
   }
 
-  if (!this.plotingState.lombaId && this.data.lomba.length > 0) {
-    this.plotingState.lombaId = this.data.lomba[0].id;
+  if (!this.plotingState.lombaId && lombaList.length > 0) {
+    this.plotingState.lombaId = lombaList[0].id;
   }
 
-  const activeLomba = this.data.lomba.find(l => l.id === this.plotingState.lombaId) || this.data.lomba[0] || {};
+  const activeLomba = lombaList.find(l => l.id === this.plotingState.lombaId) || lombaList[0] || {};
   const isTeam = (activeLomba.klasifikasi || '').includes('Tim');
   const targetSize = (activeLomba.klasifikasi || '').includes('3') ? 3 : ((activeLomba.klasifikasi || '').includes('2') ? 2 : 1);
 
@@ -5847,9 +5880,9 @@ OlympiadApp.renderPlotingModule = function() {
       <div class="flex items-center gap-2">
         <label class="text-xs font-bold text-zinc-400">Target Lomba:</label>
         <select onchange="OlympiadApp.selectPlotingLomba(this.value)" class="px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-bold focus:outline-none focus:border-violet-500">
-          ${this.data.lomba.map(l => `
+          ${lombaList.map(l => `
             <option value="${l.id}" ${l.id === activeLomba.id ? 'selected' : ''}>
-              ${l.nama} (${l.klasifikasi})
+              ${l.nama || 'Kompetisi'} (${l.klasifikasi || 'Individu'})
             </option>
           `).join('')}
         </select>
@@ -5894,8 +5927,12 @@ OlympiadApp.renderPlotingModule = function() {
           <p class="text-xs text-zinc-400 mb-3">Centang siswa di bawah ini untuk menguji sinergi tim secara manual:</p>
 
           <div class="space-y-2 max-h-96 overflow-y-auto pr-1">
-            ${this.data.siswa.map(s => {
-              const isSelected = this.plotingState.selectedStudentIds.includes(s.id);
+            ${siswaList.length === 0 ? `
+              <div class="p-6 text-center text-zinc-500 text-xs">
+                Belum ada data siswa binaan. Tambahkan data siswa terlebih dahulu di menu Data Siswa &amp; Tim.
+              </div>
+            ` : siswaList.map(s => {
+              const isSelected = (this.plotingState.selectedStudentIds || []).includes(s.id);
               const clash = this.checkScheduleClash(s.id, activeLomba.id);
               return `
                 <div class="p-3 rounded-xl border transition-all ${
@@ -5907,8 +5944,8 @@ OlympiadApp.renderPlotingModule = function() {
                            onchange="OlympiadApp.toggleStudentSelection('${s.id}', ${targetSize})"
                            class="w-4 h-4 rounded text-violet-600 bg-zinc-900 border-zinc-700">
                     <div>
-                      <div class="text-xs font-bold text-zinc-100">${s.nama}</div>
-                      <div class="text-[11px] text-zinc-400">Spesialis: <span class="text-violet-400 font-semibold">${s.bidangUtama}</span> (${s.kelas})</div>
+                      <div class="text-xs font-bold text-zinc-100">${s.nama || 'Siswa'}</div>
+                      <div class="text-[11px] text-zinc-400">Spesialis: <span class="text-violet-400 font-semibold">${s.bidangUtama || 'Umum'}</span> (${s.kelas || '-'})</div>
                     </div>
                   </label>
                   <div class="text-right shrink-0">
@@ -5927,7 +5964,7 @@ OlympiadApp.renderPlotingModule = function() {
           <button onclick="OlympiadApp.savePlotingToLomba('${activeLomba.id}')" 
                   ${this.plotingState.selectedStudentIds.length === 0 ? 'disabled' : ''}
                   class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white text-xs font-bold transition-all shadow-md">
-            Simpan Formasi Ini ke ${activeLomba.nama}
+            Simpan Formasi Ini ke ${activeLomba.nama || 'Lomba'}
           </button>
         </div>
       </div>
@@ -5963,19 +6000,23 @@ OlympiadApp.renderPlotingModule = function() {
         <i data-lucide="history" class="w-4 h-4 text-amber-400"></i> Histori Regenerasi &amp; Ploting Delegasi (2024 - 2026)
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        ${this.data.riwayatPloting.map(rp => `
+        ${riwayatPlotingList.length > 0 ? riwayatPlotingList.map(rp => `
           <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
             <div class="flex items-center justify-between mb-2">
-              <span class="px-2 py-0.5 rounded bg-zinc-800 text-violet-400 font-bold text-xs">Tahun ${rp.tahun}</span>
-              <span class="text-[11px] text-amber-400 font-bold">${rp.capaian}</span>
+              <span class="px-2 py-0.5 rounded bg-zinc-800 text-violet-400 font-bold text-xs">Tahun ${rp.tahun || 2026}</span>
+              <span class="text-[11px] text-amber-400 font-bold">${rp.capaian || 'Delegasi'}</span>
             </div>
-            <h4 class="text-xs font-bold text-zinc-100">${rp.namaTim}</h4>
-            <div class="text-[11px] text-zinc-400 mt-0.5">${rp.lomba}</div>
+            <h4 class="text-xs font-bold text-zinc-100">${rp.namaTim || 'Tim Delegasi'}</h4>
+            <div class="text-[11px] text-zinc-400 mt-0.5">${rp.lomba || '-'}</div>
             <ul class="mt-3 space-y-1 text-xs text-zinc-300 border-t border-zinc-800/80 pt-2">
-              ${rp.anggota.map(a => `<li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ${a}</li>`).join('')}
+              ${(Array.isArray(rp.anggota) ? rp.anggota : []).map(a => `<li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ${a}</li>`).join('')}
             </ul>
           </div>
-        `).join('')}
+        `).join('') : `
+          <div class="col-span-3 text-center py-6 text-zinc-500 text-xs">
+            Belum ada riwayat formasi delegasi sebelumnya. Formasi yang Anda simpan di atas akan otomatis tercatat di sini.
+          </div>
+        `}
       </div>
     </div>
   `;
@@ -6020,14 +6061,26 @@ OlympiadApp.clearPlotingSelection = function() {
 
 // Deteksi Bentrok Jadwal Otomatis
 OlympiadApp.checkScheduleClash = function(siswaId, targetLombaId) {
+  if (!this.data || !Array.isArray(this.data.lomba)) return null;
   const targetLomba = this.data.lomba.find(l => l.id === targetLombaId);
   if (!targetLomba) return null;
+
+  const targetTimeline = targetLomba.timeline || {};
+  const targetPenyisihan = (typeof targetTimeline.penyisihan === 'string') ? targetTimeline.penyisihan.trim() : '';
+  const targetFinal = (typeof targetTimeline.final === 'string') ? targetTimeline.final.trim() : '';
 
   for (const l of this.data.lomba) {
     if (l.id === targetLombaId) continue;
     if ((l.pesertaIds || []).includes(siswaId)) {
-      if (l.timeline.penyisihan === targetLomba.timeline.penyisihan || l.timeline.final === targetLomba.timeline.final) {
-        return `Bentrok tanggal babak dengan ${l.nama} (${l.timeline.penyisihan})`;
+      const lTimeline = l.timeline || {};
+      const lPenyisihan = (typeof lTimeline.penyisihan === 'string') ? lTimeline.penyisihan.trim() : '';
+      const lFinal = (typeof lTimeline.final === 'string') ? lTimeline.final.trim() : '';
+
+      if (targetPenyisihan && lPenyisihan && targetPenyisihan === lPenyisihan) {
+        return `Bentrok tanggal penyisihan dengan ${l.nama} (${lPenyisihan})`;
+      }
+      if (targetFinal && lFinal && targetFinal === lFinal) {
+        return `Bentrok tanggal final dengan ${l.nama} (${lFinal})`;
       }
     }
   }
@@ -6150,14 +6203,22 @@ OlympiadApp.updateSimulationRadar = function() {
   const ctx = document.getElementById('chart-simulation-radar');
   if (!ctx) return;
 
-  const selectedStudents = this.plotingState.selectedStudentIds.map(id => this.data.siswa.find(s => s.id === id)).filter(Boolean);
+  const selectedIds = (this.plotingState && Array.isArray(this.plotingState.selectedStudentIds)) ? this.plotingState.selectedStudentIds : [];
+  const siswaList = (this.data && Array.isArray(this.data.siswa)) ? this.data.siswa : [];
+  const selectedStudents = selectedIds.map(id => siswaList.find(s => s.id === id)).filter(Boolean);
   const summaryBox = document.getElementById('simulation-summary-box');
   const synergyBadge = document.getElementById('synergy-badge');
 
   if (selectedStudents.length === 0) {
-    if (this.radarChart) this.radarChart.destroy();
+    if (this.radarChart) {
+      try { this.radarChart.destroy(); } catch(e) {}
+      this.radarChart = null;
+    }
     if (summaryBox) summaryBox.innerHTML = '<span class="text-zinc-500 italic">Pilih minimal 1 siswa untuk melihat simulasi radar kekuatan tim...</span>';
-    if (synergyBadge) synergyBadge.textContent = 'Sinergi: --%';
+    if (synergyBadge) {
+      synergyBadge.className = 'px-2.5 py-1 rounded-full text-xs font-extrabold bg-zinc-800 text-zinc-400';
+      synergyBadge.textContent = 'Sinergi: --%';
+    }
     return;
   }
 
@@ -6217,59 +6278,98 @@ OlympiadApp.updateSimulationRadar = function() {
     if (window.lucide) window.lucide.createIcons();
   }
 
-  if (this.radarChart) this.radarChart.destroy();
-  this.radarChart = new Chart(ctx, {
-    type: 'radar',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Kekuatan Maksimum Tim',
-          data: maxValues,
-          backgroundColor: 'rgba(52, 211, 153, 0.25)',
-          borderColor: '#34d399',
-          pointBackgroundColor: '#34d399',
-          borderWidth: 2
-        },
-        {
-          label: 'Rata-rata Tim',
-          data: avgValues,
-          backgroundColor: 'rgba(167, 139, 250, 0.15)',
-          borderColor: '#a78bfa',
-          pointBackgroundColor: '#a78bfa',
-          borderWidth: 1.5,
-          borderDash: [4, 4]
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        r: {
-          suggestedMin: 50,
-          suggestedMax: 100,
-          ticks: { display: false },
-          grid: { color: 'rgba(255, 255, 255, 0.1)' },
-          angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-          pointLabels: { color: '#a1a1aa', font: { size: 10, weight: '600' } }
-        }
+  if (typeof Chart === 'undefined') return;
+  if (this.radarChart) {
+    try { this.radarChart.destroy(); } catch(e) {}
+    this.radarChart = null;
+  }
+  try {
+    this.radarChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Kekuatan Maksimum Tim',
+            data: maxValues,
+            backgroundColor: 'rgba(52, 211, 153, 0.25)',
+            borderColor: '#34d399',
+            pointBackgroundColor: '#34d399',
+            borderWidth: 2
+          },
+          {
+            label: 'Rata-rata Tim',
+            data: avgValues,
+            backgroundColor: 'rgba(167, 139, 250, 0.15)',
+            borderColor: '#a78bfa',
+            pointBackgroundColor: '#a78bfa',
+            borderWidth: 1.5,
+            borderDash: [4, 4]
+          }
+        ]
       },
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: { color: '#d4d4d8', font: { size: 10 } }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            suggestedMin: 50,
+            suggestedMax: 100,
+            ticks: { display: false },
+            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+            pointLabels: { color: '#a1a1aa', font: { size: 10, weight: '600' } }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { color: '#d4d4d8', font: { size: 10 } }
+          }
         }
       }
-    }
-  });
+    });
+  } catch(chartErr) {
+    console.warn('Radar chart initialization skipped/failed:', chartErr);
+  }
 };
 
 OlympiadApp.savePlotingToLomba = function(lombaId) {
+  if (!this.data || !Array.isArray(this.data.lomba)) return;
   const l = this.data.lomba.find(item => item.id === lombaId);
   if (!l) return;
-  l.pesertaIds = [...this.plotingState.selectedStudentIds];
+  
+  const selectedIds = [...(this.plotingState.selectedStudentIds || [])];
+  l.pesertaIds = selectedIds;
+
+  // Catat riwayat formasi ke riwayatPloting
+  if (!Array.isArray(this.data.riwayatPloting)) {
+    this.data.riwayatPloting = [];
+  }
+  const memberNames = selectedIds.map(id => {
+    const s = (this.data.siswa || []).find(x => x.id === id);
+    return s ? s.nama : id;
+  });
+  if (memberNames.length > 0) {
+    const existingIdx = this.data.riwayatPloting.findIndex(r => r.lomba === l.nama && r.tahun === 2026);
+    const plotEntry = {
+      id: 'rp-' + Date.now(),
+      tahun: 2026,
+      namaTim: (l.nama || 'Lomba') + (l.klasifikasi ? ` (${l.klasifikasi})` : ''),
+      lomba: l.nama || 'Kompetisi',
+      capaian: 'Delegasi Terdaftar',
+      anggota: memberNames
+    };
+    if (existingIdx !== -1) {
+      this.data.riwayatPloting[existingIdx] = plotEntry;
+    } else {
+      this.data.riwayatPloting.unshift(plotEntry);
+    }
+  }
+
   this.saveData(true);
+  this.renderPlotingModule();
+  if (window.lucide) window.lucide.createIcons();
   this.showToast(`Formasi berhasil diploting untuk ${l.nama}!`, 'success');
 };
 
@@ -6390,13 +6490,13 @@ OlympiadApp.renderAnalyticsModule = function() {
             </tr>
           </thead>
           <tbody class="divide-y divide-zinc-800/60">
-            ${this.data.siswa.length === 0 ? `
+            ${(!this.data || !Array.isArray(this.data.siswa) || this.data.siswa.length === 0) ? `
               <tr>
                 <td colspan="9" class="py-8 text-center text-zinc-500 text-xs">
                   Belum ada data siswa binaan. Tambahkan siswa terlebih dahulu untuk melihat heatmap keahlian.
                 </td>
               </tr>
-            ` : this.data.siswa.map(s => {
+            ` : (this.data.siswa || []).map(s => {
               const getCellClass = (score) => {
                 if (score >= 90) return 'heatmap-cell-5';
                 if (score >= 80) return 'heatmap-cell-4';
@@ -6998,7 +7098,7 @@ OlympiadApp.renderUsersModule = function() {
             </tr>
           </thead>
           <tbody class="divide-y divide-zinc-800/60">
-            ${this.data.users.map(u => `
+            ${(this.data.users || []).map(u => `
               <tr class="hover:bg-zinc-900/50 transition-colors">
                 <td class="py-3 px-4 font-bold text-zinc-100 flex items-center gap-2.5">
                   <div class="w-7 h-7 rounded-lg bg-zinc-800 text-zinc-200 flex items-center justify-center text-xs font-bold">

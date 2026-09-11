@@ -24,25 +24,27 @@ PortalKimia Olimpiade dirancang aman untuk penggunaan di kelas, laboratorium, ma
 ## 📊 2. Otomatisasi Sheet & Kolom di Google Spreadsheet
 
 File `Code.gs` telah dilengkapi fungsi **`initSpreadsheetStructure(ss)`** yang secara otomatis:
-1. Membuat seluruh 8 sheet jika belum tersedia.
+1. Membuat seluruh 9 sheet jika belum tersedia.
 2. Memberikan label warna khusus (*Tab Color*) pada setiap sheet agar estetik dan mudah dibedakan.
 3. Menulis baris Header (Kolom 1) dengan desain modern: background gelap (`#18181b`), teks putih tebal, tinggi 35px, dan teks rata tengah.
 4. Membekukan baris pertama (*Freeze Row 1*) agar header tetap terlihat saat di-scroll.
 5. Mengatur lebar kolom secara proporsional sesuai kebutuhan isi data.
-6. Menghapus sheet bawaan (*Sheet1*) yang kosong secara otomatis.
+6. Mengisi nilai parameter awal pada sheet `Pengaturan_Sistem` secara otomatis.
+7. Menghapus sheet bawaan (*Sheet1*) yang kosong secara otomatis.
 
-### Rincian 8 Sheet yang Dibuat Otomatis:
+### Rincian 9 Sheet & Header Kolom yang Dibuat Otomatis:
 
-| No | Nama Sheet | Warna Tab | Jumlah Kolom | Deskripsi Data |
-|---|---|---|---|---|
-| 1 | **`Bank_Soal`** | 🔵 Biru (#2563eb) | 17 Kolom | ID, Judul, Kategori, Subtopik, Tingkat, Sumber, Tahun, Teks Soal, Rumus KaTeX, Opsi A-E, Kunci, Pembahasan, Tautan Drive, dll. |
-| 2 | **`Data_Siswa`** | 🟢 Hijau (#059669) | 14 Kolom | ID, NISN, Nama Lengkap, Kelas, Status Binaan, No HP, Wali, Rating Topik (JSON), Riwayat Lomba (JSON), dll. |
-| 3 | **`Agenda_Lomba`** | 🟣 Ungu (#7c3aed) | 13 Kolom | ID, Nama Lomba, Penyelenggara, Tingkat, Kategori Tim/Individu, Biaya Pendaftaran, Total Biaya, Peserta Aktif, Peserta Gugur, Timeline (JSON). |
-| 4 | **`Jadwal_Intensif`** | 🟠 Oranye (#d97706) | 13 Kolom | ID, Judul Sesi, Tanggal, Jam Mulai, Jam Selesai, Ruang/Lokasi, Guru Pengisi, Materi Topik, Peserta Terploting, Link Materi, Keterangan. |
-| 5 | **`Pengumuman`** | 🔴 Merah (#e11d48) | 9 Kolom | ID, Judul Pengumuman, Tanggal, Isi Pesan, Prioritas (Info/Penting/Urgent), Status Pin, Sasaran Role (Siswa/Guru/Semua), Penulis. |
-| 6 | **`Pembimbing`** | 🩵 Cyan (#0891b2) | 9 Kolom | ID, NIP, Nama Pembimbing, Bidang Keahlian (Organik/Anorganik/Fisik/Analitik/Biokimia), No HP, Email, Catatan. |
-| 7 | **`Pengaturan_Sistem`** | 🔘 Abu-abu (#475569) | 4 Kolom | Key, Value, Keterangan, Terakhir Diperbarui (Nama Sekolah, Koordinator, Target Medali, Tahun Ajaran, dll). |
-| 8 | **`Log_Aktivitas`** | ⚫ Gelap (#18181b) | 4 Kolom | Waktu, Pelaku (Role), Aksi, Keterangan Perubahan Data (Audit Trail). |
+| No | Nama Sheet | Warna Tab | Kolom | Daftar Header Kolom & Penjelasan |
+|---|---|---|:---:|---|
+| 1 | **`Bank_Soal`** | 🟣 Violet (`#8b5cf6`) | 19 Kolom | `id`, `nomor`, `tahun`, `sumber`, `penyelenggara`, `bidang`, `subtopik`, `kesulitan`, `jenis`, `teksSoal`, `opsi`, `kunciJawaban`, `pembahasan`, `pembahasanDriveUrl`, `videoPembahasanUrl`, `googleDriveUrl`, `googleDriveName`, `tags`, `terakhirDiubah`<br>*Mencakup naskah bank soal terpadu, link dokumen Google Drive, link video pembahasan YouTube/Drive, dan rumus kimia KaTeX.* |
+| 2 | **`Data_Siswa`** | 🟢 Emerald (`#10b981`) | 22 Kolom | `id`, `nama`, `namaPanggilan`, `nisn`, `levelKelas`, `kelasAsal`, `kelas`, `level`, `tempatLahir`, `tanggalLahir`, `bidangUtama`, `bidangSekunder`, `kartuPelajar`, `foto`, `berkasPendaftaran`, `pembimbingId`, `skorRata`, `ratingTopik`, `riwayatLomba`, `riwayatEvaluasi`, `kehadiran`, `terakhirDiubah`<br>*Mencakup profil lengkap talenta, kelas, rating 5 bidang kimia (Fisik, Organik, Anorganik, Analitik, Biokimia), presensi bimbingan, dan rekam jejak capaian.* |
+| 3 | **`Agenda_Lomba`** | 🟠 Amber (`#f59e0b`) | 16 Kolom | `id`, `nama`, `klasifikasi`, `penyelenggara`, `statusPendaftaran`, `kuotaSekolah`, `timeline`, `biaya`, `dokumenCeklis`, `syaratPendaftaran`, `pesertaIds`, `pesertaGugur`, `hasilBabak`, `guidebookUrl`, `statusAdministrasi`, `terakhirDiubah`<br>*Mencakup tahapan seleksi fleksibel (Penyisihan s.d. Final, moda Online/Offline), ceklis dokumen administrasi, delegasi peserta, dan status pendaftaran.* |
+| 4 | **`Riwayat_Ploting`** | 🩵 Cyan (`#06b6d4`) | 7 Kolom | `id`, `tahun`, `namaTim`, `lomba`, `capaian`, `anggota`, `terakhirDiubah`<br>*Mencatat komposisi regu/tim lomba lintas tahun, daftar anggota siswa per tim, dan riwayat prestasi tim.* |
+| 5 | **`Jadwal_Intensif`** | 🔵 Blue (`#3b82f6`) | 13 Kolom | `id`, `judul`, `bidang`, `tanggal`, `hari`, `jamMulai`, `jamSelesai`, `pengisi`, `lokasi`, `linkOnline`, `keterangan`, `status`, `terakhirDiubah`<br>*Jadwal pembinaan intensif tatap muka maupun daring (Google Meet/Zoom), ruang/lab, guru pembina pengampu, dan status sesi.* |
+| 6 | **`Pengumuman`** | 🩷 Pink (`#ec4899`) | 9 Kolom | `id`, `judul`, `isi`, `prioritas`, `tanggal`, `penulis`, `tautan`, `pinned`, `terakhirDiubah`<br>*Mading digital olimpiade, prioritas pengumuman (normal/penting/mendesak), sematan/pin, dan tautan juknis.* |
+| 7 | **`Pembimbing`** | 🔮 Indigo (`#6366f1`) | 9 Kolom | `id`, `nama`, `spesialisasi`, `kontak`, `jadwal`, `totalSesi`, `status`, `siswaBinaanCount`, `terakhirDiubah`<br>*Data profil guru pembina olimpiade, bidang spesialisasi, kontak WhatsApp/email, dan beban binaan siswa.* |
+| 8 | **`Pengaturan_Sistem`** | ⚪ Slate (`#71717a`) | 4 Kolom | `kunci`, `nilai`, `keterangan`, `terakhirDiubah`<br>*Parameter global sekolah/madrasah, koordinator, target medali, tahun ajaran aktif, dan URL backend Google Apps Script.* |
+| 9 | **`Log_Aktivitas`** | 🔘 Dark Slate (`#64748b`) | 4 Kolom | `timestamp`, `userRole`, `aksi`, `detail`<br>*Audit trail riwayat sinkronisasi data dan aktivitas modifikasi antar perangkat.* |
 
 ---
 
