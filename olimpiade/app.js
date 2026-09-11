@@ -245,7 +245,16 @@ window.OlympiadApp = {
         skorRata,
         ratingTopik,
         riwayatLomba,
-        riwayatEvaluasi: Array.isArray(sObj.riwayatEvaluasi) ? sObj.riwayatEvaluasi : [],
+        riwayatEvaluasi: (() => {
+          if (Array.isArray(sObj.riwayatEvaluasi)) return sObj.riwayatEvaluasi;
+          if (typeof sObj.riwayatEvaluasi === 'string' && sObj.riwayatEvaluasi.trim()) {
+            try {
+              const p = JSON.parse(sObj.riwayatEvaluasi);
+              if (Array.isArray(p)) return p;
+            } catch(e) {}
+          }
+          return [];
+        })(),
         kehadiran
       };
     });
@@ -340,23 +349,26 @@ window.OlympiadApp = {
         } catch(e) {}
       }
 
-      // Normalisasi Syarat Pendaftaran
+      // Normalisasi Syarat Pendaftaran (Cegah [object Object])
       let syaratPendaftaran = [];
       if (Array.isArray(lObj.syaratPendaftaran)) {
         syaratPendaftaran = lObj.syaratPendaftaran.map(s => {
           if (typeof s === 'string') return { teks: s, checked: false };
           return { teks: String(s?.teks || ''), checked: !!s?.checked };
-        }).filter(s => s.teks.trim().length > 0);
+        }).filter(s => s.teks && s.teks.trim().length > 0 && !s.teks.includes('[object Object]'));
       } else if (typeof lObj.syaratPendaftaran === 'string' && lObj.syaratPendaftaran.trim()) {
-        try {
-          const parsed = JSON.parse(lObj.syaratPendaftaran);
-          if (Array.isArray(parsed)) {
-            syaratPendaftaran = parsed.map(s => (typeof s === 'string' ? { teks: s, checked: false } : { teks: String(s?.teks || ''), checked: !!s?.checked }));
-          } else {
-            syaratPendaftaran = lObj.syaratPendaftaran.split('\n').map(s => ({ teks: s.trim(), checked: false })).filter(s => s.teks);
+        if (!lObj.syaratPendaftaran.includes('[object Object]')) {
+          try {
+            const parsed = JSON.parse(lObj.syaratPendaftaran);
+            if (Array.isArray(parsed)) {
+              syaratPendaftaran = parsed.map(s => (typeof s === 'string' ? { teks: s, checked: false } : { teks: String(s?.teks || ''), checked: !!s?.checked }))
+                .filter(s => s.teks && !s.teks.includes('[object Object]'));
+            } else {
+              syaratPendaftaran = lObj.syaratPendaftaran.split('\n').map(s => ({ teks: s.trim(), checked: false })).filter(s => s.teks && !s.teks.includes('[object Object]'));
+            }
+          } catch(e) {
+            syaratPendaftaran = lObj.syaratPendaftaran.split('\n').map(s => ({ teks: s.trim(), checked: false })).filter(s => s.teks && !s.teks.includes('[object Object]'));
           }
-        } catch(e) {
-          syaratPendaftaran = lObj.syaratPendaftaran.split('\n').map(s => ({ teks: s.trim(), checked: false })).filter(s => s.teks);
         }
       }
       if (syaratPendaftaran.length === 0) {
@@ -464,10 +476,12 @@ window.OlympiadApp = {
     data.jadwalIntensif = Array.isArray(data.jadwalIntensif) ? data.jadwalIntensif : [];
     data.jadwalIntensif = data.jadwalIntensif.map((j, idx) => {
       const jObj = (j && typeof j === 'object') ? j : {};
+      const lvl = String(jObj.level || jObj.bidang || 'Kelas 10').trim();
       return {
         id: String(jObj.id || ('jdw-' + (idx + 1) + '-' + Math.random().toString(36).substr(2, 5))),
         judul: String(jObj.judul || 'Sesi Bimbingan Intensif'),
-        bidang: String(jObj.bidang || 'Kimia Umum'),
+        bidang: lvl,
+        level: lvl,
         tanggal: String(jObj.tanggal || new Date().toISOString().slice(0, 10)),
         hari: String(jObj.hari || 'Senin'),
         jamMulai: String(jObj.jamMulai || '15:30'),
@@ -509,6 +523,21 @@ window.OlympiadApp = {
         anggota: Array.isArray(rpObj.anggota) ? rpObj.anggota.map(String) : []
       };
     });
+
+    // 10. Pengaturan & Evaluasi Columns
+    data.settings = (data.settings && typeof data.settings === 'object') ? data.settings : {};
+    if (typeof data.settings.evaluasiColumns === 'string' && data.settings.evaluasiColumns.trim()) {
+      try { data.settings.evaluasiColumns = JSON.parse(data.settings.evaluasiColumns); } catch(e) {}
+    }
+    if (!Array.isArray(data.settings.evaluasiColumns) || data.settings.evaluasiColumns.length === 0) {
+      data.settings.evaluasiColumns = ['Simulasi OSN-K 1', 'Kuis Stoikiometri', 'Tryout OMI'];
+    }
+    if (typeof data.settings.levelList === 'string' && data.settings.levelList.trim()) {
+      try { data.settings.levelList = JSON.parse(data.settings.levelList); } catch(e) {}
+    }
+    if (!Array.isArray(data.settings.levelList) || data.settings.levelList.length === 0) {
+      data.settings.levelList = ['Kelas 10', 'Kelas 11', 'Kelas 12', 'Delegasi OSN', 'Delegasi OMI'];
+    }
 
     return data;
   },
@@ -2250,19 +2279,21 @@ OlympiadApp.savePengumuman = function() {
     });
   }
 
-  this.saveDataLocally();
+  this.saveData(true);
   this.closePengumumanModal();
   this.renderDashboard();
   if (window.lucide) lucide.createIcons();
+  this.showToast(idInput ? 'Pengumuman berhasil diperbarui & disimpan ke Cloud!' : 'Pengumuman baru berhasil dipublikasikan & disimpan ke Cloud!', 'success');
 };
 
 OlympiadApp.deletePengumuman = function(id) {
   if (this.isSiswa()) return;
   if (!confirm('Yakin ingin menghapus pengumuman ini?')) return;
   this.data.pengumuman = (this.data.pengumuman || []).filter(p => p.id !== id);
-  this.saveDataLocally();
+  this.saveData(true);
   this.renderDashboard();
   if (window.lucide) lucide.createIcons();
+  this.showToast('Pengumuman berhasil dihapus dan diperbarui ke Cloud.', 'info');
 };
 
 OlympiadApp.togglePinPengumuman = function(id) {
@@ -2270,9 +2301,10 @@ OlympiadApp.togglePinPengumuman = function(id) {
   const p = (this.data.pengumuman || []).find(item => item.id === id);
   if (p) {
     p.pinned = !p.pinned;
-    this.saveDataLocally();
+    this.saveData(true);
     this.renderDashboard();
     if (window.lucide) lucide.createIcons();
+    this.showToast(p.pinned ? 'Pengumuman disematkan ke atas!' : 'Sematkan pengumuman dilepas.', 'info');
   }
 };
 
@@ -5284,20 +5316,26 @@ OlympiadApp.openEditLombaModal = function(id) {
 
   const syaratInput = document.getElementById('form-lomba-syarat-pendaftaran');
   if (syaratInput) {
+    let cleanLines = [];
     if (Array.isArray(l.syaratPendaftaran) && l.syaratPendaftaran.length > 0) {
-      syaratInput.value = l.syaratPendaftaran.map(s => typeof s === 'string' ? s : s.teks).join('\n');
-    } else if (typeof l.syaratPendaftaran === 'string' && l.syaratPendaftaran.trim()) {
-      syaratInput.value = l.syaratPendaftaran;
-    } else {
-      syaratInput.value = [
+      cleanLines = l.syaratPendaftaran
+        .map(s => typeof s === 'string' ? s : (s?.teks || ''))
+        .map(t => String(t).trim())
+        .filter(t => t && !t.includes('[object Object]'));
+    } else if (typeof l.syaratPendaftaran === 'string' && l.syaratPendaftaran.trim() && !l.syaratPendaftaran.includes('[object Object]')) {
+      cleanLines = l.syaratPendaftaran.split('\n').map(s => s.trim()).filter(Boolean);
+    }
+    if (cleanLines.length === 0) {
+      cleanLines = [
         'Scan Asli Kartu Pelajar (PDF/JPG)',
         'Pas Foto 3x4 Latar Merah/Biru',
         'Surat Rekomendasi Kepala Sekolah',
         'Bukti Transfer Pendaftaran',
         'Follow Akun Instagram Penyelenggara',
         'Unggah Twibbon & Repost Poster'
-      ].join('\n');
+      ];
     }
+    syaratInput.value = cleanLines.join('\n');
   }
 
   // Muat tahapan kompetisi ke editor
@@ -5357,7 +5395,7 @@ OlympiadApp.saveLomba = function() {
   const guidebookUrl = document.getElementById('form-lomba-drive-guidebook').value.trim();
 
   const syaratRaw = document.getElementById('form-lomba-syarat-pendaftaran')?.value || '';
-  const parsedSyaratLines = syaratRaw.split('\n').map(s => s.trim()).filter(Boolean);
+  const parsedSyaratLines = syaratRaw.split('\n').map(s => s.trim()).filter(s => s && !s.includes('[object Object]'));
 
   // Baca tahapan lomba yang dikustomisasi
   let stages = (this.currentLombaFormStages || []).map((st, i) => ({
@@ -5862,7 +5900,8 @@ OlympiadApp.renderPlotingModule = function() {
 
   const activeLomba = lombaList.find(l => l.id === this.plotingState.lombaId) || lombaList[0] || {};
   const isTeam = (activeLomba.klasifikasi || '').includes('Tim');
-  const targetSize = (activeLomba.klasifikasi || '').includes('3') ? 3 : ((activeLomba.klasifikasi || '').includes('2') ? 2 : 1);
+  const maxQuota = parseInt(activeLomba.kuotaSekolah) || (isTeam ? (activeLomba.klasifikasi.includes('3') ? 3 : 2) : 3);
+  const targetSize = isTeam ? ((activeLomba.klasifikasi || '').includes('3') ? 3 : ((activeLomba.klasifikasi || '').includes('2') ? 2 : Math.min(maxQuota, 3))) : maxQuota;
 
   let html = `
     <!-- Top Bar -->
@@ -5882,7 +5921,7 @@ OlympiadApp.renderPlotingModule = function() {
         <select onchange="OlympiadApp.selectPlotingLomba(this.value)" class="px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-bold focus:outline-none focus:border-violet-500">
           ${lombaList.map(l => `
             <option value="${l.id}" ${l.id === activeLomba.id ? 'selected' : ''}>
-              ${l.nama || 'Kompetisi'} (${l.klasifikasi || 'Individu'})
+              ${l.nama || 'Kompetisi'} (${l.klasifikasi || 'Individu'} - Kuota: ${l.kuotaSekolah || 3})
             </option>
           `).join('')}
         </select>
@@ -5894,7 +5933,10 @@ OlympiadApp.renderPlotingModule = function() {
       <div>
         <div class="flex items-center gap-2">
           <span class="px-2.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-bold text-[11px]">${activeLomba.klasifikasi || 'Individu'}</span>
-          <span class="text-xs text-zinc-400">Kuota Maksimal: <strong class="text-zinc-200">${activeLomba.kuotaSekolah || 3} Delegasi</strong></span>
+          <span class="text-xs text-zinc-400">Kuota Sekolah: <strong class="text-zinc-200">${maxQuota} Delegasi</strong></span>
+          <span class="text-[11px] px-2 py-0.5 rounded-full font-bold ${this.plotingState.selectedStudentIds.length === maxQuota ? 'bg-emerald-500/20 text-emerald-300' : 'bg-zinc-800 text-zinc-400'}">
+            Terpilih: ${this.plotingState.selectedStudentIds.length} / ${maxQuota}
+          </span>
         </div>
         <h3 class="text-base font-bold text-zinc-100 mt-1">${activeLomba.nama || 'Agenda Lomba'}</h3>
         <p class="text-xs text-zinc-400">Jadwal Penyisihan: <span class="text-violet-400 font-bold">${activeLomba.timeline?.penyisihan || '-'}</span> • Final: <span class="text-amber-400 font-bold">${activeLomba.timeline?.final || '-'}</span></p>
@@ -5903,7 +5945,7 @@ OlympiadApp.renderPlotingModule = function() {
       <!-- Smart Matching Trigger Button -->
       <button onclick="OlympiadApp.runSmartMatching('${activeLomba.id}', ${targetSize})" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-violet-600/30 transition-all shrink-0">
         <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
-        <span>Jalankan Smart Matching Otomatis</span>
+        <span>Jalankan Smart Matching (${targetSize} Siswa)</span>
       </button>
     </div>
 
@@ -5920,11 +5962,11 @@ OlympiadApp.renderPlotingModule = function() {
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-bold text-zinc-100 flex items-center gap-1.5">
               <i data-lucide="users" class="w-4 h-4 text-violet-400"></i>
-              <span>Pilih Anggota Tim (${this.plotingState.selectedStudentIds.length} / ${targetSize} Dipilih)</span>
+              <span>Pilih Delegasi (${this.plotingState.selectedStudentIds.length} / ${maxQuota} Terpilih)</span>
             </h3>
             <button onclick="OlympiadApp.clearPlotingSelection()" class="text-[11px] text-zinc-400 hover:text-rose-400">Reset</button>
           </div>
-          <p class="text-xs text-zinc-400 mb-3">Centang siswa di bawah ini untuk menguji sinergi tim secara manual:</p>
+          <p class="text-xs text-zinc-400 mb-3">Centang siswa di bawah ini untuk formasi delegasi (Maksimal ${maxQuota} siswa sesuai kuota):</p>
 
           <div class="space-y-2 max-h-96 overflow-y-auto pr-1">
             ${siswaList.length === 0 ? `
@@ -5941,7 +5983,7 @@ OlympiadApp.renderPlotingModule = function() {
                   <label class="flex items-center gap-3 cursor-pointer flex-grow">
                     <input type="checkbox" 
                            ${isSelected ? 'checked' : ''}
-                           onchange="OlympiadApp.toggleStudentSelection('${s.id}', ${targetSize})"
+                           onchange="OlympiadApp.toggleStudentSelection('${s.id}', ${maxQuota})"
                            class="w-4 h-4 rounded text-violet-600 bg-zinc-900 border-zinc-700">
                     <div>
                       <div class="text-xs font-bold text-zinc-100">${s.nama || 'Siswa'}</div>
@@ -6038,12 +6080,15 @@ OlympiadApp.selectPlotingLomba = function(lombaId) {
 };
 
 OlympiadApp.toggleStudentSelection = function(siswaId, maxSize) {
+  const activeLomba = (this.data && Array.isArray(this.data.lomba)) ? this.data.lomba.find(item => item.id === this.plotingState.lombaId) : null;
+  const quotaLimit = activeLomba ? (parseInt(activeLomba.kuotaSekolah) || maxSize || 1) : (maxSize || 1);
+
   const idx = this.plotingState.selectedStudentIds.indexOf(siswaId);
   if (idx !== -1) {
     this.plotingState.selectedStudentIds.splice(idx, 1);
   } else {
-    if (this.plotingState.selectedStudentIds.length >= maxSize) {
-      alert(`Batas formasi untuk lomba ini adalah ${maxSize} siswa. Hapus pilihan sebelumnya untuk mengganti.`);
+    if (this.plotingState.selectedStudentIds.length >= quotaLimit) {
+      alert(`Batas kuota delegasi untuk ${activeLomba?.nama || 'lomba ini'} adalah maksimal ${quotaLimit} siswa. Hapus pilihan sebelumnya terlebih dahulu jika ingin mengganti.`);
       this.renderPlotingModule();
       return;
     }
@@ -6377,21 +6422,27 @@ OlympiadApp.savePlotingToLomba = function(lombaId) {
 
 // --- START FILE: app_part6_analitik.js ---
 // ============================================================================
-// MODUL 6: ANALITIK & REPORTING (HEATMAP KEAHLIAN & EKSPOR LAPORAN)
+// MODUL 6: ANALITIK & REPORTING (DISTRIBUSI JUARA & HEATMAP EVALUASI INLINE)
 // ============================================================================
+
 OlympiadApp.renderAnalyticsModule = function() {
   const container = document.getElementById('panel-analitik');
   if (!container) return;
+
+  const canEdit = (this.currentRole === 'Guru' || this.currentRole === 'Admin');
+  const evalCols = (this.data.settings && Array.isArray(this.data.settings.evaluasiColumns) && this.data.settings.evaluasiColumns.length > 0)
+    ? this.data.settings.evaluasiColumns
+    : ['Simulasi OSN-K 1', 'Kuis Stoikiometri', 'Tryout OMI'];
 
   let html = `
     <!-- Top Bar -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <div>
         <h2 class="text-xl sm:text-2xl font-black text-zinc-100 flex items-center gap-2">
-          <i data-lucide="bar-chart-3" class="w-6 h-6 text-violet-400"></i> Analitik Performa &amp; Heatmap Keahlian
+          <i data-lucide="bar-chart-3" class="w-6 h-6 text-violet-400"></i> Analitik Prestasi &amp; Heatmap Evaluasi
         </h2>
         <p class="text-zinc-400 text-xs sm:text-sm mt-1">
-          Visualisasi pemetaan kompetensi 5 bidang kimia, tren medali, evaluasi titik lemah, dan ekspor laporan koordinasi.
+          Visualisasi capaian juara, titik lemah siswa, input nilai evaluasi inline, dan ekspor laporan koordinasi.
         </p>
       </div>
 
@@ -6408,18 +6459,18 @@ OlympiadApp.renderAnalyticsModule = function() {
 
     <!-- Analytics Charts Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Chart 1: Medal Distribution -->
+      <!-- Chart 1: Distribution of Champions (Distribusi Juara) -->
       <div class="glass-card rounded-2xl p-5 border border-zinc-800 flex flex-col justify-between">
         <div>
           <h3 class="text-xs font-bold text-zinc-200 uppercase mb-3 flex items-center gap-1.5">
-            <i data-lucide="award" class="w-4 h-4 text-amber-400"></i> Distribusi Capaian Medali
+            <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i> Distribusi Juara Kontingen
           </h3>
           <div class="relative h-52">
             <canvas id="chart-medals-donut"></canvas>
           </div>
         </div>
-        <div class="text-center text-xs text-zinc-400 mt-2">
-          Total Koleksi Medali Kontingen
+        <div class="text-center text-xs text-zinc-400 mt-2" id="summary-juara-text">
+          Rekapitulasi Prestasi: Juara 1 - 3 &amp; Harapan 1 - 3
         </div>
       </div>
 
@@ -6449,27 +6500,45 @@ OlympiadApp.renderAnalyticsModule = function() {
           </div>
         </div>
         <div class="text-center text-xs text-zinc-400 mt-2">
-          Perbandingan Medali &amp; Rasio Lolos
+          Perbandingan Prestasi &amp; Rasio Lolos Final
         </div>
       </div>
     </div>
 
-    <!-- HEATMAP KEAHLIAN SISWA (MATRIKS VISUALISASI) -->
+    <!-- HEATMAP EVALUASI NILAI SISWA (INLINE EDITABLE & REALTIME SYNC) -->
     <div class="glass-card rounded-2xl p-6 border border-zinc-800 mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-5">
         <div>
           <h3 class="text-base font-bold text-zinc-100 flex items-center gap-2">
-            <i data-lucide="grid" class="w-5 h-5 text-violet-400"></i> Heatmap Keahlian Siswa vs 5 Bidang Kimia
+            <i data-lucide="calculator" class="w-5 h-5 text-violet-400"></i> Heatmap Evaluasi &amp; Rekapitulasi Nilai Binaan
           </h3>
-          <p class="text-xs text-zinc-400 mt-0.5">Matriks pemetaan kemampuan personal (0 - 100) untuk penentuan spesialisasi dan materi bimbingan tambahan.</p>
+          <p class="text-xs text-zinc-400 mt-0.5">
+            Input langsung nilai evaluasi/kuis di dalam kotak sel tabel. Nilai otomatis tersimpan ke spreadsheet dan tersinkronisasi antar-perangkat secara real-time.
+          </p>
         </div>
 
-        <!-- Legend -->
-        <div class="flex items-center gap-2 text-[10px] font-bold">
-          <span class="px-2 py-0.5 rounded heatmap-cell-5">&gt;90 (Master)</span>
-          <span class="px-2 py-0.5 rounded heatmap-cell-4">80-89 (Mahir)</span>
-          <span class="px-2 py-0.5 rounded heatmap-cell-3">70-79 (Cukup)</span>
-          <span class="px-2 py-0.5 rounded heatmap-cell-1">&lt;70 (Lemah)</span>
+        <!-- Action Controls & Legend -->
+        <div class="flex flex-wrap items-center gap-2">
+          ${canEdit ? `
+            <button onclick="OlympiadApp.promptAddEvaluasiColumn()" class="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-violet-600/20">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> + Tambah Evaluasi
+            </button>
+          ` : ''}
+          <button onclick="OlympiadApp.syncEvaluasiNow()" class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition-all border border-zinc-700">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sinkron Cloud
+          </button>
+        </div>
+      </div>
+
+      <!-- Color Legend Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800/80 mb-4 text-[11px]">
+        <span class="text-zinc-400 font-medium">Keterangan Skala Nilai:</span>
+        <div class="flex flex-wrap items-center gap-2 font-bold">
+          <span class="px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300">≥85 (Sangat Baik)</span>
+          <span class="px-2 py-0.5 rounded bg-violet-950/60 border border-violet-500/40 text-violet-300">70 - 84 (Baik)</span>
+          <span class="px-2 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300">60 - 69 (Cukup)</span>
+          <span class="px-2 py-0.5 rounded bg-rose-950/60 border border-rose-500/40 text-rose-300">&lt;60 (Perlu Bimbingan)</span>
+          <span class="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-500">Kosong (-)</span>
         </div>
       </div>
 
@@ -6477,53 +6546,86 @@ OlympiadApp.renderAnalyticsModule = function() {
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs border-collapse">
           <thead>
-            <tr class="border-b border-zinc-800 text-zinc-400 uppercase text-[10px] tracking-wider">
-              <th class="py-3 px-3">Nama Siswa</th>
-              <th class="py-3 px-3">Kelas</th>
-              <th class="py-3 px-3 text-center">Kimia Fisik</th>
-              <th class="py-3 px-3 text-center">Kimia Organik</th>
-              <th class="py-3 px-3 text-center">Kimia Anorganik</th>
-              <th class="py-3 px-3 text-center">Kimia Analitik</th>
-              <th class="py-3 px-3 text-center">Biokimia</th>
-              <th class="py-3 px-3 text-center">Rata-rata</th>
-              <th class="py-3 px-3 text-center">Kesiapan</th>
+            <tr class="border-b border-zinc-800 text-zinc-400 uppercase text-[10px] tracking-wider bg-zinc-950/40">
+              <th class="py-3 px-3 min-w-[180px]">Nama Siswa</th>
+              <th class="py-3 px-2 text-center min-w-[90px]">Level / Kelas</th>
+              ${evalCols.map(col => `
+                <th class="py-3 px-2 text-center min-w-[120px]">
+                  <div class="flex items-center justify-center gap-1">
+                    <span class="truncate max-w-[110px]" title="${col}">${col}</span>
+                    ${canEdit ? `
+                      <button onclick="event.stopPropagation(); OlympiadApp.promptRemoveEvaluasiColumn('${encodeURIComponent(col)}')" class="text-zinc-500 hover:text-rose-400 p-0.5 rounded transition-colors" title="Hapus kolom evaluasi ini">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                      </button>
+                    ` : ''}
+                  </div>
+                </th>
+              `).join('')}
+              <th class="py-3 px-3 text-center min-w-[90px]">Rata-rata</th>
+              <th class="py-3 px-3 text-center min-w-[110px]">Kesiapan</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-zinc-800/60">
             ${(!this.data || !Array.isArray(this.data.siswa) || this.data.siswa.length === 0) ? `
               <tr>
-                <td colspan="9" class="py-8 text-center text-zinc-500 text-xs">
-                  Belum ada data siswa binaan. Tambahkan siswa terlebih dahulu untuk melihat heatmap keahlian.
+                <td colspan="${4 + evalCols.length}" class="py-8 text-center text-zinc-500 text-xs">
+                  Belum ada data siswa binaan. Tambahkan siswa terlebih dahulu di menu Data Siswa.
                 </td>
               </tr>
             ` : (this.data.siswa || []).map(s => {
-              const getCellClass = (score) => {
-                if (score >= 90) return 'heatmap-cell-5';
-                if (score >= 80) return 'heatmap-cell-4';
-                if (score >= 70) return 'heatmap-cell-3';
-                if (score >= 60) return 'heatmap-cell-2';
-                return 'heatmap-cell-1';
-              };
+              const rata = this.calculateStudentScoreAverage(s);
+              const badge = this.getReadinessBadge(rata);
 
               return `
-                <tr class="hover:bg-zinc-900/50 transition-colors cursor-pointer" onclick="OlympiadApp.openSiswaDetail('${s.id}')">
-                  <td class="py-3 px-3 font-bold text-zinc-100 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-violet-400"></span>
-                    <span>${s.nama}</span>
+                <tr class="hover:bg-zinc-900/40 transition-colors">
+                  <!-- Siswa Info -->
+                  <td class="py-2.5 px-3 font-bold text-zinc-100 flex items-center gap-2 cursor-pointer" onclick="OlympiadApp.openSiswaDetail('${s.id}')" title="Klik untuk lihat profil siswa">
+                    <div class="w-6 h-6 rounded-full bg-violet-600/30 text-violet-300 font-bold text-[10px] flex items-center justify-center">
+                      ${(s.nama || 'S').charAt(0)}
+                    </div>
+                    <span class="hover:text-violet-300 transition-colors">${s.nama}</span>
                   </td>
-                  <td class="py-3 px-3 text-zinc-400">${s.kelas || '-'}</td>
-                  <td class="py-3 px-3 text-center font-mono font-bold rounded ${getCellClass(s.ratingTopik?.fisik ?? 75)}">${s.ratingTopik?.fisik ?? 75}</td>
-                  <td class="py-3 px-3 text-center font-mono font-bold rounded ${getCellClass(s.ratingTopik?.organik ?? 75)}">${s.ratingTopik?.organik ?? 75}</td>
-                  <td class="py-3 px-3 text-center font-mono font-bold rounded ${getCellClass(s.ratingTopik?.anorganik ?? 75)}">${s.ratingTopik?.anorganik ?? 75}</td>
-                  <td class="py-3 px-3 text-center font-mono font-bold rounded ${getCellClass(s.ratingTopik?.analitik ?? 75)}">${s.ratingTopik?.analitik ?? 75}</td>
-                  <td class="py-3 px-3 text-center font-mono font-bold rounded ${getCellClass(s.ratingTopik?.biokimia ?? 75)}">${s.ratingTopik?.biokimia ?? 75}</td>
-                  <td class="py-3 px-3 text-center font-mono font-black text-emerald-400">${(Number(s.skorRata) || 75.0).toFixed(1)}</td>
-                  <td class="py-3 px-3 text-center">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      (Number(s.skorRata) || 75) >= 85 ? 'bg-emerald-500/20 text-emerald-300' :
-                      (Number(s.skorRata) || 75) >= 80 ? 'bg-violet-500/20 text-violet-300' :
-                      'bg-amber-500/20 text-amber-300'
-                    }">${(Number(s.skorRata) || 75) >= 85 ? 'Siap Nasional' : (Number(s.skorRata) || 75) >= 80 ? 'Siap Provinsi' : 'Pematangan'}</span>
+
+                  <!-- Level / Kelas -->
+                  <td class="py-2.5 px-2 text-center">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-800 text-zinc-300">
+                      ${s.level || s.levelKelas || s.kelas || '-'}
+                    </span>
+                  </td>
+
+                  <!-- Dynamic Evaluation Columns -->
+                  ${evalCols.map(col => {
+                    const score = this.getScoreForCol(s, col);
+                    const bgClass = this.getEvalCellBgClass(score);
+                    return `
+                      <td class="py-2 px-2 text-center">
+                        <input 
+                          type="number" 
+                          min="0" 
+                          max="100" 
+                          step="any"
+                          placeholder="-"
+                          value="${score !== '' ? score : ''}"
+                          data-siswa-id="${s.id}"
+                          data-col-name="${encodeURIComponent(col)}"
+                          class="eval-cell-input border ${bgClass} ${canEdit ? 'cursor-text' : 'cursor-not-allowed opacity-75'}"
+                          ${!canEdit ? 'readonly' : ''}
+                          onchange="OlympiadApp.handleEvaluasiCellChange('${s.id}', '${encodeURIComponent(col)}', this.value, this)"
+                          oninput="OlympiadApp.handleEvaluasiCellInput(this)"
+                          title="${canEdit ? 'Ketik nilai (0-100) lalu tekan Enter/pindah sel untuk menyimpan' : 'Hanya Guru/Admin yang dapat mengubah nilai'}"
+                        />
+                      </td>
+                    `;
+                  }).join('')}
+
+                  <!-- Rata-rata Skor -->
+                  <td class="py-2.5 px-3 text-center font-mono font-black text-emerald-400" id="eval-avg-${s.id}">
+                    ${rata.toFixed(1)}
+                  </td>
+
+                  <!-- Status Kesiapan -->
+                  <td class="py-2.5 px-3 text-center" id="eval-badge-${s.id}">
+                    ${badge}
                   </td>
                 </tr>
               `;
@@ -6536,33 +6638,240 @@ OlympiadApp.renderAnalyticsModule = function() {
 
   container.innerHTML = html;
 
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+
   setTimeout(() => {
     this.renderAnalyticsCharts();
   }, 100);
 };
 
+// ============================================================================
+// HELPER METHODS UNTUK EVALUASI HEATMAP INLINE & CLOUD SYNC
+// ============================================================================
+
+OlympiadApp.getScoreForCol = function(s, colName) {
+  if (!s || !Array.isArray(s.riwayatEvaluasi)) return '';
+  const cleanCol = (colName || '').trim().toLowerCase();
+  const match = s.riwayatEvaluasi.find(e => (e && e.nama && String(e.nama).trim().toLowerCase() === cleanCol));
+  if (match && match.skor !== undefined && match.skor !== null && match.skor !== '') {
+    return Number(match.skor);
+  }
+  return '';
+};
+
+OlympiadApp.getEvalCellBgClass = function(score) {
+  if (score === '' || score === null || score === undefined) {
+    return 'bg-zinc-900/60 border-zinc-800 text-zinc-400';
+  }
+  const num = Number(score);
+  if (isNaN(num)) return 'bg-zinc-900/60 border-zinc-800 text-zinc-400';
+  if (num >= 85) return 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300 font-bold';
+  if (num >= 70) return 'bg-violet-950/60 border-violet-500/40 text-violet-300 font-bold';
+  if (num >= 60) return 'bg-amber-950/60 border-amber-500/40 text-amber-300 font-bold';
+  return 'bg-rose-950/60 border-rose-500/40 text-rose-300 font-bold';
+};
+
+OlympiadApp.handleEvaluasiCellInput = function(inputEl) {
+  if (!inputEl) return;
+  const val = inputEl.value.trim();
+  inputEl.className = `eval-cell-input border ${this.getEvalCellBgClass(val)} cursor-text`;
+};
+
+OlympiadApp.calculateStudentScoreAverage = function(s) {
+  if (!s) return 75.0;
+  if (Array.isArray(s.riwayatEvaluasi) && s.riwayatEvaluasi.length > 0) {
+    const validScores = s.riwayatEvaluasi
+      .map(e => Number(e?.skor))
+      .filter(n => !isNaN(n) && n !== null && n !== undefined);
+    if (validScores.length > 0) {
+      const sum = validScores.reduce((acc, cur) => acc + cur, 0);
+      return Number((sum / validScores.length).toFixed(1));
+    }
+  }
+  return Number(s.skorRata) || 75.0;
+};
+
+OlympiadApp.getReadinessBadge = function(rata) {
+  const num = Number(rata) || 75.0;
+  if (num >= 85) {
+    return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Siap Nasional</span>`;
+  }
+  if (num >= 80) {
+    return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30">Siap Provinsi</span>`;
+  }
+  if (num >= 70) {
+    return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Siap OSN-K</span>`;
+  }
+  return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">Pematangan</span>`;
+};
+
+OlympiadApp.handleEvaluasiCellChange = function(siswaId, encodedColName, rawVal, inputEl) {
+  const colName = decodeURIComponent(encodedColName);
+  const s = (this.data.siswa || []).find(x => x.id === siswaId);
+  if (!s) return;
+
+  s.riwayatEvaluasi = Array.isArray(s.riwayatEvaluasi) ? s.riwayatEvaluasi : [];
+  const cleanCol = colName.trim().toLowerCase();
+  const existingIdx = s.riwayatEvaluasi.findIndex(e => (e && e.nama && String(e.nama).trim().toLowerCase() === cleanCol));
+
+  let finalVal = null;
+  const trimmed = String(rawVal || '').trim();
+
+  if (trimmed === '') {
+    // Hapus dari riwayat jika dikosongkan
+    if (existingIdx !== -1) {
+      s.riwayatEvaluasi.splice(existingIdx, 1);
+    }
+  } else {
+    const num = Math.max(0, Math.min(100, parseFloat(trimmed) || 0));
+    finalVal = Math.round(num * 10) / 10; // 1 desimal presisi
+    if (existingIdx !== -1) {
+      s.riwayatEvaluasi[existingIdx].skor = finalVal;
+      s.riwayatEvaluasi[existingIdx].tanggal = new Date().toISOString().slice(0, 10);
+    } else {
+      s.riwayatEvaluasi.push({
+        nama: colName.trim(),
+        skor: finalVal,
+        tanggal: new Date().toISOString().slice(0, 10)
+      });
+    }
+    if (inputEl) inputEl.value = finalVal;
+  }
+
+  // Perbarui styling input
+  if (inputEl) {
+    inputEl.className = `eval-cell-input border ${this.getEvalCellBgClass(finalVal !== null ? finalVal : '')} cursor-text`;
+  }
+
+  // Hitung ulang rata-rata skor
+  const newAvg = this.calculateStudentScoreAverage(s);
+  s.skorRata = newAvg;
+
+  // Perbarui elemen DOM rata-rata & badge kesiapan tanpa render ulang seluruh halaman
+  const avgEl = document.getElementById(`eval-avg-${s.id}`);
+  if (avgEl) avgEl.textContent = newAvg.toFixed(1);
+
+  const badgeEl = document.getElementById(`eval-badge-${s.id}`);
+  if (badgeEl) badgeEl.innerHTML = this.getReadinessBadge(newAvg);
+
+  // SIMPAN & SINKRONKAN KE SPREADSHEET (CROSS-DEVICE GUARANTEE)
+  this.saveData(true);
+
+  this.showToast(
+    finalVal !== null 
+      ? `Nilai ${s.nama} (${colName}: ${finalVal}) disimpan & disinkronkan ke Spreadsheet.` 
+      : `Nilai ${s.nama} (${colName}) dihapus & disinkronkan.`,
+    'success'
+  );
+};
+
+OlympiadApp.promptAddEvaluasiColumn = function() {
+  const colName = prompt("Masukkan nama evaluasi / kuis baru (contoh: Simulasi OSN-P 1, Kuis Termokimia):");
+  if (!colName || !colName.trim()) return;
+  const cleanName = colName.trim();
+
+  if (!this.data.settings) this.data.settings = {};
+  if (!Array.isArray(this.data.settings.evaluasiColumns)) {
+    this.data.settings.evaluasiColumns = ['Simulasi OSN-K 1', 'Kuis Stoikiometri', 'Tryout OMI'];
+  }
+
+  const exists = this.data.settings.evaluasiColumns.some(c => c.trim().toLowerCase() === cleanName.toLowerCase());
+  if (exists) {
+    this.showToast(`Kolom evaluasi "${cleanName}" sudah ada!`, 'warning');
+    return;
+  }
+
+  this.data.settings.evaluasiColumns.push(cleanName);
+  this.saveData(true);
+  this.renderAnalyticsModule();
+  this.showToast(`Kolom evaluasi "${cleanName}" ditambahkan & disinkronkan ke Spreadsheet!`, 'success');
+};
+
+OlympiadApp.promptRemoveEvaluasiColumn = function(encodedColName) {
+  const colName = decodeURIComponent(encodedColName);
+  if (!confirm(`Hapus kolom evaluasi "${colName}" dari tabel? (Nilai siswa tidak akan langsung terhapus)`)) {
+    return;
+  }
+
+  if (!this.data.settings || !Array.isArray(this.data.settings.evaluasiColumns)) return;
+  this.data.settings.evaluasiColumns = this.data.settings.evaluasiColumns.filter(c => c.trim() !== colName.trim());
+  this.saveData(true);
+  this.renderAnalyticsModule();
+  this.showToast(`Kolom evaluasi "${colName}" berhasil dihapus dari tampilan.`, 'info');
+};
+
+OlympiadApp.syncEvaluasiNow = function() {
+  this.showToast('Menyinkronkan data evaluasi dengan Google Spreadsheet...', 'info');
+  this.fetchFromCloud(false);
+};
+
+// ============================================================================
+// ANALYTICS CHARTS (DISTRIBUSI JUARA 1-3 & HARAPAN 1-3)
+// ============================================================================
+
 OlympiadApp.renderAnalyticsCharts = function() {
-  // Chart 1: Medal Donut
-  const ctxMedals = document.getElementById('chart-medals-donut');
-  if (ctxMedals) {
+  // Chart 1: Distribusi Juara (Juara 1, 2, 3, Harapan 1, 2, 3)
+  const ctxJuara = document.getElementById('chart-medals-donut');
+  if (ctxJuara) {
     if (this.medalChart) this.medalChart.destroy();
-    let emas = 0, perak = 0, perunggu = 0;
+    
+    let j1 = 0, j2 = 0, j3 = 0, h1 = 0, h2 = 0, h3 = 0;
+    
+    // 1. Hitung capaian dari Data Siswa (riwayatLomba)
     (this.data.siswa || []).forEach(s => {
       (s.riwayatLomba || []).forEach(r => {
-        const cap = String(r?.capaian || r?.nama || '');
-        if (cap.includes('Emas') || cap.includes('Juara 1')) emas++;
-        else if (cap.includes('Perak') || cap.includes('Juara 2')) perak++;
-        else if (cap.includes('Perunggu') || cap.includes('Juara 3')) perunggu++;
+        const cap = String(r?.capaian || r?.nama || '').toLowerCase();
+        if (cap.includes('juara 1') || cap.includes('juara i ') || cap.endsWith('juara i') || cap.includes('emas') || cap.includes('gold')) {
+          j1++;
+        } else if (cap.includes('juara 2') || cap.includes('juara ii ') || cap.endsWith('juara ii') || cap.includes('perak') || cap.includes('silver')) {
+          j2++;
+        } else if (cap.includes('juara 3') || cap.includes('juara iii ') || cap.endsWith('juara iii') || cap.includes('perunggu') || cap.includes('bronze')) {
+          j3++;
+        } else if (cap.includes('harapan 1') || cap.includes('harapan i ') || cap.endsWith('harapan i')) {
+          h1++;
+        } else if (cap.includes('harapan 2') || cap.includes('harapan ii ') || cap.endsWith('harapan ii')) {
+          h2++;
+        } else if (cap.includes('harapan 3') || cap.includes('harapan iii ') || cap.endsWith('harapan iii')) {
+          h3++;
+        }
       });
     });
 
-    this.medalChart = new Chart(ctxMedals, {
+    // 2. Hitung capaian dari Riwayat Ploting Tim/Individu
+    (this.data.riwayatPloting || []).forEach(rp => {
+      const cap = String(rp?.capaian || '').toLowerCase();
+      if (cap.includes('juara 1') || cap.includes('juara i ') || cap.endsWith('juara i') || cap.includes('emas') || cap.includes('gold')) {
+        j1++;
+      } else if (cap.includes('juara 2') || cap.includes('juara ii ') || cap.endsWith('juara ii') || cap.includes('perak') || cap.includes('silver')) {
+        j2++;
+      } else if (cap.includes('juara 3') || cap.includes('juara iii ') || cap.endsWith('juara iii') || cap.includes('perunggu') || cap.includes('bronze')) {
+        j3++;
+      } else if (cap.includes('harapan 1') || cap.includes('harapan i ') || cap.endsWith('harapan i')) {
+        h1++;
+      } else if (cap.includes('harapan 2') || cap.includes('harapan ii ') || cap.endsWith('harapan ii')) {
+        h2++;
+      } else if (cap.includes('harapan 3') || cap.includes('harapan iii ') || cap.endsWith('harapan iii')) {
+        h3++;
+      }
+    });
+
+    const totalJuara = j1 + j2 + j3 + h1 + h2 + h3;
+    const summaryText = document.getElementById('summary-juara-text');
+    if (summaryText) {
+      summaryText.innerHTML = totalJuara > 0 
+        ? `Total Koleksi: <strong>${totalJuara} Prestasi Juara Kontingen</strong>` 
+        : `Rekapitulasi Prestasi: Juara 1 - 3 &amp; Harapan 1 - 3`;
+    }
+
+    this.medalChart = new Chart(ctxJuara, {
       type: 'doughnut',
       data: {
-        labels: ['Emas', 'Perak', 'Perunggu'],
+        labels: ['Juara 1', 'Juara 2', 'Juara 3', 'Harapan 1', 'Harapan 2', 'Harapan 3'],
         datasets: [{
-          data: [emas, perak, perunggu],
-          backgroundColor: ['#fbbf24', '#94a3b8', '#d97706'],
+          data: [j1, j2, j3, h1, h2, h3],
+          backgroundColor: ['#eab308', '#94a3b8', '#d97706', '#6366f1', '#06b6d4', '#10b981'],
           borderWidth: 0
         }]
       },
@@ -6570,9 +6879,9 @@ OlympiadApp.renderAnalyticsCharts = function() {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { color: '#a1a1aa', font: { size: 10 } } }
+          legend: { position: 'bottom', labels: { color: '#a1a1aa', font: { size: 9 }, boxWidth: 10 } }
         },
-        cutout: '70%'
+        cutout: '65%'
       }
     });
   }
@@ -6629,7 +6938,7 @@ OlympiadApp.renderAnalyticsCharts = function() {
         labels: ['2023', '2024', '2025', '2026 (Target)'],
         datasets: [
           {
-            label: 'Total Medali',
+            label: 'Total Capaian Juara',
             data: [2, 3, 5, 8],
             borderColor: '#fbbf24',
             backgroundColor: 'rgba(251, 191, 36, 0.15)',
@@ -6666,7 +6975,10 @@ OlympiadApp.renderAnalyticsCharts = function() {
   }
 };
 
-// SheetJS Excel Export
+// ============================================================================
+// SHEETJS EXCEL EXPORT DENGAN KOLOM EVALUASI DINAMIS
+// ============================================================================
+
 OlympiadApp.exportExcel = function() {
   if (!window.XLSX) {
     alert('Library SheetJS belum termuat.');
@@ -6674,25 +6986,39 @@ OlympiadApp.exportExcel = function() {
   }
 
   const wb = XLSX.utils.book_new();
+  const evalCols = (this.data.settings && Array.isArray(this.data.settings.evaluasiColumns))
+    ? this.data.settings.evaluasiColumns
+    : ['Simulasi OSN-K 1', 'Kuis Stoikiometri', 'Tryout OMI'];
 
-  // Sheet 1: Data Siswa
-  const siswaRows = this.data.siswa.map(s => ({
-    'Nama Siswa': s.nama,
-    'NISN': s.nisn,
-    'Kelas': s.kelas,
-    'Level Bimbingan': s.level,
-    'Spesialisasi Utama': s.bidangUtama || 'Belum Ditentukan',
-    'Spesialisasi Sub': s.bidangSekunder || '',
-    'Kimia Fisik': s.ratingTopik?.fisik ?? 75,
-    'Kimia Organik': s.ratingTopik?.organik ?? 75,
-    'Kimia Anorganik': s.ratingTopik?.anorganik ?? 75,
-    'Kimia Analitik': s.ratingTopik?.analitik ?? 75,
-    'Biokimia': s.ratingTopik?.biokimia ?? 75,
-    'Rata-rata': s.skorRata || 75.0,
-    'Kehadiran (%)': s.kehadiran?.persentase ?? 100
-  }));
+  // Sheet 1: Data Siswa & Rekap Nilai Evaluasi
+  const siswaRows = (this.data.siswa || []).map(s => {
+    const row = {
+      'Nama Siswa': s.nama,
+      'NISN': s.nisn,
+      'Kelas': s.kelas,
+      'Level Bimbingan': s.level || s.levelKelas || '-',
+      'Spesialisasi Utama': s.bidangUtama || 'Belum Ditentukan',
+      'Spesialisasi Sub': s.bidangSekunder || ''
+    };
+
+    // Sertakan nilai setiap kolom evaluasi
+    evalCols.forEach(c => {
+      row[c] = this.getScoreForCol(s, c) || '-';
+    });
+
+    row['Rata-rata Evaluasi'] = this.calculateStudentScoreAverage(s);
+    row['Kimia Fisik'] = s.ratingTopik?.fisik ?? 75;
+    row['Kimia Organik'] = s.ratingTopik?.organik ?? 75;
+    row['Kimia Anorganik'] = s.ratingTopik?.anorganik ?? 75;
+    row['Kimia Analitik'] = s.ratingTopik?.analitik ?? 75;
+    row['Biokimia'] = s.ratingTopik?.biokimia ?? 75;
+    row['Kehadiran (%)'] = s.kehadiran?.persentase ?? 100;
+
+    return row;
+  });
+
   const wsSiswa = XLSX.utils.json_to_sheet(siswaRows);
-  XLSX.utils.book_append_sheet(wb, wsSiswa, "Data Siswa & Nilai");
+  XLSX.utils.book_append_sheet(wb, wsSiswa, "Data Siswa & Evaluasi");
 
   // Sheet 2: Agenda Lomba
   const lombaRows = (this.data.lomba || []).map(l => ({
@@ -6712,10 +7038,16 @@ OlympiadApp.exportExcel = function() {
   this.showToast('Laporan lengkap Excel (.xlsx) berhasil diekspor!', 'success');
 };
 
-// Print / PDF Report Generator
+// ============================================================================
+// PRINT / PDF REPORT GENERATOR RESMI
+// ============================================================================
+
 OlympiadApp.exportPDFReport = function() {
   const printWin = window.open('', '_blank');
   const d = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+  const evalCols = (this.data.settings && Array.isArray(this.data.settings.evaluasiColumns))
+    ? this.data.settings.evaluasiColumns
+    : ['Simulasi OSN-K 1', 'Kuis Stoikiometri', 'Tryout OMI'];
 
   let html = `
     <!DOCTYPE html>
@@ -6738,58 +7070,53 @@ OlympiadApp.exportPDFReport = function() {
     </head>
     <body>
       <div class="header">
-        <h1>${this.data.settings.namaSekolah}</h1>
+        <h1>${this.data.settings?.namaSekolah || 'Portal Kimia Olimpiade'}</h1>
         <h2>TIM KOORDINASI PEMBINAAN TALENTA &amp; OLIMPIADE KIMIA</h2>
-        <p style="margin: 3px 0; font-size: 10pt;">Alamat: Kompleks Pendidikan Progresif Bumi Shalawat, Sidoarjo • Tahun Ajaran 2025/2026</p>
+        <p style="margin: 3px 0; font-size: 10pt;">Tahun Ajaran ${this.data.settings?.tahunAjaran || '2025/2026'}</p>
       </div>
 
       <p style="text-align: right; font-size: 10pt;">Tanggal: ${d}</p>
-      <h2 style="text-align: center; font-weight: bold; margin-bottom: 20px;">LAPORAN KOORDINASI &amp; PERKEMBANGAN TIM OLIMPIADE KIMIA</h2>
+      <h2 style="text-align: center; font-weight: bold; margin-bottom: 20px;">LAPORAN KOORDINASI &amp; EVALUASI PRESTASI TIM OLIMPIADE KIMIA</h2>
 
       <h3>1. Ringkasan Eksekutif Kontingen</h3>
       <p>Berdasarkan hasil pembinaan intensif dan evaluasi berkala hingga bulan berjalan:</p>
       <ul>
         <li>Jumlah Siswa Binaan Aktif: <strong>${(this.data.siswa || []).length} Siswa</strong></li>
         <li>Jumlah Bank Soal Terstandarisasi KaTeX: <strong>${(this.data.soal || []).length} Butir Soal</strong></li>
-        <li>Target Medali Nasional Tahun Ini: <strong>${this.data.settings.targetMedaliNasional || 0} Medali</strong></li>
-        <li>Agenda Kompetisi Mendatang: <strong>${(this.data.lomba || []).length} Kompetisi Resmi</strong></li>
+        <li>Target Capaian Juara Nasional Tahun Ini: <strong>${this.data.settings?.targetMedaliNasional || 3} Prestasi</strong></li>
+        <li>Agenda Kompetisi Terjadwal: <strong>${(this.data.lomba || []).length} Agenda Resmi</strong></li>
       </ul>
 
-      <h3>2. Rekap Matriks Keahlian Siswa Binaan</h3>
+      <h3>2. Rekap Matriks Nilai Evaluasi Siswa Binaan</h3>
       <table>
         <thead>
           <tr>
-            <th>No</th>
+            <th class="text-center">No</th>
             <th>Nama Siswa</th>
-            <th>Kelas</th>
-            <th>Spesialisasi</th>
-            <th class="text-center">Fisik</th>
-            <th class="text-center">Organik</th>
-            <th class="text-center">Anorganik</th>
-            <th class="text-center">Analitik</th>
-            <th class="text-center">Biokimia</th>
+            <th>Level / Kelas</th>
+            ${evalCols.map(c => `<th class="text-center">${c}</th>`).join('')}
             <th class="text-center">Rata-rata</th>
+            <th class="text-center">Kesiapan</th>
           </tr>
         </thead>
         <tbody>
-          ${(this.data.siswa || []).map((s, i) => `
-            <tr>
-              <td class="text-center">${i + 1}</td>
-              <td><strong>${s.nama}</strong></td>
-              <td>${s.kelas || '-'}</td>
-              <td>${s.bidangUtama || 'Umum'}</td>
-              <td class="text-center">${s.ratingTopik?.fisik ?? 75}</td>
-              <td class="text-center">${s.ratingTopik?.organik ?? 75}</td>
-              <td class="text-center">${s.ratingTopik?.anorganik ?? 75}</td>
-              <td class="text-center">${s.ratingTopik?.analitik ?? 75}</td>
-              <td class="text-center">${s.ratingTopik?.biokimia ?? 75}</td>
-              <td class="text-center"><strong>${(Number(s.skorRata) || 75.0).toFixed(1)}</strong></td>
-            </tr>
-          `).join('')}
+          ${(this.data.siswa || []).map((s, i) => {
+            const avg = this.calculateStudentScoreAverage(s);
+            return `
+              <tr>
+                <td class="text-center">${i + 1}</td>
+                <td><strong>${s.nama}</strong></td>
+                <td>${s.level || s.levelKelas || s.kelas || '-'}</td>
+                ${evalCols.map(c => `<td class="text-center">${this.getScoreForCol(s, c) || '-'}</td>`).join('')}
+                <td class="text-center"><strong>${avg.toFixed(1)}</strong></td>
+                <td class="text-center">${avg >= 85 ? 'Siap Nasional' : avg >= 80 ? 'Siap Provinsi' : 'Pematangan'}</td>
+              </tr>
+            `;
+          }).join('')}
         </tbody>
       </table>
 
-      <h3>3. Status Agenda Kompetisi &amp; Administrasi</h3>
+      <h3>3. Status Agenda Kompetisi</h3>
       <table>
         <thead>
           <tr>
@@ -6798,7 +7125,6 @@ OlympiadApp.exportPDFReport = function() {
             <th>Deadline</th>
             <th>Penyisihan</th>
             <th>Status Pendaftaran</th>
-            <th>Kelengkapan Dokumen</th>
           </tr>
         </thead>
         <tbody>
@@ -6809,10 +7135,6 @@ OlympiadApp.exportPDFReport = function() {
               <td>${l.timeline?.deadlineDaftar || '-'}</td>
               <td>${l.timeline?.penyisihan || '-'}</td>
               <td>${l.statusPendaftaran || 'Draft'}</td>
-              <td>
-                ${l.dokumenCeklis?.proposalAcc ? '✓ ACC Proposal' : '- Belum ACC'}, 
-                ${l.dokumenCeklis?.suratIzinDibuat ? '✓ Surat Izin' : '- Surat Izin Proses'}
-              </td>
             </tr>
           `).join('')}
         </tbody>
@@ -6827,7 +7149,7 @@ OlympiadApp.exportPDFReport = function() {
         <div class="sig-box">
           <p>Sidoarjo, ${d}<br>Koordinator Olimpiade Kimia</p>
           <br><br><br>
-          <p><strong>${this.data.settings.koordinator}</strong><br>NIP/ID. PortalKimia</p>
+          <p><strong>${this.data.settings?.koordinator || 'Pembina Olimpiade'}</strong><br>NIP/ID. PortalKimia</p>
         </div>
       </div>
 
@@ -7167,10 +7489,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // --- START FILE: app_part8_jadwal.js ---
 // ============================================================================
-// MODUL 8: JADWAL INTENSIF BIMBINGAN / PELATDA
+// MODUL 8: JADWAL INTENSIF BIMBINGAN / PELATDA (BERBASIS LEVEL FLEKSIBEL)
 // ============================================================================
+OlympiadApp.jadwalFilterLevel = 'all';
 OlympiadApp.jadwalFilterBidang = 'all';
 OlympiadApp.jadwalSearchQuery = '';
+
+OlympiadApp.filterJadwalLevel = function(lvl) {
+  this.jadwalFilterLevel = lvl;
+  this.jadwalFilterBidang = lvl;
+  this.renderJadwalModule();
+  if (window.lucide) lucide.createIcons();
+};
+
+OlympiadApp.filterJadwalBidang = function(lvl) {
+  this.filterJadwalLevel(lvl);
+};
 
 OlympiadApp.renderJadwalModule = function() {
   const container = document.getElementById('panel-jadwal');
@@ -7179,24 +7513,34 @@ OlympiadApp.renderJadwalModule = function() {
   const list = this.data.jadwalIntensif || [];
   const now = new Date();
 
-  // Filter list
+  // Kumpulkan seluruh kategori Level (default + kustom yang pernah dibuat)
+  const defaultLevels = ['Kelas 10', 'Kelas 11', 'Kelas 12', 'Delegasi OSN', 'Delegasi OMI'];
+  const settingLevels = (this.data.settings && Array.isArray(this.data.settings.levelList)) ? this.data.settings.levelList : [];
+  const existingLevels = list.map(j => (j.level || j.bidang || '').trim()).filter(Boolean);
+  const allLevels = Array.from(new Set([...defaultLevels, ...settingLevels, ...existingLevels]));
+
+  // Filter list berdasarkan Level sasaran
   const filtered = list.filter(j => {
-    const matchBidang = this.jadwalFilterBidang === 'all' || j.bidang === this.jadwalFilterBidang;
+    const jLevel = String(j.level || j.bidang || 'Kelas 10').trim();
+    const matchLevel = this.jadwalFilterLevel === 'all' || jLevel.toLowerCase() === this.jadwalFilterLevel.toLowerCase();
     const q = (this.jadwalSearchQuery || '').toLowerCase();
     const matchSearch = !q || 
       (j.judul || '').toLowerCase().includes(q) ||
+      jLevel.toLowerCase().includes(q) ||
       (j.pengisi || '').toLowerCase().includes(q) ||
       (j.lokasi || '').toLowerCase().includes(q) ||
       (j.keterangan || '').toLowerCase().includes(q);
-    return matchBidang && matchSearch;
+    return matchLevel && matchSearch;
   }).sort((a, b) => new Date(a.tanggal + 'T' + (a.jamMulai || '00:00')) - new Date(b.tanggal + 'T' + (b.jamMulai || '00:00')));
 
-  const bidangColors = {
-    'Kimia Organik': 'bg-violet-500/15 text-violet-300 border-violet-500/30',
-    'Kimia Anorganik': 'bg-blue-500/15 text-blue-300 border-blue-500/30',
-    'Kimia Fisik': 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-    'Kimia Analitik': 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-    'Biokimia': 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+  const getLevelBadgeStyle = (lvl) => {
+    const l = (lvl || '').toLowerCase();
+    if (l.includes('10')) return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+    if (l.includes('11')) return 'bg-blue-500/15 text-blue-300 border-blue-500/30';
+    if (l.includes('12')) return 'bg-violet-500/15 text-violet-300 border-violet-500/30';
+    if (l.includes('osn')) return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+    if (l.includes('omi')) return 'bg-rose-500/15 text-rose-300 border-rose-500/30';
+    return 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30';
   };
 
   let html = `
@@ -7207,7 +7551,7 @@ OlympiadApp.renderJadwalModule = function() {
           <i data-lucide="calendar-clock" class="w-6 h-6 text-violet-400"></i> Jadwal Intensif Bimbingan &amp; Pelatda
         </h2>
         <p class="text-zinc-400 text-xs sm:text-sm mt-1">
-          Agenda pembinaan olimpiade fleksibel: rotasi materi 5 bidang kimia, pengajar ahli, ruang lab, dan persiapan naskah soal.
+          Agenda pembinaan olimpiade fleksibel berdasarkan Level (Kelas 10, 11, 12, Delegasi OSN, OMI, dll.), pengajar ahli, dan ruang lab.
         </p>
       </div>
 
@@ -7224,33 +7568,23 @@ OlympiadApp.renderJadwalModule = function() {
         <i data-lucide="search" class="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
         <input 
           type="text" 
-          placeholder="Cari materi, nama pengisi, ruangan, atau topik..." 
+          placeholder="Cari materi, level sasaran, pengisi, atau ruangan..." 
           value="${this.jadwalSearchQuery || ''}"
           oninput="OlympiadApp.onSearchJadwal(this.value)"
           class="w-full pl-10 pr-4 py-2 rounded-xl bg-zinc-900/80 border border-zinc-700/80 text-zinc-100 text-xs placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
         >
       </div>
 
-      <!-- Filter Buttons -->
+      <!-- Dynamic Level Filter Buttons -->
       <div class="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-        <button onclick="OlympiadApp.filterJadwalBidang('all')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${this.jadwalFilterBidang === 'all' ? 'bg-violet-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}">
-          Semua Bidang
+        <button onclick="OlympiadApp.filterJadwalLevel('all')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${this.jadwalFilterLevel === 'all' ? 'bg-violet-600 text-white shadow-md shadow-violet-600/30' : 'bg-zinc-800 text-zinc-400 hover:text-white'}">
+          Semua Level
         </button>
-        <button onclick="OlympiadApp.filterJadwalBidang('Kimia Organik')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${this.jadwalFilterBidang === 'Kimia Organik' ? 'bg-violet-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}">
-          Organik
-        </button>
-        <button onclick="OlympiadApp.filterJadwalBidang('Kimia Anorganik')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${this.jadwalFilterBidang === 'Kimia Anorganik' ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}">
-          Anorganik
-        </button>
-        <button onclick="OlympiadApp.filterJadwalBidang('Kimia Fisik')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${this.jadwalFilterBidang === 'Kimia Fisik' ? 'bg-amber-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}">
-          Fisik
-        </button>
-        <button onclick="OlympiadApp.filterJadwalBidang('Kimia Analitik')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${this.jadwalFilterBidang === 'Kimia Analitik' ? 'bg-emerald-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}">
-          Analitik
-        </button>
-        <button onclick="OlympiadApp.filterJadwalBidang('Biokimia')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${this.jadwalFilterBidang === 'Biokimia' ? 'bg-rose-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}">
-          Biokimia
-        </button>
+        ${allLevels.map(lvl => `
+          <button onclick="OlympiadApp.filterJadwalLevel('${lvl}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${this.jadwalFilterLevel === lvl ? 'bg-violet-600 text-white shadow-md shadow-violet-600/30' : 'bg-zinc-800 text-zinc-400 hover:text-white'}">
+            ${lvl}
+          </button>
+        `).join('')}
       </div>
     </div>
 
@@ -7293,7 +7627,8 @@ OlympiadApp.renderJadwalModule = function() {
           countdownBadge = `<span class="px-2.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30 text-[11px] font-bold">H-${diffDays} Hari</span>`;
         }
 
-        const bidangBadge = bidangColors[j.bidang] || 'bg-zinc-800 text-zinc-300 border-zinc-700';
+        const currentLvl = String(j.level || j.bidang || 'Kelas 10').trim();
+        const levelBadge = getLevelBadgeStyle(currentLvl);
 
         return `
           <div class="glass-card rounded-2xl p-5 sm:p-6 border border-zinc-800 hover:border-zinc-700 transition-all shadow-lg" id="jadwal-card-${j.id}">
@@ -7301,8 +7636,8 @@ OlympiadApp.renderJadwalModule = function() {
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-zinc-800/80">
               <div class="flex flex-wrap items-center gap-2">
                 ${countdownBadge}
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border ${bidangBadge}">
-                  ${j.bidang}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border ${levelBadge}">
+                  Level: ${currentLvl}
                 </span>
                 <span class="px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-300 text-xs font-medium flex items-center gap-1.5">
                   <i data-lucide="calendar" class="w-3.5 h-3.5 text-violet-400"></i>
@@ -7431,8 +7766,18 @@ OlympiadApp.openAddJadwalModal = function() {
   if (title) title.textContent = 'Tambah Jadwal Intensif Bimbingan';
   if (saveBtn) saveBtn.textContent = 'Simpan Jadwal Baru';
 
+  // Muat opsi datalist level dinamis
+  const defaultLevels = ['Kelas 10', 'Kelas 11', 'Kelas 12', 'Delegasi OSN', 'Delegasi OMI'];
+  const settingLevels = (this.data.settings && Array.isArray(this.data.settings.levelList)) ? this.data.settings.levelList : [];
+  const listLevels = (this.data.jadwalIntensif || []).map(item => (item.level || item.bidang || '').trim()).filter(Boolean);
+  const allLevels = Array.from(new Set([...defaultLevels, ...settingLevels, ...listLevels]));
+  const dl = document.getElementById('datalist-jadwal-level');
+  if (dl) {
+    dl.innerHTML = allLevels.map(l => `<option value="${l}"></option>`).join('');
+  }
+
   document.getElementById('form-jadwal-judul').value = '';
-  document.getElementById('form-jadwal-bidang').value = 'Kimia Fisik';
+  document.getElementById('form-jadwal-bidang').value = 'Kelas 10';
   document.getElementById('form-jadwal-tanggal').value = new Date().toISOString().split('T')[0];
   document.getElementById('form-jadwal-hari').value = 'Sabtu';
   document.getElementById('form-jadwal-jam-mulai').value = '08:00';
@@ -7463,8 +7808,18 @@ OlympiadApp.openEditJadwalModal = function(id) {
   if (title) title.textContent = 'Edit Jadwal Bimbingan: ' + j.judul;
   if (saveBtn) saveBtn.textContent = 'Perbarui Jadwal';
 
+  // Muat opsi datalist level dinamis
+  const defaultLevels = ['Kelas 10', 'Kelas 11', 'Kelas 12', 'Delegasi OSN', 'Delegasi OMI'];
+  const settingLevels = (this.data.settings && Array.isArray(this.data.settings.levelList)) ? this.data.settings.levelList : [];
+  const listLevels = (this.data.jadwalIntensif || []).map(item => (item.level || item.bidang || '').trim()).filter(Boolean);
+  const allLevels = Array.from(new Set([...defaultLevels, ...settingLevels, ...listLevels]));
+  const dl = document.getElementById('datalist-jadwal-level');
+  if (dl) {
+    dl.innerHTML = allLevels.map(l => `<option value="${l}"></option>`).join('');
+  }
+
   document.getElementById('form-jadwal-judul').value = j.judul || '';
-  document.getElementById('form-jadwal-bidang').value = j.bidang || 'Kimia Fisik';
+  document.getElementById('form-jadwal-bidang').value = j.level || j.bidang || 'Kelas 10';
   document.getElementById('form-jadwal-tanggal').value = j.tanggal || '';
   document.getElementById('form-jadwal-hari').value = j.hari || 'Sabtu';
   document.getElementById('form-jadwal-jam-mulai').value = j.jamMulai || '08:00';
@@ -7491,7 +7846,9 @@ OlympiadApp.saveJadwal = function() {
     return;
   }
 
-  const bidang = document.getElementById('form-jadwal-bidang')?.value || 'Kimia Fisik';
+  const levelVal = document.getElementById('form-jadwal-bidang')?.value.trim() || 'Kelas 10';
+  const bidang = levelVal;
+  const level = levelVal;
   const tanggal = document.getElementById('form-jadwal-tanggal')?.value || new Date().toISOString().split('T')[0];
   const hari = document.getElementById('form-jadwal-hari')?.value.trim() || 'Sabtu';
   const jamMulai = document.getElementById('form-jadwal-jam-mulai')?.value || '08:00';
@@ -7508,6 +7865,7 @@ OlympiadApp.saveJadwal = function() {
     if (j) {
       j.judul = judul;
       j.bidang = bidang;
+      j.level = level;
       j.tanggal = tanggal;
       j.hari = hari;
       j.jamMulai = jamMulai;
@@ -7523,6 +7881,7 @@ OlympiadApp.saveJadwal = function() {
       id: newId,
       judul,
       bidang,
+      level,
       tanggal,
       hari,
       jamMulai,
@@ -7535,19 +7894,30 @@ OlympiadApp.saveJadwal = function() {
     });
   }
 
-  this.saveDataLocally();
+  // Tambahkan ke data.settings.levelList jika belum terdaftar
+  if (!this.data.settings) this.data.settings = {};
+  if (!Array.isArray(this.data.settings.levelList)) {
+    this.data.settings.levelList = ['Kelas 10', 'Kelas 11', 'Kelas 12', 'Delegasi OSN', 'Delegasi OMI'];
+  }
+  if (!this.data.settings.levelList.includes(level)) {
+    this.data.settings.levelList.push(level);
+  }
+
+  this.saveData(true);
   this.closeJadwalModal();
   this.renderJadwalModule();
   if (window.lucide) lucide.createIcons();
+  this.showToast(idInput ? 'Jadwal berhasil diperbarui & disimpan ke Cloud!' : 'Jadwal intensif baru berhasil disimpan & disinkronkan ke Spreadsheet!', 'success');
 };
 
 OlympiadApp.deleteJadwal = function(id) {
   if (this.isSiswa()) return;
   if (!confirm('Yakin ingin menghapus sesi bimbingan intensif ini?')) return;
   this.data.jadwalIntensif = (this.data.jadwalIntensif || []).filter(j => j.id !== id);
-  this.saveDataLocally();
+  this.saveData(true);
   this.renderJadwalModule();
   if (window.lucide) lucide.createIcons();
+  this.showToast('Jadwal berhasil dihapus dan disinkronkan ke Cloud.', 'info');
 };
 
 OlympiadApp.syncJadwalToCalendar = function(id) {

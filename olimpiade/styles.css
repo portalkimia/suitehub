@@ -384,6 +384,31 @@ html.light .heatmap-cell-3 { background-color: rgba(217, 119, 6, 0.14); color: #
 html.light .heatmap-cell-2 { background-color: rgba(225, 29, 72, 0.12); color: #be123c; font-weight: 500; }
 html.light .heatmap-cell-1 { background-color: rgba(225, 29, 72, 0.20); color: #9f1239; font-weight: 700; }
 
+/* Heatmap Inline Input Fields */
+.eval-cell-input {
+  width: 72px;
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.35rem 0.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease-in-out;
+  outline: none;
+}
+.eval-cell-input:focus {
+  ring: 2px solid #8b5cf6;
+  outline: 2px solid #8b5cf6;
+  border-color: #a78bfa !important;
+}
+html.light .eval-cell-input {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+html.light .eval-cell-input:focus {
+  background-color: #ffffff;
+}
+
 /* Shake Animation for Password Error */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
