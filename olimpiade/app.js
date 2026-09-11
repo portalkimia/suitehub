@@ -5115,6 +5115,15 @@ OlympiadApp.removeLombaStage = function(idx) {
 };
 
 OlympiadApp.addLombaStage = function(presetName, targetPosition, defaultModa) {
+  if (!Array.isArray(this.currentLombaFormStages) || this.currentLombaFormStages.length === 0) {
+    this.currentLombaFormStages = [
+      { id: 'stage-deadline', nama: 'Deadline', tanggal: '2026-04-15', moda: 'Online', isDefault: true },
+      { id: 'stage-penyisihan', nama: 'Penyisihan', tanggal: '2026-05-02', moda: 'Online', isDefault: true },
+      { id: 'stage-semifinal', nama: 'Semifinal', tanggal: '2026-05-20', moda: 'Offline', isDefault: true },
+      { id: 'stage-final', nama: 'Final', tanggal: '2026-06-06', moda: 'Offline', isDefault: true }
+    ];
+  }
+
   const name = presetName || 'Tahap Tambahan';
   const moda = defaultModa || (name.toLowerCase().includes('final') && !name.toLowerCase().includes('perempat') && !name.toLowerCase().includes('semi') ? 'Offline' : 'Online');
 
@@ -5271,7 +5280,11 @@ OlympiadApp.openEditLombaModal = function(id) {
 
   // Muat tahapan kompetisi ke editor
   this.currentLombaFormStages = this.getLombaStages(l);
-  this.renderFormLombaStages();
+  if (!Array.isArray(this.currentLombaFormStages) || this.currentLombaFormStages.length === 0) {
+    this.resetLombaStagesToDefault();
+  } else {
+    this.renderFormLombaStages();
+  }
 
   modal.classList.remove('hidden');
 };
@@ -5325,7 +5338,7 @@ OlympiadApp.saveLomba = function() {
   const parsedSyaratLines = syaratRaw.split('\n').map(s => s.trim()).filter(Boolean);
 
   // Baca tahapan lomba yang dikustomisasi
-  const stages = (this.currentLombaFormStages || []).map((st, i) => ({
+  let stages = (this.currentLombaFormStages || []).map((st, i) => ({
     id: st.id || ('stage-' + i + '-' + Date.now()),
     nama: String(st.nama || ('Tahap ' + (i + 1))).trim(),
     tanggal: String(st.tanggal || '').trim(),
@@ -5333,6 +5346,31 @@ OlympiadApp.saveLomba = function() {
     isDefault: !!st.isDefault,
     isCustom: !!st.isCustom
   }));
+
+  // Fallback membaca langsung dari DOM jika stages di memori belum sinkron
+  const stageRows = document.querySelectorAll('#form-lomba-stages-list > div');
+  if (stageRows && stageRows.length > 0) {
+    const domStages = [];
+    stageRows.forEach((row, idx) => {
+      const nameInput = row.querySelector('input[type="text"]');
+      const modaSelect = row.querySelector('select');
+      const dateInput = row.querySelector('input[type="date"]');
+      const nama = nameInput ? nameInput.value.trim() : ('Tahap ' + (idx + 1));
+      const moda = modaSelect ? modaSelect.value : 'Online';
+      const tanggal = dateInput ? dateInput.value.trim() : '';
+      if (nama) {
+        domStages.push({
+          id: 'stage-' + idx + '-' + Date.now(),
+          nama: nama,
+          tanggal: tanggal,
+          moda: moda
+        });
+      }
+    });
+    if (domStages.length > 0) {
+      stages = domStages;
+    }
+  }
 
   const findStageDate = (keywords) => {
     const found = stages.find(s => {
