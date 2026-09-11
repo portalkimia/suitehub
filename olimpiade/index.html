@@ -329,7 +329,7 @@
 
       <div>
         <label class="block text-[11px] font-bold text-zinc-200 mb-1">Judul / Nama Paket Naskah Soal:</label>
-        <input type="text" id="form-soal-subtopik" placeholder="Contoh: SOAL SEMIFINAL OSN KIMIA 2025 atau Naskah Teori IChO 2024" class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-bold focus:outline-none focus:border-violet-500">
+        <input type="text" id="form-soal-subtopik" placeholder="Contoh: SOAL SEMIFINAL OSN KIMIA 2025 (tanpa embel-embel + pembahasan)" class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-bold focus:outline-none focus:border-violet-500">
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -379,31 +379,48 @@
         </div>
       </div>
 
-      <!-- Google Drive Link Inputs -->
-      <div class="p-3.5 rounded-xl bg-violet-950/20 border border-violet-500/30 space-y-2">
-        <label class="block text-[11px] font-bold text-violet-300 flex items-center gap-1.5">
-          <i data-lucide="folder" class="w-3.5 h-3.5 text-violet-400"></i>
-          <span>Tautan Berkas Naskah di Google Drive (PDF / Docx):</span>
-        </label>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <input type="url" id="form-soal-drive-url" placeholder="https://drive.google.com/file/d/.../view" class="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-violet-500">
-          <input type="text" id="form-soal-drive-name" placeholder="Nama Berkas (e.g. Soal_Semifinal_OSN_Kimia_2025.pdf)" class="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-violet-500">
+      <!-- Google Drive Link Inputs (Naskah Soal & Dokumen Pembahasan Terpisah) -->
+      <div class="p-4 rounded-xl bg-violet-950/20 border border-violet-500/30 space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-violet-300 flex items-center gap-1.5 mb-1">
+            <i data-lucide="file-text" class="w-3.5 h-3.5 text-violet-400"></i>
+            <span>Tautan Berkas Naskah Soal di Google Drive (PDF / Docx):</span>
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <input type="url" id="form-soal-drive-url" placeholder="https://drive.google.com/file/d/.../view (Naskah Soal)" class="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-violet-500">
+            <input type="text" id="form-soal-drive-name" placeholder="Nama Berkas (e.g. Soal_Semifinal_OSN_Kimia_2025.pdf)" class="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-violet-500">
+          </div>
         </div>
-        <p class="text-[10px] text-zinc-400">
-          Siswa &amp; Guru dapat langsung membuka dokumen resmi ini di tab baru dengan resolusi asli, navigasi halaman penuh, dan fitur unduh/cetak.
-        </p>
+
+        <!-- Tautan Dokumen Solusi Google Drive -->
+        <div class="pt-2 border-t border-violet-500/20">
+          <label class="block text-[11px] font-bold text-emerald-300 flex items-center gap-1.5 mb-1">
+            <i data-lucide="file-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Tautan Dokumen Pembahasan / Solusi di Google Drive (Opsional):</span>
+          </label>
+          <input type="url" id="form-soal-pembahasan-drive-url" placeholder="https://drive.google.com/file/d/.../view (Dokumen PDF/Docx Solusi Pembina)" class="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <!-- Tautan Video Pembahasan -->
+        <div class="pt-2 border-t border-violet-500/20">
+          <label class="block text-[11px] font-bold text-rose-300 flex items-center gap-1.5 mb-1">
+            <i data-lucide="video" class="w-3.5 h-3.5 text-rose-400"></i>
+            <span>Tautan Video Pembahasan (YouTube / Google Drive Video) (Opsional):</span>
+          </label>
+          <input type="url" id="form-soal-video-url" placeholder="https://www.youtube.com/watch?v=... atau https://youtu.be/... atau link rekaman video" class="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-rose-500">
+        </div>
       </div>
 
       <!-- Deskripsi / Petunjuk Paket Soal -->
       <div>
         <label class="block text-[11px] font-bold text-zinc-300 mb-1">Deskripsi Naskah / Petunjuk / Cakupan Materi:</label>
-        <textarea id="form-soal-teks" rows="4" oninput="OlympiadApp.updateLiveLaTeXPreview()" placeholder="Tuliskan petunjuk pengerjaan, cakupan nomor soal, atau silabus materi yang diujikan..." class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-sans"></textarea>
+        <textarea id="form-soal-teks" rows="3" oninput="OlympiadApp.updateLiveLaTeXPreview()" placeholder="Tuliskan petunjuk pengerjaan, cakupan nomor soal, atau silabus materi yang diujikan..." class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-sans"></textarea>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Kunci Jawaban / Link Solusi:</label>
-          <input type="text" id="form-soal-kunci" placeholder="e.g. Terlampir di halaman akhir / link solusi" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-bold">
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Kunci Jawaban Singkat (Opsional):</label>
+          <input type="text" id="form-soal-kunci" placeholder="Kosongkan jika paket naskah campuran" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
         </div>
         <div class="sm:col-span-2">
           <label class="block text-[11px] font-bold text-zinc-300 mb-1">Penyelenggara / Institusi:</label>
@@ -412,8 +429,8 @@
       </div>
 
       <div>
-        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Catatan Pembahasan / Solusi Lengkap (Khusus Pembina &amp; Admin):</label>
-        <textarea id="form-soal-pembahasan" rows="3" placeholder="Tuliskan catatan analisis solusi atau link dokumen kunci pembina..." class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-sans"></textarea>
+        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Catatan / Rangkuman Pembahasan Pembina (Opsional):</label>
+        <textarea id="form-soal-pembahasan" rows="3" placeholder="Tuliskan catatan analisis solusi, poin-poin penting, atau instruksi pengerjaan..." class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-sans"></textarea>
       </div>
 
       <div class="pt-3 border-t border-zinc-800 flex justify-end gap-2">

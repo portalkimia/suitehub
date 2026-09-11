@@ -428,6 +428,9 @@ window.OlympiadApp = {
         bidang = 'Semua Bidang (Komprehensif)';
       }
 
+      let subtopik = String(sObj.subtopik || 'Paket Naskah Soal Olimpiade');
+      subtopik = this.stripPembahasanFromTitle(subtopik);
+
       return {
         id: String(sObj.id || ('soal-' + (idx + 1) + '-' + Math.random().toString(36).substr(2, 5))),
         nomor: parseInt(sObj.nomor) || (idx + 1),
@@ -435,13 +438,15 @@ window.OlympiadApp = {
         sumber: String(sObj.sumber || 'OSN Kimia'),
         penyelenggara: String(sObj.penyelenggara || 'BPTI Kemendikbudristek'),
         bidang: bidang,
-        subtopik: String(sObj.subtopik || 'Paket Naskah Soal Olimpiade'),
+        subtopik: subtopik,
         kesulitan: String(sObj.kesulitan || 'Tinggi (Nasional)'),
         jenis: String(sObj.jenis || 'Paket Terpadu (PG & Esai)'),
         teksSoal: String(sObj.teksSoal || ''),
         opsi: (Array.isArray(opsi) && opsi.length > 0) ? opsi : null,
-        kunciJawaban: String(sObj.kunciJawaban || '-'),
+        kunciJawaban: String(sObj.kunciJawaban || ''),
         pembahasan: String(sObj.pembahasan || ''),
+        pembahasanDriveUrl: String(sObj.pembahasanDriveUrl || ''),
+        videoPembahasanUrl: String(sObj.videoPembahasanUrl || ''),
         tags,
         googleDriveUrl: String(sObj.googleDriveUrl || ''),
         googleDriveName: String(sObj.googleDriveName || '')
@@ -485,6 +490,20 @@ window.OlympiadApp = {
     });
 
     return data;
+  },
+
+  // Helper pembersih judul naskah soal dari embel-embel "+ pembahasan" / "+ kunci"
+  stripPembahasanFromTitle(title) {
+    if (!title || typeof title !== 'string') return '';
+    let t = title.trim();
+    // Hapus format tanda kurung seperti "(+ Pembahasan)", "(Pembahasan Lengkap)", "[+ Kunci Solusi]"
+    t = t.replace(/\s*[\(\[]\s*(\+|\&|dan)?\s*(kunci|pembahasan|solusi|jawaban|lengkap)[^\)\]]*[\)\]]/gi, '');
+    // Hapus embel-embel akhiran atau sisipan "+ Pembahasan", "+ Kunci", "& Pembahasan", "dan Pembahasan"
+    t = t.replace(/\s*(dan|\&|\+)\s*(pembahasan|kunci|solusi|jawaban)\b[^\-\n\r]*/gi, '');
+    t = t.replace(/\s*[\+\-]\s*(kunci|pembahasan|solusi|jawaban)?\s*$/gi, '');
+    t = t.replace(/\s*\+\s*/g, ' ');
+    t = t.replace(/\s+/g, ' ').trim();
+    return t;
   },
 
   loadState() {
@@ -2544,34 +2563,134 @@ ${s.teksSoal || 'Tidak ada deskripsi tambahan untuk naskah ini. Silakan akses do
     </div>
 
     <!-- Kunci & Pembahasan (ROLE-RESTRICTED) -->
-    ${this.isSiswa() ? `
-      <!-- Siswa: Kunci Terkunci -->
-      <div class="mt-6 p-4 rounded-2xl bg-zinc-900/60 border border-amber-500/30 flex items-center gap-3 text-amber-300">
-        <i data-lucide="lock" class="w-5 h-5 shrink-0 text-amber-400"></i>
-        <div class="text-xs">
-          <strong class="font-bold block text-amber-200">Pembahasan &amp; Solusi Terkunci</strong>
-          Kunci jawaban dan langkah pengerjaan lengkap hanya dapat diakses oleh Guru Pembimbing dan Admin demi menjaga integritas latihan siswa.
-        </div>
-      </div>
-    ` : `
-      <!-- Guru / Admin: Solusi Lengkap -->
-      <div class="mt-6 pt-4 border-t border-zinc-800">
-        <div class="p-5 rounded-2xl bg-zinc-950/80 border border-violet-500/25 text-xs text-zinc-200 leading-relaxed shadow-lg">
-          <div class="flex items-center justify-between pb-2 mb-3 border-b border-zinc-800 text-xs">
-            <span class="font-bold text-violet-400 flex items-center gap-1.5">
+    ${(() => {
+      const hasSolution = !!(s.pembahasan || s.pembahasanDriveUrl || s.videoPembahasanUrl);
+      if (this.isSiswa()) {
+        return `
+          <!-- Siswa: Kunci Terkunci / Belum Tersedia -->
+          <div class="mt-6 p-4 rounded-2xl bg-zinc-900/60 border border-amber-500/30 flex items-center gap-3 text-amber-300">
+            <i data-lucide="${hasSolution ? 'lock' : 'clock'}" class="w-5 h-5 shrink-0 text-amber-400"></i>
+            <div class="text-xs">
+              <strong class="font-bold block text-amber-200">Pembahasan &amp; Solusi Terkunci</strong>
+              ${hasSolution ? 
+                'Kunci jawaban dan langkah pengerjaan lengkap hanya dapat diakses oleh Guru Pembimbing dan Admin demi menjaga integritas latihan siswa.' :
+                'Pembahasan dan video solusi untuk naskah ini belum tersedia atau sedang disiapkan oleh Guru Pembimbing.'}
+            </div>
+          </div>
+        `;
+      }
+
+      // Mode Guru Pembimbing & Admin
+      if (!hasSolution) {
+        return `
+          <!-- Guru / Admin: Belum Ada Pembahasan / Solusi -->
+          <div class="mt-6 pt-4 border-t border-zinc-800">
+            <div class="p-5 rounded-2xl bg-zinc-900/50 border border-dashed border-zinc-700/80 space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="help-circle" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-zinc-200">Pembahasan &amp; Solusi Belum Ditambahkan</h4>
+                    <p class="text-[11px] text-zinc-400">Paket naskah soal ini baru diimpor dan belum memiliki dokumen pembahasan Google Drive atau link video penjelasan.</p>
+                  </div>
+                </div>
+                <button onclick="OlympiadApp.closeSoalDetail(); OlympiadApp.openEditSoalModal('${s.id}')" 
+                        class="px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-violet-600/25 shrink-0">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  <span>Tambahkan Solusi / Video</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Guru / Admin: Solusi Lengkap Tersedia
+      return `
+        <div class="mt-6 pt-4 border-t border-zinc-800 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-violet-400 flex items-center gap-1.5 text-xs">
               <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-              <span>KUNCI JAWABAN &amp; PEMBAHASAN / SOLUSI LENGKAP</span>
+              <span>PEMBAHASAN &amp; SOLUSI LENGKAP</span>
             </span>
-            <span class="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 font-mono font-bold">
-              Kunci: ${s.kunciJawaban || '-'}
-            </span>
+            ${(s.kunciJawaban && s.kunciJawaban.trim() !== '' && s.kunciJawaban !== '-' && s.kunciJawaban !== 'C') ? `
+              <span class="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 font-mono font-bold text-xs">
+                Kunci: ${s.kunciJawaban}
+              </span>
+            ` : ''}
           </div>
-          <div class="katex-renderable whitespace-pre-line leading-relaxed">
-${s.pembahasan || 'Pembahasan tertera di lembar solusi resmi pada berkas Google Drive terlampir.'}
-          </div>
+
+          <!-- Video Pembahasan -->
+          ${s.videoPembahasanUrl ? `
+            <div class="p-4 rounded-2xl bg-rose-950/20 border border-rose-500/30 space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-rose-600/20 border border-rose-500/30 text-rose-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="video" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold text-zinc-100 flex items-center gap-2">
+                      <span>Video Pembahasan &amp; Bedah Soal</span>
+                      <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-bold">Video Online</span>
+                    </div>
+                    <div class="text-[11px] text-zinc-400 truncate max-w-md">${s.videoPembahasanUrl}</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <a href="${s.videoPembahasanUrl}" target="_blank" rel="noopener noreferrer"
+                     class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-rose-600/30">
+                    <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                    <span>Tonton Video Pembahasan ↗</span>
+                  </a>
+                </div>
+              </div>
+              ${this.renderYouTubeEmbed(s.videoPembahasanUrl)}
+            </div>
+          ` : ''}
+
+          <!-- Dokumen Solusi Google Drive -->
+          ${s.pembahasanDriveUrl ? `
+            <div class="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+                  <i data-lucide="file-check" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-zinc-100">Dokumen Kunci &amp; Solusi Resmi Google Drive</div>
+                  <div class="text-[11px] text-zinc-400">Berkas pembahasan lengkap tersimpan di Google Drive</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <button onclick="navigator.clipboard.writeText('${s.pembahasanDriveUrl}'); OlympiadApp.showToast('Link pembahasan disalin!', 'info')"
+                        class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold flex items-center gap-1 shadow-sm">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin Link
+                </button>
+                <a href="${s.pembahasanDriveUrl}" target="_blank" rel="noopener noreferrer"
+                   class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-emerald-600/30">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                  <span>Buka Dokumen Solusi ↗</span>
+                </a>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Catatan Solusi Tekstual Pembina -->
+          ${s.pembahasan ? `
+            <div class="p-5 rounded-2xl bg-zinc-950/80 border border-violet-500/25 text-xs text-zinc-200 leading-relaxed shadow-lg">
+              <h5 class="text-[11px] font-bold text-zinc-400 uppercase mb-2 flex items-center gap-1.5">
+                <i data-lucide="align-left" class="w-3.5 h-3.5 text-violet-400"></i>
+                <span>Catatan / Solusi Pembina:</span>
+              </h5>
+              <div class="katex-renderable whitespace-pre-line leading-relaxed">
+${s.pembahasan}
+              </div>
+            </div>
+          ` : ''}
         </div>
-      </div>
-    `}
+      `;
+    })()}
   `;
 
   modal.classList.remove('hidden');
@@ -2774,6 +2893,11 @@ OlympiadApp.openAddSoalModal = function() {
   document.getElementById('form-soal-pembahasan').value = '';
   document.getElementById('form-soal-drive-url').value = '';
   document.getElementById('form-soal-drive-name').value = '';
+  const drivePembahasan = document.getElementById('form-soal-pembahasan-drive-url');
+  if (drivePembahasan) drivePembahasan.value = '';
+  const videoUrl = document.getElementById('form-soal-video-url');
+  if (videoUrl) videoUrl.value = '';
+
   const previewBox = document.getElementById('preview-latex-box');
   if (previewBox) previewBox.innerHTML = '';
 
@@ -2790,7 +2914,8 @@ OlympiadApp.openEditSoalModal = function(id) {
 
   const modal = document.getElementById('modal-soal-form');
   if (!modal) return;
-  document.getElementById('soal-form-title').innerHTML = `<i data-lucide="edit-3" class="w-5 h-5 text-violet-400"></i><span>Edit Paket Naskah: #${s.nomor} ${s.subtopik}</span>`;
+  const cleanTitle = this.stripPembahasanFromTitle(s.subtopik);
+  document.getElementById('soal-form-title').innerHTML = `<i data-lucide="edit-3" class="w-5 h-5 text-violet-400"></i><span>Edit Paket Naskah: #${s.nomor} ${cleanTitle}</span>`;
   document.getElementById('form-soal-id').value = s.id;
   document.getElementById('form-soal-nomor').value = s.nomor;
   document.getElementById('form-soal-tahun').value = s.tahun;
@@ -2807,7 +2932,7 @@ OlympiadApp.openEditSoalModal = function(id) {
     }
   }
 
-  document.getElementById('form-soal-subtopik').value = s.subtopik;
+  document.getElementById('form-soal-subtopik').value = cleanTitle;
   document.getElementById('form-soal-kesulitan').value = s.kesulitan;
   document.getElementById('form-soal-jenis').value = s.jenis;
   const tagsInput = document.getElementById('form-soal-tags');
@@ -2819,6 +2944,10 @@ OlympiadApp.openEditSoalModal = function(id) {
   document.getElementById('form-soal-pembahasan').value = s.pembahasan || '';
   document.getElementById('form-soal-drive-url').value = s.googleDriveUrl || '';
   document.getElementById('form-soal-drive-name').value = s.googleDriveName || '';
+  const drivePembahasan = document.getElementById('form-soal-pembahasan-drive-url');
+  if (drivePembahasan) drivePembahasan.value = s.pembahasanDriveUrl || '';
+  const videoUrl = document.getElementById('form-soal-video-url');
+  if (videoUrl) videoUrl.value = s.videoPembahasanUrl || '';
 
   this.updateLiveLaTeXPreview();
   modal.classList.remove('hidden');
@@ -2835,7 +2964,8 @@ OlympiadApp.updateLiveLaTeXPreview = function() {
 
 OlympiadApp.saveSoal = function() {
   const id = document.getElementById('form-soal-id').value;
-  const judul = document.getElementById('form-soal-subtopik').value.trim();
+  const rawJudul = document.getElementById('form-soal-subtopik').value.trim();
+  const judul = this.stripPembahasanFromTitle(rawJudul);
   if (!judul) {
     alert('Judul atau nama paket naskah soal wajib diisi!');
     document.getElementById('form-soal-subtopik').focus();
@@ -2853,6 +2983,11 @@ OlympiadApp.saveSoal = function() {
   if (!driveName && driveUrl) {
     driveName = judul.replace(/\s+/g, '_') + '.pdf';
   }
+
+  const drivePembahasan = document.getElementById('form-soal-pembahasan-drive-url');
+  const pembahasanDriveUrl = drivePembahasan ? drivePembahasan.value.trim() : '';
+  const videoUrlInput = document.getElementById('form-soal-video-url');
+  const videoPembahasanUrl = videoUrlInput ? videoUrlInput.value.trim() : '';
 
   let teks = document.getElementById('form-soal-teks').value.trim();
   if (!teks) {
@@ -2875,8 +3010,10 @@ OlympiadApp.saveSoal = function() {
     tags: tagsArray.length > 0 ? tagsArray : [bidang, sumber],
     teksSoal: teks,
     opsi: null,
-    kunciJawaban: document.getElementById('form-soal-kunci').value.trim() || '-',
+    kunciJawaban: document.getElementById('form-soal-kunci').value.trim(),
     pembahasan: document.getElementById('form-soal-pembahasan').value.trim(),
+    pembahasanDriveUrl: pembahasanDriveUrl,
+    videoPembahasanUrl: videoPembahasanUrl,
     googleDriveUrl: driveUrl,
     googleDriveName: driveName
   };
@@ -2966,6 +3103,33 @@ OlympiadApp.handleHtmlFileSelect = function(input) {
   this.importLocalHtmlSoal(input.files);
 };
 
+OlympiadApp.stripPembahasanFromTitle = function(title) {
+  if (!title || typeof title !== 'string') return '';
+  let t = title.trim();
+  // Hapus format tanda kurung seperti "(+ Pembahasan)", "(Pembahasan Lengkap)", "[+ Kunci Solusi]"
+  t = t.replace(/\s*[\(\[]\s*(\+|\&|dan)?\s*(kunci|pembahasan|solusi|jawaban|lengkap)[^\)\]]*[\)\]]/gi, '');
+  // Hapus embel-embel akhiran atau sisipan "+ Pembahasan", "+ Kunci", "& Pembahasan", "dan Pembahasan"
+  t = t.replace(/\s*(dan|\&|\+)\s*(pembahasan|kunci|solusi|jawaban)\b[^\-\n\r]*/gi, '');
+  t = t.replace(/\s*[\+\-]\s*(kunci|pembahasan|solusi|jawaban)?\s*$/gi, '');
+  t = t.replace(/\s*\+\s*/g, ' ');
+  t = t.replace(/\s+/g, ' ').trim();
+  return t;
+};
+
+OlympiadApp.renderYouTubeEmbed = function(url) {
+  if (!url || typeof url !== 'string') return '';
+  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (ytMatch && ytMatch[1]) {
+    const videoId = ytMatch[1];
+    return `
+      <div class="aspect-video w-full rounded-xl overflow-hidden border border-zinc-800 bg-black mt-2 shadow-inner">
+        <iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/${videoId}" title="Video Pembahasan" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    `;
+  }
+  return '';
+};
+
 OlympiadApp.parseSoalMetadata = function(rawName, htmlContent = '') {
   let cleanTitle = '';
   let extractedSoal = '';
@@ -3036,6 +3200,7 @@ OlympiadApp.parseSoalMetadata = function(rawName, htmlContent = '') {
     cleanTitle = cleanTitle.replace(/^[0-9]+[_\-\s\.]*/, '');
     cleanTitle = cleanTitle.replace(/[_\-]+/g, ' ').trim();
   }
+  cleanTitle = this.stripPembahasanFromTitle(cleanTitle);
 
   const combinedSearch = (rawName + ' ' + cleanTitle + ' ' + (extractedSoal || '')).toLowerCase();
 
@@ -3111,12 +3276,13 @@ OlympiadApp.parseSoalMetadata = function(rawName, htmlContent = '') {
     jenis = 'Uraian & Praktikum';
   }
 
-  // Default teks dan pembahasan naskah paket
+  // Default teks naskah paket
   if (!extractedSoal) {
     extractedSoal = `Bundel naskah paket soal **${cleanTitle}** (${sumber} ${tahun}). Berisi kumpulan butir soal terpadu yang dapat langsung dibuka atau diunduh melalui tautan Google Drive terlampir.`;
   }
+  // Pembahasan awal KOSONG jika tidak diekstrak secara spesifik dari dokumen
   if (!extractedPembahasan) {
-    extractedPembahasan = `Kunci dan pembahasan lengkap untuk naskah soal ${cleanTitle} tertera pada lembar dokumen sumber di Google Drive.`;
+    extractedPembahasan = '';
   }
 
   return {
@@ -3130,8 +3296,10 @@ OlympiadApp.parseSoalMetadata = function(rawName, htmlContent = '') {
     tags: [bidang, sumber, 'Paket Naskah'],
     teksSoal: extractedSoal,
     opsi: (extractedOpsi && extractedOpsi.length >= 2) ? extractedOpsi : null,
-    kunciJawaban: extractedKunci || '-',
-    pembahasan: extractedPembahasan
+    kunciJawaban: extractedKunci || '',
+    pembahasan: extractedPembahasan,
+    pembahasanDriveUrl: '',
+    videoPembahasanUrl: ''
   };
 };
 
@@ -3233,8 +3401,10 @@ OlympiadApp.syncDriveSoalFolder = function() {
           tags: ['Semua Bidang', 'OSN Nasional', 'Semifinal'],
           teksSoal: 'Bundel naskah paket soal SOAL SEMIFINAL OSN KIMIA 2025 lengkap mencakup seluruh cabang kimia (Kimia Fisik, Organik, Anorganik, Analitik, dan Biokimia). Berkas dokumen terhubung langsung ke Google Drive.',
           opsi: null,
-          kunciJawaban: 'Terlampir di berkas dokumen solusi',
-          pembahasan: 'Kunci dan pembahasan lengkap untuk naskah soal SOAL SEMIFINAL OSN KIMIA 2025 tertera pada lembar dokumen sumber di Google Drive.',
+          kunciJawaban: '',
+          pembahasan: '',
+          pembahasanDriveUrl: '',
+          videoPembahasanUrl: '',
           googleDriveUrl: 'https://drive.google.com/file/d/sampleDrive1/view',
           googleDriveName: 'SOAL_SEMIFINAL_OSN_KIMIA_2025.pdf'
         },
@@ -3245,14 +3415,16 @@ OlympiadApp.syncDriveSoalFolder = function() {
           sumber: 'OSN-K Kimia 2025',
           penyelenggara: 'Balai Pengembangan Talenta Indonesia',
           bidang: 'Semua Bidang (Komprehensif)',
-          subtopik: 'NASKAH SOAL SELEKSI KABUPATEN (OSN-K) KIMIA 2025',
+          subtopik: 'NASKAH SOAL SELEKSI KABUPATEN OSN-K KIMIA 2025',
           kesulitan: 'Dasar (Kabupaten)',
           jenis: 'Pilihan Ganda Lengkap',
           tags: ['Semua Bidang', 'OSN-K', 'Seleksi Tahap 1'],
           teksSoal: 'Bundel naskah paket soal Seleksi Kabupaten/Kota OSN-K Kimia 2025 (30 butir soal pilihan ganda komprehensif). Berkas dokumen terhubung langsung ke Google Drive.',
           opsi: null,
-          kunciJawaban: 'Terlampir di lembar kunci jawaban resmi',
-          pembahasan: 'Kunci dan panduan pembahasan soal seleksi kabupaten tertera di lembar solusi resmi Google Drive.',
+          kunciJawaban: '',
+          pembahasan: '',
+          pembahasanDriveUrl: '',
+          videoPembahasanUrl: '',
           googleDriveUrl: 'https://drive.google.com/file/d/sampleDrive2/view',
           googleDriveName: 'NASKAH_OSN_K_KIMIA_2025.pdf'
         }
