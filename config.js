@@ -20,4 +20,8 @@ window.PORTALKIMIA_CONFIG = {
 
   // 4. URL Web App Backend Media Pembelajaran Kimia (Pengiriman Tugas/Jawaban & Google Drive Media)
   MEDIA_API: "https://script.google.com/macros/s/AKfycbwobr0k-44HFrf3B5YUroeEK-_U13AGVe2urQYDAmL0U43arTQHTvKjUEeM6CuZQvOE/exec"
+    
+  // 5. URL Web App Backend PortalKimia Olimpiade (Bank Soal, Ploting Tim, Data Siswa & Agenda Lomba)
+  // Masukkan URL Google Apps Script Olimpiade Anda di sini:
+  OLIMPIADE_API: "https://script.google.com/macros/s/AKfycbwnsrR8vyTLo8mu_urbIfjGApBabcj-NdvCBpNMiOIwQCwXo5UdT7Heq_Z36KxLeAgNLA/exec"
 };
