@@ -9,14 +9,6 @@
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   
-  <!-- Konfigurasi Terpusat Multi-Device -->
-  <script src="../config.js"></script>
-  
-  <!-- Favicon & PWA Icons PortalKimia -->
-  <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  
   <!-- Obsidian Fonts: Geist & Material Symbols -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -454,6 +446,9 @@
       color: #334155;
     }
   </style>
+
+  <!-- Konfigurasi Terpusat PortalKimia Suite -->
+  <script src="../config.js"></script>
 </head>
 <body>
 
@@ -863,8 +858,8 @@
     // =========================================================================
     // 0.1 MANAJEMEN BACKEND GOOGLE APPS SCRIPT (GITHUB PAGES READY)
     // =========================================================================
-    // Konfigurasi default URL Web App GAS (Diambil otomatis dari config.js)
-    const DEFAULT_GAS_URL = window.PORTALKIMIA_CONFIG?.GENERATOR_API || ""; 
+    // Konfigurasi default URL Web App GAS (dapat juga disimpan melalui tombol di UI)
+    const DEFAULT_GAS_URL = ""; 
 
     function getGasBackendUrl() {
       return localStorage.getItem('gasWebAppUrl') || DEFAULT_GAS_URL;

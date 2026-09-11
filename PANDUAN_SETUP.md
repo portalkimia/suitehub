@@ -27,7 +27,8 @@ Panduan ini memandu Anda menghubungkan **Frontend PortalKimia Suite** (`index.ht
    - Pilih akun Google Anda.
    - Klik **Lanjutan (Advanced)** > klik **Buka Database_PortalKimia_Suite (tidak aman)**.
    - Klik **Izinkan (Allow)**.
-4. Setelah selesai, buka kembali tab Spreadsheet Anda. Tabel database dengan header rapi dan 3 data cabang awal (LMS, PortalKimia Interaktif, Generator Modul AI) sudah terbuat otomatis!
+4. Setelah selesai, buka kembali tab Spreadsheet Anda. Tabel database dengan header rapi dan 13 kolom (termasuk kolom **`Roles`** untuk hak akses Siswa, Guru, Admin) serta 3 data cabang awal sudah terbuat otomatis!
+   > 💡 **Catatan untuk Spreadsheet Lama:** Jika Anda sudah memiliki spreadsheet sebelumnya, fungsi `setupDatabase` (atau saat portal diakses) akan **secara otomatis menambahkan kolom `Roles`** tanpa menghapus data cabang Anda yang lama.
 
 ---
 

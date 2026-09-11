@@ -17,7 +17,7 @@ const DEFAULT_SAMPLE_DATA = {
     tahunAjaran: "2026/2027",
     semester: "Ganjil",
     kkmDefault: 75,
-    gasWebAppUrl: ""
+    gasWebAppUrl: "https://script.google.com/macros/s/AKfycbwhHSF2V_rUkObqGcQ0aGfy58g2eIe73VPgAIbyEKn2Oxw8m7FVIyu2oVKHzyLGsu2q/exec"
   },
 
   // Daftar Kelas Default

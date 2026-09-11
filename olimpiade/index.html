@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PortalKimia Olimpiade — Cabang Pembinaan &amp; Talenta Sains</title>
+  
+  <!-- PWA & Mobile Web App Meta Tags -->
+  <meta name="theme-color" content="#09090b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PortalKimia Olimpiade">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="portalkimia-logo.svg">
+
+  <!-- Google Fonts: Geist & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            "surface-lowest": "#09090b",
+            "surface-low": "#0f0f12",
+            "surface": "#0c0c0f",
+            "surface-card": "#121215",
+            "surface-high": "#18181b",
+            "surface-highest": "#1e1e22",
+            "surface-bright": "#27272a",
+            "outline-variant": "#27272a",
+            "outline": "#3f3f46",
+            primary: {
+              DEFAULT: "#a78bfa",
+              50: "#f5f3ff",
+              100: "#ede9fe",
+              400: "#a78bfa",
+              500: "#8b5cf6",
+              600: "#7c3aed"
+            },
+            tertiary: {
+              DEFAULT: "#34d399",
+              400: "#34d399",
+              500: "#10b981"
+            }
+          },
+          fontFamily: {
+            sans: ['Geist', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- KaTeX for Chemistry Formulas and Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Chart.js for Visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- SheetJS (XLSX) for Excel Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Custom Design System Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Konfigurasi Terpusat Multi-Device (Root Suite & Local Config) -->
+  <script src="../config.js"></script>
+  <script src="config.js"></script>
+
+  <!-- Application Sample Data & Core Engine -->
+  <script src="data-sample.js"></script>
+  <script src="app.js"></script>
+</head>
+
+<body class="min-h-screen antialiased flex flex-col bg-grid-pattern selection:bg-violet-500/30 selection:text-violet-200">
+
+  <!-- ========================================================================
+       TOP HEADER BAR (Obsidian Precision / Clean Light)
+       ======================================================================== -->
+  <header class="glass-header sticky top-0 z-30 shadow-md no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Left: Brand Logo, Title & Portal Utama Link -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Tombol Navigasi Kembali ke Portal Utama Suite -->
+          <a href="../" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 rounded-xl bg-violet-600/10 hover:bg-violet-600/20 text-violet-300 border border-violet-500/30 text-xs font-bold transition-all shadow-sm group" title="Kembali ke Beranda PortalKimia Suite">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform"></i>
+            <span class="hidden md:inline">Portal Utama</span>
+          </a>
+
+          <a href="#" onclick="OlympiadApp.setTab('dashboard'); return false;" class="flex items-center gap-2.5 sm:gap-3 group">
+            <!-- Official SVG Logo with Olympiad Laurel -->
+            <img src="portalkimia-logo.svg" alt="PortalKimia Logo" class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-2xl shadow-md shadow-violet-500/20 group-hover:scale-105 transition-transform">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h1 class="text-base sm:text-lg font-black tracking-tight leading-tight">
+                  Portal<span class="text-violet-400">Kimia</span>
+                </h1>
+                <span class="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] font-black tracking-wider uppercase">
+                  Olimpiade
+                </span>
+              </div>
+              <p class="text-[10px] text-zinc-400 font-medium hidden sm:block">Cabang Talenta &amp; Sains Prestasi</p>
+            </div>
+          </a>
+        </div>
+
+        <!-- Center: Deadline Alert Banner (Dynamic) -->
+        <div id="header-deadline-alert" class="hidden md:flex items-center"></div>
+
+        <!-- Right: Actions & Profile -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          
+          <!-- Cloud Sync Status Indicator (Multi-Device) -->
+          <button id="cloud-sync-btn" onclick="OlympiadApp.pushToCloud()" title="Status Sinkronisasi Multi-Device"
+                  class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-800/60 border border-zinc-700/60 text-zinc-400 text-xs font-semibold cursor-pointer hover:bg-zinc-700/60 transition-colors">
+            <span id="cloud-sync-dot" class="w-2 h-2 rounded-full bg-zinc-400"></span>
+            <span id="cloud-sync-text">Penyimpanan Lokal</span>
+          </button>
+
+          <!-- Quick Lock to Siswa Mode (Visible when Guru/Admin) -->
+          <button id="quick-lock-btn" onclick="OlympiadApp.requestRoleSwitch('siswa')" 
+                  title="Kunci Akses Cepat ke Mode Siswa"
+                  class="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold transition-all">
+            <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+            <span>Kunci Siswa</span>
+          </button>
+
+          <!-- Interactive Periodic Table & Constants Quick Access Button -->
+          <button id="tabel-periodik-btn" onclick="OlympiadApp.openTabelPeriodikModal()" 
+                  title="Tabel Periodik Unsur & Lembar Konstanta Fisik OSN"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600/20 hover:bg-violet-600/30 border border-violet-500/30 text-violet-300 transition-all text-xs font-bold shadow-sm">
+            <i data-lucide="atom" class="w-4 h-4 text-violet-400"></i>
+            <span class="hidden md:inline">Tabel &amp; Konstanta</span>
+          </button>
+
+          <!-- Mode Gelap / Mode Terang Switcher -->
+          <button id="theme-toggle-btn" onclick="OlympiadApp.toggleTheme()" 
+                  title="Ganti Mode Gelap / Terang"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700/80 border border-zinc-700/60 text-zinc-200 transition-all text-xs font-semibold shadow-sm">
+            <i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
+            <span class="hidden sm:inline">Mode Terang</span>
+          </button>
+
+          <!-- Role Selector Dropdown Trigger -->
+          <div class="relative">
+            <button onclick="document.getElementById('role-selector-menu').classList.toggle('hidden')" 
+                    class="flex items-center gap-1.5 cursor-pointer">
+              <div id="user-role-badge" class="px-2.5 py-1 rounded-full text-xs font-bold border bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
+                Mode Siswa
+              </div>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-zinc-400"></i>
+            </button>
+            <div id="role-selector-menu" class="hidden absolute right-0 mt-2 w-48 rounded-2xl bg-zinc-900 border border-zinc-700 shadow-2xl z-50 py-1.5 text-xs">
+              <div class="px-3 py-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Pilih Hak Akses:</div>
+              <button onclick="document.getElementById('role-selector-menu').classList.add('hidden'); OlympiadApp.requestRoleSwitch('siswa');" class="w-full text-left px-3 py-2 hover:bg-zinc-800 flex items-center justify-between text-zinc-200">
+                <span>Mode Siswa</span>
+                <span class="text-[10px] text-emerald-400 font-bold">Bebas</span>
+              </button>
+              <button onclick="document.getElementById('role-selector-menu').classList.add('hidden'); OlympiadApp.requestRoleSwitch('pembimbing');" class="w-full text-left px-3 py-2 hover:bg-zinc-800 flex items-center justify-between text-zinc-200">
+                <span>Guru Pembimbing</span>
+                <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400"></i>
+              </button>
+              <button onclick="document.getElementById('role-selector-menu').classList.add('hidden'); OlympiadApp.requestRoleSwitch('admin');" class="w-full text-left px-3 py-2 hover:bg-zinc-800 flex items-center justify-between text-zinc-200">
+                <span>Admin Olimpiade</span>
+                <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-rose-400"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Profile Badge -->
+          <div class="flex items-center gap-2 pl-2 border-l border-zinc-800">
+            <div id="profile-avatar" class="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-emerald-500/30 shadow-inner">
+              SB
+            </div>
+            <div class="hidden lg:flex flex-col text-left">
+              <span id="profile-name" class="text-xs font-bold text-zinc-100 leading-tight">Siswa Binaan</span>
+              <span id="profile-role-desc" class="text-[10px] text-emerald-400 font-semibold leading-tight">Siswa Olimpiade Kimia</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Navigation Bar (Role-Aware Tabs) -->
+    <div class="border-t border-zinc-800/80 bg-zinc-950/40 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav id="main-nav-items" class="flex items-center gap-1.5 overflow-x-auto py-2 scrollbar-none">
+          <!-- Dynamic Nav Items Rendered by app.js based on active role -->
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN APPLICATION WORKSPACE
+       ======================================================================== -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full relative z-10">
+
+    <!-- Tab 1: Dashboard -->
+    <section id="panel-dashboard" class="tab-panel space-y-6">
+      <!-- Injected by app.js renderDashboard() -->
+    </section>
+
+    <!-- Tab 2: Bank Soal & Pembahasan -->
+    <section id="panel-soal" class="tab-panel hidden space-y-6">
+      <!-- Injected by app.js renderBankSoal() -->
+    </section>
+
+    <!-- Tab 3: Data Siswa & Tim -->
+    <section id="panel-siswa" class="tab-panel hidden space-y-6">
+      <!-- Injected by app.js renderSiswaModule() -->
+    </section>
+
+    <!-- Tab 4: Manajemen Lomba -->
+    <section id="panel-lomba" class="tab-panel hidden space-y-6">
+      <!-- Injected by app.js renderLombaModule() -->
+    </section>
+
+    <!-- Tab: Jadwal Intensif Bimbingan -->
+    <section id="panel-jadwal" class="tab-panel hidden space-y-6">
+      <!-- Injected by app_part8_jadwal.js renderJadwalModule() -->
+    </section>
+
+    <!-- Tab 5: Ploting & Strategi Tim -->
+    <section id="panel-ploting" class="tab-panel hidden space-y-6">
+      <!-- Injected by app.js renderPlotingModule() -->
+    </section>
+
+    <!-- Tab 6: Analitik & Reporting -->
+    <section id="panel-analitik" class="tab-panel hidden space-y-6">
+      <!-- Injected by app.js renderAnalyticsModule() -->
+    </section>
+
+    <!-- Tab 7: Pengaturan Sistem -->
+    <section id="panel-settings" class="tab-panel hidden space-y-6">
+      <!-- Injected by app.js renderSettingsModule() -->
+    </section>
+
+    <!-- Tab 8: Manajemen User -->
+    <section id="panel-users" class="tab-panel hidden space-y-6">
+      <!-- Injected by app.js renderUsersModule() -->
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       FOOTER
+       ======================================================================== -->
+  <footer class="border-t border-zinc-800 bg-zinc-950/60 backdrop-blur-md py-6 text-center text-xs text-zinc-400 no-print mt-12">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-zinc-200">PortalKimia Olimpiade</span>
+        <span class="text-zinc-600">•</span>
+        <span>Cabang Resmi PortalKimia Suite</span>
+        <span class="px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400 text-[10px] font-mono">v2.4.0-Olympiad</span>
+      </div>
+      <div>
+        Dikembangkan oleh: <strong class="text-zinc-200">Tito Vanzal, S.Pd.</strong> © 2026 PortalKimia
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       MODAL CONTAINERS
+       ======================================================================== -->
+
+  <!-- Modal 1: Google Drive File Viewer / Preview -->
+  <div id="modal-drive-preview" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl w-full max-w-4xl h-[85vh] flex flex-col border border-zinc-700 shadow-2xl overflow-hidden">
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/80">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 id="drive-preview-title" class="text-sm font-bold text-zinc-100">Pratinjau Berkas Google Drive</h3>
+            <span class="text-[10px] text-zinc-400">Penyimpanan Terintegrasi Google Drive PortalKimia</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a id="drive-direct-link" href="#" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Buka di Tab Baru
+          </a>
+          <button onclick="OlympiadApp.closeDrivePreview()" class="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-all">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Body with Iframe -->
+      <div class="flex-grow bg-zinc-950 relative">
+        <iframe id="drive-iframe" class="w-full h-full border-none" src="" allow="autoplay"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Form Tambah / Edit Soal dengan Live KaTeX Preview -->
+  <div id="modal-soal-form" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-3xl border border-zinc-700 shadow-2xl my-8 p-6 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+        <h3 id="soal-form-title" class="text-base font-bold text-zinc-100">Input Soal Baru</h3>
+        <button onclick="document.getElementById('modal-soal-form').classList.add('hidden')" class="p-1 rounded-lg hover:bg-zinc-800 text-zinc-400">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="form-soal-id">
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Nomor Soal:</label>
+          <input type="number" id="form-soal-nomor" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Tahun Lomba:</label>
+          <input type="number" id="form-soal-tahun" value="2026" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Sumber Lomba:</label>
+          <input type="text" id="form-soal-sumber" placeholder="e.g. OSN-K Kimia" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Bidang Kimia:</label>
+          <select id="form-soal-bidang" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+            <option value="Kimia Fisik">Kimia Fisik</option>
+            <option value="Kimia Organik">Kimia Organik</option>
+            <option value="Kimia Anorganik">Kimia Anorganik</option>
+            <option value="Kimia Analitik">Kimia Analitik</option>
+            <option value="Biokimia">Biokimia</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Tingkat Kesulitan:</label>
+          <select id="form-soal-kesulitan" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+            <option value="Dasar (Kabupaten)">Dasar (Kabupaten)</option>
+            <option value="Menengah (Provinsi)">Menengah (Provinsi)</option>
+            <option value="Tinggi (Nasional)">Tinggi (Nasional)</option>
+            <option value="Master (Internasional)">Master (Internasional)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Format Soal:</label>
+          <select id="form-soal-jenis" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+            <option value="Pilihan Ganda">Pilihan Ganda</option>
+            <option value="Esai Terstruktur">Esai Terstruktur</option>
+            <option value="Isian Singkat">Isian Singkat</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Subtopik / Materi:</label>
+          <input type="text" id="form-soal-subtopik" placeholder="e.g. Termodinamika &amp; Kinetika" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Tags (Pisahkan koma):</label>
+          <input type="text" id="form-soal-tags" placeholder="e.g. Entropi, Delta G, Kp" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        </div>
+      </div>
+
+      <!-- Google Drive Link Inputs -->
+      <div class="p-3 rounded-xl bg-violet-950/20 border border-violet-500/25 space-y-2">
+        <label class="block text-[11px] font-bold text-violet-300">Penyimpanan Berkas Soal di Google Drive:</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <input type="url" id="form-soal-drive-url" placeholder="URL Sharing Google Drive (PDF / Docs)" class="w-full px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+          <input type="text" id="form-soal-drive-name" placeholder="Nama Berkas (e.g. Naskah_OSN_K_2026.pdf)" class="w-full px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        </div>
+      </div>
+
+      <!-- Teks Soal & Live KaTeX Preview -->
+      <div>
+        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Teks Soal (Mendukung KaTeX: $...$ atau $$...$$):</label>
+        <textarea id="form-soal-teks" rows="4" oninput="OlympiadApp.updateLiveLaTeXPreview()" class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-mono"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-bold text-violet-400 uppercase tracking-wider mb-1">Pratinjau Rumus KaTeX Live:</label>
+        <div id="preview-latex-box" class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-200 katex-renderable min-h-[48px]"></div>
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Pilihan Ganda (1 baris 1 opsi, contoh: A. ...):</label>
+        <textarea id="form-soal-opsi" rows="3" placeholder="A. Opsi pertama&#10;B. Opsi kedua&#10;C. Opsi ketiga" class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-mono"></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Kunci Jawaban:</label>
+          <input type="text" id="form-soal-kunci" placeholder="e.g. C atau 50.27%" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-bold">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Penyelenggara:</label>
+          <input type="text" id="form-soal-penyelenggara" placeholder="e.g. BPTI Kemendikbudristek" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Langkah Pembahasan &amp; Reaksi (KaTeX Supported):</label>
+        <textarea id="form-soal-pembahasan" rows="4" placeholder="Tuliskan analisis konsep, reaksi kimia setara, dan kalkulasinya..." class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-mono"></textarea>
+      </div>
+
+      <div class="pt-3 border-t border-zinc-800 flex justify-end gap-2">
+        <button onclick="document.getElementById('modal-soal-form').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold">Batal</button>
+        <button onclick="OlympiadApp.saveSoal()" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-md shadow-violet-600/30">Simpan Soal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Detail Siswa, Radar & Riwayat Evaluasi -->
+  <div id="modal-siswa-detail" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-3xl border border-zinc-700 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto sm:my-4">
+      <div class="px-6 py-3.5 border-b border-zinc-800 flex items-center justify-between shrink-0 bg-zinc-900/90">
+        <div class="flex items-center gap-2">
+          <i data-lucide="user" class="w-4 h-4 text-emerald-400"></i>
+          <h3 class="text-sm font-bold text-zinc-100">Profil &amp; Informasi Delegasi Siswa</h3>
+        </div>
+        <button onclick="document.getElementById('modal-siswa-detail').classList.add('hidden')" class="p-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-all">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="siswa-detail-content" class="p-6 overflow-y-auto flex-grow space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Form Tambah & Edit Siswa -->
+  <div id="modal-siswa-form" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-lg border border-zinc-700 shadow-2xl p-6 space-y-3.5 my-6 max-h-[92vh] overflow-y-auto flex flex-col">
+      <div class="flex items-center justify-between pb-2 border-b border-zinc-800 shrink-0">
+        <h3 id="form-siswa-title" class="text-sm font-bold text-zinc-100 flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i> Data Siswa Binaan
+        </h3>
+        <button onclick="document.getElementById('modal-siswa-form').classList.add('hidden')" class="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <input type="hidden" id="form-siswa-id">
+
+      <!-- Nama Lengkap & Nama Panggilan -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="sm:col-span-2">
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Nama Lengkap Siswa:</label>
+          <input type="text" id="form-siswa-nama" placeholder="Muhammad Zaidan Al-Faris" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Nama Panggilan:</label>
+          <input type="text" id="form-siswa-panggilan" placeholder="Zaidan" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-emerald-500">
+        </div>
+      </div>
+
+      <!-- NISN, Level Kelas & Kelas Asal -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">NISN:</label>
+          <input type="text" id="form-siswa-nisn" placeholder="0078921101" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-emerald-400 mb-1">Level Kelas:</label>
+          <select id="form-siswa-level-kelas" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-emerald-500 font-bold">
+            <option value="10">Kelas 10 (Tingkat Dasar)</option>
+            <option value="11">Kelas 11 (Tingkat Menengah)</option>
+            <option value="12">Kelas 12 (Tingkat Mahir/Senior)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Kelas Asal:</label>
+          <input type="text" id="form-siswa-kelas-asal" placeholder="X-MIPA 1" value="X-MIPA 1" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-emerald-500">
+        </div>
+      </div>
+
+      <!-- Tempat & Tanggal Lahir -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Tempat Lahir:</label>
+          <input type="text" id="form-siswa-tempat-lahir" placeholder="Surabaya" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Tanggal Lahir:</label>
+          <input type="date" id="form-siswa-tanggal-lahir" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-emerald-500">
+        </div>
+      </div>
+
+      <!-- Spesialisasi Awal (Opsional / Fleksibel) -->
+      <div class="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-violet-300">Peminatan / Spesialisasi Cabang Kimia:</span>
+          <span class="text-[10px] text-zinc-400 italic">Dapat ditentukan nanti seiring bimbingan</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] text-zinc-400 mb-1">Spesialisasi Utama:</label>
+            <select id="form-siswa-bidang-utama" class="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-violet-500">
+              <option value="Belum Ditentukan">Belum Ditentukan (Tahap Penjajakan)</option>
+              <option value="Kimia Fisik">Kimia Fisik</option>
+              <option value="Kimia Organik">Kimia Organik</option>
+              <option value="Kimia Anorganik">Kimia Anorganik</option>
+              <option value="Kimia Analitik">Kimia Analitik</option>
+              <option value="Biokimia">Biokimia</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] text-zinc-400 mb-1">Bidang Sekunder:</label>
+            <select id="form-siswa-bidang-sub" class="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-violet-500">
+              <option value="Eksplorasi Umum">Eksplorasi Umum</option>
+              <option value="Kimia Analitik">Kimia Analitik</option>
+              <option value="Kimia Fisik">Kimia Fisik</option>
+              <option value="Kimia Organik">Kimia Organik</option>
+              <option value="Kimia Anorganik">Kimia Anorganik</option>
+              <option value="Biokimia">Biokimia</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Penyimpanan Berkas & Data Diri Siswa -->
+      <div class="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-2.5">
+        <span class="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
+          <i data-lucide="folder-check" class="w-3.5 h-3.5"></i> Penyimpanan Berkas Data Diri Siswa (Tautan / Cloud Drive):
+        </span>
+        <div>
+          <label class="block text-[10px] text-zinc-400 mb-0.5">Link / URL Scan Kartu Pelajar:</label>
+          <input type="url" id="form-siswa-kartu-pelajar" placeholder="https://drive.google.com/file/d/.../kartu-pelajar.pdf" class="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-[10px] text-zinc-400 mb-0.5">Link / URL Pas Foto Siswa (3x4):</label>
+          <input type="url" id="form-siswa-foto" placeholder="https://drive.google.com/file/d/.../pas-foto.jpg" class="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-[10px] text-zinc-400 mb-0.5">Link / URL Folder Berkas Pendaftaran &amp; Dokumen Pendukung Lainnya:</label>
+          <input type="url" id="form-siswa-berkas" placeholder="https://drive.google.com/drive/folders/... atau link dokumen" class="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500">
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-zinc-800 flex justify-end gap-2 shrink-0">
+        <button onclick="document.getElementById('modal-siswa-form').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-zinc-700 transition-colors">Batal</button>
+        <button onclick="OlympiadApp.saveSiswa()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all">Simpan Data Siswa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Form Tambah & Edit Lomba -->
+  <div id="modal-lomba-form" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-lg border border-zinc-700 shadow-2xl p-6 space-y-3.5 my-6 max-h-[92vh] overflow-y-auto flex flex-col">
+      <div class="flex items-center justify-between pb-2 border-b border-zinc-800 shrink-0">
+        <h3 id="form-lomba-title" class="text-sm font-bold text-zinc-100">Tambah Agenda Lomba</h3>
+        <button onclick="document.getElementById('modal-lomba-form').classList.add('hidden')" class="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <input type="hidden" id="form-lomba-id">
+      <div>
+        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Nama Lomba / Kompetisi:</label>
+        <input type="text" id="form-lomba-nama" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Penyelenggara / Kampus:</label>
+        <input type="text" id="form-lomba-penyelenggara" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Klasifikasi:</label>
+          <select id="form-lomba-klasifikasi" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+            <option value="Individu">Individu</option>
+            <option value="Tim (2 Orang)">Tim (2 Orang)</option>
+            <option value="Tim (3 Orang)">Tim (3 Orang)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Batas Kuota Delegasi:</label>
+          <input type="number" id="form-lomba-kuota" value="3" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        </div>
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Biaya Pendaftaran Satuan (Rp):</label>
+        <input type="number" id="form-lomba-biaya-daftar" value="150000" placeholder="150000" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        <span class="text-[10px] text-zinc-400 italic">Dihitung per peserta (lomba individu) atau per tim (lomba tim).</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <div>
+          <label class="block text-[10px] font-bold text-rose-400 mb-1">Deadline:</label>
+          <input type="date" id="form-lomba-deadline" class="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-zinc-300 mb-1">Penyisihan:</label>
+          <input type="date" id="form-lomba-penyisihan" class="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-amber-400 mb-1">Final:</label>
+          <input type="date" id="form-lomba-final" class="w-full px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+        </div>
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Link Google Drive Guidebook/Juknis:</label>
+        <input type="url" id="form-lomba-drive-guidebook" placeholder="https://drive.google.com/file/d/.../view" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+      </div>
+
+      <!-- Syarat & Berkas Pendaftaran Baru -->
+      <div>
+        <label class="block text-[11px] font-bold text-amber-400 mb-1 flex items-center gap-1.5">
+          <i data-lucide="check-square" class="w-3.5 h-3.5"></i> Syarat &amp; Berkas Pendaftaran (Satu syarat per baris):
+        </label>
+        <textarea id="form-lomba-syarat-pendaftaran" rows="3" placeholder="Scan Asli Kartu Pelajar (PDF/JPG)&#10;Pas Foto 3x4 Latar Merah/Biru&#10;Surat Rekomendasi Kepala Sekolah&#10;Bukti Transfer Pendaftaran&#10;Follow Akun Instagram Penyelenggara @...&#10;Unggah Twibbon &amp; Repost Poster Lomba" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500"></textarea>
+        <span class="text-[10px] text-zinc-400 mt-0.5 block">Tuliskan berkas administrasi dan syarat khusus lainnya (misal: follow akun sosmed, twibbon, dll.) yang wajib dipenuhi delegasi.</span>
+      </div>
+
+      <div class="pt-3 border-t border-zinc-800 flex justify-end gap-2 shrink-0">
+        <button onclick="document.getElementById('modal-lomba-form').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-zinc-700 transition-colors">Batal</button>
+        <button onclick="OlympiadApp.saveLomba()" id="btn-save-lomba" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-md shadow-amber-600/20 transition-all">Simpan Lomba</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Kelolosan Babak & Eliminasi Peserta -->
+  <div id="modal-kelolosan" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-2xl border border-zinc-700 shadow-2xl p-6 space-y-4 my-8 max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
+        <div>
+          <h3 id="kelolosan-title" class="text-base font-bold text-zinc-100 flex items-center gap-2">
+            <i data-lucide="award" class="w-5 h-5 text-amber-400"></i> Kelola Kelolosan Babak &amp; Peserta
+          </h3>
+          <p id="kelolosan-subtitle" class="text-xs text-zinc-400 mt-0.5">Tentukan delegasi yang lolos ke babak berikutnya atau tereliminasi.</p>
+        </div>
+        <button onclick="OlympiadApp.closeKelolosanModal()" class="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="kelolosan-body" class="overflow-y-auto space-y-4 flex-grow pr-1"></div>
+      <div class="pt-3 border-t border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+        <span class="text-[11px] text-amber-400/90 font-medium">
+          <i data-lucide="info" class="inline w-3.5 h-3.5 mr-1"></i>Siswa tidak lolos otomatis dibebaskan agar dapat didaftarkan ke lomba lainnya.
+        </span>
+        <div class="flex gap-2 self-end sm:self-auto">
+          <button onclick="OlympiadApp.closeKelolosanModal()" class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold hover:bg-zinc-700">Tutup</button>
+          <button onclick="OlympiadApp.saveKelolosan()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4"></i> Simpan Hasil Kelolosan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: Verifikasi Akses Kata Sandi Guru / Admin -->
+  <div id="modal-role-auth" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div id="role-auth-card" class="glass-card rounded-2xl w-full max-w-sm border border-zinc-700 shadow-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-violet-600/20 text-violet-400 flex items-center justify-center">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+          </div>
+          <h3 id="role-auth-title" class="text-sm font-bold text-zinc-100">Verifikasi Kata Sandi</h3>
+        </div>
+        <button onclick="OlympiadApp.closeRoleAuthModal()" class="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      
+      <p id="role-auth-desc" class="text-xs text-zinc-400 leading-relaxed">
+        Masukkan kata sandi untuk mengakses hak akses ini.
+      </p>
+
+      <input type="hidden" id="role-auth-target" value="">
+
+      <div>
+        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Kata Sandi:</label>
+        <input type="password" id="role-auth-input" placeholder="Masukkan kata sandi..." 
+               onkeydown="if(event.key==='Enter') OlympiadApp.verifyRoleAuth()"
+               class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-violet-500 transition-colors">
+      </div>
+
+      <div id="role-auth-error" class="hidden p-2.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-400"></i>
+        <span>Kata sandi salah. Silakan coba lagi.</span>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2">
+        <button onclick="OlympiadApp.closeRoleAuthModal()" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-all">
+          Batal
+        </button>
+        <button onclick="OlympiadApp.verifyRoleAuth()" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-violet-600/30">
+          Verifikasi &amp; Masuk
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 7: Detail Butir Soal & KaTeX Formula Preview (Compact List Popup) -->
+  <div id="modal-detail-soal" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-3xl border border-zinc-700 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto sm:my-4">
+      <div class="px-6 py-3.5 border-b border-zinc-800 flex items-center justify-between shrink-0 bg-zinc-900/90">
+        <div class="flex items-center gap-2">
+          <i data-lucide="file-text" class="w-4 h-4 text-violet-400"></i>
+          <h3 class="text-sm font-bold text-zinc-100">Lembar Naskah &amp; Pembahasan Soal</h3>
+        </div>
+        <button onclick="OlympiadApp.closeSoalDetail()" class="p-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-all">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="detail-soal-content" class="p-6 overflow-y-auto flex-grow space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- Modal 8: Tabel Periodik Interaktif & Lembar Konstanta OSN -->
+  <div id="modal-tabel-periodik" class="modal-overlay hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-6xl border border-zinc-700 shadow-2xl flex flex-col max-h-[95vh] overflow-hidden my-auto">
+      <!-- Modal Header -->
+      <div class="px-5 py-3.5 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 bg-zinc-900/90">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-violet-600/20 text-violet-400 border border-violet-500/30 flex items-center justify-center">
+            <i data-lucide="atom" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-zinc-100">Tabel Periodik &amp; Lembar Konstanta OSN</h3>
+            <p class="text-[11px] text-zinc-400">118 Unsur Kimia interaktif &bull; Tetapan resmi &amp; rumus termodinamika/kinetika IChO</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 self-end sm:self-auto">
+          <!-- Switcher Buttons -->
+          <div class="flex items-center p-1 rounded-xl bg-zinc-950/60 border border-zinc-800">
+            <button id="tab-btn-periodik" onclick="OlympiadApp.switchTabelPeriodikTab('periodik')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-violet-600 text-white shadow-md shadow-violet-600/30 transition-all">
+              Tabel Periodik
+            </button>
+            <button id="tab-btn-konstanta" onclick="OlympiadApp.switchTabelPeriodikTab('konstanta')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-transparent text-zinc-400 hover:text-white transition-all">
+              Konstanta &amp; Rumus OSN
+            </button>
+          </div>
+
+          <button onclick="OlympiadApp.closeTabelPeriodikModal()" class="p-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-all">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-4 sm:p-6 overflow-y-auto flex-grow space-y-4">
+        <!-- Panel 1: Tabel Periodik -->
+        <div id="tab-panel-periodik" class="space-y-4">
+          <!-- Filter & Search Bar -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="relative flex-1 max-w-xs">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input 
+                type="text" 
+                placeholder="Cari simbol, nomor atom (Z), atau nama unsur..." 
+                oninput="OlympiadApp.filterPeriodicTable(this.value)"
+                class="w-full pl-9 pr-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-700/80 text-zinc-100 text-xs placeholder:text-zinc-500 focus:outline-none focus:border-violet-500"
+              >
+            </div>
+
+            <!-- Categories Legend -->
+            <div class="flex flex-wrap items-center gap-1 text-[10px] text-zinc-400">
+              <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">Alkali</span>
+              <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Alkali Tanah</span>
+              <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">Transisi</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Post-Transisi</span>
+              <span class="px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30">Metaloid</span>
+              <span class="px-2 py-0.5 rounded bg-lime-500/20 text-lime-300 border border-lime-500/30">Nonlogam</span>
+              <span class="px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">Halogen</span>
+              <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">Gas Mulia</span>
+              <span class="px-2 py-0.5 rounded bg-pink-500/20 text-pink-300 border border-pink-500/30">Lantanida</span>
+              <span class="px-2 py-0.5 rounded bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30">Aktinida</span>
+            </div>
+          </div>
+
+          <!-- 18-Column Interactive Grid Container -->
+          <div class="overflow-x-auto pb-2 border border-zinc-800 rounded-2xl p-3 bg-zinc-950/40">
+            <div id="periodic-table-grid" class="periodic-table-grid"></div>
+          </div>
+
+          <!-- Element Inspector Card -->
+          <div id="element-inspector-content"></div>
+        </div>
+
+        <!-- Panel 2: Konstanta & Rumus OSN -->
+        <div id="tab-panel-konstanta" class="hidden space-y-4">
+          <div id="konstanta-osn-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 9: Tambah / Edit Pengumuman Pembinaan (Mading Digital) -->
+  <div id="modal-pengumuman-form" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-lg border border-zinc-700 shadow-2xl p-5 sm:p-6 space-y-4 my-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+            <i data-lucide="megaphone" class="w-4 h-4"></i>
+          </div>
+          <h3 id="form-pengumuman-title" class="text-sm sm:text-base font-bold text-zinc-100">Tambah Pengumuman Pembinaan</h3>
+        </div>
+        <button onclick="OlympiadApp.closePengumumanModal()" class="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="form-pengumuman-id" value="">
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-zinc-300 mb-1">Judul Pengumuman:</label>
+          <input type="text" id="form-pengumuman-judul" placeholder="Contoh: Briefing Teknis &amp; Pembagian Jas Lab Pelatda..." 
+                 class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+        </div>
+
+        <div>
+          <label class="block font-bold text-zinc-300 mb-1">Isi Pengumuman / Instruksi Lengkap:</label>
+          <textarea id="form-pengumuman-isi" rows="4" placeholder="Tuliskan arahan, berkas yang perlu dibawa, waktu kumpul, atau link meeting..." 
+                    class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-zinc-300 mb-1">Prioritas / Label:</label>
+            <select id="form-pengumuman-prioritas" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+              <option value="Urgent">Urgent (Merah)</option>
+              <option value="Penting" selected>Penting (Kuning)</option>
+              <option value="Info">Info (Hijau)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-zinc-300 mb-1">Tanggal Terbit:</label>
+            <input type="date" id="form-pengumuman-tanggal" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-zinc-300 mb-1">Nama Pembina / Penulis:</label>
+          <input type="text" id="form-pengumuman-penulis" placeholder="Tito Vanzal, S.Pd." 
+                 class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+        </div>
+
+        <div>
+          <label class="block font-bold text-zinc-300 mb-1">Tautan Lampiran Dokumen / Google Drive (Opsional):</label>
+          <input type="url" id="form-pengumuman-tautan" placeholder="https://drive.google.com/file/d/..." 
+                 class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+        </div>
+
+        <div class="pt-1 flex items-center gap-2">
+          <input type="checkbox" id="form-pengumuman-pinned" class="w-4 h-4 rounded text-violet-600 bg-zinc-900 border-zinc-700 focus:ring-violet-500">
+          <label for="form-pengumuman-pinned" class="text-zinc-300 font-semibold cursor-pointer">Sematkan di baris teratas (PINNED)</label>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-zinc-800 flex justify-end gap-2">
+        <button onclick="OlympiadApp.closePengumumanModal()" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-all">
+          Batal
+        </button>
+        <button id="btn-save-pengumuman" onclick="OlympiadApp.savePengumuman()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-md shadow-amber-600/20">
+          Terbitkan Pengumuman
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 10: Tambah / Edit Jadwal Intensif Bimbingan -->
+  <div id="modal-jadwal-form" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-xl border border-zinc-700 shadow-2xl p-5 sm:p-6 space-y-4 my-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-violet-600/20 text-violet-400 flex items-center justify-center">
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+          </div>
+          <h3 id="form-jadwal-title" class="text-sm sm:text-base font-bold text-zinc-100">Tambah Jadwal Intensif Bimbingan</h3>
+        </div>
+        <button onclick="OlympiadApp.closeJadwalModal()" class="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="form-jadwal-id" value="">
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-zinc-300 mb-1">Materi / Topik Bimbingan:</label>
+          <input type="text" id="form-jadwal-judul" placeholder="Contoh: Kinetika Reaksi, Orde Reaksi &amp; Mekanisme Katalis..." 
+                 class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+        </div>
+
+        <div>
+          <label class="block font-bold text-zinc-300 mb-1">Bidang Kimia:</label>
+          <select id="form-jadwal-bidang" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+            <option value="Kimia Fisik">Kimia Fisik</option>
+            <option value="Kimia Organik">Kimia Organik</option>
+            <option value="Kimia Anorganik">Kimia Anorganik</option>
+            <option value="Kimia Analitik">Kimia Analitik</option>
+            <option value="Biokimia">Biokimia</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-zinc-300 mb-1">Tanggal Pertemuan:</label>
+            <input type="date" id="form-jadwal-tanggal" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+          </div>
+          <div>
+            <label class="block font-bold text-zinc-300 mb-1">Hari:</label>
+            <input type="text" id="form-jadwal-hari" placeholder="Contoh: Sabtu / Senin" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-zinc-300 mb-1">Jam Mulai:</label>
+            <input type="time" id="form-jadwal-jam-mulai" value="08:00" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+          </div>
+          <div>
+            <label class="block font-bold text-zinc-300 mb-1">Jam Selesai:</label>
+            <input type="time" id="form-jadwal-jam-selesai" value="11:30" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-zinc-300 mb-1">Guru Pengisi / Pelatih:</label>
+            <input type="text" id="form-jadwal-pengisi" placeholder="Dr. Ahmad Rasyid, M.Si." class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+          </div>
+          <div>
+            <label class="block font-bold text-zinc-300 mb-1">Lokasi / Ruangan:</label>
+            <input type="text" id="form-jadwal-lokasi" placeholder="Laboratorium Kimia Dasar" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-zinc-300 mb-1">Tautan Sesi Daring / Zoom / Google Meet (Opsional):</label>
+          <input type="url" id="form-jadwal-online" placeholder="https://meet.google.com/..." class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500">
+        </div>
+
+        <div>
+          <label class="block font-bold text-zinc-300 mb-1">Keterangan / Perlengkapan / Naskah Soal:</label>
+          <textarea id="form-jadwal-keterangan" rows="3" placeholder="Membawa kalkulator saintifik &amp; tabel periodik. Pembahasan naskah soal OSN 2024..." 
+                    class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-violet-500"></textarea>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-zinc-800 flex justify-end gap-2">
+        <button onclick="OlympiadApp.closeJadwalModal()" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-all">
+          Batal
+        </button>
+        <button id="btn-save-jadwal" onclick="OlympiadApp.saveJadwal()" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-violet-600/20">
+          Simpan Jadwal Baru
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden File Input for Batch HTML Question Import -->
+  <input type="file" id="input-import-html-soal" multiple accept=".html,.htm" class="hidden" onchange="OlympiadApp.handleHtmlFileSelect(this)">
+
+  <!-- Modal 11: Pindai Folder Google Drive Otomatis (Bank Soal) -->
+  <div id="modal-sync-drive-soal" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl w-full max-w-lg border border-zinc-700 shadow-2xl p-5 sm:p-6 space-y-4 my-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center">
+            <i data-lucide="cloud" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-zinc-100">Pindai Folder Google Drive Otomatis</h3>
+        </div>
+        <button onclick="OlympiadApp.closeSyncDriveSoalModal()" class="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <p class="text-zinc-300 leading-relaxed">
+          Sama seperti pada <span class="font-semibold text-blue-400">PortalKimia Media</span>, masukkan link atau ID folder Google Drive tempat Anda menyimpan berkas soal HTML atau dokumen materi. Sistem akan otomatis memindai judul, mengelompokkan ke dalam 5 cabang ilmu kimia, tahun, dan tingkat kesulitan olimpiade.
+        </p>
+
+        <div>
+          <label class="block font-bold text-zinc-300 mb-1">Tautan / ID Folder Google Drive:</label>
+          <input type="text" id="input-drive-soal-folder" placeholder="https://drive.google.com/drive/folders/1aBcDeFgHiJkLmNoPqr..." 
+                 class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 text-xs">
+          <p class="mt-1 text-[11px] text-zinc-400">
+            Pastikan hak akses folder diset ke <em>"Anyone with the link can view"</em> jika diakses oleh web.
+          </p>
+        </div>
+
+        <!-- Status & Progress Container -->
+        <div id="sync-drive-soal-status"></div>
+
+        <div class="p-3 rounded-xl bg-zinc-800/60 border border-zinc-700/60 space-y-1.5 text-[11px] text-zinc-400">
+          <div class="font-semibold text-zinc-300 flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i> Fitur Auto-Parsing Cerdas:
+          </div>
+          <ul class="list-disc list-inside space-y-0.5 text-zinc-400">
+            <li>Ekstraksi otomatis judul materi &amp; nomor soal dari tag <code class="text-violet-300">&lt;title&gt;</code> atau <code class="text-violet-300">&lt;h1&gt;</code>.</li>
+            <li>Klasifikasi cerdas 5 cabang kimia (Fisik, Organik, Anorganik, Analitik, Biokimia).</li>
+            <li>Deteksi tingkat kesulitan (OSN-K, OSN-P, OSN Nasional, IChO).</li>
+            <li>Pengenalan kunci jawaban, opsi ganda (A-E), dan pembahasan lengkap.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-zinc-800 flex justify-end gap-2">
+        <button onclick="OlympiadApp.closeSyncDriveSoalModal()" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-all">
+          Batal
+        </button>
+        <button id="btn-do-sync-drive-soal" onclick="OlympiadApp.syncDriveSoalFolder()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/20 flex items-center gap-1.5">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Mulai Pindai Folder
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Portal Utama Back Button (Mobile & Desktop Accessible) -->
+  <a href="../" id="floating-portal-back-btn" 
+     class="fixed bottom-6 left-6 z-40 hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/80 shadow-2xl backdrop-blur-md text-xs font-bold transition-all group hover:scale-105" 
+     title="Kembali ke Beranda PortalKimia Suite">
+    <i data-lucide="arrow-left" class="w-3.5 h-3.5 text-violet-400 group-hover:-translate-x-0.5 transition-transform"></i>
+    <span>Portal Utama</span>
+  </a>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+</body>
+</html>

@@ -47,9 +47,6 @@
     }
   </style>
 
-  <!-- Konfigurasi Terpusat Multi-Device -->
-  <script src="../config.js"></script>
-
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
@@ -114,6 +111,9 @@
       }
     };
   </script>
+
+  <!-- Konfigurasi Terpusat PortalKimia Suite -->
+  <script src="../config.js"></script>
 
   <!-- Prevent FOUC Theme Script -->
   <script>
@@ -1360,9 +1360,9 @@
   </footer>  <!-- ==================== JAVASCRIPT APPLICATION LOGIC ==================== -->
   <script>
     // ==========================================
-    // 1. STATE & CONSTANTS (Multi-Device Connected)
+    // 1. STATE & CONSTANTS
     // ==========================================
-    const GAS_API_URL = window.PORTALKIMIA_CONFIG?.MEDIA_API || 'https://script.google.com/macros/s/AKfycbwobr0k-44HFrf3B5YUroeEK-_U13AGVe2urQYDAmL0U43arTQHTvKjUEeM6CuZQvOE/exec';
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwobr0k-44HFrf3B5YUroeEK-_U13AGVe2urQYDAmL0U43arTQHTvKjUEeM6CuZQvOE/exec';
     const DEFAULT_TEACHER_PIN = 'guru123';
     
     let allMaterials = [];

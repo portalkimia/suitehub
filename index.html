@@ -558,6 +558,7 @@
               <option value="flask">🧪 Tabung Reaksi (Lab / Media)</option>
               <option value="academic-cap">🎓 Topi Akademik (Kelas / LMS)</option>
               <option value="sparkles">✨ AI / Sparkles (Generator Otomatis)</option>
+              <option value="trophy">🏆 Piala / Prestasi (Olimpiade Sains)</option>
               <option value="book">📚 Buku / Modul Ajar</option>
               <option value="calculator">🧮 Kalkulator / Rumus Kimia</option>
               <option value="globe" selected>🌐 Globe / Website Eksternal</option>
@@ -742,6 +743,18 @@
         theme: "cyan",
         icon: "sparkles",
         roles: ["guru", "admin"]
+      },
+      {
+        id: "branch_olimpiade",
+        title: "PortalKimia Olimpiade",
+        category: "Pembinaan Prestasi",
+        description: "Pusat pembinaan kompetisi sains kimia, bank soal ber-KaTeX, ploting tim delegasi, jadwal intensif, dan analitik talenta.",
+        chips: ["Bank Soal KaTeX", "Ploting Tim", "Jadwal Intensif"],
+        url: "./olimpiade/",
+        buttonText: "Buka Olimpiade",
+        theme: "amber",
+        icon: "trophy",
+        roles: ["siswa", "guru", "admin"]
       }
     ];
 
@@ -752,6 +765,12 @@
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
+            // Pastikan seluruh branch default resmi selalu hadir
+            DEFAULT_BRANCHES.forEach(def => {
+              if (!parsed.some(p => p.id === def.id)) {
+                parsed.push(def);
+              }
+            });
             return parsed.map(normalizeBranch);
           }
         }
@@ -798,6 +817,10 @@
       'calculator': `
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>`,
+      'trophy': `
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M8 21h8m-4-4v4M5 3h14a2 2 0 012 2v2a6 6 0 01-6 6h-4a6 6 0 01-6-6V5a2 2 0 012-2zm0 0H3a2 2 0 00-2 2v1a4 4 0 004 4h1m12-7h2a2 2 0 012 2v1a4 4 0 01-4 4h-1" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>`,
       'globe': `
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

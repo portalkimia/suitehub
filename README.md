@@ -4,6 +4,7 @@ Portal Utama terpadu yang menghubungkan seluruh cabang aplikasi dan media pembel
 - 🎓 **LMS & Kelas Mandiri** (Presensi & Rekap Nilai Siswa)
 - 🧪 **PortalKimia Interaktif** (Bank Media & Simulasi Pembelajaran)
 - ✨ **Generator Modul Ajar AI** (Otomatisasi Dokumen Kurikulum Merdeka)
+- 🏆 **PortalKimia Olimpiade** (Bank Soal KaTeX, Ploting Tim & Manajemen Lomba)
 - 🌐 **Daftar Cabang Tambahan** (Dikelola dinamis melalui Google Spreadsheet)
 
 ## Struktur Berkas

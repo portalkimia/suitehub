@@ -1,0 +1,441 @@
+/* ==========================================================================
+   PORTALKIMIA OLIMPIADE - HIGH-CONTRAST DUAL DESIGN SYSTEM
+   Dark: Obsidian Precision (#09090b) | Light: Clean Slate (#f8fafc)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary: #a78bfa;          /* Soft Violet */
+  --primary-dark: #7c3aed;     /* Deep Violet */
+  --tertiary: #34d399;         /* Emerald Green */
+  --accent-amber: #f59e0b;     /* Amber */
+  --accent-rose: #f43f5e;      /* Rose */
+  --accent-cyan: #38bdf8;      /* Cyan */
+
+  /* Dark Theme Tokens (Default) */
+  --bg-color: #09090b;
+  --surface-card: #121215;
+  --surface-high: #18181b;
+  --surface-highest: #1e1e22;
+  --surface-input: #121215;
+  --outline: #27272a;
+  --outline-light: #3f3f46;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+html.light {
+  /* Clean Light Theme Tokens */
+  --bg-color: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-high: #f1f5f9;
+  --surface-highest: #e2e8f0;
+  --surface-input: #ffffff;
+  --outline: #e2e8f0;
+  --outline-light: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --card-shadow: 0 4px 15px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Base Body Styles */
+body {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  min-height: 100vh;
+  letter-spacing: -0.01em;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Custom Scrollbars */
+html.dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+html.dark ::-webkit-scrollbar-track {
+  background: #09090b;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+html.light ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+html.light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Card & Surface Classes */
+.glass-card {
+  background: rgba(18, 18, 21, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(63, 63, 70, 0.4);
+  color: #fafafa;
+  box-shadow: var(--card-shadow);
+}
+html.light .glass-card {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.05);
+}
+
+.glass-header {
+  background: rgba(12, 12, 15, 0.90);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(39, 39, 42, 0.85);
+}
+html.light .glass-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Light Mode Global Text & Container Readability Overrides */
+html.light .text-zinc-100,
+html.light .text-zinc-200 {
+  color: #0f172a !important;
+}
+
+html.light .text-zinc-300 {
+  color: #1e293b !important;
+}
+
+html.light .text-zinc-400 {
+  color: #475569 !important;
+}
+
+html.light .text-zinc-500,
+html.light .text-zinc-600 {
+  color: #64748b !important;
+}
+
+/* Vibrant Contrast for Accent Colors in Light Mode */
+html.light .text-violet-400,
+html.light .text-violet-300 {
+  color: #6d28d9 !important;
+}
+
+html.light .text-emerald-400,
+html.light .text-emerald-300 {
+  color: #047857 !important;
+}
+
+html.light .text-amber-400,
+html.light .text-amber-300 {
+  color: #b45309 !important;
+}
+
+html.light .text-rose-400,
+html.light .text-rose-300 {
+  color: #be123c !important;
+}
+
+html.light .text-blue-400,
+html.light .text-blue-300 {
+  color: #1d4ed8 !important;
+}
+
+html.light .bg-zinc-900,
+html.light .bg-zinc-950,
+html.light .bg-zinc-900\/40,
+html.light .bg-zinc-900\/50,
+html.light .bg-zinc-900\/60,
+html.light .bg-zinc-900\/70,
+html.light .bg-zinc-900\/80,
+html.light .bg-zinc-900\/90 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light .bg-zinc-800,
+html.light .bg-zinc-800\/80,
+html.light .bg-zinc-800\/60,
+html.light .bg-zinc-800\/50,
+html.light .bg-zinc-800\/40 {
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light .bg-zinc-800:hover,
+html.light .bg-zinc-800\/80:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light .border-zinc-800,
+html.light .border-zinc-700,
+html.light .border-zinc-800\/80,
+html.light .border-zinc-800\/50,
+html.light .border-zinc-800\/60 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Light Mode Accent Badges and Containers */
+html.light .bg-violet-500\/10,
+html.light .bg-violet-500\/15,
+html.light .bg-violet-500\/20,
+html.light .bg-violet-600\/15,
+html.light .bg-violet-600\/20,
+html.light .bg-violet-950\/20 {
+  background-color: #f5f3ff !important;
+  border-color: #ddd6fe !important;
+  color: #6d28d9 !important;
+}
+
+html.light .bg-emerald-500\/10,
+html.light .bg-emerald-500\/15,
+html.light .bg-emerald-500\/20,
+html.light .bg-emerald-950\/20,
+html.light .bg-emerald-950\/40 {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #047857 !important;
+}
+
+html.light .bg-amber-500\/10,
+html.light .bg-amber-500\/15,
+html.light .bg-amber-500\/20,
+html.light .bg-amber-950\/20 {
+  background-color: #fffbeb !important;
+  border-color: #fde68a !important;
+  color: #b45309 !important;
+}
+
+html.light .bg-rose-500\/10,
+html.light .bg-rose-500\/15,
+html.light .bg-rose-500\/20,
+html.light .bg-rose-950\/20,
+html.light .bg-rose-950\/40 {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+  color: #be123c !important;
+}
+
+html.light .bg-blue-500\/10,
+html.light .bg-blue-500\/15,
+html.light .bg-blue-500\/20 {
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
+}
+
+/* Light Mode Navigation Bar */
+html.light #main-nav-items button {
+  color: #475569 !important;
+}
+html.light #main-nav-items button:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+html.light #main-nav-items button.bg-violet-600\/20 {
+  background-color: #ffffff !important;
+  color: #6d28d9 !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  font-weight: 700 !important;
+}
+
+/* Header Elements in Light Mode */
+html.light #cloud-sync-btn {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+html.light #theme-toggle-btn {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+html.light #role-selector-menu,
+html.light #export-dropdown-menu {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+html.light #role-selector-menu button:hover,
+html.light #export-dropdown-menu button:hover {
+  background-color: #f8fafc !important;
+}
+
+/* Universal Modal Scrolling Safety (Fixes Cutoff and Negative Scroll) */
+.modal-overlay {
+  align-items: flex-start !important;
+  justify-content: center !important;
+  overflow-y: auto !important;
+  padding: 1rem !important;
+  -webkit-overflow-scrolling: touch;
+}
+.modal-overlay.hidden {
+  display: none !important;
+}
+.modal-overlay > div {
+  margin-top: 1.5rem !important;
+  margin-bottom: 2.5rem !important;
+  max-height: calc(100vh - 3rem) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.modal-overlay > div > .modal-scroll-body,
+.modal-overlay > div > #siswa-detail-content,
+.modal-overlay > div > #detail-soal-content {
+  overflow-y: auto !important;
+  flex: 1 1 auto !important;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 0.25rem;
+}
+
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light input:focus,
+html.light select:focus,
+html.light textarea:focus {
+  border-color: #7c3aed !important;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15) !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Background Grids */
+.bg-grid-pattern {
+  background-size: 36px 36px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+}
+html.light .bg-grid-pattern {
+  background-size: 36px 36px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
+
+/* Ambient Radial Glows */
+.glow-ambient-violet {
+  background: radial-gradient(circle 500px at 50% 10%, rgba(139, 92, 246, 0.12), transparent 70%);
+}
+html.light .glow-ambient-violet {
+  background: radial-gradient(circle 500px at 50% 10%, rgba(139, 92, 246, 0.06), transparent 70%);
+}
+
+/* KaTeX Formula Display */
+.katex-display {
+  margin: 0.6em 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.4rem 0.2rem;
+}
+html.dark .katex {
+  color: #f4f4f5 !important;
+}
+html.light .katex {
+  color: #0f172a !important;
+}
+
+/* Heatmap Gradient Cells */
+.heatmap-cell-5 { background-color: rgba(52, 211, 153, 0.30); color: #34d399; font-weight: 700; }
+.heatmap-cell-4 { background-color: rgba(52, 211, 153, 0.18); color: #6ee7b7; font-weight: 600; }
+.heatmap-cell-3 { background-color: rgba(245, 158, 11, 0.18); color: #fcd34d; font-weight: 600; }
+.heatmap-cell-2 { background-color: rgba(244, 63, 94, 0.16); color: #fda4af; font-weight: 500; }
+.heatmap-cell-1 { background-color: rgba(244, 63, 94, 0.25); color: #f43f5e; font-weight: 700; }
+
+html.light .heatmap-cell-5 { background-color: rgba(16, 185, 129, 0.20); color: #047857; font-weight: 700; }
+html.light .heatmap-cell-4 { background-color: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 600; }
+html.light .heatmap-cell-3 { background-color: rgba(217, 119, 6, 0.14); color: #b45309; font-weight: 600; }
+html.light .heatmap-cell-2 { background-color: rgba(225, 29, 72, 0.12); color: #be123c; font-weight: 500; }
+html.light .heatmap-cell-1 { background-color: rgba(225, 29, 72, 0.20); color: #9f1239; font-weight: 700; }
+
+/* Shake Animation for Password Error */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+.shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* ==========================================================================
+   PERIODIC TABLE & CONSTANTS MODAL STYLES
+   ========================================================================== */
+.periodic-table-grid {
+  display: grid;
+  grid-template-columns: repeat(18, minmax(42px, 1fr));
+  grid-template-rows: repeat(10, minmax(48px, auto));
+  gap: 3px;
+  min-width: 820px;
+}
+
+.periodic-cell {
+  user-select: none;
+  touch-action: manipulation;
+}
+
+html.light .periodic-cell {
+  border-width: 1.5px;
+}
+
+html.light .periodic-cell strong {
+  color: #0f172a !important;
+}
+
+html.light .periodic-cell span {
+  color: #334155 !important;
+}
+
+
+/* Print Styles */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print, header, nav, aside, button, .modal-overlay {
+    display: none !important;
+  }
+  .glass-card {
+    background: #ffffff !important;
+    border: 1px solid #999999 !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+  }
+}

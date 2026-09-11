@@ -88,6 +88,9 @@
   <!-- SheetJS for Excel Export -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   
+  <!-- Konfigurasi Terpusat Multi-Device PortalKimia Suite -->
+  <script src="../config.js"></script>
+  
   <!-- Custom Styles (Embedded) -->
   <style>
 /* ==========================================================================
@@ -6850,11 +6853,17 @@ Format Output: WAJIB HANYA berupa JSON Array valid dengan skema objek persis sep
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         
-        <!-- Left: Mobile Menu Button & PortalKimia Brand Title -->
-        <div class="flex items-center space-x-3">
+        <!-- Left: Mobile Menu Button, Portal Utama Link & PortalKimia Brand Title -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
           <button @click="mobileMenuOpen = true" class="lg:hidden p-2 rounded-lg text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#18181b] focus:outline-none">
             <i data-lucide="menu" class="w-6 h-6"></i>
           </button>
+
+          <!-- Tombol Navigasi Kembali ke Portal Utama Suite -->
+          <a href="../" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 rounded-xl bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/50 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-500/30 text-xs font-semibold tracking-wide transition-all shadow-sm" title="Kembali ke Beranda PortalKimia Suite">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <span class="hidden md:inline">Portal Utama</span>
+          </a>
           
           <div class="flex items-center space-x-3">
             <!-- Official PortalKimia SVG Logo -->
