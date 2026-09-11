@@ -268,7 +268,8 @@ window.OlympiadApp = {
         penyisihan: '2026-05-15',
         perempatFinal: '',
         semifinal: '',
-        final: '2026-06-01'
+        final: '2026-06-01',
+        stages: []
       };
       if (lObj.timeline && typeof lObj.timeline === 'object') {
         timeline.pendaftaranBuka = String(lObj.timeline.pendaftaranBuka || timeline.pendaftaranBuka);
@@ -277,11 +278,17 @@ window.OlympiadApp = {
         timeline.perempatFinal = String(lObj.timeline.perempatFinal || '');
         timeline.semifinal = String(lObj.timeline.semifinal || '');
         timeline.final = String(lObj.timeline.final || timeline.final);
+        if (Array.isArray(lObj.timeline.stages)) {
+          timeline.stages = lObj.timeline.stages;
+        }
       } else if (typeof lObj.timeline === 'string' && lObj.timeline.trim()) {
         try {
           const parsed = JSON.parse(lObj.timeline);
           if (parsed && typeof parsed === 'object') {
             timeline = { ...timeline, ...parsed };
+            if (Array.isArray(parsed.stages)) {
+              timeline.stages = parsed.stages;
+            }
           } else {
             timeline.deadlineDaftar = lObj.timeline.trim();
           }
@@ -504,6 +511,63 @@ window.OlympiadApp = {
     t = t.replace(/\s*\+\s*/g, ' ');
     t = t.replace(/\s+/g, ' ').trim();
     return t;
+  },
+
+  // Helper fleksibel untuk mengambil tahapan timeline lomba (template resmi & tahapan kustom)
+  getLombaStages(l) {
+    if (!l) return [];
+    const tl = l.timeline || {};
+    if (Array.isArray(tl.stages) && tl.stages.length > 0) {
+      return tl.stages.map((st, idx) => ({
+        id: st.id || ('stage-' + idx + '-' + Date.now()),
+        nama: String(st.nama || ('Tahap ' + (idx + 1))).trim(),
+        tanggal: String(st.tanggal || '').trim(),
+        moda: String(st.moda || (st.nama && st.nama.toLowerCase().includes('final') && !st.nama.toLowerCase().includes('perempat') && !st.nama.toLowerCase().includes('semi') ? 'Offline' : 'Online')).trim(),
+        isDefault: !!st.isDefault,
+        isCustom: !!st.isCustom
+      }));
+    }
+
+    // Default template resmi: Deadline, Penyisihan, Semifinal, Final
+    const defaultStages = [];
+    defaultStages.push({
+      id: 'stage-deadline',
+      nama: 'Deadline',
+      tanggal: tl.deadlineDaftar || '',
+      moda: 'Online',
+      isDefault: true
+    });
+    defaultStages.push({
+      id: 'stage-penyisihan',
+      nama: 'Penyisihan',
+      tanggal: tl.penyisihan || '',
+      moda: 'Online',
+      isDefault: true
+    });
+    if (tl.perempatFinal) {
+      defaultStages.push({
+        id: 'stage-perempat',
+        nama: 'Perempat Final',
+        tanggal: tl.perempatFinal,
+        moda: 'Online',
+        isCustom: true
+      });
+    }
+    defaultStages.push({
+      id: 'stage-semifinal',
+      nama: 'Semifinal',
+      tanggal: tl.semifinal || '',
+      moda: tl.semifinalModa || 'Offline',
+      isDefault: true
+    });
+    defaultStages.push({
+      id: 'stage-final',
+      nama: 'Final',
+      tanggal: tl.final || '',
+      moda: 'Offline',
+      isDefault: true
+    });
+    return defaultStages;
   },
 
   loadState() {
@@ -1003,7 +1067,7 @@ window.OlympiadApp = {
 
     const navItems = [
       { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard', allowed: ['admin', 'pembimbing', 'siswa'] },
-      { id: 'soal', label: this.currentRole === 'siswa' ? 'Bank Soal' : 'Bank Soal (+Pembahasan)', icon: 'book-open', allowed: ['admin', 'pembimbing', 'siswa'] },
+      { id: 'soal', label: 'Bank Soal', icon: 'book-open', allowed: ['admin', 'pembimbing', 'siswa'] },
       { id: 'siswa', label: this.currentRole === 'siswa' ? 'Data Siswa Binaan' : 'Data Siswa & Tim', icon: 'users', allowed: ['admin', 'pembimbing', 'siswa'] },
       { id: 'lomba', label: this.currentRole === 'siswa' ? 'Timeline Lomba & Peserta' : 'Manajemen Lomba', icon: 'trophy', allowed: ['admin', 'pembimbing', 'siswa'] },
       { id: 'jadwal', label: 'Jadwal Intensif', icon: 'calendar-clock', allowed: ['admin', 'pembimbing', 'siswa'] },
@@ -4591,36 +4655,68 @@ OlympiadApp.renderLombaModule = function() {
               </div>
             </div>
 
-            <!-- Visual Stages Pipeline -->
-            <div class="my-5">
-              <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Timeline Tahapan Lomba:</h4>
-              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center text-xs">
-                <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-                  <span class="block text-[10px] text-zinc-400 uppercase">Pendaftaran</span>
-                  <strong class="text-zinc-200 text-xs">${l.timeline?.pendaftaranBuka || '-'}</strong>
+            <!-- Visual Stages Pipeline Dinamis (Online / Offline) -->
+            ${(() => {
+              const stages = this.getLombaStages(l);
+              const gridCols = stages.length <= 4 
+                ? 'grid-cols-2 sm:grid-cols-4' 
+                : (stages.length === 5 ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6');
+              
+              return `
+                <div class="my-5">
+                  <div class="flex items-center justify-between gap-2 mb-2.5">
+                    <h4 class="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <i data-lucide="calendar-range" class="w-3.5 h-3.5 text-amber-400"></i> Alur Tahapan &amp; Pelaksanaan:
+                    </h4>
+                    <span class="text-[10px] text-zinc-400">${stages.length} Tahapan Terjadwal</span>
+                  </div>
+                  <div class="grid ${gridCols} gap-2.5 text-center text-xs">
+                    ${stages.map((st) => {
+                      const lower = (st.nama || '').toLowerCase();
+                      const isDeadline = lower.includes('deadline') || lower.includes('batas');
+                      const isFinal = lower.includes('final') && !lower.includes('perempat') && !lower.includes('semi');
+                      const isSemi = lower.includes('semifinal') || lower.includes('semi');
+                      const isPerempat = lower.includes('perempat');
+                      
+                      let cardStyle = 'bg-zinc-900/70 border-zinc-800 text-zinc-200';
+                      let titleStyle = 'text-zinc-400';
+                      if (isDeadline) {
+                        cardStyle = 'bg-rose-950/20 border-rose-500/30 text-rose-300 shadow-sm';
+                        titleStyle = 'text-rose-400 font-bold';
+                      } else if (isFinal) {
+                        cardStyle = 'bg-amber-950/20 border-amber-500/30 text-amber-300 shadow-sm';
+                        titleStyle = 'text-amber-400 font-bold';
+                      } else if (isSemi) {
+                        cardStyle = 'bg-violet-950/20 border-violet-500/30 text-violet-300';
+                        titleStyle = 'text-violet-400 font-bold';
+                      } else if (isPerempat) {
+                        cardStyle = 'bg-indigo-950/20 border-indigo-500/30 text-indigo-300';
+                        titleStyle = 'text-indigo-400 font-semibold';
+                      }
+
+                      const moda = st.moda || (isFinal ? 'Offline' : 'Online');
+                      const modaBadge = moda === 'Offline'
+                        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-950/70 text-emerald-300 border border-emerald-500/30"><i data-lucide="map-pin" class="w-2.5 h-2.5"></i> Offline</span>`
+                        : (moda === 'Hybrid'
+                          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-purple-950/70 text-purple-300 border border-purple-500/30"><i data-lucide="shuffle" class="w-2.5 h-2.5"></i> Hybrid</span>`
+                          : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-cyan-950/70 text-cyan-300 border border-cyan-500/30"><i data-lucide="globe" class="w-2.5 h-2.5"></i> Online</span>`);
+
+                      return `
+                        <div class="p-2.5 rounded-xl border flex flex-col justify-between gap-1.5 transition-all hover:border-zinc-600 ${cardStyle}">
+                          <div>
+                            <span class="block text-[10px] uppercase truncate ${titleStyle}" title="${st.nama}">${st.nama}</span>
+                            <strong class="text-xs block mt-0.5">${st.tanggal || '-'}</strong>
+                          </div>
+                          <div class="pt-1">
+                            ${modaBadge}
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
                 </div>
-                <div class="p-2.5 rounded-xl bg-rose-950/20 border border-rose-500/30">
-                  <span class="block text-[10px] text-rose-400 uppercase font-bold">Deadline</span>
-                  <strong class="text-rose-300 text-xs">${l.timeline?.deadlineDaftar || '-'}</strong>
-                </div>
-                <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-                  <span class="block text-[10px] text-zinc-400 uppercase">Penyisihan</span>
-                  <strong class="text-zinc-200 text-xs">${l.timeline?.penyisihan || '-'}</strong>
-                </div>
-                <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-                  <span class="block text-[10px] text-zinc-400 uppercase">Perempat Final</span>
-                  <strong class="text-zinc-200 text-xs">${l.timeline?.perempatFinal || '-'}</strong>
-                </div>
-                <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-                  <span class="block text-[10px] text-zinc-400 uppercase">Semifinal</span>
-                  <strong class="text-zinc-200 text-xs">${l.timeline?.semifinal || '-'}</strong>
-                </div>
-                <div class="p-2.5 rounded-xl bg-amber-950/20 border border-amber-500/30">
-                  <span class="block text-[10px] text-amber-400 uppercase font-bold">Babak Final</span>
-                  <strong class="text-amber-300 text-xs">${l.timeline?.final || '-'}</strong>
-                </div>
-              </div>
-            </div>
+              `;
+            })()}
 
             <!-- Syarat & Berkas Pendaftaran (Terbuka saat Masa Pendaftaran) -->
             ${(() => {
@@ -4841,11 +4937,13 @@ OlympiadApp.syncGoogleCalendar = function(lombaId) {
   if (!l) return;
 
   const title = encodeURIComponent(`[Olimpiade Kimia] ${l.nama}`);
-  const details = encodeURIComponent(`Lomba: ${l.nama}\nPenyelenggara: ${l.penyelenggara}\nDeadline: ${l.timeline.deadlineDaftar}\nPenyisihan: ${l.timeline.penyisihan}\nFinal: ${l.timeline.final}\nPortalKimia Olimpiade`);
+  const stages = this.getLombaStages(l);
+  const stagesText = stages.map(s => `${s.nama} (${s.moda || 'Online'}): ${s.tanggal || '-'}`).join('\n');
+  const details = encodeURIComponent(`Lomba: ${l.nama}\nPenyelenggara: ${l.penyelenggara}\n\nJadwal Tahapan:\n${stagesText}\n\nPortalKimia Olimpiade`);
   const location = encodeURIComponent(`${l.penyelenggara}`);
 
-  const formatDate = (dStr) => dStr.replace(/-/g, '');
-  const startDate = formatDate(l.timeline.deadlineDaftar);
+  const formatDate = (dStr) => (dStr || '').replace(/-/g, '');
+  const startDate = formatDate(l.timeline?.deadlineDaftar || (stages[0]?.tanggal || ''));
   const endDate = startDate;
 
   const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&details=${details}&location=${location}`;
@@ -4857,17 +4955,21 @@ OlympiadApp.downloadICS = function(lombaId) {
   const l = this.data.lomba.find(item => item.id === lombaId);
   if (!l) return;
 
-  const cleanDate = (dStr) => dStr.replace(/-/g, '');
+  const stages = this.getLombaStages(l);
+  const stagesDesc = stages.map(s => `${s.nama} (${s.moda || 'Online'}): ${s.tanggal || '-'}`).join(', ');
+  const cleanDate = (dStr) => (dStr || '').replace(/-/g, '');
+  const startD = cleanDate(l.timeline?.deadlineDaftar || (stages[0]?.tanggal || ''));
+
   const ics = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//PortalKimia Suite//Olimpiade Kimia//ID
 BEGIN:VEVENT
 UID:${l.id}-${Date.now()}@portalkimia.org
 DTSTAMP:${cleanDate(new Date().toISOString().slice(0,10))}T000000Z
-DTSTART;VALUE=DATE:${cleanDate(l.timeline.deadlineDaftar)}
-DTEND;VALUE=DATE:${cleanDate(l.timeline.deadlineDaftar)}
-SUMMARY:[Deadline Lomba] ${l.nama}
-DESCRIPTION:${l.penyelenggara} - Penyisihan: ${l.timeline.penyisihan}, Final: ${l.timeline.final}
+DTSTART;VALUE=DATE:${startD}
+DTEND;VALUE=DATE:${startD}
+SUMMARY:[Agenda Lomba] ${l.nama}
+DESCRIPTION:${l.penyelenggara} - ${stagesDesc}
 LOCATION:${l.penyelenggara}
 STATUS:CONFIRMED
 END:VEVENT
@@ -4881,6 +4983,211 @@ END:VCALENDAR`;
   a.click();
   URL.revokeObjectURL(url);
   this.showToast('Berkas .ICS kalender berhasil diunduh.', 'success');
+};
+
+// ============================================================================
+// MANAJEMEN TAHAPAN DINAMIS AGENDA LOMBA (TEMPLATE RESMI & TAHAPAN KUSTOM)
+// ============================================================================
+OlympiadApp.currentLombaFormStages = [];
+
+OlympiadApp.renderFormLombaStages = function() {
+  const container = document.getElementById('form-lomba-stages-list');
+  if (!container) return;
+
+  if (!Array.isArray(this.currentLombaFormStages) || this.currentLombaFormStages.length === 0) {
+    this.currentLombaFormStages = [
+      { id: 'stage-deadline', nama: 'Deadline', tanggal: '2026-04-15', moda: 'Online', isDefault: true },
+      { id: 'stage-penyisihan', nama: 'Penyisihan', tanggal: '2026-05-02', moda: 'Online', isDefault: true },
+      { id: 'stage-semifinal', nama: 'Semifinal', tanggal: '2026-05-20', moda: 'Offline', isDefault: true },
+      { id: 'stage-final', nama: 'Final', tanggal: '2026-06-06', moda: 'Offline', isDefault: true }
+    ];
+  }
+
+  container.innerHTML = this.currentLombaFormStages.map((stage, idx) => {
+    const isFirst = idx === 0;
+    const isLast = idx === this.currentLombaFormStages.length - 1;
+    const lowerName = (stage.nama || '').toLowerCase();
+    const isDeadline = lowerName.includes('deadline') || lowerName.includes('batas');
+    const isFinal = lowerName.includes('final') && !lowerName.includes('perempat') && !lowerName.includes('semi');
+    const isSemi = lowerName.includes('semi');
+    const isPerempat = lowerName.includes('perempat');
+
+    let badgeClass = 'bg-zinc-800 text-zinc-400';
+    if (isDeadline) badgeClass = 'bg-rose-950/40 text-rose-300 border border-rose-500/30';
+    else if (isFinal) badgeClass = 'bg-amber-950/40 text-amber-300 border border-amber-500/30';
+    else if (isSemi) badgeClass = 'bg-violet-950/40 text-violet-300 border border-violet-500/30';
+    else if (isPerempat) badgeClass = 'bg-indigo-950/40 text-indigo-300 border border-indigo-500/30';
+
+    return `
+      <div class="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 transition-all hover:border-zinc-700">
+        <!-- Index & Reorder -->
+        <div class="flex items-center gap-1 shrink-0">
+          <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold ${badgeClass}">
+            #${idx + 1}
+          </span>
+          <button type="button" onclick="OlympiadApp.moveLombaStage(${idx}, -1)" ${isFirst ? 'disabled class="text-zinc-600 p-1 cursor-not-allowed"' : 'class="text-zinc-400 hover:text-amber-400 p-1 hover:bg-zinc-800 rounded"'} title="Geser ke Atas">
+            <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+          </button>
+          <button type="button" onclick="OlympiadApp.moveLombaStage(${idx}, 1)" ${isLast ? 'disabled class="text-zinc-600 p-1 cursor-not-allowed"' : 'class="text-zinc-400 hover:text-amber-400 p-1 hover:bg-zinc-800 rounded"'} title="Geser ke Bawah">
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- Nama Tahapan -->
+        <div class="flex-grow min-w-[120px]">
+          <input type="text" 
+                 value="${stage.nama || ''}" 
+                 placeholder="Nama Tahap..." 
+                 oninput="OlympiadApp.updateStageName(${idx}, this.value)"
+                 class="w-full px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-semibold focus:outline-none focus:border-amber-500">
+        </div>
+
+        <!-- Moda Pelaksanaan: Online / Offline / Hybrid -->
+        <div class="shrink-0">
+          <select onchange="OlympiadApp.updateStageModa(${idx}, this.value)" 
+                  class="w-full sm:w-auto px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs font-semibold text-zinc-200 focus:outline-none focus:border-amber-500">
+            <option value="Online" ${(stage.moda || 'Online') === 'Online' ? 'selected' : ''}>🌐 Online</option>
+            <option value="Offline" ${(stage.moda || 'Online') === 'Offline' ? 'selected' : ''}>📍 Offline</option>
+            <option value="Hybrid" ${(stage.moda || 'Online') === 'Hybrid' ? 'selected' : ''}>🔀 Hybrid</option>
+          </select>
+        </div>
+
+        <!-- Tanggal Pelaksanaan -->
+        <div class="shrink-0 w-full sm:w-auto">
+          <input type="date" 
+                 value="${stage.tanggal || ''}" 
+                 onchange="OlympiadApp.updateStageDate(${idx}, this.value)"
+                 class="w-full sm:w-auto px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-200 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <!-- Tombol Hapus -->
+        <div class="shrink-0 flex items-center justify-end">
+          <button type="button" onclick="OlympiadApp.removeLombaStage(${idx})" class="p-1.5 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-950/40 transition-all" title="Hapus Tahapan Ini">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) window.lucide.createIcons();
+  this.syncStagesToLegacyInputs();
+};
+
+OlympiadApp.updateStageName = function(idx, val) {
+  if (this.currentLombaFormStages[idx]) {
+    this.currentLombaFormStages[idx].nama = val;
+    this.syncStagesToLegacyInputs();
+  }
+};
+
+OlympiadApp.updateStageModa = function(idx, val) {
+  if (this.currentLombaFormStages[idx]) {
+    this.currentLombaFormStages[idx].moda = val;
+  }
+};
+
+OlympiadApp.updateStageDate = function(idx, val) {
+  if (this.currentLombaFormStages[idx]) {
+    this.currentLombaFormStages[idx].tanggal = val;
+    this.syncStagesToLegacyInputs();
+  }
+};
+
+OlympiadApp.moveLombaStage = function(idx, dir) {
+  const target = idx + dir;
+  if (target < 0 || target >= this.currentLombaFormStages.length) return;
+  const temp = this.currentLombaFormStages[idx];
+  this.currentLombaFormStages[idx] = this.currentLombaFormStages[target];
+  this.currentLombaFormStages[target] = temp;
+  this.renderFormLombaStages();
+};
+
+OlympiadApp.removeLombaStage = function(idx) {
+  if (this.currentLombaFormStages.length <= 1) {
+    this.showToast('Minimal harus ada satu tahapan lomba!', 'warning');
+    return;
+  }
+  const removed = this.currentLombaFormStages[idx]?.nama || 'Tahap';
+  this.currentLombaFormStages.splice(idx, 1);
+  this.renderFormLombaStages();
+  this.showToast(`Tahapan "${removed}" dihapus.`, 'info');
+};
+
+OlympiadApp.addLombaStage = function(presetName, targetPosition, defaultModa) {
+  const name = presetName || 'Tahap Tambahan';
+  const moda = defaultModa || (name.toLowerCase().includes('final') && !name.toLowerCase().includes('perempat') && !name.toLowerCase().includes('semi') ? 'Offline' : 'Online');
+
+  const newStage = {
+    id: 'stage-' + Date.now(),
+    nama: name,
+    tanggal: '',
+    moda: moda,
+    isCustom: true
+  };
+
+  if (targetPosition === 'before-semifinal') {
+    // Sisipkan sebelum Semifinal atau sebelum Final jika semifinal tidak ada
+    let insertIdx = this.currentLombaFormStages.findIndex(s => (s.nama || '').toLowerCase().includes('semi'));
+    if (insertIdx === -1) {
+      insertIdx = this.currentLombaFormStages.findIndex(s => (s.nama || '').toLowerCase().includes('final'));
+    }
+    if (insertIdx !== -1) {
+      this.currentLombaFormStages.splice(insertIdx, 0, newStage);
+    } else {
+      this.currentLombaFormStages.push(newStage);
+    }
+    this.showToast(`Babak "${name}" berhasil disisipkan sebelum Semifinal!`, 'info');
+  } else {
+    // Tambahkan sebelum Final jika ada, atau di akhir
+    let finalIdx = this.currentLombaFormStages.findIndex(s => {
+      const lower = (s.nama || '').toLowerCase();
+      return lower.includes('final') && !lower.includes('semi') && !lower.includes('perempat');
+    });
+    if (finalIdx !== -1 && finalIdx > 0) {
+      this.currentLombaFormStages.splice(finalIdx, 0, newStage);
+    } else {
+      this.currentLombaFormStages.push(newStage);
+    }
+    this.showToast(`Tahapan baru berhasil ditambahkan!`, 'info');
+  }
+
+  this.renderFormLombaStages();
+};
+
+OlympiadApp.resetLombaStagesToDefault = function() {
+  this.currentLombaFormStages = [
+    { id: 'stage-deadline', nama: 'Deadline', tanggal: '2026-04-15', moda: 'Online', isDefault: true },
+    { id: 'stage-penyisihan', nama: 'Penyisihan', tanggal: '2026-05-02', moda: 'Online', isDefault: true },
+    { id: 'stage-semifinal', nama: 'Semifinal', tanggal: '2026-05-20', moda: 'Offline', isDefault: true },
+    { id: 'stage-final', nama: 'Final', tanggal: '2026-06-06', moda: 'Offline', isDefault: true }
+  ];
+  this.renderFormLombaStages();
+  this.showToast('Tahapan dikembalikan ke template resmi (Deadline, Penyisihan, Semifinal, Final)', 'info');
+};
+
+OlympiadApp.syncStagesToLegacyInputs = function() {
+  const dl = document.getElementById('form-lomba-deadline');
+  const py = document.getElementById('form-lomba-penyisihan');
+  const fn = document.getElementById('form-lomba-final');
+
+  const findStage = (keywords) => {
+    return this.currentLombaFormStages.find(s => {
+      const lower = (s.nama || '').toLowerCase();
+      return keywords.some(k => lower.includes(k));
+    });
+  };
+
+  const stageDl = findStage(['deadline', 'batas']) || this.currentLombaFormStages[0];
+  const stagePy = findStage(['penyisihan']);
+  const stageFn = this.currentLombaFormStages.slice().reverse().find(s => {
+    const lower = (s.nama || '').toLowerCase();
+    return lower.includes('final') && !lower.includes('semi') && !lower.includes('perempat');
+  });
+
+  if (dl && stageDl) dl.value = stageDl.tanggal || '';
+  if (py && stagePy) py.value = stagePy.tanggal || '';
+  if (fn && stageFn) fn.value = stageFn.tanggal || '';
 };
 
 // ============================================================================
@@ -4900,9 +5207,6 @@ OlympiadApp.openAddLombaModal = function() {
   document.getElementById('form-lomba-klasifikasi').value = 'Individu';
   document.getElementById('form-lomba-kuota').value = '5';
   document.getElementById('form-lomba-biaya-daftar').value = '150000';
-  document.getElementById('form-lomba-deadline').value = '2026-04-15';
-  document.getElementById('form-lomba-penyisihan').value = '2026-05-02';
-  document.getElementById('form-lomba-final').value = '2026-06-06';
   document.getElementById('form-lomba-drive-guidebook').value = '';
 
   const defaultSyarat = [
@@ -4915,6 +5219,15 @@ OlympiadApp.openAddLombaModal = function() {
   ].join('\n');
   const syaratInput = document.getElementById('form-lomba-syarat-pendaftaran');
   if (syaratInput) syaratInput.value = defaultSyarat;
+
+  // Inisialisasi tahapan default template resmi
+  this.currentLombaFormStages = [
+    { id: 'stage-deadline', nama: 'Deadline', tanggal: '2026-04-15', moda: 'Online', isDefault: true },
+    { id: 'stage-penyisihan', nama: 'Penyisihan', tanggal: '2026-05-02', moda: 'Online', isDefault: true },
+    { id: 'stage-semifinal', nama: 'Semifinal', tanggal: '2026-05-20', moda: 'Offline', isDefault: true },
+    { id: 'stage-final', nama: 'Final', tanggal: '2026-06-06', moda: 'Offline', isDefault: true }
+  ];
+  this.renderFormLombaStages();
 
   modal.classList.remove('hidden');
 };
@@ -4936,9 +5249,6 @@ OlympiadApp.openEditLombaModal = function(id) {
   document.getElementById('form-lomba-klasifikasi').value = l.klasifikasi || 'Individu';
   document.getElementById('form-lomba-kuota').value = l.kuotaSekolah || 3;
   document.getElementById('form-lomba-biaya-daftar').value = (l.biaya && l.biaya.pendaftaran !== undefined) ? l.biaya.pendaftaran : 150000;
-  document.getElementById('form-lomba-deadline').value = l.timeline?.deadlineDaftar || '';
-  document.getElementById('form-lomba-penyisihan').value = l.timeline?.penyisihan || '';
-  document.getElementById('form-lomba-final').value = l.timeline?.final || '';
   document.getElementById('form-lomba-drive-guidebook').value = l.dokumenCeklis?.guidebookUrl || '';
 
   const syaratInput = document.getElementById('form-lomba-syarat-pendaftaran');
@@ -4958,6 +5268,10 @@ OlympiadApp.openEditLombaModal = function(id) {
       ].join('\n');
     }
   }
+
+  // Muat tahapan kompetisi ke editor
+  this.currentLombaFormStages = this.getLombaStages(l);
+  this.renderFormLombaStages();
 
   modal.classList.remove('hidden');
 };
@@ -5005,13 +5319,39 @@ OlympiadApp.saveLomba = function() {
   const klasifikasi = document.getElementById('form-lomba-klasifikasi').value;
   const kuotaSekolah = parseInt(document.getElementById('form-lomba-kuota').value) || 3;
   const biayaDaftar = parseInt(document.getElementById('form-lomba-biaya-daftar').value) || 0;
-  const deadlineDaftar = document.getElementById('form-lomba-deadline').value;
-  const penyisihan = document.getElementById('form-lomba-penyisihan').value;
-  const finalDate = document.getElementById('form-lomba-final').value;
   const guidebookUrl = document.getElementById('form-lomba-drive-guidebook').value.trim();
 
   const syaratRaw = document.getElementById('form-lomba-syarat-pendaftaran')?.value || '';
   const parsedSyaratLines = syaratRaw.split('\n').map(s => s.trim()).filter(Boolean);
+
+  // Baca tahapan lomba yang dikustomisasi
+  const stages = (this.currentLombaFormStages || []).map((st, i) => ({
+    id: st.id || ('stage-' + i + '-' + Date.now()),
+    nama: String(st.nama || ('Tahap ' + (i + 1))).trim(),
+    tanggal: String(st.tanggal || '').trim(),
+    moda: String(st.moda || 'Online').trim(),
+    isDefault: !!st.isDefault,
+    isCustom: !!st.isCustom
+  }));
+
+  const findStageDate = (keywords) => {
+    const found = stages.find(s => {
+      const lower = (s.nama || '').toLowerCase();
+      return keywords.some(k => lower.includes(k));
+    });
+    return found ? found.tanggal : '';
+  };
+
+  const finalStage = stages.slice().reverse().find(s => {
+    const lower = (s.nama || '').toLowerCase();
+    return lower.includes('final') && !lower.includes('semi') && !lower.includes('perempat');
+  });
+
+  const deadlineDaftar = findStageDate(['deadline', 'batas']) || (stages[0]?.tanggal || '');
+  const penyisihan = findStageDate(['penyisihan']) || '';
+  const perempatFinal = findStageDate(['perempat']) || '';
+  const semifinal = findStageDate(['semifinal', 'semi']) || '';
+  const finalDate = finalStage ? finalStage.tanggal : (findStageDate(['final']) || '');
 
   if (idInput) {
     // Mode EDIT: Update Lomba yang Sudah Ada
@@ -5021,9 +5361,14 @@ OlympiadApp.saveLomba = function() {
       l.penyelenggara = penyelenggara;
       l.klasifikasi = klasifikasi;
       l.kuotaSekolah = kuotaSekolah;
+      l.timeline = l.timeline || {};
       l.timeline.deadlineDaftar = deadlineDaftar;
       l.timeline.penyisihan = penyisihan;
+      l.timeline.perempatFinal = perempatFinal;
+      l.timeline.semifinal = semifinal;
       l.timeline.final = finalDate;
+      l.timeline.stages = stages;
+
       l.biaya = l.biaya || {};
       l.biaya.pendaftaran = biayaDaftar;
       l.dokumenCeklis = l.dokumenCeklis || {};
@@ -5070,9 +5415,10 @@ OlympiadApp.saveLomba = function() {
       pendaftaranBuka: new Date().toISOString().slice(0, 10),
       deadlineDaftar: deadlineDaftar,
       penyisihan: penyisihan,
-      perempatFinal: '',
-      semifinal: '',
-      final: finalDate
+      perempatFinal: perempatFinal,
+      semifinal: semifinal,
+      final: finalDate,
+      stages: stages
     },
     biaya: { pendaftaran: biayaDaftar, transportasi: 0, akomodasi: 0 },
     dokumenCeklis: {
@@ -5140,10 +5486,24 @@ OlympiadApp.openKelolosanModal = function(lombaId) {
         <span class="text-[11px] text-zinc-400">Pilih babak yang baru saja diumumkan oleh panitia penyelenggara.</span>
       </div>
       <select id="kelolosan-tahap-select" class="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-200 font-bold">
-        <option value="Babak Penyisihan">Babak Penyisihan</option>
-        <option value="Perempat Final">Perempat Final</option>
-        <option value="Babak Semifinal">Babak Semifinal</option>
-        <option value="Babak Final">Babak Final</option>
+        ${(() => {
+          const validStages = this.getLombaStages(l).filter(s => {
+            const lower = (s.nama || '').toLowerCase();
+            return !lower.includes('deadline') && !lower.includes('daftar');
+          });
+          if (validStages.length === 0) {
+            return `
+              <option value="Babak Penyisihan">Babak Penyisihan</option>
+              <option value="Perempat Final">Perempat Final</option>
+              <option value="Babak Semifinal">Babak Semifinal</option>
+              <option value="Babak Final">Babak Final</option>
+            `;
+          }
+          return validStages.map(s => {
+            const modaInfo = s.moda ? ` [${s.moda}]` : '';
+            return `<option value="${s.nama}">${s.nama}${modaInfo}</option>`;
+          }).join('');
+        })()}
       </select>
     </div>
 
