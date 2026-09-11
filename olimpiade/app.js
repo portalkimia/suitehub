@@ -423,19 +423,24 @@ window.OlympiadApp = {
         }
       }
 
+      let bidang = String(sObj.bidang || '').trim();
+      if (!bidang || bidang.toLowerCase().includes('semua') || bidang.toLowerCase().includes('komprehensif')) {
+        bidang = 'Semua Bidang (Komprehensif)';
+      }
+
       return {
         id: String(sObj.id || ('soal-' + (idx + 1) + '-' + Math.random().toString(36).substr(2, 5))),
         nomor: parseInt(sObj.nomor) || (idx + 1),
         tahun: parseInt(sObj.tahun) || 2026,
-        sumber: String(sObj.sumber || 'OSN-K Kimia'),
-        penyelenggara: String(sObj.penyelenggara || 'BPTI Kemendikbud'),
-        bidang: String(sObj.bidang || 'Kimia Fisik'),
-        subtopik: String(sObj.subtopik || 'Materi Kimia'),
-        kesulitan: String(sObj.kesulitan || 'Dasar (Kabupaten)'),
-        jenis: String(sObj.jenis || 'Pilihan Ganda'),
+        sumber: String(sObj.sumber || 'OSN Kimia'),
+        penyelenggara: String(sObj.penyelenggara || 'BPTI Kemendikbudristek'),
+        bidang: bidang,
+        subtopik: String(sObj.subtopik || 'Paket Naskah Soal Olimpiade'),
+        kesulitan: String(sObj.kesulitan || 'Tinggi (Nasional)'),
+        jenis: String(sObj.jenis || 'Paket Terpadu (PG & Esai)'),
         teksSoal: String(sObj.teksSoal || ''),
-        opsi,
-        kunciJawaban: String(sObj.kunciJawaban || 'A'),
+        opsi: (Array.isArray(opsi) && opsi.length > 0) ? opsi : null,
+        kunciJawaban: String(sObj.kunciJawaban || '-'),
         pembahasan: String(sObj.pembahasan || ''),
         tags,
         googleDriveUrl: String(sObj.googleDriveUrl || ''),
@@ -2195,19 +2200,19 @@ OlympiadApp.renderBankSoal = function() {
   });
 
   const uniqueTahun = [...new Set(this.data.soal.map(s => s.tahun))].sort((a,b) => b-a);
-  const uniqueBidang = ["Kimia Fisik", "Kimia Organik", "Kimia Anorganik", "Kimia Analitik", "Biokimia"];
+  const uniqueBidang = ["Semua Bidang (Komprehensif)", "Kimia Fisik", "Kimia Organik", "Kimia Anorganik", "Kimia Analitik", "Biokimia"];
   const uniqueKesulitan = ["Dasar (Kabupaten)", "Menengah (Provinsi)", "Tinggi (Nasional)", "Master (Internasional)"];
-  const uniqueJenis = ["Pilihan Ganda", "Esai Terstruktur", "Isian Singkat"];
+  const uniqueJenis = ["Paket Terpadu (PG & Esai)", "Pilihan Ganda Lengkap", "Esai Terstruktur", "Uraian & Praktikum"];
 
   let html = `
     <!-- Top Bar -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <div>
         <h2 class="text-xl sm:text-2xl font-black text-zinc-100 flex items-center gap-2">
-          <i data-lucide="book-open" class="w-6 h-6 text-violet-400"></i> Bank Soal Olimpiade Kimia
+          <i data-lucide="book-open" class="w-6 h-6 text-violet-400"></i> Bank Naskah Soal Olimpiade Kimia
         </h2>
         <p class="text-zinc-400 text-xs sm:text-sm mt-1">
-          Daftar kurasi soal OSN, OMI, OKI UI, UNAIR &amp; IChO. Klik pada butir soal untuk membuka lembar soal &amp; formula KaTeX.
+          Katalog &amp; arsip naskah paket soal OSN, OMI, OKI UI, ITB, UNAIR &amp; IChO. Kelola bundel soal lengkap terintegrasi langsung Google Drive.
         </p>
       </div>
 
@@ -2215,7 +2220,7 @@ OlympiadApp.renderBankSoal = function() {
       <div class="flex flex-wrap items-center gap-2">
         ${!this.isSiswa() ? `
           <button onclick="OlympiadApp.openAddSoalModal()" class="px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-violet-600/20 transition-all">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Soal
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Paket Soal
           </button>
           <button onclick="OlympiadApp.openSyncDriveSoalModal()" class="px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all" title="Pindai &amp; Tata Otomatis dari Folder Google Drive">
             <i data-lucide="folder-sync" class="w-4 h-4 text-blue-400"></i> Pindai Folder Drive
@@ -2230,7 +2235,7 @@ OlympiadApp.renderBankSoal = function() {
 
         <div class="relative inline-block text-left">
           <button onclick="OlympiadApp.toggleExportMenu()" id="btn-export-menu" class="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold flex items-center gap-1.5 transition-all">
-            <i data-lucide="download" class="w-4 h-4 text-amber-400"></i> Ekspor Soal <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+            <i data-lucide="download" class="w-4 h-4 text-amber-400"></i> Ekspor Naskah <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
           </button>
           <div id="export-dropdown-menu" class="hidden absolute right-0 mt-2 w-52 rounded-2xl bg-zinc-900 border border-zinc-700 shadow-2xl z-40 py-2 text-xs">
             <button onclick="OlympiadApp.exportSoalJSON()" class="w-full text-left px-4 py-2 text-zinc-300 hover:bg-zinc-800 flex items-center gap-2.5">
@@ -2259,7 +2264,7 @@ OlympiadApp.renderBankSoal = function() {
         <div class="md:col-span-4 relative">
           <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
           <input type="text" 
-                 placeholder="Cari kata kunci, topik, teks soal, atau tag..." 
+                 placeholder="Cari naskah, judul lomba, OSN, OMI, atau topik..." 
                  value="${this.filterSoal.keyword}"
                  oninput="OlympiadApp.handleSoalSearch(this.value)"
                  class="w-full pl-10 pr-4 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-violet-500">
@@ -2268,8 +2273,8 @@ OlympiadApp.renderBankSoal = function() {
         <!-- Bidang Kimia Filter -->
         <div class="md:col-span-2">
           <select onchange="OlympiadApp.handleSoalFilter('bidang', this.value)" 
-                  class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-xs text-zinc-100 focus:outline-none focus:border-violet-500">
-            <option value="all" ${this.filterSoal.bidang === 'all' ? 'selected' : ''}>Semua 5 Bidang</option>
+                  class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-xs text-zinc-100 focus:outline-none focus:border-violet-500 font-semibold">
+            <option value="all" ${this.filterSoal.bidang === 'all' ? 'selected' : ''}>Semua Kategori Bidang</option>
             ${uniqueBidang.map(b => `<option value="${b}" ${this.filterSoal.bidang === b ? 'selected' : ''}>${b}</option>`).join('')}
           </select>
         </div>
@@ -2304,7 +2309,7 @@ OlympiadApp.renderBankSoal = function() {
 
       <!-- Filter Meta & Reset -->
       <div class="flex items-center justify-between text-xs text-zinc-400 pt-2 border-t border-zinc-800">
-        <div>Menampilkan <strong class="text-zinc-100">${filtered.length}</strong> dari total <strong class="text-zinc-100">${this.data.soal.length}</strong> butir soal</div>
+        <div>Menampilkan <strong class="text-zinc-100">${filtered.length}</strong> dari total <strong class="text-zinc-100">${this.data.soal.length}</strong> paket naskah soal</div>
         <button onclick="OlympiadApp.resetSoalFilter()" class="text-violet-400 hover:text-violet-300 font-bold hover:underline">Reset Filter</button>
       </div>
     </div>
@@ -2316,81 +2321,83 @@ OlympiadApp.renderBankSoal = function() {
           <div class="w-16 h-16 rounded-2xl bg-violet-600/10 border border-violet-500/20 text-violet-400 flex items-center justify-center mx-auto">
             <i data-lucide="book-open" class="w-8 h-8"></i>
           </div>
-          <h4 class="text-base font-bold text-zinc-200">Bank Soal Masih Kosong</h4>
+          <h4 class="text-base font-bold text-zinc-200">Bank Naskah Soal Masih Kosong</h4>
           <p class="text-xs text-zinc-400 max-w-md mx-auto">
-            Belum ada butir soal dalam database. Anda dapat memindai naskah soal dari Google Drive atau mengimpor berkas HTML secara langsung untuk mulai mengisi bank soal.
+            Belum ada paket naskah soal dalam database. Anda dapat menambahkan paket soal baru, memindai folder Google Drive, atau mengimpor berkas HTML soal.
           </p>
           ${!this.isSiswa() ? `
             <div class="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <button onclick="OlympiadApp.openAddSoalModal()" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-violet-600/20 flex items-center gap-1.5">
+                <i data-lucide="plus" class="w-4 h-4"></i> Tambah Paket Baru
+              </button>
               <button onclick="OlympiadApp.openSyncDriveSoalModal()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/20 flex items-center gap-1.5">
                 <i data-lucide="cloud" class="w-4 h-4"></i> Pindai Folder Drive
               </button>
-              <button onclick="OlympiadApp.triggerHtmlFileSelect()" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-violet-600/20 flex items-center gap-1.5">
+              <button onclick="OlympiadApp.triggerHtmlFileSelect()" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold transition-all flex items-center gap-1.5">
                 <i data-lucide="file-code" class="w-4 h-4"></i> Impor Berkas HTML
-              </button>
-              <button onclick="OlympiadApp.openTambahSoalModal()" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold transition-all flex items-center gap-1.5">
-                <i data-lucide="plus" class="w-4 h-4"></i> Tambah Manual
               </button>
             </div>
           ` : `
-            <p class="text-[11px] text-zinc-500 italic">Guru pembimbing belum menambahkan atau menyinkronkan naskah soal.</p>
+            <p class="text-[11px] text-zinc-500 italic">Guru pembimbing belum menambahkan bundel paket naskah soal.</p>
           `}
         </div>
       ` : (filtered.length === 0 ? `
         <div class="p-12 text-center">
           <i data-lucide="inbox" class="w-12 h-12 text-zinc-600 mx-auto mb-3"></i>
-          <p class="text-sm text-zinc-400">Tidak ada soal yang sesuai dengan kriteria filter.</p>
-          <button onclick="OlympiadApp.resetSoalFilter()" class="mt-3 px-4 py-2 rounded-xl bg-violet-600 text-white text-xs font-bold">Tampilkan Semua Soal</button>
+          <p class="text-sm text-zinc-400">Tidak ada naskah soal yang sesuai dengan kriteria filter.</p>
+          <button onclick="OlympiadApp.resetSoalFilter()" class="mt-3 px-4 py-2 rounded-xl bg-violet-600 text-white text-xs font-bold">Tampilkan Semua Naskah</button>
         </div>
       ` : `
         <div class="divide-y divide-zinc-800/80">
           ${filtered.map(s => {
             const bidangColorMap = {
+              "Semua Bidang (Komprehensif)": "bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-bold",
               "Kimia Fisik": "bg-blue-500/15 text-blue-400 border-blue-500/30",
               "Kimia Organik": "bg-violet-500/15 text-violet-400 border-violet-500/30",
               "Kimia Anorganik": "bg-amber-500/15 text-amber-400 border-amber-500/30",
               "Kimia Analitik": "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
               "Biokimia": "bg-rose-500/15 text-rose-400 border-rose-500/30"
             };
-            const badgeColor = bidangColorMap[s.bidang] || "bg-zinc-800 text-zinc-300 border-zinc-700";
+            const badgeColor = bidangColorMap[s.bidang] || "bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-bold";
 
-            // Clean snippet for preview (first 110 chars)
-            const cleanSnippet = s.teksSoal.replace(/[\$#\n]/g, ' ').substring(0, 110) + '...';
+            // Clean snippet for preview (first 130 chars)
+            const cleanSnippet = s.teksSoal ? s.teksSoal.replace(/[\$#\n]/g, ' ').substring(0, 130) + '...' : 'Bundel naskah paket soal olimpiade kimia lengkap.';
 
             return `
-              <div class="p-4 sm:p-5 hover:bg-zinc-900/50 dark:hover:bg-zinc-900/40 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer group" onclick="OlympiadApp.openSoalDetail('${s.id}')">
-                <div class="flex items-start gap-3.5 flex-grow">
+              <div class="p-4 sm:p-5 hover:bg-zinc-900/50 dark:hover:bg-zinc-900/40 transition-colors flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer group" onclick="OlympiadApp.openSoalDetail('${s.id}')">
+                <div class="flex items-start gap-3.5 flex-grow min-w-0">
                   <!-- Number Badge -->
-                  <div class="w-9 h-9 rounded-xl bg-zinc-800 group-hover:bg-violet-600 group-hover:text-white text-zinc-300 font-mono font-bold text-xs flex items-center justify-center shrink-0 transition-colors shadow-sm">
+                  <div class="w-10 h-10 rounded-xl bg-zinc-800 group-hover:bg-violet-600 group-hover:text-white text-zinc-300 font-mono font-bold text-xs flex items-center justify-center shrink-0 transition-colors shadow-sm mt-0.5">
                     #${s.nomor}
                   </div>
 
                   <!-- Info & Preview -->
-                  <div class="space-y-1 min-w-0 flex-grow">
-                    <div class="flex flex-wrap items-center gap-2">
+                  <div class="space-y-1.5 min-w-0 flex-grow">
+                    <!-- Title -->
+                    <h3 class="text-sm sm:text-base font-bold text-zinc-100 group-hover:text-violet-300 transition-colors flex items-center gap-2 truncate">
+                      <span>${s.subtopik}</span>
+                    </h3>
+
+                    <!-- Badges -->
+                    <div class="flex flex-wrap items-center gap-1.5">
                       <span class="px-2.5 py-0.5 rounded-lg border text-[11px] font-bold ${badgeColor}">
-                        ${s.bidang}
+                        ${s.bidang === 'Semua Bidang (Komprehensif)' ? '🏆 Semua Bidang (Komprehensif)' : s.bidang}
                       </span>
-                      <span class="text-xs font-bold text-zinc-200">
+                      <span class="px-2.5 py-0.5 rounded-lg bg-zinc-800/90 text-zinc-200 text-[11px] font-medium border border-zinc-700/60">
                         ${s.sumber} (${s.tahun})
                       </span>
-                      <span class="text-zinc-600 dark:text-zinc-500 text-xs">&bull;</span>
-                      <span class="text-xs text-zinc-400 font-medium">
+                      <span class="px-2.5 py-0.5 rounded-lg bg-zinc-800/60 text-zinc-400 text-[11px]">
                         ${s.kesulitan}
                       </span>
-                      <span class="text-zinc-600 dark:text-zinc-500 text-xs">&bull;</span>
-                      <span class="text-xs text-zinc-400 font-medium">
+                      <span class="px-2.5 py-0.5 rounded-lg bg-zinc-800/60 text-zinc-400 text-[11px]">
                         ${s.jenis}
                       </span>
                       ${s.googleDriveUrl ? `
-                        <span class="px-2 py-0.5 rounded bg-violet-500/10 text-violet-400 text-[10px] font-bold flex items-center gap-1">
-                          <i data-lucide="paperclip" class="w-3 h-3"></i> Drive
+                        <span class="px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold flex items-center gap-1 truncate max-w-[200px]">
+                          <i data-lucide="file-text" class="w-3 h-3 shrink-0"></i>
+                          <span class="truncate">${s.googleDriveName || 'Dokumen Drive'}</span>
                         </span>
                       ` : ''}
-                    </div>
-
-                    <div class="text-xs font-bold text-violet-400">
-                      ${s.subtopik}
                     </div>
 
                     <p class="text-xs text-zinc-400 line-clamp-1 leading-relaxed">
@@ -2399,22 +2406,30 @@ OlympiadApp.renderBankSoal = function() {
                   </div>
                 </div>
 
-                <!-- Right Action Button & Solution Status -->
-                <div class="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                  ${this.isSiswa() ? `
-                    <span class="px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-400 text-[11px] font-medium flex items-center gap-1">
-                      <i data-lucide="lock" class="w-3 h-3 text-amber-400"></i> Kunci Tertutup
-                    </span>
-                  ` : `
-                    <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold flex items-center gap-1">
-                      <i data-lucide="check-circle" class="w-3 h-3"></i> Solusi Siap
-                    </span>
-                  `}
-                  
-                  <button class="px-3.5 py-1.5 rounded-xl bg-violet-600/15 group-hover:bg-violet-600 text-violet-400 group-hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm">
-                    <span>Buka Soal</span>
+                <!-- Right Action Buttons -->
+                <div class="flex items-center gap-2 shrink-0 self-end lg:self-center" onclick="event.stopPropagation()">
+                  ${s.googleDriveUrl ? `
+                    <a href="${s.googleDriveUrl}" target="_blank" rel="noopener noreferrer" 
+                       class="px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-violet-600/20 transition-all" 
+                       title="Buka Dokumen Naskah Asli di Google Drive">
+                      <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                      <span>Buka di Drive ↗</span>
+                    </a>
+                  ` : ''}
+
+                  <button onclick="OlympiadApp.openSoalDetail('${s.id}')" class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold flex items-center gap-1 transition-all shadow-sm">
+                    <span>Detail Naskah</span>
                     <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
                   </button>
+
+                  ${!this.isSiswa() ? `
+                    <button onclick="OlympiadApp.closeSoalDetail(); OlympiadApp.openEditSoalModal('${s.id}')" title="Edit Paket Soal" class="p-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-all">
+                      <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button onclick="OlympiadApp.deleteSoal('${s.id}')" title="Hapus Paket Soal" class="p-1.5 rounded-xl bg-zinc-800 hover:bg-rose-900/50 text-zinc-400 hover:text-rose-400 transition-all">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                  ` : ''}
                 </div>
               </div>
             `;
@@ -2427,7 +2442,7 @@ OlympiadApp.renderBankSoal = function() {
   container.innerHTML = html;
 };
 
-// Open Soal Detail Modal (Naskah Lengkap, Opsi, Drive & Pembahasan)
+// Open Soal Detail Modal (Bundel Naskah Lengkap, Google Drive Langsung & Kunci Pembina)
 OlympiadApp.openSoalDetail = function(id) {
   const s = this.data.soal.find(item => item.id === id);
   if (!s) return;
@@ -2438,20 +2453,23 @@ OlympiadApp.openSoalDetail = function(id) {
   if (!modal || !content) return;
 
   const bidangColorMap = {
+    "Semua Bidang (Komprehensif)": "bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-bold",
     "Kimia Fisik": "bg-blue-500/15 text-blue-400 border-blue-500/30",
     "Kimia Organik": "bg-violet-500/15 text-violet-400 border-violet-500/30",
     "Kimia Anorganik": "bg-amber-500/15 text-amber-400 border-amber-500/30",
     "Kimia Analitik": "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
     "Biokimia": "bg-rose-500/15 text-rose-400 border-rose-500/30"
   };
-  const badgeColor = bidangColorMap[s.bidang] || "bg-zinc-800 text-zinc-300";
+  const badgeColor = bidangColorMap[s.bidang] || "bg-indigo-500/15 text-indigo-300 border-indigo-500/35 font-bold";
 
   content.innerHTML = `
     <!-- Top Header -->
     <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-zinc-800">
       <div class="flex flex-wrap items-center gap-2">
         <span class="px-3 py-1 rounded-xl bg-zinc-800 text-zinc-200 font-mono font-bold text-xs">#${s.nomor}</span>
-        <span class="px-3 py-1 rounded-xl border text-xs font-bold ${badgeColor}">${s.bidang}</span>
+        <span class="px-3 py-1 rounded-xl border text-xs font-bold ${badgeColor}">
+          ${s.bidang === 'Semua Bidang (Komprehensif)' ? '🏆 Semua Bidang (Komprehensif)' : s.bidang}
+        </span>
         <span class="px-2.5 py-1 rounded-xl bg-zinc-800/80 text-zinc-200 text-xs font-medium">${s.sumber} (${s.tahun})</span>
         <span class="px-2.5 py-1 rounded-xl bg-zinc-800/50 text-zinc-400 text-xs">${s.kesulitan}</span>
         <span class="px-2.5 py-1 rounded-xl bg-zinc-800/50 text-zinc-400 text-xs">${s.jenis}</span>
@@ -2459,7 +2477,7 @@ OlympiadApp.openSoalDetail = function(id) {
 
       ${!this.isSiswa() ? `
         <div class="flex items-center gap-1.5">
-          <button onclick="OlympiadApp.openEditSoalModal('${s.id}')" title="Edit Soal" class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold flex items-center gap-1 transition-all">
+          <button onclick="OlympiadApp.closeSoalDetail(); OlympiadApp.openEditSoalModal('${s.id}')" title="Edit Paket Soal" class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold flex items-center gap-1 transition-all">
             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Edit
           </button>
           <button onclick="OlympiadApp.deleteSoal('${s.id}')" title="Hapus Soal" class="p-1.5 rounded-xl bg-zinc-800 hover:bg-rose-900/50 text-zinc-400 hover:text-rose-400 transition-all">
@@ -2469,53 +2487,61 @@ OlympiadApp.openSoalDetail = function(id) {
       ` : ''}
     </div>
 
-    <!-- Subtopik & Tags -->
+    <!-- Judul Paket Naskah Soal -->
     <div class="my-4">
-      <div class="text-sm font-extrabold text-violet-400 uppercase tracking-wide">${s.subtopik}</div>
-      <div class="flex flex-wrap gap-1.5 mt-1.5">
-        ${(s.tags || []).map(t => `<span class="px-2.5 py-0.5 rounded-md bg-zinc-800/60 text-zinc-400 text-xs font-medium">#${t}</span>`).join('')}
-      </div>
+      <h2 class="text-base sm:text-lg font-black text-violet-300 tracking-wide">${s.subtopik}</h2>
+      <div class="text-xs text-zinc-400 mt-1">Penyelenggara: <strong class="text-zinc-200">${s.penyelenggara || s.sumber}</strong></div>
+      ${(s.tags && s.tags.length > 0) ? `
+        <div class="flex flex-wrap gap-1.5 mt-2">
+          ${s.tags.map(t => `<span class="px-2.5 py-0.5 rounded-md bg-zinc-800/60 text-zinc-400 text-xs font-medium">#${t}</span>`).join('')}
+        </div>
+      ` : ''}
     </div>
 
-    <!-- Teks Naskah Soal Lengkap (KaTeX) -->
-    <div class="my-4 p-5 rounded-2xl bg-zinc-900/40 dark:bg-zinc-900/30 border border-zinc-800 text-sm text-zinc-100 leading-relaxed katex-renderable whitespace-pre-line font-sans shadow-inner">
-${s.teksSoal}
-    </div>
-
-    <!-- Opsi Pilihan Ganda (Jika ada) -->
-    ${s.opsi && s.opsi.length > 0 ? `
-      <div class="space-y-2.5 my-4">
-        <h4 class="text-xs font-bold text-zinc-400 uppercase">Pilihan Jawaban:</h4>
-        ${s.opsi.map(op => `
-          <div class="px-4 py-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-200 katex-renderable">
-            ${op}
-          </div>
-        `).join('')}
-      </div>
-    ` : ''}
-
-    <!-- Tautan Berkas Google Drive -->
+    <!-- TAUTAN LANGSUNG BERKAS GOOGLE DRIVE RESMI (NO BLURRY PREVIEW) -->
     ${s.googleDriveUrl ? `
-      <div class="my-4 p-4 rounded-2xl bg-violet-950/20 border border-violet-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center gap-3 overflow-hidden">
-          <div class="w-9 h-9 rounded-xl bg-violet-500/20 text-violet-400 flex items-center justify-center shrink-0">
-            <i data-lucide="paperclip" class="w-4 h-4"></i>
+      <div class="my-4 p-5 rounded-2xl bg-violet-950/30 border border-violet-500/40 shadow-xl space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <div class="w-11 h-11 rounded-2xl bg-violet-600/20 border border-violet-500/30 text-violet-300 flex items-center justify-center shrink-0 shadow-sm">
+              <i data-lucide="file-text" class="w-6 h-6"></i>
+            </div>
+            <div class="truncate">
+              <div class="text-sm font-bold text-zinc-100 truncate">${s.googleDriveName || 'Naskah_Soal_Lengkap.pdf'}</div>
+              <div class="text-[11px] text-zinc-400">Dokumen Naskah Resmi Tersimpan di Google Drive</div>
+            </div>
           </div>
-          <div class="truncate">
-            <div class="text-xs font-bold text-zinc-200 truncate">${s.googleDriveName || 'Naskah_Soal_Lengkap.pdf'}</div>
-            <div class="text-[10px] text-zinc-400">Berkas Naskah Terhubung ke Google Drive</div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="navigator.clipboard.writeText('${s.googleDriveUrl}'); OlympiadApp.showToast('Tautan Google Drive berhasil disalin!', 'info')" 
+                    class="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm" title="Salin URL Google Drive">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin Link
+            </button>
+            <a href="${s.googleDriveUrl}" target="_blank" rel="noopener noreferrer" 
+               class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-violet-600/30 transition-all">
+              <i data-lucide="external-link" class="w-4 h-4"></i>
+              <span>Buka Dokumen di Google Drive ↗</span>
+            </a>
           </div>
         </div>
-        <div class="flex items-center gap-2 shrink-0">
-          <button onclick="OlympiadApp.previewGoogleDrive('${s.googleDriveUrl}', '${s.googleDriveName || 'Naskah Soal'}')" class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold flex items-center gap-1">
-            <i data-lucide="eye" class="w-3.5 h-3.5"></i> Pratinjau
-          </button>
-          <a href="${s.googleDriveUrl}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold flex items-center gap-1">
-            <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Buka di Drive
-          </a>
-        </div>
+
+        <p class="text-[11px] text-zinc-400 leading-relaxed border-t border-zinc-800/80 pt-2.5">
+          <i data-lucide="check-circle" class="inline w-3.5 h-3.5 text-emerald-400 mr-1"></i>
+          Membuka langsung di Google Drive memberikan navigasi multi-halaman penuh, pembaca PDF resmi, serta fitur unduh dan cetak berkualitas tinggi.
+        </p>
       </div>
     ` : ''}
+
+    <!-- Deskripsi / Petunjuk / Cakupan Naskah Soal -->
+    <div class="my-4">
+      <h4 class="text-xs font-bold text-zinc-400 uppercase mb-2 flex items-center gap-1.5">
+        <i data-lucide="align-left" class="w-3.5 h-3.5 text-violet-400"></i>
+        <span>Deskripsi &amp; Cakupan Materi Naskah:</span>
+      </h4>
+      <div class="p-5 rounded-2xl bg-zinc-900/40 dark:bg-zinc-900/30 border border-zinc-800 text-xs sm:text-sm text-zinc-200 leading-relaxed katex-renderable whitespace-pre-line font-sans shadow-inner">
+${s.teksSoal || 'Tidak ada deskripsi tambahan untuk naskah ini. Silakan akses dokumen lengkap melalui Google Drive.'}
+      </div>
+    </div>
 
     <!-- Kunci & Pembahasan (ROLE-RESTRICTED) -->
     ${this.isSiswa() ? `
@@ -2534,14 +2560,14 @@ ${s.teksSoal}
           <div class="flex items-center justify-between pb-2 mb-3 border-b border-zinc-800 text-xs">
             <span class="font-bold text-violet-400 flex items-center gap-1.5">
               <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-              <span>KUNCI JAWABAN &amp; PEMBAHASAN LENGKAP</span>
+              <span>KUNCI JAWABAN &amp; PEMBAHASAN / SOLUSI LENGKAP</span>
             </span>
             <span class="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 font-mono font-bold">
               Kunci: ${s.kunciJawaban || '-'}
             </span>
           </div>
           <div class="katex-renderable whitespace-pre-line leading-relaxed">
-${s.pembahasan}
+${s.pembahasan || 'Pembahasan tertera di lembar solusi resmi pada berkas Google Drive terlampir.'}
           </div>
         </div>
       </div>
@@ -2725,57 +2751,78 @@ OlympiadApp.exportPrintSheet = function(withSolutions = false) {
   printWin.document.close();
 };
 
-// Modal Add/Edit Soal
+// Modal Add/Edit Paket Naskah Soal
 OlympiadApp.openAddSoalModal = function() {
   const modal = document.getElementById('modal-soal-form');
   if (!modal) return;
-  document.getElementById('soal-form-title').textContent = 'Tambah Soal Baru';
+  document.getElementById('soal-form-title').innerHTML = '<i data-lucide="book-open" class="w-5 h-5 text-violet-400"></i><span>Tambah Paket Naskah Soal Baru</span>';
   document.getElementById('form-soal-id').value = '';
   document.getElementById('form-soal-nomor').value = this.data.soal.length + 1;
   document.getElementById('form-soal-tahun').value = '2026';
-  document.getElementById('form-soal-sumber').value = 'OSN-K Kimia';
+  document.getElementById('form-soal-sumber').value = 'OSN Nasional Kimia';
   document.getElementById('form-soal-penyelenggara').value = 'BPTI Kemendikbudristek';
-  document.getElementById('form-soal-bidang').value = 'Kimia Fisik';
+  document.getElementById('form-soal-bidang').value = 'Semua Bidang (Komprehensif)';
   document.getElementById('form-soal-subtopik').value = '';
-  document.getElementById('form-soal-kesulitan').value = 'Menengah (Provinsi)';
-  document.getElementById('form-soal-jenis').value = 'Pilihan Ganda';
-  document.getElementById('form-soal-tags').value = '';
+  document.getElementById('form-soal-kesulitan').value = 'Tinggi (Nasional)';
+  document.getElementById('form-soal-jenis').value = 'Paket Terpadu (PG & Esai)';
+  const tagsInput = document.getElementById('form-soal-tags');
+  if (tagsInput) tagsInput.value = '';
   document.getElementById('form-soal-teks').value = '';
-  document.getElementById('form-soal-opsi').value = '';
+  const opsiInput = document.getElementById('form-soal-opsi');
+  if (opsiInput) opsiInput.value = '';
   document.getElementById('form-soal-kunci').value = '';
   document.getElementById('form-soal-pembahasan').value = '';
   document.getElementById('form-soal-drive-url').value = '';
   document.getElementById('form-soal-drive-name').value = '';
-  document.getElementById('preview-latex-box').innerHTML = '<span class="text-zinc-500 italic">Ketik teks soal berformula LaTeX untuk melihat pratinjau KaTeX live...</span>';
+  const previewBox = document.getElementById('preview-latex-box');
+  if (previewBox) previewBox.innerHTML = '';
 
   modal.classList.remove('hidden');
+  if (window.lucide) window.lucide.createIcons();
 };
 
 OlympiadApp.openEditSoalModal = function(id) {
   const s = this.data.soal.find(item => item.id === id);
   if (!s) return;
   
+  // Tutup modal detail agar tidak terjadi tumpang tindih layer modal
+  this.closeSoalDetail();
+
   const modal = document.getElementById('modal-soal-form');
-  document.getElementById('soal-form-title').textContent = `Edit Soal #${s.nomor}`;
+  if (!modal) return;
+  document.getElementById('soal-form-title').innerHTML = `<i data-lucide="edit-3" class="w-5 h-5 text-violet-400"></i><span>Edit Paket Naskah: #${s.nomor} ${s.subtopik}</span>`;
   document.getElementById('form-soal-id').value = s.id;
   document.getElementById('form-soal-nomor').value = s.nomor;
   document.getElementById('form-soal-tahun').value = s.tahun;
   document.getElementById('form-soal-sumber').value = s.sumber;
   document.getElementById('form-soal-penyelenggara').value = s.penyelenggara || '';
-  document.getElementById('form-soal-bidang').value = s.bidang;
+  
+  // Bidang
+  const bidangSelect = document.getElementById('form-soal-bidang');
+  if (bidangSelect) {
+    if (s.bidang && (s.bidang.includes('Semua') || s.bidang.includes('Komprehensif'))) {
+      bidangSelect.value = 'Semua Bidang (Komprehensif)';
+    } else {
+      bidangSelect.value = s.bidang || 'Semua Bidang (Komprehensif)';
+    }
+  }
+
   document.getElementById('form-soal-subtopik').value = s.subtopik;
   document.getElementById('form-soal-kesulitan').value = s.kesulitan;
   document.getElementById('form-soal-jenis').value = s.jenis;
-  document.getElementById('form-soal-tags').value = (s.tags || []).join(', ');
+  const tagsInput = document.getElementById('form-soal-tags');
+  if (tagsInput) tagsInput.value = (s.tags || []).join(', ');
   document.getElementById('form-soal-teks').value = s.teksSoal;
-  document.getElementById('form-soal-opsi').value = s.opsi ? s.opsi.join('\n') : '';
-  document.getElementById('form-soal-kunci').value = s.kunciJawaban;
-  document.getElementById('form-soal-pembahasan').value = s.pembahasan;
+  const opsiInput = document.getElementById('form-soal-opsi');
+  if (opsiInput) opsiInput.value = s.opsi ? s.opsi.join('\n') : '';
+  document.getElementById('form-soal-kunci').value = s.kunciJawaban || '';
+  document.getElementById('form-soal-pembahasan').value = s.pembahasan || '';
   document.getElementById('form-soal-drive-url').value = s.googleDriveUrl || '';
   document.getElementById('form-soal-drive-name').value = s.googleDriveName || '';
 
   this.updateLiveLaTeXPreview();
   modal.classList.remove('hidden');
+  if (window.lucide) window.lucide.createIcons();
 };
 
 OlympiadApp.updateLiveLaTeXPreview = function() {
@@ -2788,42 +2835,59 @@ OlympiadApp.updateLiveLaTeXPreview = function() {
 
 OlympiadApp.saveSoal = function() {
   const id = document.getElementById('form-soal-id').value;
-  const teks = document.getElementById('form-soal-teks').value.trim();
-  if (!teks) {
-    alert('Teks soal wajib diisi!');
+  const judul = document.getElementById('form-soal-subtopik').value.trim();
+  if (!judul) {
+    alert('Judul atau nama paket naskah soal wajib diisi!');
+    document.getElementById('form-soal-subtopik').focus();
     return;
   }
 
-  const opsiText = document.getElementById('form-soal-opsi').value.trim();
-  const opsiArray = opsiText ? opsiText.split('\n').filter(o => o.trim().length > 0) : null;
-  const tagsArray = document.getElementById('form-soal-tags').value.split(',').map(t => t.trim()).filter(t => t.length > 0);
+  const sumber = document.getElementById('form-soal-sumber').value.trim() || 'OSN Kimia';
+  const tahun = parseInt(document.getElementById('form-soal-tahun').value) || 2026;
+  const bidang = document.getElementById('form-soal-bidang').value;
+  const kesulitan = document.getElementById('form-soal-kesulitan').value;
+  const jenis = document.getElementById('form-soal-jenis').value;
+  const penyelenggara = document.getElementById('form-soal-penyelenggara').value.trim() || 'BPTI Kemendikbudristek';
+  const driveUrl = document.getElementById('form-soal-drive-url').value.trim();
+  let driveName = document.getElementById('form-soal-drive-name').value.trim();
+  if (!driveName && driveUrl) {
+    driveName = judul.replace(/\s+/g, '_') + '.pdf';
+  }
+
+  let teks = document.getElementById('form-soal-teks').value.trim();
+  if (!teks) {
+    teks = `Bundel naskah paket soal **${judul}** (${sumber} ${tahun}). Berisi kumpulan butir soal terpadu yang dapat langsung dibuka, dipelajari, dan diunduh melalui dokumen Google Drive resmi terlampir.`;
+  }
+
+  const tagsInput = document.getElementById('form-soal-tags');
+  const tagsArray = tagsInput ? tagsInput.value.split(',').map(t => t.trim()).filter(Boolean) : [bidang, sumber];
 
   const newSoal = {
     id: id || 'soal-' + Date.now(),
     nomor: parseInt(document.getElementById('form-soal-nomor').value) || (this.data.soal.length + 1),
-    tahun: parseInt(document.getElementById('form-soal-tahun').value) || 2026,
-    sumber: document.getElementById('form-soal-sumber').value.trim() || 'Latihan Olimpiade',
-    penyelenggara: document.getElementById('form-soal-penyelenggara').value.trim() || '',
-    bidang: document.getElementById('form-soal-bidang').value,
-    subtopik: document.getElementById('form-soal-subtopik').value.trim() || 'Umum',
-    kesulitan: document.getElementById('form-soal-kesulitan').value,
-    jenis: document.getElementById('form-soal-jenis').value,
-    tags: tagsArray,
+    tahun: tahun,
+    sumber: sumber,
+    penyelenggara: penyelenggara,
+    bidang: bidang,
+    subtopik: judul,
+    kesulitan: kesulitan,
+    jenis: jenis,
+    tags: tagsArray.length > 0 ? tagsArray : [bidang, sumber],
     teksSoal: teks,
-    opsi: opsiArray,
-    kunciJawaban: document.getElementById('form-soal-kunci').value.trim(),
+    opsi: null,
+    kunciJawaban: document.getElementById('form-soal-kunci').value.trim() || '-',
     pembahasan: document.getElementById('form-soal-pembahasan').value.trim(),
-    googleDriveUrl: document.getElementById('form-soal-drive-url').value.trim(),
-    googleDriveName: document.getElementById('form-soal-drive-name').value.trim()
+    googleDriveUrl: driveUrl,
+    googleDriveName: driveName
   };
 
   if (id) {
     const idx = this.data.soal.findIndex(s => s.id === id);
     if (idx !== -1) this.data.soal[idx] = newSoal;
-    this.showToast('Soal berhasil diperbarui.', 'success');
+    this.showToast('Paket naskah soal berhasil diperbarui.', 'success');
   } else {
     this.data.soal.push(newSoal);
-    this.showToast('Soal baru berhasil ditambahkan.', 'success');
+    this.showToast('Paket naskah soal baru berhasil ditambahkan.', 'success');
   }
 
   this.saveData(); // Auto-save & Push to Cloud
@@ -3009,8 +3073,8 @@ OlympiadApp.parseSoalMetadata = function(rawName, htmlContent = '') {
     penyelenggara = 'Himanika Universitas Airlangga';
   }
 
-  // 3. Deteksi 5 Cabang Kimia
-  let bidang = 'Kimia Fisik';
+  // 3. Deteksi Bidang (Prioritas cabang spesifik, default ke Semua Bidang jika umum/komprehensif)
+  let bidang = 'Semua Bidang (Komprehensif)';
   if (combinedSearch.match(/organik|alkana|alkena|alkuna|benzena|stereokimia|sn1|sn2|karbonil|sintesis|polimer|alkohol|ester|siklo|aromatik/)) {
     bidang = 'Kimia Organik';
   } else if (combinedSearch.match(/anorganik|kompleks|ligan|transisi|kristal|spu|orbital|koordinasi|cft|oktahedral|tetrahedral|hibridisasi/)) {
@@ -3021,13 +3085,15 @@ OlympiadApp.parseSoalMetadata = function(rawName, htmlContent = '') {
     bidang = 'Biokimia';
   } else if (combinedSearch.match(/termo|entalpi|gibbs|kinetika|orde|laju|hess|kesetimbangan|nernst|volta|gas ideal|fasa|koligatif|raoult|kalorimetri/)) {
     bidang = 'Kimia Fisik';
+  } else {
+    bidang = 'Semua Bidang (Komprehensif)';
   }
 
   // 4. Deteksi Tingkat Kesulitan
   let kesulitan = 'Menengah (Provinsi)';
   if (combinedSearch.match(/icho|internasional/)) {
     kesulitan = 'Master (Internasional)';
-  } else if (combinedSearch.match(/nasional|osn\b/)) {
+  } else if (combinedSearch.match(/nasional|semifinal|final|osn\b/)) {
     kesulitan = 'Tinggi (Nasional)';
   } else if (combinedSearch.match(/osn-p|provinsi/)) {
     kesulitan = 'Menengah (Provinsi)';
@@ -3035,29 +3101,22 @@ OlympiadApp.parseSoalMetadata = function(rawName, htmlContent = '') {
     kesulitan = 'Dasar (Kabupaten)';
   }
 
-  // 5. Deteksi Jenis Soal
-  let jenis = 'Pilihan Ganda';
+  // 5. Deteksi Format Naskah Soal
+  let jenis = 'Paket Terpadu (PG & Esai)';
   if (combinedSearch.match(/esai|uraian|terstruktur|essay/)) {
     jenis = 'Esai Terstruktur';
+  } else if (combinedSearch.match(/pilihan ganda|\bpg\b/)) {
+    jenis = 'Pilihan Ganda Lengkap';
   } else if (combinedSearch.match(/isian|singkat/)) {
-    jenis = 'Isian Singkat';
+    jenis = 'Uraian & Praktikum';
   }
 
-  // Default teks dan pembahasan jika berkas hanya menyajikan judul
+  // Default teks dan pembahasan naskah paket
   if (!extractedSoal) {
-    extractedSoal = `Naskah latihan & pembahasan soal materi **${cleanTitle}** (${sumber} ${tahun}). Telusuri naskah lengkap melalui tautan dokumen Google Drive terlampir.`;
+    extractedSoal = `Bundel naskah paket soal **${cleanTitle}** (${sumber} ${tahun}). Berisi kumpulan butir soal terpadu yang dapat langsung dibuka atau diunduh melalui tautan Google Drive terlampir.`;
   }
   if (!extractedPembahasan) {
     extractedPembahasan = `Kunci dan pembahasan lengkap untuk naskah soal ${cleanTitle} tertera pada lembar dokumen sumber di Google Drive.`;
-  }
-  if (jenis === 'Pilihan Ganda' && extractedOpsi.length === 0) {
-    extractedOpsi = [
-      'A. Pernyataan A sesuai dengan konsep reaksi kimia.',
-      'B. Pernyataan B memenuhi hukum kesetimbangan.',
-      'C. Pernyataan C merupakan jawaban paling tepat.',
-      'D. Pernyataan D menunjukkan nilai potensial sel positif.',
-      'E. Pernyataan E bertentangan dengan kaidah termodinamika.'
-    ];
   }
 
   return {
@@ -3068,10 +3127,10 @@ OlympiadApp.parseSoalMetadata = function(rawName, htmlContent = '') {
     subtopik: cleanTitle,
     kesulitan,
     jenis,
-    tags: [bidang, sumber, 'Auto-Parsed'],
+    tags: [bidang, sumber, 'Paket Naskah'],
     teksSoal: extractedSoal,
-    opsi: jenis === 'Pilihan Ganda' ? extractedOpsi : null,
-    kunciJawaban: extractedKunci || 'C',
+    opsi: (extractedOpsi && extractedOpsi.length >= 2) ? extractedOpsi : null,
+    kunciJawaban: extractedKunci || '-',
     pembahasan: extractedPembahasan
   };
 };
@@ -3159,43 +3218,43 @@ OlympiadApp.syncDriveSoalFolder = function() {
       const match = url.match(/folders\/([a-zA-Z0-9_-]+)/);
       if (match && match[1]) folderId = match[1];
 
-      // Generate 3 butir soal contoh hasil auto-scan dari folder tersebut untuk konfirmasi visual langsung
+      // Generate contoh paket naskah hasil auto-scan dari folder tersebut
       const scannedSample = [
         {
           id: 'soal-drv-' + Date.now().toString().slice(-4) + '1',
           nomor: this.data.soal.length + 1,
           tahun: 2025,
-          sumber: 'OSN-K Kimia 2025',
+          sumber: 'OSN Nasional Kimia 2025',
           penyelenggara: 'BPTI Kemendikbudristek',
-          bidang: 'Kimia Fisik',
-          subtopik: 'Kesetimbangan Disosiasi Gas & Tekanan Parsial',
-          kesulitan: 'Menengah (Provinsi)',
-          jenis: 'Pilihan Ganda',
-          tags: ['Kimia Fisik', 'OSN-K', 'Drive Scanned'],
-          teksSoal: 'Gas dinitrogen tetroksida ($\\mathrm{N_2O_4}$) terdisosiasi menjadi nitrogen dioksida ($\\mathrm{NO_2}$) menurut reaksi kesetimbangan: $$\\mathrm{N_2O_4(g) \\rightleftharpoons 2NO_2(g)}$$ Pada suhu $25^\\circ\\text{C}$, bejana bervolume $2{,}0\\text{ L}$ berisi campuran gas pada kesetimbangan dengan derajat disosiasi $\\alpha = 0{,}20$. Hitung nilai $K_p$ sistem tersebut!',
-          opsi: ['A. 0,14 atm', 'B. 0,25 atm', 'C. 0,33 atm', 'D. 0,42 atm', 'E. 0,55 atm'],
-          kunciJawaban: 'A',
-          pembahasan: 'Perhitungan kuosien tekanan parsial $P_{\\mathrm{NO_2}}^2 / P_{\\mathrm{N_2O_4}}$ menghasilkan nilai $K_p \\approx 0{,}14\\text{ atm}$.',
+          bidang: 'Semua Bidang (Komprehensif)',
+          subtopik: 'SOAL SEMIFINAL OSN KIMIA 2025',
+          kesulitan: 'Tinggi (Nasional)',
+          jenis: 'Paket Terpadu (PG & Esai)',
+          tags: ['Semua Bidang', 'OSN Nasional', 'Semifinal'],
+          teksSoal: 'Bundel naskah paket soal SOAL SEMIFINAL OSN KIMIA 2025 lengkap mencakup seluruh cabang kimia (Kimia Fisik, Organik, Anorganik, Analitik, dan Biokimia). Berkas dokumen terhubung langsung ke Google Drive.',
+          opsi: null,
+          kunciJawaban: 'Terlampir di berkas dokumen solusi',
+          pembahasan: 'Kunci dan pembahasan lengkap untuk naskah soal SOAL SEMIFINAL OSN KIMIA 2025 tertera pada lembar dokumen sumber di Google Drive.',
           googleDriveUrl: 'https://drive.google.com/file/d/sampleDrive1/view',
-          googleDriveName: '01_Kesetimbangan_Disosiasi_Gas.html'
+          googleDriveName: 'SOAL_SEMIFINAL_OSN_KIMIA_2025.pdf'
         },
         {
           id: 'soal-drv-' + Date.now().toString().slice(-4) + '2',
           nomor: this.data.soal.length + 2,
           tahun: 2025,
-          sumber: 'OSN-P Kimia 2025',
+          sumber: 'OSN-K Kimia 2025',
           penyelenggara: 'Balai Pengembangan Talenta Indonesia',
-          bidang: 'Kimia Organik',
-          subtopik: 'Kondensasi Aldol Silang & Sintesis Kalkon',
-          kesulitan: 'Tinggi (Nasional)',
-          jenis: 'Esai Terstruktur',
-          tags: ['Kimia Organik', 'Kondensasi Aldol', 'Enolat'],
-          teksSoal: 'Asetofenon direaksikan dengan benzaldehida dalam suasana basa encer ($\\mathrm{NaOH}$ $10\\%$) menghasilkan senyawa $\\alpha,\\beta$-tak jenuh (Kalkon). Gambarkan mekanisme pembentukan ion enolat dan tahap dehidrasinya!',
+          bidang: 'Semua Bidang (Komprehensif)',
+          subtopik: 'NASKAH SOAL SELEKSI KABUPATEN (OSN-K) KIMIA 2025',
+          kesulitan: 'Dasar (Kabupaten)',
+          jenis: 'Pilihan Ganda Lengkap',
+          tags: ['Semua Bidang', 'OSN-K', 'Seleksi Tahap 1'],
+          teksSoal: 'Bundel naskah paket soal Seleksi Kabupaten/Kota OSN-K Kimia 2025 (30 butir soal pilihan ganda komprehensif). Berkas dokumen terhubung langsung ke Google Drive.',
           opsi: null,
-          kunciJawaban: 'Mekanisme adisi nukleofilik enolat asetofenon pada karbon karbonil benzaldehida dilanjutkan eliminasi E1cB menghasilkan trans-kalkon.',
-          pembahasan: 'Tahap 1: Enolisasi pada gugus metil asetofenon. Tahap 2: Serangan nukleofilik ke karbonil benzaldehida. Tahap 3: Dehidrasi irreversibel membentuk ikatan rangkap terkonjugasi.',
+          kunciJawaban: 'Terlampir di lembar kunci jawaban resmi',
+          pembahasan: 'Kunci dan panduan pembahasan soal seleksi kabupaten tertera di lembar solusi resmi Google Drive.',
           googleDriveUrl: 'https://drive.google.com/file/d/sampleDrive2/view',
-          googleDriveName: '02_Kondensasi_Aldol_Silang.html'
+          googleDriveName: 'NASKAH_OSN_K_KIMIA_2025.pdf'
         }
       ];
 

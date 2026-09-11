@@ -281,8 +281,8 @@
        MODAL CONTAINERS
        ======================================================================== -->
 
-  <!-- Modal 1: Google Drive File Viewer / Preview -->
-  <div id="modal-drive-preview" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <!-- Modal 1: Google Drive File Viewer / Preview (z-[80]) -->
+  <div id="modal-drive-preview" class="modal-overlay hidden fixed inset-0 z-[80] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="glass-card rounded-2xl w-full max-w-4xl h-[85vh] flex flex-col border border-zinc-700 shadow-2xl overflow-hidden">
       <!-- Header -->
       <div class="px-6 py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/80">
@@ -311,37 +311,47 @@
     </div>
   </div>
 
-  <!-- Modal 2: Form Tambah / Edit Soal dengan Live KaTeX Preview -->
-  <div id="modal-soal-form" class="modal-overlay hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+  <!-- Modal 2: Form Tambah / Edit Paket Naskah Soal (z-[70] Anti-Stacking) -->
+  <div id="modal-soal-form" class="modal-overlay hidden fixed inset-0 z-[70] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
     <div class="glass-card rounded-2xl w-full max-w-3xl border border-zinc-700 shadow-2xl my-8 p-6 space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
-        <h3 id="soal-form-title" class="text-base font-bold text-zinc-100">Input Soal Baru</h3>
+        <h3 id="soal-form-title" class="text-base font-bold text-zinc-100 flex items-center gap-2">
+          <i data-lucide="book-open" class="w-5 h-5 text-violet-400"></i>
+          <span>Kelola Paket Naskah Soal Olimpiade</span>
+        </h3>
         <button onclick="document.getElementById('modal-soal-form').classList.add('hidden')" class="p-1 rounded-lg hover:bg-zinc-800 text-zinc-400">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
       <input type="hidden" id="form-soal-id">
+      <input type="hidden" id="form-soal-opsi" value="">
+
+      <div>
+        <label class="block text-[11px] font-bold text-zinc-200 mb-1">Judul / Nama Paket Naskah Soal:</label>
+        <input type="text" id="form-soal-subtopik" placeholder="Contoh: SOAL SEMIFINAL OSN KIMIA 2025 atau Naskah Teori IChO 2024" class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-bold focus:outline-none focus:border-violet-500">
+      </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Nomor Soal:</label>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Nomor Urut:</label>
           <input type="number" id="form-soal-nomor" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Tahun Lomba:</label>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Tahun Naskah:</label>
           <input type="number" id="form-soal-tahun" value="2026" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Sumber Lomba:</label>
-          <input type="text" id="form-soal-sumber" placeholder="e.g. OSN-K Kimia" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Sumber / Kompetisi:</label>
+          <input type="text" id="form-soal-sumber" placeholder="e.g. OSN Nasional Kimia, OMI, IChO" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Bidang Kimia:</label>
-          <select id="form-soal-bidang" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Kategori Bidang Kimia:</label>
+          <select id="form-soal-bidang" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-violet-500 font-semibold">
+            <option value="Semua Bidang (Komprehensif)">Semua Bidang (Komprehensif)</option>
             <option value="Kimia Fisik">Kimia Fisik</option>
             <option value="Kimia Organik">Kimia Organik</option>
             <option value="Kimia Anorganik">Kimia Anorganik</option>
@@ -350,8 +360,8 @@
           </select>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Tingkat Kesulitan:</label>
-          <select id="form-soal-kesulitan" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Tingkat Kesulitan / Jenjang:</label>
+          <select id="form-soal-kesulitan" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-violet-500">
             <option value="Dasar (Kabupaten)">Dasar (Kabupaten)</option>
             <option value="Menengah (Provinsi)">Menengah (Provinsi)</option>
             <option value="Tinggi (Nasional)">Tinggi (Nasional)</option>
@@ -359,70 +369,56 @@
           </select>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Format Soal:</label>
-          <select id="form-soal-jenis" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
-            <option value="Pilihan Ganda">Pilihan Ganda</option>
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Format Naskah Paket:</label>
+          <select id="form-soal-jenis" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 focus:outline-none focus:border-violet-500">
+            <option value="Paket Terpadu (PG &amp; Esai)">Paket Terpadu (PG &amp; Esai)</option>
+            <option value="Pilihan Ganda Lengkap">Pilihan Ganda Lengkap</option>
             <option value="Esai Terstruktur">Esai Terstruktur</option>
-            <option value="Isian Singkat">Isian Singkat</option>
+            <option value="Uraian &amp; Praktikum">Uraian &amp; Praktikum</option>
           </select>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Subtopik / Materi:</label>
-          <input type="text" id="form-soal-subtopik" placeholder="e.g. Termodinamika &amp; Kinetika" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Tags (Pisahkan koma):</label>
-          <input type="text" id="form-soal-tags" placeholder="e.g. Entropi, Delta G, Kp" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
-        </div>
-      </div>
-
       <!-- Google Drive Link Inputs -->
-      <div class="p-3 rounded-xl bg-violet-950/20 border border-violet-500/25 space-y-2">
-        <label class="block text-[11px] font-bold text-violet-300">Penyimpanan Berkas Soal di Google Drive:</label>
+      <div class="p-3.5 rounded-xl bg-violet-950/20 border border-violet-500/30 space-y-2">
+        <label class="block text-[11px] font-bold text-violet-300 flex items-center gap-1.5">
+          <i data-lucide="folder" class="w-3.5 h-3.5 text-violet-400"></i>
+          <span>Tautan Berkas Naskah di Google Drive (PDF / Docx):</span>
+        </label>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <input type="url" id="form-soal-drive-url" placeholder="URL Sharing Google Drive (PDF / Docs)" class="w-full px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
-          <input type="text" id="form-soal-drive-name" placeholder="Nama Berkas (e.g. Naskah_OSN_K_2026.pdf)" class="w-full px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+          <input type="url" id="form-soal-drive-url" placeholder="https://drive.google.com/file/d/.../view" class="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-violet-500">
+          <input type="text" id="form-soal-drive-name" placeholder="Nama Berkas (e.g. Soal_Semifinal_OSN_Kimia_2025.pdf)" class="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-violet-500">
         </div>
+        <p class="text-[10px] text-zinc-400">
+          Siswa &amp; Guru dapat langsung membuka dokumen resmi ini di tab baru dengan resolusi asli, navigasi halaman penuh, dan fitur unduh/cetak.
+        </p>
       </div>
 
-      <!-- Teks Soal & Live KaTeX Preview -->
+      <!-- Deskripsi / Petunjuk Paket Soal -->
       <div>
-        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Teks Soal (Mendukung KaTeX: $...$ atau $$...$$):</label>
-        <textarea id="form-soal-teks" rows="4" oninput="OlympiadApp.updateLiveLaTeXPreview()" class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-mono"></textarea>
-      </div>
-
-      <div>
-        <label class="block text-[10px] font-bold text-violet-400 uppercase tracking-wider mb-1">Pratinjau Rumus KaTeX Live:</label>
-        <div id="preview-latex-box" class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-200 katex-renderable min-h-[48px]"></div>
-      </div>
-
-      <div>
-        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Pilihan Ganda (1 baris 1 opsi, contoh: A. ...):</label>
-        <textarea id="form-soal-opsi" rows="3" placeholder="A. Opsi pertama&#10;B. Opsi kedua&#10;C. Opsi ketiga" class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-mono"></textarea>
+        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Deskripsi Naskah / Petunjuk / Cakupan Materi:</label>
+        <textarea id="form-soal-teks" rows="4" oninput="OlympiadApp.updateLiveLaTeXPreview()" placeholder="Tuliskan petunjuk pengerjaan, cakupan nomor soal, atau silabus materi yang diujikan..." class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-sans"></textarea>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Kunci Jawaban:</label>
-          <input type="text" id="form-soal-kunci" placeholder="e.g. C atau 50.27%" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-bold">
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Kunci Jawaban / Link Solusi:</label>
+          <input type="text" id="form-soal-kunci" placeholder="e.g. Terlampir di halaman akhir / link solusi" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-bold">
         </div>
         <div class="sm:col-span-2">
-          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Penyelenggara:</label>
-          <input type="text" id="form-soal-penyelenggara" placeholder="e.g. BPTI Kemendikbudristek" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
+          <label class="block text-[11px] font-bold text-zinc-300 mb-1">Penyelenggara / Institusi:</label>
+          <input type="text" id="form-soal-penyelenggara" placeholder="e.g. Balai Pengembangan Talenta Indonesia (BPTI)" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100">
         </div>
       </div>
 
       <div>
-        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Langkah Pembahasan &amp; Reaksi (KaTeX Supported):</label>
-        <textarea id="form-soal-pembahasan" rows="4" placeholder="Tuliskan analisis konsep, reaksi kimia setara, dan kalkulasinya..." class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-mono"></textarea>
+        <label class="block text-[11px] font-bold text-zinc-300 mb-1">Catatan Pembahasan / Solusi Lengkap (Khusus Pembina &amp; Admin):</label>
+        <textarea id="form-soal-pembahasan" rows="3" placeholder="Tuliskan catatan analisis solusi atau link dokumen kunci pembina..." class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-sans"></textarea>
       </div>
 
       <div class="pt-3 border-t border-zinc-800 flex justify-end gap-2">
         <button onclick="document.getElementById('modal-soal-form').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold">Batal</button>
-        <button onclick="OlympiadApp.saveSoal()" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-md shadow-violet-600/30">Simpan Soal</button>
+        <button onclick="OlympiadApp.saveSoal()" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-md shadow-violet-600/30">Simpan Paket Soal</button>
       </div>
     </div>
   </div>
