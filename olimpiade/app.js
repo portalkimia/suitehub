@@ -268,7 +268,8 @@ window.OlympiadApp = {
       const penyelenggara = String(lObj.penyelenggara || 'Penyelenggara Lomba').trim();
       const klasifikasi = String(lObj.klasifikasi || 'Individu').trim();
       const statusPendaftaran = String(lObj.statusPendaftaran || 'Draft').trim();
-      const kuotaSekolah = parseInt(lObj.kuotaSekolah) || 3;
+      const rawK = parseInt(lObj.kuotaSekolah, 10);
+      const kuotaSekolah = (!isNaN(rawK) && rawK > 0) ? rawK : (Math.abs(rawK) > 0 ? Math.abs(rawK) : 3);
 
       // Normalisasi Timeline
       let timeline = {
@@ -5310,7 +5311,8 @@ OlympiadApp.openEditLombaModal = function(id) {
   document.getElementById('form-lomba-nama').value = l.nama || '';
   document.getElementById('form-lomba-penyelenggara').value = l.penyelenggara || '';
   document.getElementById('form-lomba-klasifikasi').value = l.klasifikasi || 'Individu';
-  document.getElementById('form-lomba-kuota').value = l.kuotaSekolah || 3;
+  const rawK = parseInt(l.kuotaSekolah, 10);
+  document.getElementById('form-lomba-kuota').value = (!isNaN(rawK) && rawK > 0) ? rawK : (Math.abs(rawK) > 0 ? Math.abs(rawK) : 3);
   document.getElementById('form-lomba-biaya-daftar').value = (l.biaya && l.biaya.pendaftaran !== undefined) ? l.biaya.pendaftaran : 150000;
   document.getElementById('form-lomba-drive-guidebook').value = l.dokumenCeklis?.guidebookUrl || '';
 
@@ -5390,7 +5392,8 @@ OlympiadApp.saveLomba = function() {
 
   const penyelenggara = document.getElementById('form-lomba-penyelenggara').value.trim() || 'Penyelenggara Lomba';
   const klasifikasi = document.getElementById('form-lomba-klasifikasi').value;
-  const kuotaSekolah = parseInt(document.getElementById('form-lomba-kuota').value) || 3;
+  const kuotaInput = parseInt(document.getElementById('form-lomba-kuota').value, 10);
+  const kuotaSekolah = (!isNaN(kuotaInput) && kuotaInput > 0) ? kuotaInput : (Math.abs(kuotaInput) > 0 ? Math.abs(kuotaInput) : 3);
   const biayaDaftar = parseInt(document.getElementById('form-lomba-biaya-daftar').value) || 0;
   const guidebookUrl = document.getElementById('form-lomba-drive-guidebook').value.trim();
 
@@ -5900,7 +5903,11 @@ OlympiadApp.renderPlotingModule = function() {
 
   const activeLomba = lombaList.find(l => l.id === this.plotingState.lombaId) || lombaList[0] || {};
   const isTeam = (activeLomba.klasifikasi || '').includes('Tim');
-  const maxQuota = parseInt(activeLomba.kuotaSekolah) || (isTeam ? (activeLomba.klasifikasi.includes('3') ? 3 : 2) : 3);
+  const rawQuota = parseInt(activeLomba.kuotaSekolah, 10);
+  const maxQuota = (!isNaN(rawQuota) && rawQuota > 0) ? rawQuota : (Math.abs(rawQuota) > 0 ? Math.abs(rawQuota) : (isTeam ? 3 : 1));
+  if (activeLomba) {
+    activeLomba.kuotaSekolah = maxQuota;
+  }
   const targetSize = isTeam ? ((activeLomba.klasifikasi || '').includes('3') ? 3 : ((activeLomba.klasifikasi || '').includes('2') ? 2 : Math.min(maxQuota, 3))) : maxQuota;
 
   let html = `
@@ -5919,11 +5926,14 @@ OlympiadApp.renderPlotingModule = function() {
       <div class="flex items-center gap-2">
         <label class="text-xs font-bold text-zinc-400">Target Lomba:</label>
         <select onchange="OlympiadApp.selectPlotingLomba(this.value)" class="px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-100 font-bold focus:outline-none focus:border-violet-500">
-          ${lombaList.map(l => `
-            <option value="${l.id}" ${l.id === activeLomba.id ? 'selected' : ''}>
-              ${l.nama || 'Kompetisi'} (${l.klasifikasi || 'Individu'} - Kuota: ${l.kuotaSekolah || 3})
-            </option>
-          `).join('')}
+          ${lombaList.map(l => {
+            const lQ = Math.max(1, Math.abs(parseInt(l.kuotaSekolah, 10)) || 3);
+            return `
+              <option value="${l.id}" ${l.id === activeLomba.id ? 'selected' : ''}>
+                ${l.nama || 'Kompetisi'} (${l.klasifikasi || 'Individu'} - Kuota: ${lQ})
+              </option>
+            `;
+          }).join('')}
         </select>
       </div>
     </div>
@@ -5931,9 +5941,14 @@ OlympiadApp.renderPlotingModule = function() {
     <!-- Active Lomba Banner & Quota Status -->
     <div class="p-4 rounded-2xl glass-card border border-violet-500/20 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <span class="px-2.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-bold text-[11px]">${activeLomba.klasifikasi || 'Individu'}</span>
-          <span class="text-xs text-zinc-400">Kuota Sekolah: <strong class="text-zinc-200">${maxQuota} Delegasi</strong></span>
+          <span class="text-xs text-zinc-400 flex items-center gap-1.5">
+            Kuota Sekolah: <strong class="text-zinc-200">${maxQuota} Delegasi</strong>
+            <button onclick="OlympiadApp.editPlotingQuota('${activeLomba.id}', ${maxQuota})" class="ml-1 px-2 py-0.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-violet-300 hover:text-white text-[10px] font-bold border border-zinc-700 transition-all inline-flex items-center gap-1" title="Ubah batas kuota lomba ini">
+              <i data-lucide="edit-2" class="w-3 h-3"></i> Ubah Kuota
+            </button>
+          </span>
           <span class="text-[11px] px-2 py-0.5 rounded-full font-bold ${this.plotingState.selectedStudentIds.length === maxQuota ? 'bg-emerald-500/20 text-emerald-300' : 'bg-zinc-800 text-zinc-400'}">
             Terpilih: ${this.plotingState.selectedStudentIds.length} / ${maxQuota}
           </span>
@@ -6000,6 +6015,32 @@ OlympiadApp.renderPlotingModule = function() {
               `;
             }).join('')}
           </div>
+          ${isTeam ? `
+            <div class="mt-3 p-3 rounded-xl bg-zinc-950/60 border border-zinc-800/80">
+              <div class="text-[11px] font-bold text-violet-300 uppercase mb-2 flex items-center justify-between">
+                <span class="flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5 text-violet-400"></i> Formasi Regu Terbentuk:</span>
+                <span class="text-[10px] text-zinc-400 font-semibold">${Math.floor(this.plotingState.selectedStudentIds.length / targetSize)} Regu Lengkap</span>
+              </div>
+              ${this.plotingState.selectedStudentIds.length === 0 ? `
+                <div class="text-[11px] text-zinc-500 italic">Pilih siswa pada daftar di atas untuk menyusun regu secara manual.</div>
+              ` : (() => {
+                const selectedStudents = this.plotingState.selectedStudentIds.map(id => (this.data.siswa || []).find(s => s.id === id)).filter(Boolean);
+                const teamGroups = [];
+                for (let i = 0; i < selectedStudents.length; i += targetSize) {
+                  teamGroups.push(selectedStudents.slice(i, i + targetSize));
+                }
+                return teamGroups.map((tm, tIdx) => `
+                  <div class="text-xs text-zinc-300 py-1.5 border-b border-zinc-800/60 last:border-0 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <span class="font-bold text-zinc-200 flex items-center gap-1.5">
+                      <span class="w-2 h-2 rounded-full ${tm.length === targetSize ? 'bg-emerald-400' : 'bg-amber-400'}"></span>
+                      Tim ${tIdx + 1} (${tm.length}/${targetSize}):
+                    </span>
+                    <span class="text-zinc-400 text-[11px]">${tm.map(s => s.nama).join(', ')}</span>
+                  </div>
+                `).join('');
+              })()}
+            </div>
+          ` : ''}
         </div>
 
         <div class="pt-4 border-t border-zinc-800 mt-4">
@@ -6081,14 +6122,20 @@ OlympiadApp.selectPlotingLomba = function(lombaId) {
 
 OlympiadApp.toggleStudentSelection = function(siswaId, maxSize) {
   const activeLomba = (this.data && Array.isArray(this.data.lomba)) ? this.data.lomba.find(item => item.id === this.plotingState.lombaId) : null;
-  const quotaLimit = activeLomba ? (parseInt(activeLomba.kuotaSekolah) || maxSize || 1) : (maxSize || 1);
+  const isTeam = (activeLomba?.klasifikasi || '').includes('Tim');
+  const rawQ = parseInt(activeLomba ? activeLomba.kuotaSekolah : maxSize, 10);
+  const quotaLimit = (!isNaN(rawQ) && rawQ > 0) ? rawQ : (Math.abs(rawQ) > 0 ? Math.abs(rawQ) : (maxSize > 0 ? maxSize : (isTeam ? 3 : 1)));
+
+  if (activeLomba) {
+    activeLomba.kuotaSekolah = quotaLimit;
+  }
 
   const idx = this.plotingState.selectedStudentIds.indexOf(siswaId);
   if (idx !== -1) {
     this.plotingState.selectedStudentIds.splice(idx, 1);
   } else {
     if (this.plotingState.selectedStudentIds.length >= quotaLimit) {
-      alert(`Batas kuota delegasi untuk ${activeLomba?.nama || 'lomba ini'} adalah maksimal ${quotaLimit} siswa. Hapus pilihan sebelumnya terlebih dahulu jika ingin mengganti.`);
+      alert(`Batas kuota delegasi untuk ${activeLomba?.nama || 'lomba ini'} adalah maksimal ${quotaLimit} siswa. Hapus pilihan sebelumnya terlebih dahulu jika ingin mengganti, atau klik tombol "Ubah Kuota" di atas jika ingin menambah batas kuota.`);
       this.renderPlotingModule();
       return;
     }
@@ -6096,6 +6143,20 @@ OlympiadApp.toggleStudentSelection = function(siswaId, maxSize) {
   }
   this.renderPlotingModule();
   if (window.lucide) window.lucide.createIcons();
+};
+
+OlympiadApp.editPlotingQuota = function(lombaId, currentQuota) {
+  const l = (this.data && Array.isArray(this.data.lomba)) ? this.data.lomba.find(item => item.id === lombaId) : null;
+  if (!l) return;
+  const curr = Math.max(1, Math.abs(parseInt(currentQuota, 10)) || 3);
+  const input = prompt(`Atur batas kuota delegasi untuk "${l.nama}":`, curr);
+  if (input === null) return;
+  const parsed = parseInt(input, 10);
+  const newQuota = (!isNaN(parsed) && parsed > 0) ? parsed : (Math.abs(parsed) > 0 ? Math.abs(parsed) : 3);
+  l.kuotaSekolah = newQuota;
+  this.saveData(true);
+  this.renderPlotingModule();
+  this.showToast(`Batas kuota "${l.nama}" berhasil diatur menjadi ${newQuota} delegasi!`, 'success');
 };
 
 OlympiadApp.clearPlotingSelection = function() {
