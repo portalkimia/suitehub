@@ -49,135 +49,128 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) {
     lucide.createIcons();
   }
-  initApiKey();
+  initConnectionModal();
   initFormListeners();
   initTabListeners();
   initExportListeners();
 });
 
-// API KEY & GAS BACKEND MANAGEMENT
+// URL BACKEND GAS DENGAN PRIORITAS SUITE CONFIG
 function getGasUrl() {
   if (typeof window !== 'undefined') {
-    if (window.SOAL_CONFIG && window.SOAL_CONFIG.GAS_API_URL && window.SOAL_CONFIG.GAS_API_URL.startsWith('http')) {
-      return window.SOAL_CONFIG.GAS_API_URL.trim();
-    }
     if (window.PORTALKIMIA_CONFIG && window.PORTALKIMIA_CONFIG.SOAL_API && window.PORTALKIMIA_CONFIG.SOAL_API.startsWith('http')) {
       return window.PORTALKIMIA_CONFIG.SOAL_API.trim();
+    }
+    if (window.SOAL_CONFIG && window.SOAL_CONFIG.GAS_API_URL && window.SOAL_CONFIG.GAS_API_URL.startsWith('http')) {
+      return window.SOAL_CONFIG.GAS_API_URL.trim();
     }
   }
   const localGas = localStorage.getItem("portal_soal_gas_url");
   if (localGas && localGas.startsWith('http')) {
     return localGas.trim();
   }
-  return "";
+  return "https://script.google.com/macros/s/AKfycbx5znz66Ye57dVVgoqiD5_QUlhbr8ap7ve81iJqeFNjLaVVRaTwpUzDMipXfE5bQbSSMQ/exec";
 }
 
-function initApiKey() {
-  const savedKey = localStorage.getItem("portal_gemini_api_key") || "";
-  const currentGasUrl = getGasUrl();
-  const apiKeyStatusText = document.getElementById("apiKeyStatusText");
-  const apiKeyBanner = document.getElementById("apiKeyBanner");
-  const modalApiKeyInput = document.getElementById("modalApiKeyInput");
-  const modalGasUrlInput = document.getElementById("modalGasUrlInput");
-  const modal = document.getElementById("apiKeyModal");
-  const btnTestGasPing = document.getElementById("btnTestGasPing");
-  const gasPingResult = document.getElementById("gasPingResult");
+// MODAL TES KONEKSI & DIAGNOSTIK AI
+function initConnectionModal() {
+  const modal = document.getElementById("connectionModal");
+  const btnOpen = document.getElementById("btnOpenConnectionModal");
+  const btnClose = document.getElementById("closeConnectionModalBtn");
+  const btnCloseBottom = document.getElementById("btnCloseDiagModal");
+  const btnPing = document.getElementById("btnRunDiagnosticPing");
+  const diagResult = document.getElementById("diagPingResult");
+  const diagEndpointText = document.getElementById("diagEndpointText");
+  const connStatusText = document.getElementById("connectionStatusText");
 
-  if (modalGasUrlInput) {
-    modalGasUrlInput.value = currentGasUrl;
+  const gasUrl = getGasUrl();
+  if (diagEndpointText) {
+    diagEndpointText.textContent = gasUrl ? `Tersambung ke ${gasUrl.slice(0, 48)}...` : "URL GAS belum terpasang";
   }
 
-  const updateStatusBadge = () => {
-    const key = localStorage.getItem("portal_gemini_api_key") || "";
-    const gas = getGasUrl();
-    if (key) {
-      apiKeyStatusText.textContent = "API Key Aktif (Direct)";
-      apiKeyStatusText.className = "text-xs font-semibold text-emerald-400";
-      apiKeyBanner.classList.add("hidden");
-    } else if (gas) {
-      apiKeyStatusText.textContent = "Backend GAS Aktif (Cloud)";
-      apiKeyStatusText.className = "text-xs font-semibold text-indigo-400";
-      apiKeyBanner.classList.add("hidden");
-    } else {
-      apiKeyStatusText.textContent = "Set API / Backend";
-      apiKeyStatusText.className = "text-xs font-semibold text-amber-400";
-      apiKeyBanner.classList.remove("hidden");
-    }
+  const openModal = () => {
+    modal.classList.remove("hidden");
+    runPingTest();
   };
-
-  updateStatusBadge();
-
-  if (savedKey) {
-    modalApiKeyInput.value = savedKey;
-  }
-
-  const openModal = () => modal.classList.remove("hidden");
   const closeModal = () => modal.classList.add("hidden");
 
-  document.getElementById("btnOpenApiKeyModal").addEventListener("click", openModal);
-  document.getElementById("btnBannerSetKey").addEventListener("click", openModal);
-  document.getElementById("closeApiKeyModalBtn").addEventListener("click", closeModal);
-  document.getElementById("cancelApiKeyBtn").addEventListener("click", closeModal);
+  if (btnOpen) btnOpen.addEventListener("click", openModal);
+  if (btnClose) btnClose.addEventListener("click", closeModal);
+  if (btnCloseBottom) btnCloseBottom.addEventListener("click", closeModal);
 
-  // Tes Ping Backend GAS
-  if (btnTestGasPing) {
-    btnTestGasPing.addEventListener("click", async () => {
-      const targetUrl = modalGasUrlInput.value.trim() || getGasUrl();
-      if (!targetUrl || !targetUrl.startsWith("http")) {
-        gasPingResult.className = "text-[11px] font-medium text-amber-400 block";
-        gasPingResult.textContent = "⚠️ Masukkan URL Web App GAS yang valid (berakhiran /exec)!";
-        return;
-      }
+  async function runPingTest() {
+    const url = getGasUrl();
+    if (!url) {
+      if (diagResult) diagResult.innerHTML = `<span class="text-rose-400">❌ URL Backend GAS belum terpasang di config.js!</span>`;
+      return;
+    }
 
-      btnTestGasPing.disabled = true;
-      btnTestGasPing.textContent = "Menguji...";
-      gasPingResult.className = "text-[11px] font-medium text-zinc-400 block";
-      gasPingResult.textContent = "Menghubungi server GAS...";
+    if (btnPing) {
+      btnPing.disabled = true;
+      btnPing.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Menguji...</span>`;
+      if (window.lucide) lucide.createIcons();
+    }
 
-      const tStart = performance.now();
-      try {
-        const pingUrl = targetUrl + (targetUrl.includes("?") ? "&" : "?") + "action=ping&_t=" + Date.now();
-        const res = await fetch(pingUrl, { method: "GET", mode: "cors" });
-        const latency = Math.round(performance.now() - tStart);
-        if (res.ok) {
-          const json = await res.json();
-          gasPingResult.className = "text-[11px] font-medium text-emerald-400 block";
-          gasPingResult.textContent = `✅ Terhubung ke Backend GAS! Latensi: ${latency} ms (${json.service || 'Siap'})`;
-        } else {
-          gasPingResult.className = "text-[11px] font-medium text-amber-400 block";
-          gasPingResult.textContent = `⚠️ Server merespon HTTP ${res.status} (${latency} ms). Pastikan deployment diset 'Anyone'.`;
+    if (diagResult) {
+      diagResult.innerHTML = `<span class="text-zinc-400">Menghubungi Google Apps Script &amp; AI Gemini...</span>`;
+    }
+
+    const tStart = performance.now();
+    try {
+      const pingUrl = url + (url.includes("?") ? "&" : "?") + "action=ping&_t=" + Date.now();
+      const res = await fetch(pingUrl, { method: "GET", mode: "cors" });
+      const latency = Math.round(performance.now() - tStart);
+
+      if (res.ok) {
+        const json = await res.json();
+        if (diagResult) {
+          diagResult.innerHTML = `
+            <div class="text-emerald-400 font-semibold">✅ Status: Terhubung Normal (HTTP 200)</div>
+            <div class="text-zinc-200">⏱️ Latensi Server: <b class="text-emerald-300">${latency} ms</b></div>
+            <div class="text-zinc-400 text-[10px] mt-1">Layanan: ${json.service || 'PortalKimia Generator Soal AI Backend'}</div>
+          `;
         }
-      } catch (err) {
-        gasPingResult.className = "text-[11px] font-medium text-rose-400 block";
-        gasPingResult.textContent = `❌ Gagal terhubung: ${err.message}. Pastikan izin Web App adalah 'Anyone'.`;
-      } finally {
-        btnTestGasPing.disabled = false;
-        btnTestGasPing.textContent = "Tes Ping";
+        if (connStatusText) {
+          connStatusText.textContent = `Online (${latency} ms)`;
+        }
+      } else {
+        if (diagResult) {
+          diagResult.innerHTML = `<span class="text-amber-400">⚠️ Respon server: HTTP ${res.status} (${latency} ms)</span>`;
+        }
       }
-    });
+    } catch (err) {
+      if (diagResult) {
+        diagResult.innerHTML = `<span class="text-rose-400">❌ Gagal terhubung: ${err.message}</span>`;
+      }
+    } finally {
+      if (btnPing) {
+        btnPing.disabled = false;
+        btnPing.innerHTML = `<i data-lucide="zap" class="w-3.5 h-3.5"></i><span>Uji Lagi</span>`;
+        if (window.lucide) lucide.createIcons();
+      }
+    }
   }
 
-  document.getElementById("btnSaveApiKey").addEventListener("click", () => {
-    const keyVal = modalApiKeyInput.value.trim();
-    const gasVal = modalGasUrlInput ? modalGasUrlInput.value.trim() : "";
+  if (btnPing) {
+    btnPing.addEventListener("click", runPingTest);
+  }
 
-    if (keyVal) {
-      localStorage.setItem("portal_gemini_api_key", keyVal);
-    } else {
-      localStorage.removeItem("portal_gemini_api_key");
+  // Cek latensi otomatis di awal
+  setTimeout(() => {
+    const url = getGasUrl();
+    if (url) {
+      const t0 = performance.now();
+      fetch(url + (url.includes("?") ? "&" : "?") + "action=ping&_t=" + Date.now(), { method: "GET", mode: "cors" })
+        .then(r => r.json())
+        .then(() => {
+          const lat = Math.round(performance.now() - t0);
+          if (connStatusText) connStatusText.textContent = `AI Aktif (${lat} ms)`;
+        })
+        .catch(() => {
+          if (connStatusText) connStatusText.textContent = "AI Siap";
+        });
     }
-
-    if (gasVal) {
-      localStorage.setItem("portal_soal_gas_url", gasVal);
-      if (window.SOAL_CONFIG) window.SOAL_CONFIG.GAS_API_URL = gasVal;
-    } else {
-      localStorage.removeItem("portal_soal_gas_url");
-    }
-
-    updateStatusBadge();
-    closeModal();
-    alert("✅ Konfigurasi tersimpan!");
-  });
+  }, 800);
 }
 
 // FORM LISTENERS
@@ -409,11 +402,10 @@ function sanitizeQuizPackage(pkg) {
 
 // GENERATE QUIZ DENGAN FITUR DINAMIS
 async function generateQuiz() {
-  const apiKey = localStorage.getItem("portal_gemini_api_key");
   const gasUrl = getGasUrl();
-  if (!apiKey && !gasUrl) {
-    document.getElementById("apiKeyModal").classList.remove("hidden");
-    alert("Silakan masukkan Gemini API Key atau URL Backend Google Apps Script terlebih dahulu.");
+  const apiKey = localStorage.getItem("portal_gemini_api_key");
+  if (!gasUrl && !apiKey) {
+    alert("⚠️ Backend Google Apps Script belum terhubung di config.js!");
     return;
   }
 
@@ -602,7 +594,7 @@ Pastikan tidak ada format $persen$ rusak. Tulis persen biasa (50,0%). Seluruh so
         schema: quizJsonSchema
       };
 
-      const response = await fetch(gasUrl, {
+      let response = await fetch(gasUrl, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(gasPayload)
@@ -612,7 +604,20 @@ Pastikan tidak ada format $persen$ rusak. Tulis persen biasa (50,0%). Seluruh so
         throw new Error(`HTTP error dari Backend GAS: ${response.status}`);
       }
 
-      const gasRes = await response.json();
+      let gasRes = await response.json();
+
+      // Jika model 3.7 mengalami 503 (high demand sementara), otomatis alihkan ke 3.6 Flash
+      if (gasRes.status === "error" && gasRes.code === 503 && model === "gemini-3.7-flash") {
+        console.warn("Gemini 3.7 Flash sibuk (503). Mengalihkan otomatis ke Gemini 3.6 Flash...");
+        gasPayload.model = "gemini-3.6-flash";
+        response = await fetch(gasUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(gasPayload)
+        });
+        gasRes = await response.json();
+      }
+
       if (gasRes.status === "error") {
         throw new Error(gasRes.message || "Gagal diproses di Backend GAS");
       }

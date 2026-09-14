@@ -123,11 +123,13 @@
             <span>Gemini 3.7 Flash</span>
           </span>
 
-          <!-- API Key Trigger -->
-          <button id="btnOpenApiKeyModal" type="button" 
-                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 border border-zinc-700/80 text-xs font-semibold transition-all">
-            <i data-lucide="key" class="w-3.5 h-3.5 text-violet-400"></i>
-            <span id="apiKeyStatusText">Set API Key</span>
+          <!-- Tombol Tes Koneksi AI (Status Terpusat Suite) -->
+          <button id="btnOpenConnectionModal" type="button" 
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 border border-emerald-500/40 text-xs font-semibold transition-all shadow-sm group"
+                  title="Periksa koneksi AI Gemini &amp; Backend Cloud">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform"></i>
+            <span id="connectionStatusText">Tes Koneksi AI</span>
           </button>
 
           <!-- User Profile Badge -->
@@ -164,17 +166,6 @@
         Susun naskah soal kimia berstandar Asesmen Nasional (AKM/UTBK), tabel data percobaan, ilustrasi diagram kimia SVG, matriks kisi-kisi resmi, dan paket paralel anti-contek.
       </p>
     </section>
-
-    <!-- Alert API Key Missing -->
-    <div id="apiKeyBanner" class="hidden glass-card border-amber-500/40 bg-amber-500/10 p-4 rounded-xl flex items-center justify-between gap-3 text-amber-200 text-xs sm:text-sm no-print">
-      <div class="flex items-center gap-2">
-        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-400 shrink-0"></i>
-        <span>Gemini API Key belum dimasukkan. Silakan simpan API Key Anda agar generator AI dapat aktif bekerja.</span>
-      </div>
-      <button id="btnBannerSetKey" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-lg text-xs transition-colors shrink-0">
-        Masukkan Key
-      </button>
-    </div>
 
     <!-- Generator Config Card -->
     <section class="glass-card p-5 sm:p-6 no-print" id="configCard">
@@ -532,65 +523,80 @@
   </main>
 
   <!-- ========================================================================
-       MODAL: PENGATURAN API KEY
+       MODAL: DIAGNOSTIK & TES KONEKSI AI
        ======================================================================== -->
-  <div id="apiKeyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm hidden no-print">
-    <div class="relative w-full max-w-md rounded-2xl glass-card border border-zinc-700/80 shadow-2xl p-6">
+  <div id="connectionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm hidden no-print">
+    <div class="relative w-full max-w-lg rounded-2xl glass-card border border-zinc-700/80 shadow-2xl p-6">
+      
+      <!-- Modal Header -->
       <div class="flex items-center justify-between pb-3.5 border-b border-zinc-800">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center">
-            <i data-lucide="key" class="w-4 h-4"></i>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="activity" class="w-5 h-5"></i>
           </div>
           <div>
-            <h4 class="text-sm font-bold text-white">Google Gemini API Key</h4>
-            <p class="text-[11px] text-zinc-400">Tersimpan aman di peramban lokal perangkat Anda.</p>
+            <h4 class="text-sm font-bold text-white">Status Koneksi AI &amp; Cloud Backend</h4>
+            <p class="text-[11px] text-zinc-400">PortalKimia Suite • Multi-Device Terhubung</p>
           </div>
         </div>
-        <button id="closeApiKeyModalBtn" class="text-zinc-400 hover:text-white p-1 rounded-lg">
+        <button id="closeConnectionModalBtn" class="text-zinc-400 hover:text-white p-1 rounded-lg">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <div class="mt-4 space-y-4">
-        <!-- Opsi 1: Direct Gemini API Key -->
-        <div class="space-y-1.5">
-          <div class="flex items-center justify-between">
-            <label class="block text-xs font-semibold text-zinc-300">Gemini API Key (Mode Direct):</label>
-            <span class="text-[10px] text-emerald-400 font-medium">Cepat &amp; Mandiri</span>
+      <!-- Diagnostic Info Grid -->
+      <div class="mt-4 space-y-3.5">
+        <div class="p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <div>
+              <span class="text-xs font-bold text-zinc-200 block">AI Gemini &amp; Backend GAS</span>
+              <span class="text-[11px] text-zinc-400 block" id="diagEndpointText">Tersambung ke Google Apps Script (SOAL_API)</span>
+            </div>
           </div>
-          <input type="password" id="modalApiKeyInput" placeholder="AIzaSy..."
-                 class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
-          <p class="text-[11px] text-zinc-400">
-            Dapatkan gratis di <a href="https://aistudio.google.com/" target="_blank" class="text-violet-400 hover:underline">Google AI Studio</a>.
-          </p>
+          <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">
+            SIAP DIGUNAKAN
+          </span>
         </div>
 
-        <!-- Opsi 2: Backend Google Apps Script (SOAL_API) -->
-        <div class="space-y-1.5 pt-3 border-t border-zinc-800">
-          <div class="flex items-center justify-between">
-            <label class="block text-xs font-semibold text-zinc-300">URL Backend GAS (SOAL_API):</label>
-            <span class="text-[10px] text-indigo-400 font-medium">Cloud Multi-Device</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <div class="p-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
+            <span class="text-[10px] text-zinc-400 block">Model AI:</span>
+            <span class="font-bold text-indigo-300">Gemini 3.7 &amp; 3.6 Flash</span>
           </div>
-          <div class="flex gap-2">
-            <input type="text" id="modalGasUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
-                   class="flex-grow px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none font-mono">
-            <button id="btnTestGasPing" type="button" class="px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold shrink-0 border border-zinc-700 transition-colors">
-              Tes Ping
+          <div class="p-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
+            <span class="text-[10px] text-zinc-400 block">Kunci API Gemini:</span>
+            <span class="font-bold text-emerald-300">Tersimpan di Code.gs</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
+            <span class="text-[10px] text-zinc-400 block">Google Spreadsheet Bank Soal:</span>
+            <span class="font-bold text-zinc-200">Bank_Soal_Kimia_PortalKimia</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
+            <span class="text-[10px] text-zinc-400 block">Prompt Custom Sekolah:</span>
+            <span class="font-bold text-violet-300">SMA Progresif Bumi Shalawat</span>
+          </div>
+        </div>
+
+        <!-- Ping Live Test Box -->
+        <div class="p-3.5 rounded-xl bg-violet-950/20 border border-violet-500/30 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-violet-200">Uji Kecepatan Respon (Ping):</span>
+            <button id="btnRunDiagnosticPing" type="button" 
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all shadow-sm">
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+              <span>Uji Sekarang</span>
             </button>
           </div>
-          <p class="text-[11px] text-zinc-400">
-            Tersinkron otomatis via <code class="text-violet-300">config.js</code> Suite. Memungkinkan pembuatan soal tanpa input API Key di HP/sekolah serta penyimpanan Bank Soal ke Google Sheets.
-          </p>
-          <div id="gasPingResult" class="text-[11px] font-medium hidden"></div>
+          <div id="diagPingResult" class="text-[11px] font-medium text-emerald-400 bg-zinc-950/70 p-2.5 rounded-lg border border-zinc-800 font-mono">
+            Klik tombol "Uji Sekarang" untuk mengukur latensi respon ke AI Gemini.
+          </div>
         </div>
       </div>
 
       <div class="flex justify-end gap-2 mt-5 pt-3 border-t border-zinc-800">
-        <button id="cancelApiKeyBtn" type="button" class="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold">
-          Batal
-        </button>
-        <button id="btnSaveApiKey" type="button" class="px-4 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-md shadow-violet-900/40">
-          Simpan Konfigurasi
+        <button id="btnCloseDiagModal" type="button" class="px-4 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold">
+          Tutup
         </button>
       </div>
     </div>
