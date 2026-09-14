@@ -337,8 +337,22 @@ body {
     display: none !important;
   }
 
+  main {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #resultsSection {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   .print-only, #printExamSheet {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .glass-card, .question-item, .kisi-kisi-card {

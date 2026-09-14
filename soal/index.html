@@ -292,6 +292,8 @@
               <option value="5" selected>5 Butir Soal (Direkomendasikan)</option>
               <option value="10">10 Butir Soal</option>
               <option value="15">15 Butir Soal</option>
+              <option value="20">20 Butir Soal (Maksimal)</option>
+              <option value="25">25 Butir Soal (Bank Soal Besar)</option>
             </select>
           </div>
 
@@ -313,32 +315,41 @@
             <span>Fitur Tambahan Asesmen (Centang untuk Mengaktifkan):</span>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
             
             <!-- Checkbox 1: Kisi-Kisi & Kartu Soal -->
-            <label class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors">
+            <label class="flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors border border-zinc-800 bg-zinc-900/40">
               <input type="checkbox" id="chkIncludeKisiKisi" class="mt-0.5 w-4 h-4 rounded text-violet-600 focus:ring-violet-500 bg-zinc-800 border-zinc-700">
               <div>
-                <span class="text-xs font-bold text-zinc-200 block">📋 Kisi-Kisi &amp; Kartu Soal</span>
-                <span class="text-[11px] text-zinc-400 block leading-tight">Lampirkan matriks CP/TP, level kognitif Bloom (C2-C5), dan skor resmi.</span>
+                <span class="text-xs font-bold text-zinc-200 block">📋 Kisi-Kisi Soal</span>
+                <span class="text-[11px] text-zinc-400 block leading-tight">Lampirkan matriks CP/TP, level kognitif Bloom, dan skor resmi.</span>
               </div>
             </label>
 
             <!-- Checkbox 2: Paket Paralel Anti-Contek (Paket A & B) -->
-            <label class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors">
+            <label class="flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors border border-zinc-800 bg-zinc-900/40">
               <input type="checkbox" id="chkIncludeParallel" class="mt-0.5 w-4 h-4 rounded text-violet-600 focus:ring-violet-500 bg-zinc-800 border-zinc-700">
               <div>
-                <span class="text-xs font-bold text-zinc-200 block">🔀 Paket Paralel (Paket A &amp; B)</span>
-                <span class="text-[11px] text-zinc-400 block leading-tight">Buat 2 paket ujian paralel setara untuk mengantisipasi contek di kelas.</span>
+                <span class="text-xs font-bold text-zinc-200 block">🔀 Paket Paralel (A &amp; B)</span>
+                <span class="text-[11px] text-zinc-400 block leading-tight">Buat 2 paket paralel setara anti-contek di kelas.</span>
               </div>
             </label>
 
             <!-- Checkbox 3: Tabel Eksperimen & Ilustrasi SVG -->
-            <label class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors">
+            <label class="flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors border border-zinc-800 bg-zinc-900/40">
               <input type="checkbox" id="chkIncludeVisuals" checked class="mt-0.5 w-4 h-4 rounded text-violet-600 focus:ring-violet-500 bg-zinc-800 border-zinc-700">
               <div>
                 <span class="text-xs font-bold text-zinc-200 block">🧪 Tabel &amp; Diagram SVG</span>
-                <span class="text-[11px] text-zinc-400 block leading-tight">Sertakan tabel data percobaan dan ilustrasi kimia vektor (Sel Volta, Hess, Titrasi).</span>
+                <span class="text-[11px] text-zinc-400 block leading-tight">Sertakan tabel data percobaan &amp; diagram vektor jika relevan.</span>
+              </div>
+            </label>
+
+            <!-- Checkbox 4: Kunci Jawaban & Pembahasan (Centang jika diperlukan) -->
+            <label class="flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors border border-violet-500/30 bg-violet-950/20">
+              <input type="checkbox" id="chkIncludeSolutions" class="mt-0.5 w-4 h-4 rounded text-violet-600 focus:ring-violet-500 bg-zinc-800 border-zinc-700">
+              <div>
+                <span class="text-xs font-bold text-violet-200 block">💡 Kunci &amp; Pembahasan</span>
+                <span class="text-[11px] text-zinc-400 block leading-tight">Centang jika butuh uraian solusi. Jika tidak, AI fokus 100% menghasilkan butir soal terbaik.</span>
               </div>
             </label>
 
