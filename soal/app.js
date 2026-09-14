@@ -27,10 +27,12 @@ PEDOMAN UTAMA:
    - DILARANG menggunakan tanda dollar ($...$) untuk persentase (%), angka biasa, atau satuan umum.
    - Tuliskan persentase secara langsung dalam teks biasa: tulis '50,0%' atau '25%' (JANGAN menulis '$50{,}0\\%$' atau '$50{,}0\\%' atau '$50%$').
    - Tuliskan angka desimal dan satuan biasa: '0,5 mol', '100 mL', '25 °C', '1 atm', '5,4 gram'.
-   - Tanda dollar inline ($...$) HANYA digunakan untuk:
-     a. Rumus kimia senyawa/ion: $\\text{H}_2\\text{SO}_4$, $\\text{Al}^{3+}$, $\\text{CH}_3\\text{COOH}$, $\\text{Ca(OH)}_2$
-     b. Persamaan reaksi kimia: $2\\text{H}_2 + \\text{O}_2 \\rightarrow 2\\text{H}_2\\text{O}$
+   - Tanda dollar inline ($...$) WAJIB DIGUNAKAN untuk SEMUA rumus kimia, ion, dan reaksi:
+     a. Rumus kimia senyawa/ion: $\\text{H}_2\\text{SO}_4$, $\\text{Al}^{3+}$, $\\text{CH}_3\\text{COOH}$, $\\text{Ca(OH)}_2$, $\\text{KOH}$, $\\text{O}_2$, $\\text{C}_x\\text{H}_{2x+2}$, $\\text{C}_2\\text{H}_6$, $\\text{C}_y\\text{H}_{2y}$
+     b. Persamaan reaksi kimia: $2\\text{H}_2 + \\text{O}_2 \\rightarrow 2\\text{H}_2\\text{O}$, $\\text{C}_x\\text{H}_{2x+2} + \\frac{3x+1}{2}\\text{O}_2 \\rightarrow x\\text{CO}_2 + (x+1)\\text{H}_2\\text{O}$
      c. Besaran termokimia & kesetimbangan: $\\Delta H = -285{,}8\\text{ kJ/mol}$, $K_a = 10^{-5}$, $E^\\circ = +1{,}10\\text{ V}$, $\\text{pH} = 3 - \\log 2$
+   - ATURAN KUNCI JAWABAN & PEMBAHASAN: Wajib juga menyertakan tanda dollar ($...$) pada rumus kimia, persamaan reaksi, dan variabel perhitungan.
+   - PERINGATAN KERAS: JANGAN PERNAH menulis perintah LaTeX seperti \\text{...}, \\rightarrow, \\rightleftharpoons, atau \\frac{...}{...} tanpa diapit tanda dollar $! Penulisan bare LaTeX tanpa tanda dollar inline dilarang keras.
 
 3. FORMAT TABEL DATA & ILUSTRASI KIMIA SVG (PROPORSIONAL & KONTEKSTUAL):
    - Gunakan tabel data eksperimen atau diagram vektor SVG HANYA untuk butir soal yang secara alamiah membutuhkan data empiris atau sajian visual (misal: Laju Reaksi, Sel Volta/Elektrolisis, Diagram Tingkat Energi Hess, Buret Titrasi).
@@ -346,33 +348,40 @@ function syncSavedQuestions() {
 function formatChemistryForWordHtml(text) {
   if (!text) return "";
 
-  let s = text;
+  // Pastikan format LaTeX sudah dinormalisasi dan di-repair terlebih dahulu
+  let s = formatChemistryText(text);
 
   // 1. Konversi tabel Markdown menjadi tabel native HTML Word
   s = convertMarkdownTableToWordHtml(s);
 
-  // 2. Hapus \text{...}
-  s = s.replace(/\\text\{([^{}]+)\}/g, "$1");
+  // 2. Normalisasi pecahan \frac{a}{b} -> (a)/b untuk Word
+  s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "($1)/$2");
 
-  // 3. Subscripts: _{...} atau _angka/huruf
+  // 3. Hapus \text{...} berulang sampai bersih tuntas
+  while (/\\text\{/.test(s)) {
+    s = s.replace(/\\text\{([^{}]+)\}/g, "$1");
+  }
+
+  // 4. Subscripts: _{...} atau _angka/huruf
   s = s.replace(/_\{([^{}]+)\}/g, "<sub>$1</sub>");
   s = s.replace(/_([0-9a-zA-Z\+\-]+)/g, "<sub>$1</sub>");
 
-  // 4. Superscripts & Derajat Celsius
+  // 5. Superscripts & Derajat Celsius
   s = s.replace(/\^\\circ/g, "&deg;");
   s = s.replace(/\\circ/g, "&deg;");
   s = s.replace(/\^\{([^{}]+)\}/g, "<sup>$1</sup>");
   s = s.replace(/\^([0-9a-zA-Z\+\-]+)/g, "<sup>$1</sup>");
 
-  // 5. Panah dan Kesetimbangan Kimia
+  // 6. Panah dan Kesetimbangan Kimia
   s = s.replace(/\\rightleftharpoons/g, "&#8652;"); // ⇌
   s = s.replace(/\\longleftrightarrow/g, "&#8652;");
   s = s.replace(/\\leftrightarrow/g, "&harr;");
   s = s.replace(/\\rightarrow/g, "&rarr;"); // →
-  s = s.replace(/\\to/g, "&rarr;");
+  s = s.replace(/\\to\b/g, "&rarr;");
   s = s.replace(/\\leftarrow/g, "&larr;");
 
-  // 6. Simbol Termodinamika & Yunani
+  // 7. Simbol Termodinamika & Yunani
+  s = s.replace(/\\Delta\s*H/g, "&Delta;H");
   s = s.replace(/\\Delta/g, "&Delta;"); // Δ
   s = s.replace(/\\alpha/g, "&alpha;");
   s = s.replace(/\\beta/g, "&beta;");
@@ -383,11 +392,11 @@ function formatChemistryForWordHtml(text) {
   s = s.replace(/\\dots/g, "...");
   s = s.replace(/\\ldots/g, "...");
 
-  // 7. Bersihkan koma dan persen LaTeX
+  // 8. Bersihkan koma dan persen LaTeX
   s = s.replace(/\{,\}/g, ",");
   s = s.replace(/\\%/g, "%");
 
-  // 8. Hapus delimiter math $
+  // 9. Hapus delimiter math $
   s = s.replace(/\$\$/g, "");
   s = s.replace(/\$/g, "");
 
@@ -479,7 +488,122 @@ function formatChemistryText(text) {
   // 6. Bersihkan angka polos dalam dollar yang berdiri sendiri: $5$ -> 5, $0,2$ -> 0,2
   cleaned = cleaned.replace(/\$\s*([0-9]+(?:,|\.)?[0-9]*)\s*\$/g, "$1");
 
+  // 7. Auto-Repair & Normalisasi LaTeX (Memastikan setiap rumus, ion, & reaksi terbungkus KaTeX $...$)
+  cleaned = repairAndNormalizeLatex(cleaned);
+
   return cleaned;
+}
+
+/**
+ * AUTO-REPAIR & NORMALISASI NOTASI LATEX & KIMIA
+ * Mengatasi masalah model (termasuk saat Gemini 3.6 fallback) yang memunculkan bare LaTeX (\text{}, \rightarrow, dsb.)
+ * tanpa tanda dollar, formula berkurung (\text{...}), atau dangling/unbalanced dollar.
+ */
+function repairAndNormalizeLatex(text) {
+  if (!text || typeof text !== "string") return "";
+
+  let s = text;
+
+  // 1. Perbaiki dangling single dollar pada formula kimia SEBELUM proteksi math
+  // Kasus a: "volume gas \text{CO}_2$ dan" -> berawalan \text{ diakhiri $ tanpa pembuka $
+  s = s.replace(/(^|[\s\(])(\\text\{[^{}]+\}(?:_[0-9a-zA-Z\{\}\+\-]+|\^[0-9a-zA-Z\{\}\+\-]+)*)\$/g, (m, p1, p2) => {
+    return `${p1}$${p2}$`;
+  });
+  // Kasus b: "volume gas $\text{CO}_2 dan" -> pembuka $ tanpa penutup $ sebelum spasi/tanda baca
+  s = s.replace(/(^|[\s\(])\$(\\text\{[^{}]+\}(?:_[0-9a-zA-Z\{\}\+\-]+|\^[0-9a-zA-Z\{\}\+\-]+)*)(?=[\s\.,;:!?\)]|$)/g, (m, p1, p2) => {
+    return `${p1}$${p2}$`;
+  });
+
+  // 2. Normalisasi delimiter baku LaTeX \(...\) -> $...$ dan \[...\] -> $$...$$
+  s = s.replace(/\\\(([\s\S]*?)\\\)/g, (m, p1) => `$${p1}$`);
+  s = s.replace(/\\\[([\s\S]*?)\\\]/g, (m, p1) => `$$${p1}$$`);
+
+  // 3. Formula dalam kurung tanpa tanda dollar: (\text{C}_x\text{H}_{2x+2}) -> ($\text{C}_x\text{H}_{2x+2}$)
+  s = s.replace(/\(([^()$\r\n]*?\\text\{[^()$\r\n]*?)\)/g, (m, p1) => `($${p1}$)`);
+
+  // 4. Bungkus baris persamaan reaksi kimia utuh tanpa dollar (mengandung panah dan notasi kimia/fraksi)
+  const lines = s.split(/\r?\n/);
+  const processedLines = lines.map(line => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.includes("$")) return line;
+
+    const hasArrow = /(\\rightarrow|\\rightleftharpoons|\\leftrightarrow|\\to)/.test(trimmed);
+    const hasChemOrMath = /(\\text|\\frac|_|\^)/.test(trimmed);
+
+    if (hasArrow && hasChemOrMath) {
+      // Jika baris diawali nomor poin seperti "1. " atau "- "
+      const listMatch = line.match(/^(\s*(?:[0-9]+\.|\-|\*)\s*)(.*)$/);
+      if (listMatch) {
+        const prefix = listMatch[1];
+        const content = listMatch[2].trim();
+        const colonIdx = content.indexOf(":");
+        const slashIdx = content.indexOf("\\");
+        if (colonIdx !== -1 && (slashIdx === -1 || colonIdx < slashIdx)) {
+          const intro = content.substring(0, colonIdx + 1);
+          const mathPart = content.substring(colonIdx + 1).trim();
+          return `${prefix}${intro} $$${mathPart}$$`;
+        } else {
+          return `${prefix}$$${content}$$`;
+        }
+      } else {
+        return `$$${trimmed}$$`;
+      }
+    }
+    return line;
+  });
+  s = processedLines.join("\n");
+
+  // 5. Proteksi seluruh blok matematika valid ($$...$$ dan $...$) dengan placeholder unik
+  const mathBlocks = [];
+  const placeholderPrefix = "___CHEM_MATH_BLOCK_";
+
+  // Proteksi display math $$...$$
+  s = s.replace(/\$\$[\s\S]*?\$\$/g, (match) => {
+    const idx = mathBlocks.length;
+    mathBlocks.push(match);
+    return `${placeholderPrefix}${idx}___`;
+  });
+
+  // Proteksi inline math $...$ (tidak melompati baris baru)
+  s = s.replace(/\$[^\$\r\n]+?\$/g, (match) => {
+    const idx = mathBlocks.length;
+    mathBlocks.push(match);
+    return `${placeholderPrefix}${idx}___`;
+  });
+
+  // 6. Teks yang tersisa saat ini 100% berada DI LUAR blok matematika KaTeX:
+  // a. Bungkus bare \text{...} beserta subscript/superscript: \text{KOH}, \text{O}_2, dsb.
+  s = s.replace(/((?:\\text\{[^{}]+\}(?:_[0-9a-zA-Z\{\}\+\-]+|\^[0-9a-zA-Z\{\}\+\-]+)*)+)/g, (match) => {
+    const trimmedM = match.trim();
+    if (!trimmedM) return match;
+    return `$${trimmedM}$`;
+  });
+
+  // b. Bungkus pecahan telanjang: \frac{...}{...}
+  s = s.replace(/(\\frac\{[^{}]+\}\{[^{}]+\})/g, (m, p1) => `$${p1}$`);
+
+  // c. Bungkus panah reaksi telanjang: \rightarrow -> $\rightarrow$, \rightleftharpoons -> $\rightleftharpoons$
+  s = s.replace(/\\rightarrow/g, "$\\rightarrow$");
+  s = s.replace(/\\rightleftharpoons/g, "$\\rightleftharpoons$");
+  s = s.replace(/\\leftrightarrow/g, "$\\leftrightarrow$");
+  s = s.replace(/\\to\b/g, "$\\to$");
+
+  // d. Bungkus simbol kimia/termodinamika/matematika: \Delta H, \Delta, \cdot, \pm
+  s = s.replace(/\\Delta\s*H/g, "$\\Delta H$");
+  s = s.replace(/\\Delta\b/g, "$\\Delta$");
+  s = s.replace(/\\cdot/g, "$\\cdot$");
+  s = s.replace(/\\pm/g, "$\\pm$");
+
+  // 7. Bersihkan dollar kosong ($ $) atau sisa ganjil jika ada
+  s = s.replace(/\$\s*\$/g, "");
+
+  // 8. Kembalikan seluruh blok matematika yang telah diproteksi
+  for (let i = 0; i < mathBlocks.length; i++) {
+    const placeholder = `${placeholderPrefix}${i}___`;
+    s = s.replace(placeholder, () => mathBlocks[i]);
+  }
+
+  return s;
 }
 
 /**
@@ -588,6 +712,13 @@ function sanitizeQuizPackage(pkg) {
   sanitizeQuestionList(pkg.daftar_soal);
   if (pkg.daftar_soal_paket_b) {
     sanitizeQuestionList(pkg.daftar_soal_paket_b);
+  }
+
+  if (pkg.kisi_kisi_asesmen && Array.isArray(pkg.kisi_kisi_asesmen)) {
+    pkg.kisi_kisi_asesmen.forEach(k => {
+      if (k.cp_tp) k.cp_tp = formatChemistryText(k.cp_tp);
+      if (k.indikator_soal) k.indikator_soal = formatChemistryText(k.indikator_soal);
+    });
   }
 
   return pkg;
@@ -758,7 +889,7 @@ INSTRUKSI KHUSUS FITUR:
 4. PAKET PARALEL: ${includeParallel ? 'WAJIB susun juga daftar_soal_paket_b sebanyak ' + numQuestions + ' butir soal paralel yang memiliki indikator setara dengan Paket A namun berbeda variabel/angka stoikiometrinya.' : 'Hanya susun Paket A.'}
 5. KISI-KISI ASESMEN: ${includeKisiKisi ? 'WAJIB susun matriks kisi_kisi_asesmen yang memetakan CP/TP, indikator soal, level kognitif Bloom (C2-C5), kunci, dan skor.' : 'Tidak perlu menyusun matriks kisi-kisi.'}
 
-Pastikan tidak ada format $persen$ rusak. Tulis persen biasa (50,0%). Seluruh soal harus berbobot dan terverifikasi akurat!
+6. FORMAT NOTASI RUMUS KIMIA: SETIAP rumus kimia senyawa/ion dan persamaan reaksi kimia (\text{...}, \rightarrow, \frac) WAJIB DIAPIT TANDA DOLLAR INLINE: $...$ (Contoh: $\text{KOH}$, $\text{C}_x\text{H}_{2x+2}$, $\text{O}_2$, $\text{C}_2\text{H}_6$, $2\text{H}_2 + \text{O}_2 \rightarrow 2\text{H}_2\text{O}$). JANGAN PERNAH menulis \text atau \rightarrow tanpa tanda dollar $! Kunci jawaban dan pembahasan juga wajib menggunakan tanda dollar untuk rumus kimia. Tulis persen dan angka desimal secara biasa tanpa dollar (50,0%).
 `;
 
   try {
@@ -958,7 +1089,9 @@ function renderResults(pkg) {
     renderMathInElement(resultsSection, {
       delimiters: [
         { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false }
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
       ],
       throwOnError: false
     });
@@ -982,14 +1115,19 @@ function renderActiveQuestionsList() {
   renderStudentQuestions(activeQuestions);
 
   if (window.renderMathInElement) {
-    renderMathInElement(document.getElementById("teacherQuestionsList"), {
-      delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }],
+    const mathOpts = {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
       throwOnError: false
-    });
-    renderMathInElement(document.getElementById("studentQuestionsList"), {
-      delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }],
-      throwOnError: false
-    });
+    };
+    const tElem = document.getElementById("teacherQuestionsList");
+    const sElem = document.getElementById("studentQuestionsList");
+    if (tElem) renderMathInElement(tElem, mathOpts);
+    if (sElem) renderMathInElement(sElem, mathOpts);
   }
 }
 
@@ -1242,6 +1380,20 @@ function renderKisiKisiTab(kisiList) {
       </tbody>
     </table>
   `;
+
+  if (window.renderMathInElement) {
+    const mathOpts = {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+      throwOnError: false
+    };
+    renderMathInElement(container, mathOpts);
+    if (printContainer) renderMathInElement(printContainer, mathOpts);
+  }
 }
 
 // PRINT / PDF LAYOUT RENDERER (STANDAR A4 & KATEX RESMI)
@@ -1324,7 +1476,9 @@ function renderPrintLayout(pkg) {
     renderMathInElement(printSheet, {
       delimiters: [
         { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false }
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
       ],
       throwOnError: false
     });
@@ -1335,18 +1489,39 @@ function renderPrintLayout(pkg) {
 function cleanLatex(text) {
   if (!text) return "";
   let s = formatChemistryText(text);
+
+  // Bersihkan pecahan: \frac{a}{b} -> (a)/b
+  s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "($1)/$2");
+
+  // Bersihkan \text{...} berulang sampai tuntas
+  while (/\\text\{/.test(s)) {
+    s = s.replace(/\\text\{([^{}]+)\}/g, "$1");
+  }
+
   return s
-    .replace(/\\text\{([^}]+)\}/g, "$1")
+    .replace(/\$\\rightleftharpoons\$/g, "⇌")
+    .replace(/\\rightleftharpoons/g, "⇌")
+    .replace(/\$\\longleftrightarrow\$/g, "⇌")
+    .replace(/\\longleftrightarrow/g, "⇌")
     .replace(/\$\\rightarrow\$/g, "→")
     .replace(/\\rightarrow/g, "→")
+    .replace(/\\to\b/g, "→")
     .replace(/\$\\leftrightarrow\$/g, "⇄")
     .replace(/\\leftrightarrow/g, "⇄")
+    .replace(/\$\\Delta\s*H\$/g, "ΔH")
+    .replace(/\\Delta\s*H/g, "ΔH")
     .replace(/\$\\Delta\$/g, "Δ")
     .replace(/\\Delta/g, "Δ")
+    .replace(/\$\\cdot\$/g, "·")
+    .replace(/\\cdot/g, "·")
+    .replace(/\$\\pm\$/g, "±")
+    .replace(/\\pm/g, "±")
+    .replace(/\^\\circ/g, "°")
     .replace(/\$\\circ\$/g, "°")
     .replace(/\\circ/g, "°")
     .replace(/\{,\}/g, ",")
     .replace(/\\%/g, "%")
+    .replace(/\$\$/g, "")
     .replace(/\$/g, "");
 }
 
