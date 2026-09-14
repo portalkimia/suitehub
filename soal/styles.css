@@ -1,0 +1,344 @@
+/* ==========================================================================
+   PORTALKIMIA SUITE — GENERATOR SOAL KIMIA AI
+   Design System: Obsidian Precision (#09090b) | Primary: Violet (#a78bfa)
+   Typography: Geist & JetBrains Mono | Icons: Lucide Icons
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary: #a78bfa;          /* Soft Violet */
+  --primary-dark: #7c3aed;     /* Deep Violet */
+  --tertiary: #34d399;         /* Emerald Green */
+  --accent-amber: #f59e0b;     /* Amber */
+  --accent-rose: #f43f5e;      /* Rose */
+  --accent-cyan: #38bdf8;      /* Cyan */
+
+  /* Dark Theme Tokens */
+  --bg-color: #09090b;
+  --surface-card: #121215;
+  --surface-high: #18181b;
+  --surface-highest: #1e1e22;
+  --surface-input: #121215;
+  --outline: #27272a;
+  --outline-light: #3f3f46;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* Base Body Styles */
+body {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  letter-spacing: -0.01em;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Subtle Grid Pattern */
+.bg-grid-pattern {
+  background-size: 36px 36px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Header Glass */
+.glass-header {
+  background: rgba(12, 12, 15, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(63, 63, 70, 0.35);
+}
+
+/* Card & Surface Classes */
+.glass-card {
+  background: rgba(18, 18, 21, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(63, 63, 70, 0.4);
+  box-shadow: var(--card-shadow);
+  border-radius: 1rem;
+}
+
+/* Ambient Radial Glows */
+.glow-radial-violet {
+  background: radial-gradient(circle 600px at 50% 10%, rgba(139, 92, 246, 0.12), transparent 70%);
+}
+
+.glow-radial-emerald {
+  background: radial-gradient(circle 450px at 10% 80%, rgba(16, 185, 129, 0.08), transparent 70%);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* Question & Option Items */
+.question-item {
+  background: rgba(24, 24, 27, 0.7);
+  border: 1px solid rgba(63, 63, 70, 0.4);
+  border-radius: 0.875rem;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.question-item:hover {
+  border-color: rgba(167, 139, 250, 0.4);
+}
+
+.option-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.65rem 0.9rem;
+  margin-bottom: 0.45rem;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(63, 63, 70, 0.25);
+  background: rgba(18, 18, 21, 0.6);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.option-row:hover {
+  background: rgba(39, 39, 42, 0.7);
+  border-color: rgba(167, 139, 250, 0.3);
+}
+
+.option-row.correct-answer {
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.option-label {
+  font-weight: 700;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #27272a;
+  color: #fafafa;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+
+.option-row.correct-answer .option-label {
+  background: #34d399;
+  color: #064e3b;
+}
+
+/* Pembahasan Box */
+.pembahasan-box {
+  background: rgba(167, 139, 250, 0.05);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 0.625rem;
+  padding: 1rem 1.25rem;
+  margin-top: 0.85rem;
+}
+
+/* TABEL DATA EKSPERIMEN (THEME OBSIDIAN) */
+.chem-table-container {
+  overflow-x: auto;
+  margin: 0.85rem 0 1.15rem 0;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(63, 63, 70, 0.5);
+  background: rgba(12, 12, 15, 0.85);
+  box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.chem-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.chem-table th {
+  background: rgba(124, 58, 237, 0.18);
+  color: #c4b5fd;
+  font-weight: 700;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+  letter-spacing: 0.02em;
+}
+
+.chem-table td {
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid rgba(63, 63, 70, 0.3);
+  color: #e4e4e7;
+}
+
+.chem-table tr:last-child td {
+  border-bottom: none;
+}
+
+.chem-table tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.chem-table tr:hover td {
+  background: rgba(167, 139, 250, 0.08);
+}
+
+/* ILUSTRASI KIMIA SVG CONTAINER */
+.chem-svg-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 15, 19, 0.9);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 0.875rem;
+  padding: 1rem;
+  margin: 0.85rem auto 1.15rem auto;
+  max-width: 520px;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.chem-svg-wrapper svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chem-svg-caption {
+  font-size: 0.75rem;
+  color: #a1a1aa;
+  margin-top: 0.5rem;
+  font-style: italic;
+  text-align: center;
+}
+
+/* TABEL KISI-KISI ASESMEN RESMI */
+.kisi-kisi-card {
+  background: rgba(18, 18, 21, 0.9);
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+/* Spinner Animation */
+.spinner-portal {
+  width: 42px;
+  height: 42px;
+  border: 3px solid rgba(167, 139, 250, 0.2);
+  border-top-color: #a78bfa;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   PRINT STYLESHEET (CETAK NASKAH UJIAN SEKOLAH)
+   ========================================================================== */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    font-size: 11pt;
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+  .no-print, header, footer, .glow-radial-violet, .glow-radial-emerald, 
+  .bg-grid-pattern, button, #configCard, #apiKeyModal, nav {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .glass-card, .question-item, .kisi-kisi-card {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin-bottom: 12pt !important;
+    box-shadow: none !important;
+  }
+
+  .chem-table-container {
+    background: transparent !important;
+    border: 1px solid #000000 !important;
+    box-shadow: none !important;
+    margin: 8pt 0 !important;
+  }
+
+  .chem-table {
+    color: #000000 !important;
+  }
+
+  .chem-table th {
+    background: #f0f0f0 !important;
+    color: #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+  }
+
+  .chem-table td {
+    border-bottom: 1px solid #cccccc !important;
+    color: #000000 !important;
+  }
+
+  .chem-svg-wrapper {
+    background: transparent !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+    margin: 8pt auto !important;
+  }
+
+  .chem-svg-caption {
+    color: #444444 !important;
+  }
+
+  .option-row {
+    background: transparent !important;
+    border: none !important;
+    padding: 2pt 0 !important;
+    color: #000000 !important;
+  }
+
+  .option-label {
+    background: transparent !important;
+    color: #000000 !important;
+    font-weight: bold;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  .kop-surat {
+    border-bottom: 3px double #000000;
+    padding-bottom: 8pt;
+    margin-bottom: 14pt;
+    text-align: center;
+  }
+}

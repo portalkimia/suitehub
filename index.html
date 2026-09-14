@@ -130,7 +130,17 @@
       <div class="flex items-center space-x-3" data-purpose="brand-logo">
         <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-cyan-400 p-[1px] shadow-lg shadow-purple-900/30">
           <div class="w-full h-full bg-obsidian-900 rounded-[11px] flex items-center justify-center overflow-hidden">
-            <img src="https://lh3.googleusercontent.com/aida/AEtjO1X64Vrp874jLwJgW4s4ZY8fEe0CKX8pIojJBljzm3gT86mYccXqoqEa5q7v9JtYobNHMR2GBTNZIQiDXwR5zVvrXqjx9LOVfUfI995sP1DBDXUWOctSgKEQB5kmK8Fx48KYTvfOlbgqaBKpGedDiv01aKP36VgF8oY9bYwm88jqrEY4J3YSZPMfpnj15UuXAnoDYyJrbda1MQp0A3bGXqqOsyjYHNzS_jSzNGQGFnPWrek1nHXnuGNC3UIC" alt="PortalKimia Logo" class="w-9 h-9 object-contain">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-full h-full object-contain" fill="none" aria-label="Logo PortalKimia">
+              <rect width="100" height="100" rx="22" fill="#18181b"/>
+              <path d="M50 18 L50 36 M38 36 L62 36" stroke="#a78bfa" stroke-width="4" stroke-linecap="round"/>
+              <path d="M42 36 L25 72 C22 78 26 84 33 84 L67 84 C74 84 78 78 75 72 L58 36 Z" stroke="#a78bfa" stroke-width="4" stroke-linejoin="round" fill="none"/>
+              <path d="M30 68 Q50 62 70 68 L67 82 L33 82 Z" fill="#8b5cf6" fill-opacity="0.35"/>
+              <circle cx="45" cy="74" r="3" fill="#c084fc"/>
+              <circle cx="55" cy="66" r="2.5" fill="#e9d5ff"/>
+              <circle cx="50" cy="54" r="2" fill="#a78bfa"/>
+              <circle cx="68" cy="30" r="4" fill="#a78bfa" fill-opacity="0.8"/>
+              <circle cx="32" cy="24" r="3" fill="#c084fc" fill-opacity="0.6"/>
+            </svg>
           </div>
         </div>
         <div>
@@ -359,7 +369,17 @@
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300">
       <!-- Left Info -->
       <div class="flex items-center gap-2">
-        <img src="https://lh3.googleusercontent.com/aida/AEtjO1X64Vrp874jLwJgW4s4ZY8fEe0CKX8pIojJBljzm3gT86mYccXqoqEa5q7v9JtYobNHMR2GBTNZIQiDXwR5zVvrXqjx9LOVfUfI995sP1DBDXUWOctSgKEQB5kmK8Fx48KYTvfOlbgqaBKpGedDiv01aKP36VgF8oY9bYwm88jqrEY4J3YSZPMfpnj15UuXAnoDYyJrbda1MQp0A3bGXqqOsyjYHNzS_jSzNGQGFnPWrek1nHXnuGNC3UIC" alt="PortalKimia Logo" class="w-4 h-4 object-contain rounded-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-4 h-4 object-contain shrink-0" fill="none" aria-label="Logo PortalKimia">
+          <rect width="100" height="100" rx="22" fill="#18181b"/>
+          <path d="M50 18 L50 36 M38 36 L62 36" stroke="#a78bfa" stroke-width="4" stroke-linecap="round"/>
+          <path d="M42 36 L25 72 C22 78 26 84 33 84 L67 84 C74 84 78 78 75 72 L58 36 Z" stroke="#a78bfa" stroke-width="4" stroke-linejoin="round" fill="none"/>
+          <path d="M30 68 Q50 62 70 68 L67 82 L33 82 Z" fill="#8b5cf6" fill-opacity="0.35"/>
+          <circle cx="45" cy="74" r="3" fill="#c084fc"/>
+          <circle cx="55" cy="66" r="2.5" fill="#e9d5ff"/>
+          <circle cx="50" cy="54" r="2" fill="#a78bfa"/>
+          <circle cx="68" cy="30" r="4" fill="#a78bfa" fill-opacity="0.8"/>
+          <circle cx="32" cy="24" r="3" fill="#c084fc" fill-opacity="0.6"/>
+        </svg>
         <span class="font-medium text-slate-300">PortalKimia Suite</span>
         <span class="text-slate-600">•</span>
         <span class="text-slate-400">Ekosistem Pembelajaran Terpadu Kimia</span>
@@ -755,6 +775,18 @@
         theme: "amber",
         icon: "trophy",
         roles: ["siswa", "guru", "admin"]
+      },
+      {
+        id: "branch_soal",
+        title: "Generator Soal Kimia AI",
+        category: "Otomatisasi AI",
+        description: "Susun paket soal kimia terstruktur (Pilihan Ganda & Esai) dengan Gemini 3.7 & 3.6 Flash, notasi KaTeX, pembahasan bertingkat, dan ekspor Word/PDF.",
+        chips: ["Soal HOTS", "KaTeX Kimia", "Ekspor DOCX/PDF"],
+        url: "./soal/",
+        buttonText: "Buka Generator Soal",
+        theme: "indigo",
+        icon: "sparkles",
+        roles: ["guru", "admin"]
       }
     ];
 

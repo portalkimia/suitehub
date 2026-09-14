@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PortalKimia — Generator Soal Kimia AI (Gemini 3.7 &amp; 3.6 Flash)</title>
+
+  <!-- PWA & Mobile Meta Tags -->
+  <meta name="theme-color" content="#09090b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Generator Soal AI">
+  <link rel="icon" type="image/svg+xml" href="portalkimia-logo.svg">
+
+  <!-- Google Fonts: Geist & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            "surface-lowest": "#09090b",
+            "surface-low": "#0f0f12",
+            "surface": "#0c0c0f",
+            "surface-card": "#121215",
+            "surface-high": "#18181b",
+            "surface-highest": "#1e1e22",
+            "surface-bright": "#27272a",
+            "outline-variant": "#27272a",
+            "outline": "#3f3f46",
+            primary: {
+              DEFAULT: "#a78bfa",
+              50: "#f5f3ff",
+              100: "#ede9fe",
+              400: "#a78bfa",
+              500: "#8b5cf6",
+              600: "#7c3aed"
+            },
+            tertiary: {
+              DEFAULT: "#34d399",
+              400: "#34d399",
+              500: "#10b981"
+            }
+          },
+          fontFamily: {
+            sans: ['Geist', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- KaTeX for Chemistry Formulas and Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <!-- SheetJS (XLSX) for Quizizz & Excel Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Custom Design System Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Konfigurasi Terpusat PortalKimia Suite -->
+  <script src="../config.js"></script>
+  <!-- Konfigurasi Lokal Cabang Soal (Multi-Device Ready) -->
+  <script src="config.js"></script>
+</head>
+
+<body class="min-h-screen antialiased flex flex-col bg-grid-pattern selection:bg-violet-500/30 selection:text-violet-200">
+
+  <!-- Ambient Light Effects -->
+  <div class="fixed inset-0 glow-radial-violet pointer-events-none z-0"></div>
+  <div class="fixed inset-0 glow-radial-emerald pointer-events-none z-0"></div>
+
+  <!-- ========================================================================
+       TOP HEADER BAR (PortalKimia Suite Standard)
+       ======================================================================== -->
+  <header class="glass-header sticky top-0 z-30 shadow-md no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Left: Brand Logo, Title & Portal Utama Link -->
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <!-- Tombol Navigasi Kembali ke Portal Utama Suite -->
+          <a href="../" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 rounded-xl bg-violet-600/10 hover:bg-violet-600/20 text-violet-300 border border-violet-500/30 text-xs font-bold transition-all shadow-sm group" title="Kembali ke Beranda PortalKimia Suite">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform"></i>
+            <span class="hidden md:inline">Portal Utama</span>
+          </a>
+
+          <div class="flex items-center gap-2.5 sm:gap-3">
+            <img src="portalkimia-logo.svg" alt="PortalKimia Logo" class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-2xl shadow-md shadow-violet-500/20">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h1 class="text-base sm:text-lg font-black tracking-tight leading-tight">
+                  Portal<span class="text-violet-400">Kimia</span>
+                </h1>
+                <span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[10px] font-black tracking-wider uppercase">
+                  Generator Soal AI
+                </span>
+              </div>
+              <p class="text-[10px] text-zinc-400 font-medium hidden sm:block">Otomatisasi Asesmen &amp; Bank Soal Kimia</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Actions & API Key & Profile -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Active Model Tag -->
+          <span class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold" id="headerModelBadge">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+            <span>Gemini 3.7 Flash</span>
+          </span>
+
+          <!-- API Key Trigger -->
+          <button id="btnOpenApiKeyModal" type="button" 
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 border border-zinc-700/80 text-xs font-semibold transition-all">
+            <i data-lucide="key" class="w-3.5 h-3.5 text-violet-400"></i>
+            <span id="apiKeyStatusText">Set API Key</span>
+          </button>
+
+          <!-- User Profile Badge -->
+          <div class="flex items-center space-x-2 pl-2 border-l border-zinc-800">
+            <div class="w-8 h-8 rounded-full ring-2 ring-violet-500/30 overflow-hidden bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-inner">
+              <span>TV</span>
+            </div>
+            <div class="hidden lg:flex flex-col text-left">
+              <span class="text-xs font-semibold text-zinc-200 leading-tight">Tito Vanzal, S.Pd.</span>
+              <span class="text-[10px] text-violet-400 font-medium leading-tight">Guru Kimia</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN CONTAINER
+       ======================================================================== -->
+  <main class="relative z-10 flex-grow px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto w-full space-y-6">
+
+    <!-- Hero Greeting -->
+    <section class="text-center max-w-3xl mx-auto pt-1 pb-2 no-print">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-900/30 border border-violet-500/30 text-violet-300 text-xs font-medium tracking-wide mb-2.5 shadow-sm">
+        <span>✦</span>
+        <span>MODUL OTOMATISASI ASESMEN NASIONAL &amp; UJIAN SEKOLAH</span>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-1.5 leading-tight">
+        Generator Soal Kimia <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-300">Berbasis AI</span>
+      </h2>
+      <p class="text-xs sm:text-sm text-zinc-400 max-w-2xl mx-auto">
+        Susun naskah soal kimia berstandar Asesmen Nasional (AKM/UTBK), tabel data percobaan, ilustrasi diagram kimia SVG, matriks kisi-kisi resmi, dan paket paralel anti-contek.
+      </p>
+    </section>
+
+    <!-- Alert API Key Missing -->
+    <div id="apiKeyBanner" class="hidden glass-card border-amber-500/40 bg-amber-500/10 p-4 rounded-xl flex items-center justify-between gap-3 text-amber-200 text-xs sm:text-sm no-print">
+      <div class="flex items-center gap-2">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-400 shrink-0"></i>
+        <span>Gemini API Key belum dimasukkan. Silakan simpan API Key Anda agar generator AI dapat aktif bekerja.</span>
+      </div>
+      <button id="btnBannerSetKey" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-lg text-xs transition-colors shrink-0">
+        Masukkan Key
+      </button>
+    </div>
+
+    <!-- Generator Config Card -->
+    <section class="glass-card p-5 sm:p-6 no-print" id="configCard">
+      <div class="flex items-center justify-between pb-4 mb-5 border-b border-zinc-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-violet-500/15 border border-violet-500/30 text-violet-400 flex items-center justify-center">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-white">Parameter Naskah Soal &amp; Asesmen</h3>
+            <p class="text-xs text-zinc-400">Atur kurikulum, model stimulus, format soal, dan fitur khusus asesmen.</p>
+          </div>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+          <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+          <span>AI Multi-Feature Ready</span>
+        </span>
+      </div>
+
+      <form id="quizConfigForm" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          
+          <!-- Pilihan Model Gemini -->
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Model Gemini AI:</label>
+            <select id="modelSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+              <option value="gemini-3.7-flash" selected>Gemini 3.7 Flash (Flagship - Penalaran Tinggi)</option>
+              <option value="gemini-3.6-flash">Gemini 3.6 Flash (Cepat &amp; Efisien)</option>
+            </select>
+          </div>
+
+          <!-- Jenjang Pendidikan -->
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Jenjang / Fase Kurikulum:</label>
+            <select id="gradeSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+              <option value="SMA Kelas 11 (Fase F)" selected>SMA Kelas 11 (Fase F - Kurikulum Merdeka)</option>
+              <option value="SMA Kelas 10 (Fase E)">SMA Kelas 10 (Fase E - Kurikulum Merdeka)</option>
+              <option value="SMA Kelas 12 (Fase F)">SMA Kelas 12 (Fase F - Kurikulum Merdeka)</option>
+              <option value="SMP (Kelas 7-9)">SMP (IPA Kimia Dasar)</option>
+              <option value="UTBK / SNBT">UTBK / SNBT (Penalaran Sains)</option>
+              <option value="Olimpiade Sains (OSN)">Olimpiade Sains Nasional (OSN) Kimia</option>
+            </select>
+          </div>
+
+          <!-- Ragam Tipe Soal (Opsi 4) -->
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Format Tipe Soal:</label>
+            <select id="questionTypeSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+              <option value="Pilihan Ganda Biasa (A-E)" selected>Pilihan Ganda Biasa (5 Opsi: A s.d. E)</option>
+              <option value="Pilihan Ganda Kompleks (Kombinasi Pernyataan)">PG Kompleks (Kombinasi Pernyataan 1, 2, 3, 4 - AKM)</option>
+              <option value="Sebab-Akibat / Asosiasi (UTBK)">Sebab-Akibat / Asosiasi (Pernyataan - Alasan Khas UTBK)</option>
+              <option value="Esai / Uraian Perhitungan">Esai / Uraian Perhitungan Bertingkat</option>
+            </select>
+          </div>
+
+          <!-- Model Stimulus Soal (Opsi 3) -->
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Model Stimulus Soal (Kontekstual):</label>
+            <select id="stimulusSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+              <option value="Kimia Hijau & Isu Lingkungan" selected>🌿 Kimia Hijau &amp; Isu Lingkungan (Baterai EV, Polusi, Efisiensi)</option>
+              <option value="Kontekstual Kehidupan Sehari-hari">🏠 Kontekstual Sehari-hari (Antasida, Korosi, Bahan Rumah Tangga)</option>
+              <option value="Proses Industri Kimia">🏭 Proses Industri Kimia (Amonia Haber-Bosch, Kontak Asam Sulfat)</option>
+              <option value="Prosedur Laboratorium & Praktikum">🧪 Laboratorium &amp; Praktikum (Titrasi, Uji Nyala, Kalorimeter)</option>
+              <option value="Konseptual & Teori Murni">📚 Konseptual &amp; Teori Murni (Prinsip Kimia Standar)</option>
+            </select>
+          </div>
+
+          <!-- Materi Pokok Kimia -->
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Materi Pokok Kimia:</label>
+            <select id="topicSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+              <option value="Stoikiometri & Hukum Dasar Kimia" selected>Stoikiometri &amp; Hukum Dasar Kimia</option>
+              <option value="Larutan Asam-Basa & Indikator pH">Larutan Asam-Basa &amp; Indikator pH</option>
+              <option value="Larutan Penyangga (Buffer)">Larutan Penyangga (Buffer)</option>
+              <option value="Hidrolisis Garam">Hidrolisis Garam</option>
+              <option value="Kelarutan dan Hasil Kali Kelarutan (Ksp)">Kelarutan dan Hasil Kali Kelarutan (Ksp)</option>
+              <option value="Termokimia & Entalpi Reaksi">Termokimia &amp; Entalpi Reaksi</option>
+              <option value="Laju Reaksi & Teori Tumbukan">Laju Reaksi &amp; Teori Tumbukan</option>
+              <option value="Kesetimbangan Kimia & Asas Le Chatelier">Kesetimbangan Kimia &amp; Asas Le Chatelier</option>
+              <option value="Reaksi Redoks & Penyetaraan Reaksi">Reaksi Redoks &amp; Penyetaraan Reaksi</option>
+              <option value="Elektrokimia (Sel Volta & Elektrolisis)">Elektrokimia (Sel Volta &amp; Elektrolisis)</option>
+              <option value="Struktur Atom & Sistem Periodik Unsur">Struktur Atom &amp; Sistem Periodik Unsur</option>
+              <option value="Ikatan Kimia & Geometri Molekul">Ikatan Kimia &amp; Geometri Molekul</option>
+              <option value="Senyawa Hidrokarbon & Minyak Bumi">Senyawa Hidrokarbon &amp; Minyak Bumi</option>
+              <option value="Gugus Fungsi Senyawa Karbon">Gugus Fungsi Senyawa Karbon</option>
+              <option value="Makromolekul & Polimer">Makromolekul &amp; Polimer</option>
+              <option value="Kimia Koloid & Sifat Koloid">Kimia Koloid &amp; Sifat Koloid</option>
+              <option value="Kimia Unsur & Sifat Periodik">Kimia Unsur &amp; Sifat Periodik</option>
+              <option value="Kimia Lingkungan & Kimia Hijau">Kimia Lingkungan &amp; Kimia Hijau</option>
+              <option value="CUSTOM">[Topik Lain / Tulis Sendiri]</option>
+            </select>
+          </div>
+
+          <!-- Input Custom Topic jika dipilih -->
+          <div class="hidden" id="customTopicContainer">
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Tuliskan Topik Kustom:</label>
+            <input type="text" id="customTopicInput" placeholder="Contoh: Titrasi Redoks Kompleksometri"
+                   class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+          </div>
+
+          <!-- Subtopik Spesifik -->
+          <div id="subtopicContainer">
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Fokus Subtopik (Opsional):</label>
+            <input type="text" id="subtopicInput" placeholder="Contoh: Orde Reaksi &amp; Persamaan Laju Reaksi"
+                   class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+          </div>
+
+          <!-- Tingkat Kesulitan -->
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Tingkat Kognitif / Kesulitan:</label>
+            <select id="difficultySelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+              <option value="Mudah">Mudah (C1-C2 - Konseptual &amp; Pemahaman)</option>
+              <option value="Sedang" selected>Sedang (C3 - Terapan &amp; Perhitungan Standar)</option>
+              <option value="Sulit / HOTS">Sulit / HOTS (C4-C5 - Penalaran &amp; Analisis Kasus)</option>
+              <option value="Olimpiade">Olimpiade (Masalah Non-Rutin &amp; Analitis)</option>
+            </select>
+          </div>
+
+          <!-- Jumlah Soal -->
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Jumlah Butir Soal per Paket:</label>
+            <select id="numQuestionsSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+              <option value="3">3 Butir Soal</option>
+              <option value="5" selected>5 Butir Soal (Direkomendasikan)</option>
+              <option value="10">10 Butir Soal</option>
+              <option value="15">15 Butir Soal</option>
+            </select>
+          </div>
+
+          <!-- Catatan Tambahan Guru -->
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Instruksi Khusus (Opsional):</label>
+            <input type="text" id="extraNotesInput" placeholder="Contoh: Cantumkan data Ar C=12, O=16, H=1"
+                   class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+          </div>
+
+        </div>
+
+        <!-- ====================================================================
+             CHECKBOX FITUR EKSKLUSIF (SESUAI ATURAN PENGGUNA)
+             ==================================================================== -->
+        <div class="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-2.5 mt-4">
+          <div class="text-xs font-bold text-violet-300 flex items-center gap-1.5">
+            <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+            <span>Fitur Tambahan Asesmen (Centang untuk Mengaktifkan):</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+            
+            <!-- Checkbox 1: Kisi-Kisi & Kartu Soal -->
+            <label class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors">
+              <input type="checkbox" id="chkIncludeKisiKisi" class="mt-0.5 w-4 h-4 rounded text-violet-600 focus:ring-violet-500 bg-zinc-800 border-zinc-700">
+              <div>
+                <span class="text-xs font-bold text-zinc-200 block">📋 Kisi-Kisi &amp; Kartu Soal</span>
+                <span class="text-[11px] text-zinc-400 block leading-tight">Lampirkan matriks CP/TP, level kognitif Bloom (C2-C5), dan skor resmi.</span>
+              </div>
+            </label>
+
+            <!-- Checkbox 2: Paket Paralel Anti-Contek (Paket A & B) -->
+            <label class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors">
+              <input type="checkbox" id="chkIncludeParallel" class="mt-0.5 w-4 h-4 rounded text-violet-600 focus:ring-violet-500 bg-zinc-800 border-zinc-700">
+              <div>
+                <span class="text-xs font-bold text-zinc-200 block">🔀 Paket Paralel (Paket A &amp; B)</span>
+                <span class="text-[11px] text-zinc-400 block leading-tight">Buat 2 paket ujian paralel setara untuk mengantisipasi contek di kelas.</span>
+              </div>
+            </label>
+
+            <!-- Checkbox 3: Tabel Eksperimen & Ilustrasi SVG -->
+            <label class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors">
+              <input type="checkbox" id="chkIncludeVisuals" checked class="mt-0.5 w-4 h-4 rounded text-violet-600 focus:ring-violet-500 bg-zinc-800 border-zinc-700">
+              <div>
+                <span class="text-xs font-bold text-zinc-200 block">🧪 Tabel &amp; Diagram SVG</span>
+                <span class="text-[11px] text-zinc-400 block leading-tight">Sertakan tabel data percobaan dan ilustrasi kimia vektor (Sel Volta, Hess, Titrasi).</span>
+              </div>
+            </label>
+
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end">
+          <button type="submit" id="btnGenerate"
+                  class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-violet-900/40 transition-all cursor-pointer">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Buat Soal dengan Gemini AI</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden glass-card text-center py-10 no-print">
+      <div class="spinner-portal"></div>
+      <h4 class="text-base font-bold text-white mb-1" id="loadingTitle">Gemini AI Sedang Merancang Soal Kimia...</h4>
+      <p class="text-xs text-zinc-400" id="loadingDesc">Menyetarakan persamaan reaksi, memvalidasi perhitungan stoikiometri, dan menyusun pembahasan ilmiah.</p>
+    </div>
+
+    <!-- Results Section -->
+    <section id="resultsSection" class="hidden space-y-4">
+      
+      <!-- Action Toolbar & Header Paket -->
+      <div class="glass-card p-4 sm:p-5 no-print">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span id="resGradeBadge" class="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-[10px] font-bold">Jenjang</span>
+              <span id="resPackageMeta" class="text-xs text-zinc-400">Materi | Jumlah Soal</span>
+            </div>
+            <h3 id="resPackageTitle" class="text-lg sm:text-xl font-extrabold text-white">Judul Paket Soal</h3>
+          </div>
+
+          <!-- Export Buttons (Termasuk Excel Quizizz Opsi 5) -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btnPrintExam" type="button" title="Cetak Naskah Ujian Resmi atau Simpan sebagai PDF"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold transition-all">
+              <i data-lucide="printer" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>Cetak / PDF</span>
+            </button>
+            <button id="btnExportWord" type="button" title="Unduh File Microsoft Word (.docx)"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold transition-all">
+              <i data-lucide="file-text" class="w-3.5 h-3.5 text-violet-400"></i>
+              <span>Word (.doc)</span>
+            </button>
+            <button id="btnExportExcelQuizizz" type="button" title="Unduh File Excel Template Impor Quizizz / LMS (.xlsx)"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all shadow-sm">
+              <i data-lucide="table" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>Quizizz Excel (.xlsx)</span>
+            </button>
+            <button id="btnExportMarkdown" type="button" title="Unduh Teks Markdown dengan KaTeX"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold transition-all">
+              <i data-lucide="code" class="w-3.5 h-3.5 text-slate-400"></i>
+              <span>Markdown</span>
+            </button>
+            <button id="btnExportJson" type="button" title="Unduh Data JSON Terstruktur"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold transition-all">
+              <i data-lucide="database" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>JSON</span>
+            </button>
+            <button id="btnSaveToCloudBank" type="button" title="Simpan Paket Soal ke Google Spreadsheet Bank Soal Cloud"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-950/50 hover:bg-purple-900/60 text-purple-300 border border-purple-500/40 text-xs font-bold transition-all shadow-sm">
+              <i data-lucide="cloud" class="w-3.5 h-3.5 text-purple-400"></i>
+              <span>Simpan ke Cloud</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sub-Navigasi Paket Paralel (Tampil Jika Checkbox Paralel Aktif) -->
+        <div id="parallelPackageNav" class="hidden flex items-center gap-2 mt-4 pt-3 border-t border-zinc-800/80">
+          <span class="text-xs font-bold text-zinc-400 mr-1">Pilih Paket Ulangan:</span>
+          <button id="btnSwitchPaketA" type="button" class="px-3 py-1 rounded-lg text-xs font-bold bg-violet-600 text-white shadow-sm transition-all">
+            Paket A (Utama)
+          </button>
+          <button id="btnSwitchPaketB" type="button" class="px-3 py-1 rounded-lg text-xs font-semibold bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-all">
+            Paket B (Paralel)
+          </button>
+        </div>
+
+        <!-- Navigation Tabs: Guru vs Siswa vs Kisi-Kisi -->
+        <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-zinc-800" role="tablist">
+          <button id="tab-teacher" type="button" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-violet-600/20 text-violet-300 border border-violet-500/40">
+            <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+            <span>Mode Guru (Naskah &amp; Pembahasan)</span>
+          </button>
+          <button id="tab-student" type="button" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-zinc-200 transition-all">
+            <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+            <span>Mode Ujian Siswa (Kuis Interaktif)</span>
+          </button>
+          <button id="tab-kisi-kisi" type="button" class="hidden inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-zinc-200 transition-all">
+            <i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i>
+            <span>Lampiran Matriks Kisi-Kisi Resmi</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Panes -->
+      <div class="no-print">
+        <!-- PANE GURU -->
+        <div id="pane-teacher" class="space-y-4">
+          <div id="teacherQuestionsList"></div>
+        </div>
+
+        <!-- PANE SISWA -->
+        <div id="pane-student" class="hidden space-y-4">
+          <div class="glass-card p-5">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-zinc-800">
+              <div>
+                <h4 class="text-sm sm:text-base font-bold text-white">Lembar Pengerjaan Siswa</h4>
+                <p class="text-xs text-zinc-400">Pilih salah satu jawaban yang paling tepat, lalu klik evaluasi di bawah.</p>
+              </div>
+              <div id="studentScoreBanner" class="hidden px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
+                Skor: <span id="studentScoreVal">0</span> / 100
+              </div>
+            </div>
+
+            <form id="studentQuizForm">
+              <div id="studentQuestionsList" class="space-y-4"></div>
+              <div class="pt-5 text-center">
+                <button type="button" id="btnSubmitStudentQuiz"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-900/40 transition-all cursor-pointer">
+                  <i data-lucide="award" class="w-4 h-4"></i>
+                  <span>Selesai &amp; Periksa Skor</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- PANE KISI-KISI -->
+        <div id="pane-kisi-kisi" class="hidden space-y-4">
+          <div class="kisi-kisi-card" id="kisiKisiDisplayCard">
+            <!-- Tabel Kisi-Kisi diisi via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- PRINT LAYOUT (Hanya Terlihat Saat Dicetak) -->
+      <div class="print-only hidden" id="printExamSheet">
+        <!-- Kop Surat Ujian -->
+        <div class="kop-surat">
+          <h3 style="margin: 0; font-weight: bold; text-transform: uppercase;" id="printHeaderTitle">PENILAIAN HARIAN / ASESMEN SUMATIF KIMIA</h3>
+          <p style="margin: 3px 0 0 0; font-size: 10pt;" id="printMetaText">Mata Pelajaran: Kimia</p>
+          <div style="display: flex; justify-content: space-between; margin-top: 10pt; font-size: 10pt; text-align: left;">
+            <div>
+              Nama Siswa : .....................................................<br>
+              Nomor Absen: .....................................................
+            </div>
+            <div>
+              Kelas / Fase: .....................................................<br>
+              Hari / Tanggal: .....................................................
+            </div>
+          </div>
+        </div>
+
+        <div id="printQuestionsContent"></div>
+
+        <div class="page-break"></div>
+        <div class="kop-surat" style="margin-top: 20pt;">
+          <h3 style="margin: 0; font-weight: bold; text-transform: uppercase;">KUNCI JAWABAN DAN PEMBAHASAN LENGKAP</h3>
+          <p style="margin: 3px 0 0 0; font-size: 10pt;">Dokumen Pembahasan Pengajar</p>
+        </div>
+        <div id="printSolutionsContent"></div>
+
+        <!-- Cetak Kisi-Kisi (Jika Ada) -->
+        <div id="printKisiKisiSection" class="hidden">
+          <div class="page-break"></div>
+          <div class="kop-surat" style="margin-top: 20pt;">
+            <h3 style="margin: 0; font-weight: bold; text-transform: uppercase;">MATRIKS KISI-KISI &amp; KARTU SOAL ASESMEN</h3>
+            <p style="margin: 3px 0 0 0; font-size: 10pt;">Dokumen Administrasi Perangkat Kurikulum</p>
+          </div>
+          <div id="printKisiKisiContent"></div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       MODAL: PENGATURAN API KEY
+       ======================================================================== -->
+  <div id="apiKeyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm hidden no-print">
+    <div class="relative w-full max-w-md rounded-2xl glass-card border border-zinc-700/80 shadow-2xl p-6">
+      <div class="flex items-center justify-between pb-3.5 border-b border-zinc-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center">
+            <i data-lucide="key" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-white">Google Gemini API Key</h4>
+            <p class="text-[11px] text-zinc-400">Tersimpan aman di peramban lokal perangkat Anda.</p>
+          </div>
+        </div>
+        <button id="closeApiKeyModalBtn" class="text-zinc-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-4">
+        <!-- Opsi 1: Direct Gemini API Key -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-zinc-300">Gemini API Key (Mode Direct):</label>
+            <span class="text-[10px] text-emerald-400 font-medium">Cepat &amp; Mandiri</span>
+          </div>
+          <input type="password" id="modalApiKeyInput" placeholder="AIzaSy..."
+                 class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+          <p class="text-[11px] text-zinc-400">
+            Dapatkan gratis di <a href="https://aistudio.google.com/" target="_blank" class="text-violet-400 hover:underline">Google AI Studio</a>.
+          </p>
+        </div>
+
+        <!-- Opsi 2: Backend Google Apps Script (SOAL_API) -->
+        <div class="space-y-1.5 pt-3 border-t border-zinc-800">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-zinc-300">URL Backend GAS (SOAL_API):</label>
+            <span class="text-[10px] text-indigo-400 font-medium">Cloud Multi-Device</span>
+          </div>
+          <div class="flex gap-2">
+            <input type="text" id="modalGasUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
+                   class="flex-grow px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none font-mono">
+            <button id="btnTestGasPing" type="button" class="px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold shrink-0 border border-zinc-700 transition-colors">
+              Tes Ping
+            </button>
+          </div>
+          <p class="text-[11px] text-zinc-400">
+            Tersinkron otomatis via <code class="text-violet-300">config.js</code> Suite. Memungkinkan pembuatan soal tanpa input API Key di HP/sekolah serta penyimpanan Bank Soal ke Google Sheets.
+          </p>
+          <div id="gasPingResult" class="text-[11px] font-medium hidden"></div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 mt-5 pt-3 border-t border-zinc-800">
+        <button id="cancelApiKeyBtn" type="button" class="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold">
+          Batal
+        </button>
+        <button id="btnSaveApiKey" type="button" class="px-4 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-md shadow-violet-900/40">
+          Simpan Konfigurasi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       FOOTER (PortalKimia Suite Standard)
+       ======================================================================== -->
+  <footer class="relative z-20 border-t border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md px-4 sm:px-6 lg:px-12 py-4 mt-8 no-print">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-400">
+      <div class="flex items-center gap-2">
+        <img src="portalkimia-logo.svg" alt="PortalKimia Logo" class="w-4 h-4 object-contain rounded-sm">
+        <span class="font-bold text-zinc-300">PortalKimia Suite</span>
+        <span class="text-zinc-600">•</span>
+        <span>Generator Soal AI — Tito Vanzal, S.Pd.</span>
+      </div>
+      <div class="flex items-center gap-3 text-zinc-400">
+        <a href="../" class="hover:text-violet-300 transition-colors">Kembali ke Suite Hub</a>
+        <span>•</span>
+        <span>© 2026 PortalKimia</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

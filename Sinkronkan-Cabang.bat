@@ -30,13 +30,24 @@ robocopy "C:\Users\Tito\Desktop\Generator Modul Ajar" "C:\Users\Tito\Desktop\Por
 echo       - Generator Modul Ajar berhasil diperbarui!
 
 echo.
-echo [5/5] Menyinkronkan PortalKimia Olimpiade...
+echo [5/6] Menyinkronkan PortalKimia Olimpiade...
 if not exist "C:\Users\Tito\Desktop\PortalKimia-Suite\olimpiade" mkdir "C:\Users\Tito\Desktop\PortalKimia-Suite\olimpiade" >nul
 robocopy "C:\Users\Tito\Desktop\PortalKimia-Olimpiade" "C:\Users\Tito\Desktop\PortalKimia-Suite\olimpiade" /E /XD "scratch" ".system_generated" /XF "*.gs" "*.log" >nul
 if exist "C:\Users\Tito\Desktop\PortalKimia-Olimpiade\Code.gs" (
     copy /Y "C:\Users\Tito\Desktop\PortalKimia-Olimpiade\Code.gs" "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite\Olimpiade_Code.gs" >nul
 )
-echo       - PortalKimia Olimpiade & Backend GAS berhasil diperbarui!
+echo       - PortalKimia Olimpiade dan Backend GAS berhasil diperbarui!
+
+echo.
+echo [6/6] Menyinkronkan Generator Soal Kimia AI...
+if not exist "C:\Users\Tito\Desktop\PortalKimia-Suite\soal" mkdir "C:\Users\Tito\Desktop\PortalKimia-Suite\soal" >nul
+robocopy "C:\Users\Tito\Desktop\Generator-Soal-Kimia" "C:\Users\Tito\Desktop\PortalKimia-Suite\soal" /E /XD "scratch" ".system_generated" /XF "*.gs" "*.log" >nul
+if exist "C:\Users\Tito\Desktop\Generator-Soal-Kimia\Code.gs" (
+    copy /Y "C:\Users\Tito\Desktop\Generator-Soal-Kimia\Code.gs" "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite\Soal_Code.gs" >nul
+    if not exist "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\soal" mkdir "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\soal" >nul
+    copy /Y "C:\Users\Tito\Desktop\Generator-Soal-Kimia\Code.gs" "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\soal\Code.gs" >nul
+)
+echo       - Generator Soal Kimia AI berhasil diperbarui!
 
 echo.
 echo ====================================================================

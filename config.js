@@ -1,4 +1,4 @@
-/**
+  /**
  * =========================================================================
  * KONFIGURASI PUSAT PORTALKIMIA SUITE (MULTI-DEVICE READY)
  * =========================================================================
@@ -24,4 +24,9 @@ window.PORTALKIMIA_CONFIG = {
   // 5. URL Web App Backend PortalKimia Olimpiade (Bank Soal, Ploting Tim, Data Siswa & Agenda Lomba)
   // Masukkan URL Google Apps Script Olimpiade Anda di sini:
   OLIMPIADE_API: "https://script.google.com/macros/s/AKfycbwnsrR8vyTLo8mu_urbIfjGApBabcj-NdvCBpNMiOIwQCwXo5UdT7Heq_Z36KxLeAgNLA/exec"
+
+  // 6. URL Web App Backend PortalKimia Soal 
+  // Masukkan URL Google Apps Script Soal Anda di sini:
+  SOAL_API: "https://script.google.com/macros/s/AKfycbx5znz66Ye57dVVgoqiD5_QUlhbr8ap7ve81iJqeFNjLaVVRaTwpUzDMipXfE5bQbSSMQ/exec"
+
 };
