@@ -1,11 +1,11 @@
 # PortalKimia Suite — Gerbang Ekosistem Pembelajaran Digital
 
 Portal Utama terpadu yang menghubungkan seluruh cabang aplikasi dan media pembelajaran kimia:
-- 🎓 **LMS & Kelas Mandiri** (Presensi & Rekap Nilai Siswa)
-- 🧪 **PortalKimia Interaktif** (Bank Media & Simulasi Pembelajaran)
-- ✨ **Generator Modul Ajar AI** (Otomatisasi Dokumen Kurikulum Merdeka)
+- 🎓 **PortalKimia LMS** (Presensi & Rekap Nilai Siswa)
+- 🧪 **PortalKimia Media** (Bank Media & Simulasi Pembelajaran)
+- ✨ **PortalKimia GeneratorAI** (Otomatisasi Dokumen Kurikulum Merdeka)
 - 🏆 **PortalKimia Olimpiade** (Bank Soal KaTeX, Ploting Tim & Manajemen Lomba)
-- ✨ **Generator Soal AI** (Otomatisasi Soal kimia berstandar Asesmen Nasional (AKM/UTBK), tabel data percobaan, ilustrasi diagram kimia SVG, matriks kisi-kisi resmi, dan paket paralel anti-contek)
+- ✨ **PortalKimia SoalAI** (Otomatisasi Soal kimia berstandar Asesmen Nasional (AKM/UTBK), tabel data percobaan, ilustrasi diagram kimia SVG, matriks kisi-kisi resmi, dan paket paralel anti-contek)
 - 🌐 **Daftar Cabang Tambahan** (Dikelola dinamis melalui Google Spreadsheet)
 
 ## Struktur Berkas
