@@ -15,6 +15,8 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <!-- Konfigurasi Terpusat Multi-Device (Dimuat paling awal) -->
+  <script src="config.js"></script>
 
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -186,7 +188,7 @@
         </button>
 
         <!-- Server Status Indicator -->
-        <button id="server-status-btn" title="Status Koneksi Google Apps Script" 
+        <button id="server-status-btn" title="Status Koneksi Google Apps Script (Klik untuk Hubungkan Ulang)" 
                 class="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-500/20 text-[11px] text-emerald-400 font-medium hover:bg-emerald-900/40 transition-colors">
           <span id="status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="status-text">Terkoneksi</span>
@@ -386,10 +388,12 @@
       </div>
       <!-- Right Copyright & Helper Link -->
       <div class="flex items-center gap-3 sm:gap-4 text-slate-400">
-        <!-- Admin Settings Link (Only in Admin Mode) -->
-        <button id="open-config-btn" class="hidden hover:text-purple-400 transition-colors items-center gap-1">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-          Konfigurasi Backend
+        <!-- Tombol Refresh / Hubungkan Ulang ke GAS -->
+        <button id="reconnect-gas-btn" type="button" class="hover:text-purple-300 text-slate-300 transition-colors flex items-center gap-1.5 text-xs font-medium" title="Segarkan dan hubungkan ulang data ke Google Apps Script">
+          <svg id="reconnect-icon" class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <span>Hubungkan Ulang GAS</span>
         </button>
         <button id="reset-default-branches-btn" class="hidden hover:text-amber-400 transition-colors items-center gap-1 text-[11px]">
           <span>↺</span> Reset Default
@@ -603,52 +607,24 @@
     </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- MODAL: PENGATURAN URL API GOOGLE APPS SCRIPT (ADMIN ONLY) -->
-  <!-- ========================================================================= -->
-  <div id="modal-config" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/80 backdrop-blur-sm hidden">
-    <div class="relative w-full max-w-md rounded-2xl glass-card border border-slate-700/80 shadow-2xl p-6">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <span>⚙️</span> Konfigurasi Backend GAS
-        </h3>
-        <button id="close-config-btn" class="text-slate-400 hover:text-white p-1 rounded-lg">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-      </div>
-      <div class="mt-4 space-y-3 text-xs">
-        <p class="text-slate-300">
-          Masukkan URL Web App dari deployment Google Apps Script Portal Utama (berakhiran <code class="text-purple-400">/exec</code>):
-        </p>
-        <input type="text" id="config-gas-url" placeholder="https://script.google.com/macros/s/.../exec" 
-               class="w-full px-3.5 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 outline-none">
-        <p class="text-[11px] text-slate-400 italic">
-          *Pengaturan pusat utama tersimpan di file <code class="text-purple-300">config.js</code> yang otomatis sinkron ke seluruh perangkat.
-        </p>
-      </div>
-      <div class="flex justify-end gap-2 mt-5">
-        <button id="save-config-btn" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs">
-          Simpan &amp; Muat Ulang
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- Toast Notifikasi Ringkas -->
   <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-xs font-medium"></div>
 
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT: LOGIKA SUITE, SECURITY HASH, ROLE VIEWS & KBM SYNC -->
   <!-- ========================================================================= -->
-  <!-- Konfigurasi Terpusat Multi-Device -->
-  <script src="config.js"></script>
   <script>
     /**
      * KONFIGURASI UTAMA
+     * Disinkronkan dengan config.js, dengan URL bawaan resmi agar SEMUA perangkat
+     * (HP, Tablet, Laptop lain) langsung otomatis terhubung ke Google Apps Script tanpa terjebak di mode lokal!
      */
+    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycby-KXmx5xmk914MwIW4RtfR0LxOfwdrj1jx8jx3lTjE7PgdGIvJGiirl3sT0WajOnNrnA/exec";
+    const DEFAULT_LMS_URL = "https://script.google.com/macros/s/AKfycbwhHSF2V_rUkObqGcQ0aGfy58g2eIe73VPgAIbyEKn2Oxw8m7FVIyu2oVKHzyLGsu2q/exec";
+
     const CONFIG = {
-      GAS_API_URL: window.PORTALKIMIA_CONFIG?.PORTAL_API || localStorage.getItem("PORTALKIMIA_GAS_URL") || "",
-      LMS_API_URL: window.PORTALKIMIA_CONFIG?.LMS_API || ""
+      GAS_API_URL: window.PORTALKIMIA_CONFIG?.PORTAL_API || DEFAULT_GAS_URL,
+      LMS_API_URL: window.PORTALKIMIA_CONFIG?.LMS_API || DEFAULT_LMS_URL
     };
 
     /**
@@ -988,7 +964,6 @@
       const heroSubtitle = document.getElementById("hero-subtitle");
       const heroBadgeText = document.getElementById("hero-badge-text");
       const addBranchTopBtn = document.getElementById("add-branch-top-btn");
-      const openConfigBtn = document.getElementById("open-config-btn");
       const resetDefaultBtn = document.getElementById("reset-default-branches-btn");
       const lmsBtn = document.getElementById("kbm-quick-lms-btn");
       const studentExploreBtn = document.getElementById("kbm-student-explore-btn");
@@ -1004,7 +979,6 @@
         if (heroHeadline) heroHeadline.innerHTML = `Eksplorasi Pembelajaran di <span class="gradient-title">PortalKimia</span>`;
         if (heroSubtitle) heroSubtitle.innerText = "Akses modul interaktif, laboratorium simulasi reaksi virtual, e-LKPD, dan materi pembelajaran kimia digital Anda.";
         if (addBranchTopBtn) addBranchTopBtn.classList.add("hidden");
-        if (openConfigBtn) { openConfigBtn.classList.add("hidden"); openConfigBtn.classList.remove("flex"); }
         if (resetDefaultBtn) { resetDefaultBtn.classList.add("hidden"); resetDefaultBtn.classList.remove("flex"); }
         if (refreshBtn) refreshBtn.title = "Segarkan Data Portal";
 
@@ -1022,7 +996,6 @@
         if (heroHeadline) heroHeadline.innerHTML = `Selamat datang, <span class="gradient-title">Pak Tito</span>`;
         if (heroSubtitle) heroSubtitle.innerText = "Akses terintegrasi administrasi wali kelas, rekap nilai & presensi LMS, lab media kimia, dan generator otomatis modul ajar.";
         if (addBranchTopBtn) addBranchTopBtn.classList.add("hidden");
-        if (openConfigBtn) { openConfigBtn.classList.add("hidden"); openConfigBtn.classList.remove("flex"); }
         if (resetDefaultBtn) { resetDefaultBtn.classList.add("hidden"); resetDefaultBtn.classList.remove("flex"); }
         if (refreshBtn) refreshBtn.title = "Segarkan Data dari Spreadsheet & LMS";
 
@@ -1039,7 +1012,6 @@
         if (heroHeadline) heroHeadline.innerHTML = `Pengaturan <span class="gradient-title">PortalKimia Suite</span>`;
         if (heroSubtitle) heroSubtitle.innerText = "Kelola tautan cabang website, integrasikan Google Spreadsheet baru, dan atur hak akses modul tiap peran.";
         if (addBranchTopBtn) { addBranchTopBtn.classList.remove("hidden"); addBranchTopBtn.classList.add("flex"); }
-        if (openConfigBtn) { openConfigBtn.classList.remove("hidden"); openConfigBtn.classList.add("flex"); }
         if (resetDefaultBtn) { resetDefaultBtn.classList.remove("hidden"); resetDefaultBtn.classList.add("flex"); }
         if (refreshBtn) refreshBtn.title = "Segarkan Data dari Spreadsheet & LMS";
 
@@ -1892,15 +1864,6 @@
       document.getElementById("branch-edit-id").value = "";
     }
 
-    function openConfigModal() {
-      const input = document.getElementById("config-gas-url");
-      if (input) input.value = CONFIG.GAS_API_URL;
-      document.getElementById("modal-config").classList.remove("hidden");
-    }
-    function closeConfigModal() {
-      document.getElementById("modal-config").classList.add("hidden");
-    }
-
     /**
      * =========================================================================
      * INISIALISASI EVENT LISTENERS
@@ -2079,19 +2042,26 @@
         }
       });
 
-      // 10. Modal Config GAS (Admin Mode)
-      document.getElementById("open-config-btn").addEventListener("click", openConfigModal);
-      document.getElementById("server-status-btn").addEventListener("click", openConfigModal);
-      document.getElementById("close-config-btn").addEventListener("click", closeConfigModal);
-      
-      document.getElementById("save-config-btn").addEventListener("click", () => {
-        const val = document.getElementById("config-gas-url").value.trim();
-        CONFIG.GAS_API_URL = val;
-        localStorage.setItem("PORTALKIMIA_GAS_URL", val);
-        closeConfigModal();
-        showToast("Konfigurasi API diperbarui!", "success");
-        fetchBranches();
-      });
+      // 10. Tombol Hubungkan Ulang ke GAS (Footer & Header Status)
+      const reconnectGasBtn = document.getElementById("reconnect-gas-btn");
+      if (reconnectGasBtn) {
+        reconnectGasBtn.addEventListener("click", () => {
+          const icon = document.getElementById("reconnect-icon");
+          if (icon) icon.classList.add("animate-spin");
+          showToast("Menghubungkan ulang ke Google Apps Script...", "warning");
+          fetchBranches().finally(() => {
+            if (icon) icon.classList.remove("animate-spin");
+          });
+        });
+      }
+
+      const serverStatusBtn = document.getElementById("server-status-btn");
+      if (serverStatusBtn) {
+        serverStatusBtn.addEventListener("click", () => {
+          showToast("Memeriksa koneksi Google Apps Script...", "warning");
+          fetchBranches();
+        });
+      }
 
       // Reset ke Default Branches
       const resetDefaultBtn = document.getElementById("reset-default-branches-btn");
