@@ -422,6 +422,38 @@
           </button>
         </div>
 
+        <!-- Bilah Koleksi Soal Terpilih / Ditandai (Fitur Simpan Soal Inkremental) -->
+        <div id="savedCollectionBar" class="p-3 rounded-xl bg-violet-950/25 border border-violet-500/35 flex flex-wrap items-center justify-between gap-3 text-xs mt-4">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2.5 py-1 rounded-lg bg-violet-600/30 border border-violet-500/40 text-violet-200 font-bold flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="bookmark-check" class="w-3.5 h-3.5 text-violet-400"></i>
+              <span id="savedCountBadge">0 Soal Ditandai</span>
+            </span>
+            <span class="text-zinc-400 hidden sm:inline text-[11px]">
+              📌 Soal yang ditandai <b>tidak akan terhapus</b> saat Anda men-generate soal baru.
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <button type="button" id="btnFilterSavedOnly" 
+                    class="px-3 py-1.5 rounded-lg bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 font-medium transition-all text-xs flex items-center gap-1.5 border border-zinc-700">
+              <i data-lucide="filter" class="w-3.5 h-3.5 text-violet-400"></i>
+              <span id="filterSavedText">Lihat Soal Ditandai Saja</span>
+            </button>
+
+            <label class="flex items-center gap-1.5 text-zinc-300 hover:text-white cursor-pointer text-xs select-none bg-zinc-900/60 px-2.5 py-1.5 rounded-lg border border-zinc-800">
+              <input type="checkbox" id="chkExportSavedOnly" class="w-3.5 h-3.5 rounded text-violet-600 focus:ring-violet-500 bg-zinc-800 border-zinc-700">
+              <span>Hanya Ekspor Soal Ditandai</span>
+            </label>
+
+            <button type="button" id="btnClearSavedCollection" 
+                    class="px-2.5 py-1.5 rounded-lg text-zinc-400 hover:text-rose-300 hover:bg-rose-950/30 text-xs transition-all border border-transparent hover:border-rose-500/30" 
+                    title="Hapus semua tanda simpan pada naskah">
+              <i data-lucide="rotate-ccw" class="w-3 h-3 inline mr-1"></i>Reset Tanda
+            </button>
+          </div>
+        </div>
+
         <!-- Navigation Tabs: Guru vs Siswa vs Kisi-Kisi -->
         <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-zinc-800" role="tablist">
           <button id="tab-teacher" type="button" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-violet-600/20 text-violet-300 border border-violet-500/40">
@@ -480,8 +512,8 @@
         </div>
       </div>
 
-      <!-- PRINT LAYOUT (Hanya Terlihat Saat Dicetak) -->
-      <div class="print-only hidden" id="printExamSheet">
+      <!-- PRINT LAYOUT (Hanya Terlihat Saat Dicetak Standar A4) -->
+      <div class="print-only" id="printExamSheet">
         <!-- Kop Surat Ujian -->
         <div class="kop-surat">
           <h3 style="margin: 0; font-weight: bold; text-transform: uppercase;" id="printHeaderTitle">PENILAIAN HARIAN / ASESMEN SUMATIF KIMIA</h3>

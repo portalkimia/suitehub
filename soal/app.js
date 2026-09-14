@@ -10,6 +10,8 @@
 // Global State
 let currentPackage = null;
 let activeParallelTab = 'A'; // 'A' atau 'B'
+let savedQuestions = [];     // Koleksi soal yang ditandai / disimpan oleh guru
+let filterSavedOnly = false; // Filter tampilan: tampilkan hanya soal yang ditandai
 
 // SYSTEM PROMPT DASAR DENGAN ATURAN ILMIAH DAN NOTASI KIMIA
 const BASE_CHEMISTRY_PROMPT = `
@@ -30,9 +32,11 @@ PEDOMAN UTAMA:
      b. Persamaan reaksi kimia: $2\\text{H}_2 + \\text{O}_2 \\rightarrow 2\\text{H}_2\\text{O}$
      c. Besaran termokimia & kesetimbangan: $\\Delta H = -285{,}8\\text{ kJ/mol}$, $K_a = 10^{-5}$, $E^\\circ = +1{,}10\\text{ V}$, $\\text{pH} = 3 - \\log 2$
 
-3. FORMAT TABEL DATA & ILUSTRASI KIMIA SVG:
-   - Jika materi memerlukan data pengamatan (misal: laju reaksi, titrasi, sifat koligatif, daya hantar listrik), sajikan tabel dalam format Markdown table yang rapi.
-   - Jika materi sangat terbantu dengan diagram (misal: Rangkaian Sel Volta Zn-Cu, Diagram Profil Energi Hess/Eksoterm, Tabung Uji Elektrolit, Buret Titrasi), Anda DAPAT menyertakan kode vektor SVG murni yang valid pada properti "ilustrasi_svg". Kode SVG harus bersih, menggunakan viewBox="0 0 400 250", gaya minimalis kontras tinggi, teks terbaca jelas, dan tanpa tag script berbahaya.
+3. FORMAT TABEL DATA & ILUSTRASI KIMIA SVG (PROPORSIONAL & KONTEKSTUAL):
+   - Gunakan tabel data eksperimen atau diagram vektor SVG HANYA untuk butir soal yang secara alamiah membutuhkan data empiris atau sajian visual (misal: Laju Reaksi, Sel Volta/Elektrolisis, Diagram Tingkat Energi Hess, Buret Titrasi).
+   - JANGAN memaksakan tabel atau diagram pada seluruh butir soal jika konteks soal bersifat konseptual murni atau perhitungan numerik langsung.
+   - KECUALI jika guru menuliskan instruksi khusus yang mewajibkan diagram/tabel pada tiap soal, baru patuhi instruksi tersebut secara penuh.
+   - Jika memuat diagram SVG: kode SVG harus bersih, menggunakan viewBox="0 0 400 250", kontras tinggi, teks terbaca jelas, dan tanpa tag script berbahaya.
 
 4. FORMAT PILIHAN GANDA KOMPLEKS & SEBAB-AKIBAT:
    - Untuk Pilihan Ganda Kompleks: Sajikan pernyataan (1), (2), (3), (4) di narasi pertanyaan, lalu opsi jawaban berupa kombinasi:
@@ -52,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initConnectionModal();
   initFormListeners();
   initTabListeners();
+  initCollectionListeners();
   initExportListeners();
 });
 
@@ -256,6 +261,194 @@ function initTabListeners() {
   });
 }
 
+// KOLEKSI SOAL TERSIMPAN / DITANDAI (FITUR SIMPAN INKREMENTAL)
+function initCollectionListeners() {
+  const btnFilter = document.getElementById("btnFilterSavedOnly");
+  const btnClear = document.getElementById("btnClearSavedCollection");
+  const filterText = document.getElementById("filterSavedText");
+
+  if (btnFilter) {
+    btnFilter.addEventListener("click", () => {
+      filterSavedOnly = !filterSavedOnly;
+      if (filterSavedOnly) {
+        btnFilter.className = "px-3 py-1.5 rounded-lg bg-violet-600 text-white font-bold transition-all text-xs flex items-center gap-1.5 shadow-sm";
+        if (filterText) filterText.textContent = "Tampilkan Semua Soal";
+      } else {
+        btnFilter.className = "px-3 py-1.5 rounded-lg bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 font-medium transition-all text-xs flex items-center gap-1.5 border border-zinc-700";
+        if (filterText) filterText.textContent = "Lihat Soal Ditandai Saja";
+      }
+      renderActiveQuestionsList();
+    });
+  }
+
+  if (btnClear) {
+    btnClear.addEventListener("click", () => {
+      if (savedQuestions.length === 0) {
+        alert("Belum ada soal yang ditandai.");
+        return;
+      }
+      if (confirm(`Apakah Anda yakin ingin mereset tanda simpan pada ${savedQuestions.length} butir soal ini?`)) {
+        if (currentPackage && currentPackage.daftar_soal) {
+          currentPackage.daftar_soal.forEach(q => q.is_pinned = false);
+        }
+        if (currentPackage && currentPackage.daftar_soal_paket_b) {
+          currentPackage.daftar_soal_paket_b.forEach(q => q.is_pinned = false);
+        }
+        savedQuestions = [];
+        filterSavedOnly = false;
+        if (btnFilter) {
+          btnFilter.className = "px-3 py-1.5 rounded-lg bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 font-medium transition-all text-xs flex items-center gap-1.5 border border-zinc-700";
+          if (filterText) filterText.textContent = "Lihat Soal Ditandai Saja";
+        }
+        updateSavedCountBadge();
+        renderActiveQuestionsList();
+      }
+    });
+  }
+}
+
+function updateSavedCountBadge() {
+  const badge = document.getElementById("savedCountBadge");
+  if (badge) {
+    badge.textContent = `${savedQuestions.length} Soal Ditandai`;
+  }
+}
+
+function togglePinQuestion(nomor) {
+  if (!currentPackage || !currentPackage.daftar_soal) return;
+  const list = (activeParallelTab === 'B' && currentPackage.daftar_soal_paket_b)
+    ? currentPackage.daftar_soal_paket_b
+    : currentPackage.daftar_soal;
+
+  const target = list.find(q => q.nomor === nomor);
+  if (!target) return;
+
+  target.is_pinned = !target.is_pinned;
+
+  syncSavedQuestions();
+  updateSavedCountBadge();
+  renderActiveQuestionsList();
+  renderPrintLayout(currentPackage);
+}
+
+function syncSavedQuestions() {
+  if (!currentPackage) return;
+  const pinnedA = currentPackage.daftar_soal ? currentPackage.daftar_soal.filter(q => q.is_pinned === true) : [];
+  const pinnedB = currentPackage.daftar_soal_paket_b ? currentPackage.daftar_soal_paket_b.filter(q => q.is_pinned === true) : [];
+  savedQuestions = [...pinnedA, ...pinnedB.filter(b => !pinnedA.some(a => a.pertanyaan === b.pertanyaan))];
+}
+
+/**
+ * KONVERTER NOTASI KIMIA & FORMULA LATEX MENJADI HTML NATIVE UNTUK WORD (.DOC)
+ * Word tidak menjalankan JavaScript KaTeX, sehingga formula diubah menjadi
+ * tag HTML native: <sub>, <sup>, &rarr;, &#8652;, &Delta;, dll.
+ */
+function formatChemistryForWordHtml(text) {
+  if (!text) return "";
+
+  let s = text;
+
+  // 1. Konversi tabel Markdown menjadi tabel native HTML Word
+  s = convertMarkdownTableToWordHtml(s);
+
+  // 2. Hapus \text{...}
+  s = s.replace(/\\text\{([^{}]+)\}/g, "$1");
+
+  // 3. Subscripts: _{...} atau _angka/huruf
+  s = s.replace(/_\{([^{}]+)\}/g, "<sub>$1</sub>");
+  s = s.replace(/_([0-9a-zA-Z\+\-]+)/g, "<sub>$1</sub>");
+
+  // 4. Superscripts & Derajat Celsius
+  s = s.replace(/\^\\circ/g, "&deg;");
+  s = s.replace(/\\circ/g, "&deg;");
+  s = s.replace(/\^\{([^{}]+)\}/g, "<sup>$1</sup>");
+  s = s.replace(/\^([0-9a-zA-Z\+\-]+)/g, "<sup>$1</sup>");
+
+  // 5. Panah dan Kesetimbangan Kimia
+  s = s.replace(/\\rightleftharpoons/g, "&#8652;"); // ⇌
+  s = s.replace(/\\longleftrightarrow/g, "&#8652;");
+  s = s.replace(/\\leftrightarrow/g, "&harr;");
+  s = s.replace(/\\rightarrow/g, "&rarr;"); // →
+  s = s.replace(/\\to/g, "&rarr;");
+  s = s.replace(/\\leftarrow/g, "&larr;");
+
+  // 6. Simbol Termodinamika & Yunani
+  s = s.replace(/\\Delta/g, "&Delta;"); // Δ
+  s = s.replace(/\\alpha/g, "&alpha;");
+  s = s.replace(/\\beta/g, "&beta;");
+  s = s.replace(/\\gamma/g, "&gamma;");
+  s = s.replace(/\\pm/g, "&plusmn;");
+  s = s.replace(/\\times/g, "&times;");
+  s = s.replace(/\\cdot/g, "&middot;");
+  s = s.replace(/\\dots/g, "...");
+  s = s.replace(/\\ldots/g, "...");
+
+  // 7. Bersihkan koma dan persen LaTeX
+  s = s.replace(/\{,\}/g, ",");
+  s = s.replace(/\\%/g, "%");
+
+  // 8. Hapus delimiter math $
+  s = s.replace(/\$\$/g, "");
+  s = s.replace(/\$/g, "");
+
+  return s;
+}
+
+function convertMarkdownTableToWordHtml(text) {
+  if (!text || !text.includes("|")) return text;
+
+  const lines = text.split("\n");
+  let inTable = false;
+  let tableLines = [];
+  let resultLines = [];
+
+  const renderTable = (tbl) => {
+    if (tbl.length < 2) return tbl.join("<br>");
+    const headerRow = tbl[0];
+    const bodyRows = tbl.slice(2);
+
+    const splitCells = (row) => row.split("|").map(c => c.trim()).filter((c, i, arr) => i > 0 && i < arr.length);
+
+    let headers = splitCells(headerRow);
+    let html = `<table border="1" style="width: 100%; border-collapse: collapse; margin: 8pt 0; font-size: 10pt;"><thead><tr style="background-color: #f2f2f2;">`;
+    headers.forEach(h => html += `<th style="border: 1px solid #000; padding: 4pt 6pt; text-align: center; font-weight: bold;">${formatChemistryForWordHtml(h)}</th>`);
+    html += `</tr></thead><tbody>`;
+
+    bodyRows.forEach(r => {
+      let cells = splitCells(r);
+      if (cells.length > 0) {
+        html += `<tr>`;
+        cells.forEach(c => html += `<td style="border: 1px solid #000; padding: 4pt 6pt; text-align: left;">${formatChemistryForWordHtml(c)}</td>`);
+        html += `</tr>`;
+      }
+    });
+
+    html += `</tbody></table>`;
+    return html;
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith("|") && line.endsWith("|")) {
+      inTable = true;
+      tableLines.push(line);
+    } else {
+      if (inTable) {
+        resultLines.push(renderTable(tableLines));
+        tableLines = [];
+        inTable = false;
+      }
+      resultLines.push(lines[i]);
+    }
+  }
+
+  if (inTable) {
+    resultLines.push(renderTable(tableLines));
+  }
+
+  return resultLines.join("<br>");
+}
+
 /**
  * SANITIZER NOTASI KIMIA & ANGKA
  */
@@ -400,6 +593,30 @@ function sanitizeQuizPackage(pkg) {
   return pkg;
 }
 
+// NOTIFIKASI & PERGANTIAN OTOMATIS KE GEMINI 3.6 FLASH JIKA 3.7 HIGH DEMAND
+function notifyFallbackTo36() {
+  const loadingTitle = document.getElementById("loadingTitle");
+  const loadingDesc = document.getElementById("loadingDesc");
+  if (loadingTitle) {
+    loadingTitle.textContent = "Gemini 3.7 Flash Sibuk (High Demand)...";
+  }
+  if (loadingDesc) {
+    loadingDesc.innerHTML = `<span class="text-amber-300 font-semibold">⚡ Mengalihkan otomatis ke Gemini 3.6 Flash agar soal tetap selesai dibuat tanpa hambatan...</span>`;
+  }
+
+  const headerModelBadge = document.getElementById("headerModelBadge");
+  if (headerModelBadge) {
+    headerModelBadge.innerHTML = `
+      <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+      <span>Gemini 3.6 Flash (Auto-Fallback)</span>
+    `;
+  }
+  const modelSelect = document.getElementById("modelSelect");
+  if (modelSelect) {
+    modelSelect.value = "gemini-3.6-flash";
+  }
+}
+
 // GENERATE QUIZ DENGAN FITUR DINAMIS
 async function generateQuiz() {
   const gasUrl = getGasUrl();
@@ -535,7 +752,9 @@ Susun naskah soal asesmen kimia berkualitas tinggi dengan spesifikasi berikut:
 INSTRUKSI KHUSUS FITUR:
 1. STIMULUS SOAL: Gunakan model pendekatan "${stimulus}". Awali pertanyaan dengan narasi kontekstual yang relevan dan menggugah nalar literasi sains.
 2. FORMAT TIPE SOAL: Buat butir soal dalam format "${qType}".
-3. TABEL & ILUSTRASI KIMIA: ${includeVisuals ? 'Sertakan tabel data eksperimen (dalam Markdown table) atau diagram vektor SVG (pada ilustrasi_svg) untuk soal-soal yang membutuhkan pengamatan data / visual (seperti laju reaksi, sel volta, titrasi, termokimia).' : 'Tidak perlu tabel atau diagram khusus.'}
+3. TABEL & ILUSTRASI KIMIA: ${includeVisuals 
+     ? 'Sertakan tabel data eksperimen (dalam format Markdown table rapi) atau diagram vektor SVG (pada properti ilustrasi_svg) HANYA untuk butir soal yang secara alamiah membutuhkan pengamatan data empiris / sajian visual (seperti laju reaksi, sel volta, titrasi, termokimia). JANGAN memaksakan tabel atau diagram pada seluruh butir soal jika tidak relevan, KECUALI jika catatan instruksi khusus guru di bawah secara eksplisit meminta tabel/diagram di setiap soal.' 
+     : 'Tidak perlu menyertakan tabel atau diagram khusus.'}
 4. PAKET PARALEL: ${includeParallel ? 'WAJIB susun juga daftar_soal_paket_b sebanyak ' + numQuestions + ' butir soal paralel yang memiliki indikator setara dengan Paket A namun berbeda variabel/angka stoikiometrinya.' : 'Hanya susun Paket A.'}
 5. KISI-KISI ASESMEN: ${includeKisiKisi ? 'WAJIB susun matriks kisi_kisi_asesmen yang memetakan CP/TP, indikator soal, level kognitif Bloom (C2-C5), kunci, dan skor.' : 'Tidak perlu menyusun matriks kisi-kisi.'}
 
@@ -547,7 +766,7 @@ Pastikan tidak ada format $persen$ rusak. Tulis persen biasa (50,0%). Seluruh so
 
     if (apiKey) {
       // MODE 1: Direct Client-Side (Kecepatan Maksimal langsung dari browser)
-      const endpointUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      let endpointUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
       const requestBody = {
         contents: [
           {
@@ -565,15 +784,42 @@ Pastikan tidak ada format $persen$ rusak. Tulis persen biasa (50,0%). Seluruh so
         }
       };
 
-      const response = await fetch(endpointUrl, {
+      let response = await fetch(endpointUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error ? errorData.error.message : `HTTP error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        const errMsg = errorData.error ? errorData.error.message : `HTTP error: ${response.status}`;
+
+        const isDemandIssue = response.status === 503 || 
+                              response.status === 429 || 
+                              errMsg.toLowerCase().includes("high demand") || 
+                              errMsg.toLowerCase().includes("spikes in demand") || 
+                              errMsg.toLowerCase().includes("unavailable") ||
+                              errMsg.toLowerCase().includes("temporarily unavailable");
+
+        // Auto-Fallback ke Gemini 3.6 Flash jika 3.7 Flash sedang high demand
+        if (isDemandIssue && model === "gemini-3.7-flash") {
+          console.warn("⚠️ Gemini 3.7 Flash sedang sibuk (503 High Demand). Mengalihkan otomatis ke Gemini 3.6 Flash...");
+          notifyFallbackTo36();
+
+          const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+          response = await fetch(fallbackUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody)
+          });
+
+          if (!response.ok) {
+            const errFb = await response.json().catch(() => ({}));
+            throw new Error(errFb.error ? errFb.error.message : `HTTP error: ${response.status}`);
+          }
+        } else {
+          throw new Error(errMsg);
+        }
       }
 
       const data = await response.json();
@@ -606,9 +852,21 @@ Pastikan tidak ada format $persen$ rusak. Tulis persen biasa (50,0%). Seluruh so
 
       let gasRes = await response.json();
 
+      const isGasDemandIssue = (gasRes.status === "error") && (
+        gasRes.code == 503 || 
+        gasRes.code == 429 ||
+        (gasRes.message && (
+          gasRes.message.toLowerCase().includes("high demand") ||
+          gasRes.message.toLowerCase().includes("spikes in demand") ||
+          gasRes.message.toLowerCase().includes("unavailable") ||
+          gasRes.message.includes("503")
+        ))
+      );
+
       // Jika model 3.7 mengalami 503 (high demand sementara), otomatis alihkan ke 3.6 Flash
-      if (gasRes.status === "error" && gasRes.code === 503 && model === "gemini-3.7-flash") {
-        console.warn("Gemini 3.7 Flash sibuk (503). Mengalihkan otomatis ke Gemini 3.6 Flash...");
+      if (isGasDemandIssue && model === "gemini-3.7-flash") {
+        console.warn("⚠️ Gemini 3.7 Flash sibuk (503). Mengalihkan otomatis ke Gemini 3.6 Flash...");
+        notifyFallbackTo36();
         gasPayload.model = "gemini-3.6-flash";
         response = await fetch(gasUrl, {
           method: "POST",
@@ -625,7 +883,34 @@ Pastikan tidak ada format $persen$ rusak. Tulis persen biasa (50,0%). Seluruh so
       parsedPkg = gasRes.data || (typeof gasRes.raw === "string" ? JSON.parse(gasRes.raw) : gasRes);
     }
 
-    currentPackage = sanitizeQuizPackage(parsedPkg);
+    parsedPkg = sanitizeQuizPackage(parsedPkg);
+
+    // FITUR SIMPAN SOAL INKREMENTAL:
+    // Jika ada soal yang ditandai sebelumnya, JANGAN HAPUS!
+    // Tambahkan N butir soal baru yang baru digenerate ke koleksi soal bertanda
+    if (savedQuestions && savedQuestions.length > 0) {
+      // Pertahankan tanda pada soal yang lama
+      savedQuestions.forEach(q => q.is_pinned = true);
+
+      // Butir soal baru yang datang diberi status belum ditandai
+      if (parsedPkg.daftar_soal && Array.isArray(parsedPkg.daftar_soal)) {
+        parsedPkg.daftar_soal.forEach(q => q.is_pinned = false);
+      }
+
+      // Gabungkan: Soal lama yang ditandai tetap ada di awal, disusul butir soal baru
+      const combined = [...savedQuestions, ...(parsedPkg.daftar_soal || [])];
+
+      // Re-numbering urut 1, 2, 3, ... N
+      combined.forEach((soal, idx) => {
+        soal.nomor = idx + 1;
+      });
+
+      parsedPkg.daftar_soal = combined;
+    }
+
+    currentPackage = parsedPkg;
+    syncSavedQuestions();
+    updateSavedCountBadge();
     activeParallelTab = 'A';
     renderResults(currentPackage);
   } catch (err) {
@@ -708,14 +993,29 @@ function renderActiveQuestionsList() {
   }
 }
 
-// RENDER GURU QUESTIONS (DENGAN TABEL & SVG)
+// RENDER GURU QUESTIONS (DENGAN TABEL & SVG & FITUR TANDAI SOAL)
 function renderTeacherQuestions(questions) {
   const container = document.getElementById("teacherQuestionsList");
   container.innerHTML = "";
 
-  questions.forEach((soal) => {
+  const displayedQuestions = filterSavedOnly ? questions.filter(q => q.is_pinned === true) : questions;
+
+  if (filterSavedOnly && displayedQuestions.length === 0) {
+    container.innerHTML = `
+      <div class="glass-card p-6 text-center text-zinc-400">
+        <i data-lucide="bookmark-x" class="w-8 h-8 mx-auto mb-2 text-violet-400 opacity-60"></i>
+        <h5 class="text-sm font-bold text-zinc-200 mb-1">Belum Ada Soal yang Ditandai</h5>
+        <p class="text-xs">Klik tombol "📌 Tandai Soal" pada butir soal yang Anda sukai untuk menyimpannya.</p>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  displayedQuestions.forEach((soal) => {
+    const isPinned = soal.is_pinned === true;
     const card = document.createElement("div");
-    card.className = "question-item";
+    card.className = `question-item ${isPinned ? 'pinned-active' : ''}`;
 
     let optionsHtml = "";
     if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
@@ -746,8 +1046,13 @@ function renderTeacherQuestions(questions) {
         <div class="flex items-center gap-2">
           <span class="px-2 py-0.5 rounded bg-violet-600/30 text-violet-300 text-xs font-mono font-bold">Paket ${activeParallelTab}</span>
           <h5 class="font-bold text-white text-sm sm:text-base">Soal Nomor ${soal.nomor}</h5>
+          ${isPinned ? '<span class="pinned-badge"><i data-lucide="star" class="w-2.5 h-2.5 fill-violet-300 inline mr-0.5"></i>Ditandai</span>' : ''}
         </div>
-        <div class="flex items-center gap-1.5">
+        <div class="flex items-center gap-2">
+          <button type="button" class="btn-pin-question ${isPinned ? 'is-pinned' : ''}" onclick="togglePinQuestion(${soal.nomor})" title="${isPinned ? 'Batalkan tanda simpan' : 'Tandai soal ini agar tidak hilang saat generate baru'}">
+            <i data-lucide="${isPinned ? 'check' : 'bookmark'}" class="w-3.5 h-3.5"></i>
+            <span>${isPinned ? '⭐ Disimpan' : '📌 Tandai Soal'}</span>
+          </button>
           <span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[10px] font-bold">${soal.tingkat_kesulitan}</span>
           <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">${soal.subtopik}</span>
         </div>
@@ -783,7 +1088,9 @@ function renderStudentQuestions(questions) {
   container.innerHTML = "";
   document.getElementById("studentScoreBanner").classList.add("hidden");
 
-  questions.forEach((soal) => {
+  const displayedQuestions = filterSavedOnly ? questions.filter(q => q.is_pinned === true) : questions;
+
+  displayedQuestions.forEach((soal) => {
     const card = document.createElement("div");
     card.className = "question-item";
     card.id = `student-card-${soal.nomor}`;
@@ -937,8 +1244,9 @@ function renderKisiKisiTab(kisiList) {
   `;
 }
 
-// PRINT / PDF LAYOUT RENDERER
+// PRINT / PDF LAYOUT RENDERER (STANDAR A4 & KATEX RESMI)
 function renderPrintLayout(pkg) {
+  if (!pkg) return;
   document.getElementById("printMetaText").textContent = `Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang} | Topik: ${pkg.topik_utama}`;
 
   const qContainer = document.getElementById("printQuestionsContent");
@@ -946,23 +1254,40 @@ function renderPrintLayout(pkg) {
   qContainer.innerHTML = "";
   sContainer.innerHTML = "";
 
+  const exportSavedOnly = document.getElementById("chkExportSavedOnly")?.checked;
+  let questionsA = pkg.daftar_soal || [];
+  let questionsB = pkg.daftar_soal_paket_b || [];
+
+  if (exportSavedOnly && savedQuestions.length > 0) {
+    questionsA = questionsA.filter(q => q.is_pinned === true);
+    if (questionsB.length > 0) {
+      questionsB = questionsB.filter(q => q.is_pinned === true);
+    }
+  }
+
   const renderPrintQuestions = (questions, labelPaket) => {
-    let html = `<h4 style="margin: 10pt 0 6pt 0; text-decoration: underline;">LEMBAR SOAL ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
+    let html = `<h4 style="margin: 12pt 0 6pt 0; text-decoration: underline; font-weight: bold; font-size: 11pt;">LEMBAR SOAL ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
     questions.forEach((soal) => {
       let optText = "";
-      if (soal.pilihan_jawaban) {
+      if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
         optText = soal.pilihan_jawaban.map(o => `
           <div style="margin-left: 18pt; margin-top: 2pt;">
-            <b>${o.label}.</b> ${cleanLatex(o.teks)}
+            <b>${o.label}.</b> ${o.teks}
           </div>
         `).join("");
       } else {
         optText = `<div style="margin-left: 18pt; margin-top: 6pt; color: #555;">[Jawaban: ..........................................................................................................................]</div>`;
       }
 
+      const formattedQ = parseMarkdownTable(soal.pertanyaan);
+      const svgHtml = (soal.ilustrasi_svg && soal.ilustrasi_svg.includes("<svg")) 
+        ? renderSvgIllustration(soal.ilustrasi_svg, soal.caption_ilustrasi) 
+        : "";
+
       html += `
         <div style="margin-bottom: 12pt; page-break-inside: avoid;">
-          <div style="font-weight: bold; margin-bottom: 3pt;">${soal.nomor}. ${cleanLatex(soal.pertanyaan)}</div>
+          <div style="font-weight: bold; margin-bottom: 3pt;">${soal.nomor}. ${formattedQ}</div>
+          ${svgHtml}
           ${optText}
         </div>
       `;
@@ -971,30 +1296,42 @@ function renderPrintLayout(pkg) {
   };
 
   const renderPrintSolutions = (questions, labelPaket) => {
-    let html = `<h4 style="margin: 10pt 0 6pt 0; text-decoration: underline;">KUNCI JAWABAN &amp; PEMBAHASAN ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
+    let html = `<h4 style="margin: 12pt 0 6pt 0; text-decoration: underline; font-weight: bold; font-size: 11pt;">KUNCI JAWABAN &amp; PEMBAHASAN ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
     questions.forEach((soal) => {
-      const steps = soal.pembahasan_langkah.map(st => `<li>${cleanLatex(st)}</li>`).join("");
+      const steps = soal.pembahasan_langkah.map(st => `<li>${st}</li>`).join("");
       html += `
         <div style="margin-bottom: 10pt; page-break-inside: avoid;">
           <div style="font-weight: bold;">Soal ${soal.nomor} — Kunci: <u>${soal.kunci_jawaban}</u></div>
           <ul style="margin: 2pt 0; padding-left: 18pt;">${steps}</ul>
-          ${soal.tips_atau_jebakan ? `<div style="font-size: 9pt; font-style: italic; margin-left: 18pt;">Tips: ${cleanLatex(soal.tips_atau_jebakan)}</div>` : ''}
+          ${soal.tips_atau_jebakan ? `<div style="font-size: 9.5pt; font-style: italic; margin-left: 18pt; margin-top: 2pt;">Tips: ${soal.tips_atau_jebakan}</div>` : ''}
         </div>
       `;
     });
     return html;
   };
 
-  qContainer.innerHTML = renderPrintQuestions(pkg.daftar_soal, pkg.daftar_soal_paket_b ? "PAKET A" : "");
-  sContainer.innerHTML = renderPrintSolutions(pkg.daftar_soal, pkg.daftar_soal_paket_b ? "PAKET A" : "");
+  qContainer.innerHTML = renderPrintQuestions(questionsA, questionsB.length > 0 ? "PAKET A" : "");
+  sContainer.innerHTML = renderPrintSolutions(questionsA, questionsB.length > 0 ? "PAKET A" : "");
 
-  if (pkg.daftar_soal_paket_b && pkg.daftar_soal_paket_b.length > 0) {
-    qContainer.innerHTML += `<div class="page-break"></div>` + renderPrintQuestions(pkg.daftar_soal_paket_b, "PAKET B");
-    sContainer.innerHTML += `<div class="page-break"></div>` + renderPrintSolutions(pkg.daftar_soal_paket_b, "PAKET B");
+  if (questionsB.length > 0) {
+    qContainer.innerHTML += `<div class="page-break"></div>` + renderPrintQuestions(questionsB, "PAKET B");
+    sContainer.innerHTML += `<div class="page-break"></div>` + renderPrintSolutions(questionsB, "PAKET B");
+  }
+
+  // Render KaTeX untuk dokumen cetak
+  const printSheet = document.getElementById("printExamSheet");
+  if (window.renderMathInElement && printSheet) {
+    renderMathInElement(printSheet, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false }
+      ],
+      throwOnError: false
+    });
   }
 }
 
-// PEMBERSIH LATEX UNTUK PLAIN TEXT / WORD
+// PEMBERSIH LATEX UNTUK PLAIN TEXT
 function cleanLatex(text) {
   if (!text) return "";
   let s = formatChemistryText(text);
@@ -1017,7 +1354,15 @@ function cleanLatex(text) {
 function initExportListeners() {
   document.getElementById("btnPrintExam").addEventListener("click", () => {
     if (!currentPackage) return;
-    window.print();
+    const exportSavedOnly = document.getElementById("chkExportSavedOnly")?.checked;
+    if (exportSavedOnly && savedQuestions.length === 0) {
+      alert("⚠️ Belum ada soal yang ditandai untuk dicetak.\nSilakan klik tombol '📌 Tandai Soal' pada butir soal yang ingin Anda cetak, atau hilangkan centang 'Hanya Ekspor Soal Ditandai'.");
+      return;
+    }
+    renderPrintLayout(currentPackage);
+    setTimeout(() => {
+      window.print();
+    }, 150);
   });
 
   document.getElementById("btnExportWord").addEventListener("click", () => {
@@ -1046,8 +1391,7 @@ function initExportListeners() {
       if (!currentPackage) return;
       const gasUrl = getGasUrl();
       if (!gasUrl) {
-        alert("⚠️ Backend Google Apps Script belum dikonfigurasi.\nSilakan klik tombol 'Set API / Backend' di kanan atas dan masukkan URL Web App GAS Anda!");
-        document.getElementById("apiKeyModal").classList.remove("hidden");
+        alert("⚠️ Backend Google Apps Script belum dikonfigurasi di config.js.");
         return;
       }
 
@@ -1090,6 +1434,19 @@ function exportToQuizizzExcel(pkg) {
     return;
   }
 
+  const exportSavedOnly = document.getElementById("chkExportSavedOnly")?.checked;
+  let questionsA = pkg.daftar_soal || [];
+  let questionsB = pkg.daftar_soal_paket_b || [];
+
+  if (exportSavedOnly) {
+    if (savedQuestions.length === 0) {
+      alert("⚠️ Belum ada soal yang ditandai untuk diekspor ke Quizizz.\nSilakan klik tombol '📌 Tandai Soal' pada butir soal yang ingin Anda pilih.");
+      return;
+    }
+    questionsA = questionsA.filter(q => q.is_pinned === true);
+    if (questionsB.length > 0) questionsB = questionsB.filter(q => q.is_pinned === true);
+  }
+
   const wb = XLSX.utils.book_new();
 
   const prepareQuizizzRows = (questions) => {
@@ -1110,7 +1467,6 @@ function exportToQuizizzExcel(pkg) {
         });
       }
 
-      // Konversi kunci huruf (A,B,C,D,E) ke nomor (1,2,3,4,5) untuk Quizizz
       let correctIdx = 1;
       const keyUpper = q.kunci_jawaban.toUpperCase().trim();
       if (keyUpper === 'B' || keyUpper === '2') correctIdx = 2;
@@ -1129,7 +1485,7 @@ function exportToQuizizzExcel(pkg) {
         opt4,
         opt5,
         correctIdx,
-        60, // waktu default 60 detik per butir
+        60,
         "",
         explanation
       ]);
@@ -1138,15 +1494,15 @@ function exportToQuizizzExcel(pkg) {
     return rows;
   };
 
-  const wsA = XLSX.utils.aoa_to_sheet(prepareQuizizzRows(pkg.daftar_soal));
+  const wsA = XLSX.utils.aoa_to_sheet(prepareQuizizzRows(questionsA));
   XLSX.utils.book_append_sheet(wb, wsA, "Quizizz Paket A");
 
-  if (pkg.daftar_soal_paket_b && pkg.daftar_soal_paket_b.length > 0) {
-    const wsB = XLSX.utils.aoa_to_sheet(prepareQuizizzRows(pkg.daftar_soal_paket_b));
+  if (questionsB.length > 0) {
+    const wsB = XLSX.utils.aoa_to_sheet(prepareQuizizzRows(questionsB));
     XLSX.utils.book_append_sheet(wb, wsB, "Quizizz Paket B");
   }
 
-  if (pkg.kisi_kisi_asesmen && pkg.kisi_kisi_asesmen.length > 0) {
+  if (pkg.kisi_kisi_asesmen && pkg.kisi_kisi_asesmen.length > 0 && !exportSavedOnly) {
     const kisiRows = [
       ["No", "Capaian / Tujuan Pembelajaran (CP/TP)", "Indikator Soal", "Level Kognitif", "Bentuk Soal", "Kunci Jawaban", "Skor Maksimal"]
     ];
@@ -1157,65 +1513,96 @@ function exportToQuizizzExcel(pkg) {
     XLSX.utils.book_append_sheet(wb, wsKisi, "Matriks Kisi-Kisi");
   }
 
-  const fileName = `Quizizz_${pkg.judul.replace(/\s+/g, "_")}.xlsx`;
+  const fileName = `Quizizz_${pkg.judul.replace(/\s+/g, "_")}${exportSavedOnly ? '_Pilihan' : ''}.xlsx`;
   XLSX.writeFile(wb, fileName);
 }
 
-// WORD EXPORTER (.doc / .docx)
+// WORD EXPORTER (.doc / .docx - STANDAR UKURAN KERTAS A4 & NOTASI KIMIA HTML)
 function exportToWordDocx(pkg) {
-  const formatWordQuestions = (questions, label) => {
+  const exportSavedOnly = document.getElementById("chkExportSavedOnly")?.checked;
+  let listA = pkg.daftar_soal || [];
+  let listB = pkg.daftar_soal_paket_b || [];
+
+  if (exportSavedOnly) {
+    if (savedQuestions.length === 0) {
+      alert("⚠️ Belum ada soal yang ditandai untuk diekspor.\nSilakan klik tombol '📌 Tandai Soal' pada butir soal yang ingin Anda ekspor, atau hilangkan centang 'Hanya Ekspor Soal Ditandai'.");
+      return;
+    }
+    listA = listA.filter(q => q.is_pinned === true);
+    if (listB.length > 0) {
+      listB = listB.filter(q => q.is_pinned === true);
+    }
+  }
+
+  const formatWordQuestions = (questions) => {
     return questions.map((soal) => {
       let opts = "";
-      if (soal.pilihan_jawaban) {
+      if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
         opts = soal.pilihan_jawaban.map(o => `
           <p style="margin-left: 20pt; margin-top: 2pt; margin-bottom: 2pt;">
-            <b>${o.label}.</b> ${cleanLatex(o.teks)}
+            <b>${o.label}.</b> ${formatChemistryForWordHtml(o.teks)}
           </p>
         `).join("");
       } else {
-        opts = `<p style="margin-left: 20pt; margin-top: 6pt;">[Jawaban: .....................................................................................................]</p>`;
+        opts = `<p style="margin-left: 20pt; margin-top: 6pt; color: #555;">[Jawaban: .....................................................................................................]</p>`;
       }
+
+      let svgWord = "";
+      if (soal.ilustrasi_svg && soal.ilustrasi_svg.includes("<svg")) {
+        let cleanSvg = soal.ilustrasi_svg.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+        if (!cleanSvg.includes("xmlns")) {
+          cleanSvg = cleanSvg.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"');
+        }
+        svgWord = `
+          <div style="text-align: center; margin: 8pt auto;">
+            ${cleanSvg}
+            ${soal.caption_ilustrasi ? `<p style="font-size: 9pt; font-style: italic; color: #555; margin-top: 3pt;">Diagram: ${formatChemistryForWordHtml(soal.caption_ilustrasi)}</p>` : ''}
+          </div>
+        `;
+      }
+
       return `
-        <div style="margin-bottom: 12pt;">
-          <p style="font-weight: bold; margin-bottom: 4pt;">${soal.nomor}. ${cleanLatex(soal.pertanyaan)}</p>
+        <div style="margin-bottom: 12pt; page-break-inside: avoid;">
+          <p style="font-weight: bold; margin-bottom: 4pt;">${soal.nomor}. ${formatChemistryForWordHtml(soal.pertanyaan)}</p>
+          ${svgWord}
           ${opts}
         </div>
       `;
     }).join("");
   };
 
-  const formatWordSolutions = (questions, label) => {
+  const formatWordSolutions = (questions) => {
     return questions.map((soal) => {
-      let steps = soal.pembahasan_langkah.map(st => `<li>${cleanLatex(st)}</li>`).join("");
+      let steps = soal.pembahasan_langkah.map(st => `<li>${formatChemistryForWordHtml(st)}</li>`).join("");
       return `
-        <div style="margin-bottom: 12pt;">
-          <p style="font-weight: bold; margin-bottom: 2pt;">Soal ${soal.nomor} — Kunci: ${soal.kunci_jawaban}</p>
+        <div style="margin-bottom: 12pt; page-break-inside: avoid;">
+          <p style="font-weight: bold; margin-bottom: 2pt;">Soal ${soal.nomor} — Kunci: <u>${soal.kunci_jawaban}</u></p>
           <ul style="margin: 0; padding-left: 20pt;">${steps}</ul>
-          ${soal.tips_atau_jebakan ? `<p style="font-size: 10pt; font-style: italic; margin-left: 20pt; margin-top: 3pt;">💡 Tips: ${cleanLatex(soal.tips_atau_jebakan)}</p>` : ''}
+          ${soal.tips_atau_jebakan ? `<p style="font-size: 10pt; font-style: italic; margin-left: 20pt; margin-top: 3pt;">💡 Tips: ${formatChemistryForWordHtml(soal.tips_atau_jebakan)}</p>` : ''}
         </div>
       `;
     }).join("");
   };
 
-  let questionsPart = `<h3 style="color: #2980b9;">BAGIAN I: LEMBAR SOAL ${pkg.daftar_soal_paket_b ? '(PAKET A)' : ''}</h3>` + formatWordQuestions(pkg.daftar_soal);
-  let solutionsPart = `<h3 style="color: #c0392b; text-align: center;">BAGIAN II: KUNCI JAWABAN &amp; PEMBAHASAN ${pkg.daftar_soal_paket_b ? '(PAKET A)' : ''}</h3>` + formatWordSolutions(pkg.daftar_soal);
+  let questionsPart = `<h3 style="color: #2980b9;">BAGIAN I: LEMBAR SOAL ${listB.length > 0 ? '(PAKET A)' : ''}</h3>` + formatWordQuestions(listA);
+  let solutionsPart = `<h3 style="color: #c0392b; text-align: center;">BAGIAN II: KUNCI JAWABAN &amp; PEMBAHASAN ${listB.length > 0 ? '(PAKET A)' : ''}</h3>` + formatWordSolutions(listA);
 
-  if (pkg.daftar_soal_paket_b && pkg.daftar_soal_paket_b.length > 0) {
-    questionsPart += `<div class="page-break"></div><h3 style="color: #2980b9;">LEMBAR SOAL (PAKET B)</h3>` + formatWordQuestions(pkg.daftar_soal_paket_b);
-    solutionsPart += `<div class="page-break"></div><h3 style="color: #c0392b; text-align: center;">KUNCI JAWABAN &amp; PEMBAHASAN (PAKET B)</h3>` + formatWordSolutions(pkg.daftar_soal_paket_b);
+  if (listB.length > 0) {
+    questionsPart += `<div class="page-break"></div><h3 style="color: #2980b9;">LEMBAR SOAL (PAKET B)</h3>` + formatWordQuestions(listB);
+    solutionsPart += `<div class="page-break"></div><h3 style="color: #c0392b; text-align: center;">KUNCI JAWABAN &amp; PEMBAHASAN (PAKET B)</h3>` + formatWordSolutions(listB);
   }
 
   let kisiPart = "";
-  if (pkg.kisi_kisi_asesmen && pkg.kisi_kisi_asesmen.length > 0) {
+  if (pkg.kisi_kisi_asesmen && pkg.kisi_kisi_asesmen.length > 0 && !exportSavedOnly) {
     let rows = pkg.kisi_kisi_asesmen.map(k => `
       <tr>
-        <td style="padding: 4pt; text-align: center;">${k.nomor}</td>
-        <td style="padding: 4pt;">${k.cp_tp}</td>
-        <td style="padding: 4pt;">${k.indikator_soal}</td>
-        <td style="padding: 4pt; text-align: center;">${k.level_kognitif}</td>
-        <td style="padding: 4pt; text-align: center;">${k.bentuk_soal}</td>
-        <td style="padding: 4pt; text-align: center; font-weight: bold;">${k.kunci_jawaban}</td>
-        <td style="padding: 4pt; text-align: center;">${k.skor || 10}</td>
+        <td style="padding: 4pt; text-align: center; border: 1px solid #000;">${k.nomor}</td>
+        <td style="padding: 4pt; border: 1px solid #000;">${formatChemistryForWordHtml(k.cp_tp)}</td>
+        <td style="padding: 4pt; border: 1px solid #000;">${formatChemistryForWordHtml(k.indikator_soal)}</td>
+        <td style="padding: 4pt; text-align: center; border: 1px solid #000;">${k.level_kognitif}</td>
+        <td style="padding: 4pt; text-align: center; border: 1px solid #000;">${k.bentuk_soal}</td>
+        <td style="padding: 4pt; text-align: center; font-weight: bold; border: 1px solid #000;">${k.kunci_jawaban}</td>
+        <td style="padding: 4pt; text-align: center; border: 1px solid #000;">${k.skor || 10}</td>
       </tr>
     `).join("");
 
@@ -1225,14 +1612,14 @@ function exportToWordDocx(pkg) {
       <div style="border-bottom: 1px solid #000; margin-bottom: 12pt;"></div>
       <table border="1" style="width: 100%; border-collapse: collapse; font-size: 9pt;">
         <thead>
-          <tr style="background: #eee;">
-            <th>No</th>
-            <th>Capaian / Tujuan Pembelajaran</th>
-            <th>Indikator Butir Soal</th>
-            <th>Level</th>
-            <th>Bentuk</th>
-            <th>Kunci</th>
-            <th>Skor</th>
+          <tr style="background: #f2f2f2;">
+            <th style="border: 1px solid #000; padding: 4pt; text-align: center;">No</th>
+            <th style="border: 1px solid #000; padding: 4pt;">Capaian / Tujuan Pembelajaran</th>
+            <th style="border: 1px solid #000; padding: 4pt;">Indikator Butir Soal</th>
+            <th style="border: 1px solid #000; padding: 4pt; text-align: center;">Level</th>
+            <th style="border: 1px solid #000; padding: 4pt; text-align: center;">Bentuk</th>
+            <th style="border: 1px solid #000; padding: 4pt; text-align: center;">Kunci</th>
+            <th style="border: 1px solid #000; padding: 4pt; text-align: center;">Skor</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -1246,21 +1633,36 @@ function exportToWordDocx(pkg) {
       <meta charset='utf-8'>
       <title>${pkg.judul}</title>
       <style>
+        @page Section1 {
+          size: 595.3pt 841.9pt; /* A4: 210mm x 297mm */
+          margin: 54.0pt 54.0pt 54.0pt 54.0pt; /* 1.9cm (0.75in) Margins */
+          mso-header-margin: 35.4pt;
+          mso-footer-margin: 35.4pt;
+          mso-paper-source: 0;
+        }
+        div.Section1 { page: Section1; }
         body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.4; color: #000; }
         h2 { text-align: center; font-size: 14pt; margin-bottom: 4pt; color: #1E3C72; }
         .meta { text-align: center; font-size: 10pt; font-style: italic; margin-bottom: 15pt; border-bottom: 2px solid #000; padding-bottom: 8pt; }
         .page-break { page-break-before: always; }
+        table { border-collapse: collapse; width: 100%; margin: 8pt 0; font-size: 10pt; }
+        th, td { border: 1px solid #000; padding: 4pt 6pt; }
+        th { background-color: #f2f2f2; text-align: center; font-weight: bold; }
+        sub { vertical-align: sub; font-size: 8pt; }
+        sup { vertical-align: super; font-size: 8pt; }
       </style>
     </head>
     <body>
-      <h2>${pkg.judul.toUpperCase()}</h2>
-      <div class='meta'>Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang} | Topik: ${pkg.topik_utama} | Pendekatan: ${pkg.stimulus_model || 'Kontekstual'}</div>
-      ${questionsPart}
+      <div class="Section1">
+        <h2>${pkg.judul.toUpperCase()}</h2>
+        <div class='meta'>Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang} | Topik: ${pkg.topik_utama} | Pendekatan: ${pkg.stimulus_model || 'Kontekstual'}${exportSavedOnly ? ' (Koleksi Soal Pilihan Guru)' : ''}</div>
+        ${questionsPart}
 
-      <div class="page-break"></div>
-      ${solutionsPart}
+        <div class="page-break"></div>
+        ${solutionsPart}
 
-      ${kisiPart}
+        ${kisiPart}
+      </div>
     </body>
     </html>
   `;
@@ -1269,7 +1671,7 @@ function exportToWordDocx(pkg) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${pkg.judul.replace(/\s+/g, "_")}.doc`;
+  a.download = `${pkg.judul.replace(/\s+/g, "_")}${exportSavedOnly ? '_Pilihan' : ''}.doc`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -1278,8 +1680,21 @@ function exportToWordDocx(pkg) {
 
 // MARKDOWN EXPORTER
 function exportToMarkdownFile(pkg) {
+  const exportSavedOnly = document.getElementById("chkExportSavedOnly")?.checked;
+  let questionsA = pkg.daftar_soal || [];
+  let questionsB = pkg.daftar_soal_paket_b || [];
+
+  if (exportSavedOnly) {
+    if (savedQuestions.length === 0) {
+      alert("⚠️ Belum ada soal yang ditandai untuk diekspor ke Markdown.");
+      return;
+    }
+    questionsA = questionsA.filter(q => q.is_pinned === true);
+    if (questionsB.length > 0) questionsB = questionsB.filter(q => q.is_pinned === true);
+  }
+
   let lines = [
-    `# ${pkg.judul}`,
+    `# ${pkg.judul}${exportSavedOnly ? ' (Soal Pilihan Guru)' : ''}`,
     `**Jenjang:** ${pkg.jenjang} | **Topik Pokok:** ${pkg.topik_utama} | **Model:** ${pkg.stimulus_model || 'Kontekstual'}\n`,
     `---\n`,
     `## 📝 Lembar Soal (Paket A)\n`
@@ -1310,18 +1725,18 @@ function exportToMarkdownFile(pkg) {
     });
   };
 
-  formatMdList(pkg.daftar_soal);
+  formatMdList(questionsA);
 
-  if (pkg.daftar_soal_paket_b && pkg.daftar_soal_paket_b.length > 0) {
+  if (questionsB.length > 0) {
     lines.push(`\n## 📝 Lembar Soal Paralel (Paket B)\n`);
-    formatMdList(pkg.daftar_soal_paket_b);
+    formatMdList(questionsB);
   }
 
   const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${pkg.judul.replace(/\s+/g, "_")}.md`;
+  a.download = `${pkg.judul.replace(/\s+/g, "_")}${exportSavedOnly ? '_Pilihan' : ''}.md`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -1330,12 +1745,27 @@ function exportToMarkdownFile(pkg) {
 
 // JSON EXPORTER
 function exportToJsonFile(pkg) {
-  const jsonStr = JSON.stringify(pkg, null, 2);
+  const exportSavedOnly = document.getElementById("chkExportSavedOnly")?.checked;
+  let exportData = pkg;
+
+  if (exportSavedOnly) {
+    if (savedQuestions.length === 0) {
+      alert("⚠️ Belum ada soal yang ditandai untuk diekspor ke JSON.");
+      return;
+    }
+    exportData = JSON.parse(JSON.stringify(pkg));
+    exportData.daftar_soal = exportData.daftar_soal.filter(q => q.is_pinned === true);
+    if (exportData.daftar_soal_paket_b) {
+      exportData.daftar_soal_paket_b = exportData.daftar_soal_paket_b.filter(q => q.is_pinned === true);
+    }
+  }
+
+  const jsonStr = JSON.stringify(exportData, null, 2);
   const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${pkg.judul.replace(/\s+/g, "_")}.json`;
+  a.download = `${pkg.judul.replace(/\s+/g, "_")}${exportSavedOnly ? '_Pilihan' : ''}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
