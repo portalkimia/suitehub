@@ -56,7 +56,7 @@
       background-color: var(--obs-bg);
       font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       color: var(--obs-text-primary);
-      padding-top: 40px;
+      padding-top: 36px;
       padding-bottom: 72px;
       line-height: 1.5;
       transition: background-color 0.25s ease, color 0.25s ease;
@@ -65,7 +65,7 @@
       overflow-x: hidden;
     }
 
-    /* AMBIENT GLOW EFFECTS (OBSIDIAN AESTHETIC) */
+    /* AMBIENT GLOW EFFECTS */
     .ambient-glow-1 {
       position: fixed;
       top: -120px;
@@ -100,6 +100,7 @@
     .text-emerald { color: var(--obs-tertiary) !important; }
     .text-violet { color: var(--obs-primary) !important; }
     .border-emerald { border-color: var(--obs-border) !important; }
+    .border-violet { border-color: rgba(167, 139, 250, 0.4) !important; }
 
     /* CARDS */
     .card {
@@ -137,7 +138,7 @@
       color: var(--obs-text-primary);
     }
 
-    /* KARTU AI GEMINI (OBSIDIAN GLOW CARD) */
+    /* KARTU AI GEMINI */
     .ai-card {
       background: linear-gradient(135deg, rgba(167, 139, 250, 0.09) 0%, rgba(18, 18, 21, 0.95) 55%, rgba(52, 211, 153, 0.05) 100%) !important;
       border: 1px solid rgba(167, 139, 250, 0.35) !important;
@@ -149,204 +150,107 @@
       box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(167, 139, 250, 0.18) !important;
     }
 
-    .ai-card .card-title {
-      color: var(--obs-text-primary) !important;
-      font-size: 1.2rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    /* FORM CONTROLS & INPUTS */
-    .form-label {
-      font-size: 0.825rem;
-      font-weight: 600;
-      color: #d4d4d8;
-      margin-bottom: 0.45rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .form-label.text-emerald {
-      color: var(--obs-tertiary) !important;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 700;
-    }
-
+    /* FORM CONTROLS */
     .form-control, .form-select {
-      background-color: var(--obs-surface-low) !important;
+      background-color: var(--obs-surface-high) !important;
       border: 1px solid var(--obs-border) !important;
       color: var(--obs-text-primary) !important;
-      border-radius: var(--obs-radius-sm) !important;
-      padding: 0.65rem 0.95rem;
+      border-radius: var(--obs-radius-md);
       font-size: 0.9rem;
-      font-family: inherit;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-    }
-
-    .form-control::placeholder {
-      color: var(--obs-outline) !important;
-      opacity: 0.85;
-      font-size: 0.875rem;
+      padding: 0.62rem 0.85rem;
+      transition: all 0.2s ease;
     }
 
     .form-control:focus, .form-select:focus {
-      background-color: var(--obs-surface-high) !important;
+      background-color: var(--obs-surface-highest) !important;
       border-color: var(--obs-primary) !important;
       box-shadow: 0 0 0 3px var(--obs-primary-glow) !important;
       color: var(--obs-text-primary) !important;
       outline: none;
     }
 
-    .form-select option {
-      background-color: var(--obs-surface-container);
-      color: var(--obs-text-primary);
+    .form-control::placeholder {
+      color: var(--obs-text-muted);
+      opacity: 0.75;
     }
 
-    /* ACCORDION (OBSIDIAN SPEC) */
-    .accordion-item {
-      background-color: var(--obs-surface-container) !important;
-      border: 1px solid var(--obs-border) !important;
-      border-radius: var(--obs-radius-md) !important;
-      margin-bottom: 10px;
-      overflow: hidden;
-      box-shadow: none !important;
-      transition: border-color 0.2s ease;
-    }
-
-    .accordion-item:hover {
-      border-color: var(--obs-border-hover) !important;
-    }
-
-    .accordion-button {
-      background-color: var(--obs-surface-container) !important;
-      color: var(--obs-text-primary) !important;
+    .form-label {
       font-weight: 600;
-      font-size: 0.92rem;
-      padding: 0.9rem 1.25rem;
-      border: none;
-      box-shadow: none !important;
-      transition: all 0.2s ease;
-    }
-
-    .accordion-button:not(.collapsed) {
-      background-color: var(--obs-surface-high) !important;
-      color: var(--obs-primary) !important;
-      border-bottom: 1px solid var(--obs-border);
-      box-shadow: inset 0 -1px 0 var(--obs-border) !important;
-    }
-
-    .accordion-button::after {
-      filter: invert(1) brightness(0.6);
-      transition: transform 0.25s ease;
-    }
-
-    .accordion-button:not(.collapsed)::after {
-      filter: invert(72%) sepia(50%) saturate(1200%) hue-rotate(210deg) brightness(105%) contrast(100%);
-    }
-
-    .accordion-body {
-      background-color: var(--obs-surface) !important;
-      padding: 1.35rem;
-      color: var(--obs-text-primary);
-    }
-
-    /* CHECKBOXES & PROFIL LULUSAN */
-    .profil-box {
-      background-color: var(--obs-surface-low) !important;
-      border: 1px solid var(--obs-border) !important;
-      border-radius: var(--obs-radius-md);
-      padding: 1.2rem;
-    }
-
-    .form-check-input {
-      background-color: var(--obs-surface-high);
-      border: 1px solid var(--obs-border);
-      border-radius: 4px;
-      width: 1.15em;
-      height: 1.15em;
-      margin-top: 0.15em;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .form-check-input:checked {
-      background-color: var(--obs-primary);
-      border-color: var(--obs-primary);
-      box-shadow: 0 0 8px var(--obs-primary-glow);
-    }
-
-    .form-check-input:focus {
-      border-color: var(--obs-primary);
-      box-shadow: 0 0 0 3px var(--obs-primary-glow);
-    }
-
-    .form-check-label {
-      color: #e4e4e7;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      padding-left: 0.2rem;
+      font-size: 0.82rem;
+      color: var(--obs-text-secondary);
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     /* BUTTONS */
-    .btn-primary, #tombolAI {
-      background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%) !important;
+    .btn-primary {
+      background: linear-gradient(135deg, var(--obs-primary) 0%, #8b5cf6 100%) !important;
       border: none !important;
-      border-radius: var(--obs-radius-sm) !important;
-      padding: 0.75rem 1.5rem !important;
-      font-weight: 700 !important;
-      color: #0a0012 !important;
-      box-shadow: 0 4px 16px var(--obs-primary-glow) !important;
-      transition: all 0.2s ease;
+      color: #0c071e !important;
+      font-weight: 700;
       letter-spacing: -0.01em;
-    }
-
-    .btn-primary:hover, #tombolAI:hover {
-      background: linear-gradient(135deg, #8b5cf6 0%, #c4b5fd 100%) !important;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 22px rgba(167, 139, 250, 0.4) !important;
-      color: #0a0012 !important;
-    }
-
-    .btn-success, #tombolSubmit {
-      background: linear-gradient(135deg, #059669 0%, #34d399 100%) !important;
-      border: none !important;
-      border-radius: var(--obs-radius-md) !important;
-      padding: 0.95rem 1.6rem !important;
-      font-weight: 700 !important;
-      font-size: 1.05rem !important;
-      color: #001a12 !important;
-      box-shadow: 0 4px 18px var(--obs-tertiary-glow) !important;
+      border-radius: var(--obs-radius-md);
+      padding: 0.65rem 1.4rem;
+      box-shadow: 0 4px 14px var(--obs-primary-glow);
       transition: all 0.2s ease;
     }
 
-    .btn-success:hover, #tombolSubmit:hover {
-      background: linear-gradient(135deg, #10b981 0%, #6ee7b7 100%) !important;
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%) !important;
+      box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
       transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(52, 211, 153, 0.38) !important;
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--obs-tertiary) 0%, #059669 100%) !important;
+      border: none !important;
       color: #001a12 !important;
+      font-weight: 700;
+      border-radius: var(--obs-radius-md);
+      padding: 0.65rem 1.4rem;
+      box-shadow: 0 4px 14px var(--obs-tertiary-glow);
+      transition: all 0.2s ease;
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #6ee7b7 0%, var(--obs-tertiary) 100%) !important;
+      box-shadow: 0 6px 20px rgba(52, 211, 153, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline-secondary {
+      border-color: var(--obs-border) !important;
+      color: var(--obs-text-secondary) !important;
+      background: transparent;
+      border-radius: var(--obs-radius-md);
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline-secondary:hover {
+      border-color: var(--obs-border-hover) !important;
+      color: var(--obs-text-primary) !important;
+      background-color: var(--obs-surface-high) !important;
     }
 
     .btn-outline-danger {
-      border: 1px solid rgba(239, 68, 68, 0.4) !important;
-      background: rgba(239, 68, 68, 0.06) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
       color: #f87171 !important;
-      border-radius: var(--obs-radius-md) !important;
-      padding: 0.95rem 1.5rem !important;
-      font-weight: 700 !important;
-      font-size: 1.05rem !important;
+      background: transparent;
+      border-radius: var(--obs-radius-md);
       transition: all 0.2s ease;
     }
 
     .btn-outline-danger:hover {
-      background-color: var(--obs-error) !important;
+      background-color: #3b1111 !important;
       border-color: var(--obs-error) !important;
-      color: #09090b !important;
-      box-shadow: 0 4px 18px rgba(239, 68, 68, 0.3) !important;
-      transform: translateY(-1px);
+      color: #fca5a5 !important;
     }
 
     /* TOP BAR ACTION BUTTONS */
@@ -380,13 +284,79 @@
     .dot-online { background-color: var(--obs-tertiary); box-shadow: 0 0 6px var(--obs-tertiary); }
     .dot-offline { background-color: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
 
-    /* RESULT AREA */
-    .alert-obsidian {
+    /* CHECKBOX PROFIL */
+    .profil-box {
+      background-color: var(--obs-surface-low);
+      border: 1px solid var(--obs-border);
+      border-radius: var(--obs-radius-md);
+      padding: 1.1rem 1.25rem;
+    }
+
+    .form-check-input {
       background-color: var(--obs-surface-high) !important;
-      border: 1px solid var(--obs-tertiary) !important;
+      border: 1px solid var(--obs-outline) !important;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 1.15em;
+      height: 1.15em;
+      transition: all 0.15s ease;
+    }
+
+    .form-check-input:checked {
+      background-color: var(--obs-tertiary) !important;
+      border-color: var(--obs-tertiary) !important;
+      box-shadow: 0 0 8px var(--obs-tertiary-glow);
+    }
+
+    .form-check-label {
+      color: var(--obs-text-secondary);
+      font-size: 0.86rem;
+      cursor: pointer;
+      user-select: none;
+      padding-top: 1px;
+    }
+
+    .form-check-input:checked + .form-check-label {
+      color: var(--obs-text-primary);
+      font-weight: 500;
+    }
+
+    /* ACCORDION (OBSIDIAN PRECISION) */
+    .accordion-item {
+      background-color: var(--obs-surface-low) !important;
+      border: 1px solid var(--obs-border) !important;
+      border-radius: var(--obs-radius-md) !important;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .accordion-button {
+      background-color: var(--obs-surface-high) !important;
       color: var(--obs-text-primary) !important;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45) !important;
-      border-radius: var(--obs-radius-lg);
+      font-weight: 600;
+      font-size: 0.92rem;
+      padding: 0.95rem 1.25rem;
+      border: none !important;
+      box-shadow: none !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .accordion-button:not(.collapsed) {
+      background-color: var(--obs-surface-highest) !important;
+      color: var(--obs-primary) !important;
+      border-bottom: 1px solid var(--obs-border) !important;
+    }
+
+    .accordion-button::after {
+      filter: invert(1) brightness(0.8);
+      margin-left: auto;
+    }
+
+    .accordion-body {
+      background-color: var(--obs-surface-container) !important;
+      padding: 1.25rem;
     }
 
     /* BORDER ACCENT */
@@ -415,6 +385,164 @@
       padding: 0.9rem 1.4rem;
     }
 
+    /* ==========================================================================
+       FITUR BARU 1: QUICK TAGS (MATERI CEPAT KIMIA)
+       ========================================================================== */
+    .quick-tags-container {
+      background: var(--obs-surface-low);
+      border: 1px solid var(--obs-border);
+      border-radius: var(--obs-radius-md);
+      padding: 0.85rem 1rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .quick-tag-pill {
+      background: var(--obs-surface-high);
+      border: 1px solid var(--obs-border);
+      color: var(--obs-text-secondary);
+      border-radius: 9999px;
+      padding: 0.32rem 0.75rem;
+      font-size: 0.76rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      user-select: none;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .quick-tag-pill:hover {
+      border-color: var(--obs-primary);
+      color: var(--obs-primary);
+      background: var(--obs-surface-highest);
+      transform: translateY(-1px);
+    }
+
+    .quick-tag-pill.active {
+      background: rgba(167, 139, 250, 0.18);
+      border-color: var(--obs-primary);
+      color: #ede9fe;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(167, 139, 250, 0.25);
+    }
+
+    .quick-tag-pill .tag-media-badge {
+      font-size: 0.65rem;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(52, 211, 153, 0.2);
+      color: var(--obs-tertiary);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       FITUR BARU 2: DRAG & DROP BERKAS MEDIA / UPLOAD ZONE
+       ========================================================================== */
+    .obs-dropzone {
+      border: 2px dashed var(--obs-border);
+      background-color: var(--obs-surface-low);
+      border-radius: var(--obs-radius-md);
+      padding: 1.1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      margin-bottom: 0.75rem;
+    }
+
+    .obs-dropzone:hover, .obs-dropzone.dragover {
+      border-color: var(--obs-primary);
+      background-color: rgba(167, 139, 250, 0.08);
+      box-shadow: 0 0 15px rgba(167, 139, 250, 0.15);
+    }
+
+    .file-preview-card {
+      background: var(--obs-surface-high);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      border-radius: var(--obs-radius-md);
+      padding: 0.6rem 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ==========================================================================
+       FITUR BARU 3: ANIMASI PROGRESS BERTAHAP
+       ========================================================================== */
+    .stepped-progress-container {
+      background: var(--obs-surface-high);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      border-radius: var(--obs-radius-md);
+      padding: 1rem 1.25rem;
+      margin-top: 0.9rem;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .stepped-bar-bg {
+      background: var(--obs-surface-highest);
+      border-radius: 9999px;
+      height: 7px;
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--obs-border);
+    }
+
+    .stepped-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 50%, #34d399 100%);
+      border-radius: 9999px;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px rgba(167, 139, 250, 0.5);
+    }
+
+    /* ==========================================================================
+       FITUR BARU 4: MICRO AI CO-PILOT BUTTON & HIGHLIGHT
+       ========================================================================== */
+    .btn-micro-copilot {
+      background: rgba(167, 139, 250, 0.12);
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      color: #ede9fe;
+      border-radius: 6px;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.74rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      margin-left: auto;
+      margin-right: 12px;
+    }
+
+    .btn-micro-copilot:hover {
+      background: rgba(167, 139, 250, 0.25);
+      border-color: var(--obs-primary);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(167, 139, 250, 0.35);
+    }
+
+    @keyframes highlightPulse {
+      0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6); border-color: var(--obs-tertiary); }
+      50% { box-shadow: 0 0 15px 3px rgba(52, 211, 153, 0.4); border-color: var(--obs-tertiary); }
+      100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+    }
+
+    .field-highlight {
+      animation: highlightPulse 2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     /* LIGHT MODE COMPATIBILITY */
     [data-bs-theme="light"] {
       --obs-bg: #f4f4f5;
@@ -441,14 +569,7 @@
     [data-bs-theme="light"] .accordion-button::after {
       filter: none;
     }
-    
-    [data-bs-theme="light"] .form-label {
-      color: #334155;
-    }
   </style>
-
-  <!-- Konfigurasi Terpusat PortalKimia Suite -->
-  <script src="../config.js"></script>
 </head>
 <body>
 
@@ -456,11 +577,11 @@
   <div class="ambient-glow-1"></div>
   <div class="ambient-glow-2"></div>
 
-  <div class="container position-relative" style="max-width: 950px; z-index: 2;">
+  <div class="container position-relative" style="max-width: 960px; z-index: 2;">
     
     <!-- TOP BAR NAVIGATION & CONFIG BUTTONS -->
     <div class="d-flex justify-content-between align-items-center gap-2 mb-3" style="position: relative; z-index: 10;">
-      <!-- Tombol Kembali ke Portal Utama & Brand Logo -->
+      <!-- Brand & Link Portal Utama -->
       <div class="d-flex align-items-center gap-2">
         <a href="../" class="top-action-btn text-decoration-none me-1" title="Kembali ke Beranda PortalKimia Suite">
           <span class="material-symbols-outlined" style="font-size: 16px;">arrow_back</span>
@@ -483,7 +604,7 @@
       </div>
 
       <div class="d-flex gap-2">
-        <!-- Tombol Pengaturan Backend GAS (Untuk GitHub Hosting) -->
+        <!-- Tombol Pengaturan Backend GAS -->
         <button id="btnBackendConfig" onclick="bukaModalBackend()" class="top-action-btn" title="Atur URL Google Apps Script Backend">
           <span class="dot-status dot-offline" id="backendDot"></span>
           <span class="material-symbols-outlined" style="font-size: 16px;">cloud_sync</span>
@@ -497,8 +618,8 @@
       </div>
     </div>
 
-    <!-- HEADER / HERO SECTION (PORTALKIMIA OBSIDIAN) -->
-    <div class="text-center mb-5 mt-1">
+    <!-- HEADER / HERO SECTION -->
+    <div class="text-center mb-4 mt-1">
       <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background-color: var(--obs-surface-high); border: 1px solid var(--obs-border);">
         <span class="material-symbols-outlined text-violet" style="font-size: 16px;">auto_stories</span>
         <span class="text-xs font-mono font-semibold text-violet" style="font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;">PortalKimia • Modul Ajar AI</span>
@@ -508,8 +629,8 @@
       <h2 style="font-weight: 800; letter-spacing: -0.03em; color: var(--obs-text-primary); font-size: 2.1rem; margin-bottom: 0.4rem;">
         Generator Administrasi Kimia
       </h2>
-      <p style="color: var(--obs-text-secondary); font-size: 0.95rem; max-width: 600px; margin: 0 auto;">
-        Otomatisasi Modul Ajar &amp; Lesson Plan Berbasis AI dengan Integrasi Pedagogis Terstruktur
+      <p style="color: var(--obs-text-secondary); font-size: 0.95rem; max-width: 620px; margin: 0 auto;">
+        Otomatisasi Modul Ajar &amp; Lesson Plan Berbasis Multi-Model Gemini dengan Integrasi Media Interaktif
       </p>
     </div>
     
@@ -521,16 +642,44 @@
             <span class="material-symbols-outlined text-violet" style="font-size: 24px;">psychology</span>
             <h5 class="card-title m-0">Asisten AI Perancang Dokumen</h5>
           </div>
-          <span class="badge" id="statusSimpan" style="display:none; font-size: 0.75rem; background-color: var(--obs-tertiary); color: #001a12; font-weight: 700; border-radius: 6px; padding: 0.35rem 0.65rem;">
-            Disimpan Otomatis ✓
-          </span>
+          <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-outline-info d-flex align-items-center gap-1.5" onclick="bukaModalMediaPortal()" style="border-radius: 20px; font-size: 0.76rem; border-color: rgba(52,211,153,0.4); color: var(--obs-tertiary);">
+              <span class="material-symbols-outlined" style="font-size: 16px;">science</span>
+              <span>Media PortalKimia (<strong id="badgeJumlahMedia">8</strong>)</span>
+            </button>
+            <span class="badge" id="statusSimpan" style="display:none; font-size: 0.75rem; background-color: var(--obs-tertiary); color: #001a12; font-weight: 700; border-radius: 6px; padding: 0.35rem 0.65rem;">
+              Disimpan Otomatis ✓
+            </span>
+          </div>
         </div>
-        <p class="small mb-4 mt-2" style="color: var(--obs-text-secondary);">
-          Tentukan parameter dan tempelkan referensi bahan ajar untuk hasil presisi berbasis model Gemini.
+        <p class="small mb-3 mt-1" style="color: var(--obs-text-secondary);">
+          Gunakan Quick Tags, tentukan model pembelajaran, unggah berkas rujukan, atau tautkan media interaktif PortalKimia.
         </p>
+
+        <!-- FITUR 1: QUICK TAGS TOPIK KIMIA -->
+        <div class="quick-tags-container">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex align-items-center gap-1.5">
+              <span class="material-symbols-outlined text-violet" style="font-size: 15px;">sell</span>
+              <span style="font-size: 0.78rem; font-weight: 700; color: var(--obs-text-primary);">Quick Tags Materi Kimia:</span>
+            </div>
+            <!-- Tab Filter Jenjang -->
+            <div class="d-flex gap-1">
+              <button type="button" class="btn btn-sm py-0 px-2 rounded-pill text-xs" id="tabQuickAll" onclick="filterQuickTags('ALL')" style="font-size: 0.7rem; background: var(--obs-surface-highest); color: var(--obs-text-primary);">Semua</button>
+              <button type="button" class="btn btn-sm py-0 px-2 rounded-pill text-xs" id="tabQuickE" onclick="filterQuickTags('10')" style="font-size: 0.7rem; color: var(--obs-text-secondary);">Fase E (10)</button>
+              <button type="button" class="btn btn-sm py-0 px-2 rounded-pill text-xs" id="tabQuickF11" onclick="filterQuickTags('11')" style="font-size: 0.7rem; color: var(--obs-text-secondary);">Fase F (11)</button>
+              <button type="button" class="btn btn-sm py-0 px-2 rounded-pill text-xs" id="tabQuickF12" onclick="filterQuickTags('12')" style="font-size: 0.7rem; color: var(--obs-text-secondary);">Fase F (12)</button>
+              <button type="button" class="btn btn-sm py-0 px-2 rounded-pill text-xs" id="tabQuickMedia" onclick="filterQuickTags('MEDIA')" style="font-size: 0.7rem; color: var(--obs-tertiary);">⚡ Terhubung Media</button>
+            </div>
+          </div>
+          <!-- Baris Tag Scrollable -->
+          <div id="quickTagsList" class="d-flex flex-wrap gap-1.5" style="max-height: 105px; overflow-y: auto;">
+            <!-- Rendered by JavaScript -->
+          </div>
+        </div>
         
         <div class="row">
-          <div class="col-md-12 mb-3">
+          <div class="col-md-6 mb-3">
             <label class="form-label" for="jenisDokumen">
               <span class="material-symbols-outlined text-violet" style="font-size: 16px;">description</span>
               Jenis Dokumen Administrasi
@@ -540,21 +689,43 @@
               <option value="Lesson Plan">Lesson Plan (Harian - Max 2 Pertemuan)</option>
             </select>
           </div>
+
+          <!-- FITUR 2: PILIHAN CEPAT MODEL PEMBELAJARAN -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="aiModelPembelajaran">
+              <span class="material-symbols-outlined text-violet" style="font-size: 16px;">model_training</span>
+              Pilihan Cepat Model Pembelajaran
+            </label>
+            <select id="aiModelPembelajaran" class="form-select border-violet" onchange="sinkronModelKeForm()">
+              <option value="Otomatis">Otomatis / AI (Dipilihkan Terbaik Secara Pedagogis)</option>
+              <option value="Problem-Based Learning (PBL)">Problem-Based Learning (PBL)</option>
+              <option value="Project-Based Learning (PjBL)">Project-Based Learning (PjBL)</option>
+              <option value="Discovery Learning">Discovery Learning</option>
+              <option value="Inkuiri Terbimbing (Inquiry Learning)">Inkuiri Terbimbing (Inquiry Learning)</option>
+              <option value="Cooperative Learning - Jigsaw">Cooperative Learning - Jigsaw</option>
+              <option value="Cooperative Learning - STAD">Cooperative Learning - STAD</option>
+              <option value="Cooperative Learning - TGT (Teams Games Tournament)">Cooperative Learning - TGT</option>
+              <option value="Cooperative Learning - Think-Pair-Share (TPS)">Cooperative Learning - Think-Pair-Share</option>
+              <option value="Cooperative Learning - Numbered Heads Together (NHT)">Cooperative Learning - NHT</option>
+              <option value="STEM (Science, Technology, Engineering, & Mathematics)">STEM (Science, Tech, Engineering, Math)</option>
+            </select>
+          </div>
+
           <div class="col-md-4 mb-3">
             <label class="form-label" for="aiKelas">
               <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">school</span>
               Jenjang / Kelas
             </label>
-            <input type="text" id="aiKelas" class="form-control" placeholder="Contoh: 12">
+            <input type="text" id="aiKelas" class="form-control" placeholder="Contoh: 12" oninput="sinkronKelasKeForm()">
           </div>
-          <div class="col-md-4 mb-3">
+          <div class="col-md-5 mb-3">
             <label class="form-label" for="aiTopik">
               <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">science</span>
               Topik / Materi
             </label>
-            <input type="text" id="aiTopik" class="form-control" placeholder="Contoh: Sifat Koligatif">
+            <input type="text" id="aiTopik" class="form-control" placeholder="Contoh: Sifat Koligatif Larutan" oninput="sinkronTopikKeForm()">
           </div>
-          <div class="col-md-4 mb-3">
+          <div class="col-md-3 mb-3">
             <label class="form-label" for="aiPertemuan">
               <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">calendar_today</span>
               Jumlah Pertemuan
@@ -573,17 +744,69 @@
           </div>
         </div>
 
-        <div class="mb-4">
-          <label class="form-label" for="aiBahanAjar">
-            <span class="material-symbols-outlined text-violet" style="font-size: 16px;">menu_book</span>
-            Referensi Bahan Ajar (Opsional)
+        <!-- FITUR 4: DRAG & DROP BERKAS MEDIA / UPLOAD ZONE -->
+        <div class="mb-3">
+          <label class="form-label">
+            <span class="material-symbols-outlined text-violet" style="font-size: 16px;">upload_file</span>
+            Rujukan Media Pembelajaran / Dokumen Pendukung (Opsional)
           </label>
-          <textarea id="aiBahanAjar" class="form-control" rows="3" placeholder="Tempelkan ekstraksi materi dari Gem atau naskah bahan ajar di sini..."></textarea>
+          
+          <!-- Dropzone -->
+          <div id="dropzoneArea" class="obs-dropzone" onclick="document.getElementById('fileUploadInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event)">
+            <input type="file" id="fileUploadInput" style="display: none;" accept=".html,.htm,.txt,.md,.pdf,.png,.jpg,.jpeg,.webp" onchange="handleFileSelect(event)">
+            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+              <span class="material-symbols-outlined text-violet" style="font-size: 26px;">cloud_upload</span>
+              <span class="fw-bold" style="font-size: 0.88rem; color: var(--obs-text-primary);">Tarik &amp; Lepas Berkas di Sini, atau <span class="text-violet text-decoration-underline">Pilih dari Komputer</span></span>
+            </div>
+            <div class="small" style="font-size: 0.74rem; color: var(--obs-text-muted);">
+              Mendukung berkas simulasi <code>.html</code>, teks/LKM <code>.txt</code>, dokumen <code>.pdf</code>, atau foto diagram <code>.png/.jpg</code> (Diproses Multimodal Gemini)
+            </div>
+          </div>
+
+          <!-- Preview File Terunggah -->
+          <div id="filePreviewContainer" style="display: none;" class="file-preview-card">
+            <div class="d-flex align-items-center gap-2.5">
+              <span class="material-symbols-outlined text-emerald" id="filePreviewIcon" style="font-size: 22px;">task</span>
+              <div>
+                <div class="fw-bold text-xs text-light" id="filePreviewName" style="font-size: 0.82rem;">nama-file.html</div>
+                <div class="text-muted small" style="font-size: 0.7rem;" id="filePreviewSize">0 KB &bull; Siap dianalisis oleh Gemini</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge rounded-pill bg-dark border border-emerald text-emerald px-2 py-1" style="font-size: 0.68rem;">Multimodal Siap</span>
+              <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1.5" onclick="hapusFileTerunggah()" title="Hapus Berkas">
+                <span class="material-symbols-outlined" style="font-size: 16px;">close</span>
+              </button>
+            </div>
+          </div>
+
+          <textarea id="aiBahanAjar" class="form-control" rows="3" placeholder="Tempelkan ekstraksi materi, ringkasan LKM, atau prompt media interaktif di sini..."></textarea>
         </div>
+
+        <!-- TOMBOL GENERATE UTAMA -->
         <button type="button" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" id="tombolAI" onclick="mintaBantuanAI()">
           <span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span>
           <span>Generate Kerangka Otomatis</span>
         </button>
+
+        <!-- FITUR 5: ANIMASI PROGRESS BERTAHAP -->
+        <div id="containerProgressAI" class="stepped-progress-container">
+          <div class="stepped-bar-bg">
+            <div id="steppedBarFill" class="stepped-bar-fill"></div>
+          </div>
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+              <span class="spinner-border spinner-border-sm text-violet" style="width: 14px; height: 14px;"></span>
+              <span id="labelStepProgress" class="small fw-semibold text-light" style="font-size: 0.82rem;">
+                Menganalisis Kurikulum Merdeka &amp; Capaian Pembelajaran...
+              </span>
+            </div>
+            <span id="persenStepProgress" class="badge rounded-pill" style="background: rgba(167, 139, 250, 0.25); color: var(--obs-primary); font-family: monospace; font-size: 0.75rem;">
+              20%
+            </span>
+          </div>
+        </div>
+
       </div>
     </div>
     
@@ -622,7 +845,7 @@
           <div class="row">
             <div class="col-md-4 mb-3">
               <label class="form-label">Model Pembelajaran</label>
-              <input type="text" class="form-control" name="model">
+              <input type="text" class="form-control" name="model" id="formModelInput">
             </div>
             <div class="col-md-4 mb-3">
               <label class="form-label">Strategi Pembelajaran</label>
@@ -689,16 +912,22 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Pemanfaatan Digital</label>
-            <input type="text" class="form-control" name="digital">
+            <input type="text" class="form-control" name="digital" id="formDigitalInput">
           </div>
         </div>
       </div>
 
       <!-- 2. PEMETAAN ITP (AKORDEON) -->
       <div class="card">
-        <div class="card-header">
-          <span class="material-symbols-outlined text-emerald" style="font-size: 20px;">checklist_rtl</span>
-          <span>2. Pemetaan Indikator Ketercapaian Tujuan Pembelajaran</span>
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-emerald" style="font-size: 20px;">checklist_rtl</span>
+            <span>2. Pemetaan Indikator Ketercapaian Tujuan Pembelajaran</span>
+          </div>
+          <button type="button" class="btn-micro-copilot m-0" onclick="bukaMicroCopilot('itp', 0, event)" title="Poles Rumusan ITP dengan AI">
+            <span class="material-symbols-outlined" style="font-size: 14px;">auto_awesome</span>
+            <span>Co-Pilot ITP</span>
+          </button>
         </div>
         <div class="card-body" id="itpContainer"></div>
       </div>
@@ -757,7 +986,104 @@
   </div>
 
   <!-- =========================================================================
-       MODAL PENGATURAN BACKEND GOOGLE APPS SCRIPT (GITHUB PAGES INTEGRATION)
+       MODAL 1: INTEGRASI MEDIA PORTALKIMIA & SINKRONISASI OTOMATIS
+       ========================================================================= -->
+  <div class="modal fade" id="modalMediaPortal" tabindex="-1" aria-labelledby="modalMediaPortalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-emerald" style="font-size: 22px;">science</span>
+            <h5 class="modal-title fs-6 font-bold m-0" id="modalMediaPortalLabel">Katalog Media Interaktif PortalKimia</h5>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+            <p class="small text-muted m-0" style="color: var(--obs-text-secondary) !important;">
+              Pilih media interaktif untuk langsung mengisi Topik, Kelas, Pemanfaatan Digital, dan skenario lab virtual AI.
+            </p>
+            <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5 shrink-0" onclick="sinkronkanMediaPortalTerbaru()">
+              <span class="material-symbols-outlined" style="font-size: 16px;">sync</span>
+              <span>Sinkronkan Media</span>
+            </button>
+          </div>
+
+          <!-- Filter Pencarian Media -->
+          <div class="input-group mb-3">
+            <span class="input-group-text bg-dark border-secondary text-secondary">
+              <span class="material-symbols-outlined" style="font-size: 18px;">search</span>
+            </span>
+            <input type="text" id="cariMediaInput" class="form-control" placeholder="Cari media, topik, atau kata kunci (contoh: Volta, SPU, Titrasi)..." oninput="renderDaftarMediaPortal()">
+          </div>
+
+          <!-- Grid Kartu Media -->
+          <div id="gridKartuMedia" class="row g-3" style="max-height: 420px; overflow-y: auto;">
+            <!-- Rendered by JavaScript -->
+          </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <span class="small text-muted font-mono" id="labelTotalMediaInfo">8 Media Terverifikasi</span>
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 2: MICRO AI CO-PILOT (POLES BAGIAN TERTENTU)
+       ========================================================================= -->
+  <div class="modal fade" id="modalMicroCopilot" tabindex="-1" aria-labelledby="modalMicroCopilotLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-violet" style="font-size: 22px;">auto_awesome</span>
+            <h5 class="modal-title fs-6 font-bold m-0" id="modalMicroCopilotLabel">Micro AI Co-Pilot &bull; Poles Bagian</h5>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="p-2.5 rounded-3 mb-3" style="background: var(--obs-surface-low); border: 1px solid var(--obs-border);">
+            <div class="text-xs text-secondary mb-1">Target Pemolesan:</div>
+            <div class="fw-bold text-violet small" id="copilotTargetLabel">Pertemuan Ke-1</div>
+          </div>
+
+          <!-- Prompt Pills Cepat -->
+          <div class="mb-3">
+            <label class="form-label" style="font-size: 0.78rem;">Saran Aksi Cepat (Klik untuk memilih):</label>
+            <div class="d-flex flex-wrap gap-1.5">
+              <button type="button" class="btn btn-sm py-1 px-2.5 rounded-pill" onclick="isiPromptCopilot('Tingkatkan level berpikir tingkat tinggi (HOTS), ajak murid bernalar kritis dan menganalisis masalah nyata.')" style="font-size: 0.72rem; background: var(--obs-surface-high); border: 1px solid var(--obs-border); color: #c4b5fd;">⚡ Perkuat HOTS</button>
+              <button type="button" class="btn btn-sm py-1 px-2.5 rounded-pill" onclick="isiPromptCopilot('Tambahkan kegiatan penyelidikan eksperimen virtual lab atau simulasi interaktif pada fase memahami dan mengaplikasi.')" style="font-size: 0.72rem; background: var(--obs-surface-high); border: 1px solid var(--obs-border); color: #6ee7b7;">🔬 Eksperimen Virtual Lab</button>
+              <button type="button" class="btn btn-sm py-1 px-2.5 rounded-pill" onclick="isiPromptCopilot('Rancang aktivitas diskusi kelompok kolaboratif dengan pembagian peran murid yang jelas.')" style="font-size: 0.72rem; background: var(--obs-surface-high); border: 1px solid var(--obs-border); color: #93c5fd;">🤝 Kolaborasi Kelompok</button>
+              <button type="button" class="btn btn-sm py-1 px-2.5 rounded-pill" onclick="isiPromptCopilot('Perdalam integrasi ayat Qur\'an atau Hadits yang selaras dan kuatkan aspek refleksi kehidupan sehari-hari.')" style="font-size: 0.72rem; background: var(--obs-surface-high); border: 1px solid var(--obs-border); color: #fde047;">📖 Refleksi Qur\'ani</button>
+              <button type="button" class="btn btn-sm py-1 px-2.5 rounded-pill" onclick="isiPromptCopilot('Ringkaskan narasi kegiatan menjadi poin-poin padat dan efisien untuk alokasi waktu terbatas.')" style="font-size: 0.72rem; background: var(--obs-surface-high); border: 1px solid var(--obs-border); color: #fca5a5;">⏱️ Ringkas &amp; Padat</button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="copilotInstruksi">
+              <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">edit_note</span>
+              Instruksi Khusus dari Anda:
+            </label>
+            <textarea id="copilotInstruksi" class="form-control" rows="3" placeholder="Contoh: Buat ice breaking tebak unsur kimia, lalu di fase mengaplikasi gunakan simulasi buret titrasi..."></textarea>
+          </div>
+
+          <div id="copilotStatusFeedback" class="small text-violet" style="display: none;"></div>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-1.5" id="btnEksekusiCopilot" onclick="eksekusiPolesCopilot()">
+            <span class="material-symbols-outlined" style="font-size: 16px;">auto_awesome</span>
+            <span>Poles Bagian Ini</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 3: PENGATURAN BACKEND GOOGLE APPS SCRIPT
        ========================================================================= -->
   <div class="modal fade" id="modalBackendConfig" tabindex="-1" aria-labelledby="modalBackendLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -771,7 +1097,7 @@
         </div>
         <div class="modal-body p-4">
           <p class="small text-muted mb-3" style="color: var(--obs-text-secondary) !important;">
-            Karena antarmuka ini di-hosting di <strong>GitHub Pages</strong>, Anda perlu menghubungkannya ke Web App Google Apps Script backend agar proses AI Gemini dan pembuatan dokumen Drive dapat berjalan otomatis.
+            Karena antarmuka ini di-hosting di <strong>GitHub Pages</strong>, hubungkan ke Web App Google Apps Script backend agar fitur AI Gemini dan pencetakan dokumen Google Drive berjalan mulus.
           </p>
 
           <div class="mb-3">
@@ -786,14 +1112,14 @@
           <div class="p-3 rounded-2" style="background-color: var(--obs-surface-low); border: 1px solid var(--obs-border);">
             <div class="fw-bold mb-2 text-violet small d-flex align-items-center gap-1">
               <span class="material-symbols-outlined" style="font-size: 16px;">help</span>
-              Langkah Singkat Mendapatkan URL Web App:
+              Panduan Singkat Mendapatkan URL Web App:
             </div>
             <ol class="small mb-0 ps-3" style="color: var(--obs-text-secondary); line-height: 1.6;">
               <li>Buka file <code>Code.gs</code> di <a href="https://script.google.com" target="_blank" class="text-violet text-decoration-none">Google Apps Script</a>.</li>
               <li>Klik tombol biru <strong>Deploy</strong> (Terapkan) &rarr; <strong>New deployment</strong>.</li>
               <li>Pilih tipe <strong>Web app</strong>.</li>
               <li>Set <strong>Execute as:</strong> <em>Me (email Anda)</em>.</li>
-              <li>Set <strong>Who has access:</strong> <strong class="text-emerald">Anyone (Siapa saja)</strong> &mdash; <em>PENTING untuk akses dari GitHub!</em></li>
+              <li>Set <strong>Who has access:</strong> <strong class="text-emerald">Anyone (Siapa saja)</strong> &mdash; <em>PENTING!</em></li>
               <li>Salin URL Web App dan tempelkan di atas.</li>
             </ol>
           </div>
@@ -848,17 +1174,14 @@
 
     function updateThemeIcon(theme) {
       const btn = document.getElementById('btnThemeToggle');
-      if (theme === 'dark') {
-        btn.innerHTML = '☀️ Mode Terang';
-      } else {
-        btn.innerHTML = '🌙 Mode Obsidian';
+      if (btn) {
+        btn.innerHTML = (theme === 'dark') ? '☀️ Mode Terang' : '🌙 Mode Obsidian';
       }
     }
 
     // =========================================================================
     // 0.1 MANAJEMEN BACKEND GOOGLE APPS SCRIPT (GITHUB PAGES READY)
     // =========================================================================
-    // Konfigurasi default URL Web App GAS (dapat juga disimpan melalui tombol di UI)
     const DEFAULT_GAS_URL = ""; 
 
     function getGasBackendUrl() {
@@ -870,19 +1193,18 @@
       const dot = document.getElementById('backendDot');
       const label = document.getElementById('backendStatusLabel');
       
-      // Jika berjalan di dalam lingkungan asli Google Apps Script
       if (typeof google !== 'undefined' && google.script && google.script.run) {
-        if (dot) { dot.className = 'dot-status dot-online'; }
-        if (label) { label.innerText = 'GAS Internal'; }
+        if (dot) dot.className = 'dot-status dot-online';
+        if (label) label.innerText = 'GAS Internal';
         return;
       }
       
       if (url && url.startsWith('http')) {
-        if (dot) { dot.className = 'dot-status dot-online'; }
-        if (label) { label.innerText = 'GAS Terhubung'; }
+        if (dot) dot.className = 'dot-status dot-online';
+        if (label) label.innerText = 'GAS Terhubung';
       } else {
-        if (dot) { dot.className = 'dot-status dot-offline'; }
-        if (label) { label.innerText = 'Hubungkan GAS'; }
+        if (dot) dot.className = 'dot-status dot-offline';
+        if (label) label.innerText = 'Hubungkan GAS';
       }
     }
 
@@ -897,8 +1219,7 @@
       } else {
         feedback.style.display = 'none';
       }
-      const modalEl = document.getElementById('modalBackendConfig');
-      const modal = new bootstrap.Modal(modalEl);
+      const modal = new bootstrap.Modal(document.getElementById('modalBackendConfig'));
       modal.show();
     }
 
@@ -936,7 +1257,6 @@
 
       const waktuMulai = Date.now();
 
-      // Gunakan Content-Type: text/plain agar browser TIDAK mengirim CORS preflight OPTIONS
       fetch(url, {
         method: 'POST',
         redirect: 'follow',
@@ -956,13 +1276,782 @@
       .catch(err => {
         btnPing.disabled = false;
         feedback.className = 'small mt-2 text-danger';
-        feedback.innerText = `❌ Gagal menghubungi: ${err.message}. Pastikan deployment diset ke 'Who has access: Anyone'.`;
+        feedback.innerText = `❌ Gagal: ${err.message}. Pastikan akses diatur ke 'Anyone'.`;
       });
     }
 
     // =========================================================================
-    // 1. GENERATOR TAMPILAN AKORDEON DINAMIS (14 ITP & 9 Pertemuan)
-    //    Semua ID, NAME, dan hierarki DOM dipertahankan 100% untuk integrasi AI.
+    // 1. DATA KATALOG MEDIA PORTALKIMIA & SINKRONISASI DINAMIS
+    // =========================================================================
+    // Katalog bawaan awal yang terhubung dengan simulasi interaktif
+    const DEFAULT_PORTALKIMIA_MEDIA = [
+      {
+        id: "spu-sejarah-01",
+        title: "Sejarah Perkembangan Sistem Periodik Unsur (SPU)",
+        grade: "10",
+        fase: "Fase E",
+        topic: "Perkembangan Sistem Periodik Unsur",
+        file: "SejarahSPU.html",
+        url: "../media/SejarahSPU.html",
+        description: "Garis waktu interaktif Dobereiner, Newlands, Lothar Meyer, Mendeleev hingga Modern Moseley dilengkapi simulator dan kuis.",
+        digital: "Modul Interaktif: Simulasi Garis Waktu Perkembangan SPU (PortalKimia) untuk penelusuran hukum periodik kimia.",
+        promptBahanAjar: "Simulasi interaktif Sejarah SPU PortalKimia: Murid mengeksplorasi evolusi pengelompokan unsur kimia berdasarkan kenaikan massa atom hingga nomor atom modern (Dobereiner, Newlands, Meyer, Mendeleev, Moseley). Fitur simulasi mencakup pengujian keteraturan sifat unsur dan penyelesaian kuis prediksi letak unsur."
+      },
+      {
+        id: "spu-pergol-02",
+        title: "Penentuan Periode dan Golongan Unsur (A-B & 1-18)",
+        grade: "10",
+        fase: "Fase E",
+        topic: "Sifat Keperiodikan Unsur (Golongan & Periode)",
+        file: "PeriodeGolongan.html",
+        url: "../media/PeriodeGolongan.html",
+        description: "Laboratorium interaktif penentuan letak unsur berdasarkan konfigurasi elektron, elektron valensi, jumlah kulit, serta tabel periodik 118 unsur.",
+        digital: "Modul Interaktif: Lab Penentuan Periode & Golongan SPU (PortalKimia) berbasis web canvas dan tabel periodik 118 unsur.",
+        promptBahanAjar: "Simulasi interaktif Periode dan Golongan PortalKimia: Murid memasukkan nomor atom atau memilih unsur pada tabel periodik untuk mengamati hubungan konfigurasi elektron dengan nomor periode (jumlah kulit n) dan golongan (elektron valensi). Meliputi pemilahan golongan utama (A / 1, 2, 13-18) dan transisi (B / 3-12)."
+      },
+      {
+        id: "bil-kuan-03",
+        title: "Bilangan Kuantum & Bentuk Orbital Atom 3D",
+        grade: "10",
+        fase: "Fase E",
+        topic: "Bilangan Kuantum dan Bentuk Orbital Atom",
+        file: "BilanganKuantum.html",
+        url: "../media/BilanganKuantum.html",
+        description: "Visualisasi 3D empat bilangan kuantum (n, l, m, s), orientasi ruang orbital s, p, d, f, serta penerapan aturan Hund dan Larangan Pauli.",
+        digital: "Modul Interaktif: Visualisasi 3D Orbital & Simulator Bilangan Kuantum (PortalKimia) untuk pemodelan ruang elektron.",
+        promptBahanAjar: "Media Bilangan Kuantum PortalKimia: Menampilkan visualisasi 3D bentuk orbital s (bola), p (balon terpilin), d (daun semanggi), dan f. Murid mensimulasikan penentuan nilai n (utama), l (azimut), m (magnetik), dan s (spin) untuk elektron terakhir suatu atom serta memverifikasi aturan pengisian orbital."
+      },
+      {
+        id: "konfig-kuan-04",
+        title: "Konfigurasi Elektron Mekanika Kuantum & Diagram Orbital",
+        grade: "10",
+        fase: "Fase E",
+        topic: "Konfigurasi Elektron Mekanika Kuantum",
+        file: "KonfigurasiKuantum.html",
+        url: "../media/KonfigurasiKuantum.html",
+        description: "Simulator pengisian elektron subkulit spdf beranimasi spin, diagram tingkat energi Aufbau, dan kestabilan orbital setengah/penuh.",
+        digital: "Modul Interaktif: Simulator Pengisian Subkulit Aufbau & Diagram Orbital (PortalKimia) untuk latihan mandiri interaktif.",
+        promptBahanAjar: "Simulasi Konfigurasi Mekanika Kuantum PortalKimia: Murid mempraktikkan pengisian elektron berdasarkan Prinsip Aufbau (tingkat energi 1s, 2s, 2p, ...), Kaidah Hund (pengisian paralel spin), dan Larangan Pauli. Simulator menyediakan fitur pengecekan otomatis konfigurasi ion dan penyimpangan orbital d (Cr dan Cu)."
+      },
+      {
+        id: "konfig-bohr-05",
+        title: "Konfigurasi Elektron Model Bohr & Kulit Atom (KLMN)",
+        grade: "10",
+        fase: "Fase E",
+        topic: "Struktur Atom & Konfigurasi Bohr",
+        file: "KonfigurasiBohr.html",
+        url: "../media/KonfigurasiBohr.html",
+        description: "Simulasi orbit elektron 2n² pada kulit K, L, M, N untuk unsur golongan utama, jari-jari lintasan elektron, dan spektrum emisi atom.",
+        digital: "Modul Interaktif: Simulator Orbit Kulit Atom Model Niels Bohr (PortalKimia) untuk pemahaman visual kulit elektron.",
+        promptBahanAjar: "Media Konfigurasi Bohr PortalKimia: Memvisualisasikan model atom Niels Bohr dengan peredaran elektron pada lintasan stasioner (kulit K=2, L=8, M=18, N=32). Murid dapat menambahkan elektron pada masing-masing kulit dan melihat emisi foton ketika elektron berpindah lintasan."
+      },
+      {
+        id: "lab-titrasi-06",
+        title: "Virtual Lab Titrasi Asam Basa & Kurva pH Realtime",
+        grade: "11",
+        fase: "Fase F",
+        topic: "Asam Basa dan Titrasi Asam Basa",
+        file: "Laboratorium_Kimia_Virtual.html",
+        url: "../media/Laboratorium_Kimia_Virtual.html",
+        description: "Eksperimen virtual buret dan labu Erlenmeyer, penetesan titran ke analit, perubahan warna indikator fenolftalein, dan plot grafik pH dinamis.",
+        digital: "Modul Interaktif: Laboratorium Virtual Titrasi Asam Basa (PortalKimia) dengan simulasi buret presisi dan grafik pH waktu-nyata.",
+        promptBahanAjar: "Virtual Lab Titrasi Asam Basa PortalKimia: Menghadirkan simulasi laboratorium lengkap dengan buret digital, kran pengatur tetesan, larutan analit HCl/CH3COOH, titran standar NaOH, dan indikator fenolftalein/bromtimol biru. Murid mengamati perubahan warna pada titik ekuivalen dan menyusun kurva titrasi pH vs volume titran."
+      },
+      {
+        id: "sel-volta-07",
+        title: "Simulasi Interaktif Sel Volta & Potensial Sel Elektrokimia",
+        grade: "12",
+        fase: "Fase F",
+        topic: "Sel Volta dan Potensial Sel Elektrokimia",
+        file: "SelVolta.html",
+        url: "../media/SelVolta.html",
+        description: "Simulasi interaktif sel galvanik/volta (Zn-Cu, Fe-Cu, dll.), jembatan garam, voltmeter digital, pergerakan elektron, dan perhitungan E° sel.",
+        digital: "Modul Interaktif: Simulasi Sel Volta & Deret Kereaktifan Logam (PortalKimia) dengan pembacaan voltmeter interaktif.",
+        promptBahanAjar: "Simulasi Sel Volta PortalKimia: Murid memilih elektroda anoda dan katoda (Zn, Cu, Fe, Ag, Mg), larutan elektrolit, dan jembatan garam. Simulator menampilkan arah aliran elektron dari anoda ke katoda, reaksi oksidasi-reduksi di permukaan elektroda, serta pembacaan nilai potensial sel standar (E° sel = E° katoda - E° anoda)."
+      },
+      {
+        id: "sel-elektrolisis-08",
+        title: "Simulasi Interaktif Sel Elektrolisis & Hukum Faraday",
+        grade: "12",
+        fase: "Fase F",
+        topic: "Sel Elektrolisis dan Hukum Faraday",
+        file: "SelElektrolisis.html",
+        url: "../media/SelElektrolisis.html",
+        description: "Simulasi dekomposisi lelehan dan larutan elektrolit, reaksi di anoda dan katoda dengan elektroda inert (Pt/C) atau aktif, serta kalkulasi massa endapan Faraday.",
+        digital: "Modul Interaktif: Simulasi Sel Elektrolisis & Reaksi Redoks Non-Spontan (PortalKimia) berbasis kalkulator Hukum Faraday.",
+        promptBahanAjar: "Simulasi Sel Elektrolisis PortalKimia: Mengajak murid menyelidiki reaksi non-spontan dengan sumber arus listrik DC. Murid dapat menguji elektrolisis lelehan NaCl, larutan CuSO4, KI, dan air dengan elektroda karbon atau tembaga. Simulator memperlihatkan gelembung gas di elektroda, pengendapan logam, dan perhitungan massa zat menurut Hukum Faraday I dan II."
+      }
+    ];
+
+    let portalMediaCatalog = [...DEFAULT_PORTALKIMIA_MEDIA];
+
+    // Sinkronisasi dinamis dari localStorage dan manifest lokal
+    function muatKatalogMediaTersimpan() {
+      try {
+        // 1. Cek dari localStorage (yang sinkron dengan Dashboard Guru Portal Media)
+        const savedMedia = localStorage.getItem('chemportal_materials') || localStorage.getItem('portalkimia_media_custom');
+        if (savedMedia) {
+          const parsed = JSON.parse(savedMedia);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            parsed.forEach(item => {
+              if (!portalMediaCatalog.some(m => m.id === item.id || m.title === item.title)) {
+                portalMediaCatalog.push({
+                  id: item.id || ('cust-' + Date.now()),
+                  title: item.title,
+                  grade: (item.grade || '10').replace('Kelas ', '').trim(),
+                  fase: item.fase || (item.grade === 'Kelas 10' ? 'Fase E' : 'Fase F'),
+                  topic: item.topic || item.title,
+                  file: item.url || item.file || '',
+                  url: item.url || ('../media/' + item.file),
+                  description: item.description || 'Media interaktif pembelajaran kimia.',
+                  digital: `Modul Interaktif: ${item.title} (PortalKimia).`,
+                  promptBahanAjar: `Media Pembelajaran PortalKimia "${item.title}": ${item.description || ''}`
+                });
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.log("Info katalog media lokal:", e);
+      }
+
+      // Update badge jumlah media
+      const badge = document.getElementById('badgeJumlahMedia');
+      if (badge) badge.innerText = portalMediaCatalog.length;
+      const labelTotal = document.getElementById('labelTotalMediaInfo');
+      if (labelTotal) labelTotal.innerText = `${portalMediaCatalog.length} Media Terverifikasi & Terhubung`;
+    }
+
+    function sinkronkanMediaPortalTerbaru() {
+      // Coba fetch dari manifest JSON lokal jika ada
+      fetch('portal_media_manifest.json')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            data.forEach(item => {
+              const idx = portalMediaCatalog.findIndex(m => m.id === item.id);
+              if (idx >= 0) {
+                portalMediaCatalog[idx] = item;
+              } else {
+                portalMediaCatalog.push(item);
+              }
+            });
+          }
+          muatKatalogMediaTersimpan();
+          renderDaftarMediaPortal();
+          renderQuickTags();
+          alert(`✅ Sukses! ${portalMediaCatalog.length} materi media PortalKimia berhasil disinkronkan.`);
+        })
+        .catch(() => {
+          // Fallback ke localStorage sync
+          muatKatalogMediaTersimpan();
+          renderDaftarMediaPortal();
+          renderQuickTags();
+          alert(`✅ Media tersinkronisasi dengan penyimpanan PortalKimia! (${portalMediaCatalog.length} media aktif)`);
+        });
+    }
+
+    function bukaModalMediaPortal() {
+      renderDaftarMediaPortal();
+      const modal = new bootstrap.Modal(document.getElementById('modalMediaPortal'));
+      modal.show();
+    }
+
+    function renderDaftarMediaPortal() {
+      const grid = document.getElementById('gridKartuMedia');
+      const q = (document.getElementById('cariMediaInput')?.value || '').toLowerCase();
+      if (!grid) return;
+
+      const filtered = portalMediaCatalog.filter(m => {
+        if (!q) return true;
+        return (m.title || '').toLowerCase().includes(q) ||
+               (m.topic || '').toLowerCase().includes(q) ||
+               (m.description || '').toLowerCase().includes(q) ||
+               (m.grade || '').includes(q);
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-12 text-center py-5 text-secondary">
+            <span class="material-symbols-outlined" style="font-size: 32px;">search_off</span>
+            <p class="mt-2 small">Tidak ada media yang cocok dengan pencarian "${q}".</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(item => `
+        <div class="col-md-6">
+          <div class="p-3 rounded-3 h-100 d-flex flex-column justify-content-between" style="background: var(--obs-surface-low); border: 1px solid var(--obs-border); transition: all 0.2s ease;">
+            <div>
+              <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <span class="badge rounded-pill" style="background: rgba(167, 139, 250, 0.2); color: var(--obs-primary); font-size: 0.7rem; border: 1px solid rgba(167, 139, 250, 0.3);">
+                  ${item.fase || 'Fase E/F'} &bull; Kelas ${item.grade}
+                </span>
+                <span class="badge rounded-pill" style="background: rgba(52, 211, 153, 0.15); color: var(--obs-tertiary); font-size: 0.68rem; border: 1px solid rgba(52, 211, 153, 0.3);">
+                  HTML5 Simulation
+                </span>
+              </div>
+              <h6 class="fw-bold mb-1 text-light" style="font-size: 0.88rem; line-height: 1.3;">
+                ${item.title}
+              </h6>
+              <p class="small text-muted mb-3" style="font-size: 0.74rem; line-height: 1.4; color: var(--obs-text-secondary) !important;">
+                ${item.description}
+              </p>
+            </div>
+            <div class="pt-2 border-top border-secondary-subtle d-flex justify-content-between align-items-center">
+              ${item.url ? `
+                <a href="${item.url}" target="_blank" class="small text-decoration-none text-violet d-flex align-items-center gap-1" style="font-size: 0.75rem;" title="Buka Simulasi di Tab Baru">
+                  <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span>
+                  <span>Uji Simulasi</span>
+                </a>
+              ` : '<span></span>'}
+              <button type="button" class="btn btn-sm btn-primary py-1 px-2.5 d-flex align-items-center gap-1" onclick="terapkanMediaKeGenerator('${item.id}')" style="font-size: 0.75rem;">
+                <span class="material-symbols-outlined" style="font-size: 14px;">input</span>
+                <span>Terapkan</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function terapkanMediaKeGenerator(mediaId) {
+      const media = portalMediaCatalog.find(m => m.id === mediaId);
+      if (!media) return;
+
+      // Isi input kendali AI
+      document.getElementById('aiKelas').value = media.grade;
+      document.getElementById('aiTopik').value = media.topic || media.title;
+      
+      // Isi Bahan Ajar dengan konteks simulasi
+      const areaBahan = document.getElementById('aiBahanAjar');
+      areaBahan.value = media.promptBahanAjar || `Simulasi Interaktif: ${media.title}\n${media.description}`;
+
+      // Sinkronkan ke formulir dokumen
+      if (document.getElementsByName('kelas')[0]) document.getElementsByName('kelas')[0].value = media.grade;
+      if (document.getElementsByName('topik')[0]) document.getElementsByName('topik')[0].value = media.topic || media.title;
+      if (document.getElementsByName('digital')[0]) document.getElementsByName('digital')[0].value = media.digital || `Modul Interaktif: Simulasi ${media.title} (PortalKimia).`;
+
+      // Simpan perubahan ke draft
+      simpanDraft();
+
+      // Tutup modal
+      const modalEl = document.getElementById('modalMediaPortal');
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+
+      // Sorot form
+      highlightInputFields(['topik', 'kelas', 'digital']);
+
+      alert(`✅ Media "${media.title}" berhasil dihubungkan ke Generator! Topik, Kelas, dan Pemanfaatan Digital telah disesuaikan.`);
+    }
+
+    // =========================================================================
+    // 2. QUICK TAGS MANAGEMENT
+    // =========================================================================
+    const STANDARD_TOPICS = [
+      // FASE E (KELAS 10)
+      { grade: '10', title: 'Hakikat Ilmu Kimia & Metode Ilmiah', mediaId: null },
+      { grade: '10', title: 'Struktur Atom & Konfigurasi Bohr', mediaId: 'konfig-bohr-05' },
+      { grade: '10', title: 'Bilangan Kuantum dan Bentuk Orbital Atom', mediaId: 'bil-kuan-03' },
+      { grade: '10', title: 'Konfigurasi Elektron Mekanika Kuantum', mediaId: 'konfig-kuan-04' },
+      { grade: '10', title: 'Perkembangan Sistem Periodik Unsur', mediaId: 'spu-sejarah-01' },
+      { grade: '10', title: 'Sifat Keperiodikan Unsur (Golongan & Periode)', mediaId: 'spu-pergol-02' },
+      { grade: '10', title: 'Ikatan Kimia (Ion, Kovalen, & Logam)', mediaId: null },
+      { grade: '10', title: 'Hukum-Hukum Dasar Kimia & Stoikiometri', mediaId: null },
+      { grade: '10', title: 'Kimia Hijau (Green Chemistry) Berkelanjutan', mediaId: null },
+
+      // FASE F (KELAS 11)
+      { grade: '11', title: 'Bentuk Molekul & Gaya Antarmolekul', mediaId: null },
+      { grade: '11', title: 'Termokimia & Perubahan Entalpi Reaksi', mediaId: null },
+      { grade: '11', title: 'Laju Reaksi & Teori Tumbukan', mediaId: null },
+      { grade: '11', title: 'Kesetimbangan Kimia & Azas Le Chatelier', mediaId: null },
+      { grade: '11', title: 'Asam Basa dan Titrasi Asam Basa', mediaId: 'lab-titrasi-06' },
+      { grade: '11', title: 'Larutan Penyangga (Buffer)', mediaId: null },
+      { grade: '11', title: 'Hidrolisis Garam', mediaId: null },
+      { grade: '11', title: 'Kelarutan & Hasil Kali Kelarutan (Ksp)', mediaId: null },
+      { grade: '11', title: 'Sistem Koloid & Pemanfaatannya', mediaId: null },
+
+      // FASE F (KELAS 12)
+      { grade: '12', title: 'Sifat Koligatif Larutan', mediaId: null },
+      { grade: '12', title: 'Reaksi Redoks & Penyetaraan Reaksi', mediaId: null },
+      { grade: '12', title: 'Sel Volta dan Potensial Sel Elektrokimia', mediaId: 'sel-volta-07' },
+      { grade: '12', title: 'Sel Elektrolisis dan Hukum Faraday', mediaId: 'sel-elektrolisis-08' },
+      { grade: '12', title: 'Kimia Unsur Golongan Utama & Transisi', mediaId: null },
+      { grade: '12', title: 'Senyawa Karbon & Turunan Alkana', mediaId: null },
+      { grade: '12', title: 'Makromolekul (Polimer, Karbohidrat, Protein)', mediaId: null }
+    ];
+
+    let activeQuickFilter = 'ALL';
+
+    function filterQuickTags(filter) {
+      activeQuickFilter = filter;
+      ['tabQuickAll', 'tabQuickE', 'tabQuickF11', 'tabQuickF12', 'tabQuickMedia'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.background = 'transparent';
+          el.style.color = 'var(--obs-text-secondary)';
+        }
+      });
+
+      const activeBtnId = filter === 'ALL' ? 'tabQuickAll' : 
+                          filter === '10' ? 'tabQuickE' : 
+                          filter === '11' ? 'tabQuickF11' : 
+                          filter === '12' ? 'tabQuickF12' : 'tabQuickMedia';
+      const activeBtn = document.getElementById(activeBtnId);
+      if (activeBtn) {
+        activeBtn.style.background = 'var(--obs-surface-highest)';
+        activeBtn.style.color = (filter === 'MEDIA') ? 'var(--obs-tertiary)' : 'var(--obs-text-primary)';
+      }
+
+      renderQuickTags();
+    }
+
+    function renderQuickTags() {
+      const container = document.getElementById('quickTagsList');
+      if (!container) return;
+
+      // Gabungkan topik standar dengan media di portal catalog
+      let allTopics = [...STANDARD_TOPICS];
+
+      portalMediaCatalog.forEach(m => {
+        if (!allTopics.some(t => t.title.toLowerCase() === (m.topic || m.title).toLowerCase())) {
+          allTopics.push({
+            grade: m.grade || '10',
+            title: m.topic || m.title,
+            mediaId: m.id
+          });
+        }
+      });
+
+      const filtered = allTopics.filter(t => {
+        if (activeQuickFilter === 'ALL') return true;
+        if (activeQuickFilter === 'MEDIA') return !!t.mediaId;
+        return t.grade === activeQuickFilter;
+      });
+
+      const currentTopikVal = (document.getElementById('aiTopik')?.value || '').toLowerCase();
+
+      container.innerHTML = filtered.map(t => {
+        const isActive = currentTopikVal && t.title.toLowerCase().includes(currentTopikVal);
+        const hasMedia = !!t.mediaId;
+        return `
+          <button type="button" class="quick-tag-pill ${isActive ? 'active' : ''}" onclick="pilihQuickTag('${t.title}', '${t.grade}', '${t.mediaId || ''}')">
+            <span>${t.title}</span>
+            <span class="badge rounded-pill" style="font-size: 0.65rem; background: var(--obs-surface-highest); color: var(--obs-text-muted);">K-${t.grade}</span>
+            ${hasMedia ? `<span class="tag-media-badge">⚡ Media</span>` : ''}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function pilihQuickTag(topik, kelas, mediaId) {
+      document.getElementById('aiTopik').value = topik;
+      document.getElementById('aiKelas').value = kelas;
+      sinkronTopikKeForm();
+      sinkronKelasKeForm();
+
+      if (mediaId) {
+        const media = portalMediaCatalog.find(m => m.id === mediaId);
+        if (media) {
+          const areaBahan = document.getElementById('aiBahanAjar');
+          if (!areaBahan.value || confirm("Tautkan skenario simulasi media interaktif PortalKimia ini ke kolom Bahan Ajar?")) {
+            areaBahan.value = media.promptBahanAjar || `Simulasi Interaktif: ${media.title}`;
+            if (document.getElementsByName('digital')[0]) {
+              document.getElementsByName('digital')[0].value = media.digital || `Modul Interaktif: Simulasi ${media.title} (PortalKimia).`;
+            }
+          }
+        }
+      }
+
+      renderQuickTags();
+      simpanDraft();
+    }
+
+    // =========================================================================
+    // 3. MODEL PEMBELAJARAN SYNC
+    // =========================================================================
+    function sinkronModelKeForm() {
+      const selectVal = document.getElementById('aiModelPembelajaran').value;
+      const formModelInput = document.getElementById('formModelInput');
+      if (formModelInput) {
+        formModelInput.value = (selectVal === 'Otomatis') ? '' : selectVal;
+      }
+      simpanDraft();
+    }
+
+    function sinkronTopikKeForm() {
+      const val = document.getElementById('aiTopik').value;
+      if (document.getElementsByName('topik')[0]) document.getElementsByName('topik')[0].value = val;
+    }
+
+    function sinkronKelasKeForm() {
+      const val = document.getElementById('aiKelas').value;
+      if (document.getElementsByName('kelas')[0]) document.getElementsByName('kelas')[0].value = val;
+    }
+
+    // =========================================================================
+    // 4. UPLOAD / DRAG & DROP BERKAS (MULTIMODAL GEMINI READY)
+    // =========================================================================
+    window.currentUploadedFile = null;
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      document.getElementById('dropzoneArea')?.classList.add('dragover');
+    }
+
+    function handleDragLeave(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      document.getElementById('dropzoneArea')?.classList.remove('dragover');
+    }
+
+    function handleFileDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      document.getElementById('dropzoneArea')?.classList.remove('dragover');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        prosesFile(e.dataTransfer.files[0]);
+      }
+    }
+
+    function handleFileSelect(e) {
+      if (e.target.files && e.target.files[0]) {
+        prosesFile(e.target.files[0]);
+      }
+    }
+
+    function prosesFile(file) {
+      if (!file) return;
+
+      const fileName = file.name;
+      const fileSize = (file.size / 1024).toFixed(1) + ' KB';
+      const fileExt = fileName.split('.').pop().toLowerCase();
+
+      // Tampilkan info preview file
+      document.getElementById('filePreviewContainer').style.display = 'flex';
+      document.getElementById('filePreviewName').innerText = fileName;
+      document.getElementById('filePreviewSize').innerText = `${fileSize} • Terlampir untuk analisis Gemini`;
+
+      const iconEl = document.getElementById('filePreviewIcon');
+      if (['html', 'htm'].includes(fileExt)) iconEl.innerText = 'code';
+      else if (['png', 'jpg', 'jpeg', 'webp'].includes(fileExt)) iconEl.innerText = 'image';
+      else if (fileExt === 'pdf') iconEl.innerText = 'picture_as_pdf';
+      else iconEl.innerText = 'description';
+
+      // 1. JIKA BERKAS HTML / TEKS / MD: Ekstraksi teks langsung di browser
+      if (['html', 'htm', 'txt', 'md'].includes(fileExt)) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          let isiTeks = evt.target.result;
+          if (['html', 'htm'].includes(fileExt)) {
+            // Bersihkan tag script, style, svg dari html
+            try {
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(isiTeks, 'text/html');
+              doc.querySelectorAll('script, style, svg, nav, footer').forEach(el => el.remove());
+              isiTeks = (doc.body.innerText || doc.body.textContent || '').replace(/\s+/g, ' ').trim();
+              if (isiTeks.length > 5000) isiTeks = isiTeks.substring(0, 5000) + "... [ekstraksi dipotong]";
+            } catch(eParse) {}
+          }
+
+          const areaBahan = document.getElementById('aiBahanAjar');
+          const prefix = `[BERKAS EKSTRAKSI: ${fileName}]\n`;
+          if (!areaBahan.value.includes(prefix)) {
+            areaBahan.value = prefix + isiTeks + (areaBahan.value ? "\n\n" + areaBahan.value : "");
+          }
+
+          // Simpan juga sebagai fallback multimodal
+          window.currentUploadedFile = {
+            name: fileName,
+            mimeType: file.type || 'text/plain',
+            base64: btoa(unescape(encodeURIComponent(isiTeks.substring(0, 3000))))
+          };
+          simpanDraft();
+        };
+        reader.readAsText(file);
+      } 
+      // 2. JIKA BERKAS GAMBAR ATAU PDF: Baca sebagai Base64
+      else {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const result = evt.target.result;
+          const base64Data = result.split(',')[1];
+          window.currentUploadedFile = {
+            name: fileName,
+            mimeType: file.type || 'application/octet-stream',
+            base64: base64Data
+          };
+
+          const areaBahan = document.getElementById('aiBahanAjar');
+          if (!areaBahan.value) {
+            areaBahan.value = `[Lampiran Dokumen Multimodal: ${fileName}]\nInstruksi: Analisis dokumen terlampir ini untuk merancang tujuan pembelajaran, ITP, dan langkah kegiatan kimia.`;
+          }
+          simpanDraft();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function hapusFileTerunggah() {
+      window.currentUploadedFile = null;
+      document.getElementById('fileUploadInput').value = '';
+      document.getElementById('filePreviewContainer').style.display = 'none';
+      simpanDraft();
+    }
+
+    // =========================================================================
+    // 5. ANIMASI PROGRESS BERTAHAP
+    // =========================================================================
+    let intervalProgress = null;
+
+    const TAHAPAN_PROGRESS = [
+      { persen: 15, pesan: "Menganalisis Kurikulum Merdeka & Capaian Pembelajaran..." },
+      { persen: 38, pesan: "Menyelaraskan Sintaks Model Pembelajaran Terpilih..." },
+      { persen: 62, pesan: "Mencocokkan Integrasi Nilai Qur'ani & Profil Lulusan..." },
+      { persen: 84, pesan: "Merumuskan Fase Inti (Memahami, Mengaplikasi, Merefleksi) & ITP..." },
+      { persen: 96, pesan: "Memvalidasi Skema JSON & Menyiapkan Formulir..." }
+    ];
+
+    function mulaiAnimasiProgress(modelTerpilih) {
+      const container = document.getElementById('containerProgressAI');
+      const barFill = document.getElementById('steppedBarFill');
+      const labelText = document.getElementById('labelStepProgress');
+      const persenText = document.getElementById('persenStepProgress');
+      
+      if (!container || !barFill) return;
+
+      container.style.display = 'block';
+      let stepIndex = 0;
+
+      function updateStep() {
+        if (stepIndex < TAHAPAN_PROGRESS.length) {
+          const item = TAHAPAN_PROGRESS[stepIndex];
+          let pesan = item.pesan;
+          if (stepIndex === 1 && modelTerpilih && modelTerpilih !== 'Otomatis') {
+            pesan = `Menyelaraskan Sintaks Model "${modelTerpilih}"...`;
+          }
+          barFill.style.width = item.persen + '%';
+          labelText.innerText = pesan;
+          persenText.innerText = item.persen + '%';
+          stepIndex++;
+        }
+      }
+
+      updateStep();
+      intervalProgress = setInterval(updateStep, 1600);
+    }
+
+    function selesaiAnimasiProgress(sukses, pesanAkhir) {
+      if (intervalProgress) clearInterval(intervalProgress);
+      const container = document.getElementById('containerProgressAI');
+      const barFill = document.getElementById('steppedBarFill');
+      const labelText = document.getElementById('labelStepProgress');
+      const persenText = document.getElementById('persenStepProgress');
+
+      if (!container) return;
+
+      if (sukses) {
+        barFill.style.width = '100%';
+        labelText.innerText = pesanAkhir || "✅ Selesai! Rancangan pembelajaran siap.";
+        persenText.innerText = "100%";
+        setTimeout(() => {
+          container.style.display = 'none';
+        }, 2200);
+      } else {
+        labelText.innerText = pesanAkhir || "Terjadi kendala proses AI.";
+        setTimeout(() => {
+          container.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    // =========================================================================
+    // 6. MICRO AI CO-PILOT (POLES BAGIAN TERTENTU)
+    // =========================================================================
+    let copilotState = {
+      bagian: 'pertemuan',
+      nomor: 1
+    };
+
+    function bukaMicroCopilot(bagian, nomor, event) {
+      if (event) event.stopPropagation();
+
+      copilotState.bagian = bagian;
+      copilotState.nomor = nomor || 1;
+
+      const labelTarget = document.getElementById('copilotTargetLabel');
+      const feedback = document.getElementById('copilotStatusFeedback');
+      feedback.style.display = 'none';
+      document.getElementById('copilotInstruksi').value = '';
+
+      if (bagian === 'pertemuan') {
+        const subTopikVal = document.getElementsByName(`subTopik${nomor}`)[0]?.value || '';
+        labelTarget.innerHTML = `Pertemuan Ke-${nomor} ${subTopikVal ? `&mdash; <span class="text-light">"${subTopikVal}"</span>` : ''}`;
+      } else if (bagian === 'itp') {
+        labelTarget.innerHTML = `Indikator Tujuan Pembelajaran (ITP 1 &ndash; 14)`;
+      }
+
+      const modal = new bootstrap.Modal(document.getElementById('modalMicroCopilot'));
+      modal.show();
+    }
+
+    function isiPromptCopilot(teks) {
+      const area = document.getElementById('copilotInstruksi');
+      if (area) {
+        area.value = (area.value ? area.value + " " : "") + teks;
+        area.focus();
+      }
+    }
+
+    function eksekusiPolesCopilot() {
+      const btn = document.getElementById('btnEksekusiCopilot');
+      const feedback = document.getElementById('copilotStatusFeedback');
+      const instruksi = document.getElementById('copilotInstruksi').value;
+      const gasUrl = getGasBackendUrl();
+
+      feedback.style.display = 'block';
+      feedback.className = 'small text-violet mt-2';
+      feedback.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5"></span> Co-Pilot sedang memoles bagian ini...';
+      btn.disabled = true;
+
+      // Kumpulkan data bagian saat ini
+      let currentData = {};
+      if (copilotState.bagian === 'pertemuan') {
+        const j = copilotState.nomor;
+        ['subTopik', 'ayat', 'zona', 'awal', 'memahami', 'mengaplikasi', 'merefleksi', 'penutup'].forEach(field => {
+          const el = document.getElementsByName(field + j)[0];
+          if (el) currentData[field + j] = el.value;
+        });
+      } else if (copilotState.bagian === 'itp') {
+        for (let i = 1; i <= 14; i++) {
+          ['itp', 'asesmen', 'aktivitas'].forEach(field => {
+            const el = document.getElementsByName(field + i)[0];
+            if (el && el.value) currentData[field + i] = el.value;
+          });
+        }
+      }
+
+      const payloadPoles = {
+        action: 'polesBagian',
+        dataPoles: {
+          bagian: copilotState.bagian,
+          nomor: copilotState.nomor,
+          instruksiKhusus: instruksi,
+          currentData: currentData,
+          topik: document.getElementById('aiTopik').value || document.getElementsByName('topik')[0]?.value || '',
+          kelas: document.getElementById('aiKelas').value || document.getElementsByName('kelas')[0]?.value || '12',
+          model: document.getElementById('aiModelPembelajaran').value || ''
+        }
+      };
+
+      // 1. DI LINGKUNGAN NATIVE GAS
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(hasilRespon) {
+            btn.disabled = false;
+            terapkanHasilPoles(hasilRespon);
+          })
+          .withFailureHandler(function(err) {
+            btn.disabled = false;
+            feedback.className = 'small text-danger mt-2';
+            feedback.innerText = "Gagal memoles: " + err.message;
+          })
+          .polesBagian(payloadPoles.dataPoles);
+      }
+      // 2. DI GITHUB PAGES / HOSTING EKSTERNAL
+      else {
+        if (!gasUrl) {
+          btn.disabled = false;
+          feedback.className = 'small text-warning mt-2';
+          feedback.innerText = "Masukkan URL Web App Backend GAS terlebih dahulu.";
+          bukaModalBackend();
+          return;
+        }
+
+        fetch(gasUrl, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payloadPoles)
+        })
+        .then(r => r.json())
+        .then(res => {
+          btn.disabled = false;
+          terapkanHasilPoles(res);
+        })
+        .catch(err => {
+          btn.disabled = false;
+          feedback.className = 'small text-danger mt-2';
+          feedback.innerText = "Gagal memoles: " + err.message;
+        });
+      }
+    }
+
+    function terapkanHasilPoles(hasil) {
+      let data = typeof hasil === 'string' ? JSON.parse(hasil) : hasil;
+      if (data.error) {
+        alert("Respon Error AI Co-Pilot: " + data.error);
+        return;
+      }
+
+      const modalEl = document.getElementById('modalMicroCopilot');
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+
+      let fieldsUpdated = [];
+
+      if (copilotState.bagian === 'pertemuan') {
+        const j = copilotState.nomor;
+        ['subTopik', 'ayat', 'zona', 'awal', 'memahami', 'mengaplikasi', 'merefleksi', 'penutup'].forEach(field => {
+          const key = field + j;
+          const el = document.getElementsByName(key)[0];
+          if (el && data[key] && !data[key].includes("[Isi")) {
+            el.value = data[key];
+            fieldsUpdated.push(key);
+          }
+        });
+
+        // Buka akordeon pertemuan yang baru dipoles
+        const collapsePertemuan = document.getElementById(`collapsePertemuan${j}`);
+        if (collapsePertemuan) {
+          const bsCollapse = new bootstrap.Collapse(collapsePertemuan, { toggle: false });
+          bsCollapse.show();
+        }
+      } 
+      else if (copilotState.bagian === 'itp') {
+        for (let i = 1; i <= 14; i++) {
+          ['itp', 'asesmen', 'aktivitas'].forEach(field => {
+            const key = field + i;
+            const el = document.getElementsByName(key)[0];
+            if (el && data[key] && !data[key].includes("[Isi")) {
+              el.value = data[key];
+              fieldsUpdated.push(key);
+            }
+          });
+        }
+      }
+
+      highlightInputFields(fieldsUpdated);
+      simpanDraft();
+      alert(`✨ Co-Pilot Berhasil! Bagian telah dipoles secara otomatis tanpa mengubah bagian lainnya.`);
+    }
+
+    function highlightInputFields(fieldNames) {
+      fieldNames.forEach(name => {
+        const el = document.getElementsByName(name)[0];
+        if (el) {
+          el.classList.add('field-highlight');
+          setTimeout(() => {
+            el.classList.remove('field-highlight');
+          }, 2200);
+        }
+      });
+    }
+
+    // =========================================================================
+    // 7. GENERATOR TAMPILAN AKORDEON DINAMIS (14 ITP & 9 Pertemuan)
     // =========================================================================
     function bangunTampilanDinamsis() {
       // Pemetaan 14 ITP
@@ -1003,7 +2092,7 @@
       htmlITP += '</div>';
       document.getElementById('itpContainer').innerHTML = htmlITP;
 
-      // Pemetaan 9 Pertemuan
+      // Pemetaan 9 Pertemuan dengan Tombol Micro AI Co-Pilot
       let htmlPertemuan = '<div class="accordion" id="accordionPertemuan">';
       for (let j = 1; j <= 9; j++) {
         let isExpanded = (j === 1) ? 'true' : 'false';
@@ -1012,10 +2101,14 @@
 
         htmlPertemuan += `
           <div class="accordion-item" id="itemPertemuan${j}">
-            <h2 class="accordion-header" id="headingPertemuan${j}">
+            <h2 class="accordion-header d-flex align-items-center" id="headingPertemuan${j}">
               <button class="accordion-button ${collapsedClass}" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePertemuan${j}" aria-expanded="${isExpanded}" aria-controls="collapsePertemuan${j}">
                 <span class="badge rounded-pill me-2 px-2.5 py-1" style="background:#18181b; border:1px solid #27272a; color:#34d399; font-size:0.75rem; font-family:monospace;">P-${j}</span>
                 Pertemuan Ke-${j}
+              </button>
+              <button type="button" class="btn-micro-copilot" onclick="bukaMicroCopilot('pertemuan', ${j}, event)" title="Poles Pertemuan ${j} dengan Micro AI Co-Pilot">
+                <span class="material-symbols-outlined" style="font-size: 13px;">auto_awesome</span>
+                <span>Co-Pilot</span>
               </button>
             </h2>
             <div id="collapsePertemuan${j}" class="accordion-collapse collapse ${isShow}" aria-labelledby="headingPertemuan${j}" data-bs-parent="#accordionPertemuan">
@@ -1063,7 +2156,7 @@
     bangunTampilanDinamsis();
 
     // =========================================================================
-    // 2. FITUR AUTO-SAVE DAN RESET
+    // 8. AUTO-SAVE & DRAFT
     // =========================================================================
     function simpanDraft() {
       const form = document.getElementById('formModul');
@@ -1077,6 +2170,7 @@
       draft.aiPertemuan = document.getElementById('aiPertemuan').value;
       draft.jenisDokumen = document.getElementById('jenisDokumen').value;
       draft.aiBahanAjar = document.getElementById('aiBahanAjar').value;
+      draft.aiModelPembelajaran = document.getElementById('aiModelPembelajaran').value;
       
       const ceklisFields = ['keimanan', 'penalaran', 'kolaborasi', 'kesehatan', 'kewargaan', 'kreativitas', 'kemandirian', 'komunikasi'];
       ceklisFields.forEach(item => {
@@ -1103,6 +2197,7 @@
           if (data.aiPertemuan) document.getElementById('aiPertemuan').value = data.aiPertemuan;
           if (data.jenisDokumen) document.getElementById('jenisDokumen').value = data.jenisDokumen;
           if (data.aiBahanAjar) document.getElementById('aiBahanAjar').value = data.aiBahanAjar;
+          if (data.aiModelPembelajaran) document.getElementById('aiModelPembelajaran').value = data.aiModelPembelajaran;
           
           for (let key in data) {
             const elemen = document.getElementsByName(key)[0];
@@ -1119,7 +2214,7 @@
     }
 
     function resetFormulir() {
-      if (confirm("⚠️ PERHATIAN: Apakah Anda yakin ingin MENGHAPUS SELURUH isian dari form ini? Data yang dihapus tidak dapat dikembalikan.")) {
+      if (confirm("⚠️ PERHATIAN: Apakah Anda yakin ingin MENGHAPUS SELURUH isian dari form ini?")) {
         localStorage.removeItem('draftModulKimia'); 
         document.getElementById('formModul').reset(); 
         document.getElementById('aiKelas').value = '';
@@ -1127,20 +2222,10 @@
         document.getElementById('aiPertemuan').value = '1';
         document.getElementById('jenisDokumen').value = 'Modul Ajar';
         document.getElementById('aiBahanAjar').value = '';
+        document.getElementById('aiModelPembelajaran').value = 'Otomatis';
+        hapusFileTerunggah();
         aturTampilanDokumen();
-        
-        const collapseITP1 = document.getElementById('collapseITP1');
-        if (collapseITP1) {
-          const bsCollapseITP = new bootstrap.Collapse(collapseITP1, { toggle: false });
-          bsCollapseITP.show();
-        }
-        
-        const collapsePertemuan1 = document.getElementById('collapsePertemuan1');
-        if (collapsePertemuan1) {
-          const bsCollapsePertemuan = new bootstrap.Collapse(collapsePertemuan1, { toggle: false });
-          bsCollapsePertemuan.show();
-        }
-
+        renderQuickTags();
         window.scrollTo({ top: 0, behavior: 'smooth' }); 
       }
     }
@@ -1151,11 +2236,13 @@
     window.addEventListener('DOMContentLoaded', function() {
       initTheme();
       updateBackendStatusUI();
+      muatKatalogMediaTersimpan();
+      renderQuickTags();
       muatDraft();
     });
 
     // =========================================================================
-    // 3. FUNGSI SAKELAR DOKUMEN & LOGIKA PENGUNCI (SMART LOCK)
+    // 9. LOGIKA SAKELAR DOKUMEN
     // =========================================================================
     function aturTampilanDokumen() {
       const jenis = document.getElementById('jenisDokumen').value;
@@ -1164,14 +2251,12 @@
       
       if (jenis === 'Lesson Plan') { 
         if (kartuPenutup) kartuPenutup.style.display = 'none'; 
-        // Kunci dropdown Max 2 jika Lesson Plan
         for (let i = 0; i < opsiPertemuan.options.length; i++) {
           opsiPertemuan.options[i].disabled = parseInt(opsiPertemuan.options[i].value) > 2;
         }
         if (parseInt(opsiPertemuan.value) > 2) opsiPertemuan.value = '1';
       } else { 
         if (kartuPenutup) kartuPenutup.style.display = 'block'; 
-        // Buka kunci semua jika Modul Ajar
         for (let i = 0; i < opsiPertemuan.options.length; i++) {
           opsiPertemuan.options[i].disabled = false;
         }
@@ -1179,7 +2264,7 @@
     }
 
     // =========================================================================
-    // 4. PENGISIAN FORM OTOMATIS OLEH AI
+    // 10. PENGISIAN FORM OTOMATIS OLEH AI
     // =========================================================================
     function isiDataSecaraOtomatis(data, inputKelas) {
       const teksFields = ['topik', 'waktu', 'tujuan', 'model', 'strategi', 'metode', 'kemitraan', 'lingkungan', 'digital', 'listAsesmen', 'dapus', 'lampiran'];
@@ -1223,7 +2308,7 @@
     }
 
     // =========================================================================
-    // 4.1 FUNGSI ASISTEN AI GEMINI (HYBRID: GAS NATIVE + GITHUB FETCH API)
+    // 11. ASISTEN AI GEMINI (MULTI-MODEL HYBRID)
     // =========================================================================
     function mintaBantuanAI() {
       const tombolAI = document.getElementById('tombolAI');
@@ -1232,6 +2317,7 @@
       const inputTopik = document.getElementById('aiTopik').value;
       const inputPertemuan = document.getElementById('aiPertemuan').value;
       const inputBahanAjar = document.getElementById('aiBahanAjar').value;
+      const inputModel = document.getElementById('aiModelPembelajaran').value;
       
       if (!inputKelas || !inputTopik) {
         alert("Mohon lengkapi data Jenjang/Kelas dan Topik materi terlebih dahulu.");
@@ -1243,30 +2329,32 @@
         kelas: inputKelas,
         topik: inputTopik,
         pertemuan: inputPertemuan,
-        bahanAjar: inputBahanAjar
+        bahanAjar: inputBahanAjar,
+        modelPembelajaran: inputModel,
+        fileBerkas: window.currentUploadedFile
       };
 
       tombolAI.disabled = true;
-      tombolAI.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Merancang Kerangka AI Gemini...';
+      mulaiAnimasiProgress(inputModel);
 
-      // 1. JIKA BERJALAN DI LINGKUNGAN NATIVE GOOGLE APPS SCRIPT
+      // 1. JIKA BERJALAN DI LINGKUNGAN NATIVE GAS
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(function(hasilJSON) {
             tombolAI.disabled = false;
-            tombolAI.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span><span>Generate Kerangka Otomatis</span>';
+            selesaiAnimasiProgress(true, "✅ Kerangka berhasil dirancang!");
             try {
               const data = typeof hasilJSON === 'string' ? JSON.parse(hasilJSON) : hasilJSON;
               if (data.error) { alert("Gagal dari AI: " + data.error); return; }
               isiDataSecaraOtomatis(data, inputKelas);
-              alert("✅ Kerangka berhasil dirancang oleh Gemini AI! Silakan tinjau kembali isian form.");
+              alert("✅ Kerangka berhasil dirancang oleh Gemini AI! Silakan tinjau isian form.");
             } catch (e) {
               alert("Kesalahan membaca data AI: " + e.message);
             }
           })
           .withFailureHandler(function(error) {
             tombolAI.disabled = false;
-            tombolAI.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span><span>Generate Kerangka Otomatis</span>';
+            selesaiAnimasiProgress(false, "❌ Kesalahan sistem");
             alert("Terjadi kesalahan sistem Apps Script: " + error.message);
           }).panggilGemini(dataInstruksi);
       } 
@@ -1275,12 +2363,11 @@
         const gasUrl = getGasBackendUrl();
         if (!gasUrl) {
           tombolAI.disabled = false;
-          tombolAI.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span><span>Generate Kerangka Otomatis</span>';
-          bukaModalBackend("Silakan masukkan URL Web App Google Apps Script terlebih dahulu agar fitur AI dapat memproses materi.");
+          selesaiAnimasiProgress(false, "Backend belum terhubung");
+          bukaModalBackend("Silakan masukkan URL Web App Google Apps Script backend Anda.");
           return;
         }
 
-        // PENTING: Gunakan text/plain untuk bypass CORS preflight OPTIONS pada Apps Script
         fetch(gasUrl, {
           method: 'POST',
           redirect: 'follow',
@@ -1296,25 +2383,25 @@
         })
         .then(data => {
           tombolAI.disabled = false;
-          tombolAI.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span><span>Generate Kerangka Otomatis</span>';
-          
           if (data.error) {
+            selesaiAnimasiProgress(false, "Respon Error dari Server");
             alert("Respon Error dari Server: " + data.error);
             return;
           }
+          selesaiAnimasiProgress(true, "✅ Kerangka berhasil dirancang!");
           isiDataSecaraOtomatis(data, inputKelas);
           alert("✅ Kerangka berhasil dirancang oleh Gemini AI via Backend GAS! Silakan tinjau form.");
         })
         .catch(err => {
           tombolAI.disabled = false;
-          tombolAI.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span><span>Generate Kerangka Otomatis</span>';
-          alert("Gagal menghubungi Backend Google Apps Script:\n" + err.message + "\n\nPastikan Deployment GAS di-set ke 'Who has access: Anyone'.");
+          selesaiAnimasiProgress(false, "Gagal terhubung");
+          alert("Gagal menghubungi Backend Google Apps Script:\n" + err.message + "\n\nPastikan Deployment GAS diatur ke 'Who has access: Anyone'.");
         });
       }
     }
 
     // =========================================================================
-    // 5. FUNGSI UNTUK MENCETAK DOKUMEN (HYBRID: GAS NATIVE + GITHUB FETCH API)
+    // 12. PENCETAKAN DOKUMEN GOOGLE DOCS & PDF
     // =========================================================================
     function tampilkanHasilCetak(hasil) {
       const areaHasil = document.getElementById('areaHasil');
@@ -1352,21 +2439,18 @@
       const objekForm = Object.fromEntries(formData.entries());
       objekForm.jenisDokumen = document.getElementById('jenisDokumen').value;
 
-      // Ambil seluruh status checkbox
       const ceklisFields = ['keimanan', 'penalaran', 'kolaborasi', 'kesehatan', 'kewargaan', 'kreativitas', 'kemandirian', 'komunikasi'];
       ceklisFields.forEach(item => {
         const el = document.getElementsByName(item)[0];
         if (el) objekForm[item] = el.checked;
       });
 
-      // 1. JIKA BERJALAN DI LINGKUNGAN NATIVE APPS SCRIPT
+      // 1. DI LINGKUNGAN NATIVE GAS
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(function(hasil) {
             tombol.disabled = false;
-            tombol.innerHTML = `
-              <span class="material-symbols-outlined" style="font-size: 22px;">print</span>
-              <span>Proses Cetak Dokumen</span>`;
+            tombol.innerHTML = '<span class="material-symbols-outlined" style="font-size: 22px;">print</span><span>Proses Cetak Dokumen</span>';
             if (hasil.error) {
               areaHasil.innerHTML = `<div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">${hasil.error}</div>`;
               return;
@@ -1375,24 +2459,16 @@
           })
           .withFailureHandler(function(error) {
             tombol.disabled = false;
-            tombol.innerHTML = `
-              <span class="material-symbols-outlined" style="font-size: 22px;">print</span>
-              <span>Proses Cetak Dokumen</span>`;
-            areaHasil.innerHTML = `
-              <div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">
-                <span class="material-symbols-outlined align-middle me-2">error</span>
-                Terjadi kesalahan: ${error.message}
-              </div>`;
+            tombol.innerHTML = '<span class="material-symbols-outlined" style="font-size: 22px;">print</span><span>Proses Cetak Dokumen</span>';
+            areaHasil.innerHTML = `<div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">Terjadi kesalahan: ${error.message}</div>`;
           }).buatModul(objekForm);
       } 
-      // 2. JIKA BERJALAN DI GITHUB PAGES / HOSTING EKSTERNAL
+      // 2. DI GITHUB PAGES / HOSTING EKSTERNAL
       else {
         const gasUrl = getGasBackendUrl();
         if (!gasUrl) {
           tombol.disabled = false;
-          tombol.innerHTML = `
-            <span class="material-symbols-outlined" style="font-size: 22px;">print</span>
-            <span>Proses Cetak Dokumen</span>`;
+          tombol.innerHTML = '<span class="material-symbols-outlined" style="font-size: 22px;">print</span><span>Proses Cetak Dokumen</span>';
           bukaModalBackend("Silakan masukkan URL Web App Google Apps Script Anda untuk memproses cetak dokumen.");
           return;
         }
@@ -1412,30 +2488,17 @@
         })
         .then(hasil => {
           tombol.disabled = false;
-          tombol.innerHTML = `
-            <span class="material-symbols-outlined" style="font-size: 22px;">print</span>
-            <span>Proses Cetak Dokumen</span>`;
-          
+          tombol.innerHTML = '<span class="material-symbols-outlined" style="font-size: 22px;">print</span><span>Proses Cetak Dokumen</span>';
           if (hasil.error) {
-            areaHasil.innerHTML = `
-              <div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">
-                <span class="material-symbols-outlined align-middle me-2">error</span>
-                ${hasil.error}
-              </div>`;
+            areaHasil.innerHTML = `<div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">${hasil.error}</div>`;
             return;
           }
           tampilkanHasilCetak(hasil);
         })
         .catch(err => {
           tombol.disabled = false;
-          tombol.innerHTML = `
-            <span class="material-symbols-outlined" style="font-size: 22px;">print</span>
-            <span>Proses Cetak Dokumen</span>`;
-          areaHasil.innerHTML = `
-            <div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">
-              <span class="material-symbols-outlined align-middle me-2">error</span>
-              Gagal menghubungi Backend Google Apps Script: ${err.message}
-            </div>`;
+          tombol.innerHTML = '<span class="material-symbols-outlined" style="font-size: 22px;">print</span><span>Proses Cetak Dokumen</span>';
+          areaHasil.innerHTML = `<div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">Gagal menghubungi Backend Google Apps Script: ${err.message}</div>`;
         });
       }
     }
