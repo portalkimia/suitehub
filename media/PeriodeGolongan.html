@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id" class="dark scroll-smooth">
 <head>
   <meta charset="UTF-8">
@@ -1957,7 +1957,7 @@
       elementsData.forEach(elem => {
         const opt = document.createElement('option');
         opt.value = elem.z;
-        opt.textContent = ${elem.z}.  () - Periode , Golongan  ();
+        opt.textContent = elem.z + '. ' + elem.s + ' (' + elem.n + ') - Periode ' + elem.p + ', Golongan ' + elem.gA + ' (' + elem.gN + ')';
         if (elem.z === currentSelectedZ) opt.selected = true;
         sel.appendChild(opt);
       });
@@ -2011,17 +2011,17 @@
       const elem = elementsData.find(e => e.z === z) || elementsData[10];
 
       // Left Big Card
-      document.getElementById('disp-elem-z-badge').textContent = Z = ;
+      document.getElementById('disp-elem-z-badge').textContent = 'Z = ' + elem.z;
       document.getElementById('disp-elem-category').textContent = elem.c;
       document.getElementById('disp-elem-symbol').textContent = elem.s;
       document.getElementById('disp-elem-name').textContent = elem.n;
-      document.getElementById('disp-elem-mass').textContent = Massa Atom:  sma;
+      document.getElementById('disp-elem-mass').textContent = 'Massa Atom: ' + elem.m + ' sma';
       document.getElementById('disp-elem-state').textContent = elem.st;
-      document.getElementById('disp-elem-ev-count').textContent = ${elem.ev} Elektron;
+      document.getElementById('disp-elem-ev-count').textContent = elem.ev + ' Elektron Valensi';
 
       // 4 Highlight Cards
       document.getElementById('disp-res-period').textContent = elem.p;
-      document.getElementById('disp-res-period-detail').textContent = Kulit Terbesar n = ;
+      document.getElementById('disp-res-period-detail').textContent = 'Kulit Terbesar n = ' + elem.p;
 
       document.getElementById('disp-res-group-ab').textContent = elem.gA;
       document.getElementById('disp-res-group-ab-detail').textContent = 
@@ -2031,13 +2031,13 @@
       document.getElementById('disp-res-group-num').textContent = elem.gN;
       document.getElementById('disp-res-group-family').textContent = elem.fam;
 
-      document.getElementById('disp-res-block').textContent = Blok ;
-      document.getElementById('disp-res-block-detail').textContent = Subkulit Terakhir ;
+      document.getElementById('disp-res-block').textContent = 'Blok ' + elem.b.toUpperCase();
+      document.getElementById('disp-res-block-detail').textContent = 'Subkulit Valensi ' + elem.val;
 
       // Configurations
       document.getElementById('disp-conf-full').innerHTML = elem.cfg;
       document.getElementById('disp-conf-noble').innerHTML = elem.noble;
-      document.getElementById('disp-valence-info').innerHTML = Kulit  () &rarr;  ev;
+      document.getElementById('disp-valence-info').innerHTML = 'Kulit n=' + elem.p + ' (' + elem.val + ') &rarr; ' + elem.ev + ' ev';
 
       // Detailed Step-by-Step Pedagogical Explanation
       const stepBox = document.getElementById('disp-step-by-step');
@@ -2050,43 +2050,43 @@
       let html = '';
 
       // Step 1: Konfigurasi
-      html += <p><strong>Langkah 1 (Tuliskan Konfigurasi Elektron):</strong><br>;
-      html += Atom <sub></sub> () memiliki  elektron dengan konfigurasi: <strong class="font-mono text-violet-700 dark:text-primary"></strong>.</p>;
+      html += '<p><strong>Langkah 1 (Tuliskan Konfigurasi Elektron):</strong><br>';
+      html += 'Atom <sub>' + elem.z + '</sub>' + elem.s + ' (' + elem.n + ') memiliki ' + elem.z + ' elektron dengan konfigurasi: <strong class="font-mono text-violet-700 dark:text-primary">' + elem.cfg + '</strong> (atau disingkat: <span class="font-mono text-emerald-600 dark:text-tertiary">' + elem.noble + '</span>).</p>';
 
       // Step 2: Periode
-      html += <p><strong>Langkah 2 (Tentukan Periode):</strong><br>;
-      html += Angka koefisien kulit utama terbesar yang ditempati elektron adalah <strong><i>n</i> = </strong>. Maka unsur ini terletak pada <strong>Periode </strong>.</p>;
+      html += '<p class="mt-2"><strong>Langkah 2 (Tentukan Periode):</strong><br>';
+      html += 'Angka koefisien kulit utama terbesar yang ditempati elektron (<i>n</i><sub>maks</sub>) adalah <strong><i>n</i> = ' + elem.p + '</strong>. Maka unsur ' + elem.n + ' terletak pada <strong>Periode ' + elem.p + '</strong>.</p>';
 
       // Step 3: Blok
-      html += <p><strong>Langkah 3 (Tentukan Blok Orbital):</strong><br>;
-      html += Pengisian elektron terakhir berada pada subkulit <strong></strong> (), sehingga unsur ini termasuk dalam <strong>Blok </strong>.</p>;
+      html += '<p class="mt-2"><strong>Langkah 3 (Tentukan Blok Orbital):</strong><br>';
+      html += 'Pengisian elektron terakhir (kulit valensi) berada pada subkulit <strong>' + elem.val + '</strong>, sehingga unsur ini termasuk dalam <strong>Blok ' + elem.b.toUpperCase() + '</strong>.</p>';
 
       // Step 4: Golongan
-      html += <p><strong>Langkah 4 (Tentukan Golongan A/B &amp; IUPAC 1&ndash;18):</strong><br>;
+      html += '<p class="mt-2"><strong>Langkah 4 (Tentukan Golongan A/B &amp; IUPAC 1&ndash;18):</strong><br>';
       if (elem.z === 2) {
-        html += Meskipun konfigurasi Helium berakhir pada <i>1s</i><sup>2</sup> (Blok s), Helium memiliki kulit pertama yang terisi penuh (duplet stabil) dan bersifat inert (tidak reaktif). Oleh karena itu, Helium secara unik diklasifikasikan ke dalam <strong>Golongan VIIIA (Sistem A/B)</strong> atau <strong>Golongan 18 (Sistem IUPAC Modern)</strong> bersama keluarga Gas Mulia.</p>;
+        html += 'Meskipun konfigurasi Helium berakhir pada <i>1s</i><sup>2</sup> (Blok s), Helium memiliki kulit pertama yang terisi penuh (duplet stabil 2 elektron) dan bersifat inert (sangat sukar bereaksi). Oleh karena itu, Helium secara unik diklasifikasikan ke dalam <strong>Golongan VIIIA (Sistem A/B)</strong> atau <strong>Golongan 18 (Sistem IUPAC Modern)</strong> bersama keluarga Gas Mulia lainnya.</p>';
       } else if (elem.b === 's') {
-        html += Pada Blok <i>s</i>, nomor golongan ditentukan langsung oleh jumlah elektron pada subkulit <i>ns</i>. Karena terdapat  elektron pada subkulit terluar, maka unsur ini berada pada <strong>Golongan </strong> (Sistem A/B) atau <strong>Golongan </strong> (Sistem IUPAC 1&ndash;18: ).</p>;
+        html += 'Pada Blok <i>s</i>, nomor golongan ditentukan langsung oleh jumlah elektron pada subkulit <i>ns</i>. Karena terdapat ' + elem.ev + ' elektron pada subkulit terluar, maka unsur ini berada pada <strong>Golongan ' + elem.gA + '</strong> (Sistem Tradisional A/B) atau <strong>Golongan ' + elem.gN + '</strong> (Sistem IUPAC 1&ndash;18: ' + elem.fam + ').</p>';
       } else if (elem.b === 'p') {
         const pCount = elem.ev - 2;
-        html += Pada Blok <i>p</i>, elektron valensi dihitung dari <strong><i>ns</i><sup>2</sup> + <i>np</i><sup></sup> =  elektron valensi</strong>.<br>;
-        html += &bull; Sistem A/B: Golongan Utama = <strong>Golongan </strong>.<br>;
-        html += &bull; Sistem IUPAC: 10 + 2 +  = <strong>Golongan  ()</strong>.</p>;
+        html += 'Pada Blok <i>p</i>, elektron valensi dihitung dari <strong><i>ns</i><sup>2</sup> + <i>np</i><sup>' + pCount + '</sup> = ' + elem.ev + ' elektron valensi</strong>.<br>';
+        html += '&bull; Sistem A/B: Golongan Utama = <strong>Golongan ' + elem.gA + '</strong>.<br>';
+        html += '&bull; Sistem IUPAC: 10 + 2 + ' + pCount + ' = <strong>Golongan ' + elem.gN + ' (' + elem.fam + ')</strong>.</p>';
       } else if (elem.b === 'd') {
-        html += Pada Blok <i>d</i> (Logam Transisi), elektron valensi dihitung dari penjumlahan elektron <strong><i>ns</i> + (<i>n</i>-1)<i>d</i> =  elektron</strong>.<br>;
+        html += 'Pada Blok <i>d</i> (Logam Transisi), elektron valensi dihitung dari penjumlahan elektron <strong><i>ns</i> + (<i>n</i>-1)<i>d</i> = ' + elem.ev + ' elektron</strong>.<br>';
         if (elem.z === 24) {
-          html += <i>Catatan Anomali Kestabilan:</i> Kromium memiliki konfigurasi stabil [Ar] 4s<sup>1</sup> 3d<sup>5</sup> (setengah penuh). Jumlah elektron (1 + 5 = 6), sehingga berada pada <strong>Golongan VIB</strong> atau <strong>Golongan 6</strong>.<br>;
+          html += '<i>Catatan Anomali Kestabilan:</i> Kromium memiliki konfigurasi stabil [Ar] 4s<sup>1</sup> 3d<sup>5</sup> (subkulit d setengah penuh). Jumlah elektron (1 + 5 = 6), sehingga berada pada <strong>Golongan VIB</strong> atau <strong>Golongan 6</strong>.<br>';
         } else if (elem.z === 29) {
-          html += <i>Catatan Anomali Kestabilan:</i> Tembaga memiliki konfigurasi stabil [Ar] 4s<sup>1</sup> 3d<sup>10</sup> (penuh). Jumlah elektron (1 + 10 = 11), sehingga berada pada <strong>Golongan IB</strong> atau <strong>Golongan 11</strong>.<br>;
+          html += '<i>Catatan Anomali Kestabilan:</i> Tembaga memiliki konfigurasi stabil [Ar] 4s<sup>1</sup> 3d<sup>10</sup> (subkulit d penuh). Jumlah elektron (1 + 10 = 11), sehingga berada pada <strong>Golongan IB</strong> atau <strong>Golongan 11</strong>.<br>';
         } else if (elem.ev >= 8 && elem.ev <= 10) {
-          html += Karena jumlah elektron (<i>s</i> + <i>d</i>) bernilai , unsur ini masuk dalam rumpun <strong>Golongan VIIIB (Triad Besi)</strong>, atau dalam sistem IUPAC bernomor <strong>Golongan </strong>.<br>;
+          html += 'Karena jumlah elektron (<i>s</i> + <i>d</i>) bernilai ' + elem.ev + ', unsur ini masuk dalam rumpun <strong>Golongan VIIIB (Triad Besi: Fe, Co, Ni)</strong>, atau dalam sistem IUPAC bernomor <strong>Golongan ' + elem.gN + '</strong>.<br>';
         } else {
-          html += Sesuai aturan Blok d, jumlah  elektron ini menempatkannya pada <strong>Golongan </strong> (Sistem Tradisional) atau <strong>Golongan </strong> (Sistem IUPAC 1&ndash;18).<br>;
+          html += 'Sesuai aturan Blok d, jumlah ' + elem.ev + ' elektron ini menempatkannya pada <strong>Golongan ' + elem.gA + '</strong> (Sistem Tradisional) atau <strong>Golongan ' + elem.gN + '</strong> (Sistem IUPAC 1&ndash;18).<br>';
         }
-        html += </p>;
+        html += '</p>';
       } else if (elem.b === 'f') {
         const series = elem.p === 6 ? 'Lantanida (4f)' : 'Aktinida (5f)';
-        html += Karena elektron terakhir mengisi subkulit <i>f</i>, unsur ini tergolong Logam Transisi Dalam deret <strong></strong>. Sesuai konvensi internasional IUPAC, seluruh deret ini dimasukkan ke dalam <strong>Golongan IIIB</strong> atau <strong>Golongan 3</strong> pada Periode .</p>;
+        html += 'Karena elektron terakhir mengisi subkulit <i>f</i>, unsur ini tergolong Logam Transisi Dalam deret <strong>' + series + '</strong>. Sesuai konvensi internasional IUPAC, seluruh deret ini dimasukkan ke dalam <strong>Golongan IIIB</strong> atau <strong>Golongan 3</strong> pada Periode ' + elem.p + '.</p>';
       }
 
       return html;
@@ -2132,13 +2132,13 @@
           } else if (item === 'lanth-placeholder') {
             const lPh = document.createElement('div');
             lPh.className = 'h-11 sm:h-12 rounded-lg border border-dashed border-purple-400/40 bg-purple-500/10 flex flex-col items-center justify-center text-center text-[9px] font-bold text-purple-700 dark:text-purple-300 cursor-pointer hover:bg-purple-500/20 transition-all';
-            lPh.innerHTML = <span>57-71</span><span class="text-[8px] font-normal">La-Lu</span>;
+            lPh.innerHTML = '<span>57-71</span><span class="text-[8px] font-normal">La-Lu</span>';
             lPh.onclick = () => setElementByZ(57);
             rowDiv.appendChild(lPh);
           } else if (item === 'actin-placeholder') {
             const aPh = document.createElement('div');
             aPh.className = 'h-11 sm:h-12 rounded-lg border border-dashed border-purple-400/40 bg-purple-500/10 flex flex-col items-center justify-center text-center text-[9px] font-bold text-purple-700 dark:text-purple-300 cursor-pointer hover:bg-purple-500/20 transition-all';
-            aPh.innerHTML = <span>89-103</span><span class="text-[8px] font-normal">Ac-Lr</span>;
+            aPh.innerHTML = '<span>89-103</span><span class="text-[8px] font-normal">Ac-Lr</span>';
             aPh.onclick = () => setElementByZ(89);
             rowDiv.appendChild(aPh);
           } else {
@@ -2181,25 +2181,24 @@
 
     function createPeriodicCell(elem) {
       const cell = document.createElement('div');
-      cell.id = pt-cell-;
-      cell.className = pt-cell h-11 sm:h-12 rounded-lg p-0.5 flex flex-col items-center justify-center text-center block- shadow-xs;
+      cell.id = 'pt-cell-' + elem.z;
+      cell.className = 'pt-cell h-11 sm:h-12 rounded-lg p-0.5 flex flex-col items-center justify-center text-center block-' + elem.b + ' shadow-xs cursor-pointer';
       cell.setAttribute('data-z', elem.z);
       cell.setAttribute('data-block', elem.b);
       cell.setAttribute('data-category', elem.c);
       cell.onclick = () => selectElementFromTable(elem.z);
 
       cell.innerHTML = 
-        <span class="text-[9px] font-mono leading-none opacity-80"></span>
-        <span class="text-xs sm:text-sm font-black leading-tight tracking-tight"></span>
-        <span class="text-[8px] truncate max-w-full px-0.5 opacity-90 hidden sm:block"></span>
-      ;
+        '<span class="text-[9px] font-mono leading-none opacity-80">' + elem.z + '</span>' +
+        '<span class="text-xs sm:text-sm font-black leading-tight tracking-tight">' + elem.s + '</span>' +
+        '<span class="text-[8px] truncate max-w-full px-0.5 opacity-90 hidden sm:block">' + elem.n + '</span>';
 
       return cell;
     }
 
     function highlightElementInTable(z) {
       document.querySelectorAll('.pt-cell').forEach(c => c.classList.remove('active-selected'));
-      const activeCell = document.getElementById(pt-cell-);
+      const activeCell = document.getElementById('pt-cell-' + z);
       if (activeCell) activeCell.classList.add('active-selected');
     }
 
@@ -2213,7 +2212,7 @@
         b.className = 'px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-slate-100 dark:bg-surface-container text-slate-700 dark:text-on-surface hover:bg-slate-200';
       });
 
-      const activeBtn = document.getElementById(ilter-btn-);
+      const activeBtn = document.getElementById('filter-btn-' + type);
       if (activeBtn) {
         activeBtn.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all bg-primary text-on-primary shadow-sm';
       }
@@ -2389,67 +2388,59 @@
 
       quizQuestions.forEach((q, idx) => {
         const qCard = document.createElement('div');
-        qCard.id = quiz-card-;
+        qCard.id = 'quiz-card-' + idx;
         qCard.className = 'stitch-card rounded-2xl p-5 shadow-sm space-y-3';
 
         const optHtml = q.options.map((opt, optIdx) => {
           let btnClass = 'p-3 rounded-xl border border-slate-200 dark:border-outline-variant text-left text-xs sm:text-sm font-medium transition-all flex items-start space-x-2.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-surface-container text-slate-700 dark:text-on-surface';
-          let iconHtml = <span class="w-5 h-5 rounded-full border border-slate-300 dark:border-outline flex items-center justify-center text-[10px] font-bold text-slate-500 shrink-0 mt-0.5"></span>;
+          let iconHtml = '<span class="w-5 h-5 rounded-full border border-slate-300 dark:border-outline flex items-center justify-center text-[10px] font-bold text-slate-500 shrink-0 mt-0.5">' + String.fromCharCode(65 + optIdx) + '</span>';
 
           const userAnswer = userQuizAnswers[idx];
           if (userAnswer !== null) {
             if (optIdx === q.answer) {
               btnClass = 'p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50/60 dark:bg-tertiary-container/30 text-left text-xs sm:text-sm font-bold text-emerald-800 dark:text-tertiary flex items-start space-x-2.5';
-              iconHtml = <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">&check;</span>;
+              iconHtml = '<span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">&check;</span>';
             } else if (userAnswer === optIdx) {
               btnClass = 'p-3 rounded-xl border-2 border-rose-500 bg-rose-50/60 dark:bg-rose-950/40 text-left text-xs sm:text-sm font-bold text-rose-800 dark:text-rose-300 flex items-start space-x-2.5';
-              iconHtml = <span class="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">&times;</span>;
+              iconHtml = '<span class="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">&times;</span>';
             } else {
               btnClass += ' opacity-50 cursor-not-allowed';
             }
           }
 
-          return 
-            <button 
-              onclick="selectQuizAnswer(, )" 
-               
-              class=" w-full">
-              
-              <span class="leading-relaxed"></span>
-            </button>
-          ;
+          return '<button onclick="selectQuizAnswer(' + idx + ', ' + optIdx + ')" ' +
+            (userAnswer !== null ? 'disabled' : '') + ' class="' + btnClass + ' w-full">' +
+            iconHtml + '<span class="leading-relaxed">' + opt + '</span></button>';
         }).join('');
 
         let feedbackHtml = '';
         if (userQuizAnswers[idx] !== null) {
           const isCorrect = (userQuizAnswers[idx] === q.answer);
           feedbackHtml = 
-            <div class="mt-3 p-3.5 rounded-xl  text-xs space-y-1">
-              <div class="font-bold flex items-center space-x-1.5 ">
-                <span class="material-symbols-outlined text-[16px]"></span>
-                <span></span>
-              </div>
-              <p class="text-slate-600 dark:text-on-surface-variant leading-relaxed">
-                <strong>Pembahasan:</strong> 
-              </p>
-            </div>
-          ;
+            '<div class="mt-3 p-3.5 rounded-xl ' + (isCorrect ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-200 border border-rose-200 dark:border-rose-800') + ' text-xs space-y-1">' +
+              '<div class="font-bold flex items-center space-x-1.5 ' + (isCorrect ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400') + '">' +
+                '<span class="material-symbols-outlined text-[16px]">' + (isCorrect ? 'check_circle' : 'cancel') + '</span>' +
+                '<span>' + (isCorrect ? 'Jawaban Anda Tepat!' : 'Jawaban Anda Kurang Tepat') + '</span>' +
+              '</div>' +
+              '<p class="text-slate-600 dark:text-on-surface-variant leading-relaxed">' +
+                '<strong>Pembahasan:</strong> ' + q.explanation +
+              '</p>' +
+            '</div>';
         }
 
         qCard.innerHTML = 
-          <div class="flex items-start justify-between">
-            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-violet-100 dark:bg-primary/20 text-violet-700 dark:text-primary">
-              Soal  dari 
-            </span>
-          </div>
-          <div class="text-xs sm:text-sm font-bold text-slate-900 dark:text-on-surface leading-relaxed">
-            
-          </div>
-          <div class="space-y-2 pt-1">
-            
-          </div>
-          
-        ;
+          '<div class="flex items-start justify-between">' +
+            '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-violet-100 dark:bg-primary/20 text-violet-700 dark:text-primary">' +
+              'Soal ' + (idx + 1) + ' dari ' + quizQuestions.length +
+            '</span>' +
+          '</div>' +
+          '<div class="text-xs sm:text-sm font-bold text-slate-900 dark:text-on-surface leading-relaxed">' +
+            q.question +
+          '</div>' +
+          '<div class="space-y-2 pt-1">' +
+            optHtml +
+          '</div>' +
+          feedbackHtml;
 
         container.appendChild(qCard);
       });
@@ -2509,7 +2500,7 @@
             status.className = 'text-sm sm:text-base font-extrabold text-rose-600 dark:text-rose-400';
           }
         } else {
-          status.textContent = Progres:  dari  Soal;
+          status.textContent = 'Progres: ' + answered + ' dari ' + quizQuestions.length + ' Soal';
           status.className = 'text-sm sm:text-base font-extrabold text-slate-900 dark:text-on-surface';
         }
       }
@@ -2578,13 +2569,13 @@
       const score = Math.round((correct / quizQuestions.length) * 100);
 
       document.getElementById('summary-quiz-score').textContent = score;
-      document.getElementById('summary-quiz-answered').textContent = ${answered} / ;
+      document.getElementById('summary-quiz-answered').textContent = answered + ' / ' + quizQuestions.length;
 
       let essayCount = 0;
       if (document.getElementById('lab-essay-1')?.value.trim()) essayCount++;
       if (document.getElementById('lab-essay-2')?.value.trim()) essayCount++;
       if (document.getElementById('lab-essay-3')?.value.trim()) essayCount++;
-      document.getElementById('summary-essay-status').textContent = ${essayCount} / 3 Diisi;
+      document.getElementById('summary-essay-status').textContent = essayCount + ' / 3 Diisi';
 
       const refText = document.getElementById('student-reflection-text')?.value.trim();
       document.getElementById('summary-reflection-status').textContent = refText ? 'Sudah Diisi' : 'Belum';
@@ -2632,23 +2623,23 @@
 
     function generateFormattedTextReport() {
       const data = getStudentReportData();
-      return \uD83D\uDCCB *LAPORAN TUGAS: PORTAL KIMIA SMA*\n +
-        *Materi:* \n +
-        *Pengajar:* Tito Vanzal, S.Pd. \u2022 SMA Progresif Bumi Shalawat\n +
-        -----------------------------------------\n +
-        \uD83D\uDC64 *Nama Siswa:* \n +
-        \uD83C\uDFEB *Kelas / Fase:* \n +
-        \uD83D\uDD22 *No. Absen / NISN:* \n +
-        -----------------------------------------\n +
-        \uD83C\uDFAF *Nilai Kuis Evaluasi:*  / 100 (Benar  dari  Soal)\n +
-        -----------------------------------------\n +
-        \uD83D\uDD2C *Jawaban Esai Kasus 1 (Anomali Cr & Cu):*\n\n\n +
-        \uD83D\uDD2C *Jawaban Esai Kasus 2 (Dilema Posisi Helium):*\n\n\n +
-        \uD83D\uDD2C *Jawaban Esai Kasus 3 (Prediksi Unsur Z = 119):*\n\n +
-        -----------------------------------------\n +
-        \uD83D\uDCA1 *Catatan Refleksi Diri:*\n\n +
-        -----------------------------------------\n +
-        _Dikirim otomatis melalui Portal Pembelajaran Kimia Interaktif_;
+      return '\uD83D\uDCCB *LAPORAN TUGAS: PORTAL KIMIA SMA*\n' +
+        '*Materi:* ' + data.materi + '\n' +
+        '*Pengajar:* Tito Vanzal, S.Pd. \u2022 SMA Progresif Bumi Shalawat\n' +
+        '-----------------------------------------\n' +
+        '\uD83D\uDC64 *Nama Siswa:* ' + data.nama + '\n' +
+        '\uD83C\uDFEB *Kelas / Fase:* ' + data.kelas + '\n' +
+        '\uD83D\uDD22 *No. Absen / NISN:* ' + data.nis + '\n' +
+        '-----------------------------------------\n' +
+        '\uD83C\uDFAF *Nilai Kuis Evaluasi:* ' + data.skor + ' / 100 (Benar ' + data.benar + ' dari ' + data.totalSoal + ' Soal)\n' +
+        '-----------------------------------------\n' +
+        '\uD83D\uDD2C *Jawaban Esai Kasus 1 (Anomali Cr & Cu):*\n' + (data.essay1 || '-') + '\n\n' +
+        '\uD83D\uDD2C *Jawaban Esai Kasus 2 (Dilema Posisi Helium):*\n' + (data.essay2 || '-') + '\n\n' +
+        '\uD83D\uDD2C *Jawaban Esai Kasus 3 (Prediksi Unsur Z = 119):*\n' + (data.essay3 || '-') + '\n\n' +
+        '-----------------------------------------\n' +
+        '\uD83D\uDCA1 *Catatan Refleksi Diri:*\n' + (data.refleksi || '-') + '\n\n' +
+        '-----------------------------------------\n' +
+        '_Dikirim otomatis melalui Portal Pembelajaran Kimia Interaktif_';
     }
 
     function copyReportSummary() {
@@ -2684,7 +2675,7 @@
       const btn = document.getElementById('btn-submit-db');
       const originalText = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div><span>Mengirim Data...</span>;
+      btn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div><span>Mengirim Data...</span>';
 
       // Endpoint Google Apps Script Portal
       const endpointUrl = 'https://script.google.com/macros/s/AKfycbwobr0k-44HFrf3B5YUroeEK-_U13AGVe2urQYDAmL0U43arTQHTvKjUEeM6CuZQvOE/exec';

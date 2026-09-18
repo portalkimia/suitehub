@@ -64,14 +64,16 @@ Agar file HTML yang dibuka dari Google Drive atau link mandiri dapat mengirim ni
 Anda **tidak perlu lagi menambahkan bahan ajar satu per satu**:
 
 1. Di komputer Anda, buka folder:
-   `C:\Users\Tito\.gemini\antigravity\scratch\portal-bahan-ajar\Media_Pembelajaran_Kimia_Drive\`
-2. Buka Google Drive Anda, buat satu folder khusus, misalnya: `📁 Media Kimia Interaktif`.
-3. Klik kanan folder Drive tersebut > **Bagikan (Share)** > ubah ke **"Siapa saja yang memiliki link dapat melihat"** > Salin Link Folder.
-4. Upload semua file `.html` (atau PDF/PPT/Video) dari folder laptop Anda ke folder Google Drive tersebut.
-5. Buka Web Portal Anda > klik tombol kuning **"Auto-Sync Drive"** di bilah atas:
-   - Tempelkan link folder Google Drive Anda.
+   `C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Media_Pembelajaran_Kimia_Drive\`
+2. Buka Google Drive Anda, gunakan folder resmi: `Media_Pembelajaran_Kimia_Drive` (ID: `1ruHfGdoXO35G9SeMfS5Q2nh_MpjHhMrQ`).
+3. Seluruh berkas media pada folder Google Drive dinamai dengan format baku:
+   **`Judul_Kelas_Fase.html`**
+   - Contoh Kelas 10: `Periode_dan_Golongan_10_Fase_E.html`, `Sejarah_Perkembangan_SPU_10_Fase_E.html`
+   - Contoh Kelas 12: `Sel_Volta_12_Fase_F.html`, `Sel_Elektrolisis_12_Fase_F.html`
+   - Contoh Lintas Tingkat / Umum: `Laboratorium_Kimia_Virtual_Umum.html`
+4. Buka Web Portal Anda > klik tombol kuning **"Auto-Sync Drive"** di bilah atas:
    - Klik **"Mulai Pindai &amp; Sinkronkan"**.
-6. **Selesai!** Seluruh bahan ajar di dalam folder Google Drive akan otomatis terbaca judulnya, dideteksi formatnya (HTML/PDF/PPT/Video), dan langsung masuk rapi ke database Google Spreadsheet `BahanAjar` portal Anda!
+5. **Selesai!** Seluruh bahan ajar di dalam folder Google Drive akan otomatis terbaca judulnya, dideteksi formatnya (HTML/PDF/PPT/Video), dipetakan ke jenjang/fase yang sesuai, dan langsung masuk rapi ke database Google Spreadsheet `BahanAjar` portal Anda!
 
 ---
 
