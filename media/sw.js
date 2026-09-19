@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'portal-kimia-v1';
+const CACHE_NAME = 'portal-kimia-v4';
 const STATIC_ASSETS = [
   './',
   './index.html',

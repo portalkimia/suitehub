@@ -375,15 +375,37 @@
         
         <!-- Section Header Bar -->
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pb-3 border-b border-slate-200/80 dark:border-outline-variant/60">
-          <div class="flex items-center gap-2.5">
+          <div class="flex flex-wrap items-center gap-3">
             <div class="w-3 h-3 rounded-md bg-violet-600 dark:bg-primary"></div>
             <h2 class="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-on-surface tracking-tight">
-              Katalog Media Pembelajaran Terbuka
+              Katalog Media Pembelajaran
             </h2>
+
+            <!-- Mode Tampilan: Alur Belajar (Folder) vs Grid Kartu -->
+            <div class="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-surface-container border border-slate-200 dark:border-outline-variant text-xs">
+              <button 
+                id="view-btn-flow" 
+                type="button"
+                onclick="switchViewMode('flow')" 
+                class="px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all bg-white dark:bg-surface-container-high text-violet-600 dark:text-primary shadow-sm cursor-pointer"
+                title="Mode Alur Belajar Berjenjang (Folder Kelas &amp; Bab)">
+                <span class="material-symbols-outlined text-[16px]">account_tree</span>
+                <span>Alur Belajar</span>
+              </button>
+              <button 
+                id="view-btn-grid" 
+                type="button"
+                onclick="switchViewMode('grid')" 
+                class="px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface cursor-pointer"
+                title="Mode Grid Kartu Klasik">
+                <span class="material-symbols-outlined text-[16px]">grid_view</span>
+                <span>Grid Kartu</span>
+              </button>
+            </div>
           </div>
 
-          <div class="flex items-center gap-3 text-xs">
-            <span class="text-slate-500 dark:text-on-surface-variant">
+          <div class="flex flex-wrap items-center gap-2.5 text-xs">
+            <span class="text-slate-500 dark:text-on-surface-variant hidden sm:inline">
               Menampilkan <strong id="displayed-count" class="text-slate-900 dark:text-on-surface font-mono font-bold">0</strong> materi
             </span>
             
@@ -392,16 +414,32 @@
               id="sort-order" 
               onchange="renderMaterials()"
               class="px-2.5 py-1.5 rounded-xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface text-xs focus:outline-none focus:ring-2 focus:ring-violet-500/50 cursor-pointer">
-              <option value="grade_title">Urutkan: Jenjang &amp; Judul</option>
+              <option value="learning_flow">🎯 Alur Belajar Kurikulum</option>
+              <option value="grade_title">Jenjang &amp; Judul</option>
               <option value="title_asc">Judul (A-Z)</option>
               <option value="title_desc">Judul (Z-A)</option>
-              <option value="newest">Terbaru</option>
             </select>
+
+            <!-- Reset Urutan Button -->
+            <button 
+              id="btn-reset-order"
+              type="button"
+              onclick="resetLearningOrder()" 
+              class="hidden px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-surface-container hover:bg-slate-200 dark:hover:bg-surface-bright text-slate-600 dark:text-on-surface-variant border border-slate-200 dark:border-outline-variant flex items-center gap-1 transition-colors cursor-pointer"
+              title="Kembalikan urutan langkah belajar ke alur kurikulum standar">
+              <span class="material-symbols-outlined text-[15px]">restart_alt</span>
+              <span class="hidden sm:inline">Reset Urutan</span>
+            </button>
           </div>
         </div>
 
+        <!-- Alur Belajar Berjenjang (Folder Kelas -> Folder Bab -> Urutan Langkah 1, 2, 3) -->
+        <div id="materials-flow" class="space-y-6">
+          <!-- Dynamically populated by renderHierarchicalLearningPath -->
+        </div>
+
         <!-- Responsive Grid Bento Layout -->
-        <div id="materials-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div id="materials-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
           <!-- Dynamically populated by JavaScript -->
         </div>
 
@@ -927,10 +965,10 @@
             </div>
             <div>
               <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-on-surface">
-                Sinkronisasi Folder Google Drive (AI Smart Classifier)
+                Sinkronisasi Otomatis Google Drive (Smart Classifier)
               </h3>
               <p class="text-xs text-slate-500 dark:text-on-surface-variant">
-                Pindai folder Google Drive secara otomatis &bull; deteksi berkas HTML, PDF, PPT, dan kategorikan ke database portal.
+                Pindai folder Google Drive secara otomatis &bull; Deteksi format <code>Judul_Kelas_Fase</code> &bull; Tanpa perlu Kunci API (100% Mandiri).
               </p>
             </div>
           </div>
@@ -950,8 +988,8 @@
               <input 
                 type="text" 
                 id="driveFolderUrlInput" 
-                value="https://drive.google.com/drive/folders/1ruHfGdoXO35G9SeMfS5Q2nh_MpjHhMrQ"
-                placeholder="https://drive.google.com/drive/folders/1ruHfGdoXO35G9SeMfS5Q2nh_MpjHhMrQ" 
+                value="https://drive.google.com/drive/folders/1oJQYW7QxMvbBhyNmKBNQZrE-yh6cdXBk"
+                placeholder="https://drive.google.com/drive/folders/1oJQYW7QxMvbBhyNmKBNQZrE-yh6cdXBk" 
                 class="flex-1 px-3.5 py-2.5 bg-slate-50 dark:bg-surface-container-low text-slate-900 dark:text-on-surface placeholder:text-slate-400 dark:placeholder:text-secondary-fixed-dim text-xs rounded-xl border border-slate-200 dark:border-outline-variant focus:outline-none focus:ring-2 focus:ring-violet-500 font-mono text-[11px]"
                 onkeydown="if(event.key==='Enter'){event.preventDefault();executeDriveSync();}"
               >
@@ -965,7 +1003,7 @@
             </div>
             <p class="text-[11px] text-slate-500 dark:text-on-surface-variant mt-1.5 flex items-center gap-1.5">
               <span class="material-symbols-outlined text-[14px] text-emerald-600 dark:text-tertiary">folder_open</span>
-              <span>Folder PortalKimia: <strong>Media_Pembelajaran_Kimia_Drive</strong> (<code>1ruHfGdoXO35G9SeMfS5Q2nh_MpjHhMrQ</code>). Media dari proyek lain (seperti D-Chem) otomatis diisolasi.</span>
+              <span>Folder PortalKimia: <strong>Media_Pembelajaran_Kimia_Drive</strong> (<code>1oJQYW7QxMvbBhyNmKBNQZrE-yh6cdXBk</code>). Media dari proyek lain (seperti D-Chem) otomatis diisolasi.</span>
             </p>
           </div>
 
@@ -1473,8 +1511,8 @@
     const DEFAULT_TEACHER_PIN = 'guru123';
     
     // Folder Resmi PortalKimia Google Drive
-    const PORTALKIMIA_DRIVE_FOLDER_ID = '1ruHfGdoXO35G9SeMfS5Q2nh_MpjHhMrQ';
-    const PORTALKIMIA_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1ruHfGdoXO35G9SeMfS5Q2nh_MpjHhMrQ';
+    const PORTALKIMIA_DRIVE_FOLDER_ID = '1oJQYW7QxMvbBhyNmKBNQZrE-yh6cdXBk';
+    const PORTALKIMIA_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1oJQYW7QxMvbBhyNmKBNQZrE-yh6cdXBk';
 
     // Signature materi proyek lain (seperti proyek D-Chem) untuk menjamin isolasi 100%
     const EXCLUDED_PROJECT_PATTERNS = [
@@ -1778,6 +1816,14 @@
         }
       } catch(e) {}
 
+      // Auto-update URL folder Drive jika device masih menyimpan link folder lama
+      try {
+        const savedFolder = localStorage.getItem('portal_drive_folder_url');
+        if (!savedFolder || !savedFolder.includes(PORTALKIMIA_DRIVE_FOLDER_ID)) {
+          localStorage.setItem('portal_drive_folder_url', PORTALKIMIA_DRIVE_FOLDER_URL);
+        }
+      } catch(e) {}
+
       if (!hasLocal) {
         allMaterials = [...defaultCuratedMaterials];
         try {
@@ -1902,11 +1948,597 @@
       renderMaterials();
     }
 
+    // ==========================================
+    // 5. VIEW MODE & HIERARCHICAL LEARNING PATH
+    // ==========================================
+    let currentViewMode = localStorage.getItem('chemportal_view_mode') || 'flow';
+
+    function switchViewMode(mode) {
+      currentViewMode = mode;
+      try {
+        localStorage.setItem('chemportal_view_mode', mode);
+      } catch(e) {}
+      updateViewModeButtons();
+      renderMaterials();
+    }
+
+    function updateViewModeButtons() {
+      const btnFlow = document.getElementById('view-btn-flow');
+      const btnGrid = document.getElementById('view-btn-grid');
+      if (!btnFlow || !btnGrid) return;
+
+      if (currentViewMode === 'flow') {
+        btnFlow.className = 'px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all bg-white dark:bg-surface-container-high text-violet-600 dark:text-primary shadow-sm cursor-pointer';
+        btnGrid.className = 'px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface cursor-pointer';
+      } else {
+        btnGrid.className = 'px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all bg-white dark:bg-surface-container-high text-violet-600 dark:text-primary shadow-sm cursor-pointer';
+        btnFlow.className = 'px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface cursor-pointer';
+      }
+    }
+
+    function showToast(message, icon = 'info') {
+      let toastContainer = document.getElementById('portal-toast-container');
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'portal-toast-container';
+        toastContainer.className = 'fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none';
+        document.body.appendChild(toastContainer);
+      }
+
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900/95 dark:bg-surface-container-highest text-white text-xs font-medium shadow-2xl border border-white/10 backdrop-blur-md transform transition-all duration-300 translate-y-3 opacity-0';
+      toast.innerHTML = `
+        <span class="material-symbols-outlined text-base text-violet-400 dark:text-primary">${icon}</span>
+        <span>${message}</span>
+      `;
+      toastContainer.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-3', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    function normalizeGradeKey(gradeStr) {
+      const g = (gradeStr || '').toLowerCase();
+      if (g.includes('10')) return { key: 'kelas-10', name: 'Kelas 10 (Fase E)', badge: 'Fase E', icon: 'school', color: 'violet', order: 10 };
+      if (g.includes('11')) return { key: 'kelas-11', name: 'Kelas 11 (Fase F)', badge: 'Fase F', icon: 'science', color: 'sky', order: 11 };
+      if (g.includes('12')) return { key: 'kelas-12', name: 'Kelas 12 (Fase F)', badge: 'Fase F', icon: 'bolt', color: 'purple', order: 12 };
+      return { key: 'umum', name: 'Semua Kelas & Laboratorium Terbuka', badge: 'Umum', icon: 'biotech', color: 'emerald', order: 99 };
+    }
+
+    function getMaterialPedagogicalScore(item) {
+      const t = (item.title + ' ' + (item.topic || '') + ' ' + (item.url || '')).toLowerCase();
+      // Kelas 10 Bab 1: Struktur Atom
+      if (t.includes('bohr')) return 1010;
+      if (t.includes('mekanika kuantum') || t.includes('konfigurasi kuantum') || (t.includes('konfigurasi') && !t.includes('bohr'))) return 1020;
+      if (t.includes('bilangan kuantum') || t.includes('orbital')) return 1030;
+      
+      // Kelas 10 Bab 2: SPU
+      if (t.includes('sejarah') || t.includes('dobereiner') || t.includes('mendeleev') || t.includes('perkembangan')) return 1040;
+      if (t.includes('periode') || t.includes('golongan')) return 1050;
+      
+      // Kelas 11
+      if (t.includes('titrasi') || t.includes('asam basa')) return 1110;
+      if (t.includes('termo') || t.includes('kalor') || t.includes('entalpi') || t.includes('lkpd')) return 1120;
+      
+      // Kelas 12
+      if (t.includes('slide') && t.includes('volta')) return 1210;
+      if (t.includes('volta') || t.includes('galvani')) return 1220;
+      if (t.includes('elektrolisis') || t.includes('faraday')) return 1230;
+      
+      return 9999;
+    }
+
+    function getMaterialChapter(item) {
+      const t = (item.title + ' ' + (item.topic || '') + ' ' + (item.description || '')).toLowerCase();
+      const g = (item.grade || '').toLowerCase();
+      
+      if (g.includes('10') || t.includes('bohr') || t.includes('kuantum') || t.includes('spu') || t.includes('periode') || t.includes('mendeleev')) {
+        if (t.includes('spu') || t.includes('periode') || t.includes('golongan') || t.includes('mendeleev') || t.includes('dobereiner') || t.includes('tabel periodik')) {
+          return {
+            id: 'k10-bab2',
+            name: 'Bab 2: Sistem Periodik Unsur (SPU)',
+            desc: 'Evolusi penataan tabel periodik dan penentuan letak periode serta golongan unsur',
+            icon: 'table_chart',
+            order: 2
+          };
+        }
+        return {
+          id: 'k10-bab1',
+          name: 'Bab 1: Struktur Atom & Konfigurasi Elektron',
+          desc: 'Model atom Bohr, konfigurasi subkulit mekanika kuantum, dan 4 bilangan kuantum',
+          icon: 'blur_on',
+          order: 1
+        };
+      }
+      
+      if (g.includes('11') || t.includes('titrasi') || t.includes('asam') || t.includes('termo')) {
+        if (t.includes('termo') || t.includes('kalor') || t.includes('entalpi') || t.includes('lkpd')) {
+          return {
+            id: 'k11-bab2',
+            name: 'Bab 2: Termokimia & Energi Reaksi',
+            desc: 'Perubahan entalpi reaksi, reaksi eksoterm-endoterm, dan kalorimeter',
+            icon: 'local_fire_department',
+            order: 2
+          };
+        }
+        return {
+          id: 'k11-bab1',
+          name: 'Bab 1: Larutan Asam Basa & Titrasi',
+          desc: 'Konsep netralisasi, kurva titrasi pH analitik, dan indikator asam-basa',
+          icon: 'science',
+          order: 1
+        };
+      }
+      
+      if (g.includes('12') || t.includes('volta') || t.includes('elektrolisis') || t.includes('redoks')) {
+        return {
+          id: 'k12-bab1',
+          name: 'Bab 1: Reaksi Redoks & Sel Elektrokimia',
+          desc: 'Prinsip sel Volta spontan, sel elektrolisis industri, deret volta, dan Hukum Faraday',
+          icon: 'bolt',
+          order: 1
+        };
+      }
+      
+      return {
+        id: 'umum-lab',
+        name: 'Laboratorium Virtual & Pengayaan Terbuka',
+        desc: 'Simulasi dan eksplorasi laboratorium kimia interaktif mandiri lintas jenjang',
+        icon: 'biotech',
+        order: 1
+      };
+    }
+
+    function getCustomLearningOrder() {
+      try {
+        const saved = localStorage.getItem('chemportal_learning_order');
+        return saved ? JSON.parse(saved) : [];
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function saveCustomLearningOrder(orderArray) {
+      try {
+        localStorage.setItem('chemportal_learning_order', JSON.stringify(orderArray));
+      } catch(e) {}
+    }
+
+    function moveMaterialStep(materialId, direction) {
+      const item = allMaterials.find(m => String(m.id) === String(materialId));
+      if (!item) return;
+
+      const chap = getMaterialChapter(item);
+      let chapterItems = allMaterials.filter(m => getMaterialChapter(m).id === chap.id);
+
+      const customOrder = getCustomLearningOrder();
+      chapterItems.sort((a, b) => {
+        const idxA = customOrder.indexOf(String(a.id));
+        const idxB = customOrder.indexOf(String(b.id));
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return getMaterialPedagogicalScore(a) - getMaterialPedagogicalScore(b);
+      });
+
+      const currentIndex = chapterItems.findIndex(m => String(m.id) === String(materialId));
+      if (currentIndex === -1) return;
+
+      const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      if (targetIndex < 0 || targetIndex >= chapterItems.length) return;
+
+      // Swap items
+      const temp = chapterItems[currentIndex];
+      chapterItems[currentIndex] = chapterItems[targetIndex];
+      chapterItems[targetIndex] = temp;
+
+      // Build updated customOrder array
+      let newOrder = customOrder.filter(id => !chapterItems.some(m => String(m.id) === String(id)));
+      newOrder.push(...chapterItems.map(m => String(m.id)));
+
+      saveCustomLearningOrder(newOrder);
+      renderMaterials();
+      showToast(`Langkah belajar ${direction === 'up' ? 'dinaikkan' : 'diturunkan'} urutannya!`, 'swap_vert');
+    }
+
+    function getCustomChapterOrder() {
+      try {
+        const saved = localStorage.getItem('chemportal_chapter_order');
+        return saved ? JSON.parse(saved) : [];
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function saveCustomChapterOrder(orderArray) {
+      try {
+        localStorage.setItem('chemportal_chapter_order', JSON.stringify(orderArray));
+      } catch(e) {}
+    }
+
+    function moveChapterOrder(chapterId, gradeKey, direction) {
+      const customChapterOrder = getCustomChapterOrder();
+      const gradeItems = allMaterials.filter(m => normalizeGradeKey(m.grade).key === gradeKey);
+      
+      const chapterObjMap = new Map();
+      gradeItems.forEach(m => {
+        const chap = getMaterialChapter(m);
+        if (!chapterObjMap.has(chap.id)) {
+          chapterObjMap.set(chap.id, chap);
+        }
+      });
+      
+      let chaptersInGrade = Array.from(chapterObjMap.values());
+      chaptersInGrade.sort((a, b) => {
+        const idxA = customChapterOrder.indexOf(a.id);
+        const idxB = customChapterOrder.indexOf(b.id);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.order - b.order;
+      });
+
+      const currentIndex = chaptersInGrade.findIndex(c => c.id === chapterId);
+      if (currentIndex === -1) return;
+
+      const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      if (targetIndex < 0 || targetIndex >= chaptersInGrade.length) return;
+
+      const temp = chaptersInGrade[currentIndex];
+      chaptersInGrade[currentIndex] = chaptersInGrade[targetIndex];
+      chaptersInGrade[targetIndex] = temp;
+
+      const currentGradeChapterIds = chaptersInGrade.map(c => c.id);
+      let newOrder = customChapterOrder.filter(id => !currentGradeChapterIds.includes(id));
+      newOrder.push(...currentGradeChapterIds);
+
+      saveCustomChapterOrder(newOrder);
+      renderMaterials();
+      showToast(`Urutan bab berhasil ${direction === 'up' ? 'dinaikkan' : 'diturunkan'}!`, 'folder_open');
+    }
+
+    function resetLearningOrder() {
+      if (confirm('Kembalikan urutan langkah belajar dan urutan bab ke alur kurikulum standar?')) {
+        localStorage.removeItem('chemportal_learning_order');
+        localStorage.removeItem('chemportal_chapter_order');
+        renderMaterials();
+        showToast('Urutan bab dan materi dikembalikan ke alur standar.', 'restart_alt');
+      }
+    }
+
+    function renderHierarchicalLearningPath(filtered) {
+      const container = document.getElementById('materials-flow');
+      if (!container) return;
+
+      const customOrder = getCustomLearningOrder();
+
+      // 1. Group by Grade
+      const gradeMap = new Map();
+      filtered.forEach(item => {
+        const gradeMeta = normalizeGradeKey(item.grade);
+        if (!gradeMap.has(gradeMeta.key)) {
+          gradeMap.set(gradeMeta.key, {
+            meta: gradeMeta,
+            items: []
+          });
+        }
+        gradeMap.get(gradeMeta.key).items.push(item);
+      });
+
+      // Sort grade groups
+      const sortedGrades = Array.from(gradeMap.values()).sort((a, b) => a.meta.order - b.meta.order);
+
+      let html = '';
+
+      sortedGrades.forEach(gradeGroup => {
+        const { meta: gradeMeta, items: gradeItems } = gradeGroup;
+
+        // Group items in this grade by Chapter (Bab)
+        const chapterMap = new Map();
+        gradeItems.forEach(item => {
+          const chap = getMaterialChapter(item);
+          if (!chapterMap.has(chap.id)) {
+            chapterMap.set(chap.id, {
+              meta: chap,
+              items: []
+            });
+          }
+          chapterMap.get(chap.id).items.push(item);
+        });
+
+        const customChapterOrder = getCustomChapterOrder();
+        const sortedChapters = Array.from(chapterMap.values()).sort((a, b) => {
+          const idxA = customChapterOrder.indexOf(a.meta.id);
+          const idxB = customChapterOrder.indexOf(b.meta.id);
+          if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+          if (idxA !== -1) return -1;
+          if (idxB !== -1) return 1;
+          return a.meta.order - b.meta.order;
+        });
+
+        let chaptersHtml = '';
+
+        sortedChapters.forEach((chapGroup, chapIdx) => {
+          const { meta: chapMeta, items: chapItems } = chapGroup;
+
+          // Sort items within this chapter according to custom order or pedagogical score
+          const sortOrder = document.getElementById('sort-order')?.value || 'learning_flow';
+          chapItems.sort((a, b) => {
+            if (sortOrder === 'title_asc') return (a.title || '').localeCompare(b.title || '');
+            if (sortOrder === 'title_desc') return (b.title || '').localeCompare(a.title || '');
+            
+            const idxA = customOrder.indexOf(String(a.id));
+            const idxB = customOrder.indexOf(String(b.id));
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
+            return getMaterialPedagogicalScore(a) - getMaterialPedagogicalScore(b);
+          });
+
+          const cardsHtml = chapItems.map((item, idx) => {
+            const stepNum = idx + 1;
+            const isFirst = (idx === 0);
+            const isLast = (idx === chapItems.length - 1);
+            return createStepCardHtml(item, stepNum, isFirst, isLast, chapMeta.id);
+          }).join('');
+
+          chaptersHtml += `
+            <details open class="group/bab bg-white dark:bg-surface-container rounded-2xl border border-slate-200 dark:border-outline-variant p-4 sm:p-5 transition-all shadow-sm">
+              <summary class="cursor-pointer list-none flex items-center justify-between gap-3 select-none">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl bg-violet-50 dark:bg-surface-container-high text-violet-600 dark:text-primary flex items-center justify-center shrink-0 border border-violet-100 dark:border-outline-variant">
+                    <span class="material-symbols-outlined text-xl">${chapMeta.icon}</span>
+                  </div>
+                  <div>
+                    <h4 class="text-sm sm:text-base font-headline font-bold text-slate-900 dark:text-on-surface">
+                      ${chapMeta.name}
+                    </h4>
+                    <p class="text-[11px] text-slate-500 dark:text-on-surface-variant mt-0.5">
+                      ${chapMeta.desc}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <!-- Chapter Reorder Controls (Khusus Mode Guru) -->
+                  ${isTeacherMode && sortedChapters.length > 1 ? `
+                    <div class="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 p-1 rounded-xl border border-amber-300 dark:border-amber-800/60 mr-1" onclick="event.stopPropagation()">
+                      <span class="text-[10px] font-bold text-amber-700 dark:text-amber-300 px-1 font-mono hidden sm:inline">Urutan Bab:</span>
+                      <button 
+                        type="button"
+                        onclick="moveChapterOrder('${chapMeta.id}', '${gradeMeta.key}', 'up')" 
+                        ${chapIdx === 0 ? 'disabled class="w-6 h-6 rounded-lg opacity-25 cursor-not-allowed text-slate-400 flex items-center justify-center"' : 'class="w-6 h-6 rounded-lg text-amber-800 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-800/50 active:scale-90 cursor-pointer flex items-center justify-center transition-all"'}
+                        title="Geser Bab Naik">
+                        <span class="material-symbols-outlined text-[15px]">arrow_upward</span>
+                      </button>
+                      <button 
+                        type="button"
+                        onclick="moveChapterOrder('${chapMeta.id}', '${gradeMeta.key}', 'down')" 
+                        ${chapIdx === sortedChapters.length - 1 ? 'disabled class="w-6 h-6 rounded-lg opacity-25 cursor-not-allowed text-slate-400 flex items-center justify-center"' : 'class="w-6 h-6 rounded-lg text-amber-800 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-800/50 active:scale-90 cursor-pointer flex items-center justify-center transition-all"'}
+                        title="Geser Bab Turun">
+                        <span class="material-symbols-outlined text-[15px]">arrow_downward</span>
+                      </button>
+                    </div>
+                  ` : ''}
+                  <span class="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-slate-100 dark:bg-surface-container-high text-slate-700 dark:text-on-surface-variant border border-slate-200 dark:border-outline-variant shrink-0">
+                    ${chapItems.length} Langkah Belajar
+                  </span>
+                  <div class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 group-open/bab:rotate-180 transition-transform duration-200">
+                    <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                  </div>
+                </div>
+              </summary>
+
+              <!-- Sequential Step Cards List -->
+              <div class="mt-4 space-y-3 pt-3 border-t border-slate-100 dark:border-outline-variant/60">
+                ${cardsHtml}
+              </div>
+            </details>
+          `;
+        });
+
+        html += `
+          <details open class="group/grade bg-slate-50/80 dark:bg-surface-container-low rounded-3xl border border-slate-200/90 dark:border-outline-variant p-4 sm:p-6 transition-all shadow-sm">
+            <summary class="cursor-pointer list-none flex items-center justify-between gap-3 select-none">
+              <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-violet-600 dark:bg-primary text-white dark:text-on-primary flex items-center justify-center shadow-md shadow-violet-500/20 shrink-0">
+                  <span class="material-symbols-outlined text-2xl">${gradeMeta.icon}</span>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-on-surface tracking-tight">
+                      Folder Jenjang: ${gradeMeta.name}
+                    </h3>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-100 dark:bg-surface-bright text-emerald-700 dark:text-tertiary border border-emerald-300 dark:border-outline-variant">
+                      ${gradeMeta.badge}
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-on-surface-variant mt-0.5">
+                    Terdapat <strong>${gradeItems.length}</strong> modul pembelajaran berurutan
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-400 hidden md:inline">Buka / Tutup Folder</span>
+                <div class="w-8 h-8 rounded-xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant flex items-center justify-center text-slate-600 dark:text-on-surface group-open/grade:rotate-180 transition-transform duration-200">
+                  <span class="material-symbols-outlined text-[20px]">expand_more</span>
+                </div>
+              </div>
+            </summary>
+
+            <div class="mt-5 space-y-4">
+              ${chaptersHtml}
+            </div>
+          </details>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function createStepCardHtml(item, stepNum, isFirst, isLast, chapterId) {
+      const format = (item.format || 'HTML').toUpperCase();
+      const title = item.title || 'Modul Pembelajaran';
+      const desc = item.description || 'Simulasi media pembelajaran kimia interaktif Kurikulum Merdeka.';
+      
+      let thumb = item.thumbnail;
+      if (!thumb || (thumb.includes('photo-1532187863486-abf9dbad1b69') && !title.toLowerCase().includes('sejarah') && !title.toLowerCase().includes('dobereiner'))) {
+        thumb = getFallbackThumb(format, title, item.topic);
+      }
+
+      let badgeFormat = '';
+      let actionBtn = '';
+      let formatIcon = 'terminal';
+
+      if (format === 'PDF') {
+        badgeFormat = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider uppercase bg-rose-500/90 text-white shadow-sm backdrop-blur-sm">Modul PDF &bull; LKPD</span>`;
+        actionBtn = `
+          <button onclick="openPdfViewer('${item.id}')" class="flex-1 py-2 px-3 rounded-xl bg-violet-600 hover:bg-violet-700 dark:bg-primary dark:hover:bg-primary-fixed-dim text-white dark:text-on-primary text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+            <span>Buka Dokumen</span>
+          </button>`;
+        formatIcon = 'picture_as_pdf';
+      } else if (format === 'PPT') {
+        badgeFormat = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider uppercase bg-amber-500/90 text-white shadow-sm backdrop-blur-sm">Slide Presentasi</span>`;
+        actionBtn = `
+          <button onclick="openPptViewer('${item.id}')" class="flex-1 py-2 px-3 rounded-xl bg-violet-600 hover:bg-violet-700 dark:bg-primary dark:hover:bg-primary-fixed-dim text-white dark:text-on-primary text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">slideshow</span>
+            <span>Buka Presentasi</span>
+          </button>`;
+        formatIcon = 'slideshow';
+      } else {
+        badgeFormat = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider uppercase bg-violet-600/90 dark:bg-primary/90 text-white dark:text-on-primary shadow-sm backdrop-blur-sm">HTML Interaktif</span>`;
+        actionBtn = `
+          <button onclick="openHtmlViewer('${item.id}')" class="flex-1 py-2 px-3 rounded-xl bg-violet-600 hover:bg-violet-700 dark:bg-primary dark:hover:bg-primary-fixed-dim text-white dark:text-on-primary text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">play_circle</span>
+            <span>Buka Simulasi</span>
+          </button>`;
+        formatIcon = 'terminal';
+      }
+
+      const isFav = isMaterialBookmarked(item.id);
+
+      return `
+        <div class="relative flex flex-col sm:flex-row items-stretch bg-slate-50/50 dark:bg-surface-container-high rounded-xl border border-slate-200/80 dark:border-outline-variant hover:border-violet-400 dark:hover:border-primary/60 transition-all duration-200 overflow-hidden group">
+          
+          <!-- Step Number & Move Up/Down Controls -->
+          <div class="sm:w-28 bg-slate-100/70 dark:bg-surface-container border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-outline-variant p-2.5 sm:p-3 flex sm:flex-col items-center justify-between sm:justify-center gap-2 shrink-0">
+            <div class="flex items-center sm:flex-col gap-1.5 text-center">
+              <span class="text-[9px] uppercase font-bold tracking-wider text-slate-400 dark:text-on-surface-variant font-mono">Tahap</span>
+              <span class="w-8 h-8 rounded-xl bg-violet-600 dark:bg-primary text-white dark:text-on-primary font-mono font-extrabold text-sm flex items-center justify-center shadow-sm">
+                ${stepNum}
+              </span>
+              <span class="text-[11px] font-bold text-violet-700 dark:text-primary-fixed hidden sm:block">Langkah ${stepNum}</span>
+            </div>
+
+            <!-- Reorder 🔼 🔽 buttons: Hanya untuk Mode Guru, disembunyikan untuk siswa -->
+            ${isTeacherMode ? `
+              <div class="flex items-center gap-1 mt-0.5">
+                <button 
+                  type="button"
+                  onclick="moveMaterialStep('${item.id}', 'up')" 
+                  ${isFirst ? 'disabled class="w-7 h-7 rounded-lg border border-slate-200 dark:border-outline opacity-25 cursor-not-allowed text-slate-400 flex items-center justify-center"' : 'class="w-7 h-7 rounded-lg border border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 active:scale-95 cursor-pointer flex items-center justify-center transition-all"'}
+                  title="Geser Langkah Belajar Naik">
+                  <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+                </button>
+                <button 
+                  type="button"
+                  onclick="moveMaterialStep('${item.id}', 'down')" 
+                  ${isLast ? 'disabled class="w-7 h-7 rounded-lg border border-slate-200 dark:border-outline opacity-25 cursor-not-allowed text-slate-400 flex items-center justify-center"' : 'class="w-7 h-7 rounded-lg border border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 active:scale-95 cursor-pointer flex items-center justify-center transition-all"'}
+                  title="Geser Langkah Belajar Turun">
+                  <span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+                </button>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Thumbnail (Compact) -->
+          <div class="w-full sm:w-40 h-32 sm:h-auto shrink-0 relative overflow-hidden bg-slate-900">
+            <img src="${thumb}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100" loading="lazy">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent sm:hidden"></div>
+            <div class="absolute top-2 left-2">
+              ${badgeFormat}
+            </div>
+            <button 
+              type="button"
+              onclick="toggleMaterialBookmark('${item.id}', event)" 
+              class="absolute top-2 right-2 w-7 h-7 rounded-lg ${isFav ? 'bg-amber-400 text-slate-950 font-bold shadow-md shadow-amber-400/40' : 'bg-slate-950/70 text-slate-300 hover:text-amber-400'} backdrop-blur-md flex items-center justify-center transition-all cursor-pointer z-10"
+              title="${isFav ? 'Hapus dari Favorit' : 'Simpan ke Favorit'}">
+              <span class="material-symbols-outlined text-[16px] ${isFav ? 'material-symbols-fill' : ''}">star</span>
+            </button>
+          </div>
+
+          <!-- Main Card Body -->
+          <div class="p-3.5 sm:p-4 flex-1 flex flex-col justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-white dark:bg-surface-container text-slate-600 dark:text-on-surface-variant border border-slate-200 dark:border-outline-variant font-mono">
+                  ${item.topic || 'Kimia'}
+                </span>
+                <span class="text-[11px] text-emerald-600 dark:text-tertiary flex items-center gap-1 font-mono">
+                  <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                  <span>Terverifikasi Kurikulum</span>
+                </span>
+              </div>
+              <h4 class="text-sm sm:text-base font-headline font-bold text-slate-900 dark:text-on-surface group-hover:text-violet-600 dark:group-hover:text-primary transition-colors leading-snug">
+                ${title}
+              </h4>
+              <p class="text-xs text-slate-500 dark:text-on-surface-variant mt-1 line-clamp-2 leading-relaxed">
+                ${desc}
+              </p>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="pt-2.5 border-t border-slate-200/60 dark:border-secondary-container flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-2 flex-1 min-w-[220px]">
+                ${actionBtn}
+                
+                <button 
+                  type="button"
+                  onclick="openDirectTab('${item.id}')" 
+                  class="p-2 rounded-xl border border-slate-200 dark:border-outline-variant bg-white dark:bg-surface-container hover:bg-slate-100 dark:hover:bg-surface-bright text-slate-700 dark:text-on-surface transition-colors cursor-pointer shrink-0" 
+                  title="Buka Langsung di Tab Baru">
+                  <span class="material-symbols-outlined text-[17px]">open_in_new</span>
+                </button>
+              </div>
+
+              ${isTeacherMode ? `
+                <div class="flex items-center gap-1.5">
+                  <button 
+                    type="button"
+                    onclick="openManualMaterialModal('${item.id}')" 
+                    class="p-1.5 rounded-lg border border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 transition-colors cursor-pointer" 
+                    title="Edit Materi">
+                    <span class="material-symbols-outlined text-[16px]">edit</span>
+                  </button>
+                  <button 
+                    type="button"
+                    onclick="deleteMaterial('${item.id}')" 
+                    class="p-1.5 rounded-lg border border-red-300 dark:border-red-700/60 bg-red-50 dark:bg-error-container text-red-600 dark:text-on-error-container hover:bg-red-100 transition-colors cursor-pointer" 
+                    title="Hapus Materi">
+                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+
+          </div>
+
+        </div>
+      `;
+    }
+
     function renderMaterials() {
       const grid = document.getElementById('materials-grid');
+      const flow = document.getElementById('materials-flow');
       const emptyState = document.getElementById('empty-state');
       const displayedCount = document.getElementById('displayed-count');
-      if (!grid) return;
+      if (!grid && !flow) return;
 
       let filtered = allMaterials.filter(item => {
         // Format or Bookmark filter
@@ -1932,18 +2564,39 @@
         return true;
       });
 
-      displayedCount.textContent = filtered.length;
+      if (displayedCount) displayedCount.textContent = filtered.length;
+
+      const btnReset = document.getElementById('btn-reset-order');
+      if (btnReset) btnReset.classList.toggle('hidden', !isTeacherMode);
 
       // Sorting
-      const sortOrder = document.getElementById('sort-order')?.value || 'grade_title';
-      filtered.sort((a, b) => {
-        if (sortOrder === 'title_asc') return (a.title || '').localeCompare(b.title || '');
-        if (sortOrder === 'title_desc') return (b.title || '').localeCompare(a.title || '');
-        return (a.grade || '').localeCompare(b.grade || '') || (a.title || '').localeCompare(b.title || '');
-      });
+      const sortOrder = document.getElementById('sort-order')?.value || 'learning_flow';
+      if (sortOrder === 'title_asc') {
+        filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+      } else if (sortOrder === 'title_desc') {
+        filtered.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
+      } else if (sortOrder === 'grade_title') {
+        filtered.sort((a, b) => (a.grade || '').localeCompare(b.grade || '') || (a.title || '').localeCompare(b.title || ''));
+      } else {
+        // learning_flow: sort by Grade order, then customOrder / pedagogical score
+        const customOrder = getCustomLearningOrder();
+        filtered.sort((a, b) => {
+          const gA = normalizeGradeKey(a.grade).order;
+          const gB = normalizeGradeKey(b.grade).order;
+          if (gA !== gB) return gA - gB;
+          
+          const idxA = customOrder.indexOf(String(a.id));
+          const idxB = customOrder.indexOf(String(b.id));
+          if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+          if (idxA !== -1) return -1;
+          if (idxB !== -1) return 1;
+          return getMaterialPedagogicalScore(a) - getMaterialPedagogicalScore(b);
+        });
+      }
 
       if (filtered.length === 0) {
-        grid.innerHTML = '';
+        if (grid) grid.innerHTML = '';
+        if (flow) flow.innerHTML = '';
         if (emptyState) {
           if (currentFilterFormat === 'FAV') {
             emptyState.innerHTML = `
@@ -1976,7 +2629,20 @@
       }
 
       emptyState?.classList.add('hidden');
-      grid.innerHTML = filtered.map(item => createCardHtml(item)).join('');
+
+      if (currentViewMode === 'flow') {
+        if (flow) {
+          flow.classList.remove('hidden');
+          renderHierarchicalLearningPath(filtered);
+        }
+        if (grid) grid.classList.add('hidden');
+      } else {
+        if (grid) {
+          grid.classList.remove('hidden');
+          grid.innerHTML = filtered.map(item => createCardHtml(item)).join('');
+        }
+        if (flow) flow.classList.add('hidden');
+      }
     }
 
     function createCardHtml(item) {
@@ -3841,6 +4507,7 @@ function copyGlossaryFormula(id) {
       initBookmarks();
       initPWA();
       updateTeacherUI();
+      updateViewModeButtons();
       loadMaterials();
       initGlossary();
     }

@@ -65,7 +65,7 @@ Anda **tidak perlu lagi menambahkan bahan ajar satu per satu**:
 
 1. Di komputer Anda, buka folder:
    `C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Media_Pembelajaran_Kimia_Drive\`
-2. Buka Google Drive Anda, gunakan folder resmi: `Media_Pembelajaran_Kimia_Drive` (ID: `1ruHfGdoXO35G9SeMfS5Q2nh_MpjHhMrQ`).
+2. Buka Google Drive Anda, gunakan folder resmi: `Media_Pembelajaran_Kimia_Drive` (ID: `1oJQYW7QxMvbBhyNmKBNQZrE-yh6cdXBk`).
 3. Seluruh berkas media pada folder Google Drive dinamai dengan format baku:
    **`Judul_Kelas_Fase.html`**
    - Contoh Kelas 10: `Periode_dan_Golongan_10_Fase_E.html`, `Sejarah_Perkembangan_SPU_10_Fase_E.html`
