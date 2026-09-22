@@ -1,18 +1,5 @@
-const CACHE_NAME = 'portal-kimia-v6-submissions';
-const STATIC_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon.svg',
-  './SejarahSPU.html',
-  './PeriodeGolongan.html',
-  './SifatKeperiodikanUnsur.html',
-  './BilanganKuantum.html',
-  './KonfigurasiKuantum.html',
-  './KonfigurasiBohr.html',
-  './SelVolta.html',
-  './SelElektrolisis.html'
-];
+const CACHE_NAME = 'portal-kimia-v7-final';
+const STATIC_ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 // Install Event
 self.addEventListener('install', (event) => {
@@ -39,7 +26,19 @@ self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
 
   // Ignore Google Apps Script API calls or external domains for dynamic data
-  if (requestUrl.origin.includes('script.google.com') || requestUrl.origin.includes('drive.google.com')) {
+  if (event.request.method !== 'GET' || requestUrl.origin !== self.location.origin || requestUrl.pathname.endsWith('/Guru.html')) {
+    return;
+  }
+
+  // Assessment pages should receive current submission rules whenever connected.
+  if (event.request.mode === 'navigate' || requestUrl.pathname.endsWith('.html')) {
+    event.respondWith(fetch(event.request).then(async response => {
+      if (response.ok && response.type === 'basic') {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(event.request, response.clone());
+      }
+      return response;
+    }).catch(async () => (await caches.match(event.request)) || new Response('Halaman belum tersedia offline. Sambungkan jaringan untuk memuat media.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })));
     return;
   }
 

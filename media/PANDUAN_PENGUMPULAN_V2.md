@@ -1,11 +1,24 @@
 # Pengumpulan tugas v2
 
+> Panduan versi lama. Untuk deployment saat ini, ikuti **PANDUAN_RUANG_GURU.md**: ID tugas/kode pribadi wajib, pengumpulan final dikunci, dan fungsi setup yang dipilih dari menu Run bernama `setupAnalisisAI`. Ketentuan pengiriman ulang di bawah berlaku untuk versi v2 sebelum manajemen tugas.
+
 ## Mengaktifkan
 
 1. Cadangkan kode GAS yang sedang aktif, lalu ganti isi `Code.gs` di editor Apps Script dengan `Code.gs` dari folder ini. Fungsi pengelolaan materi tetap disertakan. Jangan menambahkan `submission-backend.js` sebagai file GAS kedua: fungsinya sudah digabung ke `Code.gs`.
 2. Pilih Deploy → Manage deployments → Edit → New version → Deploy pada deployment yang sama. URL lama tetap dipakai oleh media. Jangan menjalankan `setupInitialSheet()`, karena fungsi setup lama mengosongkan sheet BahanAjar.
 3. Ganti HTML media di tempat yang digunakan siswa, termasuk salinan Drive. Untuk hosting lokal/Pages, sertakan `sw.js` baru. Setiap HTML sudah membawa kode pengiriman sehingga tidak perlu mengunggah JavaScript tambahan ke Drive.
 4. Uji dengan identitas `UJI GURU`: isi tabel LKS, semua esai, refleksi, serta kuis. Tekan kirim dan tunggu bukti pengumpulan. Periksa ID yang sama di RekapPengumpulan dan sheet Tugas media terkait. Uji ulang saat jaringan putus dan pulih.
+
+## Mengaktifkan analisis Gemini
+
+1. Buat API key Gemini di Google AI Studio. Jangan menulis API key di HTML atau `Code.gs`.
+2. Di Apps Script buka **Project Settings → Script Properties**, lalu tambahkan `GEMINI_API_KEY` dengan API key sebagai nilainya.
+3. Tambahkan `GEMINI_MODELS` bila ingin mengubah urutan model. Nilai bawaan: `gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash-lite`. Model pertama dicoba lebih dulu, model berikutnya menjadi alternatif bila permintaan gagal.
+4. Dari editor Apps Script, pilih fungsi `setupAnalisisAI`, tekan **Run**, lalu izinkan akses. Fungsi ini membuat trigger setiap satu menit dan sheet `Analisis_AI`.
+5. Jalankan fungsi `antrekanDataTersimpanUntukAI` satu kali agar pengumpulan lama, termasuk uji Sel Volta yang sudah tersimpan, ikut dianalisis. Satu eksekusi memeriksa maksimal 200 pengumpulan; jalankan lagi bila jumlahnya lebih banyak.
+6. Kirim satu jawaban uji. Status bergerak dari `MENUNGGU` → `DIPROSES` → `SELESAI`. Jika seluruh model gagal, sistem mencoba maksimal tiga kali dan menampilkan penyebab pada kolom `Pesan Error`.
+
+Jawaban asli selalu disimpan lebih dahulu. Gemini hanya menerima materi, nilai kuis, dan jawaban akademik; nama, kelas, NIS, token bukti, dan ID pengumpulan tidak dikirim ke API. Sheet `Analisis_AI` tetap memuat identitas agar guru mudah mencocokkan hasil. Skor AI adalah rekomendasi yang perlu diverifikasi guru.
 
 Perubahan lokal belum mengubah deployment GAS atau file di Drive/GitHub. Sampai langkah 1–3 dilakukan, sistem online masih menggunakan versi lama.
 

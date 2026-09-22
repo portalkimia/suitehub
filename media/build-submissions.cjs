@@ -4,6 +4,7 @@ const vm = require('vm');
 const root = __dirname;
 const client = fs.readFileSync(path.join(root, 'submission-client.js'), 'utf8');
 const backend = fs.readFileSync(path.join(root, 'submission-backend.js'), 'utf8');
+const teacherBackend = fs.readFileSync(path.join(root, 'teacher-backend.js'), 'utf8');
 const rules = [
   [/Sel_?Volta/i, 'sel-volta', 'Sel Volta'], [/Sel_?Elektrolisis/i, 'sel-elektrolisis', 'Sel Elektrolisis'],
   [/Bohr/i, 'konfigurasi-bohr', 'Konfigurasi Elektron Model Bohr'],
@@ -27,7 +28,8 @@ function replaceFunction(s, name, replacement) {
   return s.replace(regex, replacement);
 }
 for (const dir of ['', 'Media_Pembelajaran_Kimia_Drive', 'File Spark']) {
-  for (const file of fs.readdirSync(path.join(root, dir)).filter(f => /\.html$/i.test(f) && f !== 'index.html')) {
+  if (!fs.existsSync(path.join(root, dir))) continue;
+  for (const file of fs.readdirSync(path.join(root, dir)).filter(f => /\.html$/i.test(f) && !['index.html','Guru.html'].includes(f))) {
     const full = path.join(root, dir, file);
     let s = fs.readFileSync(full, 'utf8');
     // Existing extra closing brace prevented Bohr/Kuantum scripts from running at all.
@@ -37,6 +39,21 @@ for (const dir of ['', 'Media_Pembelajaran_Kimia_Drive', 'File Spark']) {
     if (!rule) throw new Error('Unknown media: '+file);
     const config = { id: rule[1], title: rule[2] };
     s = s.replace(/\n?<!-- PK-SUBMISSION-V2-START -->[\s\S]*?<!-- PK-SUBMISSION-V2-END -->\n?/g, '');
+    const draftKeys = [...s.matchAll(/localStorage\.(?:setItem|removeItem)\(['"]([^'"]+)['"]/g)].map(m=>m[1]).filter(k=>!/theme|portalkimia|pk_/.test(k));
+    const storageConstant=s.match(/const STORAGE_KEY\s*=\s*['"]([^'"]+)['"]/);
+    if(storageConstant)draftKeys.push(storageConstant[1]);
+    config.draftKeys=[...new Set(draftKeys)];
+    // Guard delayed autosaves as well as immediate ones, without touching theme preferences.
+    s=s.replace(/(?<!if \(!window\.PortalSubmission\?\.isFinal\(\)\) )localStorage\.setItem\((['"])([^'"]+)\1/g,(whole,quote,key)=>config.draftKeys.includes(key)?'if (!window.PortalSubmission?.isFinal()) '+whole:whole);
+    s=s.replace(/(?<!if \(!window\.PortalSubmission\?\.isFinal\(\)\) )localStorage\.setItem\(STORAGE_KEY/g,'if (!window.PortalSubmission?.isFinal()) localStorage.setItem(STORAGE_KEY');
+    if(/function resetQuiz\(/.test(s))s=replaceFunction(s,'resetQuiz','    function resetQuiz() {\n      return; // Evaluasi final tidak dapat diulang oleh siswa.\n    }');
+    s=s.replace(/<button\b[^>]*onclick="resetQuiz\([^"\n]*"[^>]*>[\s\S]*?<\/button>/g,'');
+    if(!s.includes('data-pk-legacy-eval')) {
+      let found=false;
+      s=s.replace(/(<section\b[^>]*id="(?:section-kuis|tab-quiz|tab-kuis)"[^>]*>)([\s\S]*?)(<\/section>)/,(_,start,body,end)=>{found=true;return start+'<div data-pk-legacy-eval hidden inert>'+body+'</div><div id="pk-evaluation"></div>'+end;});
+      if(!found)throw new Error('Evaluation section missing: '+file);
+      s=s.replace('</head>','<style>[data-pk-legacy-eval]{display:none!important}</style>\n</head>');
+    }
     const answers = /\blet userQuizAnswers\b/.test(s) ? 'userQuizAnswers' : /\blet userAnswers\b/.test(s) ? 'userAnswers' : 'quizAnswers';
     const questions = /\bconst QUIZ_QUESTIONS\b/.test(s) ? 'QUIZ_QUESTIONS' : /\bconst quizData\b/.test(s) ? 'quizData' : 'quizQuestions';
     const call = 'return PortalSubmission.submit('+JSON.stringify(config)+', '+answers+', '+questions+');';
@@ -65,7 +82,7 @@ for (const dir of ['', 'Media_Pembelajaran_Kimia_Drive', 'File Spark']) {
       if (!s.includes('data-pk-identity')) throw new Error('Cannot insert identity: '+file);
     }
     const adapter = (!hadSubmit && !hadSync) ? '\nfunction submitToTeacherDatabase() { '+call+' }\n' : '';
-    const block = '\n<!-- PK-SUBMISSION-V2-START -->\n<script>\n'+client+adapter+'\nPortalSubmission.install('+JSON.stringify(config)+');\n</script>\n<!-- PK-SUBMISSION-V2-END -->\n';
+    const block = '\n<!-- PK-SUBMISSION-V2-START -->\n<script>\n'+client+adapter+'\nPortalSubmission.install('+JSON.stringify(config)+', {questions:'+questions+',setAnswers:value=>{'+answers+'=value;}});\n</script>\n<!-- PK-SUBMISSION-V2-END -->\n';
     s = s.replace(/<\/body>/i, extra+block+'</body>');
     for (const match of s.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) new vm.Script(match[1], {filename:file});
     write(full, s);
@@ -74,15 +91,18 @@ for (const dir of ['', 'Media_Pembelajaran_Kimia_Drive', 'File Spark']) {
 const gasPath = path.join(root, 'Code.gs');
 let gas = fs.readFileSync(gasPath, 'utf8');
 gas = gas.replace(/\n?\/\/ PK-BACKEND-V2-START[\s\S]*?\/\/ PK-BACKEND-V2-END\n?/g, '\n');
+gas = gas.replace(/\n?\/\/ PK-TEACHER-START[\s\S]*?\/\/ PK-TEACHER-END\n?/g, '\n');
 if (/function simpanTugasSiswa\(/.test(gas)) gas = replaceFunction(gas, 'simpanTugasSiswa', '// Submission implementation is generated at the end of this file.');
 if (!gas.includes("action === 'submissionStatus'")) gas = gas.replace("  // API Action Handler untuk Pengumpulan Tugas", "  if (action === 'submissionStatus') return pkStatusOutput_(e.parameter);\n\n  // API Action Handler untuk Pengumpulan Tugas");
 // Form-wrapped legacy POSTs must be unpacked before normalization.
 if (!gas.includes('PK unwrap data')) gas = gas.replace('    // Jika berupa request sinkronisasi folder Google Drive', "    // PK unwrap data: older media submit an action/data form.\n    if (payload.data && typeof payload.data === 'string') payload = JSON.parse(payload.data);\n\n    // Jika berupa request sinkronisasi folder Google Drive");
-gas = gas.trimEnd()+'\n// PK-BACKEND-V2-START\n'+backend+'\n// PK-BACKEND-V2-END\n';
+if(!gas.includes("payload.action === 'studentAccess'"))gas=gas.replace('    // Default: Simpan data tugas',"    if (payload.action === 'studentAccess') return ContentService.createTextOutput(JSON.stringify(portalStudentAccess(payload))).setMimeType(ContentService.MimeType.JSON);\n\n    // Default: Simpan data tugas");
+if(!gas.includes("page === 'Guru'"))gas=gas.replace("  if (action === 'submissionStatus')", "  if (page === 'Guru') return HtmlService.createHtmlOutputFromFile('Guru').setTitle('Ruang Guru · PortalKimia').addMetaTag('viewport', 'width=device-width, initial-scale=1');\n\n  if (action === 'submissionStatus')");
+gas = gas.trimEnd()+'\n// PK-BACKEND-V2-START\n'+backend+'\n// PK-BACKEND-V2-END\n// PK-TEACHER-START\n'+teacherBackend+'\n// PK-TEACHER-END\n';
 new vm.Script(gas, {filename:'Code.gs'});
 write(gasPath, gas);
 const swPath = path.join(root, 'sw.js');
-let sw = fs.readFileSync(swPath, 'utf8').replace("'portal-kimia-v5'", "'portal-kimia-v6-submissions'");
-if (!sw.includes("'./SelVolta.html'")) sw = sw.replace("  './KonfigurasiBohr.html'", "  './KonfigurasiBohr.html',\n  './SelVolta.html',\n  './SelElektrolisis.html'");
+let sw = fs.readFileSync(swPath, 'utf8').replace(/const CACHE_NAME = '[^']+';/, "const CACHE_NAME = 'portal-kimia-v7-final';");
+sw=sw.replace(/const STATIC_ASSETS = \[[\s\S]*?\];/,"const STATIC_ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];");
 write(swPath, sw);
 console.log('Updated '+changed.length+' files: '+changed.join(', '));

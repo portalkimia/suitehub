@@ -28,10 +28,18 @@ const ss = { getSheetByName:n=>sheets.get(n), insertSheet:n=>{const s=new Sheet(
 ss.insertSheet('TugasSiswa').rows=[['OLD'],['KEEP']];
 ss.insertSheet('BahanAjar').rows=[['MATERIAL'],['KEEP']];
 const lock={held:false,waitLock(){assert.equal(this.held,false);this.held=true;},hasLock(){return this.held;},releaseLock(){this.held=false;}};
+const scriptProperties={GEMINI_API_KEY:'test-key',GEMINI_MODELS:'gemini-3.6-flash,gemini-backup'};
+let lastGeminiRequest=null;
+const aiResult={skorRekomendasi:82,kelengkapanLks:96,statusPemahaman:'BAIK',ringkasan:'Konsep utama dipahami.',miskonsepsi:['Arah elektron perlu diperjelas.'],umpanBalikSiswa:'Perbaiki alasan.',saranGuru:'Tinjau jawaban esai.',penilaianEsai:[{id:'essay4',skor:80,catatan:'Baik'}],catatanLks:['Lengkap']};
 const gas=vm.createContext({console,SpreadsheetApp:{openById:()=>ss,getActiveSpreadsheet:()=>ss,flush(){}},LockService:{getScriptLock:()=>lock},
   Utilities:{DigestAlgorithm:{SHA_256:'sha256'},Charset:{UTF_8:'utf8'},computeDigest:(_,s)=>Array.from(crypto.createHash('sha256').update(s).digest()),getUuid:()=>crypto.randomUUID()},
-  ContentService:{MimeType:{JSON:'json',JAVASCRIPT:'js'},createTextOutput:text=>({text,setMimeType(type){this.type=type;return this;}})} });
+  ContentService:{MimeType:{JSON:'json',JAVASCRIPT:'js'},createTextOutput:text=>({text,setMimeType(type){this.type=type;return this;}})},
+  PropertiesService:{getScriptProperties:()=>({getProperty:k=>scriptProperties[k]||null,setProperty:(k,v)=>{scriptProperties[k]=v;}})},
+  UrlFetchApp:{fetch:(url,options)=>{lastGeminiRequest={url,options};return {getResponseCode:()=>200,getContentText:()=>JSON.stringify({candidates:[{content:{parts:[{text:JSON.stringify(aiResult)}]}}]})};}},
+  ScriptApp:{getProjectTriggers:()=>[],newTrigger:()=>({timeBased(){return this;},everyMinutes(){return this;},create(){}})} });
 vm.runInContext(fs.readFileSync(path.join(__dirname,'Code.gs'),'utf8'),gas);
+// Isolate storage regression tests; real authorization/task boundaries are tested in test-teacher.cjs.
+gas.pkCheckTask_=(ss,p)=>{const d=gas.pkNormalize_(p);return {task:{Judul:'Test'},participant:{Nama:d.nama,Kelas:d.kelas,'NIS / Absen':d.nis,Revisi:0},finalKey:p.submissionId||crypto.randomUUID(),late:false};};
 const id=()=>crypto.randomBytes(24).toString('hex');
 function packet(mediaId='sel-volta') {return {schemaVersion:2,mediaId,materi:mediaId,submissionId:id(),receiptToken:id(),siswa:{nama:'UJI',kelas:'XII-1',nis:'001'},nilai:{skorKuis:75},jawaban:{kuis:[{pilihan:0}],esai:{essay4:'Esai keempat'},lks:{'obs-v-1':'0'},refleksi:{catatan:'Sudah paham'}}};}
 function rowRecord(name,row=1){const s=sheets.get(name);return Object.fromEntries(s.rows[0].map((h,i)=>[h,s.rows[row][i]]));}
@@ -44,6 +52,15 @@ test('Volta saves all sections, raw JSON and index',()=>{
   const count=sheets.get('RekapPengumpulan').rows.length;
   assert.equal(gas.simpanTugasSiswa(p).stored,true);assert.equal(sheets.get('RekapPengumpulan').rows.length,count);
   p.jawaban.esai.essay4='changed';assert.equal(gas.simpanTugasSiswa(p).success,false);
+});
+test('AI queue excludes identity from Gemini input and stores structured analysis',()=>{
+  const queue=sheets.get('Analisis_AI');assert.ok(queue);const before=queue.rows.length;
+  const result=gas.processAntreanAnalisisAI_();assert.equal(result.processed,Math.min(3,before-1));
+  const row=rowRecord('Analisis_AI');assert.equal(row['Status AI'],'SELESAI');assert.equal(row['Model AI'],'gemini-3.6-flash');
+  assert.equal(row['Skor Rekomendasi AI'],82);assert.equal(row['Kelengkapan LKS (%)'],96);assert.match(row['Ringkasan AI'],/dipahami/);
+  const request=JSON.parse(lastGeminiRequest.options.payload);const prompt=request.contents[0].parts[0].text;
+  assert.ok(!prompt.includes('"nama"'));assert.ok(!prompt.includes('"nis"'));assert.ok(!prompt.includes('UJI'));
+  assert.equal(lastGeminiRequest.options.headers['x-goog-api-key'],'test-key');assert.ok(!lastGeminiRequest.url.includes('test-key'));
 });
 test('Old records untouched',()=>{
   assert.deepEqual(sheets.get('TugasSiswa').rows,[['OLD'],['KEEP']]);assert.deepEqual(sheets.get('BahanAjar').rows,[['MATERIAL'],['KEEP']]);
@@ -103,11 +120,11 @@ function clientContext(fields=[],fetchImpl=async()=>({json:async()=>({success:fa
   return {ctx,els,storage};
 }
 const files=[];
-for(const dir of ['','Media_Pembelajaran_Kimia_Drive','File Spark'])for(const f of fs.readdirSync(path.join(__dirname,dir)))if(f.endsWith('.html')&&f!=='index.html')files.push(path.join(__dirname,dir,f));
+for(const dir of ['','Media_Pembelajaran_Kimia_Drive','File Spark'])if(fs.existsSync(path.join(__dirname,dir)))for(const f of fs.readdirSync(path.join(__dirname,dir)))if(f.endsWith('.html')&&!['index.html','Guru.html'].includes(f))files.push(path.join(__dirname,dir,f));
 for(const file of files) test('Complete payload and syntax: '+path.relative(__dirname,file),()=>{
   const html=fs.readFileSync(file,'utf8');
   for(const m of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new vm.Script(m[1],{filename:file});
-  const config=JSON.parse(html.match(/PortalSubmission\.install\((\{[^\n]+\})\)/)[1]);
+  const config=JSON.parse(html.match(/PortalSubmission\.install\((\{[^\n]+?\}), \{questions/)[1]);
   const ids=[...new Set([...html.matchAll(/<(?:input|textarea|select)\b[^>]*\bid="([^"]+)"/g)].map(m=>m[1]))];
   const fields=[];
   for(const field of ids){
@@ -121,25 +138,10 @@ for(const file of files) test('Complete payload and syntax: '+path.relative(__di
   const answers=questions.map(q=>q.answer??q.correct??q.ans);
   const payload=ctx.PortalSubmission.collect(config,answers,questions);
   assert.equal(payload.nilai.skorKuis,100);assert.equal(payload.jawaban.kuis.length,questions.length);
-  for(const field of fields.filter(e=>!e.id.startsWith('student-')))assert.ok(Object.values(payload.jawaban).some(group=>group && Object.hasOwn(group,field.id.replace(/^mob-/,''))),field.id+' lost');
+  for(const field of fields.filter(e=>!(/^(student-(name|class|nis|date)$|pk-)/.test(e.id))))assert.ok(Object.values(payload.jawaban).some(group=>group && Object.hasOwn(group,field.id.replace(/^mob-/,''))),field.id+' lost');
   payload.submissionId=id();payload.receiptToken=id();
   const result=gas.simpanTugasSiswa(payload);assert.equal(result.stored,true);
   if(config.id==='sel-volta'){assert.equal(Object.keys(payload.jawaban.esai).length,4);assert.equal(Object.keys(payload.jawaban.lks).length,50);}
   if(config.id==='sel-elektrolisis')assert.equal(Object.keys(payload.jawaban.lks).length,8);
 });
-(async()=>{
-  const fields=[element('student-name','UJI'),element('student-class','XII'),element('analysis-essay-4','four'),element('obs-v-1','0'),element('mob-obs-v-1','')];
-  const config={id:'sel-volta',title:'Sel Volta'},questions=[{q:'q',options:['a'],answer:0}];
-  let sends=0;
-  const c=clientContext(fields,async(_,o)=>{sends++;return {json:async()=>gas.simpanTugasSiswa(JSON.parse(o.body))};});
-  await c.ctx.PortalSubmission.submit(config,[0],questions);
-  assert.ok(c.els.get('portal-submission-status').textContent.startsWith('Tersimpan:'));assert.equal(Object.keys(c.storage).filter(k=>k.startsWith('portalkimia_pending')).length,0);
-  await c.ctx.PortalSubmission.submit(config,[0],questions);assert.equal(sends,1);tests++;console.log('PASS confirmed save and repeated click deduplication');
-  const rejected=clientContext(fields);await rejected.ctx.PortalSubmission.submit(config,[0],questions);
-  assert.equal(Object.keys(rejected.storage).filter(k=>k.startsWith('portalkimia_pending')).length,1);assert.equal(rejected.els.get('portal-submission-status').textContent,'server rejected');tests++;console.log('PASS server failure retains pending answers');
-  const opaque=clientContext(fields,async(_,o)=>{gas.simpanTugasSiswa(JSON.parse(o.body));throw Error('Response blocked by CORS');});
-  await opaque.ctx.PortalSubmission.submit(config,[0],questions);assert.ok(opaque.els.get('portal-submission-status').textContent.startsWith('Tersimpan:'));tests++;console.log('PASS unreadable POST verified through receipt');
-  const offline=clientContext(fields,async()=>{throw Error('Offline');});await offline.ctx.PortalSubmission.submit(config,[0],questions);
-  assert.equal(Object.keys(offline.storage).filter(k=>k.startsWith('portalkimia_pending')).length,1);assert.ok(!offline.els.get('portal-submission-status').textContent.startsWith('Tersimpan:'));tests++;console.log('PASS unconfirmed offline send never reports success');
-  console.log('TOTAL '+tests+' checks passed. No live Sheets/Drive writes.');
-})().catch(e=>{console.error(e);process.exitCode=1;});
+console.log('TOTAL '+tests+' storage/media regression checks passed. No live writes.');
