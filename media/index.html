@@ -1583,6 +1583,17 @@
         thumbnail: 'https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?w=600&auto=format&fit=crop&q=80'
       },
       {
+        id: 'spu-sifat-03',
+        title: 'Sifat Keperiodikan Unsur (SPU) & Anomali Tren',
+        subject: 'Kimia',
+        grade: 'Kelas 10',
+        topic: 'Tabel Periodik Unsur',
+        format: 'HTML',
+        url: 'SifatKeperiodikanUnsur.html',
+        description: 'Laboratorium interaktif sifat keperiodikan unsur: peta heatmap SPU 118 unsur, duel komparasi atom berdampingan, grafik fluktuasi Canvas 2D, detektif anomali, dan kuis 12 butir HOTS.',
+        thumbnail: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&auto=format&fit=crop&q=80'
+      },
+      {
         id: 'bil-kuan-03',
         title: 'Bilangan Kuantum & Bentuk Orbital Atom 3D',
         subject: 'Kimia',
@@ -1808,7 +1819,9 @@
           if (Array.isArray(parsed) && parsed.length > 0) {
             const clean = sanitizePortalKimiaMaterials(parsed);
             if (clean.length > 0) {
-              allMaterials = clean;
+              const existingIds = new Set(clean.map(m => String(m.id || m.title)));
+              const missingDefaults = defaultCuratedMaterials.filter(dm => !existingIds.has(String(dm.id || dm.title)));
+              allMaterials = [...clean, ...missingDefaults];
               hasLocal = true;
               localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
             }
@@ -1835,48 +1848,78 @@
       updateCounters();
       renderMaterials();
 
-      // 2. Background sync ke Google Apps Script (dengan filter folder resmi PortalKimia)
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
-              const cleanData = sanitizePortalKimiaMaterials(res.data);
-              if (cleanData.length > 0) {
-                allMaterials = cleanData.map(m => ({
-                  ...m,
-                  thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
-                }));
-                window.allMaterials = allMaterials;
-                localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
-                updateCounters();
-                renderMaterials();
-              }
-            }
-          })
-          .getMaterials(PORTALKIMIA_DRIVE_FOLDER_ID);
-      } else {
-        fetch(GAS_API_URL + '?action=getMaterials&folderId=' + PORTALKIMIA_DRIVE_FOLDER_ID)
-          .then(r => r.json())
-          .then(res => {
-            if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
-              const cleanData = sanitizePortalKimiaMaterials(res.data);
-              if (cleanData.length > 0) {
-                allMaterials = cleanData.map(m => ({
-                  ...m,
-                  thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
-                }));
-                window.allMaterials = allMaterials;
-                localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
-                updateCounters();
-                renderMaterials();
-              }
-            }
-          })
-          .catch(() => {
-            // Beroperasi secara offline / lokal
-          });
-      }
+    function isSameMaterialSemantic(t1, t2) {
+      const s1 = (t1 || '').toLowerCase();
+      const s2 = (t2 || '').toLowerCase();
+      if (s1 === s2) return true;
+      if ((s1.includes('sejarah') && s2.includes('sejarah')) && (s1.includes('spu') || s2.includes('spu') || s1.includes('periodik') || s2.includes('periodik'))) return true;
+      if ((s1.includes('periode') || s1.includes('golongan')) && (s2.includes('periode') || s2.includes('golongan'))) return true;
+      if ((s1.includes('sifat') && s2.includes('sifat')) && (s1.includes('keperiodikan') || s2.includes('keperiodikan') || s1.includes('spu') || s2.includes('spu'))) return true;
+      if (s1.includes('bohr') && s2.includes('bohr')) return true;
+      if (s1.includes('bilangan kuantum') && s2.includes('bilangan kuantum')) return true;
+      if ((s1.includes('konfigurasi') && s2.includes('konfigurasi')) && !s1.includes('bohr') && !s2.includes('bohr')) return true;
+      if (s1.includes('titrasi') && s2.includes('titrasi')) return true;
+      if ((s1.includes('termo') || s1.includes('kalor') || s1.includes('entalpi') || s1.includes('lkpd')) && 
+          (s2.includes('termo') || s2.includes('kalor') || s2.includes('entalpi') || s2.includes('lkpd'))) return true;
+      if (s1.includes('volta') && s2.includes('volta') && !s1.includes('slide') && !s2.includes('slide')) return true;
+      if (s1.includes('elektrolisis') && s2.includes('elektrolisis')) return true;
+      if (s1.includes('laboratorium') && s2.includes('laboratorium')) return true;
+      return false;
     }
+
+    function mergeDriveAndCuratedMaterials(driveData) {
+      const cleanData = sanitizePortalKimiaMaterials(driveData);
+      if (!cleanData || cleanData.length === 0) return [...defaultCuratedMaterials];
+
+      const missingCurated = defaultCuratedMaterials.filter(dm => {
+        return !cleanData.some(m => isSameMaterialSemantic(m.title, dm.title) || isSameMaterialSemantic(m.url, dm.url));
+      });
+
+      return [...cleanData, ...missingCurated];
+    }
+
+    // 2. Background sync ke Google Apps Script (dengan filter folder resmi PortalKimia)
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+            const mergedData = mergeDriveAndCuratedMaterials(res.data);
+            if (mergedData.length > 0) {
+              allMaterials = mergedData.map(m => ({
+                ...m,
+                thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
+              }));
+              window.allMaterials = allMaterials;
+              localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
+              updateCounters();
+              renderMaterials();
+            }
+          }
+        })
+        .getMaterials(PORTALKIMIA_DRIVE_FOLDER_ID);
+    } else {
+      fetch(GAS_API_URL + '?action=getMaterials&folderId=' + PORTALKIMIA_DRIVE_FOLDER_ID)
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+            const mergedData = mergeDriveAndCuratedMaterials(res.data);
+            if (mergedData.length > 0) {
+              allMaterials = mergedData.map(m => ({
+                ...m,
+                thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
+              }));
+              window.allMaterials = allMaterials;
+              localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
+              updateCounters();
+              renderMaterials();
+            }
+          }
+        })
+        .catch(() => {
+          // Beroperasi secara offline / lokal
+        });
+    }
+  }
 
     function updateCounters() {
       const total = allMaterials.length;
@@ -2015,12 +2058,14 @@
       const t = (item.title + ' ' + (item.topic || '') + ' ' + (item.url || '')).toLowerCase();
       // Kelas 10 Bab 1: Struktur Atom
       if (t.includes('bohr')) return 1010;
+      if (t.includes('bilangan kuantum')) return 1030;
       if (t.includes('mekanika kuantum') || t.includes('konfigurasi kuantum') || (t.includes('konfigurasi') && !t.includes('bohr'))) return 1020;
-      if (t.includes('bilangan kuantum') || t.includes('orbital')) return 1030;
+      if (t.includes('orbital')) return 1030;
       
       // Kelas 10 Bab 2: SPU
       if (t.includes('sejarah') || t.includes('dobereiner') || t.includes('mendeleev') || t.includes('perkembangan')) return 1040;
       if (t.includes('periode') || t.includes('golongan')) return 1050;
+      if (t.includes('sifat') || t.includes('keperiodikan') || t.includes('ionisasi') || t.includes('elektronegatif')) return 1060;
       
       // Kelas 11
       if (t.includes('titrasi') || t.includes('asam basa')) return 1110;
@@ -2038,12 +2083,13 @@
       const t = (item.title + ' ' + (item.topic || '') + ' ' + (item.description || '')).toLowerCase();
       const g = (item.grade || '').toLowerCase();
       
-      if (g.includes('10') || t.includes('bohr') || t.includes('kuantum') || t.includes('spu') || t.includes('periode') || t.includes('mendeleev')) {
-        if (t.includes('spu') || t.includes('periode') || t.includes('golongan') || t.includes('mendeleev') || t.includes('dobereiner') || t.includes('tabel periodik')) {
+      if (g.includes('10') || t.includes('bohr') || t.includes('kuantum') || t.includes('spu') || t.includes('periode') || t.includes('mendeleev') || t.includes('sifat') || t.includes('keperiodikan')) {
+        const isBab1 = (t.includes('bohr') || t.includes('bilangan kuantum') || t.includes('orbital') || (t.includes('konfigurasi') && !t.includes('periode'))) && !t.includes('sejarah') && !t.includes('sifat');
+        if (!isBab1 && (t.includes('spu') || t.includes('periode') || t.includes('golongan') || t.includes('mendeleev') || t.includes('dobereiner') || t.includes('tabel periodik') || t.includes('sifat') || t.includes('keperiodikan'))) {
           return {
             id: 'k10-bab2',
             name: 'Bab 2: Sistem Periodik Unsur (SPU)',
-            desc: 'Evolusi penataan tabel periodik dan penentuan letak periode serta golongan unsur',
+            desc: 'Evolusi penataan tabel periodik, penentuan letak periode & golongan, serta tren sifat keperiodikan unsur',
             icon: 'table_chart',
             order: 2
           };

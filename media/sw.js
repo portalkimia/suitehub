@@ -1,4 +1,4 @@
-const CACHE_NAME = 'portal-kimia-v4';
+const CACHE_NAME = 'portal-kimia-v6-submissions';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -6,9 +6,12 @@ const STATIC_ASSETS = [
   './icon.svg',
   './SejarahSPU.html',
   './PeriodeGolongan.html',
+  './SifatKeperiodikanUnsur.html',
   './BilanganKuantum.html',
   './KonfigurasiKuantum.html',
-  './KonfigurasiBohr.html'
+  './KonfigurasiBohr.html',
+  './SelVolta.html',
+  './SelElektrolisis.html'
 ];
 
 // Install Event

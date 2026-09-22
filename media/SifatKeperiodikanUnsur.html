@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="id" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sifat Keperiodikan Unsur (SPU) &bull; PortalKimia SMA</title>
+
+  <!-- Google Fonts: Geist & Amiri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Tailwind Configuration matching Google Stitch Obsidian & Light Mode -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#a78bfa",
+            "primary-container": "#7c3aed",
+            "primary-fixed": "#ede9fe",
+            "primary-fixed-dim": "#c4b5fd",
+            "on-primary": "#0a0012",
+            "on-primary-container": "#ede9fe",
+
+            "tertiary": "#34d399",
+            "tertiary-container": "#065f46",
+            "tertiary-fixed": "#bbf7d0",
+            "tertiary-fixed-dim": "#6ee7b7",
+            "on-tertiary": "#001a12",
+            "on-tertiary-container": "#bbf7d0",
+
+            "secondary": "#71717a",
+            "secondary-container": "#27272a",
+            "secondary-fixed": "#a1a1aa",
+            "secondary-fixed-dim": "#71717a",
+            "on-secondary": "#09090b",
+            "on-secondary-container": "#a1a1aa",
+
+            "background": "#09090b",
+            "surface": "#0c0c0f",
+            "surface-dim": "#0c0c0f",
+            "surface-bright": "#18181b",
+            "surface-container-lowest": "#09090b",
+            "surface-container-low": "#0f0f12",
+            "surface-container": "#121215",
+            "surface-container-high": "#18181b",
+            "surface-container-highest": "#1e1e22",
+
+            "outline": "#52525b",
+            "outline-variant": "#27272a",
+
+            "on-background": "#fafafa",
+            "on-surface": "#fafafa",
+            "on-surface-variant": "#a1a1aa",
+
+            "error": "#ef4444",
+            "error-container": "#3b1111",
+            "on-error": "#1a0000",
+            "on-error-container": "#fca5a5"
+          },
+          fontFamily: {
+            sans: ["Geist", "sans-serif"],
+            headline: ["Geist", "sans-serif"],
+            body: ["Geist", "sans-serif"],
+            arabic: ["Amiri", "serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Prevent FOUC Theme Script -->
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('chemportal_theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    .font-arabic { font-family: 'Amiri', serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+    .light ::-webkit-scrollbar-thumb { background: #d4d4d8; }
+    .light ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* Periodic Table Cells */
+    .pt-cell {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      user-select: none;
+    }
+    .pt-cell:hover {
+      transform: translateY(-2px) scale(1.08);
+      z-index: 30;
+      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.45);
+    }
+    .pt-cell.active-selected {
+      outline: 2px solid #a78bfa;
+      outline-offset: 1px;
+      z-index: 25;
+      transform: scale(1.05);
+    }
+
+    /* Bouncy Animation */
+    .bouncy {
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .bouncy:hover { transform: scale(1.03); }
+    .bouncy:active { transform: scale(0.97); }
+
+    /* Custom Canvas Tooltip */
+    #chart-tooltip {
+      pointer-events: none;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex flex-col antialiased selection:bg-primary selection:text-on-primary font-sans transition-colors duration-200">
+
+  <!-- ============================================================== -->
+  <!-- 1. TOP HEADER & NAVIGATION BAR                                  -->
+  <!-- ============================================================== -->
+  <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-md border-b border-outline-variant px-4 sm:px-6 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Left: Back & Title -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-all bouncy" title="Kembali ke Katalog Media">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
+              Kelas 10 &bull; Fase E
+            </span>
+            <span class="text-xs text-on-surface-variant font-mono hidden sm:inline">Bab 2: Sistem Periodik Unsur</span>
+          </div>
+          <h1 class="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight flex items-center gap-1.5 mt-0.5">
+            <span>Sifat Keperiodikan Unsur (SPU)</span>
+            <span class="material-symbols-outlined text-primary text-xl">auto_graph</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Center / Right: Navigation Tabs -->
+      <nav class="flex items-center gap-1 bg-surface-container p-1 rounded-2xl border border-outline-variant overflow-x-auto text-xs font-medium">
+        <button onclick="switchTab('tab-heatmap')" id="nav-tab-heatmap" class="tab-btn px-3 py-1.5 rounded-xl font-bold bg-primary text-on-primary shadow-sm flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[15px]">table_chart</span>
+          <span>Heatmap SPU</span>
+        </button>
+        <button onclick="switchTab('tab-duel')" id="nav-tab-duel" class="tab-btn px-3 py-1.5 rounded-xl text-on-surface-variant hover:text-on-surface flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[15px]">swords</span>
+          <span>Duel Unsur</span>
+        </button>
+        <button onclick="switchTab('tab-graph')" id="nav-tab-graph" class="tab-btn px-3 py-1.5 rounded-xl text-on-surface-variant hover:text-on-surface flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[15px]">show_chart</span>
+          <span>Grafik Tren</span>
+        </button>
+        <button onclick="switchTab('tab-anomali')" id="nav-tab-anomali" class="tab-btn px-3 py-1.5 rounded-xl text-on-surface-variant hover:text-on-surface flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[15px]">psychology</span>
+          <span>Anomali</span>
+        </button>
+        <button onclick="switchTab('tab-quiz')" id="nav-tab-quiz" class="tab-btn px-3 py-1.5 rounded-xl text-on-surface-variant hover:text-on-surface flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[15px]">quiz</span>
+          <span>Kuis (12 Soal)</span>
+        </button>
+      </nav>
+
+      <!-- Utility Controls -->
+      <div class="flex items-center gap-1.5">
+        <button onclick="toggleAudioSound()" id="btn-audio" class="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-colors" title="Efek Suara Audio Web">
+          <span class="material-symbols-outlined text-[18px]" id="audio-icon">volume_up</span>
+        </button>
+        <button onclick="toggleTheme()" class="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-colors" title="Ganti Tema Gelap/Terang">
+          <span class="material-symbols-outlined text-[18px] dark:hidden">dark_mode</span>
+          <span class="material-symbols-outlined text-[18px] hidden dark:inline">light_mode</span>
+        </button>
+        <button onclick="toggleFullscreen()" class="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-colors" title="Layar Penuh">
+          <span class="material-symbols-outlined text-[18px]">fullscreen</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- MAIN APPLICATION CONTENT CONTAINER                             -->
+  <!-- ============================================================== -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+    <!-- ============================================================ -->
+    <!-- SECTION 1: HEATMAP SPU INTERAKTIF                            -->
+    <!-- ============================================================ -->
+    <section id="tab-heatmap" class="tab-content space-y-6">
+      
+      <!-- Top Control Toolbar -->
+      <div class="p-4 sm:p-5 rounded-3xl bg-surface-container border border-outline-variant flex flex-wrap items-center justify-between gap-4 shadow-sm">
+        
+        <!-- Left: Property Selector -->
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+            <span class="text-xs font-bold font-mono uppercase text-on-surface-variant">Sifat Periodik:</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5" id="property-buttons">
+            <button onclick="setActiveProperty('radius')" data-prop="radius" class="prop-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-primary text-on-primary shadow-sm flex items-center gap-1.5 transition-all">
+              <span class="material-symbols-outlined text-[15px]">circle</span>
+              <span>Jari-Jari Atom (pm)</span>
+            </button>
+            <button onclick="setActiveProperty('ie')" data-prop="ie" class="prop-btn px-3 py-1.5 rounded-xl text-xs font-medium text-on-surface-variant hover:text-on-surface bg-surface-container-high transition-all flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[15px]">bolt</span>
+              <span>Energi Ionisasi (kJ/mol)</span>
+            </button>
+            <button onclick="setActiveProperty('ea')" data-prop="ea" class="prop-btn px-3 py-1.5 rounded-xl text-xs font-medium text-on-surface-variant hover:text-on-surface bg-surface-container-high transition-all flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[15px]">download</span>
+              <span>Afinitas Elektron (kJ/mol)</span>
+            </button>
+            <button onclick="setActiveProperty('en')" data-prop="en" class="prop-btn px-3 py-1.5 rounded-xl text-xs font-medium text-on-surface-variant hover:text-on-surface bg-surface-container-high transition-all flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[15px]">attractions</span>
+              <span>Elektronegativitas (Pauling)</span>
+            </button>
+            <button onclick="setActiveProperty('mp')" data-prop="mp" class="prop-btn px-3 py-1.5 rounded-xl text-xs font-medium text-on-surface-variant hover:text-on-surface bg-surface-container-high transition-all flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[15px]">thermostat</span>
+              <span>Titik Leleh (°C)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Heatmap Legend -->
+        <div class="flex items-center gap-3 text-xs font-mono">
+          <span id="legend-min-val" class="text-on-surface-variant">Min: --</span>
+          <div class="w-32 h-3 rounded-full bg-gradient-to-r from-violet-950 via-violet-600 to-amber-400 border border-outline-variant shadow-inner"></div>
+          <span id="legend-max-val" class="text-amber-400 font-bold">Max: --</span>
+        </div>
+
+      </div>
+
+      <!-- Educational Trend Summary Banner -->
+      <div id="trend-summary-banner" class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl bg-violet-600/20 text-primary flex items-center justify-center shrink-0 mt-0.5 border border-primary/30">
+            <span class="material-symbols-outlined text-lg">arrow_downward</span>
+          </div>
+          <div>
+            <h4 class="font-bold text-on-surface">Tren Dalam Satu Golongan (Atas &rarr; Bawah):</h4>
+            <p id="trend-desc-group" class="text-on-surface-variant mt-0.5 leading-relaxed">
+              Makin ke bawah, jumlah kulit elektron bertambah sehingga jari-jari atom membesar dan gaya tarik inti melemah.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl bg-emerald-600/20 text-tertiary flex items-center justify-center shrink-0 mt-0.5 border border-tertiary/30">
+            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+          </div>
+          <div>
+            <h4 class="font-bold text-on-surface">Tren Dalam Satu Periode (Kiri &rarr; Kanan):</h4>
+            <p id="trend-desc-period" class="text-on-surface-variant mt-0.5 leading-relaxed">
+              Makin ke kanan, jumlah kulit tetap namun muatan inti ($Z$) bertambah, gaya tarik inti makin kuat menarik elektron.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Two-Column Layout: Periodic Table (Left) + Selected Element Dossier (Right) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Full 118 Element Periodic Table Grid -->
+        <div class="lg:col-span-8 p-4 sm:p-5 rounded-3xl bg-surface border border-outline-variant overflow-x-auto shadow-sm">
+          <div class="flex items-center justify-between mb-3 text-xs text-on-surface-variant">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-base text-primary">touch_app</span>
+              <span>Klik pada unsur untuk memeriksa rincian sifat &amp; visualisasi elektron:</span>
+            </div>
+            <span class="font-mono text-[11px] text-tertiary hidden sm:inline">118 Unsur Lengkap</span>
+          </div>
+
+          <!-- Periodic Table Container (18 Columns) -->
+          <div id="periodic-table-grid" class="grid grid-cols-18 gap-1 min-w-[760px] text-center font-sans">
+            <!-- Dynamically populated by JavaScript -->
+          </div>
+
+          <!-- Lanthanides and Actinides Row Container -->
+          <div class="mt-4 pt-3 border-t border-outline-variant space-y-1">
+            <div class="flex items-center gap-2 text-[10px] font-mono text-on-surface-variant mb-1">
+              <span class="w-16 text-right">Lantanida:</span>
+              <div id="lanthanides-row" class="flex gap-1 flex-1 min-w-[660px]"></div>
+            </div>
+            <div class="flex items-center gap-2 text-[10px] font-mono text-on-surface-variant">
+              <span class="w-16 text-right">Aktinida:</span>
+              <div id="actinides-row" class="flex gap-1 flex-1 min-w-[660px]"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Element Dossier Card -->
+        <div class="lg:col-span-4 p-5 rounded-3xl bg-surface-container border border-outline-variant space-y-5 shadow-sm sticky top-24">
+          
+          <div class="flex items-start justify-between gap-3 pb-3 border-b border-outline-variant">
+            <div>
+              <span id="dossier-category" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
+                Logam Alkali
+              </span>
+              <h3 id="dossier-name" class="text-xl font-headline font-extrabold text-on-surface mt-1">
+                Natrium (Sodium)
+              </h3>
+              <p id="dossier-config" class="text-xs text-on-surface-variant font-mono mt-0.5">
+                [Ne] 3s¹ &bull; Golongan IA, Periode 3
+              </p>
+            </div>
+            
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-primary-container text-white flex flex-col items-center justify-center font-headline shadow-md shrink-0">
+              <span id="dossier-symbol" class="text-2xl font-black">Na</span>
+              <span id="dossier-z" class="text-[10px] font-mono opacity-80">Z = 11</span>
+            </div>
+          </div>
+
+          <!-- Atomic Radius Visualizer Circle -->
+          <div class="p-4 rounded-2xl bg-surface border border-outline-variant text-center relative overflow-hidden">
+            <div class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mb-2 flex items-center justify-center gap-1">
+              <span class="material-symbols-outlined text-[14px] text-primary">radio_button_checked</span>
+              <span>Proporsi Jari-Jari Atom</span>
+            </div>
+            
+            <div class="h-28 flex items-center justify-center relative">
+              <div id="radius-bubble-halo" class="rounded-full bg-primary/15 border border-primary/40 flex items-center justify-center transition-all duration-300 shadow-inner">
+                <div id="radius-bubble-core" class="w-3 h-3 rounded-full bg-primary shadow-sm shadow-primary"></div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs font-mono mt-2 pt-2 border-t border-outline-variant text-on-surface-variant">
+              <span>Radius: <strong id="dossier-radius" class="text-primary font-bold">186 pm</strong></span>
+              <span>Kulit: <strong id="dossier-shells" class="text-on-surface">3 Kulit (K, L, M)</strong></span>
+            </div>
+          </div>
+
+          <!-- All Periodic Properties Table -->
+          <div class="space-y-2 text-xs">
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface border border-outline-variant">
+              <span class="text-on-surface-variant flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-primary">bolt</span>
+                <span>Energi Ionisasi Ke-1</span>
+              </span>
+              <span id="dossier-ie" class="font-mono font-bold text-on-surface">496 kJ/mol</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface border border-outline-variant">
+              <span class="text-on-surface-variant flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-tertiary">download</span>
+                <span>Afinitas Elektron</span>
+              </span>
+              <span id="dossier-ea" class="font-mono font-bold text-on-surface">53 kJ/mol</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface border border-outline-variant">
+              <span class="text-on-surface-variant flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-amber-400">attractions</span>
+                <span>Keelektronegatifan (Pauling)</span>
+              </span>
+              <span id="dossier-en" class="font-mono font-bold text-on-surface">0.93</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface border border-outline-variant">
+              <span class="text-on-surface-variant flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-rose-400">thermostat</span>
+                <span>Titik Leleh / Didih</span>
+              </span>
+              <span id="dossier-mp-bp" class="font-mono font-bold text-on-surface">97.8°C / 883°C</span>
+            </div>
+          </div>
+
+          <!-- Send to Duel Button -->
+          <button onclick="sendDossierToDuel()" class="w-full py-2.5 px-4 rounded-2xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md bouncy cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">swords</span>
+            <span>Kirim Unsur ke Mode Duel Komparasi</span>
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 2: DUEL KOMPARASI 2 UNSUR (SIDE-BY-SIDE)              -->
+    <!-- ============================================================ -->
+    <section id="tab-duel" class="tab-content hidden space-y-6">
+      
+      <!-- Top Preset Selector -->
+      <div class="p-4 rounded-3xl bg-surface-container border border-outline-variant flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-xl">swords</span>
+          <span class="text-xs font-bold text-on-surface">Pilih Perbandingan Cepat (Studi Kasus Kurikulum):</span>
+        </div>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <button onclick="setDuelPreset('Na', 'Cl')" class="px-3 py-1 rounded-xl bg-surface-container-high hover:bg-primary/20 hover:text-primary text-on-surface-variant border border-outline-variant font-mono transition-colors">
+            Na (IA) vs Cl (VIIA) &bull; 1 Periode
+          </button>
+          <button onclick="setDuelPreset('Li', 'Cs')" class="px-3 py-1 rounded-xl bg-surface-container-high hover:bg-primary/20 hover:text-primary text-on-surface-variant border border-outline-variant font-mono transition-colors">
+            Li vs Cs &bull; 1 Golongan
+          </button>
+          <button onclick="setDuelPreset('Be', 'B')" class="px-3 py-1 rounded-xl bg-surface-container-high hover:bg-primary/20 hover:text-primary text-on-surface-variant border border-outline-variant font-mono transition-colors">
+            Be vs B &bull; Anomali EI
+          </button>
+          <button onclick="setDuelPreset('N', 'O')" class="px-3 py-1 rounded-xl bg-surface-container-high hover:bg-primary/20 hover:text-primary text-on-surface-variant border border-outline-variant font-mono transition-colors">
+            N vs O &bull; Subkulit Setengah Penuh
+          </button>
+          <button onclick="setDuelPreset('F', 'Cl')" class="px-3 py-1 rounded-xl bg-surface-container-high hover:bg-primary/20 hover:text-primary text-on-surface-variant border border-outline-variant font-mono transition-colors">
+            F vs Cl &bull; Anomali Afinitas
+          </button>
+        </div>
+      </div>
+
+      <!-- Duel Arena Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Element A Card -->
+        <div class="p-5 rounded-3xl bg-surface border-2 border-primary/40 shadow-sm space-y-4">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-primary/20 text-primary font-mono text-xs font-bold flex items-center justify-center">A</span>
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Unsur Petarung 1</span>
+            </div>
+            <select id="duel-select-a" onchange="updateDuelUI()" class="px-3 py-1.5 rounded-xl bg-surface-container border border-outline-variant text-on-surface text-xs font-bold focus:ring-2 focus:ring-primary">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+
+          <!-- Graphic Circle & Stats A -->
+          <div class="p-4 rounded-2xl bg-surface-container-low text-center flex flex-col items-center justify-center">
+            <div class="h-32 flex items-center justify-center">
+              <div id="duel-bubble-a" class="rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center shadow-lg transition-all duration-300">
+                <span id="duel-symbol-a" class="text-2xl font-black text-on-surface">Na</span>
+              </div>
+            </div>
+            <p id="duel-name-a" class="text-sm font-bold text-on-surface mt-2">Natrium (Z = 11)</p>
+            <p id="duel-shells-a" class="text-xs text-on-surface-variant font-mono">3 Kulit Elektron &bull; [Ne] 3s¹</p>
+          </div>
+
+          <!-- Metrics A -->
+          <div class="space-y-2 text-xs font-mono" id="duel-metrics-a">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Element B Card -->
+        <div class="p-5 rounded-3xl bg-surface border-2 border-tertiary/40 shadow-sm space-y-4">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-tertiary/20 text-tertiary font-mono text-xs font-bold flex items-center justify-center">B</span>
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Unsur Petarung 2</span>
+            </div>
+            <select id="duel-select-b" onchange="updateDuelUI()" class="px-3 py-1.5 rounded-xl bg-surface-container border border-outline-variant text-on-surface text-xs font-bold focus:ring-2 focus:ring-tertiary">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+
+          <!-- Graphic Circle & Stats B -->
+          <div class="p-4 rounded-2xl bg-surface-container-low text-center flex flex-col items-center justify-center">
+            <div class="h-32 flex items-center justify-center">
+              <div id="duel-bubble-b" class="rounded-full bg-tertiary/20 border-2 border-tertiary flex items-center justify-center shadow-lg transition-all duration-300">
+                <span id="duel-symbol-b" class="text-2xl font-black text-on-surface">Cl</span>
+              </div>
+            </div>
+            <p id="duel-name-b" class="text-sm font-bold text-on-surface mt-2">Klorin (Z = 17)</p>
+            <p id="duel-shells-b" class="text-xs text-on-surface-variant font-mono">3 Kulit Elektron &bull; [Ne] 3s² 3p⁵</p>
+          </div>
+
+          <!-- Metrics B -->
+          <div class="space-y-2 text-xs font-mono" id="duel-metrics-b">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Pedagogical Reasoning Engine Output Card -->
+      <div class="p-5 rounded-3xl bg-surface-container border border-outline-variant space-y-4 shadow-sm">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-primary/20 text-primary flex items-center justify-center shrink-0 border border-primary/30">
+            <span class="material-symbols-outlined text-xl">psychology</span>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-headline font-bold text-on-surface">
+              Analisis Penalaran Ilmiah (Mengapa Perbedaan Ini Terjadi?)
+            </h3>
+            <p class="text-xs text-on-surface-variant">Penjelasan berbasis muatan inti efektif (Z_eff) &amp; jumlah kulit Bohr</p>
+          </div>
+        </div>
+
+        <div id="duel-reasoning-content" class="p-4 rounded-2xl bg-surface border border-outline-variant space-y-3 text-xs sm:text-sm text-on-surface leading-relaxed">
+          <!-- Populated by JS dynamically -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 3: GRAFIK TREN PERIODIK (CANVAS 2D PLOTTER)          -->
+    <!-- ============================================================ -->
+    <section id="tab-graph" class="tab-content hidden space-y-6">
+      
+      <!-- Graph Header & Toolbar -->
+      <div class="p-4 sm:p-5 rounded-3xl bg-surface-container border border-outline-variant flex flex-wrap items-center justify-between gap-4 shadow-sm">
+        <div>
+          <h3 class="text-sm sm:text-base font-headline font-bold text-on-surface flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-xl">show_chart</span>
+            <span>Grafik Fluktuasi Tren Keperiodikan vs Nomor Atom (Z)</span>
+          </h3>
+          <p class="text-xs text-on-surface-variant mt-0.5">
+            Perhatikan pola berulang (zig-zag) setiap pergantian periode baru (kulit baru).
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <select id="graph-property-select" onchange="renderTrendChart()" class="px-3 py-1.5 rounded-xl bg-surface border border-outline-variant text-on-surface text-xs font-bold focus:ring-2 focus:ring-primary">
+            <option value="radius">Jari-Jari Atom (pm)</option>
+            <option value="ie" selected>Energi Ionisasi Pertama (kJ/mol)</option>
+            <option value="ea">Afinitas Elektron (kJ/mol)</option>
+            <option value="en">Elektronegativitas (Pauling)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Canvas Plotter Frame -->
+      <div class="p-4 sm:p-6 rounded-3xl bg-surface border border-outline-variant relative shadow-sm overflow-hidden">
+        <div class="relative w-full h-80 sm:h-96">
+          <canvas id="trend-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+          
+          <!-- Tooltip Floating Div -->
+          <div id="chart-tooltip" class="absolute hidden z-20 px-3 py-2 rounded-xl bg-surface-container-highest/95 border border-primary/40 text-on-surface text-xs font-mono shadow-xl backdrop-blur-md">
+            <div class="font-bold text-primary" id="tt-title">Unsur</div>
+            <div id="tt-val" class="text-on-surface">Nilai: --</div>
+          </div>
+        </div>
+
+        <!-- Graph Period Color Indicators Legend -->
+        <div class="mt-4 pt-3 border-t border-outline-variant flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-on-surface-variant">
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500"></span><span>Periode 1 (Z=1-2)</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-violet-500"></span><span>Periode 2 (Z=3-10)</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-sky-500"></span><span>Periode 3 (Z=11-18)</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span><span>Periode 4 (Z=19-36)</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500"></span><span>Periode 5 (Z=37-54)</span></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 4: DETEKTIF ANOMALI KIMIA (CASE STUDIES)             -->
+    <!-- ============================================================ -->
+    <section id="tab-anomali" class="tab-content hidden space-y-6">
+      
+      <div class="p-5 rounded-3xl bg-surface-container border border-outline-variant flex items-center justify-between gap-4">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-400/20 text-amber-400 border border-amber-400/30">
+            Penalaran Tingkat Tinggi (HOTS)
+          </span>
+          <h3 class="text-base sm:text-lg font-headline font-bold text-on-surface mt-1">
+            Mengapa Terjadi Anomali pada Tren SPU?
+          </h3>
+          <p class="text-xs text-on-surface-variant mt-0.5">
+            Tren keperiodikan tidak selalu linier mulus. Pelajari 3 kasus anomali klasik yang paling sering diujikan di UTBK &amp; Olimpiade Kimia.
+          </p>
+        </div>
+      </div>
+
+      <!-- 3 Anomaly Case Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Case 1: Be vs B -->
+        <div class="p-5 rounded-3xl bg-surface border border-outline-variant space-y-4 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-2xl bg-violet-600/20 text-primary flex items-center justify-center font-bold font-mono text-sm border border-primary/30 mb-3">
+              01
+            </div>
+            <h4 class="text-sm font-bold font-headline text-on-surface">
+              Energi Ionisasi: Be (899 kJ) &gt; B (801 kJ)
+            </h4>
+            <p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+              Secara teori, Boron ($Z=5$) di sebelah kanan Berilium ($Z=4$) harusnya memiliki EI lebih tinggi. Mengapa justru lebih rendah?
+            </p>
+          </div>
+
+          <details class="group bg-surface-container p-3 rounded-2xl border border-outline-variant text-xs">
+            <summary class="cursor-pointer font-bold text-primary flex items-center justify-between list-none">
+              <span>Buka Pembahasan Orbital</span>
+              <span class="material-symbols-outlined text-[16px] group-open:rotate-180 transition-transform">expand_more</span>
+            </summary>
+            <div class="mt-2.5 pt-2 border-t border-outline-variant text-on-surface space-y-1.5 leading-relaxed font-sans">
+              <p><strong>Konfigurasi Elektron:</strong></p>
+              <ul class="list-disc pl-4 font-mono text-[11px] text-on-surface-variant">
+                <li>₄Be: 1s² 2s² (Subkulit 2s terisi penuh = Sangat Stabil)</li>
+                <li>₅B: 1s² 2s² 2p¹ (Memiliki 1 elektron terluar di 2p)</li>
+              </ul>
+              <p class="mt-1">
+                Elektron pada orbital $2p$ memiliki tingkat energi lebih tinggi dan terperisai oleh subkulit $2s^2$, sehingga elektron tunggal $2p^1$ pada Boron jauh lebih mudah dilepaskan daripada elektron subkulit penuh $2s^2$ pada Berilium!
+              </p>
+            </div>
+          </details>
+        </div>
+
+        <!-- Case 2: N vs O -->
+        <div class="p-5 rounded-3xl bg-surface border border-outline-variant space-y-4 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-2xl bg-emerald-600/20 text-tertiary flex items-center justify-center font-bold font-mono text-sm border border-tertiary/30 mb-3">
+              02
+            </div>
+            <h4 class="text-sm font-bold font-headline text-on-surface">
+              Energi Ionisasi: N (1402 kJ) &gt; O (1314 kJ)
+            </h4>
+            <p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+              Oksigen ($Z=8$) memiliki muatan inti lebih besar dari Nitrogen ($Z=7$), namun energi ionisasinya justru turun. Mengapa?
+            </p>
+          </div>
+
+          <details class="group bg-surface-container p-3 rounded-2xl border border-outline-variant text-xs">
+            <summary class="cursor-pointer font-bold text-tertiary flex items-center justify-between list-none">
+              <span>Buka Pembahasan Orbital</span>
+              <span class="material-symbols-outlined text-[16px] group-open:rotate-180 transition-transform">expand_more</span>
+            </summary>
+            <div class="mt-2.5 pt-2 border-t border-outline-variant text-on-surface space-y-1.5 leading-relaxed font-sans">
+              <p><strong>Konfigurasi Subkulit 2p:</strong></p>
+              <ul class="list-disc pl-4 font-mono text-[11px] text-on-surface-variant">
+                <li>₇N: 2s² 2p³ (Setengah penuh: 1 elektron per orbital = Ekstra Stabil)</li>
+                <li>₈O: 2s² 2p⁴ (Ada 1 orbital p berisi pasangan elektron: ↑↓ ↑ ↑)</li>
+              </ul>
+              <p class="mt-1">
+                Dua elektron dalam satu orbital yang sama pada atom Oksigen mengalami <strong>gaya tolak-menolak elektrostatik</strong> (*electron-electron repulsion*). Tolakan ini memudahkan salah satu elektron lepas, membuat EI Oksigen lebih rendah dari Nitrogen.
+              </p>
+            </div>
+          </details>
+        </div>
+
+        <!-- Case 3: F vs Cl -->
+        <div class="p-5 rounded-3xl bg-surface border border-outline-variant space-y-4 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-2xl bg-amber-400/20 text-amber-400 flex items-center justify-center font-bold font-mono text-sm border border-amber-400/30 mb-3">
+              03
+            </div>
+            <h4 class="text-sm font-bold font-headline text-on-surface">
+              Afinitas Elektron: Cl (349 kJ) &gt; F (328 kJ)
+            </h4>
+            <p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+              Fluorin adalah unsur paling elektronegatif, namun afinitas elektronnya lebih kecil daripada Klorin. Mengapa?
+            </p>
+          </div>
+
+          <details class="group bg-surface-container p-3 rounded-2xl border border-outline-variant text-xs">
+            <summary class="cursor-pointer font-bold text-amber-400 flex items-center justify-between list-none">
+              <span>Buka Pembahasan Orbital</span>
+              <span class="material-symbols-outlined text-[16px] group-open:rotate-180 transition-transform">expand_more</span>
+            </summary>
+            <div class="mt-2.5 pt-2 border-t border-outline-variant text-on-surface space-y-1.5 leading-relaxed font-sans">
+              <p><strong>Rapatan Awan Elektron:</strong></p>
+              <p class="text-on-surface-variant">
+                Atom Fluorin berukuran sangat kecil (kulit $n=2$). Ruang orbital $2p$ sangat sempit dan padat elektron, sehingga ketika ada elektron luar yang masuk, terjadi <strong>gaya tolak antar-elektron yang sangat besar</strong> yang mengurangi kestabilan energi pelepasan.
+              </p>
+              <p class="mt-1">
+                Klorin memiliki ruang kulit $n=3$ yang lebih lapang, sehingga elektron baru dapat masuk dengan tolakan yang lebih minim.
+              </p>
+            </div>
+          </details>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 5: KUIS EVALUASI & PENALARAN (12 SOAL HOTS)          -->
+    <!-- ============================================================ -->
+    <section id="tab-quiz" class="tab-content hidden space-y-6">
+      
+      <!-- Quiz Header Card -->
+      <div class="p-5 rounded-3xl bg-surface-container border border-outline-variant flex flex-wrap items-center justify-between gap-4 shadow-sm">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
+            Evaluasi Pemahaman &bull; Kurikulum Merdeka
+          </span>
+          <h3 class="text-lg font-headline font-bold text-on-surface mt-1">
+            Uji Kompetensi Sifat Keperiodikan Unsur
+          </h3>
+          <p class="text-xs text-on-surface-variant mt-0.5">
+            12 Butir soal pilihan ganda interaktif dengan pembahasan instan dan laporan skor.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="px-3.5 py-1.5 rounded-2xl bg-surface border border-outline-variant font-mono text-xs">
+            Skor: <strong id="quiz-score-badge" class="text-primary text-sm font-bold">0 / 12</strong>
+          </div>
+          <button onclick="resetQuiz()" class="p-2 rounded-xl bg-surface hover:bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-colors" title="Ulangi Kuis">
+            <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Questions List Container -->
+      <div id="quiz-questions-list" class="space-y-4">
+        <!-- Dynamically rendered by JS -->
+      </div>
+
+      <!-- Quiz Final Action Toolbar -->
+      <div id="quiz-finish-banner" class="hidden p-6 rounded-3xl bg-surface-container border-2 border-primary/40 text-center space-y-4 shadow-lg">
+        <div class="w-16 h-16 rounded-full bg-primary/20 text-primary flex items-center justify-center mx-auto text-3xl">
+          <span class="material-symbols-outlined text-4xl">emoji_events</span>
+        </div>
+        <div>
+          <h3 class="text-xl font-headline font-bold text-on-surface" id="quiz-final-title">
+            Evaluasi Selesai!
+          </h3>
+          <p class="text-xs text-on-surface-variant mt-1" id="quiz-final-desc">
+            Skor Anda telah dihitung secara otomatis.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <button onclick="copyQuizReport()" class="px-5 py-2.5 rounded-2xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs flex items-center gap-2 bouncy shadow-md cursor-pointer">
+            <span class="material-symbols-outlined text-base">content_copy</span>
+            <span>Salin Laporan WhatsApp / LMS</span>
+          </button>
+          <button onclick="window.print()" class="px-5 py-2.5 rounded-2xl bg-surface hover:bg-surface-container border border-outline-variant text-on-surface font-semibold text-xs flex items-center gap-2 bouncy cursor-pointer">
+            <span class="material-symbols-outlined text-base">print</span>
+            <span>Cetak Raport PDF</span>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- FOOTER                                                         -->
+  <!-- ============================================================== -->
+  <footer class="mt-12 bg-surface border-t border-outline-variant py-6 px-4 text-center text-xs text-on-surface-variant font-mono">
+    <p>PortalKimia SMA &bull; Modul Interaktif Sifat Keperiodikan Unsur (SPU) &bull; Kurikulum Merdeka Fase E</p>
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT LOGIC & SCIENTIFIC DATASET                          -->
+  <!-- ============================================================== -->
+  <script>
+    // -------------------------------------------------------------
+    // 1. DATASET 118 UNSUR SPU LENGKAP DENGAN SIFAT KEPERIODIKAN
+    // -------------------------------------------------------------
+    const ELEMENTS_DATA = [
+      { z: 1, s: "H", n: "Hidrogen", g: 1, p: 1, b: "s", c: "Nonlogam", r: 37, ie: 1312, ea: 73, en: 2.20, mp: -259.1, bp: -252.9, cfg: "1s¹" },
+      { z: 2, s: "He", n: "Helium", g: 18, p: 1, b: "s", c: "Gas Mulia", r: 32, ie: 2372, ea: 0, en: null, mp: -272.2, bp: -268.9, cfg: "1s²" },
+      { z: 3, s: "Li", n: "Litium", g: 1, p: 2, b: "s", c: "Logam Alkali", r: 152, ie: 520, ea: 60, en: 0.98, mp: 180.5, bp: 1342, cfg: "[He] 2s¹" },
+      { z: 4, s: "Be", n: "Berilium", g: 2, p: 2, b: "s", c: "Logam Alkali Tanah", r: 112, ie: 899, ea: 0, en: 1.57, mp: 1287, bp: 2470, cfg: "[He] 2s²" },
+      { z: 5, s: "B", n: "Boron", g: 13, p: 2, b: "p", c: "Metaloid", r: 85, ie: 801, ea: 27, en: 2.04, mp: 2076, bp: 3927, cfg: "[He] 2s² 2p¹" },
+      { z: 6, s: "C", n: "Karbon", g: 14, p: 2, b: "p", c: "Nonlogam", r: 77, ie: 1086, ea: 122, en: 2.55, mp: 3550, bp: 4827, cfg: "[He] 2s² 2p²" },
+      { z: 7, s: "N", n: "Nitrogen", g: 15, p: 2, b: "p", c: "Nonlogam", r: 75, ie: 1402, ea: 7, en: 3.04, mp: -210.0, bp: -195.8, cfg: "[He] 2s² 2p³" },
+      { z: 8, s: "O", n: "Oksigen", g: 16, p: 2, b: "p", c: "Nonlogam", r: 73, ie: 1314, ea: 141, en: 3.44, mp: -218.8, bp: -183.0, cfg: "[He] 2s² 2p⁴" },
+      { z: 9, s: "F", n: "Fluorin", g: 17, p: 2, b: "p", c: "Halogen", r: 71, ie: 1681, ea: 328, en: 3.98, mp: -219.6, bp: -188.1, cfg: "[He] 2s² 2p⁵" },
+      { z: 10, s: "Ne", n: "Neon", g: 18, p: 2, b: "p", c: "Gas Mulia", r: 69, ie: 2080, ea: 0, en: null, mp: -248.6, bp: -246.1, cfg: "[He] 2s² 2p⁶" },
+      { z: 11, s: "Na", n: "Natrium", g: 1, p: 3, b: "s", c: "Logam Alkali", r: 186, ie: 496, ea: 53, en: 0.93, mp: 97.8, bp: 883, cfg: "[Ne] 3s¹" },
+      { z: 12, s: "Mg", n: "Magnesium", g: 2, p: 3, b: "s", c: "Logam Alkali Tanah", r: 160, ie: 738, ea: 0, en: 1.31, mp: 650, bp: 1090, cfg: "[Ne] 3s²" },
+      { z: 13, s: "Al", n: "Aluminium", g: 13, p: 3, b: "p", c: "Logam Pasca-Transisi", r: 143, ie: 578, ea: 43, en: 1.61, mp: 660.3, bp: 2519, cfg: "[Ne] 3s² 3p¹" },
+      { z: 14, s: "Si", n: "Silikon", g: 14, p: 3, b: "p", c: "Metaloid", r: 118, ie: 786, ea: 134, en: 1.90, mp: 1414, bp: 3265, cfg: "[Ne] 3s² 3p²" },
+      { z: 15, s: "P", n: "Fosfor", g: 15, p: 3, b: "p", c: "Nonlogam", r: 110, ie: 1012, ea: 72, en: 2.19, mp: 44.2, bp: 280.5, cfg: "[Ne] 3s² 3p³" },
+      { z: 16, s: "S", n: "Belerang", g: 16, p: 3, b: "p", c: "Nonlogam", r: 103, ie: 1000, ea: 200, en: 2.58, mp: 115.2, bp: 444.6, cfg: "[Ne] 3s² 3p⁴" },
+      { z: 17, s: "Cl", n: "Klorin", g: 17, p: 3, b: "p", c: "Halogen", r: 99, ie: 1251, ea: 349, en: 3.16, mp: -101.5, bp: -34.0, cfg: "[Ne] 3s² 3p⁵" },
+      { z: 18, s: "Ar", n: "Argon", g: 18, p: 3, b: "p", c: "Gas Mulia", r: 97, ie: 1520, ea: 0, en: null, mp: -189.3, bp: -185.8, cfg: "[Ne] 3s² 3p⁶" },
+      { z: 19, s: "K", n: "Kalium", g: 1, p: 4, b: "s", c: "Logam Alkali", r: 227, ie: 419, ea: 48, en: 0.82, mp: 63.5, bp: 759, cfg: "[Ar] 4s¹" },
+      { z: 20, s: "Ca", n: "Kalsium", g: 2, p: 4, b: "s", c: "Logam Alkali Tanah", r: 197, ie: 590, ea: 2, en: 1.00, mp: 842, bp: 1484, cfg: "[Ar] 4s²" },
+      { z: 21, s: "Sc", n: "Skandium", g: 3, p: 4, b: "d", c: "Logam Transisi", r: 162, ie: 633, ea: 18, en: 1.36, mp: 1541, bp: 2836, cfg: "[Ar] 3d¹ 4s²" },
+      { z: 22, s: "Ti", n: "Titanium", g: 4, p: 4, b: "d", c: "Logam Transisi", r: 147, ie: 658, ea: 8, en: 1.54, mp: 1668, bp: 3287, cfg: "[Ar] 3d² 4s²" },
+      { z: 23, s: "V", n: "Vanadium", g: 5, p: 4, b: "d", c: "Logam Transisi", r: 134, ie: 650, ea: 51, en: 1.63, mp: 1910, bp: 3407, cfg: "[Ar] 3d³ 4s²" },
+      { z: 24, s: "Cr", n: "Kromium", g: 6, p: 4, b: "d", c: "Logam Transisi", r: 128, ie: 653, ea: 65, en: 1.66, mp: 1907, bp: 2671, cfg: "[Ar] 3d⁵ 4s¹" },
+      { z: 25, s: "Mn", n: "Mangan", g: 7, p: 4, b: "d", c: "Logam Transisi", r: 127, ie: 717, ea: 0, en: 1.55, mp: 1246, bp: 2061, cfg: "[Ar] 3d⁵ 4s²" },
+      { z: 26, s: "Fe", n: "Besi", g: 8, p: 4, b: "d", c: "Logam Transisi", r: 126, ie: 762, ea: 16, en: 1.83, mp: 1538, bp: 2862, cfg: "[Ar] 3d⁶ 4s²" },
+      { z: 27, s: "Co", n: "Kobalt", g: 9, p: 4, b: "d", c: "Logam Transisi", r: 125, ie: 760, ea: 64, en: 1.88, mp: 1495, bp: 2927, cfg: "[Ar] 3d⁷ 4s²" },
+      { z: 28, s: "Ni", n: "Nikel", g: 10, p: 4, b: "d", c: "Logam Transisi", r: 124, ie: 737, ea: 112, en: 1.91, mp: 1455, bp: 2913, cfg: "[Ar] 3d⁸ 4s²" },
+      { z: 29, s: "Cu", n: "Tembaga", g: 11, p: 4, b: "d", c: "Logam Transisi", r: 128, ie: 745, ea: 118, en: 1.90, mp: 1084.6, bp: 2562, cfg: "[Ar] 3d¹⁰ 4s¹" },
+      { z: 30, s: "Zn", n: "Seng", g: 12, p: 4, b: "d", c: "Logam Transisi", r: 134, ie: 906, ea: 0, en: 1.65, mp: 419.5, bp: 907, cfg: "[Ar] 3d¹⁰ 4s²" },
+      { z: 31, s: "Ga", n: "Galium", g: 13, p: 4, b: "p", c: "Logam Pasca-Transisi", r: 135, ie: 579, ea: 29, en: 1.81, mp: 29.8, bp: 2204, cfg: "[Ar] 3d¹⁰ 4s² 4p¹" },
+      { z: 32, s: "Ge", n: "Germanium", g: 14, p: 4, b: "p", c: "Metaloid", r: 122, ie: 762, ea: 119, en: 2.01, mp: 938.3, bp: 2833, cfg: "[Ar] 3d¹⁰ 4s² 4p²" },
+      { z: 33, s: "As", n: "Arsenik", g: 15, p: 4, b: "p", c: "Metaloid", r: 120, ie: 947, ea: 78, en: 2.18, mp: 817, bp: 614, cfg: "[Ar] 3d¹⁰ 4s² 4p³" },
+      { z: 34, s: "Se", n: "Selenium", g: 16, p: 4, b: "p", c: "Nonlogam", r: 119, ie: 941, ea: 195, en: 2.55, mp: 221, bp: 685, cfg: "[Ar] 3d¹⁰ 4s² 4p⁴" },
+      { z: 35, s: "Br", n: "Bromin", g: 17, p: 4, b: "p", c: "Halogen", r: 114, ie: 1140, ea: 325, en: 2.96, mp: -7.2, bp: 58.8, cfg: "[Ar] 3d¹⁰ 4s² 4p⁵" },
+      { z: 36, s: "Kr", n: "Kripton", g: 18, p: 4, b: "p", c: "Gas Mulia", r: 110, ie: 1351, ea: 0, en: 3.00, mp: -157.4, bp: -153.2, cfg: "[Ar] 3d¹⁰ 4s² 4p⁶" },
+      { z: 37, s: "Rb", n: "Rubidium", g: 1, p: 5, b: "s", c: "Logam Alkali", r: 248, ie: 403, ea: 47, en: 0.82, mp: 39.3, bp: 688, cfg: "[Kr] 5s¹" },
+      { z: 38, s: "Sr", n: "Stronsium", g: 2, p: 5, b: "s", c: "Logam Alkali Tanah", r: 215, ie: 549, ea: 5, en: 0.95, mp: 777, bp: 1382, cfg: "[Kr] 5s²" },
+      { z: 47, s: "Ag", n: "Perak", g: 11, p: 5, b: "d", c: "Logam Transisi", r: 144, ie: 731, ea: 126, en: 1.93, mp: 961.8, bp: 2162, cfg: "[Kr] 4d¹⁰ 5s¹" },
+      { z: 50, s: "Sn", n: "Timah", g: 14, p: 5, b: "p", c: "Logam Pasca-Transisi", r: 140, ie: 709, ea: 107, en: 1.96, mp: 231.9, bp: 2602, cfg: "[Kr] 4d¹⁰ 5s² 5p²" },
+      { z: 53, s: "I", n: "Iodin", g: 17, p: 5, b: "p", c: "Halogen", r: 133, ie: 1008, ea: 295, en: 2.66, mp: 113.7, bp: 184.3, cfg: "[Kr] 4d¹⁰ 5s² 5p⁵" },
+      { z: 54, s: "Xe", n: "Xenon", g: 18, p: 5, b: "p", c: "Gas Mulia", r: 130, ie: 1170, ea: 0, en: 2.60, mp: -111.8, bp: -108.1, cfg: "[Kr] 4d¹⁰ 5s² 5p⁶" },
+      { z: 55, s: "Cs", n: "Sesium", g: 1, p: 6, b: "s", c: "Logam Alkali", r: 265, ie: 376, ea: 46, en: 0.79, mp: 28.5, bp: 671, cfg: "[Xe] 6s¹" },
+      { z: 56, s: "Ba", n: "Barium", g: 2, p: 6, b: "s", c: "Logam Alkali Tanah", r: 222, ie: 503, ea: 14, en: 0.89, mp: 727, bp: 1897, cfg: "[Xe] 6s²" },
+      { z: 79, s: "Au", n: "Emas", g: 11, p: 6, b: "d", c: "Logam Transisi", r: 144, ie: 890, ea: 223, en: 2.54, mp: 1064.2, bp: 2970, cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s¹" },
+      { z: 80, s: "Hg", n: "Raksa", g: 12, p: 6, b: "d", c: "Logam Transisi", r: 151, ie: 1007, ea: 0, en: 2.00, mp: -38.8, bp: 356.7, cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s²" },
+      { z: 82, s: "Pb", n: "Timbal", g: 14, p: 6, b: "p", c: "Logam Pasca-Transisi", r: 175, ie: 716, ea: 35, en: 2.33, mp: 327.5, bp: 1749, cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²" },
+      { z: 86, s: "Rn", n: "Radon", g: 18, p: 6, b: "p", c: "Gas Mulia", r: 145, ie: 1037, ea: 0, en: 2.20, mp: -71, bp: -61.7, cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶" },
+      { z: 87, s: "Fr", n: "Fransium", g: 1, p: 7, b: "s", c: "Logam Alkali", r: 280, ie: 380, ea: 47, en: 0.70, mp: 27, bp: 677, cfg: "[Rn] 7s¹" }
+    ];
+
+    // Lengkapi dataset dasar dengan unsur lain hingga 118 untuk grid representasi visual
+    const ALL_ELEMENTS_MAP = new Map();
+    ELEMENTS_DATA.forEach(el => ALL_ELEMENTS_MAP.set(el.z, el));
+
+    // Fallback generator for remaining elements so periodic table layout is 100% complete
+    const SYMBOLS_118 = [
+      "H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar",
+      "K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr",
+      "Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe",
+      "Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu",
+      "Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn",
+      "Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr",
+      "Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"
+    ];
+
+    // -------------------------------------------------------------
+    // 2. STATE & AUDIO SYNTHESIZER
+    // -------------------------------------------------------------
+    let currentProperty = 'radius';
+    let selectedElementZ = 11; // Default Na
+    let duelA_Z = 11; // Na
+    let duelB_Z = 17; // Cl
+    let audioSoundEnabled = true;
+
+    // Web Audio API Synthesizer
+    let audioCtx = null;
+    function playBeep(freq = 440, type = 'sine', duration = 0.1) {
+      if (!audioSoundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    function toggleAudioSound() {
+      audioSoundEnabled = !audioSoundEnabled;
+      document.getElementById('audio-icon').textContent = audioSoundEnabled ? 'volume_up' : 'volume_off';
+      if (audioSoundEnabled) playBeep(520, 'triangle', 0.15);
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        localStorage.setItem('chemportal_theme', 'light');
+      } else {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('chemportal_theme', 'dark');
+      }
+      playBeep(480, 'sine', 0.08);
+      renderTrendChart();
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 3. TAB SWITCHER
+    // -------------------------------------------------------------
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId)?.classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-on-primary', 'font-bold', 'shadow-sm');
+        btn.classList.add('text-on-surface-variant');
+      });
+
+      const activeBtn = document.getElementById('nav-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-on-surface-variant');
+        activeBtn.classList.add('bg-primary', 'text-on-primary', 'font-bold', 'shadow-sm');
+      }
+
+      playBeep(420, 'sine', 0.05);
+
+      if (tabId === 'tab-graph') {
+        setTimeout(renderTrendChart, 100);
+      } else if (tabId === 'tab-duel') {
+        updateDuelUI();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 4. PERIODIC TABLE & HEATMAP GENERATION
+    // -------------------------------------------------------------
+    function getMinMaxValues(prop) {
+      let min = Infinity, max = -Infinity;
+      ELEMENTS_DATA.forEach(el => {
+        const v = el[prop];
+        if (v !== null && v !== undefined) {
+          if (v < min) min = v;
+          if (v > max) max = v;
+        }
+      });
+      return { min, max };
+    }
+
+    function getHeatmapColor(val, min, max) {
+      if (val === null || val === undefined) return "rgba(113, 113, 122, 0.25)";
+      const ratio = Math.max(0, Math.min(1, (val - min) / (max - min)));
+      // Gradient: Dark Violet (low) -> Vivid Violet -> Emerald -> Amber (high)
+      if (ratio < 0.33) {
+        return `rgba(124, 58, 237, ${0.3 + ratio * 1.5})`;
+      } else if (ratio < 0.66) {
+        return `rgba(52, 211, 153, ${0.4 + (ratio - 0.33) * 1.5})`;
+      } else {
+        return `rgba(251, 191, 36, ${0.5 + (ratio - 0.66) * 1.5})`;
+      }
+    }
+
+    function renderPeriodicTable() {
+      const grid = document.getElementById('periodic-table-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const { min, max } = getMinMaxValues(currentProperty);
+      document.getElementById('legend-min-val').textContent = `Min: ${min}`;
+      document.getElementById('legend-max-val').textContent = `Max: ${max}`;
+
+      // 7 Periods x 18 Groups
+      for (let p = 1; p <= 7; p++) {
+        for (let g = 1; g <= 18; g++) {
+          // Find element in this position
+          const el = ELEMENTS_DATA.find(e => e.p === p && e.g === g);
+          
+          if (el) {
+            const cell = document.createElement('div');
+            const val = el[currentProperty];
+            const color = getHeatmapColor(val, min, max);
+            const isSelected = (el.z === selectedElementZ);
+
+            cell.className = `pt-cell p-1 rounded-xl border border-outline-variant flex flex-col items-center justify-between text-[11px] h-14 ${isSelected ? 'active-selected ring-2 ring-primary' : ''}`;
+            cell.style.backgroundColor = color;
+            cell.onclick = () => selectElement(el.z);
+
+            cell.innerHTML = `
+              <span class="text-[9px] opacity-75 font-mono">${el.z}</span>
+              <strong class="text-sm font-extrabold font-headline leading-none text-white">${el.s}</strong>
+              <span class="text-[9px] font-mono truncate max-w-[40px] text-white/90">${val !== null ? val : '-'}</span>
+            `;
+            grid.appendChild(cell);
+          } else {
+            // Empty grid placeholder
+            const empty = document.createElement('div');
+            empty.className = 'h-14';
+            grid.appendChild(empty);
+          }
+        }
+      }
+
+      updateElementDossier(selectedElementZ);
+    }
+
+    function setActiveProperty(prop) {
+      currentProperty = prop;
+      document.querySelectorAll('.prop-btn').forEach(b => {
+        b.classList.remove('bg-primary', 'text-on-primary', 'font-bold', 'shadow-sm');
+        b.classList.add('text-on-surface-variant', 'bg-surface-container-high');
+      });
+      const activeBtn = document.querySelector(`.prop-btn[data-prop="${prop}"]`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-on-surface-variant', 'bg-surface-container-high');
+        activeBtn.classList.add('bg-primary', 'text-on-primary', 'font-bold', 'shadow-sm');
+      }
+
+      // Update banner descriptions
+      const groupDesc = document.getElementById('trend-desc-group');
+      const periodDesc = document.getElementById('trend-desc-period');
+      if (prop === 'radius') {
+        groupDesc.textContent = "Dalam 1 golongan (atas ke bawah) jari-jari bertambah besar karena jumlah kulit elektron terus bertambah.";
+        periodDesc.textContent = "Dalam 1 periode (kiri ke kanan) jari-jari bertambah kecil karena nomor atom / muatan inti (Z) bertambah menarik elektron lebih rapat.";
+      } else if (prop === 'ie') {
+        groupDesc.textContent = "Dalam 1 golongan (atas ke bawah) energi ionisasi berkurang karena jari-jari membesar sehingga elektron terluar mudah lepas.";
+        periodDesc.textContent = "Dalam 1 periode (kiri ke kanan) energi ionisasi secara umum bertambah besar karena gaya tarik inti semakin kuat.";
+      } else if (prop === 'ea') {
+        groupDesc.textContent = "Dalam 1 golongan (atas ke bawah) afinitas elektron cenderung mengecil karena daya tarik inti terhadap elektron luar melemah.";
+        periodDesc.textContent = "Dalam 1 periode (kiri ke kanan) afinitas elektron membesar hingga golongan halogen (VIIA) yang paling kuat menarik elektron.";
+      } else if (prop === 'en') {
+        groupDesc.textContent = "Dalam 1 golongan (atas ke bawah) keelektronegatifan berkurang (Fr/Cs paling elektropositif).";
+        periodDesc.textContent = "Dalam 1 periode (kiri ke kanan) keelektronegatifan meningkat tajam (F paling elektronegatif = 3.98).";
+      }
+
+      playBeep(460, 'sine', 0.08);
+      renderPeriodicTable();
+    }
+
+    function selectElement(z) {
+      selectedElementZ = z;
+      playBeep(580, 'triangle', 0.06);
+      document.querySelectorAll('.pt-cell').forEach(c => c.classList.remove('active-selected', 'ring-2', 'ring-primary'));
+      renderPeriodicTable();
+    }
+
+    function updateElementDossier(z) {
+      const el = ELEMENTS_DATA.find(e => e.z === z) || ELEMENTS_DATA[0];
+      document.getElementById('dossier-category').textContent = el.c;
+      document.getElementById('dossier-name').textContent = `${el.n}`;
+      document.getElementById('dossier-config').textContent = `${el.cfg} • Golongan ${el.g}, Periode ${el.p}`;
+      document.getElementById('dossier-symbol').textContent = el.s;
+      document.getElementById('dossier-z').textContent = `Z = ${el.z}`;
+
+      document.getElementById('dossier-radius').textContent = `${el.r} pm`;
+      document.getElementById('dossier-shells').textContent = `${el.p} Kulit (${['K','L','M','N','O','P','Q'].slice(0, el.p).join(', ')})`;
+      
+      document.getElementById('dossier-ie').textContent = `${el.ie} kJ/mol`;
+      document.getElementById('dossier-ea').textContent = `${el.ea !== null ? el.ea + ' kJ/mol' : 'Hampir 0'}`;
+      document.getElementById('dossier-en').textContent = el.en !== null ? el.en : 'Tidak Terdefinisi';
+      document.getElementById('dossier-mp-bp').textContent = `${el.mp}°C / ${el.bp}°C`;
+
+      // Scale Radius Bubble visually (Base 30px to 90px)
+      const bubbleSize = Math.max(28, Math.min(96, Math.round((el.r / 280) * 96)));
+      const halo = document.getElementById('radius-bubble-halo');
+      if (halo) {
+        halo.style.width = `${bubbleSize}px`;
+        halo.style.height = `${bubbleSize}px`;
+      }
+    }
+
+    function sendDossierToDuel() {
+      duelA_Z = selectedElementZ;
+      switchTab('tab-duel');
+    }
+
+    // -------------------------------------------------------------
+    // 5. DUEL KOMPARASI UNSUR & REASONING ENGINE
+    // -------------------------------------------------------------
+    function initDuelDropdowns() {
+      const selA = document.getElementById('duel-select-a');
+      const selB = document.getElementById('duel-select-b');
+      if (!selA || !selB) return;
+
+      const opts = ELEMENTS_DATA.map(el => `<option value="${el.z}">Z=${el.z} &bull; ${el.s} - ${el.n}</option>`).join('');
+      selA.innerHTML = opts;
+      selB.innerHTML = opts;
+      selA.value = duelA_Z;
+      selB.value = duelB_Z;
+    }
+
+    function setDuelPreset(symA, symB) {
+      const elA = ELEMENTS_DATA.find(e => e.s === symA);
+      const elB = ELEMENTS_DATA.find(e => e.s === symB);
+      if (elA) duelA_Z = elA.z;
+      if (elB) duelB_Z = elB.z;
+      document.getElementById('duel-select-a').value = duelA_Z;
+      document.getElementById('duel-select-b').value = duelB_Z;
+      playBeep(500, 'triangle', 0.1);
+      updateDuelUI();
+    }
+
+    function updateDuelUI() {
+      const selA = document.getElementById('duel-select-a');
+      const selB = document.getElementById('duel-select-b');
+      if (selA) duelA_Z = parseInt(selA.value);
+      if (selB) duelB_Z = parseInt(selB.value);
+
+      const elA = ELEMENTS_DATA.find(e => e.z === duelA_Z) || ELEMENTS_DATA[0];
+      const elB = ELEMENTS_DATA.find(e => e.z === duelB_Z) || ELEMENTS_DATA[1];
+
+      // Update Cards
+      document.getElementById('duel-symbol-a').textContent = elA.s;
+      document.getElementById('duel-name-a').textContent = `${elA.n} (Z = ${elA.z})`;
+      document.getElementById('duel-shells-a').textContent = `${elA.p} Kulit • ${elA.cfg}`;
+
+      document.getElementById('duel-symbol-b').textContent = elB.s;
+      document.getElementById('duel-name-b').textContent = `${elB.n} (Z = ${elB.z})`;
+      document.getElementById('duel-shells-b').textContent = `${elB.p} Kulit • ${elB.cfg}`;
+
+      // Bubble Sizes
+      const sizeA = Math.max(32, Math.min(110, Math.round((elA.r / 280) * 110)));
+      const sizeB = Math.max(32, Math.min(110, Math.round((elB.r / 280) * 110)));
+      const bA = document.getElementById('duel-bubble-a');
+      const bB = document.getElementById('duel-bubble-b');
+      if (bA) { bA.style.width = `${sizeA}px`; bA.style.height = `${sizeA}px`; }
+      if (bB) { bB.style.width = `${sizeB}px`; bB.style.height = `${sizeB}px`; }
+
+      // Metrics List
+      renderDuelMetrics(elA, elB);
+
+      // Automated Reasoning Engine
+      generatePedagogicalReasoning(elA, elB);
+    }
+
+    function renderDuelMetrics(a, b) {
+      const mA = document.getElementById('duel-metrics-a');
+      const mB = document.getElementById('duel-metrics-b');
+      if (!mA || !mB) return;
+
+      const props = [
+        { label: "Jari-Jari Atom", valA: a.r, valB: b.r, unit: "pm", biggerBetter: true },
+        { label: "Energi Ionisasi", valA: a.ie, valB: b.ie, unit: "kJ/mol", biggerBetter: true },
+        { label: "Afinitas Elektron", valA: a.ea || 0, valB: b.ea || 0, unit: "kJ/mol", biggerBetter: true },
+        { label: "Elektronegativitas", valA: a.en || 0, valB: b.en || 0, unit: "", biggerBetter: true }
+      ];
+
+      mA.innerHTML = props.map(p => {
+        const isWin = p.valA > p.valB;
+        return `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container border border-outline-variant">
+            <span class="text-on-surface-variant font-sans">${p.label}:</span>
+            <span class="font-bold ${isWin ? 'text-primary' : 'text-on-surface'}">${p.valA} ${p.unit} ${isWin ? '★' : ''}</span>
+          </div>`;
+      }).join('');
+
+      mB.innerHTML = props.map(p => {
+        const isWin = p.valB > p.valA;
+        return `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container border border-outline-variant">
+            <span class="text-on-surface-variant font-sans">${p.label}:</span>
+            <span class="font-bold ${isWin ? 'text-tertiary' : 'text-on-surface'}">${p.valB} ${p.unit} ${isWin ? '★' : ''}</span>
+          </div>`;
+      }).join('');
+    }
+
+    function generatePedagogicalReasoning(a, b) {
+      const container = document.getElementById('duel-reasoning-content');
+      if (!container) return;
+
+      let html = "";
+
+      // 1. Relasi Posisi
+      if (a.g === b.g) {
+        html += `<p class="p-2.5 rounded-xl bg-violet-950/30 border border-primary/30 text-primary">
+          <strong>Relasi 1 Golongan (Golongan ${a.g}):</strong> ${a.s} dan ${b.s} berada pada golongan yang sama.
+        </p>`;
+      } else if (a.p === b.p) {
+        html += `<p class="p-2.5 rounded-xl bg-emerald-950/30 border border-tertiary/30 text-tertiary">
+          <strong>Relasi 1 Periode (Periode ${a.p}):</strong> ${a.s} dan ${b.s} memiliki jumlah kulit elektron yang sama (${a.p} kulit).
+        </p>`;
+      } else {
+        html += `<p class="p-2.5 rounded-xl bg-surface-container border border-outline-variant text-on-surface-variant">
+          <strong>Lintas Golongan &amp; Periode:</strong> ${a.s} (Periode ${a.p}, Gol ${a.g}) berbanding ${b.s} (Periode ${b.p}, Gol ${b.g}).
+        </p>`;
+      }
+
+      // 2. Penalaran Jari-Jari
+      if (a.r > b.r) {
+        html += `<p><strong>Jari-Jari Atom (${a.s} &gt; ${b.s}):</strong> `;
+        if (a.p > b.p) {
+          html += `${a.s} memiliki <strong>${a.p} kulit elektron</strong>, sedangkan ${b.s} hanya memiliki <strong>${b.p} kulit</strong>. Bertambahnya jumlah kulit menyebabkan jarak elektron valensi ke inti atom semakin jauh, sehingga ukuran atom ${a.s} lebih besar.</p>`;
+        } else if (a.p === b.p) {
+          html += `Keduanya memiliki jumlah kulit yang sama (${a.p} kulit), namun nomor atom ${b.s} (Z = ${b.z}) lebih besar dari ${a.s} (Z = ${a.z}). Muatan inti efektif yang lebih besar pada ${b.s} menarik elektron-elektron kulit terluar lebih kuat ke arah inti, sehingga jari-jari atom ${b.s} mengerut lebih kecil.</p>`;
+        } else {
+          html += `Jari-jari ${a.s} lebih besar dipengaruhi oleh kombinasi letak periode dan efek pemerisaian elektron.</p>`;
+        }
+      } else {
+        html += `<p><strong>Jari-Jari Atom (${b.s} &gt; ${a.s}):</strong> `;
+        if (b.p > a.p) {
+          html += `${b.s} memiliki <strong>${b.p} kulit elektron</strong> dibandingkan ${a.s} (${a.p} kulit), membuat jarak kulit terluar ${b.s} ke inti jauh lebih rentang lebar.</p>`;
+        } else {
+          html += `Nomor atom ${a.s} (Z = ${a.z}) lebih besar daripada ${b.s} (Z = ${b.z}), sehingga muatan positif inti ${a.s} menarik awan elektron lebih erat.</p>`;
+        }
+      }
+
+      // 3. Penalaran Energi Ionisasi
+      const higherIE = a.ie > b.ie ? a : b;
+      const lowerIE = a.ie > b.ie ? b : a;
+      html += `<p><strong>Energi Ionisasi (${higherIE.s} = ${higherIE.ie} kJ/mol &gt; ${lowerIE.s} = ${lowerIE.ie} kJ/mol):</strong> `;
+      html += `Karena jari-jari atom ${lowerIE.s} lebih besar atau elektron terluarnya kurang terikat kuat oleh inti, energi yang dibutuhkan untuk melepaskan 1 elektron dari ${lowerIE.s} menjadi lebih kecil. Sebaliknya, ${higherIE.s} menahan elektron valensinya jauh lebih kuat!</p>`;
+
+      container.innerHTML = html;
+    }
+
+    // -------------------------------------------------------------
+    // 6. CANVAS 2D TREND GRAPH PLOTTER
+    // -------------------------------------------------------------
+    function renderTrendChart() {
+      const canvas = document.getElementById('trend-canvas');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const width = rect.width;
+      const height = rect.height;
+      const padding = { top: 30, right: 30, bottom: 40, left: 50 };
+
+      ctx.clearRect(0, 0, width, height);
+
+      const propKey = document.getElementById('graph-property-select')?.value || 'ie';
+      
+      // Filter elements with valid values up to Z=54 (Period 1-5 for clear view)
+      const dataPoints = ELEMENTS_DATA.filter(el => el.z <= 54 && el[propKey] !== null && el[propKey] !== undefined);
+      if (dataPoints.length === 0) return;
+
+      let minY = Infinity, maxY = -Infinity;
+      dataPoints.forEach(p => {
+        const v = p[propKey];
+        if (v < minY) minY = v;
+        if (v > maxY) maxY = v;
+      });
+      minY = Math.min(0, minY);
+      maxY = maxY * 1.1;
+
+      const getX = (z) => padding.left + ((z - 1) / (54 - 1)) * (width - padding.left - padding.right);
+      const getY = (val) => height - padding.bottom - ((val - minY) / (maxY - minY)) * (height - padding.top - padding.bottom);
+
+      // Draw Grid Lines
+      ctx.strokeStyle = document.documentElement.classList.contains('dark') ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 5; i++) {
+        const yVal = minY + (i / 5) * (maxY - minY);
+        const y = getY(yVal);
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+
+        ctx.fillStyle = "#71717a";
+        ctx.font = "10px Geist, sans-serif";
+        ctx.fillText(Math.round(yVal), 10, y + 3);
+      }
+
+      // Draw Connecting Lines by Period
+      const periodColors = {
+        1: "#f43f5e",
+        2: "#a78bfa",
+        3: "#38bdf8",
+        4: "#34d399",
+        5: "#fbbf24"
+      };
+
+      for (let p = 1; p <= 5; p++) {
+        const pPoints = dataPoints.filter(d => d.p === p);
+        if (pPoints.length > 1) {
+          ctx.strokeStyle = periodColors[p] || "#a78bfa";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          pPoints.forEach((pt, idx) => {
+            const x = getX(pt.z);
+            const y = getY(pt[propKey]);
+            if (idx === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+        }
+      }
+
+      // Draw Points
+      dataPoints.forEach(pt => {
+        const x = getX(pt.z);
+        const y = getY(pt[propKey]);
+        ctx.fillStyle = periodColors[pt.p] || "#ffffff";
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = "#09090b";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Label special elements (Alkali, Halogen, Noble Gases)
+        if (pt.g === 1 || pt.g === 17 || pt.g === 18 || pt.z <= 10) {
+          ctx.fillStyle = document.documentElement.classList.contains('dark') ? "#fafafa" : "#18181b";
+          ctx.font = "bold 9px Geist, sans-serif";
+          ctx.fillText(pt.s, x - 5, y - 8);
+        }
+      });
+
+      // Axis Labels
+      ctx.fillStyle = "#a1a1aa";
+      ctx.font = "10px font-mono";
+      ctx.fillText("Nomor Atom (Z = 1 s.d. 54)", width / 2 - 60, height - 10);
+    }
+
+    // -------------------------------------------------------------
+    // 7. KUIS EVALUASI 12 SOAL INTERAKTIF
+    // -------------------------------------------------------------
+    const QUIZ_QUESTIONS = [
+      {
+        q: "Bagaimanakah kecenderungan jari-jari atom dalam satu golongan dari atas ke bawah pada Sistem Periodik Unsur?",
+        opts: [
+          "Makin besar, karena jumlah kulit elektron bertambah",
+          "Makin kecil, karena jumlah proton dalam inti bertambah",
+          "Makin kecil, karena elektron valensinya berkurang",
+          "Tetap sama, karena jumlah elektron valensi identik"
+        ],
+        ans: 0,
+        exp: "Dalam satu golongan dari atas ke bawah, nomor periode bertambah yang berarti jumlah kulit elektron bertambah. Akibatnya, jarak elektron terluar ke inti atom semakin jauh sehingga jari-jari atom makin besar."
+      },
+      {
+        q: "Dalam satu periode dari kiri ke kanan, jari-jari atom cenderung semakin mengecil. Alasan ilmiah yang mendasari fenomena ini adalah...",
+        opts: [
+          "Jumlah kulit elektron semakin berkurang",
+          "Massa atom relatif semakin berkurang",
+          "Muatan inti efektif (Z_eff) semakin besar menarik elektron lebih kuat",
+          "Elektron valensi semakin mudah dilepaskan ke udara"
+        ],
+        ans: 2,
+        exp: "Dalam satu periode, jumlah kulit elektron sama. Namun nomor atom (Z) terus bertambah dari kiri ke kanan, menyebabkan muatan inti bertambah positif sehingga gaya tarik inti terhadap awan elektron makin kuat dan ukuran atom mengerut."
+      },
+      {
+        q: "Energi minimum yang dibutuhkan untuk melepaskan satu elektron terluar dari suatu atom netral dalam wujud gas disebut...",
+        opts: [
+          "Afinitas Elektron",
+          "Elektronegativitas",
+          "Energi Ionisasi",
+          "Potensial Reduksi"
+        ],
+        ans: 2,
+        exp: "Energi Ionisasi (EI) adalah energi minimal yang diperlukan untuk melepaskan elektron terluar dari atom netral berwujud gas: X(g) + Energi &rarr; X⁺(g) + e⁻."
+      },
+      {
+        q: "Manakah di antara unsur-unsur berikut yang memiliki jari-jari atom paling besar?",
+        opts: [
+          "₁₁Na (Natrium)",
+          "₁₉K (Kalium)",
+          "₃₇Rb (Rubidium)",
+          "₅₅Cs (Sesium)"
+        ],
+        ans: 3,
+        exp: "Na, K, Rb, dan Cs semuanya merupakan logam alkali (Golongan IA). Dalam satu golongan, semakin ke bawah jumlah kulit elektron makin banyak, sehingga Sesium (Cs, periode 6) memiliki jari-jari paling besar."
+      },
+      {
+        q: "Mengapa Berilium (₄Be, EI = 899 kJ/mol) memiliki energi ionisasi pertama yang lebih tinggi daripada Boron (₅B, EI = 801 kJ/mol)?",
+        opts: [
+          "Jari-jari atom Boron jauh lebih kecil dari Berilium",
+          "Subkulit 2s² pada Berilium terisi penuh sehingga memiliki kestabilan ekstra",
+          "Boron merupakan unsur nonlogam sedangkan Berilium adalah gas mulia",
+          "Berilium memiliki jumlah proton yang lebih banyak daripada Boron"
+        ],
+        ans: 1,
+        exp: "Konfigurasi Be adalah 1s² 2s² di mana orbital 2s terisi penuh (stabil). Sementara Boron adalah 1s² 2s² 2p¹, di mana 1 elektron di 2p energinya lebih tinggi dan lebih mudah dilepaskan."
+      },
+      {
+        q: "Mengapa Nitrogen (₇N, EI = 1402 kJ/mol) memiliki energi ionisasi lebih tinggi daripada Oksigen (₈O, EI = 1314 kJ/mol)?",
+        opts: [
+          "Nitrogen memiliki konfigurasi subkulit 2p³ setengah penuh yang stabil",
+          "Oksigen memiliki jari-jari atom yang lebih besar daripada Nitrogen",
+          "Oksigen tidak memiliki elektron valensi pada kulit kedua",
+          "Nitrogen berada di sebelah kanan Oksigen dalam tabel periodik"
+        ],
+        ans: 0,
+        exp: "Nitrogen memiliki konfigurasi 2s² 2p³ dengan orbital 2p terisi tepat setengah penuh (1 elektron di tiap orbital px, py, pz) yang stabil. Pada Oksigen (2p⁴), terjadi tolakan antar-elektron berpasangan di orbital 2p yang mempermudah pelepasan elektron."
+      },
+      {
+        q: "Unsur yang memiliki nilai keelektronegatifan (skala Pauling) tertinggi di seluruh Sistem Periodik Unsur adalah...",
+        opts: [
+          "Fransium (Fr)",
+          "Fluorin (F)",
+          "Klorin (Cl)",
+          "Helium (He)"
+        ],
+        ans: 1,
+        exp: "Fluorin (F) memiliki nilai keelektronegatifan tertinggi yaitu 3.98 (dibulatkan menjadi 4.0). Fluorin memiliki kecenderungan paling kuat untuk menarik elektron ikatan ke arah dirinya."
+      },
+      {
+        q: "Besarnya energi yang dilepaskan atau diserap ketika suatu atom netral berwujud gas menangkap satu elektron untuk membentuk ion negatif disebut...",
+        opts: [
+          "Energi Kisi",
+          "Afinitas Elektron",
+          "Energi Ikatan",
+          "Elektronegativitas"
+        ],
+        ans: 1,
+        exp: "Afinitas Elektron (AE) adalah perubahan energi yang terjadi saat suatu atom netral dalam fase gas menerima elektron membentuk anion: X(g) + e⁻ &rarr; X⁻(g)."
+      },
+      {
+        q: "Meskipun Fluorin lebih elektronegatif dari Klorin, mengapa Afinitas Elektron Klorin (349 kJ/mol) justru lebih tinggi daripada Fluorin (328 kJ/mol)?",
+        opts: [
+          "Klorin memiliki jumlah elektron valensi yang lebih sedikit",
+          "Ukuran atom Fluorin sangat kecil sehingga terjadi tolakan antar-elektron yang kuat pada kulit 2p yang padat",
+          "Fluorin tidak dapat membentuk ion negatif F⁻",
+          "Klorin berwujud gas sedangkan Fluorin berwujud padat"
+        ],
+        ans: 1,
+        exp: "Ukuran atom F sangat kecil (kulit n=2) dengan kerapatan elektron yang sangat padat. Masuknya elektron baru menimbulkan gaya tolak-menolak elektrostatik yang besar, sehingga energi pelepasan F sedikit lebih rendah dibandingkan Cl yang memiliki kulit n=3 lebih lapang."
+      },
+      {
+        q: "Bagaimanakah perbandingan ukuran jari-jari antara atom netral Natrium (Na) dengan ion kationnya (Na⁺)?",
+        opts: [
+          "Jari-jari Na⁺ lebih besar karena jumlah proton bertambah",
+          "Jari-jari Na⁺ lebih kecil karena telah kehilangan 1 elektron pada kulit terluar (kulit ke-3 lenyap)",
+          "Jari-jari keduanya identik karena nomor atomnya sama",
+          "Jari-jari Na⁺ lebih besar karena terjadi tolakan antar-elektron"
+        ],
+        ans: 1,
+        exp: "Ketika Na (2, 8, 1) melepaskan 1 elektron membentuk Na⁺ (2, 8), kulit terluarnya (kulit M) hilang, menyisakan 2 kulit. Selain itu, 11 proton menarik 10 elektron lebih rapat, sehingga jari-jari kation selalu lebih kecil dari atom netralnya."
+      },
+      {
+        q: "Sebaliknya, bagaimanakah perbandingan ukuran jari-jari atom Klorin (Cl) dengan ion anionnya (Cl⁻)?",
+        opts: [
+          "Jari-jari Cl⁻ lebih kecil karena muatan intinya berkurang",
+          "Jari-jari Cl⁻ lebih besar karena bertambahnya elektron meningkatkan gaya tolak antar-elektron",
+          "Jari-jari Cl⁻ tetap sama karena jumlah kulitnya tidak berubah",
+          "Jari-jari Cl⁻ lebih kecil karena elektron ditarik lebih kuat oleh neutron"
+        ],
+        ans: 1,
+        exp: "Ketika Cl (2, 8, 7) menerima 1 elektron menjadi Cl⁻ (2, 8, 8), jumlah elektron bertambah menjadi 18 sementara jumlah proton tetap 17. Penambahan elektron menimbulkan gaya tolak antar-elektron valensi yang membuat awan elektron mengembang (jari-jari anion membesar)."
+      },
+      {
+        q: "Di antara kelompok unsur berikut, manakah yang tersusun menurut urutan kenaikan energi ionisasi pertama yang benar?",
+        opts: [
+          "Cs &lt; Rb &lt; K &lt; Na &lt; Li",
+          "Li &lt; Na &lt; K &lt; Rb &lt; Cs",
+          "F &lt; O &lt; N &lt; C &lt; B",
+          "Ne &lt; Ar &lt; Kr &lt; Xe &lt; Rn"
+        ],
+        ans: 0,
+        exp: "Pada Golongan IA (logam alkali), makin ke bawah jari-jari makin besar dan energi ionisasi makin kecil. Maka urutan kenaikan energi ionisasi (dari terkecil ke terbesar) adalah: Cs < Rb < K < Na < Li."
+      }
+    ];
+
+    let userAnswers = new Array(QUIZ_QUESTIONS.length).fill(null);
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-questions-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      QUIZ_QUESTIONS.forEach((item, qIdx) => {
+        const qCard = document.createElement('div');
+        qCard.className = "p-4 sm:p-5 rounded-2xl bg-surface border border-outline-variant space-y-3";
+        qCard.id = `quiz-q-${qIdx}`;
+
+        const answered = userAnswers[qIdx] !== null;
+
+        let optionsHtml = item.opts.map((opt, optIdx) => {
+          let btnClass = "w-full text-left p-3 rounded-xl border border-outline-variant bg-surface-container hover:bg-surface-container-high transition-all flex items-start gap-2.5 text-xs sm:text-sm";
+          let icon = "radio_button_unchecked";
+
+          if (answered) {
+            if (optIdx === item.ans) {
+              btnClass = "w-full text-left p-3 rounded-xl border border-tertiary/60 bg-tertiary/15 text-tertiary font-semibold flex items-start gap-2.5 text-xs sm:text-sm";
+              icon = "check_circle";
+            } else if (optIdx === userAnswers[qIdx]) {
+              btnClass = "w-full text-left p-3 rounded-xl border border-rose-500/60 bg-rose-500/15 text-rose-400 font-semibold flex items-start gap-2.5 text-xs sm:text-sm";
+              icon = "cancel";
+            } else {
+              btnClass = "w-full text-left p-3 rounded-xl border border-outline-variant bg-surface-container opacity-50 flex items-start gap-2.5 text-xs sm:text-sm";
+            }
+          }
+
+          return `
+            <button onclick="handleAnswer(${qIdx}, ${optIdx})" ${answered ? 'disabled' : ''} class="${btnClass} cursor-pointer">
+              <span class="material-symbols-outlined text-[18px] shrink-0 mt-0.5">${icon}</span>
+              <span>${opt}</span>
+            </button>
+          `;
+        }).join('');
+
+        qCard.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-primary/20 text-primary font-mono text-xs font-bold flex items-center justify-center">${qIdx + 1}</span>
+              <span class="text-xs font-mono text-on-surface-variant">Soal ${qIdx + 1} dari 12</span>
+            </div>
+          </div>
+          <p class="text-sm font-semibold text-on-surface leading-snug">${item.q}</p>
+          <div class="space-y-2 mt-2">${optionsHtml}</div>
+          ${answered ? `
+            <div class="mt-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant text-xs text-on-surface-variant leading-relaxed">
+              <strong class="text-on-surface flex items-center gap-1 mb-1">
+                <span class="material-symbols-outlined text-base text-primary">menu_book</span>
+                <span>Pembahasan:</span>
+              </strong>
+              ${item.exp}
+            </div>` : ''}
+        `;
+        container.appendChild(qCard);
+      });
+
+      updateQuizScore();
+    }
+
+    function handleAnswer(qIdx, optIdx) {
+      if (userAnswers[qIdx] !== null) return;
+      userAnswers[qIdx] = optIdx;
+
+      const isCorrect = (optIdx === QUIZ_QUESTIONS[qIdx].ans);
+      if (isCorrect) {
+        playBeep(700, 'triangle', 0.12);
+      } else {
+        playBeep(260, 'sawtooth', 0.15);
+      }
+
+      renderQuiz();
+
+      // Check if all answered
+      if (userAnswers.every(ans => ans !== null)) {
+        finishQuiz();
+      }
+    }
+
+    function updateQuizScore() {
+      let correct = 0;
+      userAnswers.forEach((ans, idx) => {
+        if (ans === QUIZ_QUESTIONS[idx].ans) correct++;
+      });
+      const badge = document.getElementById('quiz-score-badge');
+      if (badge) badge.textContent = `${correct} / ${QUIZ_QUESTIONS.length}`;
+    }
+
+    function finishQuiz() {
+      let correct = 0;
+      userAnswers.forEach((ans, idx) => {
+        if (ans === QUIZ_QUESTIONS[idx].ans) correct++;
+      });
+
+      const banner = document.getElementById('quiz-finish-banner');
+      const title = document.getElementById('quiz-final-title');
+      const desc = document.getElementById('quiz-final-desc');
+
+      if (banner) {
+        banner.classList.remove('hidden');
+        const percentage = Math.round((correct / QUIZ_QUESTIONS.length) * 100);
+        title.textContent = `Nilai Evaluasi: ${percentage} (${correct} dari 12 Benar)`;
+        if (percentage >= 75) {
+          desc.textContent = "Luar biasa! Pemahaman Anda terhadap konsep dan anomali sifat keperiodikan unsur sangat mendalam!";
+          try {
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+          } catch(e) {}
+        } else {
+          desc.textContent = "Bagus! Pelajari kembali pembahasan di atas untuk memperdalam konsep orbital dan gaya tarik inti.";
+        }
+        banner.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function resetQuiz() {
+      if (confirm('Ulangi pengerjaan kuis dari awal?')) {
+        userAnswers = new Array(QUIZ_QUESTIONS.length).fill(null);
+        document.getElementById('quiz-finish-banner')?.classList.add('hidden');
+        renderQuiz();
+        playBeep(440, 'sine', 0.08);
+      }
+    }
+
+    function copyQuizReport() {
+      let correct = 0;
+      userAnswers.forEach((ans, idx) => {
+        if (ans === QUIZ_QUESTIONS[idx].ans) correct++;
+      });
+      const percentage = Math.round((correct / QUIZ_QUESTIONS.length) * 100);
+      const report = `*LAPORAN PEMBELAJARAN KIMIA SMA (PORTALKIMIA)*\n` +
+                     `Materi: Sifat Keperiodikan Unsur (SPU)\n` +
+                     `Jenjang: Kelas 10 (Fase E)\n` +
+                     `Tanggal: ${new Date().toLocaleDateString('id-ID')}\n` +
+                     `Skor Evaluasi: ${correct}/12 (${percentage}%)\n` +
+                     `Status: ${percentage >= 75 ? 'TUNTAS KOMPETENSI' : 'PERLU PENGAYAAN'}\n` +
+                     `Aplikasi: PortalKimia Interaktif`;
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(report).then(() => {
+          alert('Laporan evaluasi berhasil disalin ke papan klip! Siap dikirim ke WhatsApp guru atau LMS.');
+        });
+      } else {
+        prompt('Salin laporan evaluasi:', report);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 8. INITIALIZATION ON DOM READY
+    // -------------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+      renderPeriodicTable();
+      initDuelDropdowns();
+      updateDuelUI();
+      renderQuiz();
+
+      window.addEventListener('resize', () => {
+        if (!document.getElementById('tab-graph')?.classList.contains('hidden')) {
+          renderTrendChart();
+        }
+      });
+    });
+  </script>
+<section data-pk-submit style="max-width:900px;margin:24px auto;padding:20px;border:1px solid #8b5cf6;border-radius:16px"><h2>Pengumpulan Hasil Belajar</h2><p>Isi identitas untuk menyimpan hasil kuis dan isian kegiatan.</p><label>Nama <input id="student-name" autocomplete="name" style="color:#111;background:#fff;padding:8px;margin:8px"></label><label>Kelas <input id="student-class" style="color:#111;background:#fff;padding:8px;margin:8px"></label><label>NIS / Absen <input id="student-nis" style="color:#111;background:#fff;padding:8px;margin:8px"></label><button id="btn-submit-db" type="button" onclick="submitToTeacherDatabase()" style="padding:12px;background:#7c3aed;color:#fff;border-radius:8px">Kirim ke Database Guru</button></section>
+
+
+<!-- PK-SUBMISSION-V2-START -->
+<script>
+/* PortalKimia submission client v2. Embedded by build-submissions.cjs so Drive HTML stays standalone. */
+window.PortalSubmission = (() => {
+  'use strict';
+  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbwobr0k-44HFrf3B5YUroeEK-_U13AGVe2urQYDAmL0U43arTQHTvKjUEeM6CuZQvOE/exec';
+  const PREFIX = 'portalkimia_pending_v2_';
+  let busy = false;
+  const value = id => (document.getElementById(id)?.value || '').trim();
+  const plain = text => {
+    const el = document.createElement('div');
+    el.innerHTML = String(text || '');
+    return el.textContent.trim();
+  };
+  function uuid() {
+    if (!window.crypto?.getRandomValues) throw new Error('Peramban tidak mendukung ID pengiriman aman. Gunakan Chrome/Edge terbaru.');
+    return Array.from(crypto.getRandomValues(new Uint8Array(24)), x => x.toString(16).padStart(2, '0')).join('');
+  }
+  function collect(config, answers, questions) {
+    const siswa = { nama: value('student-name'), kelas: value('student-class'), nis: value('student-nis'), tanggal: value('student-date') };
+    if (!siswa.nama || !siswa.kelas) throw new Error('Isi nama dan kelas sebelum mengirim.');
+    const jawaban = { kuis: [], esai: {}, lks: {}, refleksi: {}, isianLain: {} };
+    let correct = 0;
+    questions.forEach((q, i) => {
+      const selected = answers[i] ?? null;
+      const key = q.answer ?? q.correct ?? q.ans;
+      const options = q.options || q.opts || [];
+      const benar = selected !== null && selected === key;
+      if (benar) correct++;
+      jawaban.kuis.push({ nomor: i + 1, pertanyaan: plain(q.question || q.q), pilihan: selected, jawaban: selected === null ? '' : plain(options[selected]), benar });
+    });
+    // Canonical IDs collapse synchronized mobile/desktop copies without losing blank/zero values.
+    document.querySelectorAll('input[id], textarea[id], select[id]').forEach(el => {
+      if (/^(password|file|hidden|button|submit|reset)$/i.test(el.type || '') || /^student-/.test(el.id)) return;
+      const id = el.id.replace(/^mob-/, '');
+      const v = /^(checkbox|radio)$/.test(el.type) ? (el.checked ? el.value : '') : el.value;
+      const group = /essay|esai/i.test(id) ? jawaban.esai : /^(obs-|lks-|lkpd-)/.test(id) ? jawaban.lks : /reflec|refleksi|^ref-/.test(id) ? jawaban.refleksi : jawaban.isianLain;
+      if (!(id in group) || v !== '') group[id] = v;
+    });
+    if (typeof currentStarRating !== 'undefined') jawaban.refleksi.rating = currentStarRating;
+    const score = questions.length ? Math.round(correct / questions.length * 100) : 0;
+    return { schemaVersion: 2, mediaId: config.id, materi: config.title, mediaVersion: 'submission-v2', siswa,
+      nilai: { skorKuis: score, benar: correct, total: questions.length }, jawaban,
+      laporanTeks: [config.title, siswa.nama + ' | ' + siswa.kelas, 'Nilai kuis: ' + score,
+        ...['esai', 'lks', 'refleksi'].map(k => k.toUpperCase() + '\n' + Object.entries(jawaban[k]).map(([id, v]) => id + ': ' + v).join('\n'))].join('\n\n') };
+  }
+  function notice(message, anchor) {
+    let el = document.getElementById('portal-submission-status');
+    if (!el) {
+      el = document.createElement('p');
+      el.id = 'portal-submission-status';
+      el.setAttribute('role', 'status');
+      el.style.cssText = 'padding:12px;border:1px solid #8b5cf6;border-radius:10px;font-size:13px;white-space:pre-wrap';
+      (anchor?.parentElement || document.body).appendChild(el);
+    }
+    el.textContent = message;
+  }
+  function status(payload) {
+    // Receipt-only JSONP: no answers or student identity travel in the URL.
+    return new Promise((resolve, reject) => {
+      const name = 'pkReceipt_' + uuid();
+      const script = document.createElement('script');
+      const cleanup = () => { clearTimeout(timer); script.remove(); delete window[name]; };
+      const timer = setTimeout(() => { cleanup(); reject(new Error('Konfirmasi server belum diterima.')); }, 12000);
+      window[name] = data => { cleanup(); resolve(data); };
+      script.onerror = () => { cleanup(); reject(new Error('Konfirmasi server belum dapat diakses.')); };
+      script.src = ENDPOINT + '?action=submissionStatus&submissionId=' + encodeURIComponent(payload.submissionId) + '&receiptToken=' + encodeURIComponent(payload.receiptToken) + '&callback=' + name;
+      document.head.appendChild(script);
+    });
+  }
+  function confirmed(result, payload) {
+    return result?.success === true && result.stored === true && result.submissionId === payload.submissionId;
+  }
+  async function post(payload, opaque) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    try {
+      const response = await fetch(ENDPOINT, { method: 'POST', mode: opaque ? 'no-cors' : 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(payload), signal: controller.signal });
+      return opaque ? null : await response.json();
+    } finally { clearTimeout(timer); }
+  }
+  async function deliver(payload) {
+    let response;
+    try { response = await post(payload, false); } catch (_) { /* Verify before an idempotent retry. */ }
+    if (confirmed(response, payload)) return response;
+    if (response?.success === false) throw new Error(response.message || 'Server menolak kiriman.');
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try { const receipt = await status(payload); if (confirmed(receipt, payload)) return receipt; } catch (_) {}
+      if (attempt === 0) { try { await post(payload, true); } catch (_) {} }
+      if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 1500));
+    }
+    throw new Error('Penyimpanan belum terkonfirmasi. Jawaban tetap tersimpan di perangkat; tekan kirim lagi setelah koneksi pulih.');
+  }
+  async function submit(config, answers, questions) {
+    if (busy) return;
+    const btn = document.querySelector('[onclick*="submitToTeacherDatabase"], [onclick*="syncToPortalDatabase"]');
+    busy = true;
+    if (btn) btn.disabled = true;
+    try {
+      const content = collect(config, answers, questions);
+      const fingerprint = JSON.stringify(content);
+      const receiptKey = 'portalkimia_receipt_v2_' + config.id;
+      const lastReceipt = JSON.parse(localStorage.getItem(receiptKey) || 'null');
+      if (lastReceipt?.fingerprint === fingerprint) {
+        notice('Jawaban ini sudah tersimpan. Bukti: ' + lastReceipt.receipt.submissionId, btn);
+        return;
+      }
+      let payload;
+      for (const key of Object.keys(localStorage).filter(k => k.startsWith(PREFIX))) {
+        try { const pending = JSON.parse(localStorage.getItem(key)); if (pending.fingerprint === fingerprint) { payload = pending.payload; break; } } catch (_) {}
+      }
+      payload = payload || { ...content, submissionId: uuid(), receiptToken: uuid(), submittedAt: new Date().toISOString() };
+      const storageKey = PREFIX + payload.submissionId;
+      // Persist before network I/O; storage failure must not be reported as a successful save.
+      localStorage.setItem(storageKey, JSON.stringify({ fingerprint, payload }));
+      notice('Mengirim seluruh jawaban dan menunggu bukti penyimpanan...', btn);
+      const receipt = await deliver(payload);
+      localStorage.setItem(receiptKey, JSON.stringify({ fingerprint, receipt }));
+      localStorage.removeItem(storageKey);
+      notice('Tersimpan: ' + receipt.sheetName + '\nBukti pengumpulan: ' + receipt.submissionId, btn);
+    } catch (e) {
+      notice(e.message || 'Pengiriman belum berhasil. Isian tetap tersedia.', btn);
+    } finally { busy = false; if (btn) btn.disabled = false; }
+  }
+  async function retryPending(config) {
+    if (busy) return;
+    busy = true;
+    try {
+      const keys = Object.keys(localStorage).filter(k => k.startsWith(PREFIX));
+      for (const key of keys) {
+        let pending;
+        try { pending = JSON.parse(localStorage.getItem(key)); } catch (_) { continue; }
+        if (pending?.payload?.mediaId !== config.id) continue;
+        notice('Mencoba mengirim kembali jawaban yang tertunda...');
+        try {
+          const receipt = await deliver(pending.payload);
+          localStorage.setItem('portalkimia_receipt_v2_' + config.id, JSON.stringify({ fingerprint: pending.fingerprint, receipt }));
+          localStorage.removeItem(key);
+          notice('Kiriman tertunda tersimpan. Bukti: ' + receipt.submissionId);
+        } catch (e) { notice(e.message); break; }
+      }
+    } finally { busy = false; }
+  }
+  function install(config) {
+    window.addEventListener('online', () => retryPending(config));
+    // Explicit retry on a subsequent visit; no automatic transmission of merely saved drafts.
+    const init = () => {
+      try {
+        if (Object.keys(localStorage).some(k => k.startsWith(PREFIX) && JSON.parse(localStorage.getItem(k))?.payload?.mediaId === config.id)) {
+          notice('Ada pengumpulan yang belum terkonfirmasi.');
+          const button = document.createElement('button');
+          button.type = 'button'; button.textContent = 'Kirim ulang pengumpulan tertunda';
+          button.style.cssText = 'padding:10px;background:#7c3aed;color:white;border-radius:8px';
+          button.onclick = () => retryPending(config);
+          document.getElementById('portal-submission-status').appendChild(button);
+        }
+      } catch (_) {}
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  }
+  return { collect, submit, install };
+})();
+
+function submitToTeacherDatabase() { return PortalSubmission.submit({"id":"sifat-keperiodikan","title":"Sifat Keperiodikan Unsur"}, userAnswers, QUIZ_QUESTIONS); }
+
+PortalSubmission.install({"id":"sifat-keperiodikan","title":"Sifat Keperiodikan Unsur"});
+</script>
+<!-- PK-SUBMISSION-V2-END -->
+</body>
+</html>
