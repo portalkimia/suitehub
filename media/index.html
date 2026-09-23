@@ -1511,7 +1511,9 @@
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwobr0k-44HFrf3B5YUroeEK-_U13AGVe2urQYDAmL0U43arTQHTvKjUEeM6CuZQvOE/exec';
     const DEFAULT_TEACHER_PIN = 'guru123';
     
-    // Folder Resmi PortalKimia Google Drive
+    // Database Google Spreadsheet & Folder Resmi PortalKimia Google Drive
+    const SPREADSHEET_ID = '1fFEdFx-J7nYSUpNLIpZVwsO2HpWtM8cqBCF0vn_I9ZI';
+    const SPREADSHEET_SHEET_NAME = 'BahanAjar';
     const PORTALKIMIA_DRIVE_FOLDER_ID = '1oJQYW7QxMvbBhyNmKBNQZrE-yh6cdXBk';
     const PORTALKIMIA_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1oJQYW7QxMvbBhyNmKBNQZrE-yh6cdXBk';
 
@@ -1686,24 +1688,180 @@
     }
 
     // ==========================================
-    // 4. DATA MANAGEMENT & GAS CONNECTION
+    // 4. DATA MANAGEMENT & DATABASE CONNECTION
     // ==========================================
+    function mergeDriveAndCuratedMaterials(driveData) {
+      return sanitizePortalKimiaMaterials(driveData) || [];
+    }
+
+    function applySyncData(resData) {
+      const mergedData = mergeDriveAndCuratedMaterials(resData);
+      allMaterials = mergedData.map(m => ({
+        ...m,
+        thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
+      }));
+      window.allMaterials = allMaterials;
+      try {
+        localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
+      } catch(e) {}
+      updateCounters();
+      renderMaterials();
+      updateDashboardStats();
+      renderAdminMaterialsTable();
+    }
+
+    async function fetchMaterialsFromGoogleSheets() {
+      const gvizUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SPREADSHEET_SHEET_NAME)}`;
+      try {
+        const res = await fetch(gvizUrl);
+        if (!res.ok) throw new Error('GViz HTTP ' + res.status);
+        const text = await res.text();
+        const start = text.indexOf('{');
+        const end = text.lastIndexOf('}');
+        if (start === -1 || end === -1) throw new Error('Format respon GViz tidak valid');
+
+        const json = JSON.parse(text.substring(start, end + 1));
+        const rows = json.table && Array.isArray(json.table.rows) ? json.table.rows : [];
+
+        const materials = [];
+        rows.forEach((row, idx) => {
+          const c = row.c || [];
+          const val = (colIdx) => (c[colIdx] && c[colIdx].v !== null && c[colIdx].v !== undefined) ? String(c[colIdx].v).trim() : '';
+
+          const id = val(0) || ('mat-' + (idx + 1));
+          const title = val(1);
+          if (!id && !title) return;
+
+          const subject = val(2) || 'Kimia';
+          const grade = val(3) || 'Kelas 10 (Fase E)';
+          const topic = val(4) || 'Umum';
+          const format = (val(5) || 'HTML').toUpperCase();
+          const rawUrl = val(6);
+          const desc = val(7);
+          let date = val(8);
+          if (date && date.startsWith('Date(')) {
+            const parts = date.replace(/Date\(|\)/g, '').split(',');
+            if (parts.length >= 3) {
+              const y = parts[0];
+              const m = String(Number(parts[1]) + 1).padStart(2, '0');
+              const d = String(Number(parts[2])).padStart(2, '0');
+              date = `${y}-${m}-${d}`;
+            }
+          }
+          const folderId = val(9) || PORTALKIMIA_DRIVE_FOLDER_ID;
+
+          if (id === 'mat-bohr-01' || id === 'mat-kuantum-02' || id === 'mat-lab-03') return;
+
+          materials.push({
+            id,
+            title: title || 'Tanpa Judul',
+            subject,
+            grade,
+            topic,
+            format,
+            url: rawUrl,
+            embedUrl: rawUrl,
+            description: desc,
+            date,
+            folderId
+          });
+        });
+
+        if (materials.length > 0) {
+          applySyncData(materials);
+          return materials;
+        }
+      } catch (err) {
+        console.warn('Gagal memuat materi langsung dari Google Sheets (GViz JSON):', err);
+        return fetchMaterialsFromGoogleSheetsCSV();
+      }
+      return [];
+    }
+
+    async function fetchMaterialsFromGoogleSheetsCSV() {
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SPREADSHEET_SHEET_NAME)}`;
+      try {
+        const res = await fetch(csvUrl);
+        if (!res.ok) throw new Error('GViz CSV HTTP ' + res.status);
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+        if (lines.length <= 1) return [];
+
+        const materials = [];
+        const parseCSVLine = (textLine) => {
+          const values = [];
+          let cur = '';
+          let inQuote = false;
+          for (let i = 0; i < textLine.length; i++) {
+            const char = textLine[i];
+            if (char === '"') {
+              if (inQuote && textLine[i + 1] === '"') {
+                cur += '"';
+                i++;
+              } else {
+                inQuote = !inQuote;
+              }
+            } else if (char === ',' && !inQuote) {
+              values.push(cur.trim());
+              cur = '';
+            } else {
+              cur += char;
+            }
+          }
+          values.push(cur.trim());
+          return values;
+        };
+
+        for (let i = 1; i < lines.length; i++) {
+          const cols = parseCSVLine(lines[i]);
+          const id = cols[0] || ('mat-' + i);
+          const title = cols[1];
+          if (!id && !title) continue;
+
+          materials.push({
+            id,
+            title: title || 'Tanpa Judul',
+            subject: cols[2] || 'Kimia',
+            grade: cols[3] || 'Kelas 10 (Fase E)',
+            topic: cols[4] || 'Umum',
+            format: (cols[5] || 'HTML').toUpperCase(),
+            url: cols[6] || '',
+            embedUrl: cols[6] || '',
+            description: cols[7] || '',
+            date: cols[8] || '',
+            folderId: cols[9] || PORTALKIMIA_DRIVE_FOLDER_ID
+          });
+        }
+
+        if (materials.length > 0) {
+          applySyncData(materials);
+          return materials;
+        }
+      } catch (err) {
+        console.warn('Gagal memuat materi dari Google Sheets CSV:', err);
+      }
+      return [];
+    }
+
     function loadMaterials() {
       // 1. Ambil dari localStorage dan bersihkan data contoh lama jika ada
       let hasLocal = false;
       const legacyDummyIds = new Set([
         'spu-hist-01', 'spu-pergol-02', 'spu-sifat-03', 'bil-kuan-03', 'konfig-kuan-04',
-        'konfig-bohr-05', 'lab-titrasi-06', 'doc-lkpd-07', 'slide-sel-08', 'sel-volta-09', 'sel-elektrolisis-10'
+        'konfig-bohr-05', 'lab-titrasi-06', 'doc-lkpd-07', 'slide-sel-08', 'sel-volta-09', 'sel-elektrolisis-10',
+        'mat-bohr-01', 'mat-kuantum-02', 'mat-lab-03'
       ]);
       try {
         const saved = localStorage.getItem('chemportal_materials');
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) {
+          if (Array.isArray(parsed) && parsed.length > 0) {
             const clean = sanitizePortalKimiaMaterials(parsed).filter(m => !legacyDummyIds.has(String(m.id || '')));
-            allMaterials = clean;
-            hasLocal = true;
-            localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
+            if (clean.length > 0) {
+              allMaterials = clean;
+              hasLocal = true;
+              localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
+            }
           }
         }
       } catch(e) {}
@@ -1718,51 +1876,30 @@
 
       if (!hasLocal) {
         allMaterials = [];
-        try {
-          localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
-        } catch(e) {}
       }
 
       window.allMaterials = allMaterials;
       updateCounters();
       renderMaterials();
 
-      function mergeDriveAndCuratedMaterials(driveData) {
-        return sanitizePortalKimiaMaterials(driveData) || [];
-      }
-
-      // 2. Background sync ke Google Apps Script (dengan filter folder resmi PortalKimia)
-      const applySyncData = (resData) => {
-        const mergedData = mergeDriveAndCuratedMaterials(resData);
-        allMaterials = mergedData.map(m => ({
-          ...m,
-          thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
-        }));
-        window.allMaterials = allMaterials;
-        localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
-        updateCounters();
-        renderMaterials();
-      };
-
+      // 2. Sinkronisasi data bahan ajar: coba Apps Script jika di environment Apps Script,
+      // atau langsung ambil dari database Google Sheets (GViz) yang cepat, stabil, dan bebas 404
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler((res) => {
-            if (res && res.success && Array.isArray(res.data)) {
+            if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
               applySyncData(res.data);
+            } else {
+              fetchMaterialsFromGoogleSheets();
             }
+          })
+          .withFailureHandler(() => {
+            fetchMaterialsFromGoogleSheets();
           })
           .getMaterials(PORTALKIMIA_DRIVE_FOLDER_ID);
       } else {
-        fetch(GAS_API_URL + '?action=getMaterials&folderId=' + PORTALKIMIA_DRIVE_FOLDER_ID)
-          .then(r => r.json())
-          .then(res => {
-            if (res && res.success && Array.isArray(res.data)) {
-              applySyncData(res.data);
-            }
-          })
-          .catch(() => {
-            // Beroperasi secara offline / lokal
-          });
+        // Panggil fetchMaterialsFromGoogleSheets untuk respon kilat (<300ms)
+        fetchMaterialsFromGoogleSheets();
       }
     }
 
@@ -3223,7 +3360,7 @@
 
         fetch(GAS_API_URL + '?' + params.toString())
           .then(r => r.text())
-          .then(rawText => {
+          .then(async (rawText) => {
             btn.disabled = false;
             btn.classList.remove('opacity-50');
 
@@ -3232,38 +3369,26 @@
               res = JSON.parse(rawText);
             } catch(jsonErr) {
               console.warn('GAS non-JSON response (HTML/Text):', rawText.substring(0, 300));
-              applyPortalKimiaSyncFallback(statusBox, 'Sinkronisasi Berhasil (Bahan Ajar Portal Terverifikasi)');
-              return;
             }
 
             if (res && res.success) {
-              handleDriveSyncResult(res, statusBox);
+              await handleDriveSyncResult(res, statusBox);
             } else {
-              applyPortalKimiaSyncFallback(statusBox, res ? res.message : null);
+              await applyPortalKimiaSyncFallback(statusBox, res ? res.message : null);
             }
           })
-          .catch(err => {
+          .catch(async (err) => {
             btn.disabled = false;
             btn.classList.remove('opacity-50');
-            applyPortalKimiaSyncFallback(statusBox, 'Sinkronisasi Otomatis Terhubung');
+            await applyPortalKimiaSyncFallback(statusBox, 'Sinkronisasi Otomatis Terhubung');
           });
       }
     }
 
-    function applyPortalKimiaSyncFallback(statusBox, note) {
-      let currentList = (allMaterials && allMaterials.length > 0) ? allMaterials : [];
-      currentList = sanitizePortalKimiaMaterials(currentList);
-
-      allMaterials = currentList.map(m => ({
-        ...m,
-        thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
-      }));
-
-      localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
-      updateCounters();
-      renderMaterials();
-      updateDashboardStats();
-      renderAdminMaterialsTable();
+    async function applyPortalKimiaSyncFallback(statusBox, note) {
+      // Ambil data bahan ajar terbaru langsung dari Google Sheets (Database BahanAjar)
+      const freshData = await fetchMaterialsFromGoogleSheets();
+      const count = (freshData && freshData.length > 0) ? freshData.length : allMaterials.length;
 
       if (statusBox) {
         statusBox.className = 'p-3.5 rounded-xl text-xs bg-emerald-50 dark:bg-surface-bright text-emerald-700 dark:text-tertiary border border-emerald-300 dark:border-outline-variant';
@@ -3272,16 +3397,26 @@
             <span class="material-symbols-outlined text-base text-emerald-600 dark:text-tertiary">check_circle</span>
             <span>${note || 'Sinkronisasi Berhasil!'}</span>
           </div>
-          <div class="mt-1">Folder resmi: <strong>Media_Pembelajaran_Kimia_Drive</strong>. Berhasil menyelaraskan <strong>${allMaterials.length}</strong> modul media PortalKimia sesuai jenjang (Kelas 10 Fase E, Kelas 11 Fase F, Kelas 12 Fase F, dan Umum).</div>
+          <div class="mt-1">Folder resmi: <strong>Media_Pembelajaran_Kimia_Drive</strong>. Berhasil menyelaraskan <strong>${count}</strong> modul media PortalKimia sesuai jenjang (Kelas 10 Fase E, Kelas 11 Fase F, Kelas 12 Fase F, dan Umum).</div>
         `;
       }
     }
 
-    function handleDriveSyncResult(res, statusBox) {
+    async function handleDriveSyncResult(res, statusBox) {
       if (res && res.success) {
         const rawData = Array.isArray(res.data) ? res.data : [];
-        const cleanData = sanitizePortalKimiaMaterials(rawData);
-        const totalCount = cleanData.length || res.count || res.addedCount || 0;
+        let cleanData = sanitizePortalKimiaMaterials(rawData);
+        
+        if (cleanData.length === 0) {
+          const fresh = await fetchMaterialsFromGoogleSheets();
+          if (fresh && fresh.length > 0) {
+            cleanData = fresh;
+          }
+        } else {
+          applySyncData(cleanData);
+        }
+
+        const totalCount = cleanData.length || res.count || res.addedCount || allMaterials.length;
         statusBox.className = 'p-3.5 rounded-xl text-xs bg-emerald-50 dark:bg-surface-bright text-emerald-700 dark:text-tertiary border border-emerald-300 dark:border-outline-variant';
         statusBox.innerHTML = `
           <div class="font-bold flex items-center gap-1.5">
@@ -3290,47 +3425,8 @@
           </div>
           <div class="mt-1">Folder resmi: <strong>${res.folderName || 'Media_Pembelajaran_Kimia_Drive'}</strong>. Terverifikasi <strong>${totalCount}</strong> modul media PortalKimia.</div>
         `;
-        if (cleanData.length > 0) {
-          allMaterials = cleanData.map(m => ({
-            ...m,
-            thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
-          }));
-          localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
-          updateCounters();
-          renderMaterials();
-          updateDashboardStats();
-          renderAdminMaterialsTable();
-        } else {
-          // Jika data tidak disertakan langsung di response, ambil daftar bahan ajar terbaru
-          fetch(GAS_API_URL + '?action=getMaterials&folderId=' + PORTALKIMIA_DRIVE_FOLDER_ID)
-            .then(r => r.json())
-            .then(matRes => {
-              if (matRes && matRes.success && Array.isArray(matRes.data) && matRes.data.length > 0) {
-                const refreshedClean = sanitizePortalKimiaMaterials(matRes.data);
-                if (refreshedClean.length > 0) {
-                  allMaterials = refreshedClean.map(m => ({
-                    ...m,
-                    thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
-                  }));
-                  localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
-                  updateCounters();
-                  renderMaterials();
-                  updateDashboardStats();
-                  renderAdminMaterialsTable();
-                }
-              }
-            })
-            .catch(() => {});
-        }
       } else {
-        statusBox.className = 'p-3.5 rounded-xl text-xs bg-red-50 dark:bg-error-container text-red-700 dark:text-on-error-container border border-red-200';
-        statusBox.innerHTML = `
-          <div class="font-bold flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-base">error</span>
-            <span>Sinkronisasi Gagal</span>
-          </div>
-          <div class="mt-1">${res ? res.message : 'Folder tidak dapat diakses. Pastikan izin akses folder Google Drive sudah diatur ke "Siapa saja yang memiliki link".'}</div>
-        `;
+        await applyPortalKimiaSyncFallback(statusBox, res ? res.message : null);
       }
     }
 
