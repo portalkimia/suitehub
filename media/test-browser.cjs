@@ -5,7 +5,8 @@ const pw=require(process.env.PLAYWRIGHT_MODULE || 'C:/Users/Tito/.cache/codex-ru
 (async()=>{
   const h=harness(),g=h.gas;
   const token=g.portalTeacherApi({action:'login',password:h.properties.TEACHER_PASSWORD}).data.token;
-  const task=g.portalTeacherApi({action:'saveTask',token,task:{title:'Praktikum Sel Volta',mediaId:'sel-volta',className:'XII-1',open:true,roster:'001|Andi'}}).data;
+  g.portalTeacherApi({action:'saveStudents',token,students:'XII-1|001|Andi\nTEST|003|Tester'});
+  const task=g.portalTeacherApi({action:'saveTask',token,task:{title:'Praktikum Sel Volta',mediaId:'sel-volta',classes:['XII-1'],open:true}}).data;
   const participant=g.portalTeacherApi({action:'dashboard',token}).data.participants[0];
   const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://localhost');const file=path.join(__dirname,decodeURIComponent(url.pathname));if(!file.startsWith(__dirname)||!fs.existsSync(file)){res.writeHead(404);res.end();return;}res.setHeader('Content-Type',file.endsWith('.html')?'text/html; charset=utf-8':'text/plain');res.end(fs.readFileSync(file));});
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const origin='http://127.0.0.1:'+server.address().port;
@@ -44,12 +45,14 @@ const pw=require(process.env.PLAYWRIGHT_MODULE || 'C:/Users/Tito/.cache/codex-ru
     await teacher.locator('#review-score').fill('85');await teacher.locator('#review-note').fill('Pemahaman baik');await teacher.locator('#review-form button').click();await teacher.waitForFunction(()=>document.getElementById('review-message').textContent.includes('tersimpan'));
     await teacher.locator('#close-detail').click();await teacher.screenshot({path:path.join(__dirname,'preview-dashboard.png'),fullPage:true});
     await teacher.locator('#tab-tasks').click();await teacher.screenshot({path:path.join(__dirname,'preview-tugas.png'),fullPage:true});assert.match(await teacher.locator('#participant-body').innerText(),/Sudah final/);
+    await teacher.locator('#tab-students').click();assert.match(await teacher.locator('#student-body').innerText(),/Andi/);await teacher.locator('#student-import').fill('XII-2|004|Budi');await teacher.locator('#student-form button').click();await teacher.waitForFunction(()=>document.getElementById('student-body').textContent.includes('Budi'));console.log('PASS Browser: master student sheet import and class summary');
+    await teacher.locator('#tab-tasks').click();await teacher.locator('#new-task').click();await teacher.locator('#task-title').fill('Tugas untuk XII-2');await teacher.locator('#task-media').selectOption('sel-volta');await teacher.locator('#task-classes label').filter({hasText:'XII-2'}).locator('input').check();await teacher.locator('#task-form button[type="submit"]').click();await teacher.waitForFunction(()=>document.getElementById('task-list').textContent.includes('Tugas untuk XII-2'));assert.match(await teacher.locator('#task-list').innerText(),/1 peserta/);console.log('PASS Browser: task selects class and creates participants automatically');
     await teacher.setViewportSize({width:390,height:844});await teacher.screenshot({path:path.join(__dirname,'preview-mobile.png'),fullPage:true});
     await teacher.locator('#logout').click();await teacher.waitForSelector('#login-panel:visible');assert.equal(await teacher.locator('#results-body').innerText(),'');console.log('PASS Browser: teacher login, original/AI review, final grade, tasks and logout');
     for(const file of fs.readdirSync(path.join(__dirname,'Media_Pembelajaran_Kimia_Drive')).filter(f=>f.endsWith('.html'))){
       const html=fs.readFileSync(path.join(__dirname,'Media_Pembelajaran_Kimia_Drive',file),'utf8');
       const config=JSON.parse(html.match(/PortalSubmission\.install\((\{[^\n]+?\}), \{questions/)[1]);
-      const created=g.portalTeacherApi({action:'saveTask',token,task:{title:'Uji '+config.title,mediaId:config.id,className:'TEST',open:true,roster:'003|Tester'}}).data;
+      const created=g.portalTeacherApi({action:'saveTask',token,task:{title:'Uji '+config.title,mediaId:config.id,classes:['TEST'],open:true}}).data;
       const person=g.portalTeacherApi({action:'dashboard',token}).data.participants.find(x=>x.taskId===created['ID Pengumpulan']);
       const tab=await context.newPage();await tab.goto(origin+'/Media_Pembelajaran_Kimia_Drive/'+file);
       await tab.locator('#pk-assignment').fill(created['ID Pengumpulan']);await tab.locator('#pk-access-code').fill(person.code);await tab.locator('#pk-check').click();await tab.waitForFunction(()=>document.getElementById('student-name').value==='Tester');
@@ -58,6 +61,6 @@ const pw=require(process.env.PLAYWRIGHT_MODULE || 'C:/Users/Tito/.cache/codex-ru
       const choices=tab.locator('#pk-evaluation > div').first().locator('button');await choices.first().click();assert.equal(await choices.first().isDisabled(),true);
       assert.equal(await tab.locator('button[onclick="resetQuiz()"]').count(),0);await tab.close();console.log('PASS Browser media: '+config.id);
     }
-    console.log('TOTAL 5 browser integration scenarios and 14 media checks passed. No live network/data writes.');
+    console.log('TOTAL 7 browser integration scenarios and 14 media checks passed. No live network/data writes.');
   } finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

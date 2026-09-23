@@ -117,9 +117,10 @@ window.PortalSubmission = (() => {
       let payload = pending?.payload;
       if (!payload) {
         const content = collect(config, quizState.length ? quizState : answers, questions);
-        const seed = active.assignmentId + '|' + active.studentAccessCode + '|' + active.revision;
+        const seed = active.assignmentId + '|' + (active.name || '').toLowerCase() + '|' + active.studentAccessCode + '|' + active.revision;
         const digest = async text => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))), x=>x.toString(16).padStart(2,'0')).join('').slice(0,48);
         payload = { ...content, schemaVersion: 3, mediaVersion: 'submission-v3-final', assignmentId: active.assignmentId,
+          classCode: active.classCode || active.studentAccessCode, studentName: active.name || content.siswa.nama,
           studentAccessCode: active.studentAccessCode, assignmentRevision: active.revision,
           submissionId: await digest(seed), receiptToken: await digest('receipt|' + seed), submittedAt: new Date().toISOString() };
       }
@@ -149,7 +150,7 @@ window.PortalSubmission = (() => {
           localStorage.setItem('pk_final_' + pending.context, JSON.stringify({ submissionId: receipt.canonicalSubmissionId || receipt.submissionId }));
           localStorage.removeItem(key);
           if ((active && pending.context === contextKey()) || (!active && pending.context === localStorage.getItem('pk_context_'+config.id))) {
-            active = {assignmentId:pending.payload.assignmentId,studentAccessCode:pending.payload.studentAccessCode,revision:pending.payload.assignmentRevision};
+            active = {assignmentId:pending.payload.assignmentId,studentAccessCode:pending.payload.studentAccessCode,classCode:pending.payload.classCode,name:pending.payload.studentName,revision:pending.payload.assignmentRevision};
             finish(receipt, pending.payload, config);
           }
           else notice('Kiriman tertunda tersimpan. Bukti: ' + receipt.submissionId);
@@ -157,7 +158,7 @@ window.PortalSubmission = (() => {
       }
     } finally { busy = false; }
   }
-  function contextKey() { return configNow.id + '|' + active.assignmentId + '|' + active.studentAccessCode + '|' + active.revision; }
+  function contextKey() { return configNow.id + '|' + active.assignmentId + '|' + (active.name || '').toLowerCase() + '|' + active.studentAccessCode + '|' + active.revision; }
   function freeze(locked) {
     document.querySelectorAll('input,textarea,select').forEach(el => { if (!el.id.startsWith('pk-')) el.disabled = locked; });
     renderEvaluation();
@@ -171,28 +172,45 @@ window.PortalSubmission = (() => {
     if (adapters) adapters.setAnswers(quizState.slice());
   }
   function finish(receipt, payload, config) {
-    const context = config.id+'|'+payload.assignmentId+'|'+payload.studentAccessCode+'|'+payload.assignmentRevision;
+    const context = config.id+'|'+payload.assignmentId+'|'+(payload.studentName || '').toLowerCase()+'|'+payload.studentAccessCode+'|'+payload.assignmentRevision;
     // Keep only the receipt/lock, never the answer fingerprint.
     localStorage.setItem('pk_final_' + context, JSON.stringify({ submissionId: receipt.canonicalSubmissionId || receipt.submissionId }));
     finalized = true;
-    Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).forEach(k=>{const p=read(k)?.payload;if(p?.mediaId===config.id&&p.assignmentId===payload.assignmentId&&p.studentAccessCode===payload.studentAccessCode&&Number(p.assignmentRevision)===Number(payload.assignmentRevision))localStorage.removeItem(k);});
+    Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).forEach(k=>{const p=read(k)?.payload;if(p?.mediaId===config.id&&p.assignmentId===payload.assignmentId&&Number(p.assignmentRevision)===Number(payload.assignmentRevision))localStorage.removeItem(k);});
     clearDrafts(config); freeze(true);
     document.querySelectorAll('[onclick*="submitToTeacherDatabase"],[onclick*="syncToPortalDatabase"]').forEach(b=>{b.disabled=true;b.textContent='Jawaban sudah final';});
-    notice('Tersimpan dan dikunci. Draf jawaban pada perangkat telah dihapus.\nBukti: '+(receipt.canonicalSubmissionId || receipt.submissionId));
+    notice('Tersimpan dan dikunci (1 siswa hanya 1 pengumpulan per media). Draf pada perangkat telah dihapus.\nBukti pengumpulan: '+(receipt.canonicalSubmissionId || receipt.submissionId));
   }
   async function checkAccess(config) {
     if (busy) return;
-    const assignmentId = value('pk-assignment'), studentAccessCode = value('pk-access-code');
+    const classCode = (value('pk-class-code') || value('pk-access-code')).toUpperCase();
+    const studentName = value('pk-student-name') || value('student-name');
+    const assignmentId = value('pk-assignment');
     busy=true;
     try {
-      const body={assignmentId,studentAccessCode,mediaId:config.id};
+      if (!classCode && !assignmentId) throw Error('Masukkan Kode Kelas dari guru.');
+      if (!studentName && !value('pk-access-code')) throw Error('Masukkan Nama Lengkap Anda.');
+      const body = { classCode, studentName, assignmentId, studentAccessCode: classCode, mediaId: config.id };
       const response = window.google?.script?.run ? await rpc('portalStudentAccess',body) : await (await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({action:'studentAccess',...body}),signal:AbortSignal.timeout(20000)})).json();
       if (!response?.success) throw Error(response?.message || 'Tugas belum dapat diperiksa.');
       const previousContext=localStorage.getItem('pk_context_'+config.id);
-      active={assignmentId,studentAccessCode,revision:response.revision}; finalized=false;
+      active = {
+        assignmentId: response.assignmentId || assignmentId,
+        studentAccessCode: response.studentAccessCode || classCode,
+        classCode: classCode,
+        name: response.name,
+        className: response.className,
+        nis: response.nis,
+        revision: response.revision || 0
+      };
+      finalized = false;
       if(previousContext&&previousContext!==contextKey())clearDrafts(config);
       localStorage.setItem('pk_context_'+config.id,contextKey());
-      if(response.stored){finish({submissionId:response.submissionId},{assignmentId,studentAccessCode,assignmentRevision:response.revision},config);return;}
+      if(response.stored){
+        finish({submissionId:response.submissionId},{assignmentId:active.assignmentId,studentName:active.name,studentAccessCode:active.studentAccessCode,assignmentRevision:response.revision},config);
+        notice('Jawaban atas nama ' + response.name + ' (' + response.className + ') sudah final dan tersimpan.\nBukti pengumpulan: ' + response.submissionId + '\nPengumpulan dibatasi 1 kali per materi.');
+        return;
+      }
       if(!response.open || (response.due && Date.now()>new Date(response.due).getTime()&&!response.allowLate)){active=null;freeze(true);throw Error('Pengumpulan ditutup atau tenggat telah berakhir. Hubungi guru.');}
       for(const [id,v] of [['student-name',response.name],['student-class',response.className],['student-nis',response.nis]]){const e=document.getElementById(id);if(e)e.value=v;}
       const saved=read('pk_quiz_'+contextKey());
@@ -201,7 +219,7 @@ window.PortalSubmission = (() => {
       const pending=Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).map(read).find(p=>p?.context===contextKey());
       freeze(!!pending);
       document.querySelectorAll('[onclick*="submitToTeacherDatabase"],[onclick*="syncToPortalDatabase"]').forEach(b=>{b.disabled=false;b.textContent=pending?'Coba kirim ulang jawaban final':'Kirim jawaban final';});
-      notice(response.title+' · '+response.name+' · '+response.className+'\n'+(pending?'Jawaban final menunggu konfirmasi. Tekan kirim untuk mencoba ulang.':'Evaluasi hanya satu kesempatan. Tidak ada kunci jawaban sebelum pengumpulan.'));
+      notice(response.title+' · '+response.name+' ('+response.className+')\n'+(pending?'Jawaban final menunggu konfirmasi server. Tekan kirim untuk mencoba ulang.':'Pengumpulan dibatasi 1 kali per media. Silakan kerjakan dengan teliti.'));
       renderEvaluation();
     } catch(e){notice(e.message || 'Gagal memeriksa tugas. Jawaban belum dihapus.');}finally{busy=false;}
   }
@@ -209,7 +227,7 @@ window.PortalSubmission = (() => {
     const host=document.getElementById('pk-evaluation'); if(!host)return;
     host.replaceChildren();
     const heading=document.createElement('h2');heading.textContent='Evaluasi · satu kesempatan';heading.style.fontWeight='700';host.appendChild(heading);
-    const info=document.createElement('p');info.textContent=finalized?'Jawaban evaluasi sudah tersimpan dan dikunci.':!active?'Periksa ID tugas dan kode pribadi di bagian atas halaman sebelum menjawab.':'Setiap pilihan langsung dikunci. Kunci dan pembahasan tidak ditampilkan saat pengerjaan.';host.appendChild(info);
+    const info=document.createElement('p');info.textContent=finalized?'Jawaban evaluasi sudah tersimpan dan dikunci.':!active?'Periksa Kode Kelas dan Nama Lengkap di bagian atas halaman sebelum menjawab.':'Setiap pilihan langsung dikunci. Kunci dan pembahasan tidak ditampilkan saat pengerjaan.';host.appendChild(info);
     if(!active||finalized)return;
     const pending=Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).map(read).some(p=>p?.context===contextKey());
     questionsNow.forEach((q,i)=>{
@@ -229,12 +247,12 @@ window.PortalSubmission = (() => {
     window.addEventListener('online', () => retryPending(config));
     // Explicit retry on a subsequent visit; no automatic transmission of merely saved drafts.
     const init = () => {
-      const accessBox=document.createElement('section');accessBox.style.cssText='padding:20px;margin:20px;border:2px solid #0f766e;border-radius:14px;background:#effcf8;color:#123d36';
-      accessBox.innerHTML='<h2 style="font-weight:bold">Tugas dari guru</h2><p>Gunakan kode pribadi Anda. Pengumpulan final hanya satu kali.</p><label>ID tugas <input id="pk-assignment" autocomplete="off" style="padding:8px;border:1px solid #94a3b8;color:#123d36;background:white;margin:8px"></label><label>Kode pribadi <input id="pk-access-code" type="password" autocomplete="off" style="padding:8px;border:1px solid #94a3b8;color:#123d36;background:white;margin:8px"></label><button id="pk-check" type="button" style="padding:10px;background:#0f766e;color:white;border-radius:8px">Periksa tugas</button>';
+      const accessBox=document.createElement('section');accessBox.style.cssText='padding:18px 20px;margin:20px 0;border:2px solid #0f766e;border-radius:14px;background:#effcf8;color:#123d36;font-family:sans-serif';
+      accessBox.innerHTML='<h2 style="font-weight:bold;margin:0 0 6px 0;font-size:16px">Tugas dari Guru</h2><p style="margin:0 0 12px 0;font-size:12px;color:#164e63">Masukkan <strong>Kode Kelas</strong> dari guru dan <strong>Nama Lengkap Siswa</strong>. Pengumpulan jawaban final hanya satu kali per materi.</p><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><label style="font-size:12px;font-weight:600">Kode Kelas <input id="pk-class-code" autocomplete="off" placeholder="Contoh: KIM-XII1-8F2A" style="padding:8px 10px;border:1px solid #94a3b8;color:#123d36;background:white;border-radius:8px;font-family:monospace;text-transform:uppercase"></label><label style="font-size:12px;font-weight:600">Nama Lengkap <input id="pk-student-name" autocomplete="off" placeholder="Nama sesuai daftar kelas" style="padding:8px 10px;border:1px solid #94a3b8;color:#123d36;background:white;border-radius:8px;min-width:200px"></label><button id="pk-check" type="button" style="padding:9px 16px;background:#0f766e;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Periksa Tugas</button></div>';
       document.body.prepend(accessBox);document.getElementById('pk-check').onclick=()=>checkAccess(config);
       // Retain the local final marker across reloads; checking a new task/revision unlocks it.
       const last=localStorage.getItem('pk_context_'+config.id);
-      if(last&&read('pk_final_'+last)){finalized=true;clearDrafts(config);freeze(true);notice('Pengumpulan terakhir sudah final. Periksa tugas untuk membuka tugas lain atau revisi dari guru.');}
+      if(last&&read('pk_final_'+last)){finalized=true;clearDrafts(config);freeze(true);notice('Pengumpulan terakhir Anda sudah final. Hubungi guru jika memerlukan izin revisi.');}
       renderEvaluation();
       try {
         if (Object.keys(localStorage).some(k => k.startsWith(PREFIX) && read(k)?.payload?.mediaId === config.id && read(k)?.payload?.assignmentId)) {

@@ -55,6 +55,8 @@ function portalTeacherApi(request) {
     if (request.action === 'logout') { CacheService.getScriptCache().remove('pk_teacher_' + pkHash_(request.token)); data = {}; }
     else if (request.action === 'dashboard') data = pkDashboard_();
     else if (request.action === 'detail') data = pkTeacherDetail_(String(request.id || ''));
+    else if (request.action === 'saveStudents') data = pkLocked_(function() { return pkSaveStudents_(request.students || ''); });
+    else if (request.action === 'setStudentActive') data = pkLocked_(function() { return pkSetStudentActive_(String(request.id || ''), request.active === true); });
     else if (request.action === 'saveTask') data = pkLocked_(function() { return pkSaveTask_(request.task || {}); });
     else if (request.action === 'review') data = pkLocked_(function() { return pkSaveReview_(request); });
     else if (request.action === 'reopen') data = pkLocked_(function() { return pkReopen_(String(request.id || '')); });
@@ -76,17 +78,36 @@ function pkDashboard_() {
       summary: a['Ringkasan AI'] || '', misconception: a.Miskonsepsi || '', model: a['Model AI'] || '', error: a['Pesan Error'] || '',
       review: v.Status || 'Belum diperiksa', finalScore: v['Nilai Akhir'] === undefined ? '' : v['Nilai Akhir'] };
   });
+  const tasks = pkRows_(ss, 'Daftar_Tugas').map(function(t) {
+    let classCodes = {};
+    if (t['Kode Kelas JSON']) {
+      try { classCodes = JSON.parse(t['Kode Kelas JSON']); } catch (_) {}
+    }
+    return Object.assign({}, t, { classCodes: classCodes });
+  });
   const participants = pkRows_(ss, 'Peserta_Tugas').map(function(p) {
     const finalKey = pkFinalKey_(p);
     const submitted = pkRowsCachedFinal_(results, p);
     return { id: p['ID Pengumpulan'], taskId: p['ID Tugas'], name: p.Nama, nis: p['NIS / Absen'], className: p.Kelas,
       code: p['Kode Akses'], revision: p.Revisi || 0, submitted: submitted, finalKey: finalKey };
   });
-  return { results: results.reverse(), tasks: pkRows_(ss, 'Daftar_Tugas'), participants: participants,
+  const students = pkRows_(ss, 'Daftar_Siswa').map(function(s) { return { id: s['ID Pengumpulan'], nis: s['NIS / Absen'], name: s.Nama,
+    className: s.Kelas, active: s.Aktif === true || String(s.Aktif).toUpperCase() === 'TRUE' }; });
+  const classes = Array.from(new Set(students.filter(function(s) { return s.active; }).map(function(s) { return s.className; }))).sort();
+  return { results: results.reverse(), tasks: tasks, participants: participants, students: students, classes: classes,
     media: Object.keys(PK_MEDIA).map(function(id) { return { id: id, title: PK_MEDIA[id].replace(/^Tugas_/, '').replace(/_/g, ' ') }; }) };
 }
 function pkRowsCachedFinal_(results, p) {
-  return results.some(function(r) { return r.taskId === p['ID Tugas'] && String(r.nis) === String(p['NIS / Absen']) && Number(r.revision) === Number(p.Revisi || 0); });
+  const normName = String(p.Nama || p.name || '').toLowerCase().trim();
+  const cls = String(p.Kelas || p.className || '').trim();
+  return results.some(function(r) {
+    const matchTask = r.taskId === p['ID Tugas'] || r.taskId === p.taskId;
+    const matchClass = !cls || String(r.className || '').trim() === cls;
+    const matchName = String(r.name || '').toLowerCase().trim() === normName;
+    const matchNis = p['NIS / Absen'] && String(r.nis) === String(p['NIS / Absen']);
+    const matchRev = Number(r.revision || 0) === Number(p.Revisi || p.revision || 0);
+    return matchTask && matchRev && (matchName || matchNis) && matchClass;
+  });
 }
 function pkTeacherDetail_(id) {
   const ss = pkDb_(), index = pkFind_(ss.getSheetByName('RekapPengumpulan'), id);
@@ -101,53 +122,211 @@ function pkTeacherDetail_(id) {
   return { id: id, name: index.Nama, className: index.Kelas, media: index.Materi, answers: answers, analysis: analysis,
     review: pkFind_(ss.getSheetByName('Pemeriksaan_Guru'), id) || {} };
 }
+function pkStudentId_(className, nis) { return pkHash_(String(className).toLowerCase() + '|' + String(nis).toLowerCase()); }
+function pkSaveStudents_(text) {
+  const ss = pkDb_(), lines = String(text || '').trim().split(/\r?\n/).filter(Boolean);
+  if (!lines.length) throw new Error('Isi data siswa dengan format Kelas|NIS|Nama.');
+  if (lines.length > 1000) throw new Error('Maksimal 1.000 siswa dalam satu impor.');
+  const seen = {}, records = lines.map(function(line, index) {
+    const cells = line.split('|').map(function(s) { return s.trim(); });
+    if (cells.length !== 3 || !cells[0] || !/^[a-zA-Z0-9._-]{1,40}$/.test(cells[1]) || !cells[2]) throw new Error('Baris ' + (index + 1) + ': gunakan Kelas|NIS|Nama.');
+    const className = cells[0].slice(0, 80), nis = cells[1], name = cells[2].slice(0, 120), id = pkStudentId_(className, nis);
+    if (seen[id]) throw new Error('Siswa duplikat pada baris ' + (index + 1) + ': ' + className + ' / ' + nis);
+    seen[id] = true; return { id: id, className: className, nis: nis, name: name };
+  });
+  const sheet = pkSheet_(ss, 'Daftar_Siswa');
+  records.forEach(function(s) { pkUpdate_(sheet, s.id, { 'ID Pengumpulan': s.id, 'NIS / Absen': s.nis, 'Nama': s.name, 'Kelas': s.className, 'Aktif': true, 'Diperbarui': new Date() }); });
+  return { saved: records.length };
+}
+function pkSetStudentActive_(id, active) {
+  const ss = pkDb_(), sheet = ss.getSheetByName('Daftar_Siswa'), student = pkFind_(sheet, id);
+  if (!student) throw new Error('Siswa tidak ditemukan.');
+  pkUpdate_(sheet, id, { 'Aktif': active, 'Diperbarui': new Date() });
+  return { id: id, active: active };
+}
+function pkTaskClasses_(task) {
+  if (Array.isArray(task.classes)) return task.classes;
+  if (task['Kelas JSON']) { try { return JSON.parse(task['Kelas JSON']); } catch (_) {} }
+  return String(task.className || task.Kelas || '').split(',');
+}
+function pkClassCodeClean_(cls) {
+  return String(cls || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+}
+function pkMakeClassCode_(taskId, className) {
+  const clean = pkClassCodeClean_(className);
+  const hash = pkHash_(taskId + '|' + className).slice(0, 4).toUpperCase();
+  return ('KIM-' + (clean || 'KLS') + '-' + hash).slice(0, 24);
+}
+
 function pkSaveTask_(task) {
   const ss = pkDb_();
   const existing = task.id ? pkFind_(ss.getSheetByName('Daftar_Tugas'), task.id) : null;
   if (task.id && !existing) throw new Error('Tugas tidak ditemukan.');
   const id = existing ? existing['ID Pengumpulan'] : Utilities.getUuid();
-  const title = String(task.title || '').trim().slice(0, 160), className = String(task.className || '').trim().slice(0, 80);
-  if (!title || !className || !PK_MEDIA[task.mediaId]) throw new Error('Isi judul, kelas, dan media.');
-  if (existing && (existing['ID Media'] !== task.mediaId || existing.Kelas !== className)) throw new Error('Media dan kelas tugas yang sudah dibuat tidak dapat diganti. Buat tugas baru.');
+  const title = String(task.title || '').trim().slice(0, 160);
+  const classes = Array.from(new Set(pkTaskClasses_(task).map(function(x) { return String(x).trim().slice(0, 80); }).filter(Boolean))).sort();
+  if (!title || !classes.length || !PK_MEDIA[task.mediaId]) throw new Error('Isi judul, pilih minimal satu kelas, dan pilih media.');
+  const activeStudents = pkRows_(ss, 'Daftar_Siswa').filter(function(s) { return (s.Aktif === true || String(s.Aktif).toUpperCase() === 'TRUE') && classes.indexOf(String(s.Kelas)) >= 0; });
+  if (!activeStudents.length) throw new Error('Kelas yang dipilih belum memiliki siswa aktif pada Daftar_Siswa.');
+  const savedClasses = existing ? pkTaskClasses_(existing).map(String).sort() : [];
+  if (existing && (existing['ID Media'] !== task.mediaId || JSON.stringify(savedClasses) !== JSON.stringify(classes))) throw new Error('Media dan kelas tugas yang sudah dibuat tidak dapat diganti. Buat tugas baru.');
   const due = task.due ? new Date(task.due) : null;
   if (due && !isFinite(due.getTime())) throw new Error('Tenggat tidak valid.');
-  const roster = String(task.roster || '').trim().split(/\r?\n/).filter(Boolean).map(function(line) {
-    const cells = line.split('|').map(function(s) { return s.trim(); });
-    if (cells.length !== 2 || !/^[a-zA-Z0-9._-]{1,40}$/.test(cells[0]) || !cells[1]) throw new Error('Daftar siswa: gunakan NIS|Nama pada setiap baris.');
-    return { nis: cells[0], name: cells[1].slice(0, 120) };
+
+  let classCodes = {};
+  if (existing && existing['Kode Kelas JSON']) {
+    try { classCodes = JSON.parse(existing['Kode Kelas JSON']); } catch (_) {}
+  }
+  classes.forEach(function(c) {
+    if (!classCodes[c]) {
+      classCodes[c] = pkMakeClassCode_(id, c);
+    }
   });
-  if (!existing && !roster.length) throw new Error('Isi daftar siswa agar tiap siswa memperoleh kode pribadi.');
-  if (roster.length > 200) throw new Error('Maksimal 200 siswa per tugas.');
-  const seen = {}; roster.forEach(function(p) { if (seen[p.nis]) throw new Error('NIS duplikat: ' + p.nis); seen[p.nis] = true; });
-  const record = { 'ID Pengumpulan': id, 'Judul': title, 'ID Media': task.mediaId, 'Kelas': className,
+
+  const record = { 'ID Pengumpulan': id, 'Judul': title, 'ID Media': task.mediaId, 'Kelas': classes.join(', '), 'Kelas JSON': JSON.stringify(classes),
+    'Kode Kelas JSON': JSON.stringify(classCodes), 'Kode Kelas': Object.values(classCodes).join(', '),
     'Tenggat': due ? due.toISOString() : '', 'Terbuka': task.open === true, 'Izinkan Terlambat': task.allowLate === true,
     'Diperbarui': new Date() };
   pkUpdate_(pkSheet_(ss, 'Daftar_Tugas'), id, record);
-  roster.forEach(function(p) {
-    const participantId = pkHash_(id + '|' + p.nis);
-    if (pkFind_(ss.getSheetByName('Peserta_Tugas'), participantId)) return;
-    pkWrite_(pkSheet_(ss, 'Peserta_Tugas'), { 'ID Pengumpulan': participantId, 'ID Tugas': id, 'Nama': p.name,
-      'NIS / Absen': p.nis, 'Kelas': className, 'Kode Akses': pkHash_(Utilities.getUuid()).slice(0, 24), 'Revisi': 0 });
+  activeStudents.forEach(function(p) {
+    const participantId = pkHash_(id + '|' + p.Kelas + '|' + p['NIS / Absen']);
+    const participantSheet = pkSheet_(ss, 'Peserta_Tugas'), previous = pkFind_(participantSheet, participantId);
+    const code = classCodes[p.Kelas] || pkMakeClassCode_(id, p.Kelas);
+    if (previous) { pkUpdate_(participantSheet, participantId, { 'Nama': p.Nama, 'NIS / Absen': p['NIS / Absen'], 'Kelas': p.Kelas, 'Kode Akses': code }); return; }
+    pkWrite_(participantSheet, { 'ID Pengumpulan': participantId, 'ID Tugas': id, 'Nama': p.Nama,
+      'NIS / Absen': p['NIS / Absen'], 'Kelas': p.Kelas, 'Kode Akses': code, 'Revisi': 0 });
   });
-  return record;
+  return Object.assign(record, { 'Jumlah Peserta': activeStudents.length, classCodes: classCodes });
 }
 function pkFinalKey_(p) { return pkHash_(p['ID Pengumpulan'] + '|' + Number(p.Revisi || 0)); }
+function pkValidateCode_(code, p, task) {
+  if (!code) return false;
+  const upperCode = String(code).trim().toUpperCase();
+  if (p && String(p['Kode Akses'] || '').trim().toUpperCase() === upperCode) return true;
+  if (task && task['Kode Kelas JSON']) {
+    try {
+      const map = JSON.parse(task['Kode Kelas JSON']);
+      if (p && p.Kelas && map[p.Kelas]) {
+        return String(map[p.Kelas]).trim().toUpperCase() === upperCode;
+      }
+      return Object.values(map).some(function(v) { return String(v).trim().toUpperCase() === upperCode; });
+    } catch (_) {}
+  }
+  if (task && String(task['Kode Kelas'] || '').trim().toUpperCase().includes(upperCode)) return true;
+  return false;
+}
 function pkParticipant_(ss, data) {
-  const task = pkFind_(ss.getSheetByName('Daftar_Tugas'), String(data.assignmentId || ''));
-  if (!task) throw new Error('Masukkan ID tugas dan kode pribadi dari guru.');
-  const code = String(data.studentAccessCode || '').trim();
-  if (!/^[a-f0-9]{24}$/.test(code)) throw new Error('Kode pengumpulan tidak valid.');
-  const participant = pkRows_(ss, 'Peserta_Tugas').find(function(p) { return p['ID Tugas'] === data.assignmentId && p['Kode Akses'] === code; });
-  if (!participant) throw new Error('Kode pengumpulan tidak sesuai dengan tugas.');
+  data = data || {};
+  let task = null;
+  const code = String(data.classCode || data.studentAccessCode || '').trim();
+  if (!code || !/^[a-zA-Z0-9._-]{6,40}$/.test(code)) throw new Error('Kode pengumpulan tidak valid.');
+
+  if (data.assignmentId) {
+    task = pkFind_(ss.getSheetByName('Daftar_Tugas'), String(data.assignmentId));
+  }
+
+  // If not found by assignmentId, search task by classCode
+  if (!task) {
+    const tasks = pkRows_(ss, 'Daftar_Tugas');
+    task = tasks.find(function(t) {
+      if (t['Kode Kelas JSON']) {
+        try {
+          const map = JSON.parse(t['Kode Kelas JSON']);
+          return Object.values(map).some(function(v) { return String(v).toUpperCase() === code.toUpperCase(); });
+        } catch (_) {}
+      }
+      return String(t['Kode Kelas'] || '').toUpperCase().includes(code.toUpperCase());
+    }) || null;
+  }
+
+  if (!task) throw new Error('ID tugas atau kode kelas tidak ditemukan.');
   if (task['ID Media'] !== data.mediaId) throw new Error('Media ini tidak sesuai dengan tugas.');
+
+  const participants = pkRows_(ss, 'Peserta_Tugas').filter(function(p) { return p['ID Tugas'] === task['ID Pengumpulan']; });
+  let participant = null;
+
+  const studentName = String(data.studentName || data.name || (data.siswa && data.siswa.nama) || '').trim().toLowerCase();
+  const studentNis = String(data.nis || (data.siswa && data.siswa.nis) || '').trim();
+
+  // Match by student name / NIS and verify code
+  if (studentName || studentNis) {
+    const matched = participants.filter(function(p) {
+      if (studentNis && String(p['NIS / Absen']) === studentNis) return true;
+      if (studentName) {
+        const pName = String(p.Nama || '').toLowerCase().trim();
+        return pName === studentName || pName.startsWith(studentName) || studentName.startsWith(pName);
+      }
+      return false;
+    });
+    participant = matched.find(function(p) {
+      return pkValidateCode_(code, p, task);
+    }) || null;
+  }
+
+  // Fallback: match by code directly if unique
+  if (!participant) {
+    participant = participants.find(function(p) {
+      return String(p['Kode Akses'] || '').toUpperCase() === code.toUpperCase();
+    });
+  }
+
+  // If studentName provided and code is a valid class code, auto-create participant row
+  if (!participant && studentName) {
+    let targetClass = '';
+    if (task['Kode Kelas JSON']) {
+      try {
+        const map = JSON.parse(task['Kode Kelas JSON']);
+        for (const [cls, cCode] of Object.entries(map)) {
+          if (String(cCode).toUpperCase() === code.toUpperCase()) { targetClass = cls; break; }
+        }
+      } catch (_) {}
+    }
+    if (!targetClass && task['Kode Kelas']) {
+      if (String(task['Kode Kelas']).trim().toUpperCase() === code.toUpperCase()) {
+        const classes = pkTaskClasses_(task);
+        if (classes.length === 1) targetClass = classes[0];
+      }
+    }
+    if (targetClass) {
+      const pId = pkHash_(task['ID Pengumpulan'] + '|' + targetClass + '|' + studentName);
+      const pSheet = pkSheet_(ss, 'Peserta_Tugas');
+      const newP = {
+        'ID Pengumpulan': pId, 'ID Tugas': task['ID Pengumpulan'], 'Nama': data.studentName || studentName,
+        'NIS / Absen': String(data.nis || (data.siswa && data.siswa.nis) || '-'),
+        'Kelas': targetClass, 'Kode Akses': code.toUpperCase(), 'Revisi': 0
+      };
+      pkWrite_(pSheet, newP);
+      participant = newP;
+    }
+  }
+
+  if (!participant) throw new Error('Kode pengumpulan tidak sesuai dengan tugas.');
   return { task: task, participant: participant, finalKey: pkFinalKey_(participant) };
 }
-function pkFinalRecord_(ss, key) {
-  return pkRows_(ss, 'RekapPengumpulan').find(function(r) { return r['Kunci Final'] === key; }) || null;
+function pkFinalRecord_(ss, key, participant, mediaId) {
+  const rows = pkRows_(ss, 'RekapPengumpulan');
+  const byKey = rows.find(function(r) { return r['Kunci Final'] === key; });
+  if (byKey) return byKey;
+
+  // Deduplicate strictly based on Nama Siswa per Media (and Kelas):
+  if (participant) {
+    const normName = String(participant.Nama || '').toLowerCase().trim();
+    const cls = String(participant.Kelas || '').trim();
+    const rev = Number(participant.Revisi || 0);
+    const byName = rows.find(function(r) {
+      const sameMedia = (!mediaId || r['ID Media'] === mediaId || r['ID Tugas'] === participant['ID Tugas']);
+      const sameName = String(r.Nama || '').toLowerCase().trim() === normName;
+      const sameClass = !cls || String(r.Kelas || '').trim() === cls;
+      const sameRev = Number(r.Revisi || 0) === rev;
+      return sameMedia && sameName && sameClass && sameRev;
+    });
+    if (byName) return byName;
+  }
+  return null;
 }
 function pkCheckTask_(ss, data) {
   const access = pkParticipant_(ss, data), task = access.task;
-  const previous = pkFinalRecord_(ss, access.finalKey);
+  const previous = pkFinalRecord_(ss, access.finalKey, access.participant, task['ID Media']);
   if (previous) return Object.assign(access, { previous: previous });
   if (task.Terbuka !== true) throw new Error('Pengumpulan tugas sudah ditutup oleh guru.');
   const late = task.Tenggat && Date.now() > new Date(task.Tenggat).getTime();
@@ -158,10 +337,11 @@ function pkCheckTask_(ss, data) {
 function portalStudentAccess(data) {
   try {
     const ss = pkDb_(), access = pkParticipant_(ss, data), p = access.participant, t = access.task;
-    const previous = pkFinalRecord_(ss, access.finalKey);
+    const previous = pkFinalRecord_(ss, access.finalKey, p, t['ID Media']);
     return { success: true, title: t.Judul, name: p.Nama, className: p.Kelas, nis: p['NIS / Absen'],
       revision: Number(p.Revisi || 0), due: t.Tenggat || '', open: t.Terbuka === true,
-      allowLate: t['Izinkan Terlambat'] === true, stored: !!previous, submissionId: previous ? previous['ID Pengumpulan'] : '' };
+      allowLate: t['Izinkan Terlambat'] === true, stored: !!previous, submissionId: previous ? previous['ID Pengumpulan'] : '',
+      assignmentId: t['ID Pengumpulan'], studentAccessCode: p['Kode Akses'] };
   } catch (e) { return { success: false, message: e.message }; }
 }
 function pkSaveReview_(request) {

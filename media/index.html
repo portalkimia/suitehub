@@ -409,7 +409,7 @@
               Menampilkan <strong id="displayed-count" class="text-slate-900 dark:text-on-surface font-mono font-bold">0</strong> materi
             </span>
             
-            <a href="https://script.google.com/macros/s/AKfycbwobr0k-44HFrf3B5YUroeEK-_U13AGVe2urQYDAmL0U43arTQHTvKjUEeM6CuZQvOE/exec?page=Guru" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-teal-700 text-white font-semibold">Ruang Guru · Hasil &amp; Tugas</a>
+            <a href="Guru.html" class="px-3.5 py-1.5 rounded-xl bg-primary/20 hover:bg-primary/30 text-primary border border-primary/40 font-semibold text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95"><span class="material-symbols-outlined text-[16px]">school</span><span>Ruang Guru &bull; Tugas &amp; AI</span></a>
             <!-- Sorting Selector -->
             <select 
               id="sort-order" 
@@ -1559,130 +1559,8 @@
     let isTeacherMode = (localStorage.getItem('portal_is_admin') === 'true');
     let activeViewingMaterialId = null;
 
-    // Default Kurikulum Merdeka Materials for instant offline & ready usage
-    const defaultCuratedMaterials = [
-      {
-        id: 'spu-hist-01',
-        title: 'Sejarah Perkembangan Sistem Periodik Unsur (SPU)',
-        subject: 'Kimia',
-        grade: 'Kelas 10',
-        topic: 'Struktur Atom & SPU',
-        format: 'HTML',
-        url: 'SejarahSPU.html',
-        description: 'Evolusi penataan unsur dari Triade Dobereiner, Oktaf Newlands, Kurva Lothar Meyer, Mendeleev hingga Sistem Modern Moseley lengkap dengan simulator interaktif dan Web Audio.',
-        thumbnail: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=600&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 'spu-pergol-02',
-        title: 'Penentuan Periode dan Golongan Unsur (A-B & 1-18)',
-        subject: 'Kimia',
-        grade: 'Kelas 10',
-        topic: 'Tabel Periodik Unsur',
-        format: 'HTML',
-        url: 'PeriodeGolongan.html',
-        description: 'Laboratorium interaktif penentuan letak unsur berdasarkan nomor atom, konfigurasi elektron gas mulia, serta tabel periodik 118 unsur interaktif.',
-        thumbnail: 'https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?w=600&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 'spu-sifat-03',
-        title: 'Sifat Keperiodikan Unsur (SPU) & Anomali Tren',
-        subject: 'Kimia',
-        grade: 'Kelas 10',
-        topic: 'Tabel Periodik Unsur',
-        format: 'HTML',
-        url: 'SifatKeperiodikanUnsur.html',
-        description: 'Laboratorium interaktif sifat keperiodikan unsur: peta heatmap SPU 118 unsur, duel komparasi atom berdampingan, grafik fluktuasi Canvas 2D, detektif anomali, dan kuis 12 butir HOTS.',
-        thumbnail: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 'bil-kuan-03',
-        title: 'Bilangan Kuantum & Bentuk Orbital Atom 3D',
-        subject: 'Kimia',
-        grade: 'Kelas 10',
-        topic: 'Mekanika Kuantum',
-        format: 'HTML',
-        url: 'BilanganKuantum.html',
-        description: 'Visualisasi 4 bilangan kuantum (n, l, m, s), orientasi ruang orbital s, p, d, f dalam bentuk 3D, serta kaidah Aufbau dan Larangan Pauli.',
-        thumbnail: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 'konfig-kuan-04',
-        title: 'Konfigurasi Elektron Mekanika Kuantum & Diagram Orbital',
-        subject: 'Kimia',
-        grade: 'Kelas 10',
-        topic: 'Struktur Atom',
-        format: 'HTML',
-        url: 'KonfigurasiKuantum.html',
-        description: 'Simulator pengisian elektron subkulit spdf, diagram kotak orbital beranimasi spin, dan penentuan elektron valensi unsur.',
-        thumbnail: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=600&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 'konfig-bohr-05',
-        title: 'Konfigurasi Elektron Model Bohr & Kulit Atom (KLMN)',
-        subject: 'Kimia',
-        grade: 'Kelas 10',
-        topic: 'Teori Atom Bohr',
-        format: 'HTML',
-        url: 'KonfigurasiBohr.html',
-        description: 'Simulasi orbit elektron mengelilingi inti atom 2n² untuk unsur golongan utama, jari-jari lintasan, dan spektrum emisi gas.',
-        thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 'lab-titrasi-06',
-        title: 'Virtual Lab Titrasi Asam Basa & Kurva pH Realtime',
-        subject: 'Kimia',
-        grade: 'Kelas 11',
-        topic: 'Larutan Asam Basa',
-        format: 'HTML',
-        url: 'media_interaktif_kimia.html',
-        description: 'Eksperimen virtual buret dan labu Erlenmeyer, penetesan titran NaOH ke HCl, indikator fenolftalein, dan plot grafik pH dinamis.',
-        thumbnail: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 'doc-lkpd-07',
-        title: 'LKPD Praktikum: Reaksi Eksoterm & Endoterm Termokimia',
-        subject: 'Kimia',
-        grade: 'Kelas 11',
-        topic: 'Termokimia',
-        format: 'PDF',
-        url: 'https://docs.google.com/viewer?url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf&embedded=true',
-        description: 'Lembar Kerja Peserta Didik berbasis metode inkuiri terbimbing untuk mengukur perubahan entalpi kalorimeter sederhana.',
-        thumbnail: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 'slide-sel-08',
-        title: 'Presentasi Slide: Sel Volta & Potensial Redoks Standar',
-        subject: 'Kimia',
-        grade: 'Kelas 12',
-        topic: 'Elektrokimia',
-        format: 'PPT',
-        url: 'https://docs.google.com/presentation/d/e/2PACX-1vR6ZJv7nQ/embed?start=false&loop=false&delayms=3000',
-        description: 'Media presentasi interaktif bagan sel elektrokimia, jembatan garam, aliran elektron katoda-anoda, dan deret Volta.',
-        thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 'sel-volta-09',
-        title: 'Sel Volta (Sel Galvani): Energi Listrik Redoks Spontan',
-        subject: 'Kimia',
-        grade: 'Kelas 12',
-        topic: 'Elektrokimia',
-        format: 'HTML',
-        url: 'SelVolta.html',
-        description: 'Pembelajaran interaktif sel Daniell (Zn/Cu), deret Volta, perhitungan E°sel, fenomena baterai lemon, virtual lab AACT, dan kuis evaluasi 12 soal.',
-        thumbnail: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&auto=format&fit=crop&q=80'
-      },
-      {
-        id: 'sel-elektrolisis-10',
-        title: 'Sel Elektrolisis: Reaksi Redoks Non-Spontan & Industri Modern',
-        subject: 'Kimia',
-        grade: 'Kelas 12',
-        topic: 'Elektrokimia',
-        format: 'HTML',
-        url: 'SelElektrolisis.html',
-        description: 'Simulasi interaktif elektrolisis larutan & leburan, prediktor aturan katoda/anoda, kalkulator kuantitatif Hukum Faraday I & II, penyepuhan logam, dan LKPD HOTS.',
-        thumbnail: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?w=600&auto=format&fit=crop&q=80'
-      }
-    ];
+    // Opsi A: Murni dari Spreadsheet / Drive (tidak ada data hardcoded contoh bawaan)
+    const defaultCuratedMaterials = [];
 
     // ==========================================
     // 2. THEME MANAGEMENT (OBSIDIAN DARK & CLEAN LIGHT)
@@ -1811,21 +1689,21 @@
     // 4. DATA MANAGEMENT & GAS CONNECTION
     // ==========================================
     function loadMaterials() {
-      // 1. Ambil dari localStorage dan langsung bersihkan jika ada materi D-Chem yang tersimpan
+      // 1. Ambil dari localStorage dan bersihkan data contoh lama jika ada
       let hasLocal = false;
+      const legacyDummyIds = new Set([
+        'spu-hist-01', 'spu-pergol-02', 'spu-sifat-03', 'bil-kuan-03', 'konfig-kuan-04',
+        'konfig-bohr-05', 'lab-titrasi-06', 'doc-lkpd-07', 'slide-sel-08', 'sel-volta-09', 'sel-elektrolisis-10'
+      ]);
       try {
         const saved = localStorage.getItem('chemportal_materials');
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const clean = sanitizePortalKimiaMaterials(parsed);
-            if (clean.length > 0) {
-              const existingIds = new Set(clean.map(m => String(m.id || m.title)));
-              const missingDefaults = defaultCuratedMaterials.filter(dm => !existingIds.has(String(dm.id || dm.title)));
-              allMaterials = [...clean, ...missingDefaults];
-              hasLocal = true;
-              localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
-            }
+          if (Array.isArray(parsed)) {
+            const clean = sanitizePortalKimiaMaterials(parsed).filter(m => !legacyDummyIds.has(String(m.id || '')));
+            allMaterials = clean;
+            hasLocal = true;
+            localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
           }
         }
       } catch(e) {}
@@ -1839,7 +1717,7 @@
       } catch(e) {}
 
       if (!hasLocal) {
-        allMaterials = [...defaultCuratedMaterials];
+        allMaterials = [];
         try {
           localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
         } catch(e) {}
@@ -1849,78 +1727,44 @@
       updateCounters();
       renderMaterials();
 
-    function isSameMaterialSemantic(t1, t2) {
-      const s1 = (t1 || '').toLowerCase();
-      const s2 = (t2 || '').toLowerCase();
-      if (s1 === s2) return true;
-      if ((s1.includes('sejarah') && s2.includes('sejarah')) && (s1.includes('spu') || s2.includes('spu') || s1.includes('periodik') || s2.includes('periodik'))) return true;
-      if ((s1.includes('periode') || s1.includes('golongan')) && (s2.includes('periode') || s2.includes('golongan'))) return true;
-      if ((s1.includes('sifat') && s2.includes('sifat')) && (s1.includes('keperiodikan') || s2.includes('keperiodikan') || s1.includes('spu') || s2.includes('spu'))) return true;
-      if (s1.includes('bohr') && s2.includes('bohr')) return true;
-      if (s1.includes('bilangan kuantum') && s2.includes('bilangan kuantum')) return true;
-      if ((s1.includes('konfigurasi') && s2.includes('konfigurasi')) && !s1.includes('bohr') && !s2.includes('bohr')) return true;
-      if (s1.includes('titrasi') && s2.includes('titrasi')) return true;
-      if ((s1.includes('termo') || s1.includes('kalor') || s1.includes('entalpi') || s1.includes('lkpd')) && 
-          (s2.includes('termo') || s2.includes('kalor') || s2.includes('entalpi') || s2.includes('lkpd'))) return true;
-      if (s1.includes('volta') && s2.includes('volta') && !s1.includes('slide') && !s2.includes('slide')) return true;
-      if (s1.includes('elektrolisis') && s2.includes('elektrolisis')) return true;
-      if (s1.includes('laboratorium') && s2.includes('laboratorium')) return true;
-      return false;
-    }
+      function mergeDriveAndCuratedMaterials(driveData) {
+        return sanitizePortalKimiaMaterials(driveData) || [];
+      }
 
-    function mergeDriveAndCuratedMaterials(driveData) {
-      const cleanData = sanitizePortalKimiaMaterials(driveData);
-      if (!cleanData || cleanData.length === 0) return [...defaultCuratedMaterials];
+      // 2. Background sync ke Google Apps Script (dengan filter folder resmi PortalKimia)
+      const applySyncData = (resData) => {
+        const mergedData = mergeDriveAndCuratedMaterials(resData);
+        allMaterials = mergedData.map(m => ({
+          ...m,
+          thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
+        }));
+        window.allMaterials = allMaterials;
+        localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
+        updateCounters();
+        renderMaterials();
+      };
 
-      const missingCurated = defaultCuratedMaterials.filter(dm => {
-        return !cleanData.some(m => isSameMaterialSemantic(m.title, dm.title) || isSameMaterialSemantic(m.url, dm.url));
-      });
-
-      return [...cleanData, ...missingCurated];
-    }
-
-    // 2. Background sync ke Google Apps Script (dengan filter folder resmi PortalKimia)
-    if (typeof google !== 'undefined' && google.script && google.script.run) {
-      google.script.run
-        .withSuccessHandler((res) => {
-          if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
-            const mergedData = mergeDriveAndCuratedMaterials(res.data);
-            if (mergedData.length > 0) {
-              allMaterials = mergedData.map(m => ({
-                ...m,
-                thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
-              }));
-              window.allMaterials = allMaterials;
-              localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
-              updateCounters();
-              renderMaterials();
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (res && res.success && Array.isArray(res.data)) {
+              applySyncData(res.data);
             }
-          }
-        })
-        .getMaterials(PORTALKIMIA_DRIVE_FOLDER_ID);
-    } else {
-      fetch(GAS_API_URL + '?action=getMaterials&folderId=' + PORTALKIMIA_DRIVE_FOLDER_ID)
-        .then(r => r.json())
-        .then(res => {
-          if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
-            const mergedData = mergeDriveAndCuratedMaterials(res.data);
-            if (mergedData.length > 0) {
-              allMaterials = mergedData.map(m => ({
-                ...m,
-                thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
-              }));
-              window.allMaterials = allMaterials;
-              localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
-              updateCounters();
-              renderMaterials();
+          })
+          .getMaterials(PORTALKIMIA_DRIVE_FOLDER_ID);
+      } else {
+        fetch(GAS_API_URL + '?action=getMaterials&folderId=' + PORTALKIMIA_DRIVE_FOLDER_ID)
+          .then(r => r.json())
+          .then(res => {
+            if (res && res.success && Array.isArray(res.data)) {
+              applySyncData(res.data);
             }
-          }
-        })
-        .catch(() => {
-          // Beroperasi secara offline / lokal
-        });
+          })
+          .catch(() => {
+            // Beroperasi secara offline / lokal
+          });
+      }
     }
-  }
 
     function updateCounters() {
       const total = allMaterials.length;
@@ -2656,6 +2500,14 @@
                 <button onclick="setFormatFilter('ALL')" class="mt-4 px-4 py-2 rounded-xl bg-violet-600 dark:bg-primary text-white dark:text-on-primary text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer">
                   Tampilkan Semua Materi
                 </button>
+              </div>
+            `;
+          } else if (allMaterials.length === 0) {
+            emptyState.innerHTML = `
+              <div class="flex flex-col items-center justify-center text-center p-8 bg-white dark:bg-surface-container rounded-2xl border border-slate-200 dark:border-outline-variant max-w-md mx-auto">
+                <span class="material-symbols-outlined text-4xl text-slate-400 mb-2">folder_open</span>
+                <h4 class="font-bold text-slate-800 dark:text-on-surface text-base">Belum Ada Media Pembelajaran</h4>
+                <p class="text-xs text-slate-500 dark:text-on-surface-variant mt-1.5 leading-relaxed">Database spreadsheet saat ini kosong. Tambahkan baris materi pada Google Spreadsheet tab 'BahanAjar' atau lakukan sinkronisasi folder Google Drive dari Mode Guru.</p>
               </div>
             `;
           } else {
@@ -3399,11 +3251,8 @@
     }
 
     function applyPortalKimiaSyncFallback(statusBox, note) {
-      let currentList = (allMaterials && allMaterials.length > 0) ? allMaterials : [...defaultCuratedMaterials];
+      let currentList = (allMaterials && allMaterials.length > 0) ? allMaterials : [];
       currentList = sanitizePortalKimiaMaterials(currentList);
-      if (currentList.length === 0) {
-        currentList = [...defaultCuratedMaterials];
-      }
 
       allMaterials = currentList.map(m => ({
         ...m,

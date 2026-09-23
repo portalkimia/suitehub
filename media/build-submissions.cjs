@@ -6,6 +6,7 @@ const client = fs.readFileSync(path.join(root, 'submission-client.js'), 'utf8');
 const backend = fs.readFileSync(path.join(root, 'submission-backend.js'), 'utf8');
 const teacherBackend = fs.readFileSync(path.join(root, 'teacher-backend.js'), 'utf8');
 const rules = [
+  [/Hukum_?Faraday/i, 'faraday-elektrolisis', 'Hukum Faraday dan Perhitungan Elektrolisis'],
   [/Sel_?Volta/i, 'sel-volta', 'Sel Volta'], [/Sel_?Elektrolisis/i, 'sel-elektrolisis', 'Sel Elektrolisis'],
   [/Bohr/i, 'konfigurasi-bohr', 'Konfigurasi Elektron Model Bohr'],
   [/Bilangan_?Kuantum/i, 'bilangan-kuantum', 'Bilangan Kuantum'],
@@ -27,17 +28,40 @@ function replaceFunction(s, name, replacement) {
   if (!regex.test(s)) throw new Error('Function missing: '+name);
   return s.replace(regex, replacement);
 }
-for (const dir of ['', 'Media_Pembelajaran_Kimia_Drive', 'File Spark']) {
+for (const dir of ['', 'Media_Pembelajaran_Kimia_Drive', 'Media_Pembelajaran_Kimia_Drive/Paket_Media_Baru', 'File Spark']) {
   if (!fs.existsSync(path.join(root, dir))) continue;
   for (const file of fs.readdirSync(path.join(root, dir)).filter(f => /\.html$/i.test(f) && !['index.html','Guru.html'].includes(f))) {
     const full = path.join(root, dir, file);
     let s = fs.readFileSync(full, 'utf8');
+    if(s.includes('name="pk-native-media"') || /Hukum_Faraday/.test(file)) {
+      const match=s.match(/PortalSubmission\.install\((\{[^\n]+?\}), \{questions/);
+      let nativeConfig = null;
+      if (match) {
+        try { nativeConfig = JSON.parse(match[1]); } catch (_) {}
+      }
+      if (!nativeConfig) {
+        const metaMatch = s.match(/<meta\s+name="pk-native-media"\s+content="([^"]+)"/i);
+        const titleMatch = s.match(/<title>([^<]+)<\/title>/i);
+        const id = metaMatch ? metaMatch[1] : path.basename(file, '.html').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const title = titleMatch ? titleMatch[1].split('•')[0].split('·')[0].trim() : file;
+        nativeConfig = { id: id, title: title };
+      }
+      const questions = s.includes('quizQuestions') ? 'quizQuestions' : (s.includes('soalKuis') ? 'soalKuis' : '[]');
+      const answers = s.includes('userAnswers') ? 'userAnswers' : (s.includes('jawabanSiswa') ? 'jawabanSiswa' : 'window.__dummyAnswers');
+      const nativeBlock='\n<!-- PK-SUBMISSION-V2-START -->\n<script>\n'+client+'\nPortalSubmission.install('+JSON.stringify(nativeConfig)+', {questions:'+questions+',setAnswers:value=>{'+answers+'=value;}});\n</script>\n<!-- PK-SUBMISSION-V2-END -->';
+      if (s.includes('<!-- PK-SUBMISSION-V2-START -->')) {
+        s=s.replace(/<!-- PK-SUBMISSION-V2-START -->[\s\S]*?<!-- PK-SUBMISSION-V2-END -->/,()=>nativeBlock);
+      } else {
+        s=s.replace(/<\/body>/i, nativeBlock+'\n</body>');
+      }
+      for(const m of s.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new vm.Script(m[1]);
+      write(full,s);continue;
+    }
     // Existing extra closing brace prevented Bohr/Kuantum scripts from running at all.
     s = s.replace(/(function (?:updateThemeIcons|safeRenderIcons)\(\) \{[\s\S]*?^    \})\r?\n    \}(?=\r?\n\r?\n    (?:function toggleFullscreen|\/\/ ==================== SCROLL))/m, '$1');
     s = s.replace(/(function selectBohrConceptNode\(key\) \{[\s\S]*?^    \})\r?\n    \}(?=\r?\n\r?\n    \/\/ ==================== SHELL)/m, '$1');
     const rule = rules.find(r => r[0].test(file));
-    if (!rule) throw new Error('Unknown media: '+file);
-    const config = { id: rule[1], title: rule[2] };
+    const config = rule ? { id: rule[1], title: rule[2] } : { id: path.basename(file, '.html').toLowerCase().replace(/[^a-z0-9]+/g, '-'), title: path.basename(file, '.html').replace(/_/g, ' ') };
     s = s.replace(/\n?<!-- PK-SUBMISSION-V2-START -->[\s\S]*?<!-- PK-SUBMISSION-V2-END -->\n?/g, '');
     const draftKeys = [...s.matchAll(/localStorage\.(?:setItem|removeItem)\(['"]([^'"]+)['"]/g)].map(m=>m[1]).filter(k=>!/theme|portalkimia|pk_/.test(k));
     const storageConstant=s.match(/const STORAGE_KEY\s*=\s*['"]([^'"]+)['"]/);
@@ -106,3 +130,5 @@ let sw = fs.readFileSync(swPath, 'utf8').replace(/const CACHE_NAME = '[^']+';/, 
 sw=sw.replace(/const STATIC_ASSETS = \[[\s\S]*?\];/,"const STATIC_ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];");
 write(swPath, sw);
 console.log('Updated '+changed.length+' files: '+changed.join(', '));
+
+

@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Laboratorium Virtual Kimia: Tabel Periodik & Struktur Atom</title>
+  <title>Laboratorium_Kimia_Virtual_SMA_Fase_F &bull; PortalKimia</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,6 +38,7 @@
       z-index: 10;
     }
   </style>
+<style>[data-pk-legacy-eval]{display:none!important}</style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white pb-12">
 
@@ -81,8 +82,12 @@
   <!-- ==================== MAIN CONTENT WRAPPER ==================== -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 flex-grow w-full">
 
-    <!-- TAB 1: TABEL PERIODIK -->
+    <!-- ============================================================== -->
+    <!-- TAB 1: TABEL PERIODIK & DETAIL UNSUR INTERAKTIF -->
+    <!-- ============================================================== -->
     <section id="tab-periodik" class="tab-content block space-y-6">
+      
+      <!-- Top Overview Bar -->
       <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-xl font-extrabold text-white flex items-center space-x-2">
@@ -93,6 +98,7 @@
           </p>
         </div>
 
+        <!-- Filter Golongan Unsur -->
         <div class="flex items-center flex-wrap gap-1.5 text-[11px]">
           <button onclick="filterElementGroup('all')" class="group-btn active px-2.5 py-1 rounded-md bg-emerald-600 text-white font-medium">Semua</button>
           <button onclick="filterElementGroup('alkali')" class="group-btn px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700">Logam Alkali</button>
@@ -104,20 +110,31 @@
         </div>
       </div>
 
+      <!-- Layout: Periodic Grid + Element Detail Panel -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Element Cards Grid (Left 7 Cols) -->
         <div class="lg:col-span-7 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 sm:p-5">
           <div class="flex items-center justify-between mb-3 text-xs text-slate-400 font-semibold">
             <span>Daftar Unsur Pilihan (Periode 1 - 4 & Logam Populer)</span>
             <span id="element-count-hint" class="text-emerald-400">24 Unsur</span>
           </div>
-          <div id="elements-container" class="grid grid-cols-4 sm:grid-cols-6 gap-2.5 custom-scrollbar max-h-[520px] overflow-y-auto pr-1"></div>
+
+          <div id="elements-container" class="grid grid-cols-4 sm:grid-cols-6 gap-2.5 custom-scrollbar max-h-[520px] overflow-y-auto pr-1">
+            <!-- Rendered by JS -->
+          </div>
         </div>
 
+        <!-- Element Details Inspector (Right 5 Cols) -->
         <div id="inspector-panel" class="lg:col-span-5 bg-gradient-to-b from-slate-900 to-slate-950 border border-emerald-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+          
+          <!-- Background Glow -->
           <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
+          <!-- Header Unsur -->
           <div class="flex items-start justify-between border-b border-slate-800 pb-4 mb-5">
             <div class="flex items-center space-x-4">
+              <!-- Big Atomic Symbol Box -->
               <div id="inspect-symbol-box" class="w-16 h-16 rounded-2xl bg-emerald-500/20 border-2 border-emerald-500 flex flex-col items-center justify-center text-white shadow-lg">
                 <span id="inspect-number" class="text-[10px] font-bold text-emerald-400">1</span>
                 <span id="inspect-symbol" class="text-2xl font-black">H</span>
@@ -136,6 +153,7 @@
             </button>
           </div>
 
+          <!-- Quick Stats Grid -->
           <div class="grid grid-cols-2 gap-3 mb-5 text-xs">
             <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-800">
               <span class="text-slate-400 block mb-0.5">Massa Atom Relatif (\(A_r\))</span>
@@ -155,21 +173,27 @@
             </div>
           </div>
 
+          <!-- Konfigurasi Elektron Kulit Bohr -->
           <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800 mb-4">
             <div class="flex items-center justify-between mb-2">
               <span class="text-xs font-bold text-slate-300">Konfigurasi Elektron (Kulit K, L, M, N)</span>
               <span id="inspect-config-code" class="text-xs font-mono text-emerald-400 font-semibold">1</span>
             </div>
-            <div id="inspect-shells-bar" class="flex items-center space-x-2 pt-1"></div>
+            <div id="inspect-shells-bar" class="flex items-center space-x-2 pt-1">
+              <!-- Rendered by JS -->
+            </div>
           </div>
 
+          <!-- Deskripsi & Kegunaan -->
           <div class="space-y-3 text-xs">
             <div class="bg-slate-800/20 p-3.5 rounded-xl border border-slate-800">
               <h4 class="font-bold text-slate-300 mb-1 flex items-center space-x-1.5">
                 <i data-lucide="info" class="w-3.5 h-3.5 text-emerald-400"></i>
                 <span>Karakteristik Kimia:</span>
               </h4>
-              <p id="inspect-desc" class="text-slate-400 leading-relaxed"></p>
+              <p id="inspect-desc" class="text-slate-400 leading-relaxed">
+                Unsur paling ringan dan paling melimpah di alam semesta. Memiliki 1 proton dan 1 elektron.
+              </p>
             </div>
 
             <div class="bg-slate-800/20 p-3.5 rounded-xl border border-slate-800">
@@ -177,39 +201,55 @@
                 <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
                 <span>Aplikasi di Kehidupan Nyata:</span>
               </h4>
-              <p id="inspect-uses" class="text-slate-400 leading-relaxed"></p>
+              <p id="inspect-uses" class="text-slate-400 leading-relaxed">
+                Bahan bakar roket masa depan, sel bahan bakar hidrogen (fuel cell), dan sintesis amonia untuk pupuk.
+              </p>
             </div>
           </div>
 
         </div>
+
       </div>
+
     </section>
 
-    <!-- TAB 2: SIMULASI BOHR -->
+    <!-- ============================================================== -->
+    <!-- TAB 2: SIMULASI MODEL ATOM BOHR INTERAKTIF -->
+    <!-- ============================================================== -->
     <section id="tab-bohr" class="tab-content hidden space-y-6">
+      
       <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-xl font-extrabold text-white flex items-center space-x-2">
             <span>Simulasi Interaktif Model Atom Bohr</span>
           </h2>
           <p class="text-xs text-slate-400 mt-1">
-            Visualisasi dinamis perputaran elektron pada kulit atom K, L, M, N mengelilingi inti atom.
+            Visualisasi dinamis perputaran elektron pada kulit atom K, L, M, N mengelilingi inti atom (proton & neutron).
           </p>
         </div>
 
         <div class="flex items-center space-x-3 text-xs">
           <label class="font-medium text-slate-300">Pilih Nomor Atom (Z):</label>
-          <select id="bohr-element-select" onchange="onBohrSelectChange()" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-emerald-300 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"></select>
+          <select id="bohr-element-select" onchange="onBohrSelectChange()" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-emerald-300 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <!-- Populated by JS -->
+          </select>
         </div>
       </div>
 
+      <!-- Simulation Container -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        
+        <!-- Live HTML5 Canvas (Left 7 Cols) -->
         <div class="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center relative overflow-hidden min-h-[440px]">
+          
           <div class="absolute top-4 left-4 text-xs font-semibold text-slate-400 flex items-center space-x-2">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
             <span>Simulasi Real-Time</span>
           </div>
+
           <canvas id="bohrCanvas" width="420" height="420" class="orbit-canvas max-w-full"></canvas>
+
+          <!-- Legend -->
           <div class="mt-2 flex items-center space-x-4 text-[11px] text-slate-400">
             <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> <span>Proton (+)</span></span>
             <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span> <span>Neutron (0)</span></span>
@@ -217,19 +257,30 @@
           </div>
         </div>
 
+        <!-- Controls & Physics Explanations (Right 5 Cols) -->
         <div class="lg:col-span-5 space-y-4">
+          
           <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
             <h3 id="bohr-element-title" class="text-lg font-bold text-white mb-3 flex items-center space-x-2">
               <span id="bohr-badge" class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs">Z = 6</span>
               <span id="bohr-name">Karbon (C)</span>
             </h3>
 
+            <!-- Slider Kontrol Cepat -->
             <div class="space-y-2 mb-4">
               <div class="flex items-center justify-between text-xs text-slate-400">
                 <span>Geser Nomor Atom:</span>
                 <span id="bohr-slider-val" class="font-bold text-emerald-400">6</span>
               </div>
-              <input type="range" id="bohr-slider" min="1" max="20" value="6" oninput="onBohrSliderChange(this.value)" class="w-full accent-emerald-500 cursor-pointer">
+              <input 
+                type="range" 
+                id="bohr-slider" 
+                min="1" 
+                max="20" 
+                value="6" 
+                oninput="onBohrSliderChange(this.value)"
+                class="w-full accent-emerald-500 cursor-pointer"
+              >
               <div class="flex justify-between text-[10px] text-slate-500 font-mono">
                 <span>1 (H)</span>
                 <span>10 (Ne)</span>
@@ -237,6 +288,7 @@
               </div>
             </div>
 
+            <!-- Rincian Partikel Subatom -->
             <div class="grid grid-cols-3 gap-2 text-center text-xs mb-4">
               <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-800">
                 <span class="text-rose-400 font-bold block text-base" id="bohr-protons">6</span>
@@ -252,38 +304,55 @@
               </div>
             </div>
 
+            <!-- Kulit Elektron Detail -->
             <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs space-y-2">
               <div class="text-slate-400 font-semibold text-[11px]">Distribusi Elektron per Kulit:</div>
-              <div id="bohr-shells-distribution" class="space-y-1.5 font-mono"></div>
+              <div id="bohr-shells-distribution" class="space-y-1.5 font-mono">
+                <!-- Rendered by JS -->
+              </div>
             </div>
+
           </div>
 
+          <!-- Kestabilan Oktet / Sifat Pembentukan Ikatan -->
           <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl text-xs">
             <h4 class="font-bold text-emerald-400 mb-1 flex items-center space-x-1.5">
               <i data-lucide="shield-alert" class="w-4 h-4"></i>
               <span>Kecenderungan Kestabilan (Aturan Oktet/Duplet):</span>
             </h4>
-            <p id="bohr-stability-note" class="text-slate-400 leading-relaxed"></p>
+            <p id="bohr-stability-note" class="text-slate-400 leading-relaxed">
+              Memiliki 4 elektron valensi. Cenderung berbagi (sharing) 4 elektron membentuk 4 ikatan kovalen untuk mencapai konfigurasi stabil oktet (8 elektron seperti Gas Mulia Ne).
+            </p>
           </div>
+
         </div>
+
       </div>
+
     </section>
 
-    <!-- TAB 3: ASAM BASA -->
+    <!-- ============================================================== -->
+    <!-- TAB 3: MINI LAB UJI ASAM-BASA & INDIKATOR pH -->
+    <!-- ============================================================== -->
     <section id="tab-asambasa" class="tab-content hidden space-y-6">
+      
       <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-xl font-extrabold text-white flex items-center space-x-2">
             <span>Laboratorium Virtual: Uji Asam-Basa & Derajat pH</span>
           </h2>
           <p class="text-xs text-slate-400 mt-1">
-            Uji sampel larutan kimia dengan Indikator Universal, Lakmus Merah, Lakmus Biru, dan pH meter digital.
+            Uji berbagai sampel larutan kimia dengan Indikator Universal, Lakmus Merah, Lakmus Biru, dan pH meter digital.
           </p>
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Interactive Beaker & Lab Bench (Left 7 Cols) -->
         <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-between min-h-[460px] relative">
+          
+          <!-- Sample Selector Strip -->
           <div class="w-full flex items-center justify-between gap-2 mb-6">
             <span class="text-xs font-semibold text-slate-400">Pilih Sampel Larutan:</span>
             <select id="solution-select" onchange="changeSolution()" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-emerald-400 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
@@ -296,11 +365,14 @@
             </select>
           </div>
 
+          <!-- Virtual Beaker Visual -->
           <div class="relative w-64 h-72 border-4 border-slate-500 border-t-0 rounded-b-3xl bg-slate-950/40 p-2 flex flex-col justify-end overflow-hidden shadow-2xl">
+            <!-- Measurement ticks -->
             <div class="absolute right-2 top-8 text-[10px] text-slate-500 font-mono">250 mL —</div>
             <div class="absolute right-2 top-24 text-[10px] text-slate-500 font-mono">150 mL —</div>
             <div class="absolute right-2 top-40 text-[10px] text-slate-500 font-mono">50 mL —</div>
 
+            <!-- Test Strips inside Beaker (Animated Dip) -->
             <div id="test-strip-lakmus-merah" class="absolute left-10 -top-8 w-6 h-48 bg-rose-400 border border-slate-700 rounded-b-md shadow-md transition-all duration-500 flex flex-col justify-end items-center pb-2">
               <span class="text-[8px] font-bold text-slate-900 rotate-90">L. Merah</span>
             </div>
@@ -313,12 +385,15 @@
               <span class="text-[8px] font-bold text-slate-900 rotate-90">Universal</span>
             </div>
 
+            <!-- Liquid in Beaker -->
             <div id="beaker-liquid" class="w-full h-44 rounded-b-2xl bg-cyan-500/30 transition-all duration-700 relative overflow-hidden backdrop-blur-xs flex items-center justify-center">
+              <!-- Liquid wave effect -->
               <div class="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-transparent animate-pulse"></div>
               <span id="liquid-formula-label" class="text-xs font-mono font-bold text-white/70 bg-black/30 px-2 py-1 rounded-md">H2O</span>
             </div>
           </div>
 
+          <!-- Dip Action Buttons -->
           <div class="w-full flex items-center justify-center gap-3 mt-6">
             <button onclick="dipStrips()" id="btn-dip" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg transition-all active:scale-95 flex items-center space-x-2">
               <i data-lucide="test-tube" class="w-4 h-4"></i>
@@ -328,9 +403,13 @@
               Angkat / Reset
             </button>
           </div>
+
         </div>
 
+        <!-- Measurement & Theory Results (Right 5 Cols) -->
         <div class="lg:col-span-5 space-y-4">
+          
+          <!-- pH Meter Digital Display -->
           <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl relative overflow-hidden">
             <div class="flex items-center justify-between mb-3">
               <span class="text-xs font-bold text-slate-400">PENGUKURAN pH DIGITAL</span>
@@ -343,6 +422,7 @@
               <span id="ph-concentration" class="text-xs font-mono text-slate-400">[H⁺] = 1.0 × 10⁻⁷ M</span>
             </div>
 
+            <!-- pH Color Bar Scale (1 to 14) -->
             <div class="mt-4">
               <div class="flex justify-between text-[10px] text-slate-400 font-bold mb-1">
                 <span class="text-rose-400">1 (Asam Kuat)</span>
@@ -350,11 +430,13 @@
                 <span class="text-purple-400">14 (Basa Kuat)</span>
               </div>
               <div class="h-3 w-full rounded-full bg-gradient-to-r from-red-600 via-yellow-400 via-emerald-500 via-blue-500 to-purple-800 relative">
+                <!-- Pin marker -->
                 <div id="ph-pointer" class="absolute -top-1 w-5 h-5 bg-white border-2 border-slate-900 rounded-full shadow transition-all duration-500 -translate-x-1/2" style="left: 50%;"></div>
               </div>
             </div>
           </div>
 
+          <!-- Lakmus Test Observation Table -->
           <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl text-xs space-y-3">
             <h4 class="font-bold text-slate-200 flex items-center space-x-1.5">
               <i data-lucide="eye" class="w-4 h-4 text-emerald-400"></i>
@@ -377,18 +459,25 @@
             </div>
           </div>
 
+          <!-- Penjelasan Teori Kimia -->
           <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl text-xs">
             <h4 class="font-bold text-emerald-400 mb-1">Reaksi Ionisasi & Penjelasan:</h4>
             <p id="solution-explanation" class="text-slate-400 leading-relaxed">
               Air murni mengalami ionisasi parsial: H2O ⇌ H⁺ + OH⁻ dengan [H⁺] = [OH⁻] = 10⁻⁷ M, sehingga larutan bersifat netral dengan pH = 7.
             </p>
           </div>
+
         </div>
+
       </div>
+
     </section>
 
-    <!-- TAB 4: KUIS -->
-    <section id="tab-kuis" class="tab-content hidden space-y-6 max-w-3xl mx-auto">
+    <!-- ============================================================== -->
+    <!-- TAB 4: KUIS EVALUASI CEPAT KIMIA -->
+    <!-- ============================================================== -->
+    <section id="tab-kuis" class="tab-content hidden space-y-6 max-w-3xl mx-auto"><div data-pk-legacy-eval hidden inert>
+      
       <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 flex items-center justify-between">
         <div>
           <h2 class="text-xl font-extrabold text-white flex items-center space-x-2">
@@ -402,25 +491,30 @@
         </div>
       </div>
 
-      <div id="quiz-container" class="space-y-4"></div>
+      <!-- Quiz Questions Container -->
+      <div id="quiz-container" class="space-y-4">
+        <!-- Rendered by JS -->
+      </div>
 
+      <!-- Final Quiz Result Banner (Hidden initially) -->
       <div id="quiz-final-banner" class="hidden bg-gradient-to-r from-emerald-950 to-slate-900 border border-emerald-500/40 rounded-2xl p-6 text-center space-y-3">
         <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
           <i data-lucide="award" class="w-6 h-6"></i>
         </div>
         <h3 id="quiz-result-title" class="text-lg font-bold text-white">Luar Biasa!</h3>
         <p id="quiz-result-desc" class="text-xs text-slate-300 max-w-md mx-auto"></p>
-        <button onclick="resetQuiz()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md">
-          Ulangi Kuis
-        </button>
+        
       </div>
-    </section>
+
+    </div><div id="pk-evaluation"></div></section>
 
   </main>
 
+  <!-- ==================== LOGIKA JAVASCRIPT ==================== -->
   <script>
     lucide.createIcons();
 
+    // Data Unsur Kimia Lengkap untuk Eksplorasi
     const elementsData = [
       { z: 1, s: 'H', n: 'Hidrogen', mass: '1.008 u', grp: 'nonlogam', grpName: 'Nonlogam Reaktif', phase: 'Gas', col: 'IA, Periode 1', val: 1, shells: [1], config: '1s¹', desc: 'Unsur paling ringan dan paling melimpah di alam semesta. Memiliki 1 proton dan 1 elektron.', uses: 'Bahan bakar roket, sel bahan bakar (fuel cell), dan sintesis amonia untuk pupuk.' },
       { z: 2, s: 'He', n: 'Helium', mass: '4.0026 u', grp: 'gas-mulia', grpName: 'Gas Mulia', phase: 'Gas', col: 'VIIIA, Periode 1', val: 2, shells: [2], config: '1s²', desc: 'Gas mulia kedua paling melimpah, tidak berwarna, tidak berbau, dan sangat stabil (duplet).', uses: 'Pengisi balon udara, pendingin magnet superkonduktor MRI di rumah sakit.' },
@@ -448,9 +542,10 @@
       { z: 79, s: 'Au', n: 'Emas', mass: '196.97 u', grp: 'transisi', grpName: 'Logam Transisi', phase: 'Padat', col: 'IB, Periode 6', val: 1, shells: [2, 8, 18, 32, 18, 1], config: '[Xe] 4f¹⁴ 5d¹⁰ 6s¹', desc: 'Logam mulia yang sangat tahan korosi, tidak bereaksi dengan asam tunggal biasa.', uses: 'Cadangan devisa moneter emas batangan, perhiasan mewah, konektor mikroprosesor.' }
     ];
 
-    let currentSelectedElement = elementsData[0];
+    let currentSelectedElement = elementsData[0]; // Hidrogen default
     let currentFilterGroup = 'all';
 
+    // Inisialisasi Aplikasi saat Load
     document.addEventListener('DOMContentLoaded', () => {
       renderElementsGrid();
       inspectElement(currentSelectedElement);
@@ -459,6 +554,9 @@
       initQuiz();
     });
 
+    // ==========================================
+    // TAB CONTROLLER
+    // ==========================================
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(b => {
         b.className = 'tab-btn px-3 sm:px-4 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white';
@@ -478,6 +576,9 @@
       }
     }
 
+    // ==========================================
+    // TAB 1: TABEL PERIODIK LOGIC
+    // ==========================================
     function renderElementsGrid() {
       const container = document.getElementById('elements-container');
       const filtered = elementsData.filter(el => {
@@ -547,6 +648,7 @@
       document.getElementById('inspect-desc').textContent = el.desc;
       document.getElementById('inspect-uses').textContent = el.uses;
 
+      // Render Kulit Visual Bar
       const shellsBar = document.getElementById('inspect-shells-bar');
       const shellNames = ['K', 'L', 'M', 'N', 'O', 'P'];
       shellsBar.innerHTML = el.shells.map((count, idx) => `
@@ -558,18 +660,23 @@
     }
 
     function goToBohrSimulation() {
+      // Beralih ke tab Bohr dengan elemen yang sedang dipilih
       const targetZ = currentSelectedElement.z <= 20 ? currentSelectedElement.z : 6;
       updateBohrElement(targetZ);
       switchTab('bohr');
     }
 
+    // ==========================================
+    // TAB 2: SIMULASI ATOM BOHR LOGIC (CANVAS)
+    // ==========================================
     let bohrCanvas, bohrCtx;
     let bohrAnimationId = null;
     let bohrAngle = 0;
-    let currentBohrZ = 6;
+    let currentBohrZ = 6; // Default Karbon
 
     function initBohrSelector() {
       const select = document.getElementById('bohr-element-select');
+      // Hanya unsur Z = 1 s/d 20 untuk simulasi Bohr visual yang bersih
       const bohrElements = elementsData.filter(e => e.z <= 20);
       select.innerHTML = bohrElements.map(e => `
         <option value="${e.z}" ${e.z === 6 ? 'selected' : ''}>Z = ${e.z} • ${e.n} (${e.s})</option>
@@ -596,7 +703,7 @@
 
     function updateBohrElement(z) {
       currentBohrZ = z;
-      const el = elementsData.find(e => e.z === z) || elementsData[5];
+      const el = elementsData.find(e => e.z === z) || elementsData[5]; // Karbon fallback
 
       document.getElementById('bohr-slider').value = z;
       document.getElementById('bohr-slider-val').textContent = z;
@@ -604,6 +711,7 @@
       document.getElementById('bohr-badge').textContent = `Z = ${el.z}`;
       document.getElementById('bohr-name').textContent = `${el.n} (${el.s})`;
 
+      // Subatom particles
       const protons = el.z;
       const massApprox = Math.round(parseFloat(el.mass));
       const neutrons = Math.max(0, massApprox - protons);
@@ -613,6 +721,7 @@
       document.getElementById('bohr-neutrons').textContent = neutrons;
       document.getElementById('bohr-electrons').textContent = electrons;
 
+      // Kulit distribution
       const shellNames = ['K', 'L', 'M', 'N'];
       const container = document.getElementById('bohr-shells-distribution');
       container.innerHTML = el.shells.map((count, i) => `
@@ -622,6 +731,7 @@
         </div>
       `).join('');
 
+      // Penjelasan Kestabilan
       const valence = el.val;
       let stabilityText = '';
       if (el.grp === 'gas-mulia') {
@@ -667,12 +777,15 @@
       ctx.clearRect(0, 0, w, h);
 
       const el = elementsData.find(e => e.z === currentBohrZ) || elementsData[5];
-      const shells = el.shells;
+      const shells = el.shells; // Array misal [2, 4]
+
+      // Draw Kulit Orbits & Electrons
       const shellRadii = [60, 105, 145, 180];
 
       shells.forEach((electronCount, shellIdx) => {
         const radius = shellRadii[shellIdx];
 
+        // Orbit Line
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         ctx.strokeStyle = 'rgba(74, 222, 128, 0.25)';
@@ -681,13 +794,15 @@
         ctx.stroke();
         ctx.setLineDash([]);
 
+        // Orbit Label (K, L, M, N)
         ctx.fillStyle = 'rgba(148, 163, 184, 0.4)';
         ctx.font = '10px "Plus Jakarta Sans", monospace';
         const labels = ['K', 'L', 'M', 'N'];
         ctx.fillText(`n=${shellIdx+1} (${labels[shellIdx]})`, cx + radius - 15, cy - 6);
 
+        // Draw Electrons on this shell
         const direction = shellIdx % 2 === 0 ? 1 : -1;
-        const speed = (4 - shellIdx) * 0.7;
+        const speed = (4 - shellIdx) * 0.7; // Outer shell moves slightly slower
         const baseAngle = bohrAngle * speed * direction;
 
         for (let i = 0; i < electronCount; i++) {
@@ -695,16 +810,19 @@
           const ex = cx + Math.cos(theta) * radius;
           const ey = cy + Math.sin(theta) * radius;
 
+          // Electron Glow
           ctx.beginPath();
           ctx.arc(ex, ey, 7, 0, Math.PI * 2);
           ctx.fillStyle = 'rgba(34, 211, 238, 0.3)';
           ctx.fill();
 
+          // Electron Core
           ctx.beginPath();
           ctx.arc(ex, ey, 4.5, 0, Math.PI * 2);
           ctx.fillStyle = '#22d3ee';
           ctx.fill();
 
+          // Minus sign
           ctx.fillStyle = '#0f172a';
           ctx.font = 'bold 9px sans-serif';
           ctx.textAlign = 'center';
@@ -713,6 +831,7 @@
         }
       });
 
+      // Draw Nucleus (Inti Atom)
       ctx.beginPath();
       ctx.arc(cx, cy, 26, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
@@ -726,6 +845,7 @@
       ctx.fillStyle = grad;
       ctx.fill();
 
+      // Nucleus Symbol & Protons Count
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
@@ -737,6 +857,9 @@
       ctx.fillText(`${el.z}p`, cx, cy + 9);
     }
 
+    // ==========================================
+    // TAB 3: MINI LAB UJI ASAM-BASA LOGIC
+    // ==========================================
     const solutionsData = {
       hcl: {
         name: 'Asam Klorida (HCl 0.1 M)',
@@ -841,6 +964,7 @@
       const solKey = document.getElementById('solution-select').value;
       const sol = solutionsData[solKey];
 
+      // Animasi celup ke bawah
       const sMerah = document.getElementById('test-strip-lakmus-merah');
       const sBiru = document.getElementById('test-strip-lakmus-biru');
       const sUniv = document.getElementById('test-strip-universal');
@@ -849,19 +973,21 @@
       sBiru.style.top = '25px';
       sUniv.style.top = '25px';
 
+      // Ubah warna strip sesuai hasil kimia
       setTimeout(() => {
         if (sol.ph < 7) {
-          sMerah.style.backgroundColor = '#f43f5e';
-          sBiru.style.backgroundColor = '#f43f5e';
+          sMerah.style.backgroundColor = '#f43f5e'; // Merah
+          sBiru.style.backgroundColor = '#f43f5e';  // Berubah merah
         } else if (sol.ph > 7) {
-          sMerah.style.backgroundColor = '#3b82f6';
-          sBiru.style.backgroundColor = '#3b82f6';
+          sMerah.style.backgroundColor = '#3b82f6'; // Berubah biru
+          sBiru.style.backgroundColor = '#3b82f6';  // Biru
         } else {
-          sMerah.style.backgroundColor = '#f43f5e';
-          sBiru.style.backgroundColor = '#3b82f6';
+          sMerah.style.backgroundColor = '#f43f5e'; // Tetap merah
+          sBiru.style.backgroundColor = '#3b82f6';  // Tetap biru
         }
         sUniv.style.backgroundColor = sol.universalColor;
 
+        // Update display data hasil
         document.getElementById('ph-digital-value').textContent = sol.ph.toFixed(1);
         document.getElementById('ph-concentration').textContent = sol.conc;
         
@@ -869,9 +995,11 @@
         badge.textContent = sol.type;
         badge.className = `px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${sol.typeClass}`;
 
+        // Pointer posisi pH pada skala 1 - 14
         const pointerPercent = ((sol.ph - 1) / (14 - 1)) * 100;
         document.getElementById('ph-pointer').style.left = `${pointerPercent}%`;
 
+        // Update tabel observasi
         document.getElementById('obs-lakmus-merah').textContent = sol.lakmusMerah;
         document.getElementById('obs-lakmus-biru').textContent = sol.lakmusBiru;
         document.getElementById('obs-universal').textContent = sol.universal;
@@ -899,6 +1027,9 @@
       document.getElementById('obs-universal').textContent = 'Belum dicelup';
     }
 
+    // ==========================================
+    // TAB 4: KUIS EVALUASI KIMIA LOGIC
+    // ==========================================
     const quizQuestions = [
       {
         q: '1. Suatu unsur memiliki nomor atom Z = 17 (Klorin). Berapakah jumlah elektron valensi pada kulit terluarnya?',
@@ -962,18 +1093,20 @@
             `).join('')}
           </div>
 
+          <!-- Pembahasan / Feedback per Soal -->
           <div id="quiz-feedback-${qIdx}" class="hidden p-3 rounded-xl text-xs mt-2"></div>
         </div>
       `).join('');
     }
 
     function answerQuiz(qIdx, selectedOptIdx) {
-      if (quizAnswers[qIdx] !== null) return;
+      if (quizAnswers[qIdx] !== null) return; // Sudah dijawab
 
       quizAnswers[qIdx] = selectedOptIdx;
       const q = quizQuestions[qIdx];
       const isCorrect = selectedOptIdx === q.correct;
 
+      // Update button styling
       const selectedBtn = document.getElementById(`opt-${qIdx}-${selectedOptIdx}`);
       const correctBtn = document.getElementById(`opt-${qIdx}-${q.correct}`);
 
@@ -985,6 +1118,7 @@
         correctBtn.className = 'quiz-opt-btn text-left p-3 rounded-xl border border-emerald-500/80 bg-emerald-950/50 text-xs font-semibold text-emerald-300 flex items-center space-x-2';
       }
 
+      // Tampilkan pembahasan
       const feedback = document.getElementById(`quiz-feedback-${qIdx}`);
       feedback.classList.remove('hidden');
       if (isCorrect) {
@@ -995,6 +1129,7 @@
         feedback.innerHTML = `<strong>Kurang Tepat.</strong> ${q.exp}`;
       }
 
+      // Hitung skor sementara
       updateQuizScore();
     }
 
@@ -1034,12 +1169,12 @@
     }
 
     function resetQuiz() {
-      quizAnswers = new Array(quizQuestions.length).fill(null);
-      document.getElementById('quiz-final-banner').classList.add('hidden');
-      document.getElementById('quiz-score-badge').textContent = '0 / 5';
-      initQuiz();
+      return; // Evaluasi final tidak dapat diulang oleh siswa.
     }
 
+    // ==========================================
+    // AUDIO SYNTHESIZER (WEB AUDIO API - NO EXTERNAL FILES)
+    // ==========================================
     const audioCtx = (typeof window !== 'undefined') ? new (window.AudioContext || window.webkitAudioContext)() : null;
 
     function playClickChime() {
@@ -1087,6 +1222,9 @@ window.PortalSubmission = (() => {
   const ENDPOINT = 'https://script.google.com/macros/s/AKfycbwobr0k-44HFrf3B5YUroeEK-_U13AGVe2urQYDAmL0U43arTQHTvKjUEeM6CuZQvOE/exec';
   const PREFIX = 'portalkimia_pending_v2_';
   let busy = false;
+  let active = null, configNow = null, adapters = null, finalized = false;
+  let quizState = [], questionsNow = [];
+  const read = key => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) { return null; } };
   const value = id => (document.getElementById(id)?.value || '').trim();
   const plain = text => {
     const el = document.createElement('div');
@@ -1112,7 +1250,7 @@ window.PortalSubmission = (() => {
     });
     // Canonical IDs collapse synchronized mobile/desktop copies without losing blank/zero values.
     document.querySelectorAll('input[id], textarea[id], select[id]').forEach(el => {
-      if (/^(password|file|hidden|button|submit|reset)$/i.test(el.type || '') || /^student-/.test(el.id)) return;
+      if (/^(password|file|hidden|button|submit|reset)$/i.test(el.type || '') || /^(student-(name|class|nis|date)$|pk-)/.test(el.id)) return;
       const id = el.id.replace(/^mob-/, '');
       const v = /^(checkbox|radio)$/.test(el.type) ? (el.checked ? el.value : '') : el.value;
       const group = /essay|esai/i.test(id) ? jawaban.esai : /^(obs-|lks-|lkpd-)/.test(id) ? jawaban.lks : /reflec|refleksi|^ref-/.test(id) ? jawaban.refleksi : jawaban.isianLain;
@@ -1152,7 +1290,17 @@ window.PortalSubmission = (() => {
   function confirmed(result, payload) {
     return result?.success === true && result.stored === true && result.submissionId === payload.submissionId;
   }
+  function rpc(method, payload) {
+    return new Promise((resolve, reject) => {
+      const timer=setTimeout(()=>reject(new Error('Server belum merespons. Coba kembali; jawaban belum dihapus.')),20000);
+      const done=fn=>value=>{clearTimeout(timer);fn(value);};
+      google.script.run.withSuccessHandler(done(resolve)).withFailureHandler(done(reject))[method](payload);
+    });
+  }
   async function post(payload, opaque) {
+    if (!opaque && window.google?.script?.run) {
+      return rpc('simpanTugasSiswa',payload);
+    }
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 20000);
     try {
@@ -1174,35 +1322,35 @@ window.PortalSubmission = (() => {
     throw new Error('Penyimpanan belum terkonfirmasi. Jawaban tetap tersimpan di perangkat; tekan kirim lagi setelah koneksi pulih.');
   }
   async function submit(config, answers, questions) {
-    if (busy) return;
+    if (busy || finalized) return;
     const btn = document.querySelector('[onclick*="submitToTeacherDatabase"], [onclick*="syncToPortalDatabase"]');
     busy = true;
     if (btn) btn.disabled = true;
     try {
-      const content = collect(config, answers, questions);
-      const fingerprint = JSON.stringify(content);
-      const receiptKey = 'portalkimia_receipt_v2_' + config.id;
-      const lastReceipt = JSON.parse(localStorage.getItem(receiptKey) || 'null');
-      if (lastReceipt?.fingerprint === fingerprint) {
-        notice('Jawaban ini sudah tersimpan. Bukti: ' + lastReceipt.receipt.submissionId, btn);
-        return;
+      if (!active) throw new Error('Periksa ID tugas dan kode pribadi terlebih dahulu.');
+      const key = contextKey();
+      let pending = Object.keys(localStorage).filter(k => k.startsWith(PREFIX)).map(read).find(p => p?.context === key);
+      if (!pending && quizState.some(x => x === null)) throw new Error('Jawab seluruh soal evaluasi sebelum mengirim.');
+      if (!pending && !window.confirm('Kirim jawaban FINAL?\n\nPastikan seluruh LKS, esai, dan evaluasi sudah lengkap. Setelah OK, jawaban dikunci. Draf di browser akan dihapus hanya setelah server memastikan jawaban tersimpan. Perubahan berikutnya memerlukan izin guru.')) return;
+      let payload = pending?.payload;
+      if (!payload) {
+        const content = collect(config, quizState.length ? quizState : answers, questions);
+        const seed = active.assignmentId + '|' + (active.name || '').toLowerCase() + '|' + active.studentAccessCode + '|' + active.revision;
+        const digest = async text => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))), x=>x.toString(16).padStart(2,'0')).join('').slice(0,48);
+        payload = { ...content, schemaVersion: 3, mediaVersion: 'submission-v3-final', assignmentId: active.assignmentId,
+          classCode: active.classCode || active.studentAccessCode, studentName: active.name || content.siswa.nama,
+          studentAccessCode: active.studentAccessCode, assignmentRevision: active.revision,
+          submissionId: await digest(seed), receiptToken: await digest('receipt|' + seed), submittedAt: new Date().toISOString() };
       }
-      let payload;
-      for (const key of Object.keys(localStorage).filter(k => k.startsWith(PREFIX))) {
-        try { const pending = JSON.parse(localStorage.getItem(key)); if (pending.fingerprint === fingerprint) { payload = pending.payload; break; } } catch (_) {}
-      }
-      payload = payload || { ...content, submissionId: uuid(), receiptToken: uuid(), submittedAt: new Date().toISOString() };
       const storageKey = PREFIX + payload.submissionId;
-      // Persist before network I/O; storage failure must not be reported as a successful save.
-      localStorage.setItem(storageKey, JSON.stringify({ fingerprint, payload }));
+      localStorage.setItem(storageKey, JSON.stringify({ context: key, payload }));
+      freeze(true);
       notice('Mengirim seluruh jawaban dan menunggu bukti penyimpanan...', btn);
       const receipt = await deliver(payload);
-      localStorage.setItem(receiptKey, JSON.stringify({ fingerprint, receipt }));
-      localStorage.removeItem(storageKey);
-      notice('Tersimpan: ' + receipt.sheetName + '\nBukti pengumpulan: ' + receipt.submissionId, btn);
+      finish(receipt, payload, config);
     } catch (e) {
       notice(e.message || 'Pengiriman belum berhasil. Isian tetap tersedia.', btn);
-    } finally { busy = false; if (btn) btn.disabled = false; }
+    } finally { busy = false; if (btn && !finalized) btn.disabled = false; }
   }
   async function retryPending(config) {
     if (busy) return;
@@ -1212,23 +1360,120 @@ window.PortalSubmission = (() => {
       for (const key of keys) {
         let pending;
         try { pending = JSON.parse(localStorage.getItem(key)); } catch (_) { continue; }
-        if (pending?.payload?.mediaId !== config.id) continue;
+        if (pending?.payload?.mediaId !== config.id || !pending.payload.assignmentId) continue;
         notice('Mencoba mengirim kembali jawaban yang tertunda...');
         try {
           const receipt = await deliver(pending.payload);
-          localStorage.setItem('portalkimia_receipt_v2_' + config.id, JSON.stringify({ fingerprint: pending.fingerprint, receipt }));
+          // Only clean the currently loaded task; other pending tasks retain independent receipts.
+          localStorage.setItem('pk_final_' + pending.context, JSON.stringify({ submissionId: receipt.canonicalSubmissionId || receipt.submissionId }));
           localStorage.removeItem(key);
-          notice('Kiriman tertunda tersimpan. Bukti: ' + receipt.submissionId);
+          if ((active && pending.context === contextKey()) || (!active && pending.context === localStorage.getItem('pk_context_'+config.id))) {
+            active = {assignmentId:pending.payload.assignmentId,studentAccessCode:pending.payload.studentAccessCode,classCode:pending.payload.classCode,name:pending.payload.studentName,revision:pending.payload.assignmentRevision};
+            finish(receipt, pending.payload, config);
+          }
+          else notice('Kiriman tertunda tersimpan. Bukti: ' + receipt.submissionId);
         } catch (e) { notice(e.message); break; }
       }
     } finally { busy = false; }
   }
-  function install(config) {
+  function contextKey() { return configNow.id + '|' + active.assignmentId + '|' + (active.name || '').toLowerCase() + '|' + active.studentAccessCode + '|' + active.revision; }
+  function freeze(locked) {
+    document.querySelectorAll('input,textarea,select').forEach(el => { if (!el.id.startsWith('pk-')) el.disabled = locked; });
+    renderEvaluation();
+  }
+  function clearDrafts(config) {
+    (config.draftKeys || []).forEach(key => localStorage.removeItem(key));
+    localStorage.removeItem('portalkimia_receipt_v2_' + config.id); // Old receipt contained a full answer fingerprint.
+    if (active) localStorage.removeItem('pk_quiz_' + contextKey());
+    document.querySelectorAll('input,textarea').forEach(el => { if (!el.id.startsWith('pk-') && !/^(button|submit|range|color)$/.test(el.type)) { el.value=''; if(el.type==='checkbox'||el.type==='radio')el.checked=false; } });
+    quizState = questionsNow.map(()=>null);
+    if (adapters) adapters.setAnswers(quizState.slice());
+  }
+  function finish(receipt, payload, config) {
+    const context = config.id+'|'+payload.assignmentId+'|'+(payload.studentName || '').toLowerCase()+'|'+payload.studentAccessCode+'|'+payload.assignmentRevision;
+    // Keep only the receipt/lock, never the answer fingerprint.
+    localStorage.setItem('pk_final_' + context, JSON.stringify({ submissionId: receipt.canonicalSubmissionId || receipt.submissionId }));
+    finalized = true;
+    Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).forEach(k=>{const p=read(k)?.payload;if(p?.mediaId===config.id&&p.assignmentId===payload.assignmentId&&Number(p.assignmentRevision)===Number(payload.assignmentRevision))localStorage.removeItem(k);});
+    clearDrafts(config); freeze(true);
+    document.querySelectorAll('[onclick*="submitToTeacherDatabase"],[onclick*="syncToPortalDatabase"]').forEach(b=>{b.disabled=true;b.textContent='Jawaban sudah final';});
+    notice('Tersimpan dan dikunci (1 siswa hanya 1 pengumpulan per media). Draf pada perangkat telah dihapus.\nBukti pengumpulan: '+(receipt.canonicalSubmissionId || receipt.submissionId));
+  }
+  async function checkAccess(config) {
+    if (busy) return;
+    const classCode = (value('pk-class-code') || value('pk-access-code')).toUpperCase();
+    const studentName = value('pk-student-name') || value('student-name');
+    const assignmentId = value('pk-assignment');
+    busy=true;
+    try {
+      if (!classCode && !assignmentId) throw Error('Masukkan Kode Kelas dari guru.');
+      if (!studentName && !value('pk-access-code')) throw Error('Masukkan Nama Lengkap Anda.');
+      const body = { classCode, studentName, assignmentId, studentAccessCode: classCode, mediaId: config.id };
+      const response = window.google?.script?.run ? await rpc('portalStudentAccess',body) : await (await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({action:'studentAccess',...body}),signal:AbortSignal.timeout(20000)})).json();
+      if (!response?.success) throw Error(response?.message || 'Tugas belum dapat diperiksa.');
+      const previousContext=localStorage.getItem('pk_context_'+config.id);
+      active = {
+        assignmentId: response.assignmentId || assignmentId,
+        studentAccessCode: response.studentAccessCode || classCode,
+        classCode: classCode,
+        name: response.name,
+        className: response.className,
+        nis: response.nis,
+        revision: response.revision || 0
+      };
+      finalized = false;
+      if(previousContext&&previousContext!==contextKey())clearDrafts(config);
+      localStorage.setItem('pk_context_'+config.id,contextKey());
+      if(response.stored){
+        finish({submissionId:response.submissionId},{assignmentId:active.assignmentId,studentName:active.name,studentAccessCode:active.studentAccessCode,assignmentRevision:response.revision},config);
+        notice('Jawaban atas nama ' + response.name + ' (' + response.className + ') sudah final dan tersimpan.\nBukti pengumpulan: ' + response.submissionId + '\nPengumpulan dibatasi 1 kali per materi.');
+        return;
+      }
+      if(!response.open || (response.due && Date.now()>new Date(response.due).getTime()&&!response.allowLate)){active=null;freeze(true);throw Error('Pengumpulan ditutup atau tenggat telah berakhir. Hubungi guru.');}
+      for(const [id,v] of [['student-name',response.name],['student-class',response.className],['student-nis',response.nis]]){const e=document.getElementById(id);if(e)e.value=v;}
+      const saved=read('pk_quiz_'+contextKey());
+      quizState=Array.isArray(saved)&&saved.length===questionsNow.length?saved:questionsNow.map(()=>null);
+      adapters?.setAnswers(quizState.slice());
+      const pending=Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).map(read).find(p=>p?.context===contextKey());
+      freeze(!!pending);
+      document.querySelectorAll('[onclick*="submitToTeacherDatabase"],[onclick*="syncToPortalDatabase"]').forEach(b=>{b.disabled=false;b.textContent=pending?'Coba kirim ulang jawaban final':'Kirim jawaban final';});
+      notice(response.title+' · '+response.name+' ('+response.className+')\n'+(pending?'Jawaban final menunggu konfirmasi server. Tekan kirim untuk mencoba ulang.':'Pengumpulan dibatasi 1 kali per media. Silakan kerjakan dengan teliti.'));
+      renderEvaluation();
+    } catch(e){notice(e.message || 'Gagal memeriksa tugas. Jawaban belum dihapus.');}finally{busy=false;}
+  }
+  function renderEvaluation() {
+    const host=document.getElementById('pk-evaluation'); if(!host)return;
+    host.replaceChildren();
+    const heading=document.createElement('h2');heading.textContent='Evaluasi · satu kesempatan';heading.style.fontWeight='700';host.appendChild(heading);
+    const info=document.createElement('p');info.textContent=finalized?'Jawaban evaluasi sudah tersimpan dan dikunci.':!active?'Periksa Kode Kelas dan Nama Lengkap di bagian atas halaman sebelum menjawab.':'Setiap pilihan langsung dikunci. Kunci dan pembahasan tidak ditampilkan saat pengerjaan.';host.appendChild(info);
+    if(!active||finalized)return;
+    const pending=Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).map(read).some(p=>p?.context===contextKey());
+    questionsNow.forEach((q,i)=>{
+      const card=document.createElement('div');card.style.cssText='padding:16px;margin:12px 0;border:1px solid #94a3b8;border-radius:12px';
+      const title=document.createElement('p');title.textContent=(i+1)+'. '+plain(q.question||q.q);card.appendChild(title);
+      (q.options||q.opts||[]).forEach((option,j)=>{
+        const b=document.createElement('button');b.type='button';b.textContent=String.fromCharCode(65+j)+'. '+plain(option)+(quizState[i]===j?' ✓ Dipilih':'');
+        b.style.cssText='display:block;text-align:left;width:100%;padding:10px;margin-top:7px;border:1px solid #94a3b8;border-radius:8px;background:'+(quizState[i]===j?'#d1fae5':'#fff')+';color:#163d36';
+        b.disabled=pending || (quizState[i]!==null&&quizState[i]!==undefined);
+        b.onclick=()=>{if(finalized||pending||quizState[i]!==null)return;const next=quizState.slice();next[i]=j;try{localStorage.setItem('pk_quiz_'+contextKey(),JSON.stringify(next));quizState=next;adapters?.setAnswers(next.slice());renderEvaluation();}catch(_){notice('Penyimpanan browser tidak tersedia. Pilihan belum dikunci; kosongkan ruang perangkat.');}};
+        card.appendChild(b);
+      });host.appendChild(card);
+    });
+  }
+  function install(config, hooks) {
+    configNow=config;adapters=hooks;questionsNow=hooks?hooks.questions:[];quizState=questionsNow.map(()=>null);
     window.addEventListener('online', () => retryPending(config));
     // Explicit retry on a subsequent visit; no automatic transmission of merely saved drafts.
     const init = () => {
+      const accessBox=document.createElement('section');accessBox.style.cssText='padding:18px 20px;margin:20px 0;border:2px solid #0f766e;border-radius:14px;background:#effcf8;color:#123d36;font-family:sans-serif';
+      accessBox.innerHTML='<h2 style="font-weight:bold;margin:0 0 6px 0;font-size:16px">Tugas dari Guru</h2><p style="margin:0 0 12px 0;font-size:12px;color:#164e63">Masukkan <strong>Kode Kelas</strong> dari guru dan <strong>Nama Lengkap Siswa</strong>. Pengumpulan jawaban final hanya satu kali per materi.</p><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><label style="font-size:12px;font-weight:600">Kode Kelas <input id="pk-class-code" autocomplete="off" placeholder="Contoh: KIM-XII1-8F2A" style="padding:8px 10px;border:1px solid #94a3b8;color:#123d36;background:white;border-radius:8px;font-family:monospace;text-transform:uppercase"></label><label style="font-size:12px;font-weight:600">Nama Lengkap <input id="pk-student-name" autocomplete="off" placeholder="Nama sesuai daftar kelas" style="padding:8px 10px;border:1px solid #94a3b8;color:#123d36;background:white;border-radius:8px;min-width:200px"></label><button id="pk-check" type="button" style="padding:9px 16px;background:#0f766e;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Periksa Tugas</button></div>';
+      document.body.prepend(accessBox);document.getElementById('pk-check').onclick=()=>checkAccess(config);
+      // Retain the local final marker across reloads; checking a new task/revision unlocks it.
+      const last=localStorage.getItem('pk_context_'+config.id);
+      if(last&&read('pk_final_'+last)){finalized=true;clearDrafts(config);freeze(true);notice('Pengumpulan terakhir Anda sudah final. Hubungi guru jika memerlukan izin revisi.');}
+      renderEvaluation();
       try {
-        if (Object.keys(localStorage).some(k => k.startsWith(PREFIX) && JSON.parse(localStorage.getItem(k))?.payload?.mediaId === config.id)) {
+        if (Object.keys(localStorage).some(k => k.startsWith(PREFIX) && read(k)?.payload?.mediaId === config.id && read(k)?.payload?.assignmentId)) {
           notice('Ada pengumpulan yang belum terkonfirmasi.');
           const button = document.createElement('button');
           button.type = 'button'; button.textContent = 'Kirim ulang pengumpulan tertunda';
@@ -1240,12 +1485,12 @@ window.PortalSubmission = (() => {
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   }
-  return { collect, submit, install };
+  return { collect, submit, install, isFinal:()=>finalized, checkAccess, retryPending };
 })();
 
-function submitToTeacherDatabase() { return PortalSubmission.submit({"id":"laboratorium-kimia","title":"Laboratorium Kimia Virtual"}, quizAnswers, quizQuestions); }
+function submitToTeacherDatabase() { return PortalSubmission.submit({"id":"laboratorium-kimia","title":"Laboratorium Kimia Virtual","draftKeys":[]}, quizAnswers, quizQuestions); }
 
-PortalSubmission.install({"id":"laboratorium-kimia","title":"Laboratorium Kimia Virtual"});
+PortalSubmission.install({"id":"laboratorium-kimia","title":"Laboratorium Kimia Virtual","draftKeys":[]}, {questions:quizQuestions,setAnswers:value=>{quizAnswers=value;}});
 </script>
 <!-- PK-SUBMISSION-V2-END -->
 </body>

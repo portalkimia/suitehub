@@ -11,13 +11,20 @@
 
 Pembaruan ini baru pada file lokal; deployment GAS/Drive/GitHub tidak diubah otomatis. HTML dan GAS harus diperbarui bersama. Pengumpulan lama tanpa ID tugas/kode pribadi tidak lagi diterima oleh server baru; data lama di sheet tetap tersedia untuk diperiksa. Jika hasil lama belum masuk antrean AI, jalankan fungsi **antrekanDataTersimpanUntukAI** dari editor sebagai pemilik skrip.
 
+## Mengisi data siswa
+
+- Buka **Data siswa**, lalu masukkan `Kelas|NIS|Nama`, satu siswa per baris. Contoh: `XII-1|001|Andi`. Maksimal 1.000 baris per impor.
+- Data disimpan pada sheet `Daftar_Siswa`. Kombinasi kelas dan NIS menjadi identitas tetap: mengimpor kombinasi yang sama memperbarui nama tanpa membuat baris ganda.
+- Gunakan **Nonaktifkan** untuk siswa yang pindah atau tidak lagi diajar. Riwayat serta peserta tugas lama tidak dihapus; siswa nonaktif tidak disertakan pada tugas baru.
+- Gunakan dashboard untuk menambah, mengganti nama, atau menonaktifkan siswa. Kolom ID pada sheet dibentuk otomatis dan jangan diubah manual.
+
 ## Membuat dan membagikan tugas
 
-- Buka **Manajemen tugas**. Isi judul, media, kelas, tenggat, serta kebijakan terlambat. Waktu di formulir mengikuti zona waktu perangkat guru dan dikirim sebagai waktu UTC.
-- Daftar peserta memakai format `NIS|Nama`, satu siswa per baris. NIS harus unik pada satu tugas. Maksimal 200 peserta per tugas.
+- Buka **Manajemen tugas**. Isi judul, media, centang satu atau beberapa kelas, tentukan tenggat serta kebijakan terlambat. Waktu di formulir mengikuti zona waktu perangkat guru dan dikirim sebagai waktu UTC.
+- Saat tugas disimpan, seluruh siswa aktif pada kelas terpilih otomatis masuk ke `Peserta_Tugas` dan memperoleh kode pribadi. Tekan **Simpan & sinkronkan peserta** lagi bila Anda baru menambahkan siswa ke kelas yang sudah memiliki tugas.
 - Setelah menyimpan, salin ID tugas dan bagikan kode pribadi pada masing-masing siswa. Gunakan **Ekspor kode siswa** untuk administrasi; jangan membagikan seluruh daftar kode kepada kelas.
 - Siswa membuka HTML media, mengisi ID tugas dan kode pribadi pada bagian atas, lalu menekan **Periksa tugas**. Nama, kelas, dan NIS diisi sesuai daftar peserta pada server.
-- Tugas dapat dibuka/ditutup dan tenggatnya diperbarui. Saat mengedit, daftar peserta hanya menambahkan siswa baru. Media dan kelas tidak diubah agar hasil tidak tercampur.
+- Tugas dapat dibuka/ditutup dan tenggatnya diperbarui. Media dan pilihan kelas dikunci setelah tugas dibuat agar hasil tidak tercampur; buat tugas baru untuk kombinasi berbeda.
 - **Izinkan revisi** membuka satu versi baru bagi peserta yang sudah mengumpulkan. Tugas tetap harus terbuka dan tenggat/kebijakan terlambat tetap berlaku. Riwayat kiriman sebelumnya tetap disimpan.
 
 ## Perilaku pengumpulan final
@@ -40,7 +47,7 @@ Kode pribadi merupakan identitas akses siswa: siapa pun yang memegangnya dapat m
 - **Peserta & kontrol pengumpulan** menunjukkan siswa yang belum mengumpulkan versi aktif. **Ekspor rekap CSV** mengambil baris sesuai filter.
 - Sesi guru berlaku maksimal empat jam, tersimpan di memori halaman, dan dicabut saat keluar atau kata sandi diganti. Pergantian kata sandi dilakukan lewat Script Properties.
 
-Sheet tambahan dibuat saat dibutuhkan: `Daftar_Tugas`, `Peserta_Tugas`, `Pemeriksaan_Guru`, dan `Riwayat_Pemeriksaan`. Sheet jawaban asli dan `Analisis_AI` tetap digunakan.
+Sheet tambahan dibuat saat dibutuhkan: `Daftar_Siswa`, `Daftar_Tugas`, `Peserta_Tugas`, `Pemeriksaan_Guru`, dan `Riwayat_Pemeriksaan`. Sheet jawaban asli dan `Analisis_AI` tetap digunakan.
 
 ## Pengujian lokal
 
