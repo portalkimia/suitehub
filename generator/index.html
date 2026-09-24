@@ -769,6 +769,8 @@
             </div>
           </div>
 
+<div class="alert alert-warning mt-2"><strong>Privasi bahan ajar:</strong> berkas dan teks akan dikirim ke Gemini. Hapus nama, NISN, alamat, nomor telepon, foto wajah, dan jawaban pribadi siswa. Batas PDF/gambar 5 MB; teks/HTML/Markdown 1 MB.
+<label class="d-block mt-2"><input type="checkbox" id="privacyConsent"> Saya sudah memeriksa bahwa bahan yang dikirim bebas data pribadi siswa.</label></div>
           <!-- Preview File Terunggah -->
           <div id="filePreviewContainer" style="display: none;" class="file-preview-card">
             <div class="d-flex align-items-center gap-2.5">
@@ -818,6 +820,20 @@
     
     <!-- FORM UTAMA DOKUMEN MODUL AJAR -->
     <form id="formModul" onsubmit="event.preventDefault(); prosesData();">
+<section class="p-3 my-3 border rounded" aria-labelledby="alignmentHeading">
+  <h3 id="alignmentHeading" class="h5">CP dan pemeriksaan keselarasan</h3>
+  <label for="cpInput" class="form-label">Capaian Pembelajaran (salin dari kurikulum yang Anda gunakan)</label>
+  <textarea id="cpInput" name="cp" class="form-control mb-2" rows="3"></textarea>
+  <label for="cpSourceInput" class="form-label">Sumber/versi CP</label>
+  <input id="cpSourceInput" name="cpSource" class="form-control mb-2" placeholder="Judul dokumen, tahun, fase, dan halaman/URL">
+  <button type="button" class="btn btn-outline-primary" onclick="periksaKeselarasan()">Periksa CP → tujuan → ITP → kegiatan → asesmen</button>
+  <div id="alignmentReport" class="mt-3" style="overflow-x:auto" aria-live="polite"></div>
+  <label for="referenceId" class="form-label mt-3">Pustaka ayat/hadis bersumber</label>
+  <select name="referenceId" id="referenceId" class="form-select"></select>
+  <p class="small">Kutipan dan terjemahan diambil persis dari pustaka. Hadis ditandai sebagai kutipan awal; terjemahan sumbernya berbahasa Inggris. Tinjau kecocokan konteks sebelum digunakan.</p>
+  <pre id="referencePreview" style="white-space:pre-wrap;font-family:inherit"></pre>
+</section>
+
       
       <!-- 1. IDENTITAS & PEDAGOGIS -->
       <div class="card">
@@ -1124,12 +1140,12 @@
               Token Akses Guru
             </label>
             <div class="input-group">
-              <input type="password" id="inputAccessToken" class="form-control" autocomplete="off" placeholder="Token dari fungsi buatTokenAksesGuru()">
+              <input type="password" id="inputAccessToken" class="form-control" autocomplete="off" placeholder="Token dari fungsi buatTokenAksesGuru_()">
               <button class="btn btn-outline-secondary" type="button" onclick="toggleAccessTokenVisibility()" aria-label="Tampilkan atau sembunyikan token">
                 <span class="material-symbols-outlined" style="font-size:18px;">visibility</span>
               </button>
             </div>
-            <div class="small mt-1 text-muted">Disimpan hanya selama sesi tab browser guru dan dikirim melalui HTTPS.</div>
+            <div class="small mt-1 text-muted">Disimpan pada browser pribadi guru dan dikirim melalui HTTPS.</div>
             <div id="pingFeedback" class="small mt-2" style="display:none;"></div>
           </div>
 
@@ -1145,7 +1161,7 @@
               <li>Set <strong>Execute as:</strong> <em>Me (email Anda)</em>.</li>
               <li>Set <strong>Who has access:</strong> <strong class="text-emerald">Anyone (Siapa saja)</strong> &mdash; <em>PENTING!</em></li>
               <li>Di Script Properties, simpan <code>GEMINI_API_KEY</code>.</li>
-              <li>Jalankan <code>buatTokenAksesGuru()</code>, salin token dari log eksekusi, lalu tempelkan di atas.</li>
+              <li>Jalankan <code>buatTokenAksesGuru_()</code>, salin token dari log eksekusi, lalu tempelkan di atas.</li>
               <li>Salin URL Web App dan tempelkan di atas.</li>
             </ol>
           </div>
@@ -1216,7 +1232,7 @@
     }
 
     function getGeneratorAccessToken() {
-      return (sessionStorage.getItem('generatorAccessToken') || '').trim();
+      return (localStorage.getItem('generatorAccessToken') || '').trim();
     }
 
     function toggleAccessTokenVisibility() {
@@ -1280,7 +1296,7 @@
         return;
       }
       localStorage.setItem('gasWebAppUrl', url);
-      sessionStorage.setItem('generatorAccessToken', token);
+      localStorage.setItem('generatorAccessToken', token);
       backendSudahDiverifikasi = false;
       updateBackendStatusUI();
       const modalEl = document.getElementById('modalBackendConfig');
@@ -1325,7 +1341,7 @@
         if (data.error) throw new Error(data.error);
         backendSudahDiverifikasi = true;
         localStorage.setItem('gasWebAppUrl', url);
-        sessionStorage.setItem('generatorAccessToken', token);
+        localStorage.setItem('generatorAccessToken', token);
         updateBackendStatusUI();
         const durasi = Date.now() - waktuMulai;
         feedback.className = 'small mt-2 text-success fw-bold';
@@ -3852,12 +3868,7 @@
       out += `--- 5 KRITERIA PENILAIAN MODUL AJAR / LESSON PLAN SEKOLAH ---\n`;
       out += `1. KESELARASAN & PROFIL LULUSAN:\n`;
       out += `   - TUJUAN PEMBELAJARAN (Wajib dijadikan rujukan utama): "${media.tujuan}"\n`;
-      out += `   - INTEGRASI AYAT AL-QUR'AN & TADABBUR SAINS:\n`;
-      if (media.ayat) out += `     * Dalil: ${media.ayat}\n`;
-      if (media.ayatTeks) out += `     * Teks Arab: ${media.ayatTeks}\n`;
-      if (media.ayatArti) out += `     * Terjemahan: "${media.ayatArti}"\n`;
-      if (media.tadabbur) out += `     * Tadabbur Sains: ${media.tadabbur}\n`;
-      if (!media.ayat) out += `     * Pilih ayat/hadits dari sumber terverifikasi yang benar-benar selaras dengan topik; jangan membuat kutipan baru.\n`;
+      out += '   - Kutipan ayat/hadis diisi server dari pustaka pilihan guru.\n';
       out += `   - DIMENSI PROFIL LULUSAN: Beriman & Bertakwa kepada Tuhan YME (Tadabbur Sains Ilahi), Bernalar Kritis (Analisis Variabel Simulasi), Mandiri (Eksplorasi LKS Mandiri), dan Gotong Royong (Diskusi Tim Penyelidikan Virtual).\n\n`;
       
       out += `2. KERANGKA & DESAIN PEMBELAJARAN:\n`;
@@ -3936,71 +3947,7 @@
       renderDaftarMediaPortal();
     }
 
-    function renderDaftarMediaPortal() {
-      const grid = document.getElementById('gridKartuMedia');
-      const q = (document.getElementById('cariMediaInput')?.value || '').toLowerCase();
-      if (!grid) return;
-
-      const filtered = portalMediaCatalog.filter(m => {
-        if (filterJenisKatalog !== 'Semua' && m.category !== filterJenisKatalog) return false;
-        if (!q) return true;
-        return (m.title || '').toLowerCase().includes(q) ||
-               (m.topic || '').toLowerCase().includes(q) ||
-               (m.description || '').toLowerCase().includes(q) ||
-               (m.category || '').toLowerCase().includes(q) ||
-               (m.grade || '').toLowerCase().includes(q);
-      });
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `
-          <div class="col-12 text-center py-5 text-secondary">
-            <span class="material-symbols-outlined" style="font-size: 32px;">search_off</span>
-            <p class="mt-2 small">Tidak ada media yang cocok dengan pencarian "${q}".</p>
-          </div>`;
-        return;
-      }
-
-      grid.innerHTML = filtered.map(item => `
-        <div class="col-md-6">
-          <div class="p-3 rounded-3 h-100 d-flex flex-column justify-content-between" style="background: var(--obs-surface-low); border: 1px solid var(--obs-border); transition: all 0.2s ease;">
-            <div>
-              <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                <span class="badge rounded-pill" style="background: rgba(167, 139, 250, 0.2); color: var(--obs-primary); font-size: 0.7rem; border: 1px solid rgba(167, 139, 250, 0.3);">
-                  ${item.grade === 'Umum' ? 'Umum' : `${item.fase || 'Fase E/F'} &bull; Kelas ${item.grade}`}
-                </span>
-                <span class="badge rounded-pill" style="background: rgba(52, 211, 153, 0.15); color: var(--obs-tertiary); font-size: 0.68rem; border: 1px solid rgba(52, 211, 153, 0.3);">
-                  ${item.category === 'Praktikum Virtual' ? 'Praktikum Virtual' : 'Media Interaktif'}
-                </span>
-              </div>
-              <h6 class="fw-bold mb-1 text-light" style="font-size: 0.88rem; line-height: 1.3;">
-                ${item.title}
-              </h6>
-              <p class="small text-muted mb-2" style="font-size: 0.74rem; line-height: 1.4; color: var(--obs-text-secondary) !important;">
-                ${item.description}
-              </p>
-              ${item.ayat ? `
-                <div class="mb-2 p-1.5 rounded d-flex align-items-center gap-1" style="background: rgba(167, 139, 250, 0.08); border: 1px solid rgba(167, 139, 250, 0.2); font-size: 0.72rem; color: #c4b5fd;">
-                  <span class="material-symbols-outlined" style="font-size: 14px;">menu_book</span>
-                  <span><strong>${item.ayat}</strong></span>
-                </div>
-              ` : ''}
-            </div>
-            <div class="pt-2 border-top border-secondary-subtle d-flex justify-content-between align-items-center">
-              ${item.url ? `
-                <a href="${item.url}" target="_blank" class="small text-decoration-none text-violet d-flex align-items-center gap-1" style="font-size: 0.75rem;" title="Buka Simulasi di Tab Baru">
-                  <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span>
-                  <span>Uji Simulasi</span>
-                </a>
-              ` : '<span></span>'}
-              <button type="button" class="btn btn-sm btn-primary py-1 px-2.5 d-flex align-items-center gap-1" onclick="terapkanMediaKeGenerator('${item.id}')" style="font-size: 0.75rem;">
-                <span class="material-symbols-outlined" style="font-size: 14px;">input</span>
-                <span>Terapkan</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
+    function renderDaftarMediaPortal() {}
 
     function terapkanMediaKeGenerator(mediaId) {
       const media = portalMediaCatalog.find(m => m.id === mediaId) || cariMediaPortalByTopik(mediaId);
@@ -4097,43 +4044,7 @@
       renderQuickTags();
     }
 
-    function renderQuickTags() {
-      const container = document.getElementById('quickTagsList');
-      if (!container) return;
-
-      // Gabungkan topik standar dengan media di portal catalog
-      let allTopics = [...STANDARD_TOPICS];
-
-      portalMediaCatalog.forEach(m => {
-        if (!allTopics.some(t => t.title.toLowerCase() === (m.topic || m.title).toLowerCase())) {
-          allTopics.push({
-            grade: m.grade || '10',
-            title: m.topic || m.title,
-            mediaId: m.id
-          });
-        }
-      });
-
-      const filtered = allTopics.filter(t => {
-        if (activeQuickFilter === 'ALL') return true;
-        if (activeQuickFilter === 'MEDIA') return !!t.mediaId;
-        return t.grade === activeQuickFilter;
-      });
-
-      const currentTopikVal = (document.getElementById('aiTopik')?.value || '').toLowerCase();
-
-      container.innerHTML = filtered.map(t => {
-        const isActive = currentTopikVal && t.title.toLowerCase().includes(currentTopikVal);
-        const hasMedia = !!t.mediaId;
-        return `
-          <button type="button" class="quick-tag-pill ${isActive ? 'active' : ''}" onclick="pilihQuickTag('${t.title}', '${t.grade}', '${t.mediaId || ''}')">
-            <span>${t.title}</span>
-            <span class="badge rounded-pill" style="font-size: 0.65rem; background: var(--obs-surface-highest); color: var(--obs-text-muted);">K-${t.grade}</span>
-            ${hasMedia ? '<span class="tag-media-badge"><span class="material-symbols-outlined align-middle" style="font-size:12px;">bolt</span> Media</span>' : ''}
-          </button>
-        `;
-      }).join('');
-    }
+    function renderQuickTags() {}
 
     function pilihQuickTag(topik, kelas, mediaId) {
       document.getElementById('aiTopik').value = topik;
@@ -4251,12 +4162,7 @@
             areaBahan.value = prefix + isiTeks + (areaBahan.value ? "\n\n" + areaBahan.value : "");
           }
 
-          // Simpan juga sebagai fallback multimodal
-          window.currentUploadedFile = {
-            name: fileName,
-            mimeType: file.type || 'text/plain',
-            base64: btoa(unescape(encodeURIComponent(isiTeks.substring(0, 3000))))
-          };
+          window.currentUploadedFile = null;
           simpanDraft();
         };
         reader.readAsText(file);
@@ -4377,7 +4283,7 @@
 
       if (bagian === 'pertemuan') {
         const subTopikVal = document.getElementsByName(`subTopik${nomor}`)[0]?.value || '';
-        labelTarget.innerHTML = `Pertemuan Ke-${nomor} ${subTopikVal ? `&mdash; <span class="text-light">"${subTopikVal}"</span>` : ''}`;
+        labelTarget.textContent = 'Pertemuan Ke-' + nomor + ' ' + subTopikVal;
       } else if (bagian === 'itp') {
         labelTarget.innerHTML = `Indikator Tujuan Pembelajaran (ITP 1 &ndash; 14)`;
       }
@@ -4426,6 +4332,7 @@
         action: 'polesBagian',
         accessToken: getGeneratorAccessToken(),
         dataPoles: {
+          ...generatorContext(),
           bagian: copilotState.bagian,
           nomor: copilotState.nomor,
           instruksiKhusus: instruksi,
@@ -4782,13 +4689,6 @@
         if (elDigital && (!elDigital.value || elDigital.value.includes("[Isi") || !elDigital.value.includes("PortalKimia"))) {
           elDigital.value = matchedMedia.digital;
         }
-        const elAyat1 = document.getElementsByName('ayat1')[0];
-        if (elAyat1 && (!elAyat1.value || elAyat1.value.includes("[Isi") || !elAyat1.value.includes(matchedMedia.ayat))) {
-          let tAyat = matchedMedia.ayat;
-          if (matchedMedia.ayatArti) tAyat += `\n"${matchedMedia.ayatArti}"`;
-          if (matchedMedia.tadabbur) tAyat += `\nTadabbur Sains: ${matchedMedia.tadabbur}`;
-          elAyat1.value = tAyat;
-        }
         const elAsesmen = document.getElementsByName('listAsesmen')[0];
         if (elAsesmen && (!elAsesmen.value || elAsesmen.value.includes("[Isi"))) {
           elAsesmen.value = `1. Asesmen Awal (Diagnostik): ${matchedMedia.asesmen.awal}\n2. Asesmen Proses (Formatif): ${matchedMedia.asesmen.proses}\n3. Asesmen Hasil (Sumatif): ${matchedMedia.asesmen.hasil}`;
@@ -4863,6 +4763,7 @@
       }
       
       const dataInstruksi = {
+        ...generatorContext(),
         jenisDokumen: inputJenis,
         kelas: inputKelas,
         topik: inputTopik,
@@ -4941,32 +4842,10 @@
     // =========================================================================
     // 12. PENCETAKAN DOKUMEN GOOGLE DOCS & PDF
     // =========================================================================
-    function tampilkanHasilCetak(hasil) {
-      const areaHasil = document.getElementById('areaHasil');
-      areaHasil.innerHTML = `
-        <div class="alert alert-obsidian p-4">
-          <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
-            <span class="material-symbols-outlined text-emerald" style="font-size: 28px;">check_circle</span>
-            <strong class="fs-5 text-emerald">Dokumen Berhasil Dicetak ke Google Drive!</strong>
-          </div>
-          <p class="small text-muted mb-4" style="color: var(--obs-text-secondary) !important;">
-            Dokumen administrasi Anda telah selesai digenerate dan disimpan di Google Drive.
-          </p>
-          <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
-            <a href="${hasil.docUrl}" target="_blank" class="btn btn-success fw-bold px-4 py-2 d-flex align-items-center justify-content-center gap-2" style="border-radius: 8px;">
-              <span class="material-symbols-outlined" style="font-size: 20px;">description</span>
-              <span>Buka Google Docs</span>
-            </a>
-            <a href="${hasil.pdfUrl}" target="_blank" class="btn btn-danger fw-bold px-4 py-2 d-flex align-items-center justify-content-center gap-2" style="border-radius: 8px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: none; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);">
-              <span class="material-symbols-outlined" style="font-size: 20px;">download</span>
-              <span>Unduh PDF</span>
-            </a>
-          </div>
-        </div>`;
-      areaHasil.scrollIntoView({ behavior: 'smooth' });
-    }
+    function tampilkanHasilCetak() {}
 
     function prosesData() {
+      if (document.getElementById('tombolSubmit').disabled) return;
       const tombol = document.getElementById('tombolSubmit');
       const areaHasil = document.getElementById('areaHasil');
       tombol.disabled = true;
@@ -4983,6 +4862,8 @@
         if (el) objekForm[item] = el.checked;
       });
 
+      objekForm.pertemuan = Number(document.getElementById('aiPertemuan').value);
+      objekForm.requestId = generatorRequestId(objekForm);
       // 1. DI LINGKUNGAN NATIVE GAS
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
@@ -4990,7 +4871,7 @@
             tombol.disabled = false;
             tombol.innerHTML = '<span class="material-symbols-outlined" style="font-size: 22px;">print</span><span>Proses Cetak Dokumen</span>';
             if (hasil.error) {
-              areaHasil.innerHTML = `<div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">${hasil.error}</div>`;
+              tampilkanErrorCetak(hasil.error);
               return;
             }
             tampilkanHasilCetak(hasil);
@@ -4998,7 +4879,7 @@
           .withFailureHandler(function(error) {
             tombol.disabled = false;
             tombol.innerHTML = '<span class="material-symbols-outlined" style="font-size: 22px;">print</span><span>Proses Cetak Dokumen</span>';
-            areaHasil.innerHTML = `<div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">Terjadi kesalahan: ${error.message}</div>`;
+            tampilkanErrorCetak(error.message);
           }).buatModul(objekForm, getGeneratorAccessToken());
       } 
       // 2. DI GITHUB PAGES / HOSTING EKSTERNAL
@@ -5029,7 +4910,7 @@
           tombol.disabled = false;
           tombol.innerHTML = '<span class="material-symbols-outlined" style="font-size: 22px;">print</span><span>Proses Cetak Dokumen</span>';
           if (hasil.error) {
-            areaHasil.innerHTML = `<div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">${hasil.error}</div>`;
+            tampilkanErrorCetak(hasil.error);
             return;
           }
           tampilkanHasilCetak(hasil);
@@ -5037,11 +4918,179 @@
         .catch(err => {
           tombol.disabled = false;
           tombol.innerHTML = '<span class="material-symbols-outlined" style="font-size: 22px;">print</span><span>Proses Cetak Dokumen</span>';
-          areaHasil.innerHTML = `<div class="alert alert-danger p-3" style="background-color: #3b1111; border: 1px solid #ef4444; color: #fca5a5; border-radius: 10px;">Gagal menghubungi Backend Google Apps Script: ${err.message}</div>`;
+          tampilkanErrorCetak(err.message);
         });
       }
     }
   </script>
+<script>
+/* Shared deterministic validation, embedded in HTML and GAS by build-generator-v2.py. */
+var GeneratorCore = (function () {
+  'use strict';
+  var library = [
+    {id:'q55-9',reference:'QS. Ar-Rahman 55:9',arabic:'وَأَقِيمُوا۟ ٱلْوَزْنَ بِٱلْقِسْطِ وَلَا تُخْسِرُوا۟ ٱلْمِيزَانَ',translation:'Dan tegakkanlah keseimbangan itu dengan adil dan janganlah kamu mengurangi keseimbangan itu.',language:'Indonesia',source:'https://quran.com/id/ar-rahman/9',verifiedOn:'2026-09-24',scope:'Ayat lengkap; refleksi keadilan dan kejujuran pengukuran, bukan penjelasan hukum kesetimbangan kimia.'},
+    {id:'bukhari-1',reference:'Sahih al-Bukhari 1 (kutipan awal)',arabic:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ',translation:'The reward of deeds depends upon the intentions',language:'English (teks sumber)',source:'https://sunnah.com/bukhari:1',verifiedOn:'2026-09-24',scope:'Kutipan awal hadis sahih, bukan hadis lengkap. Refleksi niat belajar; bukan klaim ilmiah.'}
+  ];
+  var prefixes=['subTopik','ayat','zona','awal','memahami','mengaplikasi','merefleksi','penutup'];
+  var strings=['topik','kelas','waktu','tujuan','model','strategi','metode','kemitraan','lingkungan','digital','listAsesmen','dapus','lampiran'];
+  var bools=['keimanan','penalaran','kolaborasi','kesehatan','kewargaan','kreativitas','kemandirian','komunikasi'];
+  function reference(id) { return library.filter(function(x){return x.id===id;})[0] || null; }
+  function citation(id) { var r=reference(id); if(!r) return ''; return r.reference+'\n'+r.arabic+'\nTerjemahan ('+r.language+'): '+r.translation+'\nSumber: '+r.source+'\nCatatan konteks: '+r.scope; }
+  function keys() { var result=strings.slice(); for(var i=1;i<=14;i++) ['itp','asesmen','aktivitas'].forEach(function(p){result.push(p+i);}); for(var j=1;j<=9;j++) prefixes.forEach(function(p){result.push(p+j);}); return result; }
+  function validateAI(raw, mode, count, number) {
+    var data=typeof raw==='string'?JSON.parse(raw):raw;
+    if(!data || Array.isArray(data) || typeof data!=='object') throw Error('Respons AI harus berupa objek JSON.');
+    if(data.error) throw Error(String(data.error));
+    var allowed=keys().concat(bools), required=[];
+    if(mode==='pertemuan') { if(!Number.isInteger(Number(number))||number<1||number>9) throw Error('Nomor pertemuan tidak valid.'); allowed=prefixes.map(function(p){return p+number;}); required=allowed; }
+    else if(mode==='itp') {allowed=keys().filter(function(k){return /^(itp|asesmen|aktivitas)\d+$/.test(k);}); required=['itp1','asesmen1','aktivitas1'];}
+    else { if(!Number.isInteger(Number(count))||count<1||count>9) throw Error('Jumlah pertemuan tidak valid.'); required=['tujuan','itp1','asesmen1','aktivitas1']; for(var j=1;j<=count;j++) prefixes.forEach(function(p){required.push(p+j);}); }
+    var result={}; Object.keys(data).forEach(function(k){
+      if(allowed.indexOf(k)<0) throw Error('Field AI tidak dikenal: '+k);
+      if(bools.indexOf(k)>=0) {if(typeof data[k]!=='boolean') throw Error('Profil harus boolean: '+k);}
+      else if(typeof data[k]!=='string'||data[k].length>20000||/\[Isi\b/i.test(data[k])) throw Error('Isian AI tidak valid: '+k);
+      result[k]=data[k];
+    });
+    required.forEach(function(k){if(typeof result[k]!=='string'||!result[k].trim()) throw Error('Respons AI belum lengkap: '+k);});
+    return result;
+  }
+  function canonical(value) { if(Array.isArray(value)) return '['+value.map(canonical).join(',')+']'; if(value&&typeof value==='object') return '{'+Object.keys(value).filter(function(k){return k!=='requestId';}).sort().map(function(k){return JSON.stringify(k)+':'+canonical(value[k]);}).join(',')+'}'; return JSON.stringify(value); }
+  function tokens(s) { var stop=['murid','mampu','siswa','dengan','untuk','dalam','yang','dan','atau','pada','dari','secara','melalui','guru','kegiatan','hasil','konsep']; return String(s||'').toLowerCase().match(/[a-z0-9]{3,}/g)?.filter(function(t){return stop.indexOf(t)<0;})||[]; }
+  function evidence(a,b) { var x=tokens(a), y=tokens(b); return Array.from(new Set(x.filter(function(t){return y.indexOf(t)>=0;}))); }
+  function alignment(data) {
+    var issues=[], rows=[], cp=String(data.cp||'').trim(), tujuan=String(data.tujuan||'').trim();
+    if(!cp) issues.push('CP belum diisi dari dokumen kurikulum yang digunakan.');
+    if(!data.cpSource) issues.push('Sumber/versi CP belum diisi.');
+    if(!tujuan) issues.push('Tujuan pembelajaran belum diisi.');
+    if(cp&&tujuan&&!evidence(cp,tujuan).length) issues.push('Hubungan CP → tujuan belum terdeteksi dari istilah yang sama; tinjau manual.');
+    var count=Number(data.pertemuan)||1;
+    for(var j=1;j<=count;j++) if(!data['memahami'+j]||!data['mengaplikasi'+j]||!data['merefleksi'+j]) issues.push('Kegiatan pertemuan '+j+' belum lengkap.');
+    for(var i=1;i<=14;i++) {
+      var itp=data['itp'+i], activity=data['aktivitas'+i], assess=data['asesmen'+i];
+      if(!itp&&!activity&&!assess) continue;
+      var notes=[], linked=[];
+      if(!itp) notes.push('ITP kosong'); if(!activity) notes.push('Aktivitas kosong'); if(!assess) notes.push('Asesmen kosong');
+      var tpEvidence=evidence(tujuan,itp), actEvidence=evidence(itp,activity), assEvidence=evidence(itp,assess);
+      if(itp&&!tpEvidence.length) notes.push('Tujuan → ITP perlu ditinjau');
+      if(itp&&activity&&!actEvidence.length) notes.push('ITP → aktivitas perlu ditinjau');
+      if(itp&&assess&&!assEvidence.length) notes.push('ITP → asesmen perlu ditinjau');
+      for(var p=1;p<=count;p++) if(evidence(itp,[data['memahami'+p],data['mengaplikasi'+p],data['merefleksi'+p]].join(' ')).length) linked.push(p);
+      if(!linked.length) notes.push('Belum terhubung ke kegiatan pertemuan');
+      rows.push({itp:i,tujuan:tpEvidence,aktivitas:actEvidence,asesmen:assEvidence,pertemuan:linked,notes:notes});
+    }
+    if(!rows.length) issues.push('Belum ada ITP, aktivitas, dan asesmen yang dapat diperiksa.');
+    return {issues:issues,rows:rows,method:'Pemeriksaan kelengkapan dan kesamaan istilah; bukan penilaian semantik atau pengesahan kurikulum.'};
+  }
+  function validateFile(name,mime,bytes) {
+    var ext=String(name||'').split('.').pop().toLowerCase();
+    var types={pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',txt:'text/plain',md:'text/markdown',html:'text/html',htm:'text/html'};
+    if(!types[ext]) throw Error('Jenis berkas tidak didukung.');
+    var text=['txt','md','html','htm'].indexOf(ext)>=0, limit=text?1024*1024:5*1024*1024;
+    if(!bytes||!bytes.length||bytes.length>limit) throw Error(text?'Berkas teks maksimal 1 MB.':'PDF/gambar maksimal 5 MB.');
+    if(mime&&mime!==types[ext]&&!(text&&(mime==='text/plain'||mime==='text/markdown'))) throw Error('Jenis MIME tidak sesuai ekstensi berkas.');
+    var b=Array.from(bytes).map(function(x){return x&255;}), head=String.fromCharCode.apply(null,b.slice(0,12));
+    if(ext==='pdf'&&!head.startsWith('%PDF-')) throw Error('Tanda pengenal PDF tidak valid.');
+    if(ext==='png'&&b.slice(0,8).join(',')!=='137,80,78,71,13,10,26,10') throw Error('Tanda pengenal PNG tidak valid.');
+    if((ext==='jpg'||ext==='jpeg')&&!(b[0]===255&&b[1]===216&&b[2]===255)) throw Error('Tanda pengenal JPEG tidak valid.');
+    if(ext==='webp'&&!(head.startsWith('RIFF')&&head.slice(8)==='WEBP')) throw Error('Tanda pengenal WebP tidak valid.');
+    if(text&&b.indexOf(0)>=0) throw Error('Berkas teks mengandung data biner.');
+    return types[ext];
+  }
+  function validateManifest(items) {
+    if(!Array.isArray(items)||!items.length) throw Error('Katalog harus berupa daftar.');
+    var ids=new Set(); items.forEach(function(m){if(!m||typeof m.id!=='string'||ids.has(m.id)||typeof m.title!=='string'||!m.title.trim()) throw Error('ID/judul katalog tidak valid atau duplikat.'); ids.add(m.id);
+      if(typeof m.url!=='string'||!/^\.\.\/media\/[A-Za-z0-9_./-]+\.html$/.test(m.url)||m.url.slice(9).includes('..')) throw Error('URL katalog tidak aman.');
+      if(['10','11','12','Umum'].indexOf(m.grade)<0||['Media Pembelajaran','Praktikum Virtual'].indexOf(m.category)<0) throw Error('Kategori katalog tidak valid.');
+    }); return items;
+  }
+  function placeholders(text) { return Array.from(new Set(String(text).match(/\{\{[^{}]+\}\}/g)||[])); }
+  function templateCheck(text) {
+    var fixed=['Nama','Topik','Kelas','Waktu','Tujuan','Model','Strategi','Metode','Kemitraan','Lingkungan','Digital','ListAsesmen','Dapus','Lampiran','Keimanan','Penalaran','Kolaborasi','Kesehatan','Kewargaan','Kreativitas','Kemandirian','Komunikasi','CP','SumberCP'];
+    var found=placeholders(text), unknown=found.filter(function(p){var k=p.slice(2,-2);return fixed.indexOf(k)<0&&!/^(ITP|Asesmen|Aktivitas)([1-9]|1[0-4])$/.test(k)&&!/^(SubTopik|Ayat|Zona|Awal|Memahami|Mengaplikasi|Merefleksi|Penutup)[1-9]$/.test(k);});
+    var missing=['Topik','Kelas','Tujuan'].filter(function(k){return found.indexOf('{{'+k+'}}')<0;});
+    return {unknown:unknown,missing:missing,valid:!unknown.length&&!missing.length};
+  }
+  return {library:library,reference:reference,citation:citation,validateAI:validateAI,canonical:canonical,alignment:alignment,validateFile:validateFile,validateManifest:validateManifest,placeholders:placeholders,templateCheck:templateCheck};
+})();
+if(typeof module!=='undefined') module.exports=GeneratorCore;
+
+</script>
+<script>
+(function () {
+  'use strict';
+  function el(tag,text,cls) {var n=document.createElement(tag); if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
+  function value(name) {return document.getElementsByName(name)[0]?.value||'';}
+  function dataForm() {var d=Object.fromEntries(new FormData(document.getElementById('formModul')));d.pertemuan=Number(document.getElementById('aiPertemuan').value);return d;}
+  function safeLink(url,docsOnly) {try {var u=new URL(url,location.href); if(docsOnly)return u.protocol==='https:'&&u.hostname==='docs.google.com'&&/^\/document\/d\/[\w-]+\/(edit|export)$/.test(u.pathname)?u.href:null;return ['http:','https:','file:'].includes(u.protocol)?u.href:null;}catch(e){return null;}}
+  window.tampilkanErrorCetak=function(message){var area=document.getElementById('areaHasil');area.replaceChildren(el('div',String(message),'alert alert-danger'));};
+  window.tampilkanHasilCetak=function(result){
+    var area=document.getElementById('areaHasil');area.replaceChildren();
+    var doc=safeLink(result.docUrl,true),pdf=safeLink(result.pdfUrl,true);
+    if(!doc||!pdf){window.tampilkanErrorCetak('Tautan dokumen dari server tidak valid.');return;}
+    area.append(el('p','Dokumen tersedia di Google Drive. Permintaan ulang membuka dokumen yang sama.','alert alert-success'));
+    [[doc,'Buka Google Docs'],[pdf,'Unduh PDF']].forEach(function(pair){var a=el('a',pair[1],'btn btn-success m-2');a.href=pair[0];a.target='_blank';a.rel='noopener noreferrer';area.append(a);});
+  };
+  window.renderDaftarMediaPortal=function(){
+    var grid=document.getElementById('gridKartuMedia');if(!grid)return;
+    grid.replaceChildren();var q=document.getElementById('cariMediaInput').value.toLowerCase();
+    var list=portalMediaCatalog.filter(function(m){return (filterJenisKatalog==='Semua'||m.category===filterJenisKatalog)&&[m.title,m.topic,m.description,m.grade].join(' ').toLowerCase().includes(q);});
+    if(!list.length)grid.append(el('p','Tidak ada media yang cocok dengan pencarian: '+q));
+    list.forEach(function(m){var col=el('div',undefined,'col-md-6'),card=el('article',undefined,'p-3 border rounded h-100');card.append(el('small',m.category+' • '+(m.grade==='Umum'?'Umum':'Kelas '+m.grade)),el('h6',m.title),el('p',m.description,'small'));
+      var url=safeLink(m.url,false);if(url){var link=el('a','Buka media','btn btn-sm btn-outline-secondary me-2');link.href=url;link.target='_blank';link.rel='noopener noreferrer';card.append(link);}
+      var btn=el('button','Terapkan','btn btn-sm btn-primary');btn.type='button';btn.addEventListener('click',function(){terapkanMediaKeGenerator(m.id);});card.append(btn);col.append(card);grid.append(col);
+    });
+    var media=portalMediaCatalog.filter(function(m){return m.category==='Media Pembelajaran';}).length,lab=portalMediaCatalog.length-media;
+    [['badgeJumlahMedia',portalMediaCatalog.length],['labelTotalMediaInfo',media+' Media • '+lab+' Praktikum Virtual'],['jumlahKatalogSemua',portalMediaCatalog.length],['jumlahKatalogMedia',media],['jumlahKatalogLab',lab]].forEach(function(p){document.getElementById(p[0]).textContent=p[1];});
+  };
+  window.muatKatalogMediaTersimpan=function(){portalMediaCatalog=GeneratorCore.validateManifest(DEFAULT_PORTALKIMIA_MEDIA).slice();renderDaftarMediaPortal();};
+  window.sinkronkanMediaPortalTerbaru=async function(silent){try {var r=await fetch('portal_media_manifest.json',{cache:'no-cache'});if(!r.ok)throw Error('Katalog HTTP '+r.status);portalMediaCatalog=GeneratorCore.validateManifest(await r.json());renderDaftarMediaPortal();renderQuickTags();if(!silent)alert('Katalog diperbarui: '+portalMediaCatalog.length+' item.');}catch(e){if(!silent)alert('Menggunakan katalog bawaan. '+e.message);}};
+  window.renderQuickTags=function(){var container=document.getElementById('quickTagsList');if(!container)return;container.replaceChildren();portalMediaCatalog.filter(function(m){return activeQuickFilter==='ALL'||activeQuickFilter==='MEDIA'||m.grade===activeQuickFilter;}).forEach(function(m){var b=el('button',m.topic+' • '+m.grade,'quick-tag-pill');b.type='button';b.addEventListener('click',function(){terapkanMediaKeGenerator(m.id);});container.append(b);});};
+  var uploadGeneration=0;
+  window.prosesFile=async function(file){var generation=++uploadGeneration;window.currentUploadedFile=null;if(!file)return;try {
+    if(file.size>5*1024*1024)throw Error('Berkas maksimal 5 MB; teks maksimal 1 MB.');
+    var bytes=new Uint8Array(await file.arrayBuffer());if(generation!==uploadGeneration)return;
+    var mime=GeneratorCore.validateFile(file.name,file.type,bytes),area=document.getElementById('aiBahanAjar');
+    if(mime.startsWith('text/')){
+      var content=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
+      if(mime==='text/html'){var parsed=new DOMParser().parseFromString(content,'text/html');parsed.querySelectorAll('script,style,svg,iframe,object,nav,footer').forEach(function(n){n.remove();});content=parsed.body.textContent||'';}
+      area.value='[Ekstraksi bahan: '+file.name+']\n'+content.slice(0,50000);window.currentUploadedFile=null;
+    }else {var binary='';for(var i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));window.currentUploadedFile={name:file.name,mimeType:mime,base64:btoa(binary)};}
+    document.getElementById('filePreviewContainer').style.display='flex';document.getElementById('filePreviewName').textContent=file.name;document.getElementById('filePreviewSize').textContent=(file.size/1024).toFixed(1)+' KB • periksa privasi sebelum mengirim';
+    document.getElementById('privacyConsent').checked=false;simpanDraft();
+  }catch(e){if(generation===uploadGeneration){hapusFileTerunggah();alert(e.message);}}};
+  var oldRemove=window.hapusFileTerunggah;window.hapusFileTerunggah=function(){uploadGeneration++;oldRemove();};
+  function privacy(){if(!document.getElementById('privacyConsent').checked){alert('Pastikan bahan yang dikirim bebas data pribadi siswa, lalu centang persetujuan.');return false;}return true;}
+  var oldAI=window.mintaBantuanAI,oldPoles=window.eksekusiPolesCopilot;
+  window.mintaBantuanAI=function(){if(privacy())oldAI();};window.eksekusiPolesCopilot=function(){if(privacy())oldPoles();};
+  window.generatorContext=function(){return {cp:value('cp'),cpSource:value('cpSource'),referenceId:value('referenceId'),privacyConsent:document.getElementById('privacyConsent').checked};};
+  window.periksaKeselarasan=function(){var report=GeneratorCore.alignment(dataForm()),area=document.getElementById('alignmentReport');area.replaceChildren(el('p',report.method,'small text-muted'));
+    report.issues.forEach(function(s){area.append(el('p',s,'text-warning'));});
+    var table=el('table',undefined,'table table-sm'),head=el('tr');['ITP','Tujuan → ITP','ITP → Aktivitas','ITP → Asesmen','Pertemuan','Catatan'].forEach(function(t){head.append(el('th',t));});table.append(head);
+    report.rows.forEach(function(row){var tr=el('tr');[row.itp,row.tujuan.join(', ')||'—',row.aktivitas.join(', ')||'—',row.asesmen.join(', ')||'—',row.pertemuan.join(', ')||'—',row.notes.join('; ')||'Hubungan istilah terdeteksi; tinjau substansi.'].forEach(function(v){tr.append(el('td',v));});table.append(tr);});area.append(table);return report;
+  };
+  var oldFill=window.isiDataSecaraOtomatis,oldFillPoles=window.terapkanHasilPoles;
+  window.isiDataSecaraOtomatis=function(data,kelas){try{var checked=GeneratorCore.validateAI(data,'full',Number(document.getElementById('aiPertemuan').value));
+    for(var i=1;i<=14;i++)['itp','asesmen','aktivitas'].forEach(function(p){document.getElementsByName(p+i)[0].value='';});
+    for(var j=1;j<=9;j++)['subTopik','ayat','zona','awal','memahami','mengaplikasi','merefleksi','penutup'].forEach(function(p){document.getElementsByName(p+j)[0].value='';});
+    oldFill(checked,kelas);periksaKeselarasan();}catch(e){alert('Respons AI ditolak: '+e.message);}};
+  window.terapkanHasilPoles=function(data){try{var checked=GeneratorCore.validateAI(data,copilotState.bagian,1,copilotState.nomor);oldFillPoles(checked);periksaKeselarasan();}catch(e){alert('Respons AI ditolak: '+e.message);}};
+  window.generatorRequestId=function(data){var canonical=GeneratorCore.canonical(data),storageKey='generatorDocumentRequestV2';var previous;try{previous=JSON.parse(localStorage.getItem(storageKey)||'null');}catch(e){}
+    if(previous&&previous.payload===canonical&&/^[a-zA-Z0-9-]{20,80}$/.test(previous.id))return previous.id;
+    var id=crypto.randomUUID();localStorage.setItem(storageKey,JSON.stringify({payload:canonical,id:id}));return id;
+  };
+  document.addEventListener('DOMContentLoaded',function(){
+    var select=document.getElementsByName('referenceId')[0];GeneratorCore.library.forEach(function(r){var option=el('option',r.reference);option.value=r.id;select.append(option);});
+    var draft;try{draft=JSON.parse(localStorage.getItem('draftModulKimia')||'{}');}catch(e){draft={};}select.value=draft.referenceId||'q55-9';
+    function preview(){document.getElementById('referencePreview').textContent=GeneratorCore.citation(select.value);
+      for(var j=1;j<=9;j++){var input=document.getElementsByName('ayat'+j)[0];input.readOnly=true;input.value=j<=Number(document.getElementById('aiPertemuan').value)?GeneratorCore.citation(select.value):'';}
+    }
+    select.addEventListener('change',function(){preview();simpanDraft();});document.getElementById('aiPertemuan').addEventListener('change',preview);preview();periksaKeselarasan();
+    var timer;document.getElementById('formModul').addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(periksaKeselarasan,400);});
+  });
+})();
+
+</script>
 </body>
 </html>
+
 

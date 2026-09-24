@@ -84,7 +84,15 @@ Bila Anda sudah pernah men-deploy `Code.gs` sebelumnya:
 
 - API key Gemini tidak disimpan di `Code.gs`; simpan sebagai Script Property `GEMINI_API_KEY`.
 - Semua aksi POST memerlukan token guru dari Script Property `GENERATOR_ACCESS_TOKEN`.
-- Jalankan fungsi `buatTokenAksesGuru()` dari editor GAS untuk membuat token baru.
-- Token frontend hanya disimpan selama sesi tab browser.`r`n- Backend membatasi maksimal 20 proses per menit.
+- Jalankan fungsi `buatTokenAksesGuru_()` dari editor GAS untuk membuat token baru.
+- Token frontend disimpan pada browser perangkat guru sampai dihapus dari Pengaturan Backend atau data browser dibersihkan.
+- Backend membatasi maksimal 20 proses per menit.
 - Ikuti langkah lengkap pada `PANDUAN_KEAMANAN_BACKEND.md`.
+
+
+
+
+## Pemeriksaan dan keandalan v2
+
+CP dan sumber, matriks keselarasan otomatis, pustaka kutipan bersumber, requestId dokumen, validasi unggahan dan privasi, rendering DOM aman, serta tes otomatis tersedia. Lihat PANDUAN_GENERATOR_V2.md. Jalankan node test-generator.cjs dari folder Generator.
 
