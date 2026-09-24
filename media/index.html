@@ -1696,10 +1696,13 @@
 
     function applySyncData(resData) {
       const mergedData = mergeDriveAndCuratedMaterials(resData);
-      allMaterials = mergedData.map(m => ({
-        ...m,
-        thumbnail: m.thumbnail || getFallbackThumb(m.format, m.title, m.topic)
-      }));
+      allMaterials = mergedData.map(m => {
+        const norm = normalizeMaterialCurriculum(m);
+        return {
+          ...norm,
+          thumbnail: norm.thumbnail || getFallbackThumb(norm.format, norm.title, norm.topic)
+        };
+      });
       window.allMaterials = allMaterials;
       try {
         localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
@@ -1858,7 +1861,7 @@
           if (Array.isArray(parsed) && parsed.length > 0) {
             const clean = sanitizePortalKimiaMaterials(parsed).filter(m => !legacyDummyIds.has(String(m.id || '')));
             if (clean.length > 0) {
-              allMaterials = clean;
+              allMaterials = clean.map(m => normalizeMaterialCurriculum(m));
               hasLocal = true;
               localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
             }
@@ -1871,6 +1874,16 @@
         const savedFolder = localStorage.getItem('portal_drive_folder_url');
         if (!savedFolder || !savedFolder.includes(PORTALKIMIA_DRIVE_FOLDER_ID)) {
           localStorage.setItem('portal_drive_folder_url', PORTALKIMIA_DRIVE_FOLDER_URL);
+        }
+      } catch(e) {}
+
+      // Migrasi urutan bab & alur belajar ke taksonomi Kurikulum Merdeka v2.0
+      try {
+        const curriculumVer = localStorage.getItem('chemportal_curriculum_v2');
+        if (curriculumVer !== '2.0') {
+          localStorage.removeItem('chemportal_chapter_order');
+          localStorage.removeItem('chemportal_learning_order');
+          localStorage.setItem('chemportal_curriculum_v2', '2.0');
         }
       } catch(e) {}
 
@@ -2036,91 +2049,290 @@
       return { key: 'umum', name: 'Semua Kelas & Laboratorium Terbuka', badge: 'Umum', icon: 'biotech', color: 'emerald', order: 99 };
     }
 
+    function normalizeMaterialCurriculum(item) {
+      if (!item) return item;
+      const title = (item.title || '').trim();
+      const lower = title.toLowerCase();
+      let grade = item.grade || '';
+      const g = grade.toLowerCase();
+
+      if (!grade || grade === 'Umum' || (!g.includes('10') && !g.includes('11') && !g.includes('12'))) {
+        if (lower.includes('laboratorium kimia virtual')) {
+          grade = 'Semua Kelas (Umum)';
+        } else if (lower.match(/volta|elektrolisis|faraday|redoks|korosi|benzena|alkana|alkena|alkuna|hidrokarbon|haloalkana|alkohol|eter|aldehida|keton|asam karboksilat|ester|polimer|karbohidrat|lipid|asam amino|protein|dna|rna|unsur transisi|periode ketiga|senyawa kompleks|radioaktivitas|reaksi inti|gravimetri|spektrofotometri/)) {
+          grade = 'Kelas 12 (Fase F)';
+        } else if (lower.match(/titrasi|asam basa|ph|larutan elektrolit|konsentrasi|pembuatan larutan|penyangga|buffer|hidrolisis|kelarutan|ksp|pengendapan|koloid|koligatif|termo|kalor|entalpi|hess|laju|arrhenius|orde|kesetimbangan|le chatelier|ikatan|lewis|vsepr|bentuk molekul|hibridisasi|gaya antarmolekul/)) {
+          grade = 'Kelas 11 (Fase F)';
+        } else {
+          grade = 'Kelas 10 (Fase E)';
+        }
+      }
+
+      let topic = 'Umum';
+      let pedagogicalScore = 9999;
+      let chapterId = 'umum-lab';
+      let chapterName = 'Laboratorium Virtual & Pengayaan Terbuka';
+      let chapterDesc = 'Simulasi laboratorium interaktif dan media praktikum virtual kimia mandiri lintas jenjang';
+      let chapterIcon = 'biotech';
+      let chapterOrder = 999;
+
+      // 1. KELAS 10 (FASE E)
+      if (grade.includes('10')) {
+        if (lower.match(/hakikat|metode ilmiah|keselamatan|alat lab|materi sifat|perubahan/)) {
+          topic = 'Hakikat Kimia & Lab';
+          chapterId = 'k10-bab1';
+          chapterName = 'Bab 1: Hakikat Ilmu Kimia & Keselamatan Laboratorium';
+          chapterDesc = 'Metode ilmiah, keselamatan kerja laboratorium, serta sifat dan klasifikasi materi';
+          chapterIcon = 'biotech';
+          chapterOrder = 101;
+          pedagogicalScore = 1010;
+          if (lower.includes('hakikat')) pedagogicalScore = 1011;
+          else if (lower.includes('keselamatan')) pedagogicalScore = 1012;
+          else pedagogicalScore = 1013;
+        } else if (lower.match(/kimia hijau|keberlanjutan|pencemaran|limbah|energi alternatif|nanoteknologi/)) {
+          topic = 'Kimia Hijau & Lingkungan';
+          chapterId = 'k10-bab2';
+          chapterName = 'Bab 2: Kimia Hijau, Lingkungan & Nanoteknologi';
+          chapterDesc = 'Prinsip kimia hijau, pengelolaan limbah lingkungan, dan inovasi nanoteknologi berkelanjutan';
+          chapterIcon = 'eco';
+          chapterOrder = 102;
+          pedagogicalScore = 1020;
+          if (lower.includes('kimia hijau')) pedagogicalScore = 1021;
+          else if (lower.includes('pencemaran')) pedagogicalScore = 1022;
+          else pedagogicalScore = 1023;
+        } else if (lower.match(/partikel atom|isotop|bohr|mekanika kuantum|bilangan kuantum|sejarah.*spu|periode.*golongan|keperiodikan/)) {
+          topic = 'Struktur Atom & SPU';
+          chapterId = 'k10-bab3';
+          chapterName = 'Bab 3: Struktur Atom & Sistem Periodik Unsur';
+          chapterDesc = 'Partikel penyusun atom, konfigurasi elektron Bohr & kuantum, serta tren keperiodikan unsur';
+          chapterIcon = 'blur_on';
+          chapterOrder = 103;
+          pedagogicalScore = 1030;
+          if (lower.includes('partikel atom')) pedagogicalScore = 1031;
+          else if (lower.includes('bohr')) pedagogicalScore = 1032;
+          else if (lower.includes('mekanika kuantum')) pedagogicalScore = 1033;
+          else if (lower.includes('bilangan kuantum')) pedagogicalScore = 1034;
+          else if (lower.includes('sejarah')) pedagogicalScore = 1035;
+          else if (lower.includes('periode')) pedagogicalScore = 1036;
+          else pedagogicalScore = 1037;
+        } else {
+          topic = 'Hukum Dasar & Stoikiometri';
+          chapterId = 'k10-bab4';
+          chapterName = 'Bab 4: Hukum Dasar Kimia & Stoikiometri';
+          chapterDesc = 'Tata nama senyawa, penyetaraan reaksi, hukum Lavoisier/Proust, dan perhitungan mol stoikiometri';
+          chapterIcon = 'calculate';
+          chapterOrder = 104;
+          pedagogicalScore = 1040;
+          if (lower.includes('tata nama')) pedagogicalScore = 1041;
+          else if (lower.includes('persamaan')) pedagogicalScore = 1042;
+          else if (lower.includes('hukum')) pedagogicalScore = 1043;
+          else if (lower.includes('konsep mol')) pedagogicalScore = 1044;
+          else pedagogicalScore = 1045;
+        }
+      }
+
+      // 2. KELAS 11 (FASE F)
+      else if (grade.includes('11')) {
+        if (lower.match(/lewis|aturan oktet|ikatan ion|ikatan.*logam|vsepr|bentuk molekul|hibridisasi|polaritas|gaya antarmolekul/)) {
+          topic = 'Ikatan Kimia & Bentuk Molekul';
+          chapterId = 'k11-bab1';
+          chapterName = 'Bab 1: Ikatan Kimia & Bentuk Molekul';
+          chapterDesc = 'Struktur Lewis, ikatan kovalen/ionik, teori VSEPR, hibridisasi orbital, dan gaya antarmolekul';
+          chapterIcon = 'hub';
+          chapterOrder = 201;
+          pedagogicalScore = 1110;
+          if (lower.includes('lewis')) pedagogicalScore = 1111;
+          else if (lower.includes('ion kovalen')) pedagogicalScore = 1112;
+          else if (lower.includes('vsepr')) pedagogicalScore = 1113;
+          else if (lower.includes('hibridisasi')) pedagogicalScore = 1114;
+          else if (lower.includes('polaritas')) pedagogicalScore = 1115;
+          else pedagogicalScore = 1116;
+        } else if (lower.match(/termo|kalorimetri|entalpi|hukum hess|energi ikatan/)) {
+          topic = 'Termokimia';
+          chapterId = 'k11-bab2';
+          chapterName = 'Bab 2: Termokimia & Perubahan Entalpi';
+          chapterDesc = 'Reaksi eksoterm-endoterm, kalorimeter, hukum Hess, dan energi ikatan rata-rata';
+          chapterIcon = 'local_fire_department';
+          chapterOrder = 202;
+          pedagogicalScore = 1120;
+          if (lower.includes('kalorimetri')) pedagogicalScore = 1121;
+          else pedagogicalScore = 1122;
+        } else if (lower.match(/laju reaksi|faktor laju|arrhenius|hukum laju|orde/)) {
+          topic = 'Laju Reaksi';
+          chapterId = 'k11-bab3';
+          chapterName = 'Bab 3: Kinetika & Laju Reaksi';
+          chapterDesc = 'Teori tumbukan, faktor penentu laju reaksi, persamaan laju, dan penentuan orde reaksi';
+          chapterIcon = 'speed';
+          chapterOrder = 203;
+          pedagogicalScore = 1130;
+          if (lower.includes('faktor')) pedagogicalScore = 1131;
+          else pedagogicalScore = 1132;
+        } else if (lower.match(/kesetimbangan|dinamis kc|le chatelier/)) {
+          topic = 'Kesetimbangan Kimia';
+          chapterId = 'k11-bab4';
+          chapterName = 'Bab 4: Kesetimbangan Kimia Dinamis';
+          chapterDesc = 'Konsep kesetimbangan dinamis, tetapan Kc & Qc, serta pergeseran asas Le Chatelier';
+          chapterIcon = 'sync_alt';
+          chapterOrder = 204;
+          pedagogicalScore = 1140;
+          if (lower.includes('dinamis dan asas')) pedagogicalScore = 1141;
+          else if (lower.includes('kc dan qc')) pedagogicalScore = 1142;
+          else pedagogicalScore = 1143;
+        } else if (lower.match(/hidrolisis|penyangga|buffer|kelarutan|ksp|hasil kali kelarutan|pengendapan selektif|ion senama/)) {
+          topic = 'Kesetimbangan Larutan';
+          chapterId = 'k11-bab6';
+          chapterName = 'Bab 6: Kesetimbangan Larutan (Buffer, Hidrolisis & Ksp)';
+          chapterDesc = 'Sifat larutan penyangga, pH hidrolisis garam, kelarutan & hasil kali kelarutan (Ksp)';
+          chapterIcon = 'opacity';
+          chapterOrder = 206;
+          pedagogicalScore = 1160;
+          if (lower.includes('penyangga')) pedagogicalScore = 1161;
+          else if (lower.includes('hidrolisis')) pedagogicalScore = 1162;
+          else if (lower.includes('kelarutan dan')) pedagogicalScore = 1163;
+          else pedagogicalScore = 1164;
+        } else if (lower.match(/teori asam basa|ph|titrasi asam basa|indikator|larutan elektrolit|konsentrasi.*larutan|pembuatan larutan/)) {
+          topic = 'Larutan Asam Basa';
+          chapterId = 'k11-bab5';
+          chapterName = 'Bab 5: Larutan Asam Basa & Titrasi';
+          chapterDesc = 'Teori Arrhenius/Bronsted-Lowry, perhitungan pH larutan, konsentrasi, dan kurva titrasi analitik';
+          chapterIcon = 'science';
+          chapterOrder = 205;
+          pedagogicalScore = 1150;
+          if (lower.includes('elektrolit')) pedagogicalScore = 1151;
+          else if (lower.includes('konsentrasi')) pedagogicalScore = 1152;
+          else if (lower.includes('teori')) pedagogicalScore = 1153;
+          else pedagogicalScore = 1154;
+        } else {
+          topic = 'Sistem Koloid & Sifat Larutan';
+          chapterId = 'k11-bab7';
+          chapterName = 'Bab 7: Koloid & Sifat Larutan';
+          chapterDesc = 'Klasifikasi sistem koloid, sifat optik & kinetik koloid, serta sifat koligatif larutan';
+          chapterIcon = 'grain';
+          chapterOrder = 207;
+          pedagogicalScore = 1170;
+          if (lower.includes('koligatif')) pedagogicalScore = 1171;
+          else pedagogicalScore = 1172;
+        }
+      }
+
+      // 3. KELAS 12 (FASE F)
+      else if (grade.includes('12')) {
+        if (lower.match(/redoks|biloks|setengah reaksi|sel volta|sel elektrolisis|faraday|korosi|titrasi redoks/)) {
+          topic = 'Redoks & Elektrokimia';
+          chapterId = 'k12-bab1';
+          chapterName = 'Bab 1: Redoks & Sel Elektrokimia';
+          chapterDesc = 'Penyetaraan reaksi redoks, sel Volta/Galvani, sel elektrolisis industri, hukum Faraday, dan korosi';
+          chapterIcon = 'bolt';
+          chapterOrder = 301;
+          pedagogicalScore = 1210;
+          if (lower.includes('konsep redoks')) pedagogicalScore = 1211;
+          else if (lower.includes('metode biloks')) pedagogicalScore = 1212;
+          else if (lower.includes('setengah reaksi')) pedagogicalScore = 1213;
+          else if (lower.includes('sel volta')) pedagogicalScore = 1214;
+          else if (lower.includes('sel elektrolisis')) pedagogicalScore = 1215;
+          else if (lower.includes('faraday')) pedagogicalScore = 1216;
+          else if (lower.includes('korosi')) pedagogicalScore = 1217;
+          else pedagogicalScore = 1218;
+        } else if (lower.match(/alkana|alkena|alkuna|hidrokarbon|minyak bumi|oktan|emisi|gugus fungsi|isomer|haloalkana|alkohol|eter|aldehida|keton|asam karboksilat|ester|reaksi organik/)) {
+          topic = 'Kimia Karbon & Organik';
+          chapterId = 'k12-bab2';
+          chapterName = 'Bab 2: Kimia Karbon & Gugus Fungsi Organik';
+          chapterDesc = 'Tata nama, keisomeran, sifat kimia & sintesis senyawa karbon hidrokarbon dan turunannya';
+          chapterIcon = 'polyline';
+          chapterOrder = 302;
+          pedagogicalScore = 1220;
+          if (lower.includes('hidrokarbon')) pedagogicalScore = 1221;
+          else if (lower.includes('minyak bumi')) pedagogicalScore = 1222;
+          else if (lower.includes('bahan bakar')) pedagogicalScore = 1223;
+          else if (lower.includes('gugus fungsi')) pedagogicalScore = 1224;
+          else if (lower.includes('isomer')) pedagogicalScore = 1225;
+          else if (lower.includes('haloalkana')) pedagogicalScore = 1226;
+          else if (lower.includes('alkohol')) pedagogicalScore = 1227;
+          else if (lower.includes('aldehida')) pedagogicalScore = 1228;
+          else if (lower.includes('asam karboksilat')) pedagogicalScore = 1229;
+          else pedagogicalScore = 1230;
+        } else if (lower.match(/benzena/)) {
+          topic = 'Benzena & Turunannya';
+          chapterId = 'k12-bab3';
+          chapterName = 'Bab 3: Benzena & Senyawa Aromatik';
+          chapterDesc = 'Struktur cincin benzena, reaksi substitusi elektrofilik aromatik, dan senyawa turunan benzena';
+          chapterIcon = 'hexagon';
+          chapterOrder = 303;
+          pedagogicalScore = 1231;
+        } else if (lower.match(/polimer|material|karbohidrat|lipid|lemak|sabun|asam amino|protein|dna|rna|asam nukleat|enzim/)) {
+          topic = 'Makromolekul & Biomolekul';
+          chapterId = 'k12-bab4';
+          chapterName = 'Bab 4: Makromolekul & Biomolekul';
+          chapterDesc = 'Polimer sintesis & alami, struktur dan metabolisme karbohidrat, protein, lipid, dan asam nukleat';
+          chapterIcon = 'bubble_chart';
+          chapterOrder = 304;
+          pedagogicalScore = 1240;
+          if (lower.includes('polimer')) pedagogicalScore = 1241;
+          else if (lower.includes('karbohidrat')) pedagogicalScore = 1242;
+          else if (lower.includes('lipid')) pedagogicalScore = 1243;
+          else if (lower.includes('asam amino')) pedagogicalScore = 1244;
+          else if (lower.includes('dna')) pedagogicalScore = 1245;
+          else pedagogicalScore = 1246;
+        } else if (lower.match(/kimia unsur|periode ketiga|unsur transisi|senyawa kompleks|koordinasi/)) {
+          topic = 'Kimia Unsur & Kompleks';
+          chapterId = 'k12-bab5';
+          chapterName = 'Bab 5: Kimia Unsur & Senyawa Kompleks';
+          chapterDesc = 'Kelimpahan, sifat fisik & kimia unsur golongan utama, periode ketiga, transisi, dan ion kompleks';
+          chapterIcon = 'view_in_ar';
+          chapterOrder = 305;
+          pedagogicalScore = 1250;
+          if (lower.includes('golongan utama')) pedagogicalScore = 1251;
+          else if (lower.includes('periode ketiga')) pedagogicalScore = 1252;
+          else if (lower.includes('transisi')) pedagogicalScore = 1253;
+          else pedagogicalScore = 1254;
+        } else if (lower.match(/radioaktivitas|waktu paruh|reaksi inti|fisi|fusi/)) {
+          topic = 'Radiokimia & Reaksi Inti';
+          chapterId = 'k12-bab6';
+          chapterName = 'Bab 6: Radiokimia & Reaksi Inti';
+          chapterDesc = 'Sinar radioaktif, kestabilan inti, kinetika peluruhan waktu paruh, serta reaksi fisi dan fusi';
+          chapterIcon = 'emergency';
+          chapterOrder = 306;
+          pedagogicalScore = 1260;
+          if (lower.includes('radioaktivitas')) pedagogicalScore = 1261;
+          else pedagogicalScore = 1262;
+        } else {
+          topic = 'Kimia Analisis';
+          chapterId = 'k12-bab7';
+          chapterName = 'Bab 7: Kimia Analisis & Spektroskopi';
+          chapterDesc = 'Analisis kuantitatif gravimetri klorida, hukum Beer-Lambert, dan spektrofotometri UV-Vis';
+          chapterIcon = 'troubleshoot';
+          chapterOrder = 307;
+          pedagogicalScore = 1270;
+          if (lower.includes('gravimetri')) pedagogicalScore = 1271;
+          else pedagogicalScore = 1272;
+        }
+      }
+
+      const chapterMeta = {
+        id: chapterId,
+        name: chapterName,
+        desc: chapterDesc,
+        icon: chapterIcon,
+        order: chapterOrder
+      };
+
+      return {
+        ...item,
+        grade,
+        topic,
+        pedagogicalScore,
+        chapterMeta
+      };
+    }
+
     function getMaterialPedagogicalScore(item) {
-      const t = (item.title + ' ' + (item.topic || '') + ' ' + (item.url || '')).toLowerCase();
-      // Kelas 10 Bab 1: Struktur Atom
-      if (t.includes('bohr')) return 1010;
-      if (t.includes('bilangan kuantum')) return 1030;
-      if (t.includes('mekanika kuantum') || t.includes('konfigurasi kuantum') || (t.includes('konfigurasi') && !t.includes('bohr'))) return 1020;
-      if (t.includes('orbital')) return 1030;
-      
-      // Kelas 10 Bab 2: SPU
-      if (t.includes('sejarah') || t.includes('dobereiner') || t.includes('mendeleev') || t.includes('perkembangan')) return 1040;
-      if (t.includes('periode') || t.includes('golongan')) return 1050;
-      if (t.includes('sifat') || t.includes('keperiodikan') || t.includes('ionisasi') || t.includes('elektronegatif')) return 1060;
-      
-      // Kelas 11
-      if (t.includes('titrasi') || t.includes('asam basa')) return 1110;
-      if (t.includes('termo') || t.includes('kalor') || t.includes('entalpi') || t.includes('lkpd')) return 1120;
-      
-      // Kelas 12
-      if (t.includes('slide') && t.includes('volta')) return 1210;
-      if (t.includes('volta') || t.includes('galvani')) return 1220;
-      if (t.includes('elektrolisis') || t.includes('faraday')) return 1230;
-      
-      return 9999;
+      if (item && item.pedagogicalScore) return item.pedagogicalScore;
+      return normalizeMaterialCurriculum(item).pedagogicalScore;
     }
 
     function getMaterialChapter(item) {
-      const t = (item.title + ' ' + (item.topic || '') + ' ' + (item.description || '')).toLowerCase();
-      const g = (item.grade || '').toLowerCase();
-      
-      if (g.includes('10') || t.includes('bohr') || t.includes('kuantum') || t.includes('spu') || t.includes('periode') || t.includes('mendeleev') || t.includes('sifat') || t.includes('keperiodikan')) {
-        const isBab1 = (t.includes('bohr') || t.includes('bilangan kuantum') || t.includes('orbital') || (t.includes('konfigurasi') && !t.includes('periode'))) && !t.includes('sejarah') && !t.includes('sifat');
-        if (!isBab1 && (t.includes('spu') || t.includes('periode') || t.includes('golongan') || t.includes('mendeleev') || t.includes('dobereiner') || t.includes('tabel periodik') || t.includes('sifat') || t.includes('keperiodikan'))) {
-          return {
-            id: 'k10-bab2',
-            name: 'Bab 2: Sistem Periodik Unsur (SPU)',
-            desc: 'Evolusi penataan tabel periodik, penentuan letak periode & golongan, serta tren sifat keperiodikan unsur',
-            icon: 'table_chart',
-            order: 2
-          };
-        }
-        return {
-          id: 'k10-bab1',
-          name: 'Bab 1: Struktur Atom & Konfigurasi Elektron',
-          desc: 'Model atom Bohr, konfigurasi subkulit mekanika kuantum, dan 4 bilangan kuantum',
-          icon: 'blur_on',
-          order: 1
-        };
-      }
-      
-      if (g.includes('11') || t.includes('titrasi') || t.includes('asam') || t.includes('termo')) {
-        if (t.includes('termo') || t.includes('kalor') || t.includes('entalpi') || t.includes('lkpd')) {
-          return {
-            id: 'k11-bab2',
-            name: 'Bab 2: Termokimia & Energi Reaksi',
-            desc: 'Perubahan entalpi reaksi, reaksi eksoterm-endoterm, dan kalorimeter',
-            icon: 'local_fire_department',
-            order: 2
-          };
-        }
-        return {
-          id: 'k11-bab1',
-          name: 'Bab 1: Larutan Asam Basa & Titrasi',
-          desc: 'Konsep netralisasi, kurva titrasi pH analitik, dan indikator asam-basa',
-          icon: 'science',
-          order: 1
-        };
-      }
-      
-      if (g.includes('12') || t.includes('volta') || t.includes('elektrolisis') || t.includes('redoks')) {
-        return {
-          id: 'k12-bab1',
-          name: 'Bab 1: Reaksi Redoks & Sel Elektrokimia',
-          desc: 'Prinsip sel Volta spontan, sel elektrolisis industri, deret volta, dan Hukum Faraday',
-          icon: 'bolt',
-          order: 1
-        };
-      }
-      
-      return {
-        id: 'umum-lab',
-        name: 'Laboratorium Virtual & Pengayaan Terbuka',
-        desc: 'Simulasi dan eksplorasi laboratorium kimia interaktif mandiri lintas jenjang',
-        icon: 'biotech',
-        order: 1
-      };
+      if (item && item.chapterMeta) return item.chapterMeta;
+      return normalizeMaterialCurriculum(item).chapterMeta;
     }
 
     function getCustomLearningOrder() {
