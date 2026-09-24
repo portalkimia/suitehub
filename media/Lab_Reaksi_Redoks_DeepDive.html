@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Lab: Reaksi Redoks & Penyetaraan • PortalKimia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-space: #090d16;
+      --bg-bench: #131926;
+      --bg-panel: rgba(19, 25, 38, 0.92);
+      --bg-glass: rgba(28, 36, 54, 0.7);
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-bright: rgba(192, 132, 252, 0.4);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #a855f7;
+      --primary-hover: #9333ea;
+      --primary-glow: rgba(168, 85, 247, 0.35);
+      --accent-cyan: #38bdf8;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --accent-purple: #c084fc;
+      --lcd-bg: #03140f;
+      --lcd-text: #10f2a7;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.6);
+      --font-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === HEADER LAB BAR === */
+    header.lab-header {
+      background: rgba(15, 20, 31, 0.96);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #a855f7, #c084fc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 18px var(--primary-glow);
+    }
+
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+
+    .brand-title h1 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title h1 span.badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid var(--border-bright);
+      color: #e9d5ff;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-header {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .btn-header.primary {
+      background: linear-gradient(135deg, #a855f7, #9333ea);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .btn-header.primary:hover {
+      box-shadow: 0 6px 16px rgba(168, 85, 247, 0.5);
+    }
+
+    /* === MAIN LAYOUT CONTAINER === */
+    main.lab-workbench {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 350px 1fr 380px;
+      gap: 16px;
+      padding: 16px 20px;
+      max-width: 1740px;
+      margin: 0 auto;
+      width: 100%;
+      height: calc(100vh - 67px);
+      min-height: 720px;
+    }
+
+    /* Common Glass Panel */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-header h2 svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--primary);
+    }
+
+    .panel-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Redox System Selector Grid */
+    .system-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .btn-system {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 9px 8px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-system:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-system.active {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(168, 85, 247, 0.1));
+      border: 1px solid var(--border-bright);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-system .sys-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .btn-system.active .sys-title {
+      color: #e9d5ff;
+    }
+
+    .btn-system .sys-formula {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    /* Card Controls */
+    .card-control {
+      background: #0d131f;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .control-label span.val {
+      font-family: var(--font-mono);
+      color: #c084fc;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #a855f7;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--primary-glow);
+      border: 2px solid #fff;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Balancing Mode Selector Tabs (Metode Setengah Reaksi vs PBO) */
+    .balance-tab-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: #0f1624;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-glass);
+    }
+
+    .balance-tab-btn {
+      padding: 8px 6px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .balance-tab-btn.active {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(168, 85, 247, 0.1));
+      border: 1px solid var(--border-bright);
+      color: #e9d5ff;
+    }
+
+    /* Biloks Tracking Board */
+    .biloks-board {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .biloks-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+    }
+
+    .biloks-badge {
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 9px;
+    }
+
+    .badge-ox { background: rgba(244, 63, 94, 0.2); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.4); }
+    .badge-red { background: rgba(56, 189, 248, 0.2); color: #bae6fd; border: 1px solid rgba(56, 189, 248, 0.4); }
+
+    /* === CENTER STAGE (APPARATUS STUDIO & SUB-MICROSCOPIC VIEW) === */
+    section.lab-center-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    /* Top: Molecular Redox Canvas 2D */
+    .mol-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .mol-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mol-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mol-title svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--accent-cyan);
+    }
+
+    .mol-viewport-wrap {
+      display: grid;
+      grid-template-columns: 1fr 160px;
+      gap: 10px;
+      height: 115px;
+    }
+
+    canvas#molCanvas {
+      width: 100%;
+      height: 100%;
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+    }
+
+    /* Redox Transfer Mini Card */
+    .redox-info-card {
+      background: #080d1a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 9px;
+      font-family: var(--font-mono);
+      line-height: 1.4;
+    }
+
+    /* Main Apparatus Studio Viewport */
+    .apparatus-studio {
+      flex: 1;
+      background: radial-gradient(circle at 50% 30%, #172033 0%, #0c111c 100%);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Benchtop Surface Base */
+    .benchtop-surface {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border-top: 2px solid #334155;
+      box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    /* SVG Apparatus Canvas */
+    svg.apparatus-svg {
+      width: 100%;
+      height: 100%;
+      max-height: 480px;
+      z-index: 10;
+    }
+
+    /* Floating Workbench Control Bar */
+    .bench-control-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-glass);
+      padding: 8px 16px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 30;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .btn-act {
+      border: 1px solid var(--border-glass);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-act:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .btn-act.btn-titrate {
+      background: linear-gradient(135deg, #a855f7, #9333ea);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .control-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* === RIGHT PANEL (DIGITAL COLORIMETER, BALANCING MATH & DATA LOG) === */
+    /* Digital Colorimeter & Redox Meter */
+    .lcd-meter-box {
+      background: #020907;
+      border: 2px solid #064e3b;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.95);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lcd-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(16, 242, 167, 0.6);
+      letter-spacing: 1px;
+    }
+
+    .lcd-digits-large {
+      font-family: var(--font-mono);
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 14px rgba(16, 242, 167, 0.7);
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+
+    .lcd-status-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(16, 242, 167, 0.15);
+      color: #10f2a7;
+    }
+
+    .lcd-status-badge.endpoint {
+      background: rgba(244, 63, 94, 0.25);
+      color: #fda4af;
+    }
+
+    /* Balanced Equation Board */
+    .balance-board-card {
+      background: #0d131f;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .balance-check-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .balance-pill {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 5px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+    }
+
+    /* Live Absorbance Curve Chart Box */
+    .chart-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+
+    .chart-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    canvas#redoxChart {
+      width: 100%;
+      height: 155px;
+      border-radius: 6px;
+      background: #030712;
+    }
+
+    /* Data Table Log */
+    .log-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 120px;
+    }
+
+    .log-table-wrap {
+      overflow-y: auto;
+      flex: 1;
+      max-height: 135px;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    table.data-table th {
+      background: #111723;
+      padding: 6px 8px;
+      text-align: left;
+      color: #94a3b8;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      font-size: 10px;
+    }
+
+    table.data-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      font-size: 10px;
+    }
+
+    table.data-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* MODAL STYLES */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      max-width: 620px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #a855f7;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-card p, .modal-card ul {
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .modal-card ul {
+      padding-left: 20px;
+    }
+
+    .modal-card li {
+      margin-bottom: 6px;
+    }
+
+    /* FLOATING TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--primary);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 200;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 1280px) {
+      main.lab-workbench {
+        grid-template-columns: 320px 1fr 350px;
+      }
+    }
+    @media (max-width: 1080px) {
+      body { overflow-y: auto; }
+      main.lab-workbench {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .apparatus-studio { height: 440px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER LAB -->
+  <header class="lab-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <h1>
+          Virtual Lab: Reaksi Redoks &amp; Penyetaraan
+          <span class="badge">Standar PhET / Labster</span>
+        </h1>
+        <p>Eksperimen Titrasi Permanganometri, Analisis Bilangan Oksidasi, &amp; Penyetaraan Reaksi Redoks</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" id="btn-sound-toggle" title="Nyalakan/Matikan Suara">
+        <svg id="sound-icon-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+        <span id="sound-text">Suara: ON</span>
+      </button>
+
+      <button class="btn-header" id="btn-guide-modal">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        Panduan Lab
+      </button>
+
+      <button class="btn-header" id="btn-export-csv" title="Ekspor Data Pengamatan ke Format CSV">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Ekspor CSV
+      </button>
+
+      <button class="btn-header primary" id="btn-reset-all" title="Reset Titran & Bersihkan Reaktor">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Reset Reaksi
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN LAB WORKBENCH -->
+  <main class="lab-workbench">
+
+    <!-- LEFT PANEL: SYSTEM SELECTION & BALANCING CONTROLS -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Sistem Redoks &amp; Penyetaraan
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- 1. System Selection -->
+        <div>
+          <div class="section-title">Pilih Reaksi Redoks:</div>
+          <div class="system-grid">
+            <button class="btn-system active" data-sys="permanganate_fe">
+              <span class="sys-title">1. Permanganometri</span>
+              <span class="sys-formula">MnO₄⁻ + Fe²⁺ (Asam)</span>
+            </button>
+            <button class="btn-system" data-sys="dichromate_alcohol">
+              <span class="sys-title">2. Dikromat + Alkohol</span>
+              <span class="sys-formula">Cr₂O₇²⁻ + C₂H₅OH</span>
+            </button>
+            <button class="btn-system" data-sys="autoredox_cl2">
+              <span class="sys-title">3. Autoredoks Klorin</span>
+              <span class="sys-formula">Cl₂ + OH⁻ &rarr; Cl⁻ + ClO⁻</span>
+            </button>
+            <button class="btn-system" data-sys="zinc_copper">
+              <span class="sys-title">4. Reduksi Cu²⁺ oleh Zn</span>
+              <span class="sys-formula">Zn(s) + Cu²⁺(aq)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Interactive Redox Titration / Reagent Addition Slider -->
+        <div class="card-control" id="card-titration-control">
+          <div class="section-title">
+            <span id="label-reagent-volume-title">Volume Titran KMnO₄ Ditambahkan:</span>
+            <span id="label-equivalence-target" style="color: #38bdf8; font-family: var(--font-mono); font-size: 10px;">Titik Akhir: 20.0 mL</span>
+          </div>
+          <div class="control-row">
+            <div class="control-label">
+              <span>Volume Buret (V)</span>
+              <span class="val" id="val-buret-vol">0.0 mL</span>
+            </div>
+            <input type="range" id="slider-buret-vol" min="0" max="30" step="0.5" value="0">
+            <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; font-family: var(--font-mono);">
+              <span>0 mL (Awal)</span>
+              <span>20 mL (Ekuivalen)</span>
+              <span>30 mL (Kelebihan)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Balancing Method Tabs (Setengah Reaksi vs PBO) -->
+        <div class="card-control">
+          <div class="section-title">Metode Penyetaraan Redoks:</div>
+          <div class="balance-tab-group">
+            <button class="balance-tab-btn active" id="tab-method-ion">Metode Setengah Reaksi</button>
+            <button class="balance-tab-btn" id="tab-method-pbo">Metode Biloks (PBO)</button>
+          </div>
+        </div>
+
+        <!-- 4. Biloks & Half-Reaction Tracking Board -->
+        <div class="biloks-board" id="biloks-tracking-board">
+          <div style="font-weight: 700; color: #a855f7; font-size: 10px; margin-bottom: 2px;">
+            ANALISIS PERUBAHAN BILOKS:
+          </div>
+          <div class="biloks-row">
+            <span id="biloks-ox-label">Mn: +7 (MnO₄⁻) &rarr; +2 (Mn²⁺)</span>
+            <span class="biloks-badge badge-red">REDUKSI (&Delta; = -5)</span>
+          </div>
+          <div class="biloks-row">
+            <span id="biloks-red-label">Fe: +2 (Fe²⁺) &rarr; +3 (Fe³⁺)</span>
+            <span class="biloks-badge badge-ox">OKSIDASI (&Delta; = +1)</span>
+          </div>
+          <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px; font-size: 9px; color: #94a3b8;" id="biloks-electron-balance">
+            Faktor Pengali Silang: Reduksi &times; 1, Oksidasi &times; 5 (5e⁻ terlibat)
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- CENTER STAGE: SUB-MICROSCOPIC MOLECULES & APPARATUS STUDIO -->
+    <section class="lab-center-stage">
+
+      <!-- TOP: 2D ATOMIC ELECTRON EXCHANGE CANVAS -->
+      <div class="mol-box">
+        <div class="mol-header">
+          <div class="mol-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Jendela Molekuler 2D: Transfer Elektron Spontan
+          </div>
+          <div style="font-size: 10px; color: var(--text-muted); display: flex; gap: 10px;">
+            <span style="color: #fda4af;">&bull; Oksidator (Menerima e⁻)</span>
+            <span style="color: #38bdf8;">&bull; Reduktor (Melepas e⁻)</span>
+          </div>
+        </div>
+
+        <div class="mol-viewport-wrap">
+          <canvas id="molCanvas" width="480" height="115"></canvas>
+          <div class="redox-info-card">
+            <div>
+              <span style="color: #94a3b8; display: block; margin-bottom: 2px;">STATUS TITRASI REDOKS:</span>
+              <span id="val-titration-status" style="color: #10f2a7; font-weight: 700; font-size: 11px;">Sebelum Titik Akhir</span>
+            </div>
+            <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+              <span style="color: #94a3b8; display: block; margin-bottom: 2px;">FRAKSI TEREDUKSI:</span>
+              <span id="val-reduced-fraction" style="color: #38bdf8; font-weight: 700;">0.0 %</span>
+            </div>
+            <div style="font-size: 8px; color: #64748b;">
+              Perubahan warna menunjukkan titik ekuivalen redoks.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN APPARATUS STUDIO -->
+      <div class="apparatus-studio" id="studio-container">
+
+        <!-- SVG APPARATUS CANVAS -->
+        <svg class="apparatus-svg" viewBox="0 0 700 480" id="apparatus-svg">
+          <defs>
+            <!-- Liquids & Glass Shading -->
+            <linearGradient id="purpleKMnO4Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#9333ea"/>
+              <stop offset="100%" stop-color="#581c87"/>
+            </linearGradient>
+
+            <linearGradient id="orangeCr2O7Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#ea580c"/>
+              <stop offset="100%" stop-color="#c2410c"/>
+            </linearGradient>
+
+            <linearGradient id="greenCr3Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#10b981"/>
+              <stop offset="100%" stop-color="#047857"/>
+            </linearGradient>
+
+            <linearGradient id="glassShine" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
+              <stop offset="15%" stop-color="rgba(255,255,255,0.08)"/>
+              <stop offset="85%" stop-color="rgba(255,255,255,0.04)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0.3)"/>
+            </linearGradient>
+          </defs>
+
+          <!-- 1. RETORT STAND & BURETTE ASSEMBLY (Titrasi Permanganometri) -->
+          <g id="apparatus-buret-assembly" transform="translate(300, 20)">
+            <!-- Iron Stand Vertical Rod & Clamp -->
+            <rect x="70" y="20" width="8" height="340" fill="#475569"/>
+            <rect x="20" y="350" width="120" height="14" rx="2" fill="#334155"/>
+            <!-- Burette Clamp Arm -->
+            <rect x="30" y="110" width="45" height="10" fill="#64748b"/>
+            <circle cx="30" cy="115" r="7" fill="#475569"/>
+
+            <!-- 50 mL Glass Burette Tube -->
+            <rect x="22" y="20" width="16" height="230" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+            <!-- Titrant Liquid inside Burette (Drops with added volume) -->
+            <rect id="buret-liquid-column" x="24" y="30" width="12" height="210" fill="url(#purpleKMnO4Grad)"/>
+
+            <!-- Burette Scale Marks -->
+            <line x1="22" y1="50" x2="28" y2="50" stroke="#fff" stroke-width="1"/>
+            <line x1="22" y1="100" x2="28" y2="100" stroke="#fff" stroke-width="1"/>
+            <line x1="22" y1="150" x2="28" y2="150" stroke="#fff" stroke-width="1"/>
+            <line x1="22" y1="200" x2="28" y2="200" stroke="#fff" stroke-width="1"/>
+
+            <!-- Stopcock Valve Handle (Rotates) -->
+            <g id="stopcock-valve" transform="translate(30, 252)">
+              <rect x="-8" y="-3" width="16" height="6" rx="2" fill="#38bdf8"/>
+              <line x1="0" y1="3" x2="0" y2="18" stroke="rgba(255,255,255,0.85)" stroke-width="2.5"/>
+            </g>
+
+            <!-- Falling Droplet Animation -->
+            <circle id="buret-falling-drop" cx="30" cy="275" r="2.5" fill="#9333ea" opacity="0"/>
+          </g>
+
+          <!-- 2. ERLENMEYER FLASK & MAGNETIC STIRRER (Di Bawah Buret) -->
+          <g id="erlenmeyer-reactor" transform="translate(270, 220)">
+            <!-- Magnetic Stirrer Plate Base -->
+            <rect x="-10" y="180" width="140" height="24" rx="4" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+            <circle cx="105" cy="192" r="5" fill="#38bdf8"/>
+
+            <!-- Erlenmeyer Glass Body -->
+            <!-- Liquid Body (Transforms Color Live) -->
+            <path id="flask-liquid" d="M 32 90 L 88 90 L 126 175 C 128 184, 120 190, 105 190 L 15 190 C 0 190, -8 184, -6 175 Z"
+                  fill="rgba(241, 245, 249, 0.25)"/>
+
+            <!-- Rotating Magnetic Stirrer Bar -->
+            <rect id="stirrer-bar" x="50" y="182" width="20" height="5" rx="2.5" fill="#fff"/>
+
+            <!-- Flask Glass Walls Outline -->
+            <rect x="42" y="30" width="36" height="60" fill="url(#glassShine)" stroke="rgba(255,255,255,0.75)" stroke-width="2"/>
+            <ellipse cx="60" cy="30" rx="20" ry="5" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+            <path d="M 42 90 L -8 178 C -12 188, -2 194, 12 194 L 108 194 C 122 194, 132 188, 128 178 L 78 90"
+                  fill="url(#glassShine)" stroke="rgba(255,255,255,0.75)" stroke-width="2.2"/>
+
+            <text id="flask-solution-label" x="60" y="225" fill="#94a3b8" font-size="9" font-family="monospace" text-anchor="middle">Larutan FeSO₄ + H₂SO₄</text>
+          </g>
+        </svg>
+
+        <!-- Surface Benchtop Base -->
+        <div class="benchtop-surface"></div>
+
+        <!-- Floating Tactile Control Bar -->
+        <div class="bench-control-bar">
+          <button class="btn-act btn-titrate" id="btn-add-drop" title="Teteskan 0.5 mL Titran ke Erlenmeyer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+            </svg>
+            Teteskan Titran (+0.5 mL)
+          </button>
+
+          <button class="btn-act" id="btn-auto-titrate" title="Jalankan Titrasi Otomatis hingga Titik Akhir">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Titrasi Cepat
+          </button>
+
+          <div class="control-divider"></div>
+
+          <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; color: #94a3b8;">
+            <span>STATUS WARNA:</span>
+            <span id="endpoint-color-status" style="color: #10f2a7; font-weight: 700;">BENING (SEBELUM TE)</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: BALANCED EQUATION, COLOR SENSOR & DATA LOG -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          Sensor Absorbansi &amp; Penyetaraan
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- Digital Colorimeter Sensor Device -->
+        <div class="lcd-meter-box">
+          <div class="lcd-top-bar">
+            <span>COLORIMETER (ABSORBANSI TITRAN)</span>
+            <span class="lcd-status-badge" id="badge-redox-status">BERJALAN</span>
+          </div>
+          <div class="lcd-digits-large" id="lcd-absorbance-val">0.005 A</div>
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748b; font-family: var(--font-mono);">
+            <span>Titik Akhir: 20.0 mL</span>
+            <span id="lcd-color-hex" style="color: #a855f7;">Warna: Bening Jernih</span>
+          </div>
+        </div>
+
+        <!-- Balanced Redox Equation Board -->
+        <div class="balance-board-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; color: #e2e8f0; font-size: 10px;">PERSAMAAN REAKSI SETARA:</span>
+            <span style="color: #10f2a7; font-weight: 700; font-size: 9px;">&check; SETARA</span>
+          </div>
+          <div id="full-balanced-equation" style="color: #e9d5ff; font-weight: 700; font-size: 11px; margin: 4px 0; line-height: 1.4;">
+            MnO₄⁻ + 5Fe²⁺ + 8H⁺ &rarr; Mn²⁺ + 5Fe³⁺ + 4H₂O
+          </div>
+          <!-- Conservation verification checks -->
+          <div class="balance-check-grid">
+            <div class="balance-pill">
+              <span style="color: #94a3b8;">Kekekalan Massa:</span>
+              <span style="color: #10f2a7; font-weight: 700;">&check; 100% Cocok</span>
+            </div>
+            <div class="balance-pill">
+              <span style="color: #94a3b8;">Kekekalan Muatan:</span>
+              <span style="color: #10f2a7; font-weight: 700;">&check; +17 = +17</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Absorbance Curve Chart Box -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <span class="chart-title">Kurva Titrasi Redoks (Absorbansi vs Vol)</span>
+            <button id="btn-save-chart" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 10px;" title="Unduh Gambar PNG">
+              Unduh PNG
+            </button>
+          </div>
+          <canvas id="redoxChart" width="340" height="155"></canvas>
+          <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; font-family: var(--font-mono); padding: 0 4px;">
+            <span>0 mL</span>
+            <span>20 mL (TE)</span>
+            <span>30 mL</span>
+          </div>
+        </div>
+
+        <!-- Data Table Log -->
+        <div class="log-box">
+          <div style="padding: 6px 10px; background: #0f1624; border-bottom: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Riwayat Eksperimen Redoks</span>
+            <button id="btn-clear-log" style="background: none; border: none; color: #ef4444; font-size: 10px; cursor: pointer;">Hapus</button>
+          </div>
+          <div class="log-table-wrap">
+            <table class="data-table" id="table-log">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Sistem Redoks</th>
+                  <th>Vol Titran</th>
+                  <th>Absorbansi</th>
+                  <th>Warna Akhir</th>
+                </tr>
+              </thead>
+              <tbody id="table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- MODAL PANDUAN PRAKTIKUM -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal-card">
+      <h3>⚗️ Panduan Praktikum Virtual Reaksi Redoks &amp; Penyetaraan</h3>
+      <p>Praktikum ini menyajikan simulasi laboratorium reaksi reduksi-oksidasi analitik dan penyetaraan reaksi redoks:</p>
+      <ul>
+        <li><b>Konsep Reaksi Redoks:</b> Reaksi yang melibatkan perpindahan elektron antar zat. 
+          Oksidasi adalah pelepasan elektron (kenaikan bilangan oksidasi), sedangkan Reduksi adalah penangkapan elektron (penurunan bilangan oksidasi).
+        </li>
+        <li><b>Titrasi Permanganometri:</b> Menggunakan kalium permanganat ($\text{KMnO}_4$) sebagai oksidator kuat berwana ungu tua. 
+          $\text{KMnO}_4$ bertindak sebagai <i>auto-indikator</i>: selama larutan analit ($\text{Fe}^{2+}$) masih ada, warna ungu seketika hilang karena tereduksi menjadi $\text{Mn}^{2+}$ (tidak berwarna). 
+          Saat seluruh $\text{Fe}^{2+}$ habis teroksidasi, kelebihan satu tetes $\text{KMnO}_4$ membuat larutan berubah menjadi merah muda stabil (titik akhir titrasi).
+        </li>
+        <li><b>Metode Setengah Reaksi (Ion-Elektron):</b>
+          1. Pisahkan reaksi menjadi setengah reaksi reduksi dan oksidasi.<br>
+          2. Setarakan atom selain H dan O.<br>
+          3. Setarakan atom O dengan menambahkan $\text{H}_2\text{O}$, lalu atom H dengan $\text{H}^+$ (suasana asam).<br>
+          4. Setarakan muatan listrik dengan menambahkan elektron ($e^-$).<br>
+          5. Samakan jumlah elektron di kedua setengah reaksi dan jumlahkan!
+        </li>
+        <li><b>Uji Alkohol dengan Dikromat ($\text{K}_2\text{Cr}_2\text{O}_7$):</b> Reaksi uji alkohol (prinsip alat <i>Breathalyzer</i> kepolisian): ion dikromat jingga $\text{Cr}_2\text{O}_7^{2-}$ tereduksi menjadi ion $\text{Cr}^{3+}$ yang berwarna hijau zamrud.</li>
+      </ul>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-act btn-primary" id="btn-close-modal" style="padding: 8px 20px;">Tutup &amp; Mulai Praktikum</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST -->
+  <div class="toast" id="toastBox">Notifikasi</div>
+
+  <!-- JAVASCRIPT: ENGINE & SOUND SYNTHESIS -->
+  <script>
+    'use strict';
+
+    /* =========================================================================
+     * 1. NATIVE WEB AUDIO API SYNTHESIZER
+     * ========================================================================= */
+    class RedoxAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playDropSound() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(480, now);
+        osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.18);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      }
+
+      playEndpointChime() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const freqs = [523.25, 659.25, 783.99, 1046.50]; // C-E-G-C
+        const now = this.ctx.currentTime;
+
+        freqs.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const startTime = now + idx * 0.08;
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.12, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.4);
+        });
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        return !this.muted;
+      }
+    }
+
+    const sound = new RedoxAudioEngine();
+
+    /* =========================================================================
+     * 2. REDOX SYSTEMS DATA & EQUATIONS
+     * ========================================================================= */
+    const REDOX_SYSTEMS = {
+      permanganate_fe: {
+        id: 'permanganate_fe',
+        name: 'Sistem 1: Permanganometri',
+        titrantName: 'KMnO₄ 0.05 M',
+        analyteName: 'FeSO₄ 0.10 M',
+        eqBalanced: 'MnO₄⁻ + 5Fe²⁺ + 8H⁺ &rarr; Mn²⁺ + 5Fe³⁺ + 4H₂O',
+        biloksOx: 'Mn: +7 (MnO₄⁻) &rarr; +2 (Mn²⁺) [Reduksi Δ = -5]',
+        biloksRed: 'Fe: +2 (Fe²⁺) &rarr; +3 (Fe³⁺) [Oksidasi Δ = +1]',
+        factorMult: 'Faktor Pengali: Reduksi &times; 1, Oksidasi &times; 5 (5e⁻ terlibat)',
+        chargeLeft: '+17',
+        chargeRight: '+17',
+        eqPointMl: 20.0,
+        colorPre: 'rgba(241, 245, 249, 0.25)',
+        colorPost: 'rgba(236, 72, 153, 0.45)' // Faint pink
+      },
+      dichromate_alcohol: {
+        id: 'dichromate_alcohol',
+        name: 'Sistem 2: Dikromat + Alkohol',
+        titrantName: 'K₂Cr₂O₇ 0.05 M',
+        analyteName: 'Etanol C₂H₅OH',
+        eqBalanced: 'Cr₂O₇²⁻ + 3C₂H₅OH + 8H⁺ &rarr; 2Cr³⁺ + 3CH₃CHO + 7H₂O',
+        biloksOx: 'Cr: +6 (Cr₂O₇²⁻) &rarr; +3 (Cr³⁺) [Reduksi Δ = -3 &times; 2]',
+        biloksRed: 'C: -2 (Etanol) &rarr; 0 (Asetaldehida) [Oksidasi Δ = +2]',
+        factorMult: 'Faktor Pengali: Reduksi &times; 1, Oksidasi &times; 3 (6e⁻ terlibat)',
+        chargeLeft: '+6',
+        chargeRight: '+6',
+        eqPointMl: 15.0,
+        colorPre: 'rgba(234, 88, 12, 0.55)', // Orange
+        colorPost: 'rgba(16, 185, 129, 0.65)' // Emerald Green
+      },
+      autoredox_cl2: {
+        id: 'autoredox_cl2',
+        name: 'Sistem 3: Autoredoks Klorin',
+        titrantName: 'Larutan NaOH 0.1 M',
+        analyteName: 'Gas Klorin Cl₂',
+        eqBalanced: 'Cl₂ + 2OH⁻ &rarr; Cl⁻ + ClO⁻ + H₂O',
+        biloksOx: 'Cl₂: 0 &rarr; +1 (ClO⁻) [Oksidasi Δ = +1]',
+        biloksRed: 'Cl₂: 0 &rarr; -1 (Cl⁻) [Reduksi Δ = -1]',
+        factorMult: 'Disproporsionasi Klorin: 1e⁻ berpindah antar atom klorin yang sama',
+        chargeLeft: '-2',
+        chargeRight: '-2',
+        eqPointMl: 20.0,
+        colorPre: 'rgba(254, 240, 138, 0.35)', // Yellowish Cl2
+        colorPost: 'rgba(241, 245, 249, 0.2)'  // Clear bleach
+      },
+      zinc_copper: {
+        id: 'zinc_copper',
+        name: 'Sistem 4: Reduksi Cu²⁺ oleh Zn',
+        titrantName: 'Penambahan Serbuk Zn',
+        analyteName: 'Larutan CuSO₄ 0.1 M',
+        eqBalanced: 'Zn(s) + Cu²⁺(aq) &rarr; Zn²⁺(aq) + Cu(s)',
+        biloksOx: 'Cu: +2 (Cu²⁺) &rarr; 0 (Cu) [Reduksi Δ = -2]',
+        biloksRed: 'Zn: 0 &rarr; +2 (Zn²⁺) [Oksidasi Δ = +2]',
+        factorMult: 'Reaksi Redoks Sederhana: 2e⁻ berpindah dari Zn ke Cu²⁺',
+        chargeLeft: '+2',
+        chargeRight: '+2',
+        eqPointMl: 20.0,
+        colorPre: 'rgba(56, 189, 248, 0.55)', // Deep Blue Cu2+
+        colorPost: 'rgba(241, 245, 249, 0.2)'  // Clear Zn2+ + Cu precipitate
+      }
+    };
+
+    /* Simulation Runtime State */
+    const state = {
+      systemKey: 'permanganate_fe',
+      volumeAddedMl: 0.0,
+      activeMethod: 'ion', // 'ion' or 'pbo'
+      isStirring: true,
+      stirAngle: 0,
+      hasEndpointTriggered: false,
+
+      // Calculated analytics
+      absorbance: 0.005,
+      percentReduced: 0,
+
+      // Sub-microscopic particles
+      particles: [],
+
+      // Time series
+      chartPoints: [], // { vol, abs }
+      tableLog: []
+    };
+
+    /* =========================================================================
+     * 3. SUB-MICROSCOPIC MOLECULAR 2D CANVAS
+     * ========================================================================= */
+    class SubmicroscopicRedoxSimulator {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.init();
+      }
+
+      init() {
+        this.particles = [];
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        for (let i = 0; i < 28; i++) {
+          this.particles.push({
+            x: 20 + Math.random() * (w - 40),
+            y: 20 + Math.random() * (h - 40),
+            vx: (Math.random() - 0.5) * 1.6,
+            vy: (Math.random() - 0.5) * 1.6,
+            r: 4.5,
+            isOxidant: (i % 2 === 0)
+          });
+        }
+      }
+
+      update() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        for (let i = 0; i < this.particles.length; i++) {
+          const p = this.particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x - p.r < 10) { p.x = 10 + p.r; p.vx *= -1; }
+          if (p.x + p.r > w - 10) { p.x = w - 10 - p.r; p.vx *= -1; }
+          if (p.y - p.r < 10) { p.y = 10 + p.r; p.vy *= -1; }
+          if (p.y + p.r > h - 10) { p.y = h - 10 - p.r; p.vy *= -1; }
+        }
+      }
+
+      draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        for (let i = 0; i < this.particles.length; i++) {
+          const p = this.particles[i];
+          this.ctx.beginPath();
+          this.ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+
+          if (p.isOxidant) {
+            this.ctx.fillStyle = '#c084fc';
+            this.ctx.shadowColor = 'rgba(192, 132, 252, 0.6)';
+          } else {
+            this.ctx.fillStyle = '#38bdf8';
+            this.ctx.shadowColor = 'rgba(56, 189, 248, 0.6)';
+          }
+          this.ctx.shadowBlur = 6;
+          this.ctx.fill();
+          this.ctx.shadowBlur = 0;
+        }
+      }
+    }
+
+    /* =========================================================================
+     * 4. LIVE REDOX TITRATION ABSORBANCE CHART CANVAS
+     * ========================================================================= */
+    class RedoxChartRenderer {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+      }
+
+      render() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const padL = 36;
+        const padR = 14;
+        const padT = 16;
+        const padB = 24;
+
+        this.ctx.clearRect(0, 0, w, h);
+
+        // Grid lines (Absorbance 0.00 to 1.50)
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        this.ctx.lineWidth = 1;
+
+        for (let i = 0; i <= 3; i++) {
+          const y = padT + (i / 3) * (h - padT - padB);
+          this.ctx.beginPath();
+          this.ctx.moveTo(padL, y);
+          this.ctx.lineTo(w - padR, y);
+          this.ctx.stroke();
+
+          this.ctx.fillStyle = '#64748b';
+          this.ctx.font = '8px monospace';
+          this.ctx.textAlign = 'right';
+          const val = (1.50 - i * 0.50).toFixed(2);
+          this.ctx.fillText(`${val}A`, padL - 4, y + 3);
+        }
+
+        // X-axis: 0 to 30 mL
+        for (let i = 0; i <= 6; i++) {
+          const x = padL + (i / 6) * (w - padL - padR);
+          this.ctx.beginPath();
+          this.ctx.moveTo(x, padT);
+          this.ctx.lineTo(x, h - padB);
+          this.ctx.stroke();
+
+          this.ctx.fillStyle = '#64748b';
+          this.ctx.font = '8px monospace';
+          this.ctx.textAlign = 'center';
+          const volVal = Math.round(i * 5);
+          this.ctx.fillText(`${volVal}mL`, x, h - 8);
+        }
+
+        if (state.chartPoints.length < 2) return;
+
+        // Draw Absorbance Curve
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = '#c084fc';
+        this.ctx.lineWidth = 2.5;
+
+        state.chartPoints.forEach((pt, idx) => {
+          const x = padL + (pt.vol / 30.0) * (w - padL - padR);
+          const y = (h - padB) - (Math.min(1.5, pt.abs) / 1.5) * (h - padT - padB);
+          if (idx === 0) this.ctx.moveTo(x, y);
+          else this.ctx.lineTo(x, y);
+        });
+        this.ctx.stroke();
+
+        // Tip glow dot
+        const lastPt = state.chartPoints[state.chartPoints.length - 1];
+        const lastX = padL + (lastPt.vol / 30.0) * (w - padL - padR);
+        const lastY = (h - padB) - (Math.min(1.5, lastPt.abs) / 1.5) * (h - padT - padB);
+
+        this.ctx.beginPath();
+        this.ctx.arc(lastX, lastY, 5, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#c084fc';
+        this.ctx.shadowColor = '#c084fc';
+        this.ctx.shadowBlur = 8;
+        this.ctx.fill();
+        this.ctx.shadowBlur = 0;
+      }
+    }
+
+    /* =========================================================================
+     * 5. APPARATUS CONTROLLER & EXPERIMENT LOGIC
+     * ========================================================================= */
+    let molSim = null;
+    let chartRenderer = null;
+    let animFrameId = null;
+    let lastTimestamp = 0;
+
+    const el = {
+      btnSystemButtons: document.querySelectorAll('.btn-system'),
+      sliderBuretVol: document.getElementById('slider-buret-vol'),
+      valBuretVol: document.getElementById('val-buret-vol'),
+      labelReagentVolumeTitle: document.getElementById('label-reagent-volume-title'),
+      labelEquivalenceTarget: document.getElementById('label-equivalence-target'),
+
+      tabMethodIon: document.getElementById('tab-method-ion'),
+      tabMethodPbo: document.getElementById('tab-method-pbo'),
+
+      biloksOxLabel: document.getElementById('biloks-ox-label'),
+      biloksRedLabel: document.getElementById('biloks-red-label'),
+      biloksElectronBalance: document.getElementById('biloks-electron-balance'),
+      fullBalancedEquation: document.getElementById('full-balanced-equation'),
+
+      buretLiquidColumn: document.getElementById('buret-liquid-column'),
+      stopcockValve: document.getElementById('stopcock-valve'),
+      buretFallingDrop: document.getElementById('buret-falling-drop'),
+      flaskLiquid: document.getElementById('flask-liquid'),
+      stirrerBar: document.getElementById('stirrer-bar'),
+      flaskSolutionLabel: document.getElementById('flask-solution-label'),
+
+      btnAddDrop: document.getElementById('btn-add-drop'),
+      btnAutoTitrate: document.getElementById('btn-auto-titrate'),
+      endpointColorStatus: document.getElementById('endpoint-color-status'),
+
+      badgeRedoxStatus: document.getElementById('badge-redox-status'),
+      lcdAbsorbanceVal: document.getElementById('lcd-absorbance-val'),
+      lcdColorHex: document.getElementById('lcd-color-hex'),
+      valTitrationStatus: document.getElementById('val-titration-status'),
+      valReducedFraction: document.getElementById('val-reduced-fraction'),
+
+      tableBody: document.getElementById('table-body'),
+      btnClearLog: document.getElementById('btn-clear-log'),
+      btnExportCsv: document.getElementById('btn-export-csv'),
+      btnSaveChart: document.getElementById('btn-save-chart'),
+      btnSoundToggle: document.getElementById('btn-sound-toggle'),
+      soundText: document.getElementById('sound-text'),
+      btnGuideModal: document.getElementById('btn-guide-modal'),
+      guideModal: document.getElementById('guideModal'),
+      btnCloseModal: document.getElementById('btn-close-modal'),
+      btnResetAll: document.getElementById('btn-reset-all'),
+      toastBox: document.getElementById('toastBox')
+    };
+
+    function showToast(msg) {
+      el.toastBox.textContent = msg;
+      el.toastBox.classList.add('show');
+      setTimeout(() => el.toastBox.classList.remove('show'), 3200);
+    }
+
+    /* Titration & Spectrophotometric Engine */
+    function updateRedoxState() {
+      const sys = REDOX_SYSTEMS[state.systemKey];
+      const eqPoint = sys.eqPointMl;
+
+      // Burette physical liquid level (drops from 210px to 0px)
+      const buretHeight = Math.max(0, 210 - (state.volumeAddedMl / 30.0) * 190);
+      el.buretLiquidColumn.setAttribute('height', buretHeight.toFixed(1));
+      el.valBuretVol.textContent = `${state.volumeAddedMl.toFixed(1)} mL`;
+
+      // Percentage toward completion
+      state.percentReduced = Math.min(100.0, (state.volumeAddedMl / eqPoint) * 100.0);
+      el.valReducedFraction.textContent = `${state.percentReduced.toFixed(1)} %`;
+
+      if (state.volumeAddedMl < eqPoint) {
+        // Before Equivalence Point
+        state.absorbance = 0.005 + (state.volumeAddedMl / eqPoint) * 0.04;
+        el.flaskLiquid.setAttribute('fill', sys.colorPre);
+        el.endpointColorStatus.textContent = 'SEBELUM TITIK AKHIR';
+        el.endpointColorStatus.style.color = '#10f2a7';
+        el.badgeRedoxStatus.textContent = 'BERJALAN';
+        el.badgeRedoxStatus.className = 'lcd-status-badge';
+        el.valTitrationStatus.textContent = 'Bereaksi Sempurna (Bening)';
+        el.lcdColorHex.textContent = 'Warna: Bening / Jernih';
+        state.hasEndpointTriggered = false;
+      } else {
+        // Beyond Equivalence Point (Sharp color surge!)
+        const excess = state.volumeAddedMl - eqPoint;
+        state.absorbance = 0.15 + (excess / 10.0) * 1.25;
+        el.flaskLiquid.setAttribute('fill', sys.colorPost);
+        el.endpointColorStatus.textContent = 'TITIK AKHIR TERCAPAI!';
+        el.endpointColorStatus.style.color = '#fda4af';
+        el.badgeRedoxStatus.textContent = 'TITIK AKHIR';
+        el.badgeRedoxStatus.className = 'lcd-status-badge endpoint';
+        el.valTitrationStatus.textContent = 'Titik Akhir Ekuivalen';
+        el.lcdColorHex.textContent = 'Warna: Merah Muda Persisten';
+
+        if (!state.hasEndpointTriggered) {
+          sound.playEndpointChime();
+          showToast(`Titik akhir titrasi redoks tercapai pada V = ${state.volumeAddedMl.toFixed(1)} mL!`);
+          state.hasEndpointTriggered = true;
+          logRedoxRun();
+        }
+      }
+
+      el.lcdAbsorbanceVal.textContent = `${state.absorbance.toFixed(3)} A`;
+
+      // Update Chart points
+      if (state.chartPoints.length === 0 || Math.abs(state.volumeAddedMl - state.chartPoints[state.chartPoints.length - 1].vol) >= 0.5) {
+        state.chartPoints.push({
+          vol: state.volumeAddedMl,
+          abs: state.absorbance
+        });
+        if (chartRenderer) chartRenderer.render();
+      }
+    }
+
+    function updateSystemUI() {
+      const sys = REDOX_SYSTEMS[state.systemKey];
+      el.labelReagentVolumeTitle.textContent = `Volume Titran ${sys.titrantName} Ditambahkan:`;
+      el.labelEquivalenceTarget.textContent = `Titik Akhir: ${sys.eqPointMl.toFixed(1)} mL`;
+      el.biloksOxLabel.innerHTML = sys.biloksOx;
+      el.biloksRedLabel.innerHTML = sys.biloksRed;
+      el.biloksElectronBalance.innerHTML = sys.factorMult;
+      el.fullBalancedEquation.innerHTML = sys.eqBalanced;
+      el.flaskSolutionLabel.textContent = `Larutan ${sys.analyteName}`;
+
+      resetRunState();
+    }
+
+    function resetRunState() {
+      state.volumeAddedMl = 0.0;
+      state.hasEndpointTriggered = false;
+      el.sliderBuretVol.value = 0;
+      state.chartPoints = [];
+      updateRedoxState();
+      if (chartRenderer) chartRenderer.render();
+      if (molSim) molSim.init();
+    }
+
+    function logRedoxRun() {
+      const runNum = state.tableLog.length + 1;
+      const sys = REDOX_SYSTEMS[state.systemKey];
+
+      const entry = {
+        num: runNum,
+        sys: sys.name.split(':')[0],
+        vol: `${state.volumeAddedMl.toFixed(1)} mL`,
+        abs: `${state.absorbance.toFixed(3)} A`,
+        color: (state.volumeAddedMl >= sys.eqPointMl) ? 'Merah Muda (TE)' : 'Bening Jernih'
+      };
+
+      state.tableLog.push(entry);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:700; color:#a855f7;">#${entry.num}</td>
+        <td>${entry.sys}</td>
+        <td style="color:#38bdf8;">${entry.vol}</td>
+        <td>${entry.abs}</td>
+        <td style="font-weight:700; color:#fda4af;">${entry.color}</td>
+      `;
+      el.tableBody.prepend(tr);
+    }
+
+    /* Simulation Loop (60 FPS) */
+    function simulationLoop(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const dt = Math.min(0.08, (timestamp - lastTimestamp) / 1000.0);
+      lastTimestamp = timestamp;
+
+      // Stirrer rotation
+      if (state.isStirring) {
+        state.stirAngle += dt * 360 * 1.5;
+        el.stirrerBar.setAttribute('transform', `rotate(${state.stirAngle.toFixed(1)}, 60, 185)`);
+      }
+
+      // Update Submicroscopic Particles Canvas
+      if (molSim) {
+        molSim.update();
+        molSim.draw();
+      }
+
+      animFrameId = requestAnimationFrame(simulationLoop);
+    }
+
+    /* =========================================================================
+     * 6. EVENT LISTENERS
+     * ========================================================================= */
+    function setupEventListeners() {
+      // System Selection Buttons
+      el.btnSystemButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          el.btnSystemButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.systemKey = btn.getAttribute('data-sys');
+          sound.playEndpointChime();
+          updateSystemUI();
+          showToast(`Sistem redoks dialihkan: ${REDOX_SYSTEMS[state.systemKey].name}`);
+        });
+      });
+
+      // Volume Slider
+      el.sliderBuretVol.addEventListener('input', (e) => {
+        state.volumeAddedMl = parseFloat(e.target.value);
+        sound.playDropSound();
+        updateRedoxState();
+      });
+
+      // Single Drop Button (+0.5 mL)
+      el.btnAddDrop.addEventListener('click', () => {
+        sound.playDropSound();
+        state.volumeAddedMl = Math.min(30.0, state.volumeAddedMl + 0.5);
+        el.sliderBuretVol.value = state.volumeAddedMl;
+
+        // Animate falling drop briefly
+        el.buretFallingDrop.setAttribute('opacity', '1');
+        setTimeout(() => el.buretFallingDrop.setAttribute('opacity', '0'), 180);
+
+        updateRedoxState();
+      });
+
+      // Auto Titrate Button
+      let autoInterval = null;
+      el.btnAutoTitrate.addEventListener('click', () => {
+        sound.playDropSound();
+        if (autoInterval) {
+          clearInterval(autoInterval);
+          autoInterval = null;
+          el.btnAutoTitrate.textContent = 'Titrasi Cepat';
+          return;
+        }
+
+        el.btnAutoTitrate.textContent = 'Hentikan';
+        autoInterval = setInterval(() => {
+          if (state.volumeAddedMl >= 22.0) {
+            clearInterval(autoInterval);
+            autoInterval = null;
+            el.btnAutoTitrate.textContent = 'Titrasi Cepat';
+            return;
+          }
+          state.volumeAddedMl = Math.min(30.0, state.volumeAddedMl + 0.5);
+          el.sliderBuretVol.value = state.volumeAddedMl;
+          updateRedoxState();
+        }, 120);
+      });
+
+      // Method Tabs
+      el.tabMethodIon.addEventListener('click', () => {
+        sound.playDropSound();
+        el.tabMethodIon.classList.add('active');
+        el.tabMethodPbo.classList.remove('active');
+        state.activeMethod = 'ion';
+        showToast('Metode Penyetaraan: Setengah Reaksi (Ion-Elektron)');
+      });
+
+      el.tabMethodPbo.addEventListener('click', () => {
+        sound.playDropSound();
+        el.tabMethodPbo.classList.add('active');
+        el.tabMethodIon.classList.remove('active');
+        state.activeMethod = 'pbo';
+        showToast('Metode Penyetaraan: Perubahan Bilangan Oksidasi (PBO)');
+      });
+
+      // Reset All Button
+      el.btnResetAll.addEventListener('click', () => {
+        sound.playEndpointChime();
+        resetRunState();
+        showToast('Buret diisi penuh & labu erlenmeyer dibersihkan.');
+      });
+
+      // Clear Table Log
+      el.btnClearLog.addEventListener('click', () => {
+        sound.playDropSound();
+        state.tableLog = [];
+        el.tableBody.innerHTML = '';
+        showToast('Tabel riwayat pengamatan dikosongkan.');
+      });
+
+      // Export CSV
+      el.btnExportCsv.addEventListener('click', () => {
+        sound.playDropSound();
+        if (state.tableLog.length === 0) {
+          showToast('Belum ada data pengamatan untuk diekspor!');
+          return;
+        }
+
+        let csv = 'Run,Sistem Redoks,Volume Titran,Absorbansi,Warna Akhir\n';
+        state.tableLog.forEach(row => {
+          csv += `"${row.num}","${row.sys}","${row.vol}","${row.abs}","${row.color}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Data_Praktikum_Reaksi_Redoks_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('File CSV berhasil diunduh!');
+      });
+
+      // Save Chart PNG
+      el.btnSaveChart.addEventListener('click', () => {
+        sound.playDropSound();
+        const canvas = document.getElementById('redoxChart');
+        const link = document.createElement('a');
+        link.download = `Kurva_Titrasi_Redoks_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('Grafik berhasil disimpan sebagai gambar PNG!');
+      });
+
+      // Audio Toggle
+      el.btnSoundToggle.addEventListener('click', () => {
+        const isNowOn = sound.toggleMute();
+        el.soundText.textContent = isNowOn ? 'Suara: ON' : 'Suara: MUTE';
+        el.btnSoundToggle.style.opacity = isNowOn ? '1' : '0.6';
+      });
+
+      // Guide Modal
+      el.btnGuideModal.addEventListener('click', () => {
+        sound.playDropSound();
+        el.guideModal.classList.add('show');
+      });
+
+      el.btnCloseModal.addEventListener('click', () => {
+        sound.playDropSound();
+        el.guideModal.classList.remove('show');
+      });
+
+      el.guideModal.addEventListener('click', (e) => {
+        if (e.target === el.guideModal) el.guideModal.classList.remove('show');
+      });
+    }
+
+    /* Initialize on DOM Ready */
+    window.addEventListener('DOMContentLoaded', () => {
+      molSim = new SubmicroscopicRedoxSimulator('molCanvas');
+      chartRenderer = new RedoxChartRenderer('redoxChart');
+      setupEventListeners();
+      updateSystemUI();
+      animFrameId = requestAnimationFrame(simulationLoop);
+    });
+
+  </script>
+</body>
+</html>

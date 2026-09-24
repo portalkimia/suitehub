@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -60,20 +60,26 @@
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
-      <div class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 text-xs font-semibold">
-        <button onclick="switchTab('periodik')" id="nav-periodik" class="tab-btn active px-3 sm:px-4 py-1.5 rounded-lg transition-all bg-emerald-600 text-white shadow">
-          <span class="hidden sm:inline">1.</span> Tabel Periodik
-        </button>
-        <button onclick="switchTab('bohr')" id="nav-bohr" class="tab-btn px-3 sm:px-4 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
-          <span class="hidden sm:inline">2.</span> Simulasi Bohr
-        </button>
-        <button onclick="switchTab('asambasa')" id="nav-asambasa" class="tab-btn px-3 sm:px-4 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
-          <span class="hidden sm:inline">3.</span> Uji pH Lab
-        </button>
-        <button onclick="switchTab('kuis')" id="nav-kuis" class="tab-btn px-3 sm:px-4 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
-          <span class="hidden sm:inline">4.</span> Kuis Cepat
-        </button>
+      <!-- Navigation Tabs & Lab Link -->
+      <div class="flex items-center gap-2">
+        <a href="LaboratoriumVirtual.html" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm" title="Buka Halaman Khusus 18 Laboratorium Virtual">
+          <i data-lucide="flask-conical" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>18 Lab Virtual</span>
+        </a>
+        <div class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 text-xs font-semibold">
+          <button onclick="switchTab('periodik')" id="nav-periodik" class="tab-btn active px-3 sm:px-4 py-1.5 rounded-lg transition-all bg-emerald-600 text-white shadow">
+            <span class="hidden sm:inline">1.</span> Tabel Periodik
+          </button>
+          <button onclick="switchTab('bohr')" id="nav-bohr" class="tab-btn px-3 sm:px-4 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
+            <span class="hidden sm:inline">2.</span> Simulasi Bohr
+          </button>
+          <button onclick="switchTab('asambasa')" id="nav-asambasa" class="tab-btn px-3 sm:px-4 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
+            <span class="hidden sm:inline">3.</span> Uji pH Lab
+          </button>
+          <button onclick="switchTab('kuis')" id="nav-kuis" class="tab-btn px-3 sm:px-4 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
+            <span class="hidden sm:inline">4.</span> Kuis Cepat
+          </button>
+        </div>
       </div>
 
     </div>

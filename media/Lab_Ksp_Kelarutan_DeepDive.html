@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Lab: Kelarutan & Hasil Kali Kelarutan (Ksp) • PortalKimia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-space: #090d16;
+      --bg-bench: #131926;
+      --bg-panel: rgba(19, 25, 38, 0.9);
+      --bg-glass: rgba(28, 36, 54, 0.65);
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-bright: rgba(245, 158, 11, 0.4);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #f59e0b;
+      --primary-hover: #d97706;
+      --primary-glow: rgba(245, 158, 11, 0.35);
+      --accent-cyan: #06b6d4;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-emerald: #10b981;
+      --lcd-bg: #03140f;
+      --lcd-text: #10f2a7;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.6);
+      --font-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === HEADER LAB BAR === */
+    header.lab-header {
+      background: rgba(15, 20, 31, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+
+    .brand-title h1 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title h1 span.badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid var(--border-bright);
+      color: #fde68a;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-header {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-header.active {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: var(--primary);
+      color: #fde68a;
+    }
+
+    /* === WORKBENCH MAIN LAYOUT === */
+    .lab-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 310px 1fr 390px;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1720px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* === PANEL STYLES === */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-header h2 svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+    }
+
+    .panel-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    /* Salt Selection Cards */
+    .salt-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .salt-card {
+      background: rgba(15, 20, 31, 0.7);
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .salt-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .salt-card:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(30, 38, 56, 0.7);
+    }
+
+    .salt-card.selected {
+      border-color: var(--primary);
+      background: rgba(245, 158, 11, 0.12);
+    }
+
+    .salt-card.selected::before {
+      opacity: 1;
+    }
+
+    .salt-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .salt-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .salt-formula {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .salt-ksp-label {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    /* Sliders */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-group label span.val-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--primary);
+      background: rgba(245, 158, 11, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .range-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="range"].lab-slider {
+      flex: 1;
+      height: 6px;
+      border-radius: 999px;
+      background: #1e2638;
+      outline: none;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* === CENTER STAGE: WORKBENCH CANVAS & APPARATUS === */
+    .stage-panel {
+      position: relative;
+      background: radial-gradient(circle at 50% 25%, #1c2436 0%, #101524 65%, #080c14 100%);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lab-stage-backdrop {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, transparent 60%, rgba(5, 7, 12, 0.8) 100%);
+      background-size: 24px 24px, 100% 100%;
+    }
+
+    .benchtop-surface {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 145px;
+      background: linear-gradient(to bottom, #1e2636 0%, #131924 35%, #0b0f16 100%);
+      border-top: 3px solid #2d374d;
+      box-shadow: inset 0 3px 12px rgba(255, 255, 255, 0.08);
+      z-index: 1;
+    }
+
+    .apparatus-viewport {
+      flex: 1;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    svg#lab-apparatus-svg {
+      width: 100%;
+      height: 100%;
+      min-height: 520px;
+    }
+
+    /* Floating Workbench Control Bar (Bottom Stage) */
+    .bench-control-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 20, 31, 0.94);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-lg), 0 0 20px rgba(0, 0, 0, 0.5);
+      z-index: 25;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-act {
+      background: #1e2638;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f1f5f9;
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 7px 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-act:hover {
+      background: #2b364e;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-act:active {
+      transform: scale(0.97);
+    }
+
+    .btn-act.btn-precipitate {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: var(--primary);
+      color: #fde68a;
+    }
+
+    .btn-act.btn-precipitate:hover {
+      background: rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-act.btn-common-ion {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent-cyan);
+      color: #7dd3fc;
+    }
+
+    .btn-act.btn-common-ion:hover {
+      background: rgba(56, 189, 248, 0.3);
+    }
+
+    .control-divider {
+      width: 1px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.12);
+      margin: 0 4px;
+    }
+
+    /* === RIGHT PANEL: Qsp VS Ksp GAUGE & DATA === */
+    .qsp-device-card {
+      background: #070a0f;
+      border: 2px solid #1e2638;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 12px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .qsp-screen {
+      background: var(--lcd-bg);
+      border: 1px solid rgba(16, 242, 167, 0.3);
+      border-radius: 8px;
+      padding: 10px 14px;
+      box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .qsp-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(16, 242, 167, 0.6);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .qsp-val-display {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 12px rgba(16, 242, 167, 0.7);
+      line-height: 1.1;
+    }
+
+    .qsp-ksp-reference {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      padding-top: 4px;
+      margin-top: 2px;
+    }
+
+    /* Status Pill */
+    .status-badge {
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11px;
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+
+    .status-unsaturated { background: rgba(16, 185, 129, 0.25); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .status-saturated { background: rgba(245, 158, 11, 0.25); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .status-precipitate { background: rgba(239, 68, 68, 0.3); color: #fca5a5; border: 1px solid #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+
+    /* Selective Precipitation Card */
+    .selective-card {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .selective-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .equation-box {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 10px;
+      border-radius: 6px;
+      border-left: 3px solid var(--primary);
+      line-height: 1.5;
+    }
+
+    /* Live Data Log Table */
+    .log-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 120px;
+    }
+
+    .log-table-wrap {
+      overflow-y: auto;
+      flex: 1;
+      max-height: 130px;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    table.data-table th {
+      background: #111723;
+      padding: 6px 10px;
+      text-align: left;
+      color: #94a3b8;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      border-bottom: 1px solid var(--border-glass);
+    }
+
+    table.data-table td {
+      padding: 5px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #e2e8f0;
+    }
+
+    table.data-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .log-actions {
+      padding: 8px 12px;
+      background: #101622;
+      border-top: 1px solid var(--border-glass);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid var(--border-bright);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Modal Info */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #151a24;
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      max-width: 550px;
+      width: 90%;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .modal-card p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #94a3b8;
+      margin-bottom: 12px;
+    }
+
+    .modal-card ul {
+      margin-left: 20px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1200px) {
+      .lab-container {
+        grid-template-columns: 280px 1fr 340px;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .lab-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LAB TOP HEADER -->
+  <header class="lab-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 3v10m-4-4l4 4 4-4M4 17h16M4 21h16"/>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <h1>
+          Virtual Lab: Kelarutan & Hasil Kali Kelarutan (Ksp)
+          <span class="badge">Edisi Eksperimen Murni</span>
+        </h1>
+        <p>Simulasi Interaktif Kesetimbangan Kelarutan • Efek Ion Senama & Pengendapan Selektif</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" id="btn-audio" title="Aktifkan/Matikan Suara Efek Lab">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+        <span id="audio-label">Audio ON</span>
+      </button>
+
+      <button class="btn-header" id="btn-guide">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        Panduan
+      </button>
+
+      <button class="btn-header" id="btn-reset-all" style="color: #fca5a5; border-color: rgba(239, 68, 68, 0.3);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Bilas Beaker
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKBENCH CONTAINER -->
+  <main class="lab-container">
+
+    <!-- LEFT PANEL: PRECIPITATE SYSTEM & SLIDERS -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 7h-7L10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+          </svg>
+          Sistem Garam Sukar Larut
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <div class="section-title">Pilih Senyawa Endapan</div>
+        <div class="salt-list">
+          <!-- 1. AgCl -->
+          <div class="salt-card selected" data-salt="agcl">
+            <div class="salt-card-header">
+              <span class="salt-name">Perak Klorida</span>
+              <span class="salt-formula">AgCl</span>
+            </div>
+            <span class="salt-ksp-label">Ksp = 1.8 × 10⁻¹⁰ (Endapan Putih)</span>
+          </div>
+
+          <!-- 2. PbI2 -->
+          <div class="salt-card" data-salt="pbi2">
+            <div class="salt-card-header">
+              <span class="salt-name">Timbal(II) Iodida</span>
+              <span class="salt-formula">PbI₂</span>
+            </div>
+            <span class="salt-ksp-label">Ksp = 7.1 × 10⁻⁹ (Endapan Kuning Emas)</span>
+          </div>
+
+          <!-- 3. BaSO4 -->
+          <div class="salt-card" data-salt="baso4">
+            <div class="salt-card-header">
+              <span class="salt-name">Barium Sulfat</span>
+              <span class="salt-formula">BaSO₄</span>
+            </div>
+            <span class="salt-ksp-label">Ksp = 1.1 × 10⁻¹⁰ (Endapan Putih Halus)</span>
+          </div>
+
+          <!-- 4. Ag2CrO4 -->
+          <div class="salt-card" data-salt="ag2cro4">
+            <div class="salt-card-header">
+              <span class="salt-name">Perak Kromat</span>
+              <span class="salt-formula">Ag₂CrO₄</span>
+            </div>
+            <span class="salt-ksp-label">Ksp = 1.1 × 10⁻¹² (Endapan Merah Bata)</span>
+          </div>
+
+          <!-- 5. Selective Precipitation -->
+          <div class="salt-card" data-salt="selective" style="border-style: dashed;">
+            <div class="salt-card-header">
+              <span class="salt-name">Pengendapan Selektif</span>
+              <span class="salt-formula">Cl⁻ &amp; CrO₄²⁻</span>
+            </div>
+            <span class="salt-ksp-label">Pemisahan bertingkat dengan AgNO₃</span>
+          </div>
+        </div>
+
+        <!-- Ion Concentration Sliders -->
+        <div class="form-group" style="margin-top: 6px;">
+          <div class="section-title">Konsentrasi Ion Pereaksi</div>
+
+          <label>
+            <span id="label-cation-conc">Konsentrasi [Ag⁺]</span>
+            <span class="val-badge" id="badge-cation">1.0 × 10⁻⁴ M</span>
+          </label>
+          <div class="range-wrap">
+            <input type="range" id="slider-cation" class="lab-slider" min="-6" max="-2" step="0.2" value="-4">
+          </div>
+
+          <label style="margin-top: 6px;">
+            <span id="label-anion-conc">Konsentrasi [Cl⁻]</span>
+            <span class="val-badge" id="badge-anion">1.0 × 10⁻⁴ M</span>
+          </label>
+          <div class="range-wrap">
+            <input type="range" id="slider-anion" class="lab-slider" min="-6" max="-2" step="0.2" value="-4">
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER STAGE: WORKBENCH APPARATUS -->
+    <section class="stage-panel">
+      <div class="lab-stage-backdrop"></div>
+
+      <!-- Main Apparatus Viewport -->
+      <div class="apparatus-viewport">
+        <svg id="lab-apparatus-svg" viewBox="0 0 650 620" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="beakerGlassGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
+              <stop offset="12%" stop-color="rgba(255,255,255,0.06)"/>
+              <stop offset="88%" stop-color="rgba(255,255,255,0.03)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0.3)"/>
+            </linearGradient>
+
+            <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="2" dy="6" stdDeviation="5" flood-color="#000" flood-opacity="0.45"/>
+            </filter>
+          </defs>
+
+          <!-- 1. DUAL DISPENSERS FOR IONS -->
+          <g id="ion-dispensers" transform="translate(180, 50)" filter="url(#shadowFilter)">
+            <!-- Cation Bottle Dispenser -->
+            <g id="dispenser-cation" transform="translate(45, 0)">
+              <rect x="0" y="0" width="55" height="90" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+              <text x="27" y="24" font-size="9" font-family="'Fira Code',monospace" font-weight="700" fill="#7dd3fc" text-anchor="middle" id="svg-cation-label">AgNO₃</text>
+              <rect x="22" y="90" width="11" height="35" fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.6)"/>
+              <circle id="drop-cation" cx="27" cy="130" r="3.5" fill="#38bdf8" opacity="0"/>
+            </g>
+
+            <!-- Anion Bottle Dispenser -->
+            <g id="dispenser-anion" transform="translate(190, 0)">
+              <rect x="0" y="0" width="55" height="90" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+              <text x="27" y="24" font-size="9" font-family="'Fira Code',monospace" font-weight="700" fill="#fde68a" text-anchor="middle" id="svg-anion-label">NaCl</text>
+              <rect x="22" y="90" width="11" height="35" fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.6)"/>
+              <circle id="drop-anion" cx="27" cy="130" r="3.5" fill="#f59e0b" opacity="0"/>
+            </g>
+          </g>
+
+          <!-- 2. BEAKER GLASS (250 mL) WITH PRECIPITATION ANIMATION -->
+          <g id="beaker-assembly" transform="translate(235, 235)">
+            <clipPath id="beakerClip">
+              <rect x="10" y="10" width="160" height="225" rx="4"/>
+            </clipPath>
+
+            <!-- Beaker Shadow -->
+            <rect x="10" y="10" width="160" height="225" rx="4" fill="rgba(15, 23, 42, 0.4)"/>
+
+            <!-- Liquid & Precipitate Layer inside Beaker -->
+            <g clip-path="url(#beakerClip)">
+              <!-- Solution Liquid Body (Changes opacity/turbidity) -->
+              <rect id="beaker-liquid" x="10" y="70" width="160" height="165" fill="rgba(220, 235, 255, 0.35)"/>
+              <path id="beaker-liquid-surface" d="M 10 70 Q 90 74 170 70 L 170 78 L 10 78 Z" fill="rgba(255, 255, 255, 0.3)"/>
+
+              <!-- Precipitate Sludge/Layer at Bottom -->
+              <path id="precipitate-bed" d="M 10 235 L 10 235 L 170 235 L 170 235 Z" fill="#ffffff" opacity="0"/>
+
+              <!-- Falling Crystals / Precipitate Snow Particles -->
+              <g id="crystal-particles" opacity="0">
+                <circle cx="40" cy="110" r="2.5" fill="#fff"/>
+                <circle cx="80" cy="95" r="3" fill="#fff"/>
+                <circle cx="120" cy="115" r="2" fill="#fff"/>
+                <circle cx="60" cy="140" r="2.8" fill="#fff"/>
+                <circle cx="100" cy="155" r="3.2" fill="#fff"/>
+                <circle cx="140" cy="135" r="2.5" fill="#fff"/>
+                <circle cx="50" cy="180" r="3" fill="#fff"/>
+                <circle cx="90" cy="195" r="2.7" fill="#fff"/>
+                <circle cx="130" cy="175" r="3.5" fill="#fff"/>
+              </g>
+
+              <ellipse id="surface-ripple" cx="90" cy="72" rx="4" ry="2" fill="none" stroke="#fff" stroke-width="1.5" opacity="0"/>
+            </g>
+
+            <!-- Beaker Glass Exterior Outline -->
+            <rect x="10" y="10" width="160" height="225" rx="4" fill="url(#beakerGlassGrad)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+            <path d="M 6 10 L 10 10 M 170 10 L 174 10" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linecap="round"/>
+
+            <!-- Volume Markings -->
+            <line x1="20" y1="190" x2="36" y2="190" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="40" y="193" font-size="9" font-family="'Fira Code',monospace" fill="rgba(255,255,255,0.7)">50 mL</text>
+
+            <line x1="20" y1="150" x2="36" y2="150" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="40" y="153" font-size="9" font-family="'Fira Code',monospace" fill="rgba(255,255,255,0.7)">100 mL</text>
+
+            <line x1="20" y1="110" x2="36" y2="110" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="40" y="113" font-size="9" font-family="'Fira Code',monospace" fill="rgba(255,255,255,0.7)">150 mL</text>
+
+            <line x1="20" y1="70" x2="36" y2="70" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="40" y="73" font-size="9" font-family="'Fira Code',monospace" fill="rgba(255,255,255,0.7)">200 mL</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Surface Benchtop Base -->
+      <div class="benchtop-surface"></div>
+
+      <!-- Floating Workbench Tactile Control Bar -->
+      <div class="bench-control-bar">
+        <button class="btn-act btn-precipitate" id="btn-mix-reaction" title="Campurkan Kedua Larutan">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v6m0 0l-3-3m3 3l3-3M5 12a7 7 0 1 0 14 0"/>
+          </svg>
+          Campurkan Larutan
+        </button>
+
+        <button class="btn-act btn-common-ion" id="btn-add-common-ion" title="Tambahkan 5 mL Ion Senama Pekat (0.5 M)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+          </svg>
+          + Ion Senama (0.5 M)
+        </button>
+
+        <div class="control-divider"></div>
+
+        <button class="btn-act" id="btn-dilute-water" title="Tambahkan 50 mL Air (Uji Pelarutan Ulang)">
+          + 50 mL Air Aquades
+        </button>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Qsp vs Ksp METER & REACTION BOARD -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          Kalkulator Qsp vs Ksp
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- Qsp Digital Device Card -->
+        <div class="qsp-device-card">
+          <div class="qsp-screen">
+            <div class="qsp-title">
+              <span>NILAI HASIL KALI ION (Qsp)</span>
+              <span>TERHITUNG</span>
+            </div>
+            <div class="qsp-val-display" id="display-qsp">1.00 × 10⁻⁸</div>
+            <div class="qsp-ksp-reference">
+              <span>Tetapan Ksp:</span>
+              <span id="display-ksp" style="color: #cbd5e1; font-weight: 700;">1.80 × 10⁻¹⁰</span>
+            </div>
+          </div>
+          <div class="status-badge status-precipitate" id="status-badge">
+            LEWAT JENUH (Qsp &gt; Ksp) • TERJADI ENDAPAN
+          </div>
+        </div>
+
+        <!-- Molecular Reaction Board -->
+        <div class="selective-card">
+          <div class="selective-title">
+            <span>Kesetimbangan Kelarutan</span>
+            <span id="label-solubility-s" style="color: var(--primary); font-family: var(--font-mono);">s = 1.34 × 10⁻⁵ M</span>
+          </div>
+          <div class="equation-box" id="eq-solubility">
+            AgCl(s) ⇌ Ag⁺(aq) + Cl⁻(aq)<br>
+            Qsp = [Ag⁺][Cl⁻]
+          </div>
+        </div>
+
+        <!-- Live Observation Log Table -->
+        <div class="log-box">
+          <div class="panel-header" style="padding: 7px 12px;">
+            <h2 style="font-size: 11px;">Jurnal Eksperimen Pengendapan</h2>
+            <span id="log-count" style="font-size: 10px; color: var(--text-muted);">0 data</span>
+          </div>
+          <div class="log-table-wrap">
+            <table class="data-table" id="dataTable">
+              <thead>
+                <tr>
+                  <th>Senyawa</th>
+                  <th>Nilai Qsp</th>
+                  <th>Ksp</th>
+                  <th>Kondisi Larutan</th>
+                </tr>
+              </thead>
+              <tbody id="dataTableBody">
+                <!-- Dynamic Log Rows -->
+              </tbody>
+            </table>
+          </div>
+          <div class="log-actions">
+            <button class="btn-header" id="btn-export-csv" style="padding: 4px 9px; font-size: 11px;">
+              Ekspor CSV
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- POPUP GUIDELINES MODAL -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal-card">
+      <h3>✨ Panduan Praktikum Kelarutan & Ksp</h3>
+      <p>Praktikum ini mensimulasikan hukum kesetimbangan kelarutan dan pengendapan selektif:</p>
+      <ul>
+        <li><b>Kriteria Pengendapan:</b>
+          <ul>
+            <li><b>$Q_{sp} < K_{sp}$:</b> Belum jenuh, tidak ada endapan, larutan jernih.</li>
+            <li><b>$Q_{sp} = K_{sp}$:</b> Tepat jenuh, berada di ambang batas kelarutan.</li>
+            <li><b>$Q_{sp} > K_{sp}$:</b> Lewat jenuh, larutan keruh dan terbentuk endapan kristal!</li>
+          </ul>
+        </li>
+        <li><b>Efek Ion Senama:</b> Penambahan ion sejenis akan memperbesar nilai $Q_{sp}$, memperkecil kelarutan ($s$), dan memicu endapan baru.</li>
+        <li><b>Pengendapan Selektif:</b> Ketika dua anion diuji bersama, zat dengan kelarutan terkecil akan mengendap lebih dulu!</li>
+        <li><b>Eksperimen Emas "Golden Rain":</b> Coba senyawa <i>Timbal(II) Iodida ($PbI_2$)</i> untuk menyaksikan visualisasi endapan kristal kuning keemasan yang memukau!</li>
+      </ul>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-act btn-primary" id="btn-close-modal" style="background: var(--primary); color: #000; font-weight: 700;">Tutup & Mulai Praktikum</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST -->
+  <div class="toast" id="toastBox">Notifikasi</div>
+
+  <!-- JAVASCRIPT: ENGINE & SOUNDS -->
+  <script>
+    'use strict';
+
+    /* =========================================================================
+     * 1. NATIVE WEB AUDIO API SYNTHESIZER
+     * ========================================================================= */
+    class KspAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playDripSound() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(1100, now + 0.04);
+        osc.frequency.exponentialRampToValueAtTime(350, now + 0.1);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      }
+
+      playPrecipitateShimmer() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        [880, 1108.73, 1318.51].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+          gain.gain.setValueAtTime(0.08, now + idx * 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.22);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.05);
+          osc.stop(now + idx * 0.05 + 0.22);
+        });
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        return !this.muted;
+      }
+    }
+
+    const sound = new KspAudioEngine();
+
+    /* =========================================================================
+     * 2. SALTS & KSP DEFINITIONS
+     * ========================================================================= */
+    const SALTS = {
+      agcl: {
+        name: 'Perak Klorida',
+        formula: 'AgCl',
+        ksp: 1.8e-10,
+        cation: 'Ag⁺',
+        anion: 'Cl⁻',
+        cationSource: 'AgNO₃',
+        anionSource: 'NaCl',
+        commonIonSource: 'NaCl',
+        precipitateColor: '#ffffff',
+        liquidTurbidColor: 'rgba(240, 245, 255, 0.75)',
+        calcQsp: (cCat, cAn) => cCat * cAn,
+        calcS: (ksp) => Math.sqrt(ksp),
+        eqText: 'AgCl(s) ⇌ Ag⁺(aq) + Cl⁻(aq)<br>Qsp = [Ag⁺][Cl⁻]'
+      },
+      pbi2: {
+        name: 'Timbal(II) Iodida',
+        formula: 'PbI₂',
+        ksp: 7.1e-9,
+        cation: 'Pb²⁺',
+        anion: 'I⁻',
+        cationSource: 'Pb(NO₃)₂',
+        anionSource: 'KI',
+        commonIonSource: 'KI',
+        precipitateColor: '#facc15', // Golden Yellow
+        liquidTurbidColor: 'rgba(253, 224, 71, 0.75)',
+        calcQsp: (cCat, cAn) => cCat * Math.pow(cAn, 2),
+        calcS: (ksp) => Math.cbrt(ksp / 4),
+        eqText: 'PbI₂(s) ⇌ Pb²⁺(aq) + 2I⁻(aq)<br>Qsp = [Pb²⁺][I⁻]²'
+      },
+      baso4: {
+        name: 'Barium Sulfat',
+        formula: 'BaSO₄',
+        ksp: 1.1e-10,
+        cation: 'Ba²⁺',
+        anion: 'SO₄²⁻',
+        cationSource: 'BaCl₂',
+        anionSource: 'Na₂SO₄',
+        commonIonSource: 'Na₂SO₄',
+        precipitateColor: '#f8fafc',
+        liquidTurbidColor: 'rgba(241, 245, 249, 0.75)',
+        calcQsp: (cCat, cAn) => cCat * cAn,
+        calcS: (ksp) => Math.sqrt(ksp),
+        eqText: 'BaSO₄(s) ⇌ Ba²⁺(aq) + SO₄²⁻(aq)<br>Qsp = [Ba²⁺][SO₄²⁻]'
+      },
+      ag2cro4: {
+        name: 'Perak Kromat',
+        formula: 'Ag₂CrO₄',
+        ksp: 1.1e-12,
+        cation: 'Ag⁺',
+        anion: 'CrO₄²⁻',
+        cationSource: 'AgNO₃',
+        anionSource: 'K₂CrO₄',
+        commonIonSource: 'K₂CrO₄',
+        precipitateColor: '#be123c', // Brick Red
+        liquidTurbidColor: 'rgba(244, 63, 94, 0.75)',
+        calcQsp: (cCat, cAn) => Math.pow(cCat, 2) * cAn,
+        calcS: (ksp) => Math.cbrt(ksp / 4),
+        eqText: 'Ag₂CrO₄(s) ⇌ 2Ag⁺(aq) + CrO₄²⁻(aq)<br>Qsp = [Ag⁺]²[CrO₄²⁻]'
+      },
+      selective: {
+        name: 'Pengendapan Bertingkat',
+        formula: 'AgCl & Ag₂CrO₄',
+        ksp: 1.8e-10,
+        cation: 'Ag⁺',
+        anion: 'Cl⁻ + CrO₄²⁻',
+        cationSource: 'AgNO₃',
+        anionSource: 'Campuran',
+        commonIonSource: 'AgNO₃',
+        precipitateColor: '#ffffff',
+        liquidTurbidColor: 'rgba(254, 240, 138, 0.65)',
+        calcQsp: (cCat, cAn) => cCat * cAn,
+        calcS: (ksp) => Math.sqrt(ksp),
+        eqText: '1. Ag⁺ + Cl⁻ → AgCl(s) (Putih mengendap dulu)<br>2. 2Ag⁺ + CrO₄²⁻ → Ag₂CrO₄(s) (Merah bata menyusul)'
+      }
+    };
+
+    const state = {
+      selectedSalt: 'agcl',
+      logCation: -4.0,  // 10^-4 M
+      logAnion: -4.0,   // 10^-4 M
+      cationConc: 1e-4,
+      anionConc: 1e-4,
+      qsp: 1e-8,
+      isPrecipitated: false,
+      history: []
+    };
+
+    /* =========================================================================
+     * 3. DOM & UI UPDATES
+     * ========================================================================= */
+    const dom = {
+      svgCationLabel: document.getElementById('svg-cation-label'),
+      svgAnionLabel: document.getElementById('svg-anion-label'),
+      dropCation: document.getElementById('drop-cation'),
+      dropAnion: document.getElementById('drop-anion'),
+      beakerLiquid: document.getElementById('beaker-liquid'),
+      precipitateBed: document.getElementById('precipitate-bed'),
+      crystalParticles: document.getElementById('crystal-particles'),
+      surfaceRipple: document.getElementById('surface-ripple'),
+      labelCationConc: document.getElementById('label-cation-conc'),
+      labelAnionConc: document.getElementById('label-anion-conc'),
+      badgeCation: document.getElementById('badge-cation'),
+      badgeAnion: document.getElementById('badge-anion'),
+      sliderCation: document.getElementById('slider-cation'),
+      sliderAnion: document.getElementById('slider-anion'),
+      displayQsp: document.getElementById('display-qsp'),
+      displayKsp: document.getElementById('display-ksp'),
+      statusBadge: document.getElementById('status-badge'),
+      labelSolubilityS: document.getElementById('label-solubility-s'),
+      eqSolubility: document.getElementById('eq-solubility'),
+      dataTableBody: document.getElementById('dataTableBody'),
+      logCount: document.getElementById('log-count'),
+      btnAudio: document.getElementById('btn-audio'),
+      audioLabel: document.getElementById('audio-label'),
+      toastBox: document.getElementById('toastBox')
+    };
+
+    function toScientific(num) {
+      if (num === 0) return '0';
+      const exp = Math.floor(Math.log10(Math.abs(num)));
+      const mant = (num / Math.pow(10, exp)).toFixed(2);
+      return `${mant} × 10<sup>${exp}</sup>`;
+    }
+
+    function updateSimulation() {
+      const salt = SALTS[state.selectedSalt];
+
+      // Update Labels in SVG Dispensers
+      dom.svgCationLabel.textContent = salt.cationSource;
+      dom.svgAnionLabel.textContent = salt.anionSource;
+
+      // Update Inputs
+      state.cationConc = Math.pow(10, state.logCation);
+      state.anionConc = Math.pow(10, state.logAnion);
+
+      dom.badgeCation.innerHTML = toScientific(state.cationConc) + ' M';
+      dom.badgeAnion.innerHTML = toScientific(state.anionConc) + ' M';
+      dom.labelCationConc.textContent = `Konsentrasi [${salt.cation}]`;
+      dom.labelAnionConc.textContent = `Konsentrasi [${salt.anion}]`;
+
+      // Calculate Qsp & Solubility s
+      state.qsp = salt.calcQsp(state.cationConc, state.anionConc);
+      const s = salt.calcS(salt.ksp);
+      dom.labelSolubilityS.innerHTML = `s = ${toScientific(s)} M`;
+      dom.eqSolubility.innerHTML = salt.eqText;
+
+      // Display Displays
+      dom.displayQsp.innerHTML = toScientific(state.qsp);
+      dom.displayKsp.innerHTML = toScientific(salt.ksp);
+
+      // Condition logic
+      const ratio = state.qsp / salt.ksp;
+      const badge = dom.statusBadge;
+      badge.className = 'status-badge';
+
+      if (ratio > 1.05) {
+        // Precipitate!
+        state.isPrecipitated = true;
+        badge.classList.add('status-precipitate');
+        badge.textContent = 'LEWAT JENUH (Qsp > Ksp) • TERJADI ENDAPAN';
+
+        // Render Turbidity & Bed
+        dom.beakerLiquid.setAttribute('fill', salt.liquidTurbidColor);
+        dom.precipitateBed.setAttribute('fill', salt.precipitateColor);
+        dom.precipitateBed.setAttribute('d', 'M 10 235 L 10 215 Q 90 210 170 215 L 170 235 Z');
+        dom.precipitateBed.setAttribute('opacity', '0.9');
+        dom.crystalParticles.setAttribute('opacity', '0.8');
+
+        // Color particles
+        document.querySelectorAll('#crystal-particles circle').forEach(c => c.setAttribute('fill', salt.precipitateColor));
+        sound.playPrecipitateShimmer();
+      } else if (ratio >= 0.95 && ratio <= 1.05) {
+        // Tepat Jenuh
+        state.isPrecipitated = false;
+        badge.classList.add('status-saturated');
+        badge.textContent = 'TEPAT JENUH (Qsp ≈ Ksp) • BELUM MENGENDAP';
+        dom.beakerLiquid.setAttribute('fill', 'rgba(230, 240, 255, 0.45)');
+        dom.precipitateBed.setAttribute('opacity', '0');
+        dom.crystalParticles.setAttribute('opacity', '0');
+      } else {
+        // Belum Jenuh
+        state.isPrecipitated = false;
+        badge.classList.add('status-unsaturated');
+        badge.textContent = 'BELUM JENUH (Qsp < Ksp) • LARUTAN JERNIH';
+        dom.beakerLiquid.setAttribute('fill', 'rgba(220, 235, 255, 0.35)');
+        dom.precipitateBed.setAttribute('opacity', '0');
+        dom.crystalParticles.setAttribute('opacity', '0');
+      }
+    }
+
+    function triggerDropAnimation() {
+      sound.playDripSound();
+      const dropC = dom.dropCation;
+      const dropA = dom.dropAnion;
+      const ripple = dom.surfaceRipple;
+
+      dropC.setAttribute('cy', '130');
+      dropA.setAttribute('cy', '130');
+      dropC.setAttribute('opacity', '1');
+      dropA.setAttribute('opacity', '1');
+
+      let start = null;
+      function step(timestamp) {
+        if (!start) start = timestamp;
+        const p = Math.min((timestamp - start) / 140, 1);
+        dropC.setAttribute('cy', 130 + p * 125);
+        dropA.setAttribute('cy', 130 + p * 125);
+
+        if (p < 1) {
+          requestAnimationFrame(step);
+        } else {
+          dropC.setAttribute('opacity', '0');
+          dropA.setAttribute('opacity', '0');
+
+          ripple.setAttribute('opacity', '0.9');
+          ripple.setAttribute('rx', '4');
+          ripple.setAttribute('ry', '2');
+
+          let ripStart = null;
+          function ripStep(rt) {
+            if (!ripStart) ripStart = rt;
+            const rp = Math.min((rt - ripStart) / 220, 1);
+            ripple.setAttribute('rx', 4 + rp * 32);
+            ripple.setAttribute('ry', 2 + rp * 8);
+            ripple.setAttribute('opacity', String(0.9 * (1 - rp)));
+            if (rp < 1) requestAnimationFrame(ripStep);
+          }
+          requestAnimationFrame(ripStep);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function appendLogRow() {
+      const salt = SALTS[state.selectedSalt];
+      const pt = {
+        formula: salt.formula,
+        qsp: state.qsp,
+        ksp: salt.ksp,
+        status: state.isPrecipitated ? 'Terbentuk Endapan' : 'Larutan Jernih (Larut)'
+      };
+      state.history.push(pt);
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight: 700;">${pt.formula}</td>
+        <td>${toScientific(pt.qsp)}</td>
+        <td>${toScientific(pt.ksp)}</td>
+        <td style="color: ${state.isPrecipitated ? '#fca5a5' : '#6ee7b7'}; font-weight: 600;">${pt.status}</td>
+      `;
+      dom.dataTableBody.appendChild(tr);
+      dom.dataTableBody.parentElement.parentElement.scrollTop = dom.dataTableBody.parentElement.parentElement.scrollHeight;
+      dom.logCount.textContent = `${state.history.length} data`;
+    }
+
+    function showToast(msg) {
+      const box = dom.toastBox;
+      box.textContent = msg;
+      box.classList.add('show');
+      setTimeout(() => box.classList.remove('show'), 2600);
+    }
+
+    /* =========================================================================
+     * 4. EVENT BINDINGS
+     * ========================================================================= */
+    function setupEvents() {
+      // Salt Cards
+      document.querySelectorAll('.salt-card').forEach(card => {
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.salt-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          state.selectedSalt = card.getAttribute('data-salt');
+          triggerDropAnimation();
+          updateSimulation();
+          appendLogRow();
+          showToast(`Sistem ${SALTS[state.selectedSalt].name} aktif.`);
+        });
+      });
+
+      // Cation Slider
+      dom.sliderCation.addEventListener('input', (e) => {
+        state.logCation = Number(e.target.value);
+        updateSimulation();
+      });
+
+      // Anion Slider
+      dom.sliderAnion.addEventListener('input', (e) => {
+        state.logAnion = Number(e.target.value);
+        updateSimulation();
+      });
+
+      // Mix Reaction Button
+      document.getElementById('btn-mix-reaction').addEventListener('click', () => {
+        triggerDropAnimation();
+        updateSimulation();
+        appendLogRow();
+        showToast('Larutan telah dicampurkan!');
+      });
+
+      // Common Ion Button (+5 mL ion senama)
+      document.getElementById('btn-add-common-ion').addEventListener('click', () => {
+        // Boost anion concentration by 0.5 unit in log scale
+        state.logAnion = Math.min(state.logAnion + 0.6, -1.0);
+        dom.sliderAnion.value = state.logAnion;
+        triggerDropAnimation();
+        updateSimulation();
+        appendLogRow();
+        showToast('Ion senama pekat ditambahkan! Kesetimbangan bergeser ke kiri (endapan bertambah).');
+      });
+
+      // Dilute Water Button
+      document.getElementById('btn-dilute-water').addEventListener('click', () => {
+        // Lower both concentrations by 0.4 unit
+        state.logCation = Math.max(state.logCation - 0.4, -6.0);
+        state.logAnion = Math.max(state.logAnion - 0.4, -6.0);
+        dom.sliderCation.value = state.logCation;
+        dom.sliderAnion.value = state.logAnion;
+        sound.playDripSound();
+        updateSimulation();
+        appendLogRow();
+        showToast('Air ditambahkan (Pengenceran). Nilai Qsp mengecil.');
+      });
+
+      // Bilas Beaker (Reset)
+      document.getElementById('btn-reset-all').addEventListener('click', () => {
+        state.logCation = -4.0;
+        state.logAnion = -4.0;
+        dom.sliderCation.value = -4.0;
+        dom.sliderAnion.value = -4.0;
+        updateSimulation();
+        showToast('Beaker telah dibilas dan diisi air murni kembali.');
+      });
+
+      // Audio Toggle
+      dom.btnAudio.addEventListener('click', () => {
+        const on = sound.toggleMute();
+        dom.audioLabel.textContent = on ? 'Audio ON' : 'Audio OFF';
+        dom.btnAudio.classList.toggle('active', on);
+      });
+
+      // Guide Modal
+      const modal = document.getElementById('guideModal');
+      document.getElementById('btn-guide').addEventListener('click', () => modal.classList.add('open'));
+      document.getElementById('btn-close-modal').addEventListener('click', () => modal.classList.remove('open'));
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('open');
+      });
+
+      // Export CSV
+      document.getElementById('btn-export-csv').addEventListener('click', () => {
+        if (state.history.length === 0) return;
+        let csv = 'Senyawa,Qsp,Ksp,Kondisi\n';
+        state.history.forEach(pt => {
+          csv += `"${pt.formula}",${pt.qsp.toExponential(4)},${pt.ksp.toExponential(4)},"${pt.status}"\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `data_ksp_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Data praktikum Ksp berhasil diekspor (.CSV)!');
+      });
+    }
+
+    /* Initialize Application */
+    window.addEventListener('DOMContentLoaded', () => {
+      setupEvents();
+      updateSimulation();
+      appendLogRow();
+    });
+  </script>
+</body>
+</html>

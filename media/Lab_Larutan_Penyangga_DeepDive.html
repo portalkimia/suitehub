@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Lab: Larutan Penyangga & Kapasitas Buffer • PortalKimia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-space: #0b0f17;
+      --bg-bench: #151a24;
+      --bg-panel: rgba(21, 26, 38, 0.88);
+      --bg-glass: rgba(30, 38, 56, 0.6);
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-bright: rgba(16, 185, 129, 0.4);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --primary-glow: rgba(16, 185, 129, 0.35);
+      --accent-cyan: #06b6d4;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-indigo: #6366f1;
+      --lcd-bg: #03140f;
+      --lcd-text: #10f2a7;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.6);
+      --font-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === HEADER LAB BAR === */
+    header.lab-header {
+      background: rgba(15, 20, 31, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+
+    .brand-title h1 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title h1 span.badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--border-bright);
+      color: #6ee7b7;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-header {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-header.active {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: var(--primary);
+      color: #a7f3d0;
+    }
+
+    /* === WORKBENCH MAIN LAYOUT === */
+    .lab-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 295px 1fr 395px;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1720px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* === PANEL COMMON STYLES === */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-header h2 svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent-cyan);
+    }
+
+    .panel-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Form Controls */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--accent-cyan);
+      margin-bottom: 8px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-group label span.val-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-cyan);
+      background: rgba(6, 182, 212, 0.12);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    select.lab-select {
+      background: #0f141f;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #f8fafc;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    select.lab-select:focus {
+      border-color: var(--primary);
+    }
+
+    .range-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="range"].lab-slider {
+      flex: 1;
+      height: 6px;
+      border-radius: 999px;
+      background: #1e2638;
+      outline: none;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Ratio Display Card */
+    .ratio-card {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ratio-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .ratio-bar-wrap {
+      height: 12px;
+      background: #1e2638;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .ratio-acid-bar {
+      height: 100%;
+      background: #f43f5e;
+      transition: width 0.2s ease;
+    }
+
+    .ratio-base-bar {
+      height: 100%;
+      background: #06b6d4;
+      transition: width 0.2s ease;
+    }
+
+    .ratio-legend {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-family: var(--font-mono);
+    }
+
+    /* Indicator List */
+    .indicator-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .indicator-chip {
+      background: rgba(15, 20, 31, 0.6);
+      border: 1px solid var(--border-glass);
+      border-radius: 8px;
+      padding: 7px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 11.5px;
+      transition: all 0.2s ease;
+    }
+
+    .indicator-chip:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .indicator-chip.active {
+      border-color: var(--primary);
+      background: rgba(16, 185, 129, 0.12);
+    }
+
+    .indicator-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    /* === CENTER STAGE: WORKBENCH CANVAS & APPARATUS === */
+    .stage-panel {
+      position: relative;
+      background: radial-gradient(circle at 50% 25%, #182230 0%, #0f1420 65%, #080c14 100%);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lab-stage-backdrop {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, transparent 60%, rgba(5, 7, 12, 0.8) 100%);
+      background-size: 24px 24px, 100% 100%;
+    }
+
+    .benchtop-surface {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 145px;
+      background: linear-gradient(to bottom, #1e2636 0%, #131924 35%, #0b0f16 100%);
+      border-top: 3px solid #2d374d;
+      box-shadow: inset 0 3px 12px rgba(255, 255, 255, 0.08);
+      z-index: 1;
+    }
+
+    .apparatus-viewport {
+      flex: 1;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    svg#lab-apparatus-svg {
+      width: 100%;
+      height: 100%;
+      min-height: 520px;
+    }
+
+    /* Floating Workbench Control Bar (Bottom Stage) */
+    .bench-control-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 20, 31, 0.94);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-lg), 0 0 20px rgba(0, 0, 0, 0.5);
+      z-index: 25;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 95%;
+    }
+
+    .btn-act {
+      background: #1e2638;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f1f5f9;
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 7px 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-act:hover {
+      background: #2b364e;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-act:active {
+      transform: scale(0.97);
+    }
+
+    .btn-act.btn-acid {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.4);
+      color: #fda4af;
+    }
+
+    .btn-act.btn-acid:hover {
+      background: rgba(244, 63, 94, 0.3);
+      border-color: #f43f5e;
+    }
+
+    .btn-act.btn-base {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: rgba(6, 182, 212, 0.4);
+      color: #67e8f9;
+    }
+
+    .btn-act.btn-base:hover {
+      background: rgba(6, 182, 212, 0.3);
+      border-color: #06b6d4;
+    }
+
+    .btn-act.btn-water {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+
+    .btn-act.btn-water:hover {
+      background: rgba(99, 102, 241, 0.3);
+      border-color: #6366f1;
+    }
+
+    .btn-act.active {
+      border-color: var(--primary);
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+    }
+
+    .control-divider {
+      width: 1px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.12);
+      margin: 0 3px;
+    }
+
+    /* === RIGHT PANEL: DIGITAL pH METER & RESISTANCE CHART === */
+    .lcd-ph-device {
+      background: #070a0f;
+      border: 2px solid #1e2638;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 12px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .lcd-screen {
+      background: var(--lcd-bg);
+      border: 1px solid rgba(16, 242, 167, 0.3);
+      border-radius: 8px;
+      padding: 8px 14px;
+      box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.9);
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .lcd-unit {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(16, 242, 167, 0.5);
+      letter-spacing: 1px;
+    }
+
+    .lcd-digits {
+      font-family: var(--font-mono);
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 12px rgba(16, 242, 167, 0.7);
+      line-height: 1;
+    }
+
+    .lcd-sub {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .status-badge {
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .status-stable { background: rgba(16, 185, 129, 0.25); color: #6ee7b7; box-shadow: 0 0 6px rgba(16, 185, 129, 0.3); }
+    .status-breakdown { background: rgba(239, 68, 68, 0.3); color: #fca5a5; box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); font-weight: 700; }
+    .status-water { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+
+    /* Capacity Breakdown Gauge Card */
+    .capacity-card {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .capacity-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+
+    .capacity-meter {
+      height: 8px;
+      border-radius: 4px;
+      background: #1e2638;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .capacity-meter-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+      width: 100%;
+      transition: width 0.25s ease;
+    }
+
+    .capacity-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Chart Canvas Container */
+    .chart-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+
+    .chart-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    canvas#bufferChart {
+      width: 100%;
+      height: 175px;
+      border-radius: 6px;
+    }
+
+    /* Live Data Log Table */
+    .log-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 115px;
+    }
+
+    .log-table-wrap {
+      overflow-y: auto;
+      flex: 1;
+      max-height: 120px;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    table.data-table th {
+      background: #111723;
+      padding: 6px 10px;
+      text-align: left;
+      color: #94a3b8;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      border-bottom: 1px solid var(--border-glass);
+    }
+
+    table.data-table td {
+      padding: 5px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #e2e8f0;
+    }
+
+    table.data-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .log-actions {
+      padding: 8px 12px;
+      background: #101622;
+      border-top: 1px solid var(--border-glass);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid var(--border-bright);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Modal Info */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #151a24;
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      max-width: 550px;
+      width: 90%;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .modal-card p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #94a3b8;
+      margin-bottom: 12px;
+    }
+
+    .modal-card ul {
+      margin-left: 20px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1200px) {
+      .lab-container {
+        grid-template-columns: 260px 1fr 350px;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .lab-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LAB TOP HEADER -->
+  <header class="lab-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2v6m0 0l-3-3m3 3l3-3M5 12a7 7 0 1 0 14 0"/>
+          <circle cx="12" cy="14" r="3"/>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <h1>
+          Virtual Lab: Larutan Penyangga & Kapasitas Buffer
+          <span class="badge">Edisi Eksperimen Murni</span>
+        </h1>
+        <p>Simulasi Interaktif Kimia Fisik • Uji Daya Tahan pH terhadap Asam, Basa & Pengenceran</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" id="btn-audio" title="Aktifkan/Matikan Suara Efek Lab">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+        <span id="audio-label">Audio ON</span>
+      </button>
+
+      <button class="btn-header" id="btn-guide">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        Panduan
+      </button>
+
+      <button class="btn-header" id="btn-reset-all" style="color: #fca5a5; border-color: rgba(239, 68, 68, 0.3);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Racik Ulang
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKBENCH CONTAINER -->
+  <main class="lab-container">
+
+    <!-- LEFT PANEL: BUFFER FORMULATION & CONTROLS -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 7h-7L10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+          </svg>
+          Sistem Penyangga & Komposisi
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- Buffer System Selection -->
+        <div class="form-group">
+          <label for="bufferSelect">Sistem Larutan</label>
+          <select id="bufferSelect" class="lab-select">
+            <option value="acetate">1. Buffer Asetat: CH₃COOH + CH₃COONa (Ka=1.8×10⁻⁵)</option>
+            <option value="formate">2. Buffer Format: HCOOH + HCOONa (Ka=1.8×10⁻⁴)</option>
+            <option value="blood">3. Buffer Darah Manusia: H₂CO₃ + NaHCO₃ (pH 7.4)</option>
+            <option value="ammonia">4. Buffer Basa: NH₃ + NH₄Cl (Kb=1.8×10⁻⁵)</option>
+            <option value="water">5. [Kontrol] Air Murni / Non-Buffer (H₂O)</option>
+          </select>
+        </div>
+
+        <!-- Initial Buffer Formulation Sliders -->
+        <div class="form-group" id="group-formulation">
+          <div class="section-title">Racikan Awal Penyangga</div>
+          
+          <label>
+            <span id="label-weak-comp">Konsentrasi [HA]</span>
+            <span class="val-badge" id="badge-c-acid">0.10 M</span>
+          </label>
+          <div class="range-wrap">
+            <input type="range" id="slider-c-acid" class="lab-slider" min="0.05" max="0.50" step="0.01" value="0.10">
+          </div>
+
+          <label style="margin-top: 6px;">
+            <span id="label-conj-comp">Konsentrasi Garam [A⁻]</span>
+            <span class="val-badge" id="badge-c-salt">0.10 M</span>
+          </label>
+          <div class="range-wrap">
+            <input type="range" id="slider-c-salt" class="lab-slider" min="0.05" max="0.50" step="0.01" value="0.10">
+          </div>
+
+          <label style="margin-top: 6px;">
+            <span>Volume Awal Beaker</span>
+            <span class="val-badge" id="badge-initial-vol">100 mL</span>
+          </label>
+          <div class="range-wrap">
+            <input type="range" id="slider-initial-vol" class="lab-slider" min="50" max="200" step="25" value="100">
+          </div>
+        </div>
+
+        <!-- Live Component Ratio Card -->
+        <div class="ratio-card" id="ratio-card-box">
+          <div class="ratio-title">
+            <span>Rasio Komponen Aktif</span>
+            <span id="ratio-val-text" style="color: var(--accent-cyan); font-family: var(--font-mono);">1.00 : 1.00</span>
+          </div>
+          <div class="ratio-bar-wrap">
+            <div class="ratio-acid-bar" id="bar-acid" style="width: 50%;"></div>
+            <div class="ratio-base-bar" id="bar-base" style="width: 50%;"></div>
+          </div>
+          <div class="ratio-legend">
+            <span style="color: #f43f5e;" id="legend-acid-text">[HA]: 10.0 mmol</span>
+            <span style="color: #06b6d4;" id="legend-base-text">[A⁻]: 10.0 mmol</span>
+          </div>
+        </div>
+
+        <!-- Indicator Selection -->
+        <div class="form-group">
+          <div class="section-title">Indikator Warna Larutan</div>
+          <div class="indicator-list">
+            <div class="indicator-chip active" data-ind="btb">
+              <div>
+                <b>Bromtimol Biru (BTB)</b>
+                <div style="font-size: 10px; color: var(--text-muted);">Kuning (pH &lt; 6.0) → Biru (pH &gt; 7.6)</div>
+              </div>
+              <div class="indicator-swatch" style="background: #0284c7;"></div>
+            </div>
+
+            <div class="indicator-chip" data-ind="pp">
+              <div>
+                <b>Fenolftalein (PP)</b>
+                <div style="font-size: 10px; color: var(--text-muted);">Tak Berwarna → Merah Muda (pH 8.2 - 10.0)</div>
+              </div>
+              <div class="indicator-swatch" style="background: #f472b6;"></div>
+            </div>
+
+            <div class="indicator-chip" data-ind="mm">
+              <div>
+                <b>Metil Merah (MM)</b>
+                <div style="font-size: 10px; color: var(--text-muted);">Merah (pH &lt; 4.4) → Kuning (pH &gt; 6.2)</div>
+              </div>
+              <div class="indicator-swatch" style="background: #ef4444;"></div>
+            </div>
+
+            <div class="indicator-chip" data-ind="none">
+              <div>
+                <b>Tanpa Indikator (Bening)</b>
+                <div style="font-size: 10px; color: var(--text-muted);">Hanya tampilan probe pH digital</div>
+              </div>
+              <div class="indicator-swatch" style="background: #64748b;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER STAGE: WORKBENCH APPARATUS -->
+    <section class="stage-panel">
+      <div class="lab-stage-backdrop"></div>
+
+      <!-- Main Apparatus Viewport -->
+      <div class="apparatus-viewport">
+        <svg id="lab-apparatus-svg" viewBox="0 0 650 620" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="beakerGlassGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
+              <stop offset="12%" stop-color="rgba(255,255,255,0.06)"/>
+              <stop offset="88%" stop-color="rgba(255,255,255,0.03)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0.3)"/>
+            </linearGradient>
+
+            <linearGradient id="dispenserAcidGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#f43f5e"/>
+              <stop offset="100%" stop-color="#be123c"/>
+            </linearGradient>
+
+            <linearGradient id="dispenserBaseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#06b6d4"/>
+              <stop offset="100%" stop-color="#0e7490"/>
+            </linearGradient>
+
+            <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="2" dy="6" stdDeviation="5" flood-color="#000" flood-opacity="0.45"/>
+            </filter>
+          </defs>
+
+          <!-- 1. DUAL AUTOMATIC MICRO-DISPENSERS (HCl & NaOH on Top) -->
+          <g id="micro-dispensers" transform="translate(180, 40)" filter="url(#shadowFilter)">
+            <!-- Left Dispenser: Strong Acid (HCl 1.0 M) -->
+            <g id="dispenser-acid" transform="translate(40, 0)">
+              <rect x="0" y="0" width="60" height="95" rx="6" fill="#1e293b" stroke="#f43f5e" stroke-width="1.5"/>
+              <rect x="8" y="10" width="44" height="24" rx="3" fill="#0f172a"/>
+              <text x="30" y="26" font-size="10" font-family="'Fira Code',monospace" font-weight="700" fill="#fda4af" text-anchor="middle">HCl 1.0M</text>
+              <rect x="24" y="95" width="12" height="40" fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.6)"/>
+              <path d="M 28 135 L 30 160 L 32 160 L 34 135 Z" fill="#94a3b8"/>
+              <!-- Drop Animation Acid -->
+              <circle id="drop-acid" cx="31" cy="165" r="3.5" fill="#f43f5e" opacity="0"/>
+            </g>
+
+            <!-- Right Dispenser: Strong Base (NaOH 1.0 M) -->
+            <g id="dispenser-base" transform="translate(190, 0)">
+              <rect x="0" y="0" width="60" height="95" rx="6" fill="#1e293b" stroke="#06b6d4" stroke-width="1.5"/>
+              <rect x="8" y="10" width="44" height="24" rx="3" fill="#0f172a"/>
+              <text x="30" y="26" font-size="10" font-family="'Fira Code',monospace" font-weight="700" fill="#67e8f9" text-anchor="middle">NaOH 1M</text>
+              <rect x="24" y="95" width="12" height="40" fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.6)"/>
+              <path d="M 28 135 L 30 160 L 32 160 L 34 135 Z" fill="#94a3b8"/>
+              <!-- Drop Animation Base -->
+              <circle id="drop-base" cx="31" cy="165" r="3.5" fill="#06b6d4" opacity="0"/>
+            </g>
+          </g>
+
+          <!-- 2. MAGNETIC STIRRER HOTPLATE -->
+          <g id="magnetic-stirrer" transform="translate(225, 475)" filter="url(#shadowFilter)">
+            <rect x="0" y="0" width="200" height="50" rx="8" fill="#1e2433" stroke="#2e384d" stroke-width="2"/>
+            <rect x="10" y="-6" width="180" height="10" rx="3" fill="#e2e8f0" stroke="#cbd5e1"/>
+            <circle cx="150" cy="25" r="14" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+            <line id="stirrer-dial-indicator" x1="150" y1="25" x2="150" y2="14" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+            <circle id="stirrer-led" cx="45" cy="25" r="5" fill="#10b981" filter="drop-shadow(0 0 6px #10b981)"/>
+            <text x="60" y="29" font-size="10" font-family="'Plus Jakarta Sans',sans-serif" font-weight="700" fill="#94a3b8">STIRRER</text>
+          </g>
+
+          <!-- 3. BEAKER GLASS (250 mL) WITH BUFFER SOLUTION -->
+          <g id="beaker-assembly" transform="translate(245, 255)">
+            <clipPath id="beakerClip">
+              <rect x="8" y="10" width="144" height="210" rx="4"/>
+            </clipPath>
+
+            <!-- Beaker Shadow & Base -->
+            <rect x="8" y="10" width="144" height="210" rx="4" fill="rgba(15, 23, 42, 0.4)"/>
+
+            <!-- Liquid in Beaker -->
+            <g clip-path="url(#beakerClip)">
+              <!-- Liquid Body -->
+              <rect id="beaker-liquid-body" x="8" y="90" width="144" height="130" fill="rgba(2, 132, 199, 0.7)"/>
+              <!-- Liquid Surface Curve -->
+              <path id="beaker-liquid-surface" d="M 8 90 Q 80 94 152 90 L 152 98 L 8 98 Z" fill="rgba(255, 255, 255, 0.3)"/>
+              <!-- Magnetic Stirrer Bar -->
+              <rect id="stir-bar" x="65" y="208" width="30" height="7" rx="3.5" fill="#ffffff" stroke="#94a3b8" stroke-width="1"/>
+              <!-- Vortex Swirl -->
+              <path id="stir-vortex" d="M 68 92 Q 80 115 92 92" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" opacity="0.7"/>
+              <!-- Surface Ripple -->
+              <ellipse id="surface-ripple" cx="80" cy="92" rx="4" ry="2" fill="none" stroke="#fff" stroke-width="1.5" opacity="0"/>
+            </g>
+
+            <!-- Beaker Glass Outline & Lip -->
+            <rect x="8" y="10" width="144" height="210" rx="4" fill="url(#beakerGlassGrad)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+            <path d="M 4 10 L 8 10 M 152 10 L 156 10" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linecap="round"/>
+
+            <!-- Graduated Scale Lines (50, 100, 150, 200 mL) -->
+            <line x1="16" y1="185" x2="32" y2="185" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="36" y="188" font-size="9" font-family="'Fira Code',monospace" fill="rgba(255,255,255,0.7)">50 mL</text>
+
+            <line x1="16" y1="150" x2="32" y2="150" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="36" y="153" font-size="9" font-family="'Fira Code',monospace" fill="rgba(255,255,255,0.7)">100 mL</text>
+
+            <line x1="16" y1="115" x2="32" y2="115" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="36" y="118" font-size="9" font-family="'Fira Code',monospace" fill="rgba(255,255,255,0.7)">150 mL</text>
+
+            <line x1="16" y1="80" x2="32" y2="80" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="36" y="83" font-size="9" font-family="'Fira Code',monospace" fill="rgba(255,255,255,0.7)">200 mL</text>
+          </g>
+
+          <!-- 4. pH METER ELECTRODE PROBE -->
+          <g id="ph-probe" transform="translate(380, 235)" filter="url(#shadowFilter)">
+            <path d="M 80 40 Q 40 0 10 30" fill="none" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+            <rect x="5" y="30" width="10" height="110" rx="3" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+            <rect x="7" y="135" width="6" height="60" rx="2" fill="rgba(148, 163, 184, 0.4)" stroke="rgba(255,255,255,0.6)"/>
+            <circle cx="10" cy="198" r="5" fill="#10f2a7" fill-opacity="0.8" stroke="#fff" stroke-width="1"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Surface Benchtop Base -->
+      <div class="benchtop-surface"></div>
+
+      <!-- Floating Workbench Tactile Control Bar -->
+      <div class="bench-control-bar">
+        <button class="btn-act btn-acid" id="btn-add-acid-05" title="Tambahkan 0.5 mL HCl 1.0 M">
+          + 0.5 mL HCl
+        </button>
+        <button class="btn-act btn-acid" id="btn-add-acid-10" title="Tambahkan 1.0 mL HCl 1.0 M">
+          + 1.0 mL HCl
+        </button>
+
+        <div class="control-divider"></div>
+
+        <button class="btn-act btn-base" id="btn-add-base-05" title="Tambahkan 0.5 mL NaOH 1.0 M">
+          + 0.5 mL NaOH
+        </button>
+        <button class="btn-act btn-base" id="btn-add-base-10" title="Tambahkan 1.0 mL NaOH 1.0 M">
+          + 1.0 mL NaOH
+        </button>
+
+        <div class="control-divider"></div>
+
+        <button class="btn-act btn-water" id="btn-add-water" title="Tambahkan 25 mL Aquades (Uji Efek Pengenceran)">
+          + 25 mL Air
+        </button>
+
+        <div class="control-divider"></div>
+
+        <button class="btn-act active" id="btn-toggle-stirrer" title="Nyalakan/Matikan Pengaduk Magnetik">
+          <span id="stirrer-btn-text">Stirrer ON</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: INSTRUMENTATION, CAPACITY METER & RESISTANCE CHART -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          Status Penyangga & pH
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- Digital pH Meter Instrument -->
+        <div class="lcd-ph-device">
+          <div class="lcd-screen">
+            <span class="lcd-unit">pH DIGITAL</span>
+            <span class="lcd-digits" id="lcd-ph-val">4.74</span>
+          </div>
+          <div class="lcd-sub">
+            <span>T: 25.0 °C • ATC</span>
+            <span class="status-badge status-stable" id="state-badge">PENYANGGA AKTIF</span>
+          </div>
+        </div>
+
+        <!-- Buffer Capacity & Breakdown Gauge -->
+        <div class="capacity-card">
+          <div class="capacity-header">
+            <span>Sisa Kapasitas Penyangga</span>
+            <span id="capacity-pct-text" style="color: var(--primary); font-family: var(--font-mono);">100%</span>
+          </div>
+          <div class="capacity-meter">
+            <div class="capacity-meter-fill" id="capacity-meter-fill" style="width: 100%;"></div>
+          </div>
+          <div class="capacity-sub">
+            <span id="cap-acid-left">Kapasitas Asam: 10.0 mmol</span>
+            <span id="cap-base-left">Kapasitas Basa: 10.0 mmol</span>
+          </div>
+        </div>
+
+        <!-- Live Resistance Curve Chart -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <span class="chart-title">Kurva Ketahanan pH</span>
+            <span style="font-size: 10px; color: var(--text-muted);">Asam ditambahkan ← 0 → Basa</span>
+          </div>
+          <canvas id="bufferChart"></canvas>
+        </div>
+
+        <!-- Live Data Log Table -->
+        <div class="log-box">
+          <div class="panel-header" style="padding: 7px 12px;">
+            <h2 style="font-size: 11px;">Jurnal Data Pengujian</h2>
+            <span id="log-count" style="font-size: 10px; color: var(--text-muted);">0 aksi</span>
+          </div>
+          <div class="log-table-wrap">
+            <table class="data-table" id="dataTable">
+              <thead>
+                <tr>
+                  <th>Aksi / Uji</th>
+                  <th>Total V (mL)</th>
+                  <th>pH</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="dataTableBody">
+                <!-- Dynamic Log Rows -->
+              </tbody>
+            </table>
+          </div>
+          <div class="log-actions">
+            <button class="btn-header" id="btn-export-csv" style="padding: 4px 9px; font-size: 11px;">
+              Ekspor CSV
+            </button>
+            <button class="btn-header" id="btn-export-img" style="padding: 4px 9px; font-size: 11px;">
+              Simpan Grafik
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- POPUP GUIDELINES MODAL -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal-card">
+      <h3>🧪 Panduan Praktikum Larutan Penyangga</h3>
+      <p>Praktikum ini dirancang untuk membuktikan secara kuantitatif kemampuan <b>Larutan Penyangga (Buffer)</b> dalam mempertahankan pH:</p>
+      <ul>
+        <li><b>Resistansi Asam & Basa:</b> Uji penambahan sedikit asam kuat ($HCl$) atau basa kuat ($NaOH$). Bandingkan kestabilan pH larutan buffer dengan air murni.</li>
+        <li><b>Efek Pengenceran:</b> Tambahkan air aquades (+25 mL). Perhatikan bahwa pH buffer praktis tidak berubah karena perbandingan $[A^-]/[HA]$ tetap sama!</li>
+        <li><b>Kapasitas Penyangga:</b> Jika asam atau basa ditambahkan terus-menerus melebihi mol komponen penyangga, buffer akan "jebol" (*breakdown*) dan pH seketika melonjak atau anjlok drastis.</li>
+        <li><b>Buffer Fisiologis Darah:</b> Coba sistem nomor 3 ($H_2CO_3 / NaHCO_3$) untuk melihat cara kerja sistem penyangga darah menjaga pH tubuh di sekitar 7.4.</li>
+      </ul>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-act btn-primary" id="btn-close-modal" style="background: var(--primary); color: #fff;">Tutup & Mulai Praktikum</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST -->
+  <div class="toast" id="toastBox">Notifikasi</div>
+
+  <!-- JAVASCRIPT: SIMULATION ENGINE & AUDIO -->
+  <script>
+    'use strict';
+
+    /* =========================================================================
+     * 1. NATIVE WEB AUDIO API SYNTHESIZER
+     * ========================================================================= */
+    class BufferAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.stirrerOsc = null;
+        this.stirrerGain = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playDripSound(type = 'normal') {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+
+        const freq = type === 'acid' ? 520 : type === 'base' ? 840 : 680;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.6, now + 0.04);
+        osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      }
+
+      playBreakdownAlert() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(330, now + 0.1);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+
+      startStirrerHum() {
+        if (this.muted || this.stirrerOsc) return;
+        this.init();
+        if (!this.ctx) return;
+
+        this.stirrerOsc = this.ctx.createOscillator();
+        this.stirrerGain = this.ctx.createGain();
+        this.stirrerOsc.type = 'sine';
+        this.stirrerOsc.frequency.setValueAtTime(54, this.ctx.currentTime);
+        this.stirrerGain.gain.setValueAtTime(0.025, this.ctx.currentTime);
+
+        this.stirrerOsc.connect(this.stirrerGain);
+        this.stirrerGain.connect(this.ctx.destination);
+        this.stirrerOsc.start();
+      }
+
+      stopStirrerHum() {
+        if (this.stirrerOsc) {
+          try {
+            this.stirrerOsc.stop();
+            this.stirrerOsc.disconnect();
+          } catch(e) {}
+          this.stirrerOsc = null;
+        }
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        if (this.muted) this.stopStirrerHum();
+        else if (state.stirrerOn) this.startStirrerHum();
+        return !this.muted;
+      }
+    }
+
+    const sound = new BufferAudioEngine();
+
+    /* =========================================================================
+     * 2. STATE & BUFFER SYSTEM CALCULATIONS
+     * ========================================================================= */
+    const state = {
+      systemKey: 'acetate',
+      indicator: 'btb',
+      cAcid: 0.10,            // Molar awal HA
+      cSalt: 0.10,            // Molar awal A-
+      volumeTotal: 100.0,     // Volume total cairan di beaker (mL)
+      molAcidCurrent: 10.0,   // mmol HA tersisa
+      molBaseCurrent: 10.0,   // mmol A- tersisa
+      addedHCl: 0.0,          // Total mL HCl 1.0 M ditambahkan
+      addedNaOH: 0.0,         // Total mL NaOH 1.0 M ditambahkan
+      addedWater: 0.0,        // Total mL air ditambahkan
+      currentPH: 4.74,
+      stirrerOn: true,
+      history: []             // Log of all additions
+    };
+
+    const SYSTEMS = {
+      acetate: {
+        name: 'Buffer Asetat',
+        acidName: 'CH₃COOH',
+        baseName: 'CH₃COO⁻',
+        isBaseBuffer: false,
+        pKa: 4.74,
+        Ka: 1.8e-5
+      },
+      formate: {
+        name: 'Buffer Format',
+        acidName: 'HCOOH',
+        baseName: 'HCOO⁻',
+        isBaseBuffer: false,
+        pKa: 3.74,
+        Ka: 1.8e-4
+      },
+      blood: {
+        name: 'Buffer Darah (Karbonat)',
+        acidName: 'H₂CO₃',
+        baseName: 'HCO₃⁻',
+        isBaseBuffer: false,
+        pKa: 6.37, // Effective physiological blood buffer with dissolved CO2
+        Ka: 4.3e-7
+      },
+      ammonia: {
+        name: 'Buffer Amonia',
+        acidName: 'NH₄⁺',
+        baseName: 'NH₃',
+        isBaseBuffer: true,
+        pKa: 9.25, // pKa of conjugate acid NH4+
+        Kb: 1.8e-5
+      },
+      water: {
+        name: 'Air Murni (Non-Buffer)',
+        acidName: 'H₂O',
+        baseName: 'H₂O',
+        isBaseBuffer: false,
+        pKa: 7.00
+      }
+    };
+
+    /* Exact Chemical pH Calculation Engine */
+    function calculateBufferPH() {
+      const sys = SYSTEMS[state.systemKey];
+      const Vtot = state.volumeTotal;
+
+      if (state.systemKey === 'water') {
+        // Pure water with added strong acid or base
+        const molExcessH = state.addedHCl * 1.0;   // 1.0 M HCl
+        const molExcessOH = state.addedNaOH * 1.0; // 1.0 M NaOH
+        const netH = molExcessH - molExcessOH;
+
+        if (Math.abs(netH) < 1e-6) return 7.00;
+        if (netH > 0) {
+          const concH = netH / Vtot;
+          return -Math.log10(Math.max(concH, 1e-14));
+        } else {
+          const concOH = (-netH) / Vtot;
+          return 14.0 - (-Math.log10(Math.max(concOH, 1e-14)));
+        }
+      }
+
+      const molHA = state.molAcidCurrent;
+      const molA = state.molBaseCurrent;
+
+      // Case 1: Both buffer components still active
+      if (molHA > 1e-5 && molA > 1e-5) {
+        return sys.pKa + Math.log10(molA / molHA);
+      }
+
+      // Case 2: Buffer Breakdown - Acid component exhausted (excess strong base added)
+      if (molHA <= 1e-5) {
+        const excessOH = -molHA; // excess mmol OH-
+        if (excessOH <= 1e-5) {
+          // Exactly at exhaustion point: weak base hydrolysis
+          const cA = molA / Vtot;
+          const Kh = 1e-14 / sys.Ka;
+          const oh = Math.sqrt(Kh * cA);
+          return 14.0 - (-Math.log10(Math.max(oh, 1e-14)));
+        } else {
+          const concOH = excessOH / Vtot;
+          return 14.0 - (-Math.log10(Math.max(concOH, 1e-14)));
+        }
+      }
+
+      // Case 3: Buffer Breakdown - Base component exhausted (excess strong acid added)
+      if (molA <= 1e-5) {
+        const excessH = -molA; // excess mmol H+
+        if (excessH <= 1e-5) {
+          // Exactly at exhaustion point: weak acid dissociation
+          const cHA = molHA / Vtot;
+          const h = Math.sqrt(sys.Ka * cHA);
+          return -Math.log10(Math.max(h, 1e-14));
+        } else {
+          const concH = excessH / Vtot;
+          return -Math.log10(Math.max(concH, 1e-14));
+        }
+      }
+
+      return 7.00;
+    }
+
+    /* Indicator Colors */
+    function getIndicatorColor(ph, indKey) {
+      if (indKey === 'none') return 'rgba(235, 245, 255, 0.4)';
+      if (indKey === 'pp') {
+        if (ph < 8.2) return 'rgba(240, 245, 255, 0.4)';
+        if (ph >= 10.0) return 'rgba(236, 72, 153, 0.85)';
+        const f = (ph - 8.2) / 1.8;
+        return `rgba(244, 114, 182, ${0.4 + f * 0.45})`;
+      }
+      if (indKey === 'btb') {
+        if (ph <= 6.0) return 'rgba(234, 179, 8, 0.85)';  // Yellow
+        if (ph >= 7.6) return 'rgba(2, 132, 199, 0.85)';  // Blue
+        if (ph >= 6.8 && ph <= 7.2) return 'rgba(34, 197, 94, 0.85)'; // Green
+        if (ph < 6.8) return 'rgba(132, 204, 22, 0.85)';
+        return 'rgba(14, 165, 233, 0.85)';
+      }
+      if (indKey === 'mm') {
+        if (ph <= 4.4) return 'rgba(239, 68, 68, 0.85)';
+        if (ph >= 6.2) return 'rgba(250, 204, 21, 0.85)';
+        return 'rgba(249, 115, 22, 0.85)';
+      }
+      return 'rgba(240, 245, 255, 0.4)';
+    }
+
+    /* =========================================================================
+     * 3. DOM & APPARATUS RENDERING
+     * ========================================================================= */
+    const dom = {
+      beakerLiquidBody: document.getElementById('beaker-liquid-body'),
+      beakerLiquidSurface: document.getElementById('beaker-liquid-surface'),
+      surfaceRipple: document.getElementById('surface-ripple'),
+      dropAcid: document.getElementById('drop-acid'),
+      dropBase: document.getElementById('drop-base'),
+      stirBar: document.getElementById('stir-bar'),
+      stirVortex: document.getElementById('stir-vortex'),
+      stirrerLed: document.getElementById('stirrer-led'),
+      stirrerDial: document.getElementById('stirrer-dial-indicator'),
+      lcdPhVal: document.getElementById('lcd-ph-val'),
+      stateBadge: document.getElementById('state-badge'),
+      barAcid: document.getElementById('bar-acid'),
+      barBase: document.getElementById('bar-base'),
+      ratioValText: document.getElementById('ratio-val-text'),
+      legendAcidText: document.getElementById('legend-acid-text'),
+      legendBaseText: document.getElementById('legend-base-text'),
+      capacityPctText: document.getElementById('capacity-pct-text'),
+      capacityMeterFill: document.getElementById('capacity-meter-fill'),
+      capAcidLeft: document.getElementById('cap-acid-left'),
+      capBaseLeft: document.getElementById('cap-base-left'),
+      dataTableBody: document.getElementById('dataTableBody'),
+      logCount: document.getElementById('log-count'),
+      bufferSelect: document.getElementById('bufferSelect'),
+      sliderCAcid: document.getElementById('slider-c-acid'),
+      badgeCAcid: document.getElementById('badge-c-acid'),
+      sliderCSalt: document.getElementById('slider-c-salt'),
+      badgeCSalt: document.getElementById('badge-c-salt'),
+      sliderInitialVol: document.getElementById('slider-initial-vol'),
+      badgeInitialVol: document.getElementById('badge-initial-vol'),
+      groupFormulation: document.getElementById('group-formulation'),
+      ratioCardBox: document.getElementById('ratio-card-box'),
+      btnAudio: document.getElementById('btn-audio'),
+      audioLabel: document.getElementById('audio-label'),
+      btnStirrer: document.getElementById('btn-toggle-stirrer'),
+      toastBox: document.getElementById('toastBox'),
+      chartCanvas: document.getElementById('bufferChart')
+    };
+
+    function triggerDropAnimation(type) {
+      sound.playDripSound(type);
+      const drop = type === 'acid' ? dom.dropAcid : dom.dropBase;
+      const startX = type === 'acid' ? 71 : 221;
+      const ripple = dom.surfaceRipple;
+
+      drop.setAttribute('cx', startX);
+      drop.setAttribute('cy', '165');
+      drop.setAttribute('opacity', '1');
+
+      let start = null;
+      function step(timestamp) {
+        if (!start) start = timestamp;
+        const p = Math.min((timestamp - start) / 140, 1);
+        drop.setAttribute('cy', 165 + p * 180);
+
+        if (p < 1) {
+          requestAnimationFrame(step);
+        } else {
+          drop.setAttribute('opacity', '0');
+          // Ripple on surface
+          ripple.setAttribute('cx', startX - 165);
+          ripple.setAttribute('opacity', '0.9');
+          ripple.setAttribute('rx', '4');
+          ripple.setAttribute('ry', '2');
+
+          let ripStart = null;
+          function ripStep(rt) {
+            if (!ripStart) ripStart = rt;
+            const rp = Math.min((rt - ripStart) / 220, 1);
+            ripple.setAttribute('rx', 4 + rp * 32);
+            ripple.setAttribute('ry', 2 + rp * 8);
+            ripple.setAttribute('opacity', String(0.9 * (1 - rp)));
+            if (rp < 1) requestAnimationFrame(ripStep);
+          }
+          requestAnimationFrame(ripStep);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function updateApparatus() {
+      // Liquid Height: 50 mL is y=185, 250 mL is y=45
+      const v = Math.min(state.volumeTotal, 250);
+      const liquidY = 185 - ((v - 50) / 200) * 140;
+      dom.beakerLiquidBody.setAttribute('y', liquidY);
+      dom.beakerLiquidBody.setAttribute('height', 220 - liquidY);
+      dom.beakerLiquidSurface.setAttribute('d', `M 8 ${liquidY} Q 80 ${liquidY + 4} 152 ${liquidY} L 152 ${liquidY + 8} L 8 ${liquidY + 8} Z`);
+      dom.surfaceRipple.setAttribute('cy', liquidY + 2);
+
+      // Color
+      const col = getIndicatorColor(state.currentPH, state.indicator);
+      dom.beakerLiquidBody.setAttribute('fill', col);
+      dom.beakerLiquidSurface.setAttribute('fill', col);
+
+      // LCD Display
+      dom.lcdPhVal.textContent = state.currentPH.toFixed(2);
+
+      // Status Badge & Capacity Bar
+      updateCapacityUI();
+    }
+
+    function updateCapacityUI() {
+      const badge = dom.stateBadge;
+      badge.className = 'status-badge';
+
+      if (state.systemKey === 'water') {
+        badge.classList.add('status-water');
+        badge.textContent = 'AIR MURNI (NON-BUFFER)';
+        dom.capacityPctText.textContent = '0%';
+        dom.capacityMeterFill.style.width = '0%';
+        dom.capAcidLeft.textContent = 'Tanpa Kapasitas Penyangga';
+        dom.capBaseLeft.textContent = '';
+        return;
+      }
+
+      const sys = SYSTEMS[state.systemKey];
+      const initialTotal = (state.cAcid + state.cSalt) * Number(dom.sliderInitialVol.value);
+      const remainingAcid = Math.max(state.molAcidCurrent, 0);
+      const remainingBase = Math.max(state.molBaseCurrent, 0);
+      const remainingCap = (remainingAcid + remainingBase) / initialTotal;
+      const pct = Math.max(Math.round(remainingCap * 100), 0);
+
+      dom.capacityPctText.textContent = `${pct}%`;
+      dom.capacityMeterFill.style.width = `${pct}%`;
+
+      dom.capAcidLeft.textContent = `Tahan Asam: ${remainingBase.toFixed(1)} mmol`;
+      dom.capBaseLeft.textContent = `Tahan Basa: ${remainingAcid.toFixed(1)} mmol`;
+
+      // Ratio Bar
+      const totalMol = Math.max(remainingAcid + remainingBase, 1e-4);
+      const acidPct = (remainingAcid / totalMol) * 100;
+      const basePct = (remainingBase / totalMol) * 100;
+      dom.barAcid.style.width = `${acidPct}%`;
+      dom.barBase.style.width = `${basePct}%`;
+
+      dom.legendAcidText.textContent = `[HA]: ${remainingAcid.toFixed(1)} mmol`;
+      dom.legendBaseText.textContent = `[A⁻]: ${remainingBase.toFixed(1)} mmol`;
+
+      if (remainingAcid > 0.05 && remainingBase > 0.05) {
+        dom.ratioValText.textContent = `${(remainingAcid / remainingBase).toFixed(2)} : 1.00`;
+        badge.classList.add('status-stable');
+        badge.textContent = 'PENYANGGA AKTIF';
+      } else {
+        dom.ratioValText.textContent = 'KAPASITAS HABIS';
+        badge.classList.add('status-breakdown');
+        badge.textContent = 'KAPASITAS JEBOL!';
+        sound.playBreakdownAlert();
+      }
+    }
+
+    /* =========================================================================
+     * 4. LIVE BUFFER RESISTANCE CHART (pH vs Delta V)
+     * ========================================================================= */
+    class LiveBufferChart {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+      }
+
+      resize() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width * dpr;
+        this.canvas.height = (rect.height || 175) * dpr;
+        this.ctx.scale(dpr, dpr);
+        this.width = rect.width;
+        this.height = rect.height || 175;
+        this.render();
+      }
+
+      render() {
+        const ctx = this.ctx;
+        const w = this.width;
+        const h = this.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const padL = 34;
+        const padR = 16;
+        const padT = 12;
+        const padB = 24;
+
+        const plotW = w - padL - padR;
+        const plotH = h - padT - padB;
+
+        // Background Grid
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+        ctx.lineWidth = 1;
+
+        // pH Lines (0, 2, 4, 6, 7, 8, 10, 12, 14)
+        for (let ph = 0; ph <= 14; ph += 2) {
+          const y = padT + plotH - (ph / 14) * plotH;
+          ctx.beginPath();
+          ctx.moveTo(padL, y);
+          ctx.lineTo(w - padR, y);
+          ctx.stroke();
+
+          ctx.fillStyle = ph === 7 ? '#10b981' : '#64748b';
+          ctx.font = '9px Fira Code';
+          ctx.textAlign = 'right';
+          ctx.fillText(ph, padL - 5, y + 3);
+        }
+
+        // Neutral pH 7 dashed
+        const y7 = padT + plotH - (7 / 14) * plotH;
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(padL, y7);
+        ctx.lineTo(w - padR, y7);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // X Axis: -15 mL HCl to +15 mL NaOH
+        // Center x is 0 mL
+        const xZero = padL + plotW / 2;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.beginPath();
+        ctx.moveTo(xZero, padT);
+        ctx.lineTo(xZero, h - padB);
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '9px Plus Jakarta Sans';
+        ctx.textAlign = 'center';
+        ctx.fillText('← +HCl (Asam)   |   +NaOH (Basa) →', padL + plotW / 2, h - 3);
+
+        if (state.history.length === 0) return;
+
+        // Draw Data Curve
+        ctx.beginPath();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#10b981';
+        ctx.shadowColor = 'rgba(16, 185, 129, 0.6)';
+        ctx.shadowBlur = 8;
+
+        state.history.forEach((pt, idx) => {
+          // pt.deltaV ranges from -15 to +15 mL
+          const netV = pt.netV; // -15 to +15
+          const clampedV = Math.max(Math.min(netV, 15), -15);
+          const x = xZero + (clampedV / 15) * (plotW / 2);
+          const y = padT + plotH - (pt.ph / 14) * plotH;
+
+          if (idx === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Current Dot Glow
+        const last = state.history[state.history.length - 1];
+        const lastNet = Math.max(Math.min(last.netV, 15), -15);
+        const curX = xZero + (lastNet / 15) * (plotW / 2);
+        const curY = padT + plotH - (last.ph / 14) * plotH;
+
+        ctx.fillStyle = '#10f2a7';
+        ctx.beginPath();
+        ctx.arc(curX, curY, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+
+    let chart = null;
+
+    /* =========================================================================
+     * 5. OPERATIONS & REAGENT INJECTIONS
+     * ========================================================================= */
+    function injectReagent(type, vol) {
+      if (type === 'acid') {
+        state.addedHCl += vol;
+        state.volumeTotal += vol;
+        // 1.0 M HCl consumes base component A-
+        state.molBaseCurrent -= vol * 1.0;
+        state.molAcidCurrent += vol * 1.0;
+        triggerDropAnimation('acid');
+      } else if (type === 'base') {
+        state.addedNaOH += vol;
+        state.volumeTotal += vol;
+        // 1.0 M NaOH consumes acid component HA
+        state.molAcidCurrent -= vol * 1.0;
+        state.molBaseCurrent += vol * 1.0;
+        triggerDropAnimation('base');
+      } else if (type === 'water') {
+        state.addedWater += vol;
+        state.volumeTotal += vol;
+        sound.playDripSound('water');
+      }
+
+      state.currentPH = calculateBufferPH();
+
+      // Record to History
+      const netV = state.addedNaOH - state.addedHCl;
+      const pt = {
+        action: type === 'acid' ? `+ ${vol} mL HCl` : type === 'base' ? `+ ${vol} mL NaOH` : `+ ${vol} mL Air`,
+        totalV: state.volumeTotal,
+        netV: netV,
+        ph: state.currentPH,
+        status: state.systemKey === 'water' ? 'Air Murni' : (state.molAcidCurrent > 0.05 && state.molBaseCurrent > 0.05 ? 'Buffer Stabil' : 'Buffer Jebol!')
+      };
+      state.history.push(pt);
+
+      appendLogRow(pt);
+      updateApparatus();
+      if (chart) chart.render();
+    }
+
+    function appendLogRow(pt) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight: 600;">${pt.action}</td>
+        <td>${pt.totalV.toFixed(1)} mL</td>
+        <td style="color: var(--lcd-text); font-weight: bold;">${pt.ph.toFixed(2)}</td>
+        <td>${pt.status}</td>
+      `;
+      dom.dataTableBody.appendChild(tr);
+      dom.dataTableBody.parentElement.parentElement.scrollTop = dom.dataTableBody.parentElement.parentElement.scrollHeight;
+      dom.logCount.textContent = `${state.history.length} aksi`;
+    }
+
+    function resetBufferFormula() {
+      const initialVol = Number(dom.sliderInitialVol.value);
+      state.cAcid = Number(dom.sliderCAcid.value);
+      state.cSalt = Number(dom.sliderCSalt.value);
+      state.volumeTotal = initialVol;
+      state.addedHCl = 0.0;
+      state.addedNaOH = 0.0;
+      state.addedWater = 0.0;
+
+      if (state.systemKey === 'water') {
+        state.molAcidCurrent = 0;
+        state.molBaseCurrent = 0;
+      } else {
+        state.molAcidCurrent = state.cAcid * initialVol;
+        state.molBaseCurrent = state.cSalt * initialVol;
+      }
+
+      state.currentPH = calculateBufferPH();
+      state.history = [{
+        action: 'Racik Awal',
+        totalV: state.volumeTotal,
+        netV: 0.0,
+        ph: state.currentPH,
+        status: 'Kondisi Awal'
+      }];
+
+      dom.dataTableBody.innerHTML = '';
+      appendLogRow(state.history[0]);
+      updateApparatus();
+      if (chart) chart.render();
+      showToast('Larutan penyangga telah diracik ulang!');
+    }
+
+    function showToast(msg) {
+      const box = dom.toastBox;
+      box.textContent = msg;
+      box.classList.add('show');
+      setTimeout(() => box.classList.remove('show'), 2800);
+    }
+
+    /* =========================================================================
+     * 6. EVENT BINDINGS
+     * ========================================================================= */
+    function setupEvents() {
+      // Reagent buttons
+      document.getElementById('btn-add-acid-05').addEventListener('click', () => injectReagent('acid', 0.5));
+      document.getElementById('btn-add-acid-10').addEventListener('click', () => injectReagent('acid', 1.0));
+      document.getElementById('btn-add-base-05').addEventListener('click', () => injectReagent('base', 0.5));
+      document.getElementById('btn-add-base-10').addEventListener('click', () => injectReagent('base', 1.0));
+      document.getElementById('btn-add-water').addEventListener('click', () => injectReagent('water', 25.0));
+
+      // Reset
+      document.getElementById('btn-reset-all').addEventListener('click', resetBufferFormula);
+
+      // Stirrer Toggle
+      dom.btnStirrer.addEventListener('click', () => {
+        state.stirrerOn = !state.stirrerOn;
+        if (state.stirrerOn) {
+          dom.stirrerLed.setAttribute('fill', '#10b981');
+          dom.stirrerLed.style.filter = 'drop-shadow(0 0 6px #10b981)';
+          dom.stirVortex.setAttribute('opacity', '0.7');
+          dom.stirrerDial.setAttribute('transform', 'rotate(45 150 25)');
+          document.getElementById('stirrer-btn-text').textContent = 'Stirrer ON';
+          dom.btnStirrer.classList.add('active');
+          sound.startStirrerHum();
+        } else {
+          dom.stirrerLed.setAttribute('fill', '#ef4444');
+          dom.stirrerLed.style.filter = 'drop-shadow(0 0 6px #ef4444)';
+          dom.stirVortex.setAttribute('opacity', '0');
+          dom.stirrerDial.setAttribute('transform', 'rotate(0 150 25)');
+          document.getElementById('stirrer-btn-text').textContent = 'Stirrer OFF';
+          dom.btnStirrer.classList.remove('active');
+          sound.stopStirrerHum();
+        }
+      });
+
+      // Audio Toggle
+      dom.btnAudio.addEventListener('click', () => {
+        const on = sound.toggleMute();
+        dom.audioLabel.textContent = on ? 'Audio ON' : 'Audio OFF';
+        dom.btnAudio.classList.toggle('active', on);
+      });
+
+      // System Select
+      dom.bufferSelect.addEventListener('change', (e) => {
+        state.systemKey = e.target.value;
+        const isWater = state.systemKey === 'water';
+        dom.groupFormulation.style.display = isWater ? 'none' : 'flex';
+        dom.ratioCardBox.style.display = isWater ? 'none' : 'flex';
+
+        const sys = SYSTEMS[state.systemKey];
+        if (!isWater) {
+          document.getElementById('label-weak-comp').textContent = `Konsentrasi [${sys.acidName}]`;
+          document.getElementById('label-conj-comp').textContent = `Konsentrasi Garam [${sys.baseName}]`;
+        }
+        resetBufferFormula();
+      });
+
+      // Formulation Sliders
+      dom.sliderCAcid.addEventListener('input', (e) => {
+        dom.badgeCAcid.textContent = `${Number(e.target.value).toFixed(2)} M`;
+        resetBufferFormula();
+      });
+
+      dom.sliderCSalt.addEventListener('input', (e) => {
+        dom.badgeCSalt.textContent = `${Number(e.target.value).toFixed(2)} M`;
+        resetBufferFormula();
+      });
+
+      dom.sliderInitialVol.addEventListener('input', (e) => {
+        dom.badgeInitialVol.textContent = `${e.target.value} mL`;
+        resetBufferFormula();
+      });
+
+      // Indicator chips
+      document.querySelectorAll('.indicator-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          document.querySelectorAll('.indicator-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          state.indicator = chip.getAttribute('data-ind');
+          updateApparatus();
+        });
+      });
+
+      // Guide Modal
+      const modal = document.getElementById('guideModal');
+      document.getElementById('btn-guide').addEventListener('click', () => modal.classList.add('open'));
+      document.getElementById('btn-close-modal').addEventListener('click', () => modal.classList.remove('open'));
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('open');
+      });
+
+      // Export CSV
+      document.getElementById('btn-export-csv').addEventListener('click', () => {
+        if (state.history.length === 0) return;
+        let csv = 'Aksi,Total_Volume_mL,pH,Status\n';
+        state.history.forEach(pt => {
+          csv += `"${pt.action}",${pt.totalV.toFixed(1)},${pt.ph.toFixed(2)},"${pt.status}"\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `data_buffer_${state.systemKey}_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Data pengujian berhasil diekspor (.CSV)!');
+      });
+
+      // Export PNG
+      document.getElementById('btn-export-img').addEventListener('click', () => {
+        if (!dom.chartCanvas) return;
+        const imgUrl = dom.chartCanvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = imgUrl;
+        a.download = `kurva_buffer_${state.systemKey}_${new Date().toISOString().slice(0,10)}.png`;
+        a.click();
+        showToast('Grafik kurva ketahanan pH berhasil disimpan (.PNG)!');
+      });
+    }
+
+    /* Initialize Application */
+    window.addEventListener('DOMContentLoaded', () => {
+      chart = new LiveBufferChart(dom.chartCanvas);
+      setupEvents();
+      resetBufferFormula();
+
+      // Trigger initial stirrer state
+      dom.stirrerLed.setAttribute('fill', '#10b981');
+      dom.stirrerLed.style.filter = 'drop-shadow(0 0 6px #10b981)';
+      dom.stirVortex.setAttribute('opacity', '0.7');
+      dom.stirrerDial.setAttribute('transform', 'rotate(45 150 25)');
+      dom.btnStirrer.classList.add('active');
+    });
+  </script>
+</body>
+</html>

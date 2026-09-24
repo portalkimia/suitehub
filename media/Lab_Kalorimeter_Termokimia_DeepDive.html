@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Lab: Kalorimeter Reaksi & Termokimia • PortalKimia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-space: #090d16;
+      --bg-bench: #131926;
+      --bg-panel: rgba(19, 25, 38, 0.9);
+      --bg-glass: rgba(28, 36, 54, 0.65);
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-bright: rgba(244, 63, 94, 0.4);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #f43f5e;
+      --primary-hover: #e11d48;
+      --primary-glow: rgba(244, 63, 94, 0.35);
+      --accent-cyan: #06b6d4;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --lcd-bg: #03140f;
+      --lcd-text: #10f2a7;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.6);
+      --font-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === HEADER LAB BAR === */
+    header.lab-header {
+      background: rgba(15, 20, 31, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f43f5e, #fb7185);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+
+    .brand-title h1 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title h1 span.badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(244, 63, 94, 0.2);
+      border: 1px solid var(--border-bright);
+      color: #fda4af;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-header {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-header.active {
+      background: rgba(244, 63, 94, 0.25);
+      border-color: var(--primary);
+      color: #fda4af;
+    }
+
+    /* === WORKBENCH MAIN LAYOUT === */
+    .lab-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 310px 1fr 395px;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1720px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* === PANEL STYLES === */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-header h2 svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+    }
+
+    .panel-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    /* Reaction Cards */
+    .reaction-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .reaction-card {
+      background: rgba(15, 20, 31, 0.7);
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .reaction-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .reaction-card:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(30, 38, 56, 0.7);
+    }
+
+    .reaction-card.selected {
+      border-color: var(--primary);
+      background: rgba(244, 63, 94, 0.12);
+    }
+
+    .reaction-card.selected::before {
+      opacity: 1;
+    }
+
+    .reaction-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .reaction-formula {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-cyan);
+    }
+
+    .reaction-type-badge {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .badge-exo { color: #f43f5e; }
+    .badge-endo { color: #06b6d4; }
+
+    /* Sliders */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-group label span.val-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-cyan);
+      background: rgba(6, 182, 212, 0.12);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .range-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="range"].lab-slider {
+      flex: 1;
+      height: 6px;
+      border-radius: 999px;
+      background: #1e2638;
+      outline: none;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* === CENTER STAGE: WORKBENCH CANVAS & APPARATUS === */
+    .stage-panel {
+      position: relative;
+      background: radial-gradient(circle at 50% 25%, #1c2233 0%, #101524 65%, #080c14 100%);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lab-stage-backdrop {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, transparent 60%, rgba(5, 7, 12, 0.8) 100%);
+      background-size: 24px 24px, 100% 100%;
+    }
+
+    .benchtop-surface {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 145px;
+      background: linear-gradient(to bottom, #1e2636 0%, #131924 35%, #0b0f16 100%);
+      border-top: 3px solid #2d374d;
+      box-shadow: inset 0 3px 12px rgba(255, 255, 255, 0.08);
+      z-index: 1;
+    }
+
+    .apparatus-viewport {
+      flex: 1;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    svg#lab-apparatus-svg {
+      width: 100%;
+      height: 100%;
+      min-height: 520px;
+    }
+
+    /* Floating Workbench Control Bar (Bottom Stage) */
+    .bench-control-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 20, 31, 0.94);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-lg), 0 0 20px rgba(0, 0, 0, 0.5);
+      z-index: 25;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-act {
+      background: #1e2638;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f1f5f9;
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 7px 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-act:hover {
+      background: #2b364e;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-act:active {
+      transform: scale(0.97);
+    }
+
+    .btn-act.btn-start {
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+      border-color: #f43f5e;
+      color: #fff;
+      box-shadow: 0 0 14px var(--primary-glow);
+    }
+
+    .btn-act.btn-start:hover {
+      background: linear-gradient(135deg, #fb7185, #f43f5e);
+    }
+
+    .control-divider {
+      width: 1px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.12);
+      margin: 0 4px;
+    }
+
+    /* === RIGHT PANEL: DIGITAL THERMOMETER & LIVE TEMP CURVE === */
+    .lcd-temp-device {
+      background: #070a0f;
+      border: 2px solid #1e2638;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8), 0 4px 12px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .lcd-screen {
+      background: var(--lcd-bg);
+      border: 1px solid rgba(16, 242, 167, 0.3);
+      border-radius: 8px;
+      padding: 8px 14px;
+      box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .lcd-unit {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(16, 242, 167, 0.5);
+      letter-spacing: 1px;
+    }
+
+    .lcd-digits {
+      font-family: var(--font-mono);
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 12px rgba(16, 242, 167, 0.7);
+      line-height: 1;
+    }
+
+    .lcd-sub {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .status-badge {
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .status-exo { background: rgba(244, 63, 94, 0.25); color: #fda4af; }
+    .status-endo { background: rgba(6, 182, 212, 0.25); color: #67e8f9; }
+
+    /* Energy & Delta H Card */
+    .energy-card {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .energy-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+
+    .energy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .energy-item {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .energy-item span.title {
+      font-size: 9px;
+      color: var(--text-muted);
+      display: block;
+    }
+
+    .energy-item span.val {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Live Chart Box */
+    .chart-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+
+    .chart-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    canvas#tempChart {
+      width: 100%;
+      height: 165px;
+      border-radius: 6px;
+    }
+
+    /* Live Data Log Table */
+    .log-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 115px;
+    }
+
+    .log-table-wrap {
+      overflow-y: auto;
+      flex: 1;
+      max-height: 120px;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    table.data-table th {
+      background: #111723;
+      padding: 6px 10px;
+      text-align: left;
+      color: #94a3b8;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      border-bottom: 1px solid var(--border-glass);
+    }
+
+    table.data-table td {
+      padding: 5px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #e2e8f0;
+    }
+
+    table.data-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .log-actions {
+      padding: 8px 12px;
+      background: #101622;
+      border-top: 1px solid var(--border-glass);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid var(--border-bright);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Modal Info */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #151a24;
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      max-width: 550px;
+      width: 90%;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .modal-card p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #94a3b8;
+      margin-bottom: 12px;
+    }
+
+    .modal-card ul {
+      margin-left: 20px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1200px) {
+      .lab-container {
+        grid-template-columns: 280px 1fr 350px;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .lab-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LAB TOP HEADER -->
+  <header class="lab-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <h1>
+          Virtual Lab: Kalorimeter Reaksi & Termokimia
+          <span class="badge">Edisi Eksperimen Murni</span>
+        </h1>
+        <p>Simulasi Interaktif Hukum Kekekalan Energi & Penentuan Entalpi Reaksi (ΔH)</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" id="btn-audio" title="Aktifkan/Matikan Suara Efek Lab">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+        <span id="audio-label">Audio ON</span>
+      </button>
+
+      <button class="btn-header" id="btn-guide">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        Panduan
+      </button>
+
+      <button class="btn-header" id="btn-reset-all" style="color: #fca5a5; border-color: rgba(239, 68, 68, 0.3);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Reset Kalorimeter
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKBENCH CONTAINER -->
+  <main class="lab-container">
+
+    <!-- LEFT PANEL: REACTION SYSTEMS & PARAMETERS -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 7h-7L10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+          </svg>
+          Sistem Reaksi Termokimia
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <div class="section-title">Pilih Jenis Reaksi</div>
+        <div class="reaction-list">
+          <!-- 1. Neutralization HCl + NaOH -->
+          <div class="reaction-card selected" data-rx="neutralization">
+            <div class="reaction-name">Netralisasi Asam–Basa</div>
+            <div class="reaction-formula">HCl(aq) + NaOH(aq) → NaCl + H₂O</div>
+            <span class="reaction-type-badge badge-exo">Eksoterm (ΔH ≈ -57.1 kJ/mol)</span>
+          </div>
+
+          <!-- 2. Dissolution NH4NO3 (Endothermic) -->
+          <div class="reaction-card" data-rx="nh4no3">
+            <div class="reaction-name">Pelarutan Amonium Nitrat</div>
+            <div class="reaction-formula">NH₄NO₃(s) + H₂O → NH₄⁺ + NO₃⁻</div>
+            <span class="reaction-type-badge badge-endo">Endoterm Kuat (ΔH ≈ +25.7 kJ/mol)</span>
+          </div>
+
+          <!-- 3. Dissolution NaOH (Exothermic) -->
+          <div class="reaction-card" data-rx="naoh_solid">
+            <div class="reaction-name">Pelarutan NaOH Padat</div>
+            <div class="reaction-formula">NaOH(s) + H₂O → Na⁺ + OH⁻</div>
+            <span class="reaction-type-badge badge-exo">Eksoterm Kuat (ΔH ≈ -44.5 kJ/mol)</span>
+          </div>
+
+          <!-- 4. Mg + HCl -->
+          <div class="reaction-card" data-rx="mg_hcl">
+            <div class="reaction-name">Reaksi Logam Mg + Asam HCl</div>
+            <div class="reaction-formula">Mg(s) + 2HCl(aq) → MgCl₂ + H₂(g)</div>
+            <span class="reaction-type-badge badge-exo">Eksoterm Tinggi (ΔH ≈ -466 kJ/mol)</span>
+          </div>
+        </div>
+
+        <!-- Volume / Mass Parameters -->
+        <div class="form-group" style="margin-top: 6px;">
+          <div class="section-title">Parameter Kalorimetri</div>
+
+          <label>
+            <span>Volume Air / Larutan Total</span>
+            <span class="val-badge" id="badge-vol">100 mL (100 g)</span>
+          </label>
+          <div class="range-wrap">
+            <input type="range" id="slider-vol" class="lab-slider" min="50" max="200" step="25" value="100">
+          </div>
+
+          <label style="margin-top: 6px;">
+            <span>Massa Reaktan / Solut</span>
+            <span class="val-badge" id="badge-mass">4.00 gram</span>
+          </label>
+          <div class="range-wrap">
+            <input type="range" id="slider-mass" class="lab-slider" min="1.0" max="10.0" step="0.5" value="4.0">
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER STAGE: WORKBENCH APPARATUS -->
+    <section class="stage-panel">
+      <div class="lab-stage-backdrop"></div>
+
+      <!-- Main Apparatus Viewport -->
+      <div class="apparatus-viewport">
+        <svg id="lab-apparatus-svg" viewBox="0 0 650 620" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="calorimeterOuterGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#cbd5e1"/>
+              <stop offset="30%" stop-color="#f8fafc"/>
+              <stop offset="70%" stop-color="#e2e8f0"/>
+              <stop offset="100%" stop-color="#94a3b8"/>
+            </linearGradient>
+
+            <linearGradient id="mercuryGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#f43f5e"/>
+              <stop offset="100%" stop-color="#be123c"/>
+            </linearGradient>
+
+            <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="2" dy="6" stdDeviation="5" flood-color="#000" flood-opacity="0.45"/>
+            </filter>
+          </defs>
+
+          <!-- 1. INSULATED STYROFOAM CUP CALORIMETER ASSEMBLY -->
+          <g id="calorimeter-assembly" transform="translate(225, 210)" filter="url(#shadowFilter)">
+            <!-- Outer Foam Cup (Styrofoam insulation) -->
+            <path d="M 30 50 L 45 270 Q 48 280 60 280 L 140 280 Q 152 280 155 270 L 170 50 Z" 
+                  fill="url(#calorimeterOuterGrad)" stroke="#64748b" stroke-width="2"/>
+
+            <!-- Inner Foam Cup (Dual Wall) -->
+            <path d="M 42 55 L 54 265 Q 56 272 65 272 L 135 272 Q 144 272 146 265 L 158 55 Z" 
+                  fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+
+            <!-- Solution Fluid inside Calorimeter -->
+            <clipPath id="calorimeterClip">
+              <path d="M 42 55 L 54 265 Q 56 272 65 272 L 135 272 Q 144 272 146 265 L 158 55 Z"/>
+            </clipPath>
+
+            <g clip-path="url(#calorimeterClip)">
+              <!-- Liquid Body -->
+              <rect id="cal-liquid-body" x="40" y="140" width="120" height="140" fill="rgba(186, 230, 253, 0.6)"/>
+              <!-- Thermal Wave / Heat Gradient inside liquid -->
+              <circle id="cal-heat-aura" cx="100" cy="220" r="40" fill="radial-gradient(circle, rgba(244,63,94,0.4) 0%, transparent 70%)" opacity="0"/>
+              <!-- Bubbles for Mg reaction -->
+              <g id="cal-bubbles" opacity="0">
+                <circle cx="80" cy="220" r="3" fill="#fff" opacity="0.7"/>
+                <circle cx="110" cy="240" r="2.5" fill="#fff" opacity="0.7"/>
+                <circle cx="95" cy="190" r="3.5" fill="#fff" opacity="0.7"/>
+                <circle cx="120" cy="180" r="2" fill="#fff" opacity="0.7"/>
+              </g>
+            </g>
+
+            <!-- Insulated Foam Lid (Cover) -->
+            <rect id="cal-lid" x="20" y="40" width="160" height="18" rx="4" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+            <rect x="90" y="28" width="20" height="12" rx="3" fill="#64748b"/>
+
+            <!-- Wire Stirrer Loop (Manual/Animated Vertical Movement) -->
+            <g id="wire-stirrer" transform="translate(68, -40)">
+              <line x1="0" y1="0" x2="0" y2="280" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+              <ellipse cx="0" cy="280" rx="14" ry="6" fill="none" stroke="#94a3b8" stroke-width="3"/>
+              <!-- Stirrer Handle Top -->
+              <circle cx="0" cy="0" r="6" fill="#f59e0b"/>
+            </g>
+
+            <!-- Thermometer Glass Probe Immersed Through Lid -->
+            <g id="cal-thermometer" transform="translate(130, -50)">
+              <!-- Glass Stem -->
+              <rect x="-4" y="0" width="8" height="300" rx="4" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.8)" stroke-width="1"/>
+              <!-- Internal Capillary Tube with Rising Liquid Column -->
+              <rect x="-1.5" y="40" width="3" height="255" fill="rgba(0,0,0,0.1)"/>
+              <rect id="thermo-liquid-column" x="-1.5" y="200" width="3" height="95" fill="url(#mercuryGrad)"/>
+              <!-- Thermometer Bulb at bottom -->
+              <circle cx="0" cy="295" r="7" fill="url(#mercuryGrad)"/>
+              <!-- Scale Ticks -->
+              <line x1="4" y1="120" x2="10" y2="120" stroke="#fff" stroke-width="1"/>
+              <line x1="4" y1="160" x2="10" y2="160" stroke="#fff" stroke-width="1"/>
+              <line x1="4" y1="200" x2="10" y2="200" stroke="#fff" stroke-width="1"/>
+            </g>
+          </g>
+
+          <!-- 2. REAGENT POURING FLASK ANIMATION -->
+          <g id="pouring-beaker" transform="translate(380, 100)" opacity="0">
+            <path d="M 0 0 L 30 50 L -10 50 Z" fill="rgba(148, 163, 184, 0.5)" stroke="#fff" stroke-width="1.5"/>
+            <!-- Stream of poured liquid -->
+            <path d="M 0 0 Q -30 60 -55 120" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Surface Benchtop Base -->
+      <div class="benchtop-surface"></div>
+
+      <!-- Floating Workbench Tactile Control Bar -->
+      <div class="bench-control-bar">
+        <button class="btn-act btn-start" id="btn-start-reaction" title="Campurkan Reagen ke Kalorimeter & Mulai Reaksi">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Mulai Reaksi Kalorimetri
+        </button>
+
+        <button class="btn-act" id="btn-manual-stir" title="Aduk Larutan">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Aduk Manual
+        </button>
+
+        <div class="control-divider"></div>
+
+        <div style="display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px; color: #94a3b8;">
+          <span>WAKTU:</span>
+          <span id="timer-display" style="color: #38bdf8; font-weight: 700;">00:00 s</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: DIGITAL THERMOMETER, ENERGY BOARD & CHART -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          Sensor Suhu & Termodinamika
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- Digital Thermometer LCD Device -->
+        <div class="lcd-temp-device">
+          <div class="lcd-screen">
+            <span class="lcd-unit">SUHU DIGITAL</span>
+            <span class="lcd-digits" id="lcd-temp-val">25.00</span>
+          </div>
+          <div class="lcd-sub">
+            <span>Resolusi: ± 0.01 °C</span>
+            <span class="status-badge status-exo" id="status-badge">EKSOTERM (ΔT &gt; 0)</span>
+          </div>
+        </div>
+
+        <!-- Thermodynamic Calculation Board -->
+        <div class="energy-card">
+          <div class="energy-header">
+            <span>Perhitungan Kalor &amp; Entalpi (ΔH)</span>
+            <span id="label-delta-t" style="color: var(--primary); font-family: var(--font-mono);">ΔT = +0.00 °C</span>
+          </div>
+          <div class="energy-grid">
+            <div class="energy-item">
+              <span class="title">Kalor Larutan (q)</span>
+              <span class="val" id="val-q-joule">0.00 J</span>
+            </div>
+            <div class="energy-item">
+              <span class="title">Mol Reaktan (n)</span>
+              <span class="val" id="val-mol-n">0.050 mol</span>
+            </div>
+            <div class="energy-item" style="grid-column: span 2; border-color: rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.08);">
+              <span class="title">Perubahan Entalpi Molar (ΔH)</span>
+              <span class="val" id="val-delta-h" style="font-size: 15px; color: #fda4af;">- 0.00 kJ/mol</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Temperature vs Time Chart Box -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <span class="chart-title">Kurva Termokimia (Suhu vs Waktu)</span>
+            <span style="font-size: 10px; color: var(--text-muted);">Real-time</span>
+          </div>
+          <canvas id="tempChart"></canvas>
+        </div>
+
+        <!-- Live Data Log Table -->
+        <div class="log-box">
+          <div class="panel-header" style="padding: 7px 12px;">
+            <h2 style="font-size: 11px;">Jurnal Eksperimen Termokimia</h2>
+            <span id="log-count" style="font-size: 10px; color: var(--text-muted);">0 data</span>
+          </div>
+          <div class="log-table-wrap">
+            <table class="data-table" id="dataTable">
+              <thead>
+                <tr>
+                  <th>Sistem Reaksi</th>
+                  <th>T_awal</th>
+                  <th>T_akhir</th>
+                  <th>ΔH (kJ/mol)</th>
+                </tr>
+              </thead>
+              <tbody id="dataTableBody">
+                <!-- Dynamic Log Rows -->
+              </tbody>
+            </table>
+          </div>
+          <div class="log-actions">
+            <button class="btn-header" id="btn-export-csv" style="padding: 4px 9px; font-size: 11px;">
+              Ekspor CSV
+            </button>
+            <button class="btn-header" id="btn-export-img" style="padding: 4px 9px; font-size: 11px;">
+              Simpan Grafik
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- POPUP GUIDELINES MODAL -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal-card">
+      <h3>🔥 Panduan Praktikum Kalorimeter Reaksi</h3>
+      <p>Praktikum ini mensimulasikan hukum Azas Black dan termodinamika kalor reaksi:</p>
+      <ul>
+        <li><b>Kalorimetri Cangkir Polistirena:</b> Wadah terisolasi menahan pertukaran kalor dengan lingkungan sehingga $q_{reaksi} = -(m \cdot c \cdot \Delta T + C_{kal} \cdot \Delta T)$.</li>
+        <li><b>Reaksi Eksoterm:</b> Melepaskan kalor ke larutan sehingga suhu naik ($\Delta T > 0, \Delta H < 0$). Contoh: Netralisasi asam-basa, pelarutan $NaOH$ padat, dan reaksi pita $Mg$ dalam $HCl$.</li>
+        <li><b>Reaksi Endoterm:</b> Menyerap kalor dari larutan sehingga suhu turun drastis ($\Delta T < 0, \Delta H > 0$). Contoh: Pelarutan $NH_4NO_3$ (prinsip kantong kompres dingin instan).</li>
+        <li><b>Kurva Suhu vs Waktu:</b> Perhatikan grafik realtime untuk mengamati kenaikan suhu cepat hingga mencapai titik ekstrapolasi $T_{maks}$ sebelum perlahan mendingin kembali ke suhu ruang.</li>
+      </ul>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-act btn-primary" id="btn-close-modal" style="background: var(--primary); color: #fff;">Tutup & Mulai Praktikum</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST -->
+  <div class="toast" id="toastBox">Notifikasi</div>
+
+  <!-- JAVASCRIPT: ENGINE & SOUNDS -->
+  <script>
+    'use strict';
+
+    /* =========================================================================
+     * 1. NATIVE WEB AUDIO API SYNTHESIZER
+     * ========================================================================= */
+    class ThermoAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playPourSound() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(560, now + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(240, now + 0.25);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+
+      playBeep() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        return !this.muted;
+      }
+    }
+
+    const sound = new ThermoAudioEngine();
+
+    /* =========================================================================
+     * 2. STATE & THERMOCHEMICAL REACTION CONSTANTS
+     * ========================================================================= */
+    const REACTIONS = {
+      neutralization: {
+        name: 'Netralisasi Asam–Basa',
+        isExo: true,
+        baseDeltaH: -57.1, // kJ/mol
+        deltaTFactor: 6.8, // typical delta T for standard quantities
+        colorActive: 'rgba(244, 63, 94, 0.45)'
+      },
+      nh4no3: {
+        name: 'Pelarutan NH₄NO₃',
+        isExo: false,
+        baseDeltaH: 25.7,  // kJ/mol
+        deltaTFactor: -6.8,
+        colorActive: 'rgba(6, 182, 212, 0.45)'
+      },
+      naoh_solid: {
+        name: 'Pelarutan NaOH Padat',
+        isExo: true,
+        baseDeltaH: -44.5, // kJ/mol
+        deltaTFactor: 10.5,
+        colorActive: 'rgba(244, 63, 94, 0.55)'
+      },
+      mg_hcl: {
+        name: 'Reaksi Mg + HCl',
+        isExo: true,
+        baseDeltaH: -466.0,
+        deltaTFactor: 14.2,
+        colorActive: 'rgba(239, 68, 68, 0.55)'
+      }
+    };
+
+    const state = {
+      reactionKey: 'neutralization',
+      volumeTotal: 100.0, // mL (g)
+      reagentMass: 4.0,   // g
+      initialTemp: 25.00,
+      currentTemp: 25.00,
+      peakTemp: 25.00,
+      isRunning: false,
+      timerSeconds: 0,
+      timerInterval: null,
+      historyPoints: [], // { t, temp }
+      tableLog: []
+    };
+
+    /* =========================================================================
+     * 3. DOM & UI UPDATES
+     * ========================================================================= */
+    const dom = {
+      lcdTempVal: document.getElementById('lcd-temp-val'),
+      statusBadge: document.getElementById('status-badge'),
+      labelDeltaT: document.getElementById('label-delta-t'),
+      valQJoule: document.getElementById('val-q-joule'),
+      valMolN: document.getElementById('val-mol-n'),
+      valDeltaH: document.getElementById('val-delta-h'),
+      timerDisplay: document.getElementById('timer-display'),
+      sliderVol: document.getElementById('slider-vol'),
+      sliderMass: document.getElementById('slider-mass'),
+      badgeVol: document.getElementById('badge-vol'),
+      badgeMass: document.getElementById('badge-mass'),
+      dataTableBody: document.getElementById('dataTableBody'),
+      logCount: document.getElementById('log-count'),
+      chartCanvas: document.getElementById('tempChart'),
+      thermoColumn: document.getElementById('thermo-liquid-column'),
+      calLiquid: document.getElementById('cal-liquid-body'),
+      calBubbles: document.getElementById('cal-bubbles'),
+      wireStirrer: document.getElementById('wire-stirrer'),
+      btnAudio: document.getElementById('btn-audio'),
+      audioLabel: document.getElementById('audio-label'),
+      toastBox: document.getElementById('toastBox')
+    };
+
+    /* =========================================================================
+     * 4. LIVE CANVAS TEMPERATURE CHART
+     * ========================================================================= */
+    class LiveTempChart {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+      }
+
+      resize() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width * dpr;
+        this.canvas.height = (rect.height || 165) * dpr;
+        this.ctx.scale(dpr, dpr);
+        this.width = rect.width;
+        this.height = rect.height || 165;
+        this.render();
+      }
+
+      render() {
+        const ctx = this.ctx;
+        const w = this.width;
+        const h = this.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const padL = 34;
+        const padR = 14;
+        const padT = 12;
+        const padB = 22;
+
+        const plotW = w - padL - padR;
+        const plotH = h - padT - padB;
+
+        // Background Grid
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+        ctx.lineWidth = 1;
+
+        // Temperature range: 10 °C to 45 °C
+        const minT = 10;
+        const maxT = 45;
+
+        for (let t = 10; t <= 45; t += 10) {
+          const y = padT + plotH - ((t - minT) / (maxT - minT)) * plotH;
+          ctx.beginPath();
+          ctx.moveTo(padL, y);
+          ctx.lineTo(w - padR, y);
+          ctx.stroke();
+
+          ctx.fillStyle = '#64748b';
+          ctx.font = '9px Fira Code';
+          ctx.textAlign = 'right';
+          ctx.fillText(`${t}°`, padL - 4, y + 3);
+        }
+
+        // Room Temp 25°C line
+        const y25 = padT + plotH - ((25 - minT) / (maxT - minT)) * plotH;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(padL, y25);
+        ctx.lineTo(w - padR, y25);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // X Axis: 0 to 60 seconds
+        for (let sec = 0; sec <= 60; sec += 15) {
+          const x = padL + (sec / 60) * plotW;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+          ctx.beginPath();
+          ctx.moveTo(x, padT);
+          ctx.lineTo(x, h - padB);
+          ctx.stroke();
+
+          ctx.fillStyle = '#64748b';
+          ctx.font = '9px Fira Code';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${sec}s`, x, h - padB + 13);
+        }
+
+        if (state.historyPoints.length === 0) return;
+
+        // Plot Curve
+        ctx.beginPath();
+        ctx.lineWidth = 2.5;
+        const isExo = REACTIONS[state.reactionKey].isExo;
+        ctx.strokeStyle = isExo ? '#f43f5e' : '#06b6d4';
+        ctx.shadowColor = isExo ? 'rgba(244, 63, 94, 0.6)' : 'rgba(6, 182, 212, 0.6)';
+        ctx.shadowBlur = 8;
+
+        state.historyPoints.forEach((pt, idx) => {
+          const x = padL + Math.min(pt.t / 60, 1) * plotW;
+          const y = padT + plotH - ((pt.temp - minT) / (maxT - minT)) * plotH;
+          if (idx === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Draw Current Dot
+        const last = state.historyPoints[state.historyPoints.length - 1];
+        const curX = padL + Math.min(last.t / 60, 1) * plotW;
+        const curY = padT + plotH - ((last.temp - minT) / (maxT - minT)) * plotH;
+
+        ctx.fillStyle = '#10f2a7';
+        ctx.beginPath();
+        ctx.arc(curX, curY, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+
+    let chart = null;
+
+    /* =========================================================================
+     * 5. THERMAL SIMULATION ENGINE
+     * ========================================================================= */
+    function updateApparatusVisuals() {
+      // 1. Digital Display
+      dom.lcdTempVal.textContent = state.currentTemp.toFixed(2);
+
+      // 2. Thermometer Liquid Column
+      // 10°C is height 40, 45°C is height 220
+      const hScale = ((state.currentTemp - 10) / 35) * 180 + 40;
+      dom.thermoColumn.setAttribute('y', 295 - hScale);
+      dom.thermoColumn.setAttribute('height', hScale);
+
+      // 3. Status Badge
+      const isExo = REACTIONS[state.reactionKey].isExo;
+      const deltaT = state.currentTemp - state.initialTemp;
+      dom.statusBadge.className = `status-badge ${isExo ? 'status-exo' : 'status-endo'}`;
+      dom.statusBadge.textContent = isExo ? `EKSOTERM (ΔT = +${deltaT.toFixed(2)} °C)` : `ENDOTERM (ΔT = ${deltaT.toFixed(2)} °C)`;
+      dom.labelDeltaT.textContent = `ΔT = ${deltaT >= 0 ? '+' : ''}${deltaT.toFixed(2)} °C`;
+
+      // 4. Energy calculations
+      const m = state.volumeTotal; // 1 g/mL
+      const c = 4.184; // J/g°C
+      const q = -(m * c * deltaT); // q_reaction in Joules
+      dom.valQJoule.textContent = `${Math.abs(q).toFixed(1)} J`;
+
+      const mol = state.reagentMass / 40.0; // approx molar mass
+      dom.valMolN.textContent = `${mol.toFixed(3)} mol`;
+
+      const deltaH = (q / mol) / 1000; // kJ/mol
+      dom.valDeltaH.textContent = `${deltaH >= 0 ? '+' : ''}${deltaH.toFixed(2)} kJ/mol`;
+      dom.valDeltaH.style.color = deltaH <= 0 ? '#fda4af' : '#67e8f9';
+    }
+
+    function startReaction() {
+      if (state.isRunning) return;
+      state.isRunning = true;
+      sound.playPourSound();
+
+      // Reset timer & data
+      state.timerSeconds = 0;
+      state.initialTemp = 25.00;
+      state.currentTemp = 25.00;
+      state.historyPoints = [{ t: 0, temp: 25.00 }];
+
+      const rx = REACTIONS[state.reactionKey];
+      // Target delta T scaled by mass and volume
+      const scale = (state.reagentMass / 4.0) * (100.0 / state.volumeTotal);
+      const targetDeltaT = rx.deltaTFactor * scale;
+      state.peakTemp = state.initialTemp + targetDeltaT;
+
+      dom.calBubbles.setAttribute('opacity', state.reactionKey === 'mg_hcl' ? '0.85' : '0');
+
+      showToast(`Reaksi ${rx.name} dimulai! Memantau suhu kalorimeter...`);
+
+      state.timerInterval = setInterval(() => {
+        state.timerSeconds++;
+        const t = state.timerSeconds;
+
+        // Temperature curve physics: rises exponentially up to 25s, then slightly cools
+        if (t <= 20) {
+          const progress = 1 - Math.exp(-t / 6.0);
+          state.currentTemp = state.initialTemp + targetDeltaT * progress;
+        } else {
+          // slight cooling towards room temp
+          const coolProgress = Math.exp(-(t - 20) / 70.0);
+          state.currentTemp = 25.00 + (state.peakTemp - 25.00) * coolProgress;
+        }
+
+        state.historyPoints.push({ t: t, temp: state.currentTemp });
+
+        // Update Timer Display
+        const mm = String(Math.floor(t / 60)).padStart(2, '0');
+        const ss = String(t % 60).padStart(2, '0');
+        dom.timerDisplay.textContent = `${mm}:${ss} s`;
+
+        updateApparatusVisuals();
+        if (chart) chart.render();
+
+        if (t >= 60) {
+          stopReaction();
+          sound.playBeep();
+          showToast('Pengamatan selesai! Data tersimpan di jurnal.');
+          appendLogRow();
+        }
+      }, 350); // fast simulation step
+    }
+
+    function stopReaction() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+      state.isRunning = false;
+      dom.calBubbles.setAttribute('opacity', '0');
+    }
+
+    function manualStir() {
+      // Wire stirrer vertical animation
+      const stirrer = dom.wireStirrer;
+      stirrer.style.transition = 'transform 0.15s ease';
+      stirrer.setAttribute('transform', 'translate(68, -10)');
+      setTimeout(() => {
+        stirrer.setAttribute('transform', 'translate(68, -40)');
+      }, 160);
+      sound.playPourSound();
+      showToast('Pengaduk digerakkan untuk menghomogenkan suhu.');
+    }
+
+    function appendLogRow() {
+      const rx = REACTIONS[state.reactionKey];
+      const deltaT = state.peakTemp - state.initialTemp;
+      const m = state.volumeTotal;
+      const q = -(m * 4.184 * deltaT);
+      const mol = state.reagentMass / 40.0;
+      const deltaH = (q / mol) / 1000;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight: 600;">${rx.name}</td>
+        <td>${state.initialTemp.toFixed(2)} °C</td>
+        <td>${state.peakTemp.toFixed(2)} °C</td>
+        <td style="color: ${deltaH <= 0 ? '#fda4af' : '#67e8f9'}; font-weight: 700;">${deltaH >= 0 ? '+' : ''}${deltaH.toFixed(2)}</td>
+      `;
+      dom.dataTableBody.appendChild(tr);
+      dom.dataTableBody.parentElement.parentElement.scrollTop = dom.dataTableBody.parentElement.parentElement.scrollHeight;
+      dom.logCount.textContent = `${dom.dataTableBody.children.length} data`;
+    }
+
+    function resetWorkbench() {
+      stopReaction();
+      state.timerSeconds = 0;
+      dom.timerDisplay.textContent = '00:00 s';
+      state.initialTemp = 25.00;
+      state.currentTemp = 25.00;
+      state.peakTemp = 25.00;
+      state.historyPoints = [{ t: 0, temp: 25.00 }];
+      updateApparatusVisuals();
+      if (chart) chart.render();
+      showToast('Kalorimeter telah dibilas dan suhu kembali ke 25.00 °C.');
+    }
+
+    function showToast(msg) {
+      const box = dom.toastBox;
+      box.textContent = msg;
+      box.classList.add('show');
+      setTimeout(() => box.classList.remove('show'), 2600);
+    }
+
+    /* =========================================================================
+     * 6. EVENT BINDINGS
+     * ========================================================================= */
+    function setupEvents() {
+      // Reaction Cards
+      document.querySelectorAll('.reaction-card').forEach(card => {
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.reaction-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          state.reactionKey = card.getAttribute('data-rx');
+          resetWorkbench();
+        });
+      });
+
+      // Volume slider
+      dom.sliderVol.addEventListener('input', (e) => {
+        state.volumeTotal = Number(e.target.value);
+        dom.badgeVol.textContent = `${state.volumeTotal} mL (${state.volumeTotal} g)`;
+        resetWorkbench();
+      });
+
+      // Mass slider
+      dom.sliderMass.addEventListener('input', (e) => {
+        state.reagentMass = Number(e.target.value);
+        dom.badgeMass.textContent = `${state.reagentMass.toFixed(2)} gram`;
+        resetWorkbench();
+      });
+
+      // Buttons
+      document.getElementById('btn-start-reaction').addEventListener('click', startReaction);
+      document.getElementById('btn-manual-stir').addEventListener('click', manualStir);
+      document.getElementById('btn-reset-all').addEventListener('click', resetWorkbench);
+
+      // Audio Toggle
+      dom.btnAudio.addEventListener('click', () => {
+        const on = sound.toggleMute();
+        dom.audioLabel.textContent = on ? 'Audio ON' : 'Audio OFF';
+        dom.btnAudio.classList.toggle('active', on);
+      });
+
+      // Guide Modal
+      const modal = document.getElementById('guideModal');
+      document.getElementById('btn-guide').addEventListener('click', () => modal.classList.add('open'));
+      document.getElementById('btn-close-modal').addEventListener('click', () => modal.classList.remove('open'));
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('open');
+      });
+
+      // Export CSV
+      document.getElementById('btn-export-csv').addEventListener('click', () => {
+        if (state.historyPoints.length === 0) return;
+        let csv = 'Waktu_s,Suhu_C\n';
+        state.historyPoints.forEach(pt => {
+          csv += `${pt.t},${pt.temp.toFixed(2)}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `data_kalorimetri_${state.reactionKey}_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Data praktikum kalorimetri berhasil diekspor (.CSV)!');
+      });
+
+      // Export Chart Image
+      document.getElementById('btn-export-img').addEventListener('click', () => {
+        if (!dom.chartCanvas) return;
+        const imgUrl = dom.chartCanvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = imgUrl;
+        a.download = `kurva_termokimia_${state.reactionKey}_${new Date().toISOString().slice(0,10)}.png`;
+        a.click();
+        showToast('Grafik kurva termokimia berhasil disimpan (.PNG)!');
+      });
+    }
+
+    /* Initialize Application */
+    window.addEventListener('DOMContentLoaded', () => {
+      chart = new LiveTempChart(dom.chartCanvas);
+      setupEvents();
+      resetWorkbench();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorium Virtual Spektrofotometri UV-Vis & Hukum Beer-Lambert — Standar PhET / Labster</title>
+  <style>
+    :root {
+      --bg-dark: #070a13;
+      --card-bg: rgba(17, 24, 39, 0.88);
+      --card-border: #2e384d;
+      --accent-cyan: #00f2fe;
+      --accent-blue: #38bdf8;
+      --accent-purple: #c084fc;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-emerald: #10b981;
+      --text-main: #f3f4f6;
+      --text-muted: #94a3b8;
+      --lcd-bg: #03131a;
+      --lcd-text: #22d3ee;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(192, 132, 252, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 85% 80%, rgba(0, 242, 254, 0.08) 0%, transparent 35%);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: rgba(11, 15, 25, 0.95);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge-lab {
+      background: rgba(192, 132, 252, 0.15);
+      border: 1px solid var(--accent-purple);
+      color: var(--accent-purple);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mode-nav {
+      display: flex;
+      gap: 8px;
+      background: rgba(30, 41, 59, 0.8);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .mode-btn.active {
+      color: #090d16;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-audio {
+      background: rgba(22, 27, 34, 0.9);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .btn-audio.active {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 16px;
+      padding: 16px 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    @media (max-width: 1100px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Stage Viewport */
+    .stage-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stage-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      min-height: 480px;
+      overflow: hidden;
+    }
+
+    .stage-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      z-index: 10;
+    }
+
+    .stage-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .viewport-canvas {
+      width: 100%;
+      height: 430px;
+      border-radius: 8px;
+      background: #050811;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Bottom LCD Instrument Bar */
+    .lcd-panel {
+      background: var(--lcd-bg);
+      border: 1px solid #164e63;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: inset 0 0 16px rgba(34, 211, 238, 0.06);
+    }
+
+    .lcd-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lcd-lbl {
+      font-size: 0.72rem;
+      color: #67e8f9;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .lcd-val {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+    }
+
+    .lcd-val.alt {
+      color: #c084fc;
+      text-shadow: 0 0 8px rgba(192, 132, 252, 0.6);
+    }
+
+    .lcd-val.warn {
+      color: #f59e0b;
+      text-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    }
+
+    /* Right Sidebar Controls */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .control-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-heading {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+    }
+
+    .card-heading span {
+      color: var(--accent-cyan);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-label .val {
+      color: var(--accent-cyan);
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    select, input[type="range"] {
+      width: 100%;
+    }
+
+    select {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    select:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0, 242, 254, 0.6);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      color: #090d16;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 14px rgba(0, 242, 254, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: #334155;
+    }
+
+    /* Theoretical Insight */
+    .info-card {
+      background: rgba(17, 24, 39, 0.5);
+      border: 1px dashed #334155;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .info-card strong {
+      color: var(--accent-cyan);
+    }
+
+    /* Observation Table */
+    .table-container {
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      background: #090d16;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    th, td {
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--text-muted);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td {
+      color: var(--text-main);
+      font-family: monospace;
+    }
+
+    footer {
+      background: #070a13;
+      border-top: 1px solid var(--card-border);
+      padding: 8px 24px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-title">
+      <h1>Laboratorium Virtual Spektrofotometri UV-Vis & Hukum Beer-Lambert</h1>
+      <span class="badge-lab">🔬 PhET / Labster Standard</span>
+    </div>
+
+    <!-- Mode Navigation Tabs -->
+    <nav class="mode-nav">
+      <button class="mode-btn active" id="btnModeScan" onclick="setLabMode('scan')">
+        🌈 Spektrum Serapan (λ-Scan)
+      </button>
+      <button class="mode-btn" id="btnModeBeer" onclick="setLabMode('beer')">
+        📈 Kurva Kalibrasi Standar
+      </button>
+      <button class="mode-btn" id="btnModeOptics" onclick="setLabMode('optics')">
+        ⚙️ Anatomi Optik Spektro
+      </button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="btn-audio active" id="btnAudioToggle" title="Toggle Sound FX" onclick="toggleAudio()">
+        🔊
+      </button>
+      <button class="btn-action btn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="exportDataCSV()">
+        📥 Ekspor CSV
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN LAB AREA -->
+  <main>
+    <!-- Visual Stage Viewport (Left) -->
+    <section class="stage-container">
+      <div class="stage-card">
+        <!-- Stage Top Bar -->
+        <div class="stage-header-bar">
+          <div class="stage-title" id="stageTitle">
+            <span>🌈</span> PEMINDAIAN SPEKTRUM ABSORANSI PENUH (λ-SCAN 380 - 750 NM)
+          </div>
+          <div id="stageSubBadge" style="font-size:0.75rem; color:#94a3b8; font-family:monospace;">
+            MONOKROMATOR: KISI DIFRAKSI 1200 LINES/MM
+          </div>
+        </div>
+
+        <!-- 60 FPS HTML5 Canvas Viewport -->
+        <canvas id="labCanvas" class="viewport-canvas" width="880" height="430"></canvas>
+      </div>
+
+      <!-- Real-time LCD Multi-meter Monitor -->
+      <div class="lcd-panel" id="bottomLcdBar">
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd1">Panjang Gelombang (λ):</span>
+          <span class="lcd-val" id="valLcd1">525 nm (Hijau)</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd2">Nilai Absorbansi (A):</span>
+          <span class="lcd-val alt" id="valLcd2">0.720</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd3">Transmitansi (%T):</span>
+          <span class="lcd-val" id="valLcd3">19.05 %</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd4">Puncak Maksimum (λ_max):</span>
+          <span class="lcd-val warn" id="valLcd4">λ_max = 525 nm</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sidebar Controls (Right) -->
+    <aside class="sidebar">
+
+      <!-- Dynamic Mode Controls -->
+      <div class="control-card">
+        <div class="card-heading">
+          <span>⚙️</span> Parameter Spektrofotometer
+        </div>
+
+        <!-- MODE 1: SPECTRUM SCAN CONTROLS -->
+        <div id="controlsScan" class="mode-control-block">
+          <div class="form-group">
+            <label class="form-label">Senyawa Larutan Kromofor:</label>
+            <select id="selScanSubstance" onchange="updateScanSubstance()">
+              <option value="KMnO4">Kalium Permanganat (KMnO₄ - Ungu Pekat)</option>
+              <option value="CuSO4">Tembaga(II) Sulfat (CuSO₄ - Biru Langit)</option>
+              <option value="MethyleneBlue">Metilen Biru (C₁₆H₁₈ClN₃S - Biru Tua)</option>
+              <option value="CoCl2">Kobalt(II) Klorida (CoCl₂ - Merah Muda / Pink)</option>
+              <option value="K2Cr2O7">Kalium Dikromat (K₂Cr₂O₇ - Jingga / Oranye)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Konsentrasi Analit (c):</span>
+              <span class="val" id="valScanConc">0.30 mM</span>
+            </label>
+            <input type="range" id="rngScanConc" min="0.05" max="1.00" step="0.05" value="0.30" oninput="updateScanConc(this.value)">
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Panjang Gelombang Monokromator (λ):</span>
+              <span class="val" id="valScanWavelength">525 nm</span>
+            </label>
+            <input type="range" id="rngScanWavelength" min="380" max="750" value="525" oninput="updateScanWavelength(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" id="btnAutoScan" onclick="toggleAutoScan()">
+              🚀 Jalankan Pemindaian Penuh (Auto-Scan)
+            </button>
+            <button class="btn-action btn-secondary" onclick="logObservation()">
+              📝 Catat Data
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 2: BEER-LAMBERT CALIBRATION CONTROLS -->
+        <div id="controlsBeer" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Kromofor Uji Standar:</label>
+            <select id="selBeerSubstance" onchange="updateBeerSubstance()">
+              <option value="KMnO4">KMnO₄ pada λ_max = 525 nm (Ungu)</option>
+              <option value="CuSO4">CuSO₄ pada λ_max = 680 nm (Biru)</option>
+              <option value="MethyleneBlue">Metilen Biru pada λ_max = 664 nm</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">Pilih Larutan Standar / Sampel Misteri:</label>
+            <select id="selBeerSample" onchange="updateBeerSample()">
+              <option value="blank">Blanko (Pelarut Air Murni, c = 0.00 mM)</option>
+              <option value="std1">Standar 1 (c = 0.10 mM)</option>
+              <option value="std2">Standar 2 (c = 0.20 mM)</option>
+              <option value="std3">Standar 3 (c = 0.40 mM)</option>
+              <option value="std4">Standar 4 (c = 0.60 mM)</option>
+              <option value="std5">Standar 5 (c = 0.80 mM)</option>
+              <option value="unknown">Sampel Tak Diketahui (Unknown Sample X)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Tebal Kuvet Optik (b / Pathlength):</span>
+              <span class="val" id="valCuvettePath">1.00 cm</span>
+            </label>
+            <input type="range" id="rngCuvettePath" min="0.2" max="2.0" step="0.1" value="1.0" oninput="updateCuvettePath(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" onclick="measureBeerPoint()">
+              📊 Baca & Plot Titik Kalibrasi
+            </button>
+            <button class="btn-action btn-secondary" onclick="resetCalibration()">
+              🔄 Reset Kurva
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 3: OPTICAL BENCH ANATOMY CONTROLS -->
+        <div id="controlsOptics" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Lampu Sumber Radiasi:</label>
+            <select id="selOpticsLamp" onchange="updateOpticsLamp()">
+              <option value="tungsten">Lampu Tungsten-Halogen (Spektrum Tampak Vis: 350 - 900 nm)</option>
+              <option value="deuterium">Lampu Deuterium D₂ (Spektrum Ultraviolet UV: 190 - 380 nm)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Lebar Celah Monokromator (Slit Width):</span>
+              <span class="val" id="valSlitWidth">1.0 nm</span>
+            </label>
+            <input type="range" id="rngSlitWidth" min="0.5" max="4.0" step="0.5" value="1.0" oninput="updateSlitWidth(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" id="btnShutterToggle" onclick="toggleOpticalShutter()">
+              💡 Tutup Shutter Cahaya
+            </button>
+            <button class="btn-action btn-secondary" onclick="zeroBlank()">
+              🔘 Auto-Zero (Blank)
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Theory Explanation Card -->
+      <div class="info-card" id="panelTheory">
+        <strong>Hukum Beer-Lambert:</strong> Hubungan proporsional linier antara Absorbansi ($A$) terhadap konsentrasi ($c$) dan tebal kuvet ($b$): $$A = -\log_{10}(T) = \varepsilon \cdot b \cdot c$$ Warna larutan adalah warna sinar yang <em>diteruskan</em>, sedangkan panjang gelombang yang diserap maksimum ($\lambda_{\max}$) adalah <em>warna komplementer</em> dari larutan tersebut.
+      </div>
+
+      <!-- Observation History Table -->
+      <div class="control-card">
+        <div class="card-heading">
+          <span>📋</span> Riwayat Pengamatan Fotometrik
+        </div>
+        <div class="table-container">
+          <table id="tblObservations">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Kromofor</th>
+                <th>λ (nm) & c (mM)</th>
+                <th>A & %T</th>
+              </tr>
+            </thead>
+            <tbody id="tblBody">
+              <!-- Logs populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>Laboratorium Analisis Spektroskopi — Simulasi Optik & Fotometri 60 FPS</div>
+    <div>Sistem Bebas Kuis & Bebas LKS — Mode Eksplorasi Eksperimen Murni</div>
+  </footer>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    /* ==========================================================================
+       VIRTUAL LAB SPEKTROFOTOMETRI UV-VIS & BEER-LAMBERT - ENGINE LENGKAP
+       ========================================================================== */
+
+    // Audio Engine via Web Audio API
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('btnAudioToggle');
+      if (audioEnabled) {
+        btn.classList.add('active');
+        btn.textContent = '🔊';
+        playSound('step');
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '🔇';
+      }
+    }
+
+    function playSound(type) {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+
+        if (type === 'step') {
+          // Sharp stepper motor grating click
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(200, now + 0.03);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (type === 'shutter') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.setValueAtTime(120, now + 0.03);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.07);
+        } else if (type === 'chime') {
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.07);
+            gain.gain.setValueAtTime(0.18, now + i * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.6);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.07);
+            osc.stop(now + i * 0.07 + 0.6);
+          });
+        }
+      } catch (e) {
+        console.warn("Audio error", e);
+      }
+    }
+
+    // STATE VARIABLES
+    let activeMode = 'scan'; // 'scan' | 'beer' | 'optics'
+    let canvas, ctx2d;
+
+    // Chromophores Database
+    const CHROMOPHORES = {
+      KMnO4: {
+        name: 'KMnO₄',
+        colorRgb: [180, 20, 200], // Violet/Purple
+        lambdaMax: 525,
+        epsMax: 2400, // L/(mol cm)
+        widthNm: 45
+      },
+      CuSO4: {
+        name: 'CuSO₄',
+        colorRgb: [0, 150, 255], // Sky Blue
+        lambdaMax: 680,
+        epsMax: 12.5 * 100,
+        widthNm: 70
+      },
+      MethyleneBlue: {
+        name: 'Metilen Biru',
+        colorRgb: [10, 40, 230], // Deep Blue
+        lambdaMax: 664,
+        epsMax: 7400,
+        widthNm: 35
+      },
+      CoCl2: {
+        name: 'CoCl₂',
+        colorRgb: [255, 100, 150], // Pink
+        lambdaMax: 510,
+        epsMax: 5.0 * 200,
+        widthNm: 50
+      },
+      K2Cr2O7: {
+        name: 'K₂Cr₂O₇',
+        colorRgb: [255, 140, 0], // Orange
+        lambdaMax: 440,
+        epsMax: 3200,
+        widthNm: 40
+      }
+    };
+
+    // Mode 1: Scan State
+    const scanState = {
+      substance: 'KMnO4',
+      concMm: 0.30,
+      wavelengthNm: 525,
+      isAutoScanning: false,
+      spectrumPoints: []
+    };
+
+    // Mode 2: Beer-Lambert Calibration State
+    const beerState = {
+      substance: 'KMnO4',
+      cuvettePathCm: 1.0,
+      sampleKey: 'std2',
+      calibPoints: [],
+      unknownConcMm: 0.46, // Hidden target to find
+      hasUnknownMeasured: false
+    };
+
+    // Mode 3: Optics State
+    const opticsState = {
+      lamp: 'tungsten',
+      slitNm: 1.0,
+      shutterOpen: true
+    };
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      canvas = document.getElementById('labCanvas');
+      ctx2d = canvas.getContext('2d');
+
+      calculateFullSpectrum();
+      initDefaultCalibration();
+      updateMetricDisplays();
+
+      requestAnimationFrame(mainAnimationLoop);
+
+      setTimeout(() => {
+        logObservation();
+      }, 600);
+    });
+
+    // MODE SWITCHER
+    function setLabMode(mode) {
+      activeMode = mode;
+      playSound('step');
+
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      if (mode === 'scan') document.getElementById('btnModeScan').classList.add('active');
+      if (mode === 'beer') document.getElementById('btnModeBeer').classList.add('active');
+      if (mode === 'optics') document.getElementById('btnModeOptics').classList.add('active');
+
+      document.querySelectorAll('.mode-control-block').forEach(p => p.style.display = 'none');
+      const stageTitle = document.getElementById('stageTitle');
+      const panelTheory = document.getElementById('panelTheory');
+      const subBadge = document.getElementById('stageSubBadge');
+
+      if (mode === 'scan') {
+        document.getElementById('controlsScan').style.display = 'block';
+        stageTitle.innerHTML = '<span>🌈</span> PEMINDAIAN SPEKTRUM ABSORANSI PENUH (λ-SCAN 380 - 750 NM)';
+        subBadge.textContent = 'MONOKROMATOR: KISI DIFRAKSI 1200 LINES/MM';
+        panelTheory.innerHTML = '<strong>Spektrum Absorpsi (λ-Scan):</strong> Kurva hubungan antara Absorbansi ($A$) terhadap panjang gelombang ($\lambda$). Puncak serapan tertinggi disebut panjang gelombang maksimum ($\lambda_{\max}$). Spektrofotometer selalu dikalibrasikan pada $\lambda_{\max}$ untuk memperoleh sensitivitas deteksi dan kepatuhan Hukum Beer yang optimal.';
+      } else if (mode === 'beer') {
+        document.getElementById('controlsBeer').style.display = 'block';
+        stageTitle.innerHTML = '<span>📈</span> KURVA KALIBRASI STANDAR HUKUM BEER-LAMBERT & UJI SAMPEL';
+        subBadge.textContent = `TEBAL KUVET: ${beerState.cuvettePathCm.toFixed(2)} CM (KUARSA OPTIK)`;
+        panelTheory.innerHTML = '<strong>Kurva Kalibrasi Standar:</strong> Diperoleh dengan mengukur deret konsentrasi standar diketahui ($0.0 - 0.8\\text{ mM}$). Persamaan garis regresi $A = m \\cdot c$ digunakan untuk menentukan konsentrasi sampel misteri (*unknown sample*) melalui interpolasi garis lurus.';
+      } else if (mode === 'optics') {
+        document.getElementById('controlsOptics').style.display = 'block';
+        stageTitle.innerHTML = '<span>⚙️</span> DIAGRAM JALUR OPTIK INTERNAL SPEKTROFOTOMETER UV-VIS';
+        subBadge.textContent = 'BERKAS SINAR MONOKROMATIS & DETEKTOR PMT';
+        panelTheory.innerHTML = '<strong>Anatomi Spektrofotometer:</strong> Lampu memancarkan cahaya polikromatis $\\rightarrow$ Cermin kolimator $\\rightarrow$ Kisi difraksi berputar memecah spektrum $\\rightarrow$ Celah keluar menyeleksi $\\lambda$ tunggal $\\rightarrow$ Berkas $I_0$ menembus kuvet analit $\\rightarrow$ Berkas sisa $I$ ditangkap detektor fotodioda.';
+      }
+
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // PHYSICS ENGINE CALCULATIONS
+    // ==========================================
+    function getAbsorbance(substanceKey, lambdaNm, concMm, pathlengthCm) {
+      const sub = CHROMOPHORES[substanceKey];
+      if (!sub) return 0.0;
+
+      // Gaussian absorption peak model
+      const deltaLambda = lambdaNm - sub.lambdaMax;
+      const gaussian = Math.exp(-Math.pow(deltaLambda / sub.widthNm, 2));
+      const eps = sub.epsMax * gaussian;
+
+      // Beer-Lambert Law: A = eps * b * c (c in mol/L, concMm in mmol/L -> /1000)
+      const concM = concMm / 1000.0;
+      let A = eps * pathlengthCm * concM;
+
+      // High concentration non-linear deviation (refraction/aggregation)
+      if (A > 1.8) {
+        A = 1.8 + Math.log10(1 + (A - 1.8) * 0.4);
+      }
+
+      return Math.max(0.000, A);
+    }
+
+    function calculateFullSpectrum() {
+      scanState.spectrumPoints = [];
+      for (let lam = 380; lam <= 750; lam += 2) {
+        const A = getAbsorbance(scanState.substance, lam, scanState.concMm, 1.0);
+        scanState.spectrumPoints.push({ lambda: lam, A: A });
+      }
+    }
+
+    function wavelengthToRGB(wavelength) {
+      let r, g, b;
+      if (wavelength >= 380 && wavelength < 440) {
+        r = -(wavelength - 440) / (440 - 380);
+        g = 0.0;
+        b = 1.0;
+      } else if (wavelength >= 440 && wavelength < 490) {
+        r = 0.0;
+        g = (wavelength - 440) / (490 - 440);
+        b = 1.0;
+      } else if (wavelength >= 490 && wavelength < 510) {
+        r = 0.0;
+        g = 1.0;
+        b = -(wavelength - 510) / (510 - 490);
+      } else if (wavelength >= 510 && wavelength < 580) {
+        r = (wavelength - 510) / (580 - 510);
+        g = 1.0;
+        b = 0.0;
+      } else if (wavelength >= 580 && wavelength < 645) {
+        r = 1.0;
+        g = -(wavelength - 645) / (645 - 580);
+        b = 0.0;
+      } else if (wavelength >= 645 && wavelength <= 750) {
+        r = 1.0;
+        g = 0.0;
+        b = 0.0;
+      } else {
+        r = 0.0;
+        g = 0.0;
+        b = 0.0;
+      }
+
+      // Intensity falloff at limits
+      let factor = 1.0;
+      if (wavelength >= 380 && wavelength < 420) {
+        factor = 0.3 + 0.7 * (wavelength - 380) / (420 - 380);
+      } else if (wavelength >= 700 && wavelength <= 750) {
+        factor = 0.3 + 0.7 * (750 - wavelength) / (750 - 700);
+      }
+
+      return [
+        Math.round(r * factor * 255),
+        Math.round(g * factor * 255),
+        Math.round(b * factor * 255)
+      ];
+    }
+
+    // ==========================================
+    // MODE 1: SCAN FUNCTIONS
+    // ==========================================
+    function updateScanSubstance() {
+      scanState.substance = document.getElementById('selScanSubstance').value;
+      scanState.wavelengthNm = CHROMOPHORES[scanState.substance].lambdaMax;
+      document.getElementById('rngScanWavelength').value = scanState.wavelengthNm;
+      document.getElementById('valScanWavelength').textContent = scanState.wavelengthNm + ' nm';
+
+      calculateFullSpectrum();
+      playSound('step');
+      updateMetricDisplays();
+    }
+
+    function updateScanConc(val) {
+      scanState.concMm = parseFloat(val);
+      document.getElementById('valScanConc').textContent = parseFloat(val).toFixed(2) + ' mM';
+      calculateFullSpectrum();
+      updateMetricDisplays();
+    }
+
+    function updateScanWavelength(val) {
+      scanState.wavelengthNm = parseInt(val);
+      document.getElementById('valScanWavelength').textContent = val + ' nm';
+      playSound('step');
+      updateMetricDisplays();
+    }
+
+    function toggleAutoScan() {
+      scanState.isAutoScanning = !scanState.isAutoScanning;
+      playSound('step');
+      const btn = document.getElementById('btnAutoScan');
+      if (scanState.isAutoScanning) {
+        btn.textContent = '⏸️ Hentikan Pemindaian';
+        scanState.wavelengthNm = 380;
+      } else {
+        btn.textContent = '🚀 Jalankan Pemindaian Penuh (Auto-Scan)';
+      }
+    }
+
+    // ==========================================
+    // MODE 2: BEER-LAMBERT CALIBRATION FUNCTIONS
+    // ==========================================
+    function initDefaultCalibration() {
+      beerState.calibPoints = [];
+      const sub = CHROMOPHORES[beerState.substance];
+      const concs = [0.0, 0.1, 0.2, 0.4, 0.6, 0.8];
+      concs.forEach(c => {
+        const A = getAbsorbance(beerState.substance, sub.lambdaMax, c, beerState.cuvettePathCm);
+        beerState.calibPoints.push({ c: c, A: A, isUnknown: false });
+      });
+    }
+
+    function updateBeerSubstance() {
+      beerState.substance = document.getElementById('selBeerSubstance').value;
+      initDefaultCalibration();
+      beerState.hasUnknownMeasured = false;
+      playSound('step');
+      updateMetricDisplays();
+    }
+
+    function updateBeerSample() {
+      beerState.sampleKey = document.getElementById('selBeerSample').value;
+      playSound('step');
+      updateMetricDisplays();
+    }
+
+    function updateCuvettePath(val) {
+      beerState.cuvettePathCm = parseFloat(val);
+      document.getElementById('valCuvettePath').textContent = parseFloat(val).toFixed(2) + ' cm';
+      document.getElementById('stageSubBadge').textContent = `TEBAL KUVET: ${beerState.cuvettePathCm.toFixed(2)} CM (KUARSA OPTIK)`;
+      initDefaultCalibration();
+      updateMetricDisplays();
+    }
+
+    function measureBeerPoint() {
+      playSound('step');
+      const sub = CHROMOPHORES[beerState.substance];
+
+      if (beerState.sampleKey === 'unknown') {
+        const A_unk = getAbsorbance(beerState.substance, sub.lambdaMax, beerState.unknownConcMm, beerState.cuvettePathCm);
+        beerState.hasUnknownMeasured = true;
+        // Check if unknown already exists
+        const exists = beerState.calibPoints.find(p => p.isUnknown);
+        if (!exists) {
+          beerState.calibPoints.push({ c: beerState.unknownConcMm, A: A_unk, isUnknown: true });
+        }
+        playSound('chime');
+      } else {
+        let conc = 0.0;
+        if (beerState.sampleKey === 'blank') conc = 0.0;
+        else if (beerState.sampleKey === 'std1') conc = 0.1;
+        else if (beerState.sampleKey === 'std2') conc = 0.2;
+        else if (beerState.sampleKey === 'std3') conc = 0.4;
+        else if (beerState.sampleKey === 'std4') conc = 0.6;
+        else if (beerState.sampleKey === 'std5') conc = 0.8;
+
+        const A = getAbsorbance(beerState.substance, sub.lambdaMax, conc, beerState.cuvettePathCm);
+        // Avoid duplicate concentration
+        if (!beerState.calibPoints.some(p => Math.abs(p.c - conc) < 0.01 && !p.isUnknown)) {
+          beerState.calibPoints.push({ c: conc, A: A, isUnknown: false });
+        }
+      }
+
+      updateMetricDisplays();
+      logObservation();
+    }
+
+    function resetCalibration() {
+      beerState.calibPoints = [];
+      beerState.hasUnknownMeasured = false;
+      playSound('shutter');
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // MODE 3: OPTICS FUNCTIONS
+    // ==========================================
+    function updateOpticsLamp() {
+      opticsState.lamp = document.getElementById('selOpticsLamp').value;
+      playSound('step');
+      updateMetricDisplays();
+    }
+
+    function updateSlitWidth(val) {
+      opticsState.slitNm = parseFloat(val);
+      document.getElementById('valSlitWidth').textContent = parseFloat(val).toFixed(1) + ' nm';
+      playSound('step');
+      updateMetricDisplays();
+    }
+
+    function toggleOpticalShutter() {
+      opticsState.shutterOpen = !opticsState.shutterOpen;
+      playSound('shutter');
+      const btn = document.getElementById('btnShutterToggle');
+      if (opticsState.shutterOpen) {
+        btn.textContent = '💡 Tutup Shutter Cahaya';
+        btn.className = 'btn-action btn-primary';
+      } else {
+        btn.textContent = '💡 Buka Shutter Cahaya';
+        btn.className = 'btn-action btn-secondary';
+      }
+      updateMetricDisplays();
+    }
+
+    function zeroBlank() {
+      playSound('chime');
+      alert("Auto-Zero Selesai: Nilai Absorbansi Blanko diset 0.000 A (100.00% T)!");
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // METRICS DISPLAY UPDATE
+    // ==========================================
+    function updateMetricDisplays() {
+      const lbl1 = document.getElementById('lblLcd1');
+      const val1 = document.getElementById('valLcd1');
+      const lbl2 = document.getElementById('lblLcd2');
+      const val2 = document.getElementById('valLcd2');
+      const lbl3 = document.getElementById('lblLcd3');
+      const val3 = document.getElementById('valLcd3');
+      const lbl4 = document.getElementById('lblLcd4');
+      const val4 = document.getElementById('valLcd4');
+
+      if (activeMode === 'scan') {
+        lbl1.textContent = 'Panjang Gelombang (λ):';
+        lbl2.textContent = 'Nilai Absorbansi (A):';
+        lbl3.textContent = 'Transmitansi (%T):';
+        lbl4.textContent = 'Puncak Serapan (λ_max):';
+
+        const A = getAbsorbance(scanState.substance, scanState.wavelengthNm, scanState.concMm, 1.0);
+        const T_pct = Math.pow(10, -A) * 100;
+        const sub = CHROMOPHORES[scanState.substance];
+
+        val1.textContent = `${scanState.wavelengthNm} nm`;
+        val2.textContent = A.toFixed(3);
+        val3.textContent = `${T_pct.toFixed(2)} %`;
+        val4.textContent = `λ_max = ${sub.lambdaMax} nm`;
+
+      } else if (activeMode === 'beer') {
+        lbl1.textContent = 'Kromofor / Panjang Gelombang:';
+        lbl2.textContent = 'Nilai Absorbansi (A):';
+        lbl3.textContent = 'Konsentrasi Terbaca (c):';
+        lbl4.textContent = 'Status Sampel:';
+
+        const sub = CHROMOPHORES[beerState.substance];
+        val1.textContent = `${sub.name} (${sub.lambdaMax} nm)`;
+
+        let curConc = 0.0;
+        if (beerState.sampleKey === 'blank') curConc = 0.0;
+        else if (beerState.sampleKey === 'std1') curConc = 0.1;
+        else if (beerState.sampleKey === 'std2') curConc = 0.2;
+        else if (beerState.sampleKey === 'std3') curConc = 0.4;
+        else if (beerState.sampleKey === 'std4') curConc = 0.6;
+        else if (beerState.sampleKey === 'std5') curConc = 0.8;
+        else curConc = beerState.unknownConcMm;
+
+        const A = getAbsorbance(beerState.substance, sub.lambdaMax, curConc, beerState.cuvettePathCm);
+        val2.textContent = A.toFixed(3);
+        val3.textContent = (beerState.sampleKey === 'unknown' && !beerState.hasUnknownMeasured) ? '?? (Belum Diukur)' : `${curConc.toFixed(2)} mM`;
+        val4.textContent = (beerState.sampleKey === 'unknown') ? (beerState.hasUnknownMeasured ? 'TERUKUR (INTERPOLASI)' : 'SAMPEL MISTERI X') : 'LARUTAN STANDAR';
+        val4.style.color = (beerState.sampleKey === 'unknown') ? '#f59e0b' : '#10b981';
+
+      } else if (activeMode === 'optics') {
+        lbl1.textContent = 'Sumber Radiasi Lampu:';
+        lbl2.textContent = 'Status Shutter Celah:';
+        lbl3.textContent = 'Intensitas Detektor PMT:';
+        lbl4.textContent = 'Sinyal Fotodioda:';
+
+        val1.textContent = (opticsState.lamp === 'tungsten') ? 'Tungsten-Halogen (Vis)' : 'Deuterium D₂ (UV)';
+        val2.textContent = opticsState.shutterOpen ? 'TERBUKA (BERKAS AKTIF)' : 'TERTUTUP (GELAP)';
+        val2.style.color = opticsState.shutterOpen ? '#22d3ee' : '#ef4444';
+        val3.textContent = opticsState.shutterOpen ? '98.5 % I₀' : '0.0 % (Dark Current)';
+        val4.textContent = opticsState.shutterOpen ? 'STABIL (SNR = 2400)' : 'NOISE MINIMAL';
+      }
+    }
+
+    // ==========================================
+    // OBSERVATION LOGGING & CSV
+    // ==========================================
+    function logObservation() {
+      const tbody = document.getElementById('tblBody');
+      const tr = document.createElement('tr');
+
+      let modeName = '';
+      let subName = '';
+      let cond = '';
+      let res = '';
+
+      if (activeMode === 'scan') {
+        modeName = 'λ-Scan';
+        subName = CHROMOPHORES[scanState.substance].name;
+        cond = `λ = ${scanState.wavelengthNm} nm, c = ${scanState.concMm} mM`;
+        res = `A = ${document.getElementById('valLcd2').textContent}, %T = ${document.getElementById('valLcd3').textContent}`;
+      } else if (activeMode === 'beer') {
+        modeName = 'Kalibrasi Beer';
+        subName = CHROMOPHORES[beerState.substance].name;
+        cond = `${document.getElementById('selBeerSample').options[document.getElementById('selBeerSample').selectedIndex].text} (b=${beerState.cuvettePathCm}cm)`;
+        res = `A = ${document.getElementById('valLcd2').textContent} (c = ${document.getElementById('valLcd3').textContent})`;
+      } else if (activeMode === 'optics') {
+        modeName = 'Anatomi Optik';
+        subName = opticsState.lamp.toUpperCase();
+        cond = `Celah: ${opticsState.slitNm} nm, Shutter: ${opticsState.shutterOpen ? 'Open' : 'Closed'}`;
+        res = document.getElementById('valLcd3').textContent;
+      }
+
+      tr.innerHTML = `
+        <td><strong>${modeName}</strong></td>
+        <td>${subName}</td>
+        <td>${cond}</td>
+        <td>${res}</td>
+      `;
+
+      tbody.insertBefore(tr, tbody.firstChild);
+      playSound('step');
+    }
+
+    function exportDataCSV() {
+      let csv = "Mode,Senyawa_Kromofor,Panjang_Gelombang_dan_Konsentrasi,Absorbansi_dan_Transmitansi\n";
+      const rows = document.querySelectorAll("#tblBody tr");
+      if (rows.length === 0) {
+        alert("Belum ada data pengamatan yang dicatat. Klik 'Catat Data' terlebih dahulu!");
+        return;
+      }
+      rows.forEach(r => {
+        const cols = r.querySelectorAll("td");
+        if (cols.length >= 4) {
+          const m = cols[0].innerText.replace(/,/g, '');
+          const s = cols[1].innerText.replace(/,/g, '');
+          const c = cols[2].innerText.replace(/,/g, '');
+          const res = cols[3].innerText.replace(/,/g, '');
+          csv += `"${m}","${s}","${c}","${res}"\n`;
+        }
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Data_Spektrofotometri_BeerLambert_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      playSound('chime');
+    }
+
+    // ==========================================
+    // 60 FPS MAIN ANIMATION LOOP
+    // ==========================================
+    function mainAnimationLoop() {
+      ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (activeMode === 'scan') {
+        renderScanStage();
+      } else if (activeMode === 'beer') {
+        renderBeerStage();
+      } else if (activeMode === 'optics') {
+        renderOpticsStage();
+      }
+
+      requestAnimationFrame(mainAnimationLoop);
+    }
+
+    // 1. RENDER SCAN STAGE
+    function renderScanStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#060913';
+      ctx2d.fillRect(0, 0, W, H);
+
+      // Auto-scan stepping
+      if (scanState.isAutoScanning) {
+        scanState.wavelengthNm += 1;
+        if (scanState.wavelengthNm > 750) {
+          scanState.wavelengthNm = 750;
+          scanState.isAutoScanning = false;
+          document.getElementById('btnAutoScan').textContent = '🚀 Jalankan Pemindaian Penuh (Auto-Scan)';
+          playSound('chime');
+        }
+        document.getElementById('rngScanWavelength').value = scanState.wavelengthNm;
+        document.getElementById('valScanWavelength').textContent = scanState.wavelengthNm + ' nm';
+        updateMetricDisplays();
+      }
+
+      // Left: Miniature Cuvette & Transmission Beam
+      const cuvetteX = 80;
+      const cuvetteY = 140;
+      const cuvetteW = 70;
+      const cuvetteH = 170;
+
+      // Incident Beam (Left to Cuvette)
+      const rgb = wavelengthToRGB(scanState.wavelengthNm);
+      ctx2d.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+      ctx2d.fillRect(20, cuvetteY + 65, cuvetteX - 20, 24);
+
+      // Liquid in Cuvette
+      const sub = CHROMOPHORES[scanState.substance];
+      const liqRgb = sub.colorRgb;
+      const liqAlpha = Math.min(0.9, 0.2 + (scanState.concMm / 1.0) * 0.7);
+      ctx2d.fillStyle = `rgba(${liqRgb[0]}, ${liqRgb[1]}, ${liqRgb[2]}, ${liqAlpha})`;
+      ctx2d.fillRect(cuvetteX, cuvetteY, cuvetteW, cuvetteH);
+
+      // Glass Cuvette Outline
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx2d.lineWidth = 3;
+      ctx2d.strokeRect(cuvetteX, cuvetteY, cuvetteW, cuvetteH);
+
+      // Transmitted Beam (Right of Cuvette)
+      const curA = getAbsorbance(scanState.substance, scanState.wavelengthNm, scanState.concMm, 1.0);
+      const transRatio = Math.pow(10, -curA);
+      ctx2d.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${transRatio})`;
+      ctx2d.fillRect(cuvetteX + cuvetteW, cuvetteY + 65, 50, 24);
+
+      // Detector Box
+      ctx2d.fillStyle = '#334155';
+      ctx2d.fillRect(cuvetteX + cuvetteW + 50, cuvetteY + 45, 25, 64);
+      ctx2d.strokeStyle = '#64748b';
+      ctx2d.strokeRect(cuvetteX + cuvetteW + 50, cuvetteY + 45, 25, 64);
+
+      // Cuvette Label
+      ctx2d.fillStyle = '#94a3b8';
+      ctx2d.font = 'bold 11px sans-serif';
+      ctx2d.textAlign = 'center';
+      ctx2d.fillText(sub.name, cuvetteX + cuvetteW / 2, cuvetteY + cuvetteH + 20);
+      ctx2d.textAlign = 'left';
+
+      // Right: Spectrum Absorbance Curve Graph (380 - 750 nm)
+      const graphX = 280;
+      const graphY = 50;
+      const graphW = 550;
+      const graphH = 320;
+
+      ctx2d.fillStyle = '#090d19';
+      ctx2d.fillRect(graphX, graphY, graphW, graphH);
+      ctx2d.strokeStyle = '#334155';
+      ctx2d.strokeRect(graphX, graphY, graphW, graphH);
+
+      // Axis Lines
+      ctx2d.strokeStyle = '#64748b';
+      ctx2d.lineWidth = 1.5;
+      ctx2d.beginPath();
+      ctx2d.moveTo(graphX, graphY + graphH);
+      ctx2d.lineTo(graphX + graphW, graphY + graphH);
+      ctx2d.moveTo(graphX, graphY);
+      ctx2d.lineTo(graphX, graphY + graphH);
+      ctx2d.stroke();
+
+      // Axis Marks (Y: Absorbance 0.0 - 2.0, X: 400, 500, 600, 700 nm)
+      ctx2d.fillStyle = '#94a3b8';
+      ctx2d.font = '9px monospace';
+      [0.0, 0.5, 1.0, 1.5, 2.0].forEach(valA => {
+        const y = graphY + graphH - (valA / 2.0) * graphH;
+        ctx2d.beginPath();
+        ctx2d.moveTo(graphX, y);
+        ctx2d.lineTo(graphX + graphW, y);
+        ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx2d.stroke();
+        ctx2d.fillText(valA.toFixed(1) + ' A', graphX - 35, y + 3);
+      });
+
+      [400, 500, 600, 700].forEach(valNm => {
+        const x = graphX + ((valNm - 380) / (750 - 380)) * graphW;
+        ctx2d.beginPath();
+        ctx2d.moveTo(x, graphY);
+        ctx2d.lineTo(x, graphY + graphH);
+        ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx2d.stroke();
+        ctx2d.fillText(valNm + 'nm', x - 12, graphY + graphH + 16);
+      });
+
+      // Rainbow Visible Light Ribbon at Bottom of Graph
+      const ribbonH = 6;
+      for (let px = 0; px < graphW; px++) {
+        const lam = 380 + (px / graphW) * (750 - 380);
+        const rColor = wavelengthToRGB(lam);
+        ctx2d.fillStyle = `rgb(${rColor[0]}, ${rColor[1]}, ${rColor[2]})`;
+        ctx2d.fillRect(graphX + px, graphY + graphH - ribbonH, 1, ribbonH);
+      }
+
+      // Plot Continuous Absorbance Spectrum Curve
+      ctx2d.strokeStyle = '#00f2fe';
+      ctx2d.lineWidth = 2.5;
+      ctx2d.beginPath();
+      scanState.spectrumPoints.forEach((pt, i) => {
+        const px = graphX + ((pt.lambda - 380) / (750 - 380)) * graphW;
+        const py = graphY + graphH - Math.min(graphH, (pt.A / 2.0) * graphH);
+        if (i === 0) ctx2d.moveTo(px, py);
+        else ctx2d.lineTo(px, py);
+      });
+      ctx2d.stroke();
+
+      // Current Selected Wavelength Cursor Line
+      const curX = graphX + ((scanState.wavelengthNm - 380) / (750 - 380)) * graphW;
+      const curY = graphY + graphH - Math.min(graphH, (curA / 2.0) * graphH);
+
+      ctx2d.strokeStyle = '#f59e0b';
+      ctx2d.lineWidth = 1.5;
+      ctx2d.setLineDash([4, 4]);
+      ctx2d.beginPath();
+      ctx2d.moveTo(curX, graphY);
+      ctx2d.lineTo(curX, graphY + graphH);
+      ctx2d.stroke();
+      ctx2d.setLineDash([]);
+
+      // Highlight Current Point
+      ctx2d.fillStyle = '#f59e0b';
+      ctx2d.beginPath();
+      ctx2d.arc(curX, curY, 5, 0, Math.PI * 2);
+      ctx2d.fill();
+
+      // Lambda Max Marker Tag
+      const maxLamX = graphX + ((sub.lambdaMax - 380) / (750 - 380)) * graphW;
+      ctx2d.fillStyle = '#c084fc';
+      ctx2d.font = 'bold 10px monospace';
+      ctx2d.fillText(`λ_max = ${sub.lambdaMax} nm`, maxLamX - 35, graphY + 22);
+    }
+
+    // 2. RENDER BEER-LAMBERT STAGE
+    function renderBeerStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#060913';
+      ctx2d.fillRect(0, 0, W, H);
+
+      // Left: Optical Cuvette Chamber
+      const cuvetteX = 80;
+      const cuvetteY = 120;
+      const cuvetteW = 20 + beerState.cuvettePathCm * 40; // width reflects pathlength b
+      const cuvetteH = 200;
+
+      // Liquid in Cuvette
+      const sub = CHROMOPHORES[beerState.substance];
+      let curConc = 0.0;
+      if (beerState.sampleKey === 'blank') curConc = 0.0;
+      else if (beerState.sampleKey === 'std1') curConc = 0.1;
+      else if (beerState.sampleKey === 'std2') curConc = 0.2;
+      else if (beerState.sampleKey === 'std3') curConc = 0.4;
+      else if (beerState.sampleKey === 'std4') curConc = 0.6;
+      else if (beerState.sampleKey === 'std5') curConc = 0.8;
+      else curConc = beerState.unknownConcMm;
+
+      const liqRgb = sub.colorRgb;
+      const liqAlpha = Math.min(0.92, 0.1 + (curConc / 1.0) * 0.85);
+      ctx2d.fillStyle = `rgba(${liqRgb[0]}, ${liqRgb[1]}, ${liqRgb[2]}, ${liqAlpha})`;
+      ctx2d.fillRect(cuvetteX, cuvetteY, cuvetteW, cuvetteH);
+
+      // Glass Cuvette Outline
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx2d.lineWidth = 3;
+      ctx2d.strokeRect(cuvetteX, cuvetteY, cuvetteW, cuvetteH);
+
+      // Pathlength Arrow indicator
+      ctx2d.strokeStyle = '#38bdf8';
+      ctx2d.lineWidth = 1.5;
+      ctx2d.beginPath();
+      ctx2d.moveTo(cuvetteX, cuvetteY + cuvetteH + 15);
+      ctx2d.lineTo(cuvetteX + cuvetteW, cuvetteY + cuvetteH + 15);
+      ctx2d.stroke();
+      ctx2d.fillStyle = '#38bdf8';
+      ctx2d.font = '10px monospace';
+      ctx2d.textAlign = 'center';
+      ctx2d.fillText(`b = ${beerState.cuvettePathCm.toFixed(2)} cm`, cuvetteX + cuvetteW / 2, cuvetteY + cuvetteH + 30);
+      ctx2d.textAlign = 'left';
+
+      // Right: Calibration Curve Graph (Absorbance vs Concentration)
+      const graphX = 300;
+      const graphY = 50;
+      const graphW = 530;
+      const graphH = 320;
+
+      ctx2d.fillStyle = '#090d19';
+      ctx2d.fillRect(graphX, graphY, graphW, graphH);
+      ctx2d.strokeStyle = '#334155';
+      ctx2d.strokeRect(graphX, graphY, graphW, graphH);
+
+      // Axes
+      ctx2d.strokeStyle = '#64748b';
+      ctx2d.lineWidth = 1.5;
+      ctx2d.beginPath();
+      ctx2d.moveTo(graphX, graphY + graphH);
+      ctx2d.lineTo(graphX + graphW, graphY + graphH);
+      ctx2d.moveTo(graphX, graphY);
+      ctx2d.lineTo(graphX, graphY + graphH);
+      ctx2d.stroke();
+
+      // Axis Marks (Y: Absorbance 0.0 - 2.0, X: Conc 0.0 - 1.0 mM)
+      ctx2d.fillStyle = '#94a3b8';
+      ctx2d.font = '9px monospace';
+      [0.0, 0.5, 1.0, 1.5, 2.0].forEach(valA => {
+        const y = graphY + graphH - (valA / 2.0) * graphH;
+        ctx2d.fillText(valA.toFixed(1) + ' A', graphX - 35, y + 3);
+      });
+
+      [0.0, 0.2, 0.4, 0.6, 0.8, 1.0].forEach(valC => {
+        const x = graphX + (valC / 1.0) * graphW;
+        ctx2d.fillText(valC.toFixed(1) + ' mM', x - 12, graphY + graphH + 16);
+      });
+
+      // Best-fit Calibration Line (y = m*x)
+      const maxStdA = getAbsorbance(beerState.substance, sub.lambdaMax, 1.0, beerState.cuvettePathCm);
+      ctx2d.strokeStyle = '#38bdf8';
+      ctx2d.lineWidth = 2;
+      ctx2d.beginPath();
+      ctx2d.moveTo(graphX, graphY + graphH);
+      ctx2d.lineTo(graphX + graphW, graphY + graphH - Math.min(graphH, (maxStdA / 2.0) * graphH));
+      ctx2d.stroke();
+
+      // Calibration points dots
+      beerState.calibPoints.forEach(pt => {
+        const px = graphX + (pt.c / 1.0) * graphW;
+        const py = graphY + graphH - Math.min(graphH, (pt.A / 2.0) * graphH);
+
+        if (pt.isUnknown) {
+          // Highlight Unknown point in Amber/Yellow
+          ctx2d.fillStyle = '#f59e0b';
+          ctx2d.beginPath();
+          ctx2d.arc(px, py, 7, 0, Math.PI * 2);
+          ctx2d.fill();
+
+          // Interpolation projection lines
+          ctx2d.strokeStyle = '#f59e0b';
+          ctx2d.setLineDash([4, 4]);
+          ctx2d.beginPath();
+          ctx2d.moveTo(graphX, py);
+          ctx2d.lineTo(px, py);
+          ctx2d.lineTo(px, graphY + graphH);
+          ctx2d.stroke();
+          ctx2d.setLineDash([]);
+
+          ctx2d.fillText(`Unknown: c = ${pt.c.toFixed(2)} mM`, px + 10, py - 6);
+        } else {
+          ctx2d.fillStyle = '#00f2fe';
+          ctx2d.beginPath();
+          ctx2d.arc(px, py, 4.5, 0, Math.PI * 2);
+          ctx2d.fill();
+        }
+      });
+
+      // Regression Equation Box Top-Left of Graph
+      const slope = (maxStdA / 1.0).toFixed(3);
+      ctx2d.fillStyle = '#00f2fe';
+      ctx2d.font = 'bold 11px monospace';
+      ctx2d.fillText(`A = ${slope} · c (R² = 0.9998)`, graphX + 20, graphY + 30);
+    }
+
+    // 3. RENDER OPTICS ANATOMY STAGE
+    function renderOpticsStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#060913';
+      ctx2d.fillRect(0, 0, W, H);
+
+      // Light Source Lamp (Left)
+      const lampX = 80;
+      const lampY = 180;
+      ctx2d.fillStyle = opticsState.shutterOpen ? '#fef08a' : '#475569';
+      ctx2d.beginPath();
+      ctx2d.arc(lampX, lampY, 20, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.fillStyle = '#ffffff';
+      ctx2d.font = 'bold 10px monospace';
+      ctx2d.textAlign = 'center';
+      ctx2d.fillText(opticsState.lamp === 'tungsten' ? 'Tungsten' : 'D₂ Lamp', lampX, lampY + 35);
+
+      if (opticsState.shutterOpen) {
+        // White Light Polychromatic Beam to Collimator Mirror
+        ctx2d.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx2d.fillRect(lampX + 20, lampY - 6, 80, 12);
+      }
+
+      // Collimator Mirror
+      const mirrorX = 180;
+      const mirrorY = 150;
+      ctx2d.fillStyle = '#64748b';
+      ctx2d.fillRect(mirrorX, mirrorY, 10, 60);
+
+      // Reflection Grating (Rotatable Monochromator)
+      const gratingX = 280;
+      const gratingY = 190;
+      ctx2d.save();
+      ctx2d.translate(gratingX, gratingY);
+      ctx2d.rotate(0.2);
+      ctx2d.fillStyle = '#94a3b8';
+      ctx2d.fillRect(-8, -35, 16, 70);
+      // Grating lines
+      ctx2d.strokeStyle = '#334155';
+      ctx2d.lineWidth = 1;
+      for (let y = -30; y < 30; y += 4) {
+        ctx2d.beginPath();
+        ctx2d.moveTo(-6, y);
+        ctx2d.lineTo(6, y);
+        ctx2d.stroke();
+      }
+      ctx2d.restore();
+
+      ctx2d.fillStyle = '#00f2fe';
+      ctx2d.fillText('Kisi Difraksi', gratingX, gratingY + 55);
+
+      // Dispersed Rainbow Spectrum Beams
+      if (opticsState.shutterOpen) {
+        const exitSlitX = 420;
+        const exitSlitY = 190;
+
+        // Dispersed fan
+        ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6'].forEach((c, idx) => {
+          ctx2d.strokeStyle = c;
+          ctx2d.lineWidth = 2;
+          ctx2d.beginPath();
+          ctx2d.moveTo(gratingX + 10, gratingY);
+          ctx2d.lineTo(exitSlitX, exitSlitY - 20 + idx * 10);
+          ctx2d.stroke();
+        });
+
+        // Exit Slit plate
+        ctx2d.fillStyle = '#1e293b';
+        ctx2d.fillRect(exitSlitX, exitSlitY - 40, 8, 32);
+        ctx2d.fillRect(exitSlitX, exitSlitY + 8, 8, 32);
+
+        // Monochromatic Beam passing slit to Cuvette
+        ctx2d.fillStyle = '#22c55e'; // 525 nm green beam
+        ctx2d.fillRect(exitSlitX + 8, exitSlitY - 4, 120, 8);
+
+        // Sample Cuvette
+        const cuvX = 560;
+        const cuvY = 140;
+        ctx2d.fillStyle = 'rgba(180, 20, 200, 0.45)'; // KMnO4 purple liquid
+        ctx2d.fillRect(cuvX, cuvY, 50, 100);
+        ctx2d.strokeStyle = '#ffffff';
+        ctx2d.strokeRect(cuvX, cuvY, 50, 100);
+        ctx2d.fillStyle = '#c084fc';
+        ctx2d.fillText('Kuvet', cuvX + 25, cuvY + 120);
+
+        // Attenuated Transmitted Beam (I)
+        ctx2d.fillStyle = 'rgba(34, 197, 94, 0.3)';
+        ctx2d.fillRect(cuvX + 50, exitSlitY - 4, 100, 8);
+
+        // Photodetector PMT
+        const detX = 720;
+        const detY = 150;
+        ctx2d.fillStyle = '#334155';
+        ctx2d.fillRect(detX, detY, 40, 80);
+        ctx2d.strokeStyle = '#64748b';
+        ctx2d.strokeRect(detX, detY, 40, 80);
+        ctx2d.fillStyle = '#22d3ee';
+        ctx2d.fillText('Detektor', detX + 20, detY + 100);
+      }
+      ctx2d.textAlign = 'left';
+    }
+  </script>
+</body>
+</html>

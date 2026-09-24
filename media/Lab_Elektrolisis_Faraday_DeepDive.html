@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Lab: Sel Elektrolisis & Hukum Faraday • PortalKimia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-space: #090d16;
+      --bg-bench: #131926;
+      --bg-panel: rgba(19, 25, 38, 0.92);
+      --bg-glass: rgba(28, 36, 54, 0.7);
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-bright: rgba(14, 165, 233, 0.4);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-glow: rgba(14, 165, 233, 0.35);
+      --accent-cyan: #38bdf8;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      --lcd-bg: #03140f;
+      --lcd-text: #10f2a7;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.6);
+      --font-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === HEADER LAB BAR === */
+    header.lab-header {
+      background: rgba(15, 20, 31, 0.96);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 18px var(--primary-glow);
+    }
+
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+
+    .brand-title h1 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title h1 span.badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(14, 165, 233, 0.2);
+      border: 1px solid var(--border-bright);
+      color: #bae6fd;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-header {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .btn-header.primary {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .btn-header.primary:hover {
+      box-shadow: 0 6px 16px rgba(14, 165, 233, 0.5);
+    }
+
+    /* === MAIN LAYOUT CONTAINER === */
+    main.lab-workbench {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 350px 1fr 380px;
+      gap: 16px;
+      padding: 16px 20px;
+      max-width: 1740px;
+      margin: 0 auto;
+      width: 100%;
+      height: calc(100vh - 67px);
+      min-height: 720px;
+    }
+
+    /* Common Glass Panel */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-header h2 svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--accent-cyan);
+    }
+
+    .panel-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Mode Selection Tabs */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .btn-mode {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 9px 8px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-mode:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-mode.active {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(14, 165, 233, 0.12));
+      border: 1px solid var(--border-bright);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-mode .mode-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .btn-mode.active .mode-title {
+      color: #bae6fd;
+    }
+
+    .btn-mode .mode-desc {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    /* DC Power Supply Control Card */
+    .card-control {
+      background: #0d131f;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .control-label span.val {
+      font-family: var(--font-mono);
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--primary-glow);
+      border: 2px solid #fff;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Equation Display Box */
+    .eq-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+
+    .eq-box .eq-title {
+      font-size: 9px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Indicator Chemical Test Buttons */
+    .indicator-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .btn-indicator {
+      background: #141c2c;
+      border: 1px solid var(--border-glass);
+      border-radius: 8px;
+      padding: 8px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-indicator:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* === CENTER STAGE (APPARATUS STUDIO & SUB-MICROSCOPIC VIEW) === */
+    section.lab-center-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    /* Top: Molecular Reaction Canvas 2D */
+    .mol-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .mol-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mol-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mol-title svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--accent-cyan);
+    }
+
+    .mol-viewport-wrap {
+      display: grid;
+      grid-template-columns: 1fr 160px;
+      gap: 10px;
+      height: 115px;
+    }
+
+    canvas#molCanvas {
+      width: 100%;
+      height: 100%;
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+    }
+
+    /* Reaction Equations Mini Card */
+    .faraday-rate-card {
+      background: #080d1a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 9px;
+      font-family: var(--font-mono);
+      line-height: 1.4;
+    }
+
+    /* Main Apparatus Studio Viewport */
+    .apparatus-studio {
+      flex: 1;
+      background: radial-gradient(circle at 50% 30%, #172033 0%, #0c111c 100%);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Benchtop Surface Base */
+    .benchtop-surface {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border-top: 2px solid #334155;
+      box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    /* SVG Apparatus Canvas */
+    svg.apparatus-svg {
+      width: 100%;
+      height: 100%;
+      max-height: 480px;
+      z-index: 10;
+    }
+
+    /* Floating Workbench Control Bar */
+    .bench-control-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-glass);
+      padding: 8px 16px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 30;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .btn-act {
+      border: 1px solid var(--border-glass);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-act:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .btn-act.btn-power-on {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-act.btn-power-off {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+    }
+
+    .control-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* === RIGHT PANEL (DIGITAL METERS, FARADAY MATH & DATA LOG) === */
+    /* Digital LCD Mass & Gas Volume Meter */
+    .lcd-meter-box {
+      background: #020907;
+      border: 2px solid #064e3b;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.95);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lcd-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(16, 242, 167, 0.6);
+      letter-spacing: 1px;
+    }
+
+    .lcd-digits-large {
+      font-family: var(--font-mono);
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 14px rgba(16, 242, 167, 0.7);
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+
+    .lcd-status-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(16, 242, 167, 0.15);
+      color: #10f2a7;
+    }
+
+    .lcd-status-badge.active-power {
+      background: rgba(16, 185, 129, 0.25);
+      color: #a7f3d0;
+    }
+
+    /* Faraday Law Calculation Card */
+    .faraday-calc-card {
+      background: #0d131f;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .calc-row span.val {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Live Growth Chart Box */
+    .chart-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+
+    .chart-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    canvas#growthChart {
+      width: 100%;
+      height: 155px;
+      border-radius: 6px;
+      background: #030712;
+    }
+
+    /* Data Table Log */
+    .log-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 120px;
+    }
+
+    .log-table-wrap {
+      overflow-y: auto;
+      flex: 1;
+      max-height: 135px;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    table.data-table th {
+      background: #111723;
+      padding: 6px 8px;
+      text-align: left;
+      color: #94a3b8;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      font-size: 10px;
+    }
+
+    table.data-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      font-size: 10px;
+    }
+
+    table.data-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* MODAL STYLES */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      max-width: 620px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-card p, .modal-card ul {
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .modal-card ul {
+      padding-left: 20px;
+    }
+
+    .modal-card li {
+      margin-bottom: 6px;
+    }
+
+    /* FLOATING TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 200;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 1280px) {
+      main.lab-workbench {
+        grid-template-columns: 320px 1fr 350px;
+      }
+    }
+    @media (max-width: 1080px) {
+      body { overflow-y: auto; }
+      main.lab-workbench {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .apparatus-studio { height: 440px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER LAB -->
+  <header class="lab-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <h1>
+          Virtual Lab: Sel Elektrolisis &amp; Hukum Faraday
+          <span class="badge">Standar PhET / Labster</span>
+        </h1>
+        <p>Eksperimen Kuantitatif Hukum Faraday, Penyepuhan Logam (Electroplating), &amp; Elektrolisis Larutan</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" id="btn-sound-toggle" title="Nyalakan/Matikan Suara">
+        <svg id="sound-icon-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+        <span id="sound-text">Suara: ON</span>
+      </button>
+
+      <button class="btn-header" id="btn-guide-modal">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        Panduan Lab
+      </button>
+
+      <button class="btn-header" id="btn-export-csv" title="Ekspor Data Pengamatan ke Format CSV">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Ekspor CSV
+      </button>
+
+      <button class="btn-header primary" id="btn-reset-all" title="Reset Percobaan & Bersihkan Katoda">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Reset Sel
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN LAB WORKBENCH -->
+  <main class="lab-workbench">
+
+    <!-- LEFT PANEL: SYSTEM SELECTION & POWER SUPPLY SETTINGS -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <circle cx="8" cy="12" r="3"/>
+            <line x1="16" y1="8" x2="16" y2="16"/>
+          </svg>
+          Kontrol Catu Daya DC &amp; Sistem
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- 1. System Selection -->
+        <div>
+          <div class="section-title">Pilih Sistem Elektrolisis:</div>
+          <div class="mode-grid">
+            <button class="btn-mode active" data-sys="electroplating_cu">
+              <span class="mode-title">1. Penyepuhan Sendok</span>
+              <span class="mode-desc">CuSO₄ (Anoda Cu, Katoda Sendok)</span>
+            </button>
+            <button class="btn-mode" data-sys="electrolysis_ki">
+              <span class="mode-title">2. Larutan KI (Tabung U)</span>
+              <span class="mode-desc">Elektroda Karbon C (Uji I₂ &amp; OH⁻)</span>
+            </button>
+            <button class="btn-mode" data-sys="water_splitting">
+              <span class="mode-title">3. Elektrolisis Air</span>
+              <span class="mode-desc">H₂O + H₂SO₄ (Rasio H₂ : O₂ = 2:1)</span>
+            </button>
+            <button class="btn-mode" data-sys="silver_plating">
+              <span class="mode-title">4. Penyepuhan Perak</span>
+              <span class="mode-desc">AgNO₃ (Katoda Garpu, Anoda Ag)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Dynamic Reaction Equation Card -->
+        <div class="eq-box" id="reaction-equation-card">
+          <div class="eq-title">
+            <span id="eq-sys-title">Sistem 1: Penyepuhan Tembaga (Cu)</span>
+            <span id="eq-val-ar" style="color: #38bdf8;">Ar Cu = 63.5, n = 2</span>
+          </div>
+          <div style="font-size: 10px; color: #fda4af; margin-bottom: 2px;" id="eq-cathode-text">
+            Katoda (-): Cu²⁺(aq) + 2e⁻ &rarr; Cu(s) [Endapan Oranye]
+          </div>
+          <div style="font-size: 10px; color: #bae6fd; margin-bottom: 4px;" id="eq-anode-text">
+            Anoda (+): Cu(s) &rarr; Cu²⁺(aq) + 2e⁻ [Tembaga Larut]
+          </div>
+          <div style="font-size: 9px; color: #94a3b8;" id="eq-desc-text">
+            Massa sendok bertambah sesuai Hukum Faraday I: m = (e &bull; I &bull; t) / 96500.
+          </div>
+        </div>
+
+        <!-- 3. DC Power Supply Controls -->
+        <div class="card-control">
+          <div class="section-title">
+            <span>Catu Daya Listrik DC:</span>
+            <span id="power-indicator-badge" style="color: #10f2a7; font-size: 9px; font-family: var(--font-mono);">ON (MENGALIR)</span>
+          </div>
+          <!-- Current Slider (I) -->
+          <div class="control-row">
+            <div class="control-label">
+              <span>Kuat Arus Listrik (I)</span>
+              <span class="val" id="val-current-display">2.00 A</span>
+            </div>
+            <input type="range" id="slider-current" min="0.50" max="5.00" step="0.25" value="2.00">
+            <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; font-family: var(--font-mono);">
+              <span>0.50 A</span>
+              <span>2.50 A</span>
+              <span>5.00 A</span>
+            </div>
+          </div>
+          <!-- Voltage Slider (V) -->
+          <div class="control-row" style="margin-top: 4px;">
+            <div class="control-label">
+              <span>Tegangan Catu Daya (V)</span>
+              <span class="val" id="val-voltage-display">6.0 V</span>
+            </div>
+            <input type="range" id="slider-voltage" min="1.5" max="12.0" step="0.5" value="6.0">
+          </div>
+        </div>
+
+        <!-- 4. Reagent / Chemical Test Indicators (For Mode 2 KI) -->
+        <div class="card-control" id="card-chemical-tests" style="display: none;">
+          <div class="section-title">
+            <span>Uji Indikator Kimia (KI):</span>
+          </div>
+          <div class="indicator-grid">
+            <button class="btn-indicator" id="btn-add-pp">
+              <span>+ Indikator PP</span>
+            </button>
+            <button class="btn-indicator" id="btn-add-starch">
+              <span>+ Kanji / Amilum</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- CENTER STAGE: SUB-MICROSCOPIC TRANSFER & APPARATUS STUDIO -->
+    <section class="lab-center-stage">
+
+      <!-- TOP: 2D ATOMIC ELECTRON TRANSFER CANVAS -->
+      <div class="mol-box">
+        <div class="mol-header">
+          <div class="mol-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Jendela Molekuler 2D: Reduksi Ion &amp; Pembentukan Endapan
+          </div>
+          <div style="font-size: 10px; color: var(--text-muted); display: flex; gap: 10px;">
+            <span style="color: #fda4af;">&bull; e⁻ mengendapkan kation di Katoda (-)</span>
+          </div>
+        </div>
+
+        <div class="mol-viewport-wrap">
+          <canvas id="molCanvas" width="480" height="115"></canvas>
+          <div class="faraday-rate-card">
+            <div>
+              <span style="color: #94a3b8; display: block; margin-bottom: 2px;">LAJU REDUKSI FARADAY:</span>
+              <span id="val-faraday-rate" style="color: #10f2a7; font-weight: 700; font-size: 11px;">0.658 mg/detik</span>
+            </div>
+            <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+              <span style="color: #94a3b8; display: block; margin-bottom: 2px;">MUATAN LISTRIK (Q = I &bull; t):</span>
+              <span id="val-coulombs-display" style="color: #38bdf8; font-weight: 700;">0.0 C (0.0000 F)</span>
+            </div>
+            <div style="font-size: 8px; color: #64748b;">
+              1 Faraday = 96.500 Coulomb = 1 mol e⁻
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN APPARATUS STUDIO -->
+      <div class="apparatus-studio" id="studio-container">
+
+        <!-- SVG APPARATUS CANVAS -->
+        <svg class="apparatus-svg" viewBox="0 0 700 480" id="apparatus-svg">
+          <defs>
+            <!-- Liquid Gradients -->
+            <linearGradient id="cuSulfateGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="rgba(56, 189, 248, 0.35)"/>
+              <stop offset="100%" stop-color="rgba(2, 132, 199, 0.75)"/>
+            </linearGradient>
+
+            <linearGradient id="clearGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="rgba(241, 245, 249, 0.15)"/>
+              <stop offset="100%" stop-color="rgba(203, 213, 225, 0.3)"/>
+            </linearGradient>
+
+            <linearGradient id="copperMetalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#b45309"/>
+              <stop offset="50%" stop-color="#f97316"/>
+              <stop offset="100%" stop-color="#78350f"/>
+            </linearGradient>
+
+            <linearGradient id="silverMetalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#94a3b8"/>
+              <stop offset="50%" stop-color="#f8fafc"/>
+              <stop offset="100%" stop-color="#64748b"/>
+            </linearGradient>
+
+            <linearGradient id="carbonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#1e293b"/>
+              <stop offset="50%" stop-color="#475569"/>
+              <stop offset="100%" stop-color="#0f172a"/>
+            </linearGradient>
+
+            <!-- Glass Reflection Filter -->
+            <linearGradient id="glassShine" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.3)"/>
+              <stop offset="20%" stop-color="rgba(255,255,255,0.05)"/>
+              <stop offset="80%" stop-color="rgba(255,255,255,0.03)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0.25)"/>
+            </linearGradient>
+          </defs>
+
+          <!-- 1. DC POWER SUPPLY BENCH UNIT TOP-CENTER (x: 230, y: 30) -->
+          <g id="dc-power-supply-unit" transform="translate(230, 25)">
+            <!-- Main Chassis Body -->
+            <rect x="0" y="0" width="240" height="95" rx="8" fill="#0f172a" stroke="#334155" stroke-width="2.5"/>
+            <rect x="6" y="6" width="228" height="83" rx="5" fill="#1e293b"/>
+            <!-- Ventilation Slits -->
+            <line x1="20" y1="16" x2="80" y2="16" stroke="#475569" stroke-width="1.5"/>
+            <line x1="20" y1="20" x2="80" y2="20" stroke="#475569" stroke-width="1.5"/>
+            <!-- Dual Digital LED Displays -->
+            <!-- Voltage Display -->
+            <rect x="18" y="28" width="60" height="26" rx="4" fill="#020907" stroke="#064e3b" stroke-width="1.5"/>
+            <text id="psu-voltage-text" x="48" y="46" fill="#10f2a7" font-size="14" font-family="monospace" font-weight="bold" text-anchor="middle">6.0V</text>
+            <text x="48" y="62" fill="#64748b" font-size="7" font-family="monospace" text-anchor="middle">VOLTAGE</text>
+            <!-- Current Display -->
+            <rect x="88" y="28" width="60" height="26" rx="4" fill="#020907" stroke="#064e3b" stroke-width="1.5"/>
+            <text id="psu-current-text" x="118" y="46" fill="#10f2a7" font-size="14" font-family="monospace" font-weight="bold" text-anchor="middle">2.00A</text>
+            <text x="118" y="62" fill="#64748b" font-size="7" font-family="monospace" text-anchor="middle">CURRENT</text>
+            <!-- Power Switch Button on Supply -->
+            <circle id="psu-led" cx="170" cy="41" r="5" fill="#10b981"/>
+            <rect x="190" y="31" width="32" height="20" rx="3" fill="#334155" stroke="#cbd5e1" stroke-width="1"/>
+            <text x="206" y="45" fill="#fff" font-size="8" font-family="monospace" font-weight="bold" text-anchor="middle">PWR</text>
+            <!-- Terminal Output Binding Posts -->
+            <!-- Negative Terminal (Black) Katoda (-) -->
+            <circle cx="65" cy="78" r="8" fill="#000" stroke="#475569" stroke-width="1.5"/>
+            <circle cx="65" cy="78" r="3" fill="#ef4444"/>
+            <text x="65" y="72" fill="#fda4af" font-size="11" font-weight="bold" text-anchor="middle">-</text>
+            <!-- Positive Terminal (Red) Anoda (+) -->
+            <circle cx="175" cy="78" r="8" fill="#991b1b" stroke="#f87171" stroke-width="1.5"/>
+            <circle cx="175" cy="78" r="3" fill="#fef08a"/>
+            <text x="175" y="72" fill="#fee2e2" font-size="11" font-weight="bold" text-anchor="middle">+</text>
+          </g>
+
+          <!-- 2. APPARATUS FOR MODE 1 & 4: BEAKER ELECTROPLATING (Sendok / Logam) -->
+          <g id="apparatus-plating" transform="translate(200, 160)">
+            <!-- Glass Beaker 250 mL -->
+            <path id="plating-liquid" d="M 22 80 L 278 80 L 278 245 C 278 258, 22 258, 22 245 Z" fill="url(#cuSulfateGrad)"/>
+            <path d="M 18 50 L 18 248 C 18 262, 282 262, 282 248 L 282 50" fill="url(#glassShine)" stroke="rgba(255,255,255,0.7)" stroke-width="2.5"/>
+            <ellipse cx="150" cy="50" rx="132" ry="10" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+
+            <!-- Anode (+): Pure Copper / Silver Bar on Right -->
+            <rect id="plating-anode-bar" x="220" y="20" width="30" height="210" rx="3" fill="url(#copperMetalGrad)" stroke="#78350f" stroke-width="1.5"/>
+            <text id="plating-anode-tag" x="235" y="10" fill="#bae6fd" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">Cu (+)</text>
+
+            <!-- Cathode (-): Metal Spoon on Left (To be plated) -->
+            <g id="plating-cathode-spoon" transform="translate(50, 20)">
+              <!-- Spoon Stem -->
+              <path d="M 25 0 L 25 140 Q 25 155 22 170" fill="none" stroke="#94a3b8" stroke-width="7" stroke-linecap="round"/>
+              <!-- Spoon Bowl Head -->
+              <ellipse cx="20" cy="185" rx="20" ry="32" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+              <!-- Deposited Layer Overlay (Grows with Faraday Mass) -->
+              <ellipse id="spoon-plated-layer" cx="20" cy="185" rx="20" ry="32" fill="#ea580c" opacity="0"/>
+              <text id="plating-cathode-tag" x="25" y="-10" fill="#fda4af" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">Sendok (-)</text>
+            </g>
+
+            <text id="plating-sol-label" x="150" y="278" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">Larutan CuSO₄ (1.0 M)</text>
+          </g>
+
+          <!-- 3. APPARATUS FOR MODE 2: U-TUBE ELECTROLYSIS (KI Solution) -->
+          <g id="apparatus-utube" transform="translate(200, 160)" opacity="0">
+            <!-- Glass U-Tube Body -->
+            <path id="utube-liquid" d="M 50 70 L 50 180 Q 50 240 150 240 Q 250 240 250 180 L 250 70"
+                  fill="none" stroke="url(#clearGrad)" stroke-width="48" stroke-linecap="round"/>
+            <path d="M 50 70 L 50 180 Q 50 240 150 240 Q 250 240 250 180 L 250 70"
+                  fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="52" stroke-linecap="round"/>
+
+            <!-- Left Carbon Electrode (Katoda -) -->
+            <rect x="42" y="20" width="16" height="170" rx="3" fill="url(#carbonGrad)" stroke="#000" stroke-width="1.5"/>
+            <text x="50" y="10" fill="#fda4af" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">C (-)</text>
+
+            <!-- Right Carbon Electrode (Anoda +) -->
+            <rect x="242" y="20" width="16" height="170" rx="3" fill="url(#carbonGrad)" stroke="#000" stroke-width="1.5"/>
+            <text x="250" y="10" fill="#bae6fd" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">C (+)</text>
+
+            <!-- Color Clouds inside U-Tube -->
+            <!-- Left Cathode Cloud (turns Magenta with PP due to OH-) -->
+            <circle id="cloud-cathode-pp" cx="50" cy="160" r="22" fill="#ec4899" opacity="0"/>
+            <!-- Right Anode Cloud (turns Brown I2, or Dark Blue with Starch) -->
+            <circle id="cloud-anode-i2" cx="250" cy="160" r="22" fill="#78350f" opacity="0"/>
+
+            <text x="150" y="278" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">Larutan KI (0.5 M)</text>
+          </g>
+
+          <!-- 4. APPARATUS FOR MODE 3: HOFFMAN WATER SPLITTING VOLTAMETER -->
+          <g id="apparatus-hoffman" transform="translate(200, 150)" opacity="0">
+            <!-- Left Buret Tube (H2 gas, Katoda -) -->
+            <rect x="60" y="20" width="30" height="220" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <rect id="hoffman-h2-gas-column" x="62" y="22" width="26" height="20" fill="rgba(255,255,255,0.2)"/>
+            <text x="75" y="10" fill="#fda4af" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">H₂ (-)</text>
+            <text id="hoffman-h2-vol-text" x="75" y="65" fill="#38bdf8" font-size="9" font-family="monospace" text-anchor="middle">0.0 mL</text>
+
+            <!-- Right Buret Tube (O2 gas, Anoda +) -->
+            <rect x="210" y="20" width="30" height="220" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <rect id="hoffman-o2-gas-column" x="212" y="22" width="26" height="10" fill="rgba(255,255,255,0.2)"/>
+            <text x="225" y="10" fill="#bae6fd" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">O₂ (+)</text>
+            <text id="hoffman-o2-vol-text" x="225" y="65" fill="#38bdf8" font-size="9" font-family="monospace" text-anchor="middle">0.0 mL</text>
+
+            <!-- Connecting Cross Tube & Reservoir -->
+            <rect x="90" y="190" width="120" height="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+            <path d="M 140 190 L 140 70 L 160 70 L 160 190 Z" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+            <text x="150" y="278" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">H₂O + H₂SO₄ (Rasio V H₂ : O₂ = 2 : 1)</text>
+          </g>
+
+          <!-- 5. CIRCUIT WIRES CONNECTING POWER SUPPLY TO ELECTRODES -->
+          <!-- Negative Lead (Black Wire: PSU Terminal x: 295, y: 103 -> Cathode x: 125, y: 180) -->
+          <path id="wire-negative" d="M 295 103 L 295 140 Q 295 160 250 160 L 130 160 L 130 180" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>
+          <path id="wire-negative-core" d="M 295 103 L 295 140 Q 295 160 250 160 L 130 160 L 130 180" fill="none" stroke="#ef4444" stroke-width="1" stroke-linecap="round"/>
+
+          <!-- Positive Lead (Red Wire: PSU Terminal x: 405, y: 103 -> Anode x: 435, y: 180) -->
+          <path id="wire-positive" d="M 405 103 L 405 140 Q 405 160 420 160 L 435 160 L 435 180" fill="none" stroke="#dc2626" stroke-width="3.5" stroke-linecap="round"/>
+
+          <!-- Bubbles & Floating Particles Layer -->
+          <g id="gas-bubbles-layer"></g>
+          <!-- Moving Electrons Layer -->
+          <g id="circuit-electrons-layer"></g>
+        </svg>
+
+        <!-- Surface Benchtop Base -->
+        <div class="benchtop-surface"></div>
+
+        <!-- Floating Tactile Control Bar -->
+        <div class="bench-control-bar">
+          <button class="btn-act btn-power-on" id="btn-toggle-power" title="Nyalakan / Matikan Arus Listrik DC">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span id="btn-power-text">Arus Listrik: AKTIF (ON)</span>
+          </button>
+
+          <button class="btn-act" id="btn-tare-scale" title="Nolkan Neraca Digital (Tare)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M2 12h20"/>
+            </svg>
+            Tare Timbangan
+          </button>
+
+          <div class="control-divider"></div>
+
+          <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; color: #94a3b8;">
+            <span>TIMER:</span>
+            <span id="timer-display" style="color: #38bdf8; font-weight: 700;">00:00 s</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: DIGITAL BALANCE, FARADAY CALCULATOR & DATA LOG -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 14 14"/>
+          </svg>
+          Sensor Massa &amp; Neraca Faraday
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- Digital Analytical Balance Display -->
+        <div class="lcd-meter-box">
+          <div class="lcd-top-bar">
+            <span id="lcd-main-sensor-title">NERACA ANALITIK (MASSA KATODA)</span>
+            <span class="lcd-status-badge active-power" id="badge-process-status">ELEKTROLISIS</span>
+          </div>
+          <div class="lcd-digits-large" id="lcd-main-val">+ 0.0000 g</div>
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748b; font-family: var(--font-mono);">
+            <span>Presisi: ± 0.0001 g</span>
+            <span id="lcd-sub-reading" style="color: #38bdf8;">Volume Gas: 0.0 mL</span>
+          </div>
+        </div>
+
+        <!-- Faraday Law Quantitative Calculator Card -->
+        <div class="faraday-calc-card">
+          <div class="calc-row">
+            <span style="color: #94a3b8;">Kuat Arus (I):</span>
+            <span class="val" id="calc-val-i">2.00 A</span>
+          </div>
+          <div class="calc-row">
+            <span style="color: #94a3b8;">Waktu Elektrolisis (t):</span>
+            <span class="val" id="calc-val-t">0.0 s</span>
+          </div>
+          <div class="calc-row">
+            <span style="color: #94a3b8;">Massa Ekivalen (e = Ar/n):</span>
+            <span class="val" id="calc-val-e">31.75 (Cu)</span>
+          </div>
+          <div class="calc-row" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+            <span style="color: #94a3b8;">Muatan Listrik (Q = I &bull; t):</span>
+            <span class="val" id="calc-val-q">0.0 Coulomb</span>
+          </div>
+          <div class="calc-row">
+            <span style="color: #94a3b8;">Jumlah Faraday (F = Q/96500):</span>
+            <span class="val" id="calc-val-f" style="color: #38bdf8;">0.00000 F</span>
+          </div>
+          <div class="calc-row" style="border-top: 1px solid rgba(14, 165, 233, 0.3); padding-top: 4px;">
+            <span style="color: #bae6fd; font-weight: 700;">Massa Teoretis Faraday (w):</span>
+            <span class="val" id="calc-val-w" style="color: #10f2a7; font-size: 13px;">0.0000 g</span>
+          </div>
+        </div>
+
+        <!-- Live Mass Growth vs Time Chart Box -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <span class="chart-title" id="chart-panel-title">Kurva Massa Endapan vs Waktu</span>
+            <button id="btn-save-chart" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 10px;" title="Unduh Gambar PNG">
+              Unduh PNG
+            </button>
+          </div>
+          <canvas id="growthChart" width="340" height="155"></canvas>
+          <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; font-family: var(--font-mono); padding: 0 4px;">
+            <span>t = 0 s</span>
+            <span id="chart-max-t-label">t = 60 s</span>
+          </div>
+        </div>
+
+        <!-- Data Table Log -->
+        <div class="log-box">
+          <div style="padding: 6px 10px; background: #0f1624; border-bottom: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Riwayat Hukum Faraday</span>
+            <button id="btn-clear-log" style="background: none; border: none; color: #ef4444; font-size: 10px; cursor: pointer;">Hapus</button>
+          </div>
+          <div class="log-table-wrap">
+            <table class="data-table" id="table-log">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Sistem</th>
+                  <th>I (A)</th>
+                  <th>t (s)</th>
+                  <th>Faraday (F)</th>
+                  <th>Massa / Vol</th>
+                </tr>
+              </thead>
+              <tbody id="table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- MODAL PANDUAN PRAKTIKUM -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal-card">
+      <h3>⚡ Panduan Praktikum Virtual Sel Elektrolisis &amp; Hukum Faraday</h3>
+      <p>Praktikum ini menyajikan simulasi laboratorium elektrolisis kuantitatif dan aplikasi penyepuhan logam:</p>
+      <ul>
+        <li><b>Prinsip Sel Elektrolisis:</b> Menggunakan arus listrik searah (DC) untuk menggerakkan reaksi redoks yang tidak spontan ($E^\circ < 0$). Elektron dipompa dari anoda (kutub positif catu daya) menuju katoda (kutub negatif catu daya).</li>
+        <li><b>Reaksi di Katoda (Kutub Negatif -):</b> Tempat terjadinya reduksi kation logam atau air.
+          Contoh: $\text{Cu}^{2+} + 2e^- \rightarrow \text{Cu}(s)$ (pada penyepuhan tembaga) atau $2\text{H}_2\text{O} + 2e^- \rightarrow \text{H}_2(g) + 2\text{OH}^-$ (pada larutan garam alkali).
+        </li>
+        <li><b>Reaksi di Anoda (Kutub Positif +):</b> Tempat terjadinya oksidasi anion atau elektroda aktif.
+          Jika elektroda aktif (misal pelat Cu): $\text{Cu}(s) \rightarrow \text{Cu}^{2+} + 2e^-$ (anoda larut).
+        </li>
+        <li><b>Hukum Faraday I:</b> Massa zat yang diendapkan pada elektroda berbanding lurus dengan muatan listrik ($Q = I \times t$) yang dialirkan:
+          $$m = \frac{e \times I \times t}{96.500} = \frac{Ar \times I \times t}{n \times 96.500}$$
+        </li>
+        <li><b>Hukum Faraday II:</b> Jika arus listrik yang sama dialirkan ke beberapa sel elektrolisis berbeda, massa zat yang dihasilkan berbanding lurus dengan massa ekivalen ($e = Ar / n$) masing-masing zat.</li>
+        <li><b>Uji Kimia KI:</b> Di katoda dihasilkan ion $\text{OH}^-$ yang membuat indikator PP berwarna merah muda (basa). Di anoda dihasilkan iodin ($\text{I}_2$) yang berwarna cokelat dan berubah biru tua dengan amilum.</li>
+      </ul>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-act btn-primary" id="btn-close-modal" style="padding: 8px 20px;">Tutup &amp; Mulai Praktikum</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST -->
+  <div class="toast" id="toastBox">Notifikasi</div>
+
+  <!-- JAVASCRIPT: ENGINE & SOUND SYNTHESIS -->
+  <script>
+    'use strict';
+
+    /* =========================================================================
+     * 1. NATIVE WEB AUDIO API SYNTHESIZER
+     * ========================================================================= */
+    class ElectrolysisAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.effervescenceNode = null;
+        this.effervescenceGain = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playHeavySwitch() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+
+      startBubbling(intensity) {
+        if (this.muted || this.effervescenceNode) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const bufferSize = this.ctx.sampleRate * 2;
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        let b0 = 0, b1 = 0, b2 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99 * b0 + white * 0.05;
+          b1 = 0.95 * b1 + white * 0.1;
+          b2 = 0.85 * b2 + white * 0.25;
+          output[i] = (b0 + b1 + b2) * 0.2;
+        }
+
+        const whiteNoise = this.ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1600, this.ctx.currentTime);
+        filter.Q.setValueAtTime(2.2, this.ctx.currentTime);
+
+        this.effervescenceGain = this.ctx.createGain();
+        const vol = Math.min(0.12, intensity * 0.04);
+        this.effervescenceGain.gain.setValueAtTime(vol, this.ctx.currentTime);
+
+        whiteNoise.connect(filter);
+        filter.connect(this.effervescenceGain);
+        this.effervescenceGain.connect(this.ctx.destination);
+
+        whiteNoise.start();
+        this.effervescenceNode = whiteNoise;
+      }
+
+      updateBubblingRate(intensity) {
+        if (!this.effervescenceGain || !this.ctx) return;
+        const vol = Math.min(0.12, intensity * 0.04);
+        this.effervescenceGain.gain.setValueAtTime(vol, this.ctx.currentTime);
+      }
+
+      stopBubbling() {
+        if (this.effervescenceNode) {
+          try {
+            this.effervescenceNode.stop();
+            this.effervescenceNode.disconnect();
+          } catch(e) {}
+          this.effervescenceNode = null;
+          this.effervescenceGain = null;
+        }
+      }
+
+      playChime() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const freqs = [523.25, 659.25, 783.99]; // C5, E5, G5
+        const now = this.ctx.currentTime;
+
+        freqs.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const startTime = now + idx * 0.06;
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.08, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.3);
+        });
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        if (this.muted) this.stopBubbling();
+        return !this.muted;
+      }
+    }
+
+    const sound = new ElectrolysisAudioEngine();
+
+    /* =========================================================================
+     * 2. ELECTROLYSIS SYSTEMS DATA & CONSTANTS
+     * ========================================================================= */
+    const ELECTROLYSIS_SYSTEMS = {
+      electroplating_cu: {
+        id: 'electroplating_cu',
+        name: 'Sistem 1: Penyepuhan Tembaga (Cu)',
+        ar: 63.5,
+        n: 2,
+        e: 31.75, // 63.5 / 2
+        cathodeEq: 'Cu²⁺(aq) + 2e⁻ &rarr; Cu(s)',
+        anodeEq: 'Cu(s) &rarr; Cu²⁺(aq) + 2e⁻',
+        desc: 'Massa sendok bertambah seiring lapisan tembaga oranye mengendap.',
+        isGasMain: false
+      },
+      electrolysis_ki: {
+        id: 'electrolysis_ki',
+        name: 'Sistem 2: Larutan KI (Tabung U)',
+        ar: 1.008, // H2 gas
+        n: 2,
+        e: 1.008,
+        cathodeEq: '2H₂O(l) + 2e⁻ &rarr; H₂(g) + 2OH⁻(aq)',
+        anodeEq: '2I⁻(aq) &rarr; I₂(aq) + 2e⁻',
+        desc: 'Terbentuk gas H₂ & basa OH⁻ di katoda, serta iodin cokelat di anoda.',
+        isGasMain: true
+      },
+      water_splitting: {
+        id: 'water_splitting',
+        name: 'Sistem 3: Elektrolisis Air (Hoffman)',
+        ar: 1.008,
+        n: 2,
+        e: 1.008,
+        cathodeEq: '4H⁺(aq) + 4e⁻ &rarr; 2H₂(g)',
+        anodeEq: '2H₂O(l) &rarr; O₂(g) + 4H⁺(aq) + 4e⁻',
+        desc: 'Pembuktian rasio volume gas hidrogen dan oksigen 2 : 1.',
+        isGasMain: true
+      },
+      silver_plating: {
+        id: 'silver_plating',
+        name: 'Sistem 4: Penyepuhan Perak (Ag)',
+        ar: 107.87,
+        n: 1,
+        e: 107.87, // 107.87 / 1
+        cathodeEq: 'Ag⁺(aq) + e⁻ &rarr; Ag(s)',
+        anodeEq: 'Ag(s) &rarr; Ag⁺(aq) + e⁻',
+        desc: 'Massa perak mengendap pada katoda dengan transfer 1 elektron (n=1).',
+        isGasMain: false
+      }
+    };
+
+    /* Simulation Runtime State */
+    const state = {
+      systemKey: 'electroplating_cu',
+      currentAmps: 2.00,
+      voltageVolts: 6.0,
+      isPowerOn: true,
+      elapsedSeconds: 0,
+      tareOffsetMass: 0,
+
+      // Live Faraday Metrics
+      coulombsQ: 0,
+      faradaysF: 0,
+      massGrams: 0,
+      gasVolumeMl: 0,
+
+      // Indicator toggles (for KI)
+      ppAdded: false,
+      starchAdded: false,
+
+      // Particle pools
+      bubbles: [],
+      circuitElectrons: [],
+
+      // Time series
+      chartPoints: [], // { t, val }
+      tableLog: []
+    };
+
+    /* =========================================================================
+     * 3. SUB-MICROSCOPIC ATOMIC TRANSFER SIMULATOR (2D Particles)
+     * ========================================================================= */
+    class SubmicroscopicElectrolysisSimulator {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.ions = [];
+        this.init();
+      }
+
+      init() {
+        this.ions = [];
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        for (let i = 0; i < 22; i++) {
+          this.ions.push({
+            x: 40 + Math.random() * (w - 80),
+            y: 20 + Math.random() * (h - 40),
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: (Math.random() - 0.5) * 1.5,
+            isCation: (i % 2 === 0)
+          });
+        }
+      }
+
+      update() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const drift = state.isPowerOn ? (state.currentAmps * 0.3) : 0;
+
+        for (let i = 0; i < this.ions.length; i++) {
+          const p = this.ions[i];
+          // Cations drift toward Cathode (Left), Anions drift toward Anode (Right)
+          if (p.isCation) {
+            p.x += (p.vx - drift);
+            if (p.x < 35) {
+              p.x = w * 0.6 + Math.random() * 80;
+            }
+          } else {
+            p.x += (p.vx + drift);
+            if (p.x > w - 35) {
+              p.x = w * 0.3 + Math.random() * 80;
+            }
+          }
+          p.y += p.vy;
+
+          if (p.y < 12 || p.y > h - 12) p.vy *= -1;
+        }
+      }
+
+      draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        // Draw Cathode Electrode Plate on Left
+        this.ctx.fillStyle = 'rgba(244, 63, 94, 0.3)';
+        this.ctx.fillRect(0, 0, 30, h);
+        this.ctx.fillStyle = '#f43f5e';
+        this.ctx.font = '9px monospace';
+        this.ctx.fillText('KATODA (-)', 2, 14);
+
+        // Draw Anode Electrode Plate on Right
+        this.ctx.fillStyle = 'rgba(14, 165, 233, 0.3)';
+        this.ctx.fillRect(w - 30, 0, 30, h);
+        this.ctx.fillStyle = '#38bdf8';
+        this.ctx.fillText('ANODA (+)', w - 66, 14);
+
+        // Draw Ions
+        for (let i = 0; i < this.ions.length; i++) {
+          const p = this.ions[i];
+          this.ctx.beginPath();
+          this.ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+
+          if (p.isCation) {
+            this.ctx.fillStyle = '#fda4af';
+            this.ctx.shadowColor = 'rgba(244, 63, 94, 0.6)';
+          } else {
+            this.ctx.fillStyle = '#bae6fd';
+            this.ctx.shadowColor = 'rgba(56, 189, 248, 0.6)';
+          }
+          this.ctx.shadowBlur = 6;
+          this.ctx.fill();
+          this.ctx.shadowBlur = 0;
+        }
+      }
+    }
+
+    /* =========================================================================
+     * 4. LIVE FARADAY MASS GROWTH CHART CANVAS
+     * ========================================================================= */
+    class FaradayGrowthChartRenderer {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+      }
+
+      render() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const padL = 36;
+        const padR = 14;
+        const padT = 16;
+        const padB = 24;
+
+        this.ctx.clearRect(0, 0, w, h);
+
+        // Grid lines
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        this.ctx.lineWidth = 1;
+
+        const maxVal = (state.systemKey === 'water_splitting' || state.systemKey === 'electrolysis_ki') ? 25.0 : 0.500;
+        const unit = (state.systemKey === 'water_splitting' || state.systemKey === 'electrolysis_ki') ? 'mL' : 'g';
+
+        for (let i = 0; i <= 4; i++) {
+          const y = padT + (i / 4) * (h - padT - padB);
+          this.ctx.beginPath();
+          this.ctx.moveTo(padL, y);
+          this.ctx.lineTo(w - padR, y);
+          this.ctx.stroke();
+
+          this.ctx.fillStyle = '#64748b';
+          this.ctx.font = '8px monospace';
+          this.ctx.textAlign = 'right';
+          const val = (maxVal - i * (maxVal / 4)).toFixed(maxVal < 1 ? 3 : 1);
+          this.ctx.fillText(`${val}${unit}`, padL - 4, y + 3);
+        }
+
+        if (state.chartPoints.length < 2) return;
+
+        const maxPoints = 80;
+        const startIdx = Math.max(0, state.chartPoints.length - maxPoints);
+        const visible = state.chartPoints.slice(startIdx);
+
+        // Growth Curve
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = '#10f2a7';
+        this.ctx.lineWidth = 2.5;
+
+        visible.forEach((pt, idx) => {
+          const x = padL + (idx / (maxPoints - 1)) * (w - padL - padR);
+          const y = (h - padB) - (Math.min(maxVal, pt.val) / maxVal) * (h - padT - padB);
+          if (idx === 0) this.ctx.moveTo(x, y);
+          else this.ctx.lineTo(x, y);
+        });
+        this.ctx.stroke();
+
+        // Tip glow dot
+        const lastPt = visible[visible.length - 1];
+        const lastX = padL + (w - padL - padR);
+        const lastY = (h - padB) - (Math.min(maxVal, lastPt.val) / maxVal) * (h - padT - padB);
+
+        this.ctx.beginPath();
+        this.ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#10f2a7';
+        this.ctx.shadowColor = '#10f2a7';
+        this.ctx.shadowBlur = 8;
+        this.ctx.fill();
+        this.ctx.shadowBlur = 0;
+      }
+    }
+
+    /* =========================================================================
+     * 5. APPARATUS CONTROLLER & EXPERIMENT ENGINE
+     * ========================================================================= */
+    let molSim = null;
+    let chartRenderer = null;
+    let animFrameId = null;
+    let lastTimestamp = 0;
+
+    const el = {
+      eqSysTitle: document.getElementById('eq-sys-title'),
+      eqValAr: document.getElementById('eq-val-ar'),
+      eqCathodeText: document.getElementById('eq-cathode-text'),
+      eqAnodeText: document.getElementById('eq-anode-text'),
+      eqDescText: document.getElementById('eq-desc-text'),
+
+      sliderCurrent: document.getElementById('slider-current'),
+      valCurrentDisplay: document.getElementById('val-current-display'),
+      sliderVoltage: document.getElementById('slider-voltage'),
+      valVoltageDisplay: document.getElementById('val-voltage-display'),
+      powerIndicatorBadge: document.getElementById('power-indicator-badge'),
+
+      cardChemicalTests: document.getElementById('card-chemical-tests'),
+      btnAddPp: document.getElementById('btn-add-pp'),
+      btnAddStarch: document.getElementById('btn-add-starch'),
+
+      psuVoltageText: document.getElementById('psu-voltage-text'),
+      psuCurrentText: document.getElementById('psu-current-text'),
+      psuLed: document.getElementById('psu-led'),
+
+      apparatusPlating: document.getElementById('apparatus-plating'),
+      platingLiquid: document.getElementById('plating-liquid'),
+      platingAnodeBar: document.getElementById('plating-anode-bar'),
+      platingAnodeTag: document.getElementById('plating-anode-tag'),
+      platingCathodeSpoon: document.getElementById('plating-cathode-spoon'),
+      spoonPlatedLayer: document.getElementById('spoon-plated-layer'),
+      platingCathodeTag: document.getElementById('plating-cathode-tag'),
+      platingSolLabel: document.getElementById('plating-sol-label'),
+
+      apparatusUtube: document.getElementById('apparatus-utube'),
+      cloudCathodePp: document.getElementById('cloud-cathode-pp'),
+      cloudAnodeI2: document.getElementById('cloud-anode-i2'),
+
+      apparatusHoffman: document.getElementById('apparatus-hoffman'),
+      hoffmanH2GasCol: document.getElementById('hoffman-h2-gas-column'),
+      hoffmanH2VolText: document.getElementById('hoffman-h2-vol-text'),
+      hoffmanO2GasCol: document.getElementById('hoffman-o2-gas-column'),
+      hoffmanO2VolText: document.getElementById('hoffman-o2-vol-text'),
+
+      btnTogglePower: document.getElementById('btn-toggle-power'),
+      btnPowerText: document.getElementById('btn-power-text'),
+      btnTareScale: document.getElementById('btn-tare-scale'),
+      timerDisplay: document.getElementById('timer-display'),
+
+      lcdMainSensorTitle: document.getElementById('lcd-main-sensor-title'),
+      badgeProcessStatus: document.getElementById('badge-process-status'),
+      lcdMainVal: document.getElementById('lcd-main-val'),
+      lcdSubReading: document.getElementById('lcd-sub-reading'),
+
+      calcValI: document.getElementById('calc-val-i'),
+      calcValT: document.getElementById('calc-val-t'),
+      calcValE: document.getElementById('calc-val-e'),
+      calcValQ: document.getElementById('calc-val-q'),
+      calcValF: document.getElementById('calc-val-f'),
+      calcValW: document.getElementById('calc-val-w'),
+
+      valFaradayRate: document.getElementById('val-faraday-rate'),
+      valCoulombsDisplay: document.getElementById('val-coulombs-display'),
+      chartPanelTitle: document.getElementById('chart-panel-title'),
+
+      gasBubblesLayer: document.getElementById('gas-bubbles-layer'),
+      circuitElectronsLayer: document.getElementById('circuit-electrons-layer'),
+
+      tableBody: document.getElementById('table-body'),
+      btnClearLog: document.getElementById('btn-clear-log'),
+      btnExportCsv: document.getElementById('btn-export-csv'),
+      btnSaveChart: document.getElementById('btn-save-chart'),
+      btnSoundToggle: document.getElementById('btn-sound-toggle'),
+      soundText: document.getElementById('sound-text'),
+      btnGuideModal: document.getElementById('btn-guide-modal'),
+      guideModal: document.getElementById('guideModal'),
+      btnCloseModal: document.getElementById('btn-close-modal'),
+      btnResetAll: document.getElementById('btn-reset-all'),
+      toastBox: document.getElementById('toastBox')
+    };
+
+    function showToast(msg) {
+      el.toastBox.textContent = msg;
+      el.toastBox.classList.add('show');
+      setTimeout(() => el.toastBox.classList.remove('show'), 3200);
+    }
+
+    // Initialize bubble pool
+    for (let i = 0; i < 28; i++) {
+      state.bubbles.push({
+        x: Math.random() * 40,
+        y: 220 + Math.random() * 20,
+        r: 1.5 + Math.random() * 2.5,
+        speed: 1.2 + Math.random() * 2.0,
+        isLeft: (i % 2 === 0)
+      });
+    }
+
+    // Initialize flowing electrons
+    for (let i = 0; i < 14; i++) {
+      state.circuitElectrons.push({ t: i / 14.0 });
+    }
+
+    /* Faraday Law Calculation Engine */
+    function updateFaradayCalculations(dt) {
+      if (state.isPowerOn) {
+        state.elapsedSeconds += dt;
+        state.coulombsQ = state.currentAmps * state.elapsedSeconds;
+        state.faradaysF = state.coulombsQ / 96500.0;
+
+        const sys = ELECTROLYSIS_SYSTEMS[state.systemKey];
+        // Faraday Mass: m = (e * I * t) / 96500
+        state.massGrams = (sys.e * state.currentAmps * state.elapsedSeconds) / 96500.0;
+
+        // Gas volume at STP: 1 mol gas = 22.4 L = 22400 mL
+        // H2 (n=2): mol H2 = F / 2 -> V_H2 = (F / 2) * 22400 mL
+        state.gasVolumeMl = (state.faradaysF / 2.0) * 22400.0;
+      }
+
+      // Display Time Formatter
+      const mins = Math.floor(state.elapsedSeconds / 60);
+      const secs = Math.floor(state.elapsedSeconds % 60);
+      el.timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')} s`;
+
+      // Update Calculator Card
+      el.calcValI.textContent = `${state.currentAmps.toFixed(2)} A`;
+      el.calcValT.textContent = `${state.elapsedSeconds.toFixed(1)} s`;
+      el.calcValQ.textContent = `${state.coulombsQ.toFixed(1)} Coulomb`;
+      el.calcValF.textContent = `${state.faradaysF.toFixed(5)} F`;
+      el.calcValW.textContent = `${state.massGrams.toFixed(4)} g`;
+
+      el.valCoulombsDisplay.textContent = `${state.coulombsQ.toFixed(1)} C (${state.faradaysF.toFixed(4)} F)`;
+
+      // Rate mg/sec
+      const sys = ELECTROLYSIS_SYSTEMS[state.systemKey];
+      const rateMgSec = ((sys.e * state.currentAmps * 1000.0) / 96500.0).toFixed(3);
+      el.valFaradayRate.textContent = `${rateMgSec} mg/detik`;
+
+      // Digital Balance Display
+      const netMass = Math.max(0, state.massGrams - state.tareOffsetMass);
+      if (sys.isGasMain) {
+        el.lcdMainSensorTitle.textContent = 'VOLUME GAS TERKUMPUL (KATODA)';
+        el.lcdMainVal.textContent = `${state.gasVolumeMl.toFixed(2)} mL`;
+        el.lcdSubReading.textContent = `Massa H₂: ${(netMass * 1000).toFixed(1)} mg`;
+      } else {
+        el.lcdMainSensorTitle.textContent = 'NERACA ANALITIK (PERTAMBAHAN MASSA)';
+        el.lcdMainVal.textContent = `+ ${netMass.toFixed(4)} g`;
+        el.lcdSubReading.textContent = `Gas Sampingan: 0.0 mL`;
+      }
+
+      // Visual updates per system
+      if (state.systemKey === 'electroplating_cu') {
+        // Growth of copper coating opacity (0 to 1)
+        const plateOpacity = Math.min(1.0, state.massGrams / 0.12);
+        el.spoonPlatedLayer.setAttribute('opacity', plateOpacity.toFixed(2));
+      } else if (state.systemKey === 'silver_plating') {
+        const plateOpacity = Math.min(1.0, state.massGrams / 0.15);
+        el.spoonPlatedLayer.setAttribute('opacity', plateOpacity.toFixed(2));
+        el.spoonPlatedLayer.setAttribute('fill', '#f8fafc');
+      } else if (state.systemKey === 'electrolysis_ki') {
+        // Formation of I2 (brown cloud) at anode
+        const i2Opacity = Math.min(0.9, state.faradaysF * 450);
+        if (state.starchAdded) {
+          el.cloudAnodeI2.setAttribute('fill', '#1e1b4b'); // Deep Dark Blue with starch
+        } else {
+          el.cloudAnodeI2.setAttribute('fill', '#78350f'); // Brown I2
+        }
+        el.cloudAnodeI2.setAttribute('opacity', i2Opacity.toFixed(2));
+
+        if (state.ppAdded) {
+          const ppOpacity = Math.min(0.9, state.faradaysF * 450);
+          el.cloudCathodePp.setAttribute('opacity', ppOpacity.toFixed(2));
+        }
+      } else if (state.systemKey === 'water_splitting') {
+        // Hoffman column displacement
+        const h2Height = Math.min(180, (state.gasVolumeMl / 25.0) * 180);
+        const o2Height = h2Height * 0.5; // Exactly 2:1 ratio
+
+        el.hoffmanH2GasCol.setAttribute('height', h2Height.toFixed(1));
+        el.hoffmanO2GasCol.setAttribute('height', o2Height.toFixed(1));
+        el.hoffmanH2VolText.textContent = `${state.gasVolumeMl.toFixed(1)} mL`;
+        el.hoffmanO2VolText.textContent = `${(state.gasVolumeMl * 0.5).toFixed(1)} mL`;
+      }
+    }
+
+    function updateSystemUI() {
+      const sys = ELECTROLYSIS_SYSTEMS[state.systemKey];
+      el.eqSysTitle.textContent = sys.name;
+      el.eqValAr.textContent = `Ar = ${sys.ar}, n = ${sys.n}, e = ${sys.e}`;
+      el.eqCathodeText.innerHTML = `Katoda (-): ${sys.cathodeEq}`;
+      el.eqAnodeText.innerHTML = `Anoda (+): ${sys.anodeEq}`;
+      el.eqDescText.textContent = sys.desc;
+      el.calcValE.textContent = `${sys.e} (${sys.id.includes('cu') ? 'Cu' : (sys.id.includes('ag') ? 'Ag' : 'H₂')})`;
+
+      // Toggle Apparatus Containers
+      el.apparatusPlating.setAttribute('opacity', (state.systemKey === 'electroplating_cu' || state.systemKey === 'silver_plating') ? '1' : '0');
+      el.apparatusUtube.setAttribute('opacity', (state.systemKey === 'electrolysis_ki') ? '1' : '0');
+      el.apparatusHoffman.setAttribute('opacity', (state.systemKey === 'water_splitting') ? '1' : '0');
+
+      el.cardChemicalTests.style.display = (state.systemKey === 'electrolysis_ki') ? 'block' : 'none';
+
+      if (state.systemKey === 'silver_plating') {
+        el.platingAnodeBar.setAttribute('fill', 'url(#silverMetalGrad)');
+        el.platingAnodeTag.textContent = 'Ag (+)';
+        el.platingLiquid.setAttribute('fill', 'url(#clearGrad)');
+        el.platingSolLabel.textContent = 'Larutan AgNO₃ (0.5 M)';
+        el.spoonPlatedLayer.setAttribute('fill', '#f8fafc');
+        el.chartPanelTitle.textContent = 'Kurva Massa Endapan Perak (g) vs Waktu';
+      } else if (state.systemKey === 'electroplating_cu') {
+        el.platingAnodeBar.setAttribute('fill', 'url(#copperMetalGrad)');
+        el.platingAnodeTag.textContent = 'Cu (+)';
+        el.platingLiquid.setAttribute('fill', 'url(#cuSulfateGrad)');
+        el.platingSolLabel.textContent = 'Larutan CuSO₄ (1.0 M)';
+        el.spoonPlatedLayer.setAttribute('fill', '#ea580c');
+        el.chartPanelTitle.textContent = 'Kurva Massa Endapan Tembaga (g) vs Waktu';
+      } else {
+        el.chartPanelTitle.textContent = 'Kurva Volume Gas (mL) vs Waktu';
+      }
+
+      resetRunState();
+      if (molSim) molSim.init();
+    }
+
+    function resetRunState() {
+      state.elapsedSeconds = 0;
+      state.coulombsQ = 0;
+      state.faradaysF = 0;
+      state.massGrams = 0;
+      state.gasVolumeMl = 0;
+      state.tareOffsetMass = 0;
+      state.ppAdded = false;
+      state.starchAdded = false;
+
+      el.spoonPlatedLayer.setAttribute('opacity', '0');
+      el.cloudCathodePp.setAttribute('opacity', '0');
+      el.cloudAnodeI2.setAttribute('opacity', '0');
+
+      state.chartPoints = [];
+      updateFaradayCalculations(0);
+      if (chartRenderer) chartRenderer.render();
+    }
+
+    function logElectrolysisRun() {
+      const runNum = state.tableLog.length + 1;
+      const sys = ELECTROLYSIS_SYSTEMS[state.systemKey];
+      const timeStr = `${state.elapsedSeconds.toFixed(1)} s`;
+      const fStr = state.faradaysF.toFixed(4);
+      let yieldStr = '';
+
+      if (sys.isGasMain) {
+        yieldStr = `${state.gasVolumeMl.toFixed(1)} mL`;
+      } else {
+        yieldStr = `${state.massGrams.toFixed(4)} g`;
+      }
+
+      const entry = {
+        num: runNum,
+        sys: sys.name.split(':')[0],
+        i: `${state.currentAmps.toFixed(2)} A`,
+        t: timeStr,
+        f: `${fStr} F`,
+        yield: yieldStr
+      };
+
+      state.tableLog.push(entry);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:700; color:#38bdf8;">#${entry.num}</td>
+        <td>${entry.sys}</td>
+        <td>${entry.i}</td>
+        <td>${entry.t}</td>
+        <td style="color:#bae6fd;">${entry.f}</td>
+        <td style="font-weight:700; color:#10f2a7;">${entry.yield}</td>
+      `;
+      el.tableBody.prepend(tr);
+    }
+
+    /* Simulation Loop (60 FPS) */
+    function simulationLoop(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const dt = Math.min(0.08, (timestamp - lastTimestamp) / 1000.0);
+      lastTimestamp = timestamp;
+
+      // 1. Calculate Faraday Growth
+      updateFaradayCalculations(dt);
+
+      // 2. Animate Bubbles inside reaction vessel
+      let bubbleHtml = '';
+      if (state.isPowerOn) {
+        sound.updateBubblingRate(state.currentAmps);
+        state.bubbles.forEach(b => {
+          b.y -= b.speed * (state.currentAmps * 0.6);
+          if (b.y < 120) {
+            b.y = 240 + Math.random() * 20;
+            b.x = b.isLeft ? (150 + Math.random() * 40) : (350 + Math.random() * 40);
+          }
+          bubbleHtml += `<circle cx="${b.x.toFixed(1)}" cy="${b.y.toFixed(1)}" r="${b.r.toFixed(1)}" fill="rgba(255,255,255,0.7)"/>`;
+        });
+      }
+      el.gasBubblesLayer.innerHTML = bubbleHtml;
+
+      // 3. Animate Circuit Electrons
+      let eHtml = '';
+      if (state.isPowerOn) {
+        state.circuitElectrons.forEach(e => {
+          e.t = (e.t + dt * state.currentAmps * 0.25) % 1.0;
+          // Wire route: (435, 180) -> (405, 103) -> (295, 103) -> (130, 180)
+          let ex = 0, ey = 0;
+          if (e.t < 0.4) {
+            ex = 435 - (e.t / 0.4) * 30; ey = 180 - (e.t / 0.4) * 77;
+          } else if (e.t < 0.7) {
+            ex = 405 - ((e.t - 0.4) / 0.3) * 110; ey = 103;
+          } else {
+            ex = 295 - ((e.t - 0.7) / 0.3) * 165; ey = 103 + ((e.t - 0.7) / 0.3) * 77;
+          }
+          eHtml += `<circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="2.8" fill="#facc15" filter="drop-shadow(0 0 4px #eab308)"/>`;
+        });
+      }
+      el.circuitElectronsLayer.innerHTML = eHtml;
+
+      // 4. Update Sub-microscopic Canvas
+      if (molSim) {
+        molSim.update();
+        molSim.draw();
+      }
+
+      // 5. Update Growth Chart
+      const chartVal = (state.systemKey === 'water_splitting' || state.systemKey === 'electrolysis_ki') ? state.gasVolumeMl : state.massGrams;
+      if (state.isPowerOn && (state.chartPoints.length === 0 || state.elapsedSeconds - state.chartPoints[state.chartPoints.length - 1].t > 0.3)) {
+        state.chartPoints.push({
+          t: state.elapsedSeconds,
+          val: chartVal
+        });
+        if (chartRenderer) chartRenderer.render();
+      }
+
+      animFrameId = requestAnimationFrame(simulationLoop);
+    }
+
+    /* =========================================================================
+     * 6. EVENT LISTENERS
+     * ========================================================================= */
+    function setupEventListeners() {
+      // System Selection Buttons
+      document.querySelectorAll('.btn-mode').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.systemKey = btn.getAttribute('data-sys');
+          sound.playChime();
+          updateSystemUI();
+          showToast(`Sistem dialihkan: ${ELECTROLYSIS_SYSTEMS[state.systemKey].name}`);
+        });
+      });
+
+      // Current Slider (I)
+      el.sliderCurrent.addEventListener('input', (e) => {
+        state.currentAmps = parseFloat(e.target.value);
+        el.valCurrentDisplay.textContent = `${state.currentAmps.toFixed(2)} A`;
+        el.psuCurrentText.textContent = `${state.currentAmps.toFixed(2)}A`;
+      });
+
+      // Voltage Slider (V)
+      el.sliderVoltage.addEventListener('input', (e) => {
+        state.voltageVolts = parseFloat(e.target.value);
+        el.valVoltageDisplay.textContent = `${state.voltageVolts.toFixed(1)} V`;
+        el.psuVoltageText.textContent = `${state.voltageVolts.toFixed(1)}V`;
+      });
+
+      // Power Supply Toggle Button
+      el.btnTogglePower.addEventListener('click', () => {
+        sound.playHeavySwitch();
+        state.isPowerOn = !state.isPowerOn;
+
+        if (state.isPowerOn) {
+          el.btnTogglePower.className = 'btn-act btn-power-on';
+          el.btnPowerText.textContent = 'Arus Listrik: AKTIF (ON)';
+          el.psuLed.setAttribute('fill', '#10b981');
+          el.badgeProcessStatus.textContent = 'ELEKTROLISIS';
+          el.badgeProcessStatus.className = 'lcd-status-badge active-power';
+          el.powerIndicatorBadge.textContent = 'ON (MENGALIR)';
+          el.powerIndicatorBadge.style.color = '#10f2a7';
+          sound.startBubbling(state.currentAmps);
+        } else {
+          el.btnTogglePower.className = 'btn-act btn-power-off';
+          el.btnPowerText.textContent = 'Arus Listrik: MATI (OFF)';
+          el.psuLed.setAttribute('fill', '#ef4444');
+          el.badgeProcessStatus.textContent = 'TERHENTI';
+          el.badgeProcessStatus.className = 'lcd-status-badge';
+          el.powerIndicatorBadge.textContent = 'OFF (TERPUTUS)';
+          el.powerIndicatorBadge.style.color = '#ef4444';
+          sound.stopBubbling();
+          logElectrolysisRun();
+        }
+      });
+
+      // Tare Balance Button
+      el.btnTareScale.addEventListener('click', () => {
+        sound.playChime();
+        state.tareOffsetMass = state.massGrams;
+        showToast('Neraca analitik digital berhasil di-tara (dikeluarkan offset).');
+      });
+
+      // Chemical Indicator Tests (KI)
+      el.btnAddPp.addEventListener('click', () => {
+        sound.playChime();
+        state.ppAdded = true;
+        showToast('Indikator Fenolftalein (PP) ditambahkan! Warna katoda berubah merah muda (basa OH⁻).');
+      });
+
+      el.btnAddStarch.addEventListener('click', () => {
+        sound.playChime();
+        state.starchAdded = true;
+        showToast('Amilum ditambahkan! Iodin terkonfirmasi dengan warna biru tua/kehitaman.');
+      });
+
+      // Reset All Button
+      el.btnResetAll.addEventListener('click', () => {
+        sound.playChime();
+        resetRunState();
+        showToast('Elektroda dibersihkan & massa di-reset ke awal.');
+      });
+
+      // Clear Table Log
+      el.btnClearLog.addEventListener('click', () => {
+        sound.playHeavySwitch();
+        state.tableLog = [];
+        el.tableBody.innerHTML = '';
+        showToast('Tabel riwayat pengamatan dikosongkan.');
+      });
+
+      // Export CSV
+      el.btnExportCsv.addEventListener('click', () => {
+        sound.playHeavySwitch();
+        if (state.tableLog.length === 0) {
+          showToast('Belum ada data eksperimen untuk diekspor!');
+          return;
+        }
+
+        let csv = 'Run,Sistem Elektrolisis,Arus I (A),Waktu t (s),Faraday (F),Hasil Terukur\n';
+        state.tableLog.forEach(row => {
+          csv += `"${row.num}","${row.sys}","${row.i}","${row.t}","${row.f}","${row.yield}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Data_Praktikum_Elektrolisis_Faraday_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('File CSV berhasil diunduh!');
+      });
+
+      // Save Chart PNG
+      el.btnSaveChart.addEventListener('click', () => {
+        sound.playHeavySwitch();
+        const canvas = document.getElementById('growthChart');
+        const link = document.createElement('a');
+        link.download = `Grafik_Elektrolisis_Faraday_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('Grafik berhasil disimpan sebagai gambar PNG!');
+      });
+
+      // Audio Toggle
+      el.btnSoundToggle.addEventListener('click', () => {
+        const isNowOn = sound.toggleMute();
+        el.soundText.textContent = isNowOn ? 'Suara: ON' : 'Suara: MUTE';
+        el.btnSoundToggle.style.opacity = isNowOn ? '1' : '0.6';
+      });
+
+      // Guide Modal
+      el.btnGuideModal.addEventListener('click', () => {
+        sound.playHeavySwitch();
+        el.guideModal.classList.add('show');
+      });
+
+      el.btnCloseModal.addEventListener('click', () => {
+        sound.playHeavySwitch();
+        el.guideModal.classList.remove('show');
+      });
+
+      el.guideModal.addEventListener('click', (e) => {
+        if (e.target === el.guideModal) el.guideModal.classList.remove('show');
+      });
+    }
+
+    /* Initialize on DOM Ready */
+    window.addEventListener('DOMContentLoaded', () => {
+      molSim = new SubmicroscopicElectrolysisSimulator('molCanvas');
+      chartRenderer = new FaradayGrowthChartRenderer('growthChart');
+      setupEventListeners();
+      updateSystemUI();
+      sound.startBubbling(state.currentAmps);
+      animFrameId = requestAnimationFrame(simulationLoop);
+    });
+
+  </script>
+</body>
+</html>

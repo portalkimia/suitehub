@@ -133,5 +133,20 @@
     "digital": "Modul Interaktif: Simulasi Sel Elektrolisis & Reaksi Redoks Non-Spontan (PortalKimia) berbasis kalkulator Hukum Faraday.",
     "promptBahanAjar": "Simulasi Sel Elektrolisis PortalKimia: Mengajak murid menyelidiki reaksi non-spontan dengan sumber arus listrik DC. Murid dapat menguji elektrolisis lelehan NaCl, larutan CuSO4, KI, dan air dengan elektroda karbon atau tembaga. Simulator memperlihatkan gelembung gas di elektroda, pengendapan logam, dan perhitungan massa zat menurut Hukum Faraday I dan II.",
     "thumbnail": "https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?w=600&auto=format&fit=crop&q=80"
+  },
+  {
+    "id": "hub-virtual-lab",
+    "title": "Katalog Laboratorium Virtual Kimia Terpadu (18 Modul)",
+    "subject": "Kimia",
+    "grade": "Kelas 10-12",
+    "fase": "Fase E & F",
+    "topic": "Praktikum Laboratorium Virtual Kimia SMA",
+    "format": "HTML",
+    "file": "LaboratoriumVirtual.html",
+    "url": "../media/LaboratoriumVirtual.html",
+    "description": "Pusat katalog khusus 18 laboratorium virtual kimia SMA berstandar PhET & Labster: Titrasi Asam-Basa, Sel Volta, Kalorimeter, Laju Reaksi, Spektrofotometer UV-Vis, VSEPR 3D, Uji Nyala, dll.",
+    "digital": "Modul Interaktif: Katalog 18 Laboratorium Virtual Kimia SMA (PortalKimia) dengan fitur pencarian dan penyaringan terstruktur.",
+    "promptBahanAjar": "Katalog Laboratorium Virtual PortalKimia: Akses terpadu ke 18 instrumen praktikum kimia interaktif mencakup bidang kimia larutan, elektrokimia, kinetika kimia, termokimia, kimia organik, spektroskopi, dan struktur atom.",
+    "thumbnail": "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=600&auto=format&fit=crop&q=80"
   }
 ]

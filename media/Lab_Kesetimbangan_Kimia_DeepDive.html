@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Lab: Kesetimbangan Kimia & Azas Le Chatelier • PortalKimia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-space: #090d16;
+      --bg-bench: #131926;
+      --bg-panel: rgba(19, 25, 38, 0.92);
+      --bg-glass: rgba(28, 36, 54, 0.7);
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-bright: rgba(168, 85, 247, 0.4);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #a855f7;
+      --primary-hover: #9333ea;
+      --primary-glow: rgba(168, 85, 247, 0.35);
+      --accent-cyan: #06b6d4;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --lcd-bg: #03140f;
+      --lcd-text: #10f2a7;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.6);
+      --font-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === HEADER LAB BAR === */
+    header.lab-header {
+      background: rgba(15, 20, 31, 0.96);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #a855f7, #c084fc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 18px var(--primary-glow);
+    }
+
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+
+    .brand-title h1 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title h1 span.badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid var(--border-bright);
+      color: #e9d5ff;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-header {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .btn-header.primary {
+      background: linear-gradient(135deg, #a855f7, #9333ea);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .btn-header.primary:hover {
+      box-shadow: 0 6px 16px rgba(168, 85, 247, 0.5);
+    }
+
+    /* === MAIN LAYOUT CONTAINER === */
+    main.lab-workbench {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 340px 1fr 380px;
+      gap: 16px;
+      padding: 16px 20px;
+      max-width: 1720px;
+      margin: 0 auto;
+      width: 100%;
+      height: calc(100vh - 67px);
+      min-height: 720px;
+    }
+
+    /* Common Glass Panel */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-header h2 svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--primary);
+    }
+
+    .panel-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* System Selector Grid */
+    .system-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .btn-system {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 8px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-system:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-system.active {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(168, 85, 247, 0.12));
+      border: 1px solid var(--border-bright);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-system .sys-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .btn-system.active .sys-title {
+      color: #e9d5ff;
+    }
+
+    .btn-system .sys-formula {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    /* Equation Display Box */
+    .eq-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+
+    .eq-box .eq-title {
+      font-size: 9px;
+      font-weight: 700;
+      color: #a855f7;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Le Chatelier Stress Manipulators */
+    .card-control {
+      background: #0d131f;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Slider / Range */
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .control-label span.val {
+      font-family: var(--font-mono);
+      color: #c084fc;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #a855f7;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--primary-glow);
+      border: 2px solid #fff;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Action Push Buttons Grid */
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .btn-stress {
+      background: #141c2c;
+      border: 1px solid var(--border-glass);
+      border-radius: 8px;
+      padding: 8px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .btn-stress svg {
+      width: 13px;
+      height: 13px;
+      stroke: var(--accent-cyan);
+    }
+
+    .btn-stress:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .btn-stress:active {
+      transform: scale(0.98);
+    }
+
+    /* Bath Temperature Selector */
+    .bath-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 5px;
+    }
+
+    .bath-btn {
+      background: #141c2c;
+      border: 1px solid var(--border-glass);
+      border-radius: 8px;
+      padding: 8px 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .bath-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: #94a3b8;
+    }
+
+    .bath-btn:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #fff;
+    }
+
+    .bath-btn.active {
+      background: rgba(168, 85, 247, 0.25);
+      border-color: rgba(168, 85, 247, 0.6);
+      color: #e9d5ff;
+    }
+
+    .bath-btn.active svg {
+      stroke: #a855f7;
+    }
+
+    /* === CENTER STAGE (APPARATUS STUDIO & MOLECULAR CANVAS) === */
+    section.lab-center-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    /* Top: Molecular Equilibrium Canvas 2D */
+    .mol-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .mol-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mol-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mol-title svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--accent-cyan);
+    }
+
+    .mol-legend {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .mol-viewport-wrap {
+      display: grid;
+      grid-template-columns: 1fr 140px;
+      gap: 10px;
+      height: 115px;
+    }
+
+    canvas#molCanvas {
+      width: 100%;
+      height: 100%;
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+    }
+
+    /* Equilibrium Ratio Card */
+    .eq-state-card {
+      background: #080d1a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 9px;
+      font-family: var(--font-mono);
+    }
+
+    .ratio-bar-wrap {
+      display: flex;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .ratio-bar-reac {
+      background: #f43f5e;
+      transition: width 0.3s ease;
+    }
+
+    .ratio-bar-prod {
+      background: #38bdf8;
+      transition: width 0.3s ease;
+    }
+
+    /* Main Apparatus Studio Viewport */
+    .apparatus-studio {
+      flex: 1;
+      background: radial-gradient(circle at 50% 30%, #172033 0%, #0c111c 100%);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Benchtop Surface Base */
+    .benchtop-surface {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border-top: 2px solid #334155;
+      box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    /* SVG Apparatus Canvas */
+    svg.apparatus-svg {
+      width: 100%;
+      height: 100%;
+      max-height: 480px;
+      z-index: 10;
+    }
+
+    /* Realtime Le Chatelier Floating Banner */
+    .shift-alert-banner {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--primary);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #e9d5ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 25;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    /* Floating Workbench Control Bar */
+    .bench-control-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-glass);
+      padding: 8px 16px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 30;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .btn-act {
+      border: 1px solid var(--border-glass);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-act:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .btn-act.btn-primary {
+      background: linear-gradient(135deg, #a855f7, #9333ea);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .control-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* === RIGHT PANEL (DIGITAL METERS, GRAPH & DATA LOG) === */
+    /* Digital Equilibrium & Colorimeter Meter */
+    .lcd-meter-box {
+      background: #020907;
+      border: 2px solid #064e3b;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.95);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lcd-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(16, 242, 167, 0.6);
+      letter-spacing: 1px;
+    }
+
+    .lcd-digits-large {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 14px rgba(16, 242, 167, 0.7);
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+
+    .lcd-status-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(16, 242, 167, 0.15);
+      color: #10f2a7;
+    }
+
+    .lcd-status-badge.shift-right {
+      background: rgba(6, 182, 212, 0.25);
+      color: #67e8f9;
+    }
+
+    .lcd-status-badge.shift-left {
+      background: rgba(244, 63, 94, 0.25);
+      color: #fda4af;
+    }
+
+    /* Qc vs Kc Indicator Card */
+    .qc-kc-card {
+      background: #0d131f;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .qc-kc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .qc-kc-row span.val {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Live Concentration vs Time Chart Box */
+    .chart-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+
+    .chart-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    canvas#kineticsChart {
+      width: 100%;
+      height: 155px;
+      border-radius: 6px;
+      background: #030712;
+    }
+
+    /* Data Table Log */
+    .log-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 120px;
+    }
+
+    .log-table-wrap {
+      overflow-y: auto;
+      flex: 1;
+      max-height: 135px;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    table.data-table th {
+      background: #111723;
+      padding: 6px 8px;
+      text-align: left;
+      color: #94a3b8;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      font-size: 10px;
+    }
+
+    table.data-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      font-size: 10px;
+    }
+
+    table.data-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* MODAL STYLES */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      max-width: 620px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #a855f7;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-card p, .modal-card ul {
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .modal-card ul {
+      padding-left: 20px;
+    }
+
+    .modal-card li {
+      margin-bottom: 6px;
+    }
+
+    /* FLOATING TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--primary);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 200;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 1280px) {
+      main.lab-workbench {
+        grid-template-columns: 310px 1fr 340px;
+      }
+    }
+    @media (max-width: 1080px) {
+      body { overflow-y: auto; }
+      main.lab-workbench {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .apparatus-studio { height: 440px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER LAB -->
+  <header class="lab-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <h1>
+          Virtual Lab: Kesetimbangan Kimia &amp; Azas Le Chatelier
+          <span class="badge">Standar PhET / Labster</span>
+        </h1>
+        <p>Eksperimen Pergeseran Kesetimbangan Dinamis (Pengaruh Konsentrasi, Suhu, Tekanan &amp; Volume)</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" id="btn-sound-toggle" title="Nyalakan/Matikan Suara">
+        <svg id="sound-icon-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+        <span id="sound-text">Suara: ON</span>
+      </button>
+
+      <button class="btn-header" id="btn-guide-modal">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        Panduan Lab
+      </button>
+
+      <button class="btn-header" id="btn-export-csv" title="Ekspor Data Pengamatan ke Format CSV">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Ekspor CSV
+      </button>
+
+      <button class="btn-header primary" id="btn-reset-all" title="Reset Seluruh Gangguan & Re-equilibrate">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Reset Sistem
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN LAB WORKBENCH -->
+  <main class="lab-workbench">
+
+    <!-- LEFT PANEL: SYSTEM SELECTION & LE CHATELIER STRESS DECK -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Kontrol Reaksi &amp; Gangguan
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- 1. System Selection -->
+        <div>
+          <div class="section-title">Pilih Sistem Kesetimbangan:</div>
+          <div class="system-grid">
+            <button class="btn-system active" data-sys="no2_n2o4">
+              <span class="sys-title">1. Gas NO₂ / N₂O₄</span>
+              <span class="sys-formula">2NO₂(g) &harr; N₂O₄(g)</span>
+            </button>
+            <button class="btn-system" data-sys="fe_scn">
+              <span class="sys-title">2. Besi-Tiosianat</span>
+              <span class="sys-formula">Fe³⁺ + SCN⁻ &harr; [Fe(SCN)]²⁺</span>
+            </button>
+            <button class="btn-system" data-sys="cro4_cr2o7">
+              <span class="sys-title">3. Kromat-Dikromat</span>
+              <span class="sys-formula">2CrO₄²⁻ + 2H⁺ &harr; Cr₂O₇²⁻</span>
+            </button>
+            <button class="btn-system" data-sys="cobalt_complex">
+              <span class="sys-title">4. Kompleks Kobalt</span>
+              <span class="sys-formula">[Co(H₂O)₆]²⁺ &harr; [CoCl₄]²⁻</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Dynamic Reaction Equation Card -->
+        <div class="eq-box" id="reaction-equation-card">
+          <div class="eq-title">
+            <span id="eq-sys-title">Sistem 1: Gas Nitrogen Dioksida</span>
+            <span id="eq-thermo-badge" style="color: #67e8f9;">&Delta;H = -57.2 kJ (Eksoterm)</span>
+          </div>
+          <div id="eq-formula-text" style="color: #e9d5ff; font-weight: 700; margin-bottom: 4px;">
+            2NO₂(g) [Cokelat] &harr; N₂O₄(g) [Tak Berwarna]
+          </div>
+          <div style="font-size: 10px; color: #94a3b8;" id="eq-color-legend">
+            Reaktan: Cokelat Kemerahan (2 mol) | Produk: Bening/Tak Berwarna (1 mol)
+          </div>
+        </div>
+
+        <!-- 3. Stress: Suhu Reaksi (Temperature Water Bath) -->
+        <div class="card-control">
+          <div class="section-title">
+            <span>Suhu Penangas Air (T)</span>
+            <span id="val-temp-label" style="font-family: var(--font-mono); color: #c084fc;">25 °C (Suhu Kamar)</span>
+          </div>
+          <div class="bath-selector">
+            <button class="bath-btn" id="btn-bath-ice" data-temp="0">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07l14.14-14.14"/>
+              </svg>
+              <span>Air Es (0 °C)</span>
+            </button>
+            <button class="bath-btn active" id="btn-bath-room" data-temp="25">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+              </svg>
+              <span>Kamar (25 °C)</span>
+            </button>
+            <button class="bath-btn" id="btn-bath-hot" data-temp="80">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+              </svg>
+              <span>Air Panas (80 °C)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Stress: Volume / Tekanan Gas (Hanya Aktif di Gas NO2/N2O4) -->
+        <div class="card-control" id="card-pressure-volume">
+          <div class="control-row">
+            <div class="control-label">
+              <span>Volume Tabung Syringe (V)</span>
+              <span class="val" id="val-vol-label">50 mL (P = 1.0 atm)</span>
+            </div>
+            <input type="range" id="slider-volume" min="20" max="80" step="5" value="50">
+            <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; font-family: var(--font-mono);">
+              <span>20 mL (Tekanan Tinggi)</span>
+              <span>50 mL</span>
+              <span>80 mL (Tekanan Rendah)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Stress: Penambahan Konsentrasi Reagen (Mikrodropper) -->
+        <div class="card-control" id="card-reagents-deck">
+          <div class="section-title">
+            <span>Aksi Penambahan Reagen Uji:</span>
+          </div>
+          <div class="action-grid" id="reagents-action-grid">
+            <!-- Dynamically populated per system -->
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- CENTER STAGE: SUB-MICROSCOPIC MOLECULES & APPARATUS STUDIO -->
+    <section class="lab-center-stage">
+
+      <!-- TOP: 2D MOLECULAR EQUILIBRIUM CANVAS -->
+      <div class="mol-box">
+        <div class="mol-header">
+          <div class="mol-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Jendela Molekuler 2D: Dinamika Kesetimbangan Maju &amp; Balik
+          </div>
+          <div class="mol-legend">
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #f43f5e;" id="legend-dot-reac"></span>
+              <span id="legend-label-reac">Reaktan</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #38bdf8;" id="legend-dot-prod"></span>
+              <span id="legend-label-prod">Produk</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mol-viewport-wrap">
+          <canvas id="molCanvas" width="480" height="115"></canvas>
+          <div class="eq-state-card">
+            <div>
+              <span style="color: #94a3b8; display: block; margin-bottom: 2px;">KOMPOSISI KESETIMBANGAN:</span>
+              <div style="display: flex; justify-content: space-between; font-weight: 700;">
+                <span id="label-mol-pct-reac" style="color: #f43f5e;">50%</span>
+                <span id="label-mol-pct-prod" style="color: #38bdf8;">50%</span>
+              </div>
+              <div class="ratio-bar-wrap">
+                <div class="ratio-bar-reac" id="bar-mol-reac" style="width: 50%;"></div>
+                <div class="ratio-bar-prod" id="bar-mol-prod" style="width: 50%;"></div>
+              </div>
+            </div>
+            <div style="font-size: 8px; color: #64748b; line-height: 1.3;">
+              v_maju = v_balik saat setimbang.<br>
+              Gangguan memicu adaptasi Le Chatelier.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN APPARATUS STUDIO -->
+      <div class="apparatus-studio" id="studio-container">
+
+        <!-- Shift Alert Banner -->
+        <div class="shift-alert-banner" id="shift-banner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+          <span id="shift-banner-text">Sistem Berada dalam Kesetimbangan Dinamis (Qc = Kc)</span>
+        </div>
+
+        <!-- SVG APPARATUS CANVAS -->
+        <svg class="apparatus-svg" viewBox="0 0 700 480" id="apparatus-svg">
+          <defs>
+            <!-- Glass Shading Gradients -->
+            <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
+              <stop offset="15%" stop-color="rgba(255,255,255,0.08)"/>
+              <stop offset="85%" stop-color="rgba(255,255,255,0.04)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0.3)"/>
+            </linearGradient>
+
+            <linearGradient id="pistonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#334155"/>
+              <stop offset="50%" stop-color="#1e293b"/>
+              <stop offset="100%" stop-color="#0f172a"/>
+            </linearGradient>
+
+            <!-- Water Bath Vessel Gradient -->
+            <linearGradient id="bathGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="rgba(56, 189, 248, 0.25)"/>
+              <stop offset="100%" stop-color="rgba(14, 116, 144, 0.45)"/>
+            </linearGradient>
+          </defs>
+
+          <!-- 1. APPARATUS FOR SYSTEM 1: GAS SYRINGE IN WATER BATH (NO2 / N2O4) -->
+          <g id="apparatus-sys1" transform="translate(140, 100)">
+            <!-- Water Bath Vessel Base -->
+            <rect x="20" y="160" width="380" height="150" rx="12" fill="url(#bathGrad)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+            <rect x="16" y="152" width="388" height="12" rx="4" fill="rgba(255,255,255,0.5)"/>
+            <text x="35" y="300" fill="rgba(255,255,255,0.6)" font-size="11" font-family="monospace" id="bath-label-text">PENANGAS AIR (25 °C)</text>
+
+            <!-- Gas Syringe Barrel (Horizontal) Immersed in Bath -->
+            <!-- Syringe Outer Glass Tube -->
+            <rect x="70" y="190" width="260" height="60" rx="6" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.85)" stroke-width="2.5"/>
+            <!-- Syringe Sealed Left Tip -->
+            <rect x="44" y="208" width="26" height="24" rx="2" fill="#334155" stroke="#1e293b" stroke-width="1.5"/>
+
+            <!-- Syringe Interior Gas Tint (Color transforms dynamically from colorless to deep reddish brown) -->
+            <rect id="gas-fill-rect" x="71" y="191" width="160" height="58" rx="4" fill="#a16207" opacity="0.6"/>
+
+            <!-- Syringe Volume Graduations -->
+            <line x1="85" y1="190" x2="85" y2="202" stroke="#fff" stroke-width="1.5"/>
+            <text x="80" y="214" fill="#fff" font-size="9" font-family="monospace">0</text>
+            <line x1="135" y1="190" x2="135" y2="200" stroke="#fff" stroke-width="1"/>
+            <text x="127" y="214" fill="#fff" font-size="9" font-family="monospace">20</text>
+            <line x1="185" y1="190" x2="185" y2="200" stroke="#fff" stroke-width="1"/>
+            <text x="177" y="214" fill="#fff" font-size="9" font-family="monospace">40</text>
+            <line x1="235" y1="190" x2="235" y2="200" stroke="#fff" stroke-width="1"/>
+            <text x="227" y="214" fill="#fff" font-size="9" font-family="monospace">60</text>
+            <line x1="285" y1="190" x2="285" y2="200" stroke="#fff" stroke-width="1"/>
+            <text x="277" y="214" fill="#fff" font-size="9" font-family="monospace">80</text>
+
+            <!-- Syringe Plunger (Translates horizontally with slider-volume) -->
+            <g id="gas-plunger" transform="translate(150, 0)">
+              <!-- Black Rubber Piston Head (Width = 18px) -->
+              <rect x="70" y="192" width="18" height="56" rx="2" fill="#0f172a" stroke="#000" stroke-width="1"/>
+              <!-- Plunger Shaft Running Right -->
+              <rect x="88" y="208" width="160" height="24" fill="url(#pistonGrad)" stroke="#475569" stroke-width="1.5"/>
+              <!-- Plunger Handle -->
+              <rect x="248" y="185" width="10" height="70" rx="3" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
+            </g>
+          </g>
+
+          <!-- 2. APPARATUS FOR SYSTEMS 2, 3, 4: TEST TUBE RACK & BEAKERS -->
+          <g id="apparatus-liquid" transform="translate(180, 160)" opacity="0">
+            <!-- Wooden/Acrylic Test Tube Rack Stand -->
+            <rect x="20" y="230" width="300" height="12" rx="3" fill="#334155"/>
+            <rect x="20" y="130" width="300" height="10" rx="3" fill="#334155"/>
+            <rect x="15" y="130" width="12" height="112" rx="2" fill="#475569"/>
+            <rect x="313" y="130" width="12" height="112" rx="2" fill="#475569"/>
+
+            <!-- Tube 1: Control Standard -->
+            <g transform="translate(45, 0)">
+              <rect x="10" y="70" width="30" height="160" rx="15" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+              <!-- Liquid Body -->
+              <path id="tube1-liquid" d="M 12 120 L 38 120 L 38 215 C 38 225, 12 225, 12 215 Z" fill="#f59e0b"/>
+              <text x="14" y="255" fill="#94a3b8" font-size="9" font-family="monospace">Kontrol</text>
+            </g>
+
+            <!-- Tube 2: Main Active Equilibrium Test Tube -->
+            <g transform="translate(125, 0)">
+              <rect x="10" y="70" width="30" height="160" rx="15" fill="rgba(255,255,255,0.06)" stroke="#38bdf8" stroke-width="2.5"/>
+              <!-- Dynamic Liquid with Live Color -->
+              <path id="tube2-liquid" d="M 12 120 L 38 120 L 38 215 C 38 225, 12 225, 12 215 Z" fill="#dc2626"/>
+              <!-- Meniscus highlight -->
+              <ellipse cx="25" cy="120" rx="13" ry="3" fill="rgba(255,255,255,0.3)"/>
+              <text x="10" y="255" fill="#38bdf8" font-size="9" font-family="monospace" font-weight="bold">Uji Lab</text>
+            </g>
+
+            <!-- Tube 3: Comparison / Stressed Tube -->
+            <g transform="translate(205, 0)">
+              <rect x="10" y="70" width="30" height="160" rx="15" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+              <path id="tube3-liquid" d="M 12 120 L 38 120 L 38 215 C 38 225, 12 225, 12 215 Z" fill="#93c5fd"/>
+              <text x="5" y="255" fill="#94a3b8" font-size="9" font-family="monospace">Pembanding</text>
+            </g>
+
+            <!-- Dropper Pipette Animation Top Dropping Into Tube 2 -->
+            <g id="dropper-assembly" transform="translate(150, 0)" opacity="0">
+              <path d="M -4 20 L 4 20 L 2 65 L 0 72 L -2 65 Z" fill="rgba(255,255,255,0.4)" stroke="#fff" stroke-width="1.2"/>
+              <rect x="-6" y="8" width="12" height="12" rx="4" fill="#f43f5e"/>
+              <!-- Falling droplet -->
+              <circle id="dropper-drop" cx="0" cy="85" r="3" fill="#38bdf8"/>
+            </g>
+          </g>
+        </svg>
+
+        <!-- Surface Benchtop Base -->
+        <div class="benchtop-surface"></div>
+
+        <!-- Floating Tactile Control Bar -->
+        <div class="bench-control-bar">
+          <button class="btn-act btn-primary" id="btn-re-equilibrate" title="Pulihkan ke Titik Kesetimbangan Stabil">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6M1 20v-6h6"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+            Re-Equilibrate (Setimbangkan)
+          </button>
+
+          <div class="control-divider"></div>
+
+          <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; color: #94a3b8;">
+            <span>STATUS REAKSI:</span>
+            <span id="rate-balance-label" style="color: #10f2a7; font-weight: 700;">v₁ = v₂ (SETIMBANG)</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: DIGITAL COLORIMETER, QC VS KC & KINETIC GRAPH -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          Sensor Digital &amp; Analitik Qc/Kc
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- Digital Colorimeter / Absorbance Meter Device -->
+        <div class="lcd-meter-box">
+          <div class="lcd-top-bar">
+            <span>COLORIMETER DIGITAL</span>
+            <span class="lcd-status-badge" id="eq-shift-badge">SETIMBANG</span>
+          </div>
+          <div class="lcd-digits-large" id="lcd-absorbance-val">0.450 A</div>
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748b; font-family: var(--font-mono);">
+            <span id="lcd-transmit-val">Transmitansi: 35.5 %</span>
+            <span id="lcd-color-desc" style="color: #a855f7;">Warna: Sedang</span>
+          </div>
+        </div>
+
+        <!-- Qc vs Kc Indicator Card -->
+        <div class="qc-kc-card">
+          <div class="qc-kc-row">
+            <span style="color: #94a3b8;">Tetapan Kesetimbangan (Kc):</span>
+            <span class="val" id="val-kc-display">1.25 &times; 10⁻²</span>
+          </div>
+          <div class="qc-kc-row">
+            <span style="color: #94a3b8;">Kuisien Reaksi Aktual (Qc):</span>
+            <span class="val" id="val-qc-display" style="color: #10f2a7;">1.25 &times; 10⁻²</span>
+          </div>
+          <div style="margin-top: 4px; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; font-size: 10px;">
+            <span style="color: #94a3b8;">Prediksi Le Chatelier:</span>
+            <span id="shift-prediction-text" style="color: #67e8f9; font-weight: 700;">Qc = Kc (Tetap)</span>
+          </div>
+        </div>
+
+        <!-- Live Concentration vs Time Chart Box -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <span class="chart-title">Kurva Konsentrasi vs Waktu</span>
+            <button id="btn-save-chart" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 10px;" title="Unduh Gambar PNG">
+              Unduh PNG
+            </button>
+          </div>
+          <canvas id="kineticsChart" width="340" height="155"></canvas>
+          <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; font-family: var(--font-mono); padding: 0 4px;">
+            <span style="color: #f43f5e;">&mdash; [Reaktan]</span>
+            <span style="color: #38bdf8;">&mdash; [Produk]</span>
+            <span style="color: #94a3b8;">Waktu (t) &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Data Table Log -->
+        <div class="log-box">
+          <div style="padding: 6px 10px; background: #0f1624; border-bottom: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Riwayat Gangguan &amp; Pergeseran</span>
+            <button id="btn-clear-log" style="background: none; border: none; color: #ef4444; font-size: 10px; cursor: pointer;">Hapus</button>
+          </div>
+          <div class="log-table-wrap">
+            <table class="data-table" id="table-log">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Sistem</th>
+                  <th>Perlakuan</th>
+                  <th>Arah Geser</th>
+                  <th>Qc vs Kc</th>
+                  <th>Warna Hasil</th>
+                </tr>
+              </thead>
+              <tbody id="table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- MODAL PANDUAN PRAKTIKUM -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal-card">
+      <h3>⚖️ Panduan Praktikum Kesetimbangan Kimia &amp; Azas Le Chatelier</h3>
+      <p>Praktikum ini menyajikan simulasi laboratorium reaksi kesetimbangan dinamis dan asas Le Chatelier:</p>
+      <ul>
+        <li><b>Asas Le Chatelier:</b> Jika suatu sistem kesetimbangan diberikan aksi/gangguan (*stress* berupa perubahan konsentrasi, suhu, atau tekanan/volume), maka sistem akan mengadakan reaksi pergeseran sedemikian rupa untuk memperkecil pengaruh aksi tersebut hingga tercapai kesetimbangan baru ($v_1 = v_2$).</li>
+        <li><b>Pengaruh Konsentrasi:</b> Menambah konsentrasi zat akan menggeser kesetimbangan ke arah yang berlawanan (menjauhi zat tersebut). Sebaliknya, mengurangi zat (misal dengan penambahan pengikat ion) menggeser reaksi ke arah zat yang dikurangi.</li>
+        <li><b>Pengaruh Suhu ($T$):</b> Menaikkan suhu menggeser kesetimbangan ke arah reaksi <i>Endoterm</i> ($\Delta H > 0$). Menurunkan suhu menggeser ke arah reaksi <i>Eksoterm</i> ($\Delta H < 0$).</li>
+        <li><b>Pengaruh Tekanan &amp; Volume Gas:</b> Memperkecil volume (memperbesar tekanan) menggeser kesetimbangan gas ke arah ruas dengan jumlah koefisien mol gas lebih kecil. Memperbesar volume menggeser ke arah koefisien gas lebih besar.</li>
+        <li><b>Kuisien Reaksi ($Q_c$) vs Tetapan ($K_c$):</b> Saat $Q_c < K_c$, reaksi bergeser ke kanan (produk). Saat $Q_c > K_c$, reaksi bergeser ke kiri (reaktan). Saat $Q_c = K_c$, sistem berada dalam keadaan setimbang dinamis.</li>
+      </ul>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-act btn-primary" id="btn-close-modal" style="padding: 8px 20px;">Tutup &amp; Mulai Praktikum</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST -->
+  <div class="toast" id="toastBox">Notifikasi</div>
+
+  <!-- JAVASCRIPT: ENGINE & EQUILIBRIUM SIMULATOR -->
+  <script>
+    'use strict';
+
+    /* =========================================================================
+     * 1. NATIVE WEB AUDIO API SYNTHESIZER
+     * ========================================================================= */
+    class EquilibriumAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playDropSound() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.exponentialRampToValueAtTime(750, now + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(300, now + 0.18);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      }
+
+      playPistonHiss() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const bufferSize = this.ctx.sampleRate * 0.15;
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = (Math.random() * 2 - 1) * 0.15;
+        }
+
+        const whiteNoise = this.ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, this.ctx.currentTime);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+
+        whiteNoise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        whiteNoise.start();
+      }
+
+      playChimeEquilibrium() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const freqs = [440, 554.37, 659.25]; // A major triad
+        const now = this.ctx.currentTime;
+
+        freqs.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const startTime = now + idx * 0.06;
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.1, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.35);
+        });
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        return !this.muted;
+      }
+    }
+
+    const sound = new EquilibriumAudioEngine();
+
+    /* =========================================================================
+     * 2. REACTION SYSTEMS DATA & KINETIC CONSTANTS
+     * ========================================================================= */
+    const EQUILIBRIUM_SYSTEMS = {
+      no2_n2o4: {
+        id: 'no2_n2o4',
+        name: 'Sistem 1: Gas Nitrogen Dioksida & Dinitrogen Tetroksida',
+        equation: '2NO₂(g) [Cokelat] &harr; N₂O₄(g) [Tak Berwarna]',
+        thermo: '&Delta;H = -57.2 kJ (Eksoterm ke Kanan)',
+        isExo: true,
+        isGas: true,
+        reacName: 'NO₂ (Cokelat)',
+        prodName: 'N₂O₄ (Bening)',
+        colorReac: [161, 98, 7],     // Brown #a16207
+        colorProd: [241, 245, 249],  // Clear #f1f5f9
+        baseKc: 0.0125,
+        reagents: [
+          { name: '+ Gas NO₂', action: 'add_reac', desc: 'Menambah mol reaktan NO₂' },
+          { name: '+ Gas N₂O₄', action: 'add_prod', desc: 'Menambah mol produk N₂O₄' }
+        ]
+      },
+      fe_scn: {
+        id: 'fe_scn',
+        name: 'Sistem 2: Kompleks Besi(III)-Tiosianat',
+        equation: 'Fe³⁺(aq) [Kuning] + SCN⁻(aq) [Bening] &harr; [Fe(SCN)]²⁺(aq) [Merah Darah]',
+        thermo: '&Delta;H < 0 (Eksoterm ke Kanan)',
+        isExo: true,
+        isGas: false,
+        reacName: 'Fe³⁺ / SCN⁻ (Kuning/Bening)',
+        prodName: '[Fe(SCN)]²⁺ (Merah Darah)',
+        colorReac: [245, 158, 11],   // Amber Yellow #f59e0b
+        colorProd: [185, 28, 28],    // Deep Blood Red #b91c1c
+        baseKc: 138.0,
+        reagents: [
+          { name: '+ FeCl₃ (Fe³⁺)', action: 'add_reac', desc: 'Menambah ion Fe³⁺' },
+          { name: '+ KSCN (SCN⁻)', action: 'add_reac2', desc: 'Menambah ion SCN⁻' },
+          { name: '+ Na₂HPO₄ (Ikat Fe³⁺)', action: 'remove_reac', desc: 'Mengikat ion Fe³⁺' },
+          { name: '+ AgNO₃ (Endapkan SCN⁻)', action: 'remove_reac2', desc: 'Mengendapkan ion SCN⁻' }
+        ]
+      },
+      cro4_cr2o7: {
+        id: 'cro4_cr2o7',
+        name: 'Sistem 3: Kesetimbangan Kromat & Dikromat',
+        equation: '2CrO₄²⁻(aq) [Kuning] + 2H⁺(aq) &harr; Cr₂O₇²⁻(aq) [Jingga] + H₂O(l)',
+        thermo: '&Delta;H < 0 (Eksoterm ke Kanan)',
+        isExo: true,
+        isGas: false,
+        reacName: 'CrO₄²⁻ (Kuning Terang)',
+        prodName: 'Cr₂O₇²⁻ (Jingga/Orange)',
+        colorReac: [234, 179, 8],    // Bright Yellow #eab308
+        colorProd: [234, 88, 12],    // Deep Orange #ea580c
+        baseKc: 4.2e14,
+        reagents: [
+          { name: '+ Asam HCl (H⁺)', action: 'add_acid', desc: 'Menambah ion H⁺ (Geser Jingga)' },
+          { name: '+ Basa NaOH (OH⁻)', action: 'add_base', desc: 'Menetralkan H⁺ (Geser Kuning)' },
+          { name: '+ K₂CrO₄', action: 'add_reac', desc: 'Menambah ion Kromat' },
+          { name: '+ Aquades (+H₂O)', action: 'dilute', desc: 'Pengenceran larutan' }
+        ]
+      },
+      cobalt_complex: {
+        id: 'cobalt_complex',
+        name: 'Sistem 4: Kompleks Kobalt(II) Klorida',
+        equation: '[Co(H₂O)₆]²⁺(aq) [Pink] + 4Cl⁻(aq) &harr; [CoCl₄]²⁻(aq) [Biru] + 6H₂O(l)',
+        thermo: '&Delta;H > 0 (Endoterm ke Kanan)',
+        isExo: false,
+        isGas: false,
+        reacName: '[Co(H₂O)₆]²⁺ (Pink/Merah Muda)',
+        prodName: '[CoCl₄]²⁻ (Biru Tua)',
+        colorReac: [244, 114, 182],  // Pink #f472b6
+        colorProd: [30, 58, 138],    // Deep Blue #1e3a8a
+        baseKc: 0.05,
+        reagents: [
+          { name: '+ HCl Pekat (Cl⁻)', action: 'add_cl', desc: 'Menambah ion Cl⁻ (Geser Biru)' },
+          { name: '+ Air H₂O (Encer)', action: 'add_water', desc: 'Menambah air (Geser Pink)' },
+          { name: '+ AgNO₃ (Endap Cl⁻)', action: 'remove_cl', desc: 'Mengikat ion Cl⁻' }
+        ]
+      }
+    };
+
+    /* Simulation Runtime State */
+    const state = {
+      systemKey: 'no2_n2o4',
+      temperature: 25, // °C
+      volumeMl: 50,    // mL (For gas system)
+      pressureAtm: 1.0,
+
+      // Live Concentrations / Fractions (Normalized 0.0 to 1.0)
+      concReac: 0.50,
+      concProd: 0.50,
+      targetConcReac: 0.50,
+      targetConcProd: 0.50,
+
+      // Kinetic rates
+      rateForward: 1.0,
+      rateReverse: 1.0,
+
+      // Qc and Kc
+      kc: 0.0125,
+      qc: 0.0125,
+      shiftDirection: 'none', // 'right', 'left', 'none'
+      lastStressDesc: 'Kondisi Awal (Setimbang)',
+
+      // Chart time series
+      chartTime: 0,
+      chartPoints: [], // { t, reac, prod }
+      tableLog: []
+    };
+
+    /* =========================================================================
+     * 3. SUB-MICROSCOPIC MOLECULAR EQUILIBRIUM CANVAS (2D Particles)
+     * ========================================================================= */
+    class MolecularEquilibriumSimulator {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.initParticles();
+      }
+
+      initParticles() {
+        this.particles = [];
+        const total = 40;
+        const nReac = Math.round(total * state.concReac);
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        for (let i = 0; i < total; i++) {
+          const isReac = (i < nReac);
+          this.particles.push({
+            x: 10 + Math.random() * (w - 20),
+            y: 10 + Math.random() * (h - 20),
+            vx: (Math.random() - 0.5) * 1.8,
+            vy: (Math.random() - 0.5) * 1.8,
+            radius: isReac ? 4 : 5.5,
+            isReac: isReac
+          });
+        }
+      }
+
+      update() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const tempKelvin = state.temperature + 273.15;
+        const speed = Math.sqrt(tempKelvin / 298.15) * 1.4;
+
+        // Move particles
+        for (let i = 0; i < this.particles.length; i++) {
+          const p = this.particles[i];
+          p.x += p.vx * speed;
+          p.y += p.vy * speed;
+
+          if (p.x - p.radius < 0) { p.x = p.radius; p.vx *= -1; }
+          if (p.x + p.radius > w) { p.x = w - p.radius; p.vx *= -1; }
+          if (p.y - p.radius < 0) { p.y = p.radius; p.vy *= -1; }
+          if (p.y + p.radius > h) { p.y = h - p.radius; p.vy *= -1; }
+        }
+
+        // Dynamically adjust ratio of particles to match state.concReac
+        const currentReacCount = this.particles.filter(p => p.isReac).length;
+        const targetReacCount = Math.round(this.particles.length * state.concReac);
+
+        if (currentReacCount < targetReacCount && Math.random() < 0.1) {
+          // Convert one product to reactant
+          const prodP = this.particles.find(p => !p.isReac);
+          if (prodP) { prodP.isReac = true; prodP.radius = 4; }
+        } else if (currentReacCount > targetReacCount && Math.random() < 0.1) {
+          // Convert one reactant to product
+          const reacP = this.particles.find(p => p.isReac);
+          if (reacP) { reacP.isReac = false; reacP.radius = 5.5; }
+        }
+      }
+
+      draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        for (let i = 0; i < this.particles.length; i++) {
+          const p = this.particles[i];
+          this.ctx.beginPath();
+          this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+
+          if (p.isReac) {
+            this.ctx.fillStyle = '#f43f5e';
+            this.ctx.shadowColor = 'rgba(244, 63, 94, 0.7)';
+          } else {
+            this.ctx.fillStyle = '#38bdf8';
+            this.ctx.shadowColor = 'rgba(56, 189, 248, 0.7)';
+          }
+          this.ctx.shadowBlur = 6;
+          this.ctx.fill();
+          this.ctx.shadowBlur = 0;
+        }
+      }
+    }
+
+    /* =========================================================================
+     * 4. LIVE CONCENTRATION TIME-SERIES CHART
+     * ========================================================================= */
+    class EquilibriumChartRenderer {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+      }
+
+      render() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const padL = 34;
+        const padR = 14;
+        const padT = 16;
+        const padB = 24;
+
+        this.ctx.clearRect(0, 0, w, h);
+
+        // Grid lines
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        this.ctx.lineWidth = 1;
+
+        // Horizontals (0.0 to 1.0 M)
+        for (let i = 0; i <= 4; i++) {
+          const y = padT + (i / 4) * (h - padT - padB);
+          this.ctx.beginPath();
+          this.ctx.moveTo(padL, y);
+          this.ctx.lineTo(w - padR, y);
+          this.ctx.stroke();
+
+          this.ctx.fillStyle = '#64748b';
+          this.ctx.font = '8px monospace';
+          this.ctx.textAlign = 'right';
+          const val = (1.0 - i * 0.25).toFixed(2);
+          this.ctx.fillText(`${val}M`, padL - 4, y + 3);
+        }
+
+        if (state.chartPoints.length < 2) return;
+
+        const maxPoints = 80;
+        const startIdx = Math.max(0, state.chartPoints.length - maxPoints);
+        const visible = state.chartPoints.slice(startIdx);
+
+        // 1. Draw Reactant Curve (Red/Pink)
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = '#f43f5e';
+        this.ctx.lineWidth = 2;
+        visible.forEach((pt, idx) => {
+          const x = padL + (idx / (maxPoints - 1)) * (w - padL - padR);
+          const y = (h - padB) - pt.reac * (h - padT - padB);
+          if (idx === 0) this.ctx.moveTo(x, y);
+          else this.ctx.lineTo(x, y);
+        });
+        this.ctx.stroke();
+
+        // 2. Draw Product Curve (Cyan/Blue)
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = '#38bdf8';
+        this.ctx.lineWidth = 2;
+        visible.forEach((pt, idx) => {
+          const x = padL + (idx / (maxPoints - 1)) * (w - padL - padR);
+          const y = (h - padB) - pt.prod * (h - padT - padB);
+          if (idx === 0) this.ctx.moveTo(x, y);
+          else this.ctx.lineTo(x, y);
+        });
+        this.ctx.stroke();
+      }
+    }
+
+    /* =========================================================================
+     * 5. APPARATUS CONTROLLER & ENGINE
+     * ========================================================================= */
+    let molSim = null;
+    let chartRenderer = null;
+    let animFrameId = null;
+    let lastTimestamp = 0;
+
+    const el = {
+      eqSysTitle: document.getElementById('eq-sys-title'),
+      eqThermoBadge: document.getElementById('eq-thermo-badge'),
+      eqFormula: document.getElementById('eq-formula-text'),
+      eqColorLegend: document.getElementById('eq-color-legend'),
+      valTempLabel: document.getElementById('val-temp-label'),
+      btnBathIce: document.getElementById('btn-bath-ice'),
+      btnBathRoom: document.getElementById('btn-bath-room'),
+      btnBathHot: document.getElementById('btn-bath-hot'),
+      cardPressureVolume: document.getElementById('card-pressure-volume'),
+      sliderVolume: document.getElementById('slider-volume'),
+      valVolLabel: document.getElementById('val-vol-label'),
+      reagentsActionGrid: document.getElementById('reagents-action-grid'),
+      legendLabelReac: document.getElementById('legend-label-reac'),
+      legendLabelProd: document.getElementById('legend-label-prod'),
+      labelMolPctReac: document.getElementById('label-mol-pct-reac'),
+      labelMolPctProd: document.getElementById('label-mol-pct-prod'),
+      barMolReac: document.getElementById('bar-mol-reac'),
+      barMolProd: document.getElementById('bar-mol-prod'),
+      shiftBanner: document.getElementById('shift-banner'),
+      shiftBannerText: document.getElementById('shift-banner-text'),
+      apparatusSys1: document.getElementById('apparatus-sys1'),
+      apparatusLiquid: document.getElementById('apparatus-liquid'),
+      gasFillRect: document.getElementById('gas-fill-rect'),
+      gasPlunger: document.getElementById('gas-plunger'),
+      bathLabelText: document.getElementById('bath-label-text'),
+      tube1Liquid: document.getElementById('tube1-liquid'),
+      tube2Liquid: document.getElementById('tube2-liquid'),
+      tube3Liquid: document.getElementById('tube3-liquid'),
+      dropperAssembly: document.getElementById('dropper-assembly'),
+      dropperDrop: document.getElementById('dropper-drop'),
+      btnReEquilibrate: document.getElementById('btn-re-equilibrate'),
+      rateBalanceLabel: document.getElementById('rate-balance-label'),
+      eqShiftBadge: document.getElementById('eq-shift-badge'),
+      lcdAbsorbanceVal: document.getElementById('lcd-absorbance-val'),
+      lcdTransmitVal: document.getElementById('lcd-transmit-val'),
+      lcdColorDesc: document.getElementById('lcd-color-desc'),
+      valKcDisplay: document.getElementById('val-kc-display'),
+      valQcDisplay: document.getElementById('val-qc-display'),
+      shiftPredictionText: document.getElementById('shift-prediction-text'),
+      tableBody: document.getElementById('table-body'),
+      btnClearLog: document.getElementById('btn-clear-log'),
+      btnExportCsv: document.getElementById('btn-export-csv'),
+      btnSaveChart: document.getElementById('btn-save-chart'),
+      btnSoundToggle: document.getElementById('btn-sound-toggle'),
+      soundText: document.getElementById('sound-text'),
+      btnGuideModal: document.getElementById('btn-guide-modal'),
+      guideModal: document.getElementById('guideModal'),
+      btnCloseModal: document.getElementById('btn-close-modal'),
+      btnResetAll: document.getElementById('btn-reset-all'),
+      toastBox: document.getElementById('toastBox')
+    };
+
+    function showToast(msg) {
+      el.toastBox.textContent = msg;
+      el.toastBox.classList.add('show');
+      setTimeout(() => el.toastBox.classList.remove('show'), 3200);
+    }
+
+    /* Le Chatelier Reaction Shift Logic */
+    function applyEquilibriumShift(stressType, amount, description) {
+      state.lastStressDesc = description;
+      const sys = EQUILIBRIUM_SYSTEMS[state.systemKey];
+
+      let oldQc = state.qc;
+      let newShift = 'none';
+
+      if (stressType === 'add_reac') {
+        // Adding reactant increases reactant concentration instantaneously: Qc drops below Kc
+        state.concReac = Math.min(0.95, state.concReac + amount);
+        state.qc = state.kc * 0.25;
+        // Target shifts to right to consume added reactant
+        state.targetConcProd = Math.min(0.85, state.targetConcProd + amount * 0.65);
+        state.targetConcReac = 1.0 - state.targetConcProd;
+        newShift = 'right';
+      } else if (stressType === 'add_prod') {
+        // Adding product increases Qc above Kc
+        state.concProd = Math.min(0.95, state.concProd + amount);
+        state.qc = state.kc * 3.5;
+        // Target shifts to left
+        state.targetConcReac = Math.min(0.85, state.targetConcReac + amount * 0.65);
+        state.targetConcProd = 1.0 - state.targetConcReac;
+        newShift = 'left';
+      } else if (stressType === 'remove_reac') {
+        // Removing reactant: Qc rises above Kc, shifts left
+        state.concReac = Math.max(0.15, state.concReac - amount);
+        state.qc = state.kc * 2.8;
+        state.targetConcReac = Math.max(0.20, state.targetConcReac - amount * 0.5);
+        state.targetConcProd = 1.0 - state.targetConcReac;
+        newShift = 'left';
+      } else if (stressType === 'temp_change') {
+        // Temperature effect changes Kc value!
+        const deltaT = state.temperature - 25;
+        if (sys.isExo) {
+          // Exothermic: T up -> Kc drops, shifts left. T down -> Kc rises, shifts right.
+          state.kc = sys.baseKc * Math.pow(0.96, deltaT);
+        } else {
+          // Endothermic: T up -> Kc rises, shifts right. T down -> Kc drops, shifts left.
+          state.kc = sys.baseKc * Math.pow(1.04, deltaT);
+        }
+
+        if (deltaT > 5) {
+          newShift = sys.isExo ? 'left' : 'right';
+          state.targetConcProd = sys.isExo ? 0.25 : 0.80;
+        } else if (deltaT < -5) {
+          newShift = sys.isExo ? 'right' : 'left';
+          state.targetConcProd = sys.isExo ? 0.80 : 0.25;
+        } else {
+          newShift = 'none';
+          state.targetConcProd = 0.50;
+        }
+        state.targetConcReac = 1.0 - state.targetConcProd;
+        state.qc = (newShift === 'right') ? state.kc * 0.4 : (newShift === 'left' ? state.kc * 2.5 : state.kc);
+      } else if (stressType === 'volume_pressure') {
+        // Gas Volume change for 2NO2 (2 mol) <-> N2O4 (1 mol)
+        // V smaller (P higher) -> shifts to 1 mol (right/N2O4)
+        // V larger (P lower) -> shifts to 2 mol (left/NO2)
+        if (state.volumeMl < 40) {
+          // Compressed: instantaneous color gets darker briefly, then shifts right to colorless N2O4
+          newShift = 'right';
+          state.targetConcProd = 0.75;
+          state.targetConcReac = 0.25;
+          state.qc = state.kc * 0.35;
+        } else if (state.volumeMl > 60) {
+          // Expanded: shifts left to brown NO2
+          newShift = 'left';
+          state.targetConcReac = 0.75;
+          state.targetConcProd = 0.25;
+          state.qc = state.kc * 2.8;
+        } else {
+          newShift = 'none';
+          state.targetConcProd = 0.50;
+          state.targetConcReac = 0.50;
+          state.qc = state.kc;
+        }
+      }
+
+      state.shiftDirection = newShift;
+      updateShiftDisplay();
+      logStressEvent();
+    }
+
+    function updateShiftDisplay() {
+      if (state.shiftDirection === 'right') {
+        el.eqShiftBadge.textContent = 'GESER KE KANAN';
+        el.eqShiftBadge.className = 'lcd-status-badge shift-right';
+        el.shiftBannerText.textContent = `Aksi ${state.lastStressDesc} -> Reaksi Bergeser ke KANAN (Membentuk Produk)`;
+        el.rateBalanceLabel.textContent = 'v₁ > v₂ (BERGESER KE KANAN)';
+        el.rateBalanceLabel.style.color = '#38bdf8';
+        el.shiftPredictionText.textContent = 'Qc < Kc (Geser Kanan)';
+      } else if (state.shiftDirection === 'left') {
+        el.eqShiftBadge.textContent = 'GESER KE KIRI';
+        el.eqShiftBadge.className = 'lcd-status-badge shift-left';
+        el.shiftBannerText.textContent = `Aksi ${state.lastStressDesc} -> Reaksi Bergeser ke KIRI (Membentuk Reaktan)`;
+        el.rateBalanceLabel.textContent = 'v₁ < v₂ (BERGESER KE KIRI)';
+        el.rateBalanceLabel.style.color = '#f43f5e';
+        el.shiftPredictionText.textContent = 'Qc > Kc (Geser Kiri)';
+      } else {
+        el.eqShiftBadge.textContent = 'SETIMBANG';
+        el.eqShiftBadge.className = 'lcd-status-badge';
+        el.shiftBannerText.textContent = 'Sistem Berada dalam Kesetimbangan Dinamis (Qc = Kc)';
+        el.rateBalanceLabel.textContent = 'v₁ = v₂ (SETIMBANG)';
+        el.rateBalanceLabel.style.color = '#10f2a7';
+        el.shiftPredictionText.textContent = 'Qc = Kc (Tetap)';
+      }
+
+      el.valKcDisplay.innerHTML = state.kc.toExponential(2);
+      el.valQcDisplay.innerHTML = state.qc.toExponential(2);
+    }
+
+    function logStressEvent() {
+      const sys = EQUILIBRIUM_SYSTEMS[state.systemKey];
+      const runNum = state.tableLog.length + 1;
+      const shiftStr = (state.shiftDirection === 'right') ? '&rarr; Kanan' : ((state.shiftDirection === 'left') ? '&larr; Kiri' : 'Setimbang');
+      const qcKcStr = (state.shiftDirection === 'right') ? 'Qc < Kc' : ((state.shiftDirection === 'left') ? 'Qc > Kc' : 'Qc = Kc');
+
+      let colorResult = '';
+      if (state.systemKey === 'no2_n2o4') colorResult = (state.targetConcProd > 0.6) ? 'Bening Pucat' : 'Cokelat Pekat';
+      else if (state.systemKey === 'fe_scn') colorResult = (state.targetConcProd > 0.6) ? 'Merah Darah Tua' : 'Kuning Muda';
+      else if (state.systemKey === 'cro4_cr2o7') colorResult = (state.targetConcProd > 0.6) ? 'Jingga / Oranye' : 'Kuning Terang';
+      else colorResult = (state.targetConcProd > 0.6) ? 'Biru Pekat' : 'Pink Merah Muda';
+
+      const entry = {
+        num: runNum,
+        sys: sys.name.split(':')[0],
+        stress: state.lastStressDesc,
+        shift: shiftStr,
+        qckc: qcKcStr,
+        color: colorResult
+      };
+
+      state.tableLog.push(entry);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:700; color:#a855f7;">#${entry.num}</td>
+        <td>${entry.sys}</td>
+        <td>${entry.stress}</td>
+        <td style="font-weight:700; color:${state.shiftDirection === 'right' ? '#38bdf8' : '#f43f5e'};">${entry.shift}</td>
+        <td>${entry.qckc}</td>
+        <td style="color:#e9d5ff;">${entry.color}</td>
+      `;
+      el.tableBody.prepend(tr);
+    }
+
+    function updateSystemUI() {
+      const sys = EQUILIBRIUM_SYSTEMS[state.systemKey];
+      el.eqSysTitle.textContent = sys.name;
+      el.eqThermoBadge.innerHTML = sys.thermo;
+      el.eqFormula.innerHTML = sys.equation;
+      el.legendLabelReac.textContent = sys.reacName;
+      el.legendLabelProd.textContent = sys.prodName;
+
+      // Reset concentrations and temperature for clean switch
+      state.concReac = 0.50;
+      state.concProd = 0.50;
+      state.targetConcReac = 0.50;
+      state.targetConcProd = 0.50;
+      state.temperature = 25;
+      state.kc = sys.baseKc;
+      state.qc = sys.baseKc;
+      state.shiftDirection = 'none';
+
+      // Reset bath buttons
+      [el.btnBathIce, el.btnBathRoom, el.btnBathHot].forEach(b => b.classList.remove('active'));
+      el.btnBathRoom.classList.add('active');
+      el.valTempLabel.textContent = '25 °C (Suhu Kamar)';
+
+      // Gas vs Liquid Apparatus
+      if (sys.isGas) {
+        el.apparatusSys1.setAttribute('opacity', '1');
+        el.apparatusLiquid.setAttribute('opacity', '0');
+        el.cardPressureVolume.style.display = 'block';
+        el.sliderVolume.value = state.volumeMl = 50;
+        el.valVolLabel.textContent = '50 mL (P = 1.0 atm)';
+      } else {
+        el.apparatusSys1.setAttribute('opacity', '0');
+        el.apparatusLiquid.setAttribute('opacity', '1');
+        el.cardPressureVolume.style.display = 'none';
+      }
+
+      // Populate reagent buttons
+      el.reagentsActionGrid.innerHTML = '';
+      sys.reagents.forEach(r => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-stress';
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>${r.name}</span>
+        `;
+        btn.title = r.desc;
+        btn.addEventListener('click', () => {
+          triggerDropperPipette(() => {
+            sound.playDropSound();
+            if (r.action.startsWith('add_reac') || r.action === 'add_acid' || r.action === 'add_cl') {
+              applyEquilibriumShift('add_reac', 0.25, r.name);
+            } else if (r.action.startsWith('add_prod') || r.action === 'add_base' || r.action === 'add_water') {
+              applyEquilibriumShift('add_prod', 0.25, r.name);
+            } else if (r.action.startsWith('remove')) {
+              applyEquilibriumShift('remove_reac', 0.25, r.name);
+            } else {
+              applyEquilibriumShift('add_reac', 0.15, r.name);
+            }
+          });
+        });
+        el.reagentsActionGrid.appendChild(btn);
+      });
+
+      updateShiftDisplay();
+      if (molSim) molSim.initParticles();
+    }
+
+    function triggerDropperPipette(callback) {
+      if (state.systemKey === 'no2_n2o4') {
+        // Direct injection sound
+        sound.playPistonHiss();
+        callback();
+        return;
+      }
+      el.dropperAssembly.setAttribute('opacity', '1');
+      el.dropperDrop.setAttribute('cy', '85');
+
+      let dropY = 85;
+      const dropTimer = setInterval(() => {
+        dropY += 6;
+        el.dropperDrop.setAttribute('cy', dropY.toString());
+        if (dropY >= 140) {
+          clearInterval(dropTimer);
+          el.dropperAssembly.setAttribute('opacity', '0');
+          callback();
+        }
+      }, 20);
+    }
+
+    /* Animation Heartbeat Loop */
+    function simulationLoop(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const dt = Math.min(0.08, (timestamp - lastTimestamp) / 1000.0);
+      lastTimestamp = timestamp;
+
+      // 1. Smoothly adapt concentrations toward target (Le Chatelier relaxation)
+      const relaxSpeed = 0.65;
+      const dReac = (state.targetConcReac - state.concReac) * relaxSpeed * dt;
+      const dProd = (state.targetConcProd - state.concProd) * relaxSpeed * dt;
+
+      state.concReac += dReac;
+      state.concProd += dProd;
+
+      // Re-normalize sum to 1.0
+      const total = state.concReac + state.concProd;
+      if (total > 0) {
+        state.concReac /= total;
+        state.concProd /= total;
+      }
+
+      // Slowly bring Qc back toward Kc as equilibrium is restored
+      if (Math.abs(state.qc - state.kc) > 0.001) {
+        state.qc += (state.kc - state.qc) * 0.4 * dt;
+        el.valQcDisplay.innerHTML = state.qc.toExponential(2);
+      }
+
+      // 2. Update UI indicators
+      const pctReac = Math.round(state.concReac * 100);
+      const pctProd = Math.round(state.concProd * 100);
+      el.labelMolPctReac.textContent = `${pctReac}%`;
+      el.labelMolPctProd.textContent = `${pctProd}%`;
+      el.barMolReac.style.width = `${pctReac}%`;
+      el.barMolProd.style.width = `${pctProd}%`;
+
+      // 3. Compute Colorimetry & Absorbance
+      const sys = EQUILIBRIUM_SYSTEMS[state.systemKey];
+      const rVal = Math.round(sys.colorReac[0] * state.concReac + sys.colorProd[0] * state.concProd);
+      const gVal = Math.round(sys.colorReac[1] * state.concReac + sys.colorProd[1] * state.concProd);
+      const bVal = Math.round(sys.colorReac[2] * state.concReac + sys.colorProd[2] * state.concProd);
+
+      const colorHex = `rgb(${rVal}, ${gVal}, ${bVal})`;
+
+      // Update Apparatus SVG colors
+      if (sys.isGas) {
+        // Gas opacity based on NO2 (brown reactant) concentration + compression
+        const gasOpacity = Math.min(0.95, 0.15 + (state.concReac * 0.7) * (50 / state.volumeMl));
+        el.gasFillRect.setAttribute('opacity', gasOpacity.toFixed(2));
+      } else {
+        el.tube2Liquid.setAttribute('fill', colorHex);
+        el.tube1Liquid.setAttribute('fill', `rgb(${sys.colorReac[0]}, ${sys.colorReac[1]}, ${sys.colorReac[2]})`);
+        el.tube3Liquid.setAttribute('fill', `rgb(${sys.colorProd[0]}, ${sys.colorProd[1]}, ${sys.colorProd[2]})`);
+      }
+
+      // Digital Absorbance reading: A ~ proportional to colored component
+      const absorbance = (0.05 + state.concProd * 0.85).toFixed(3);
+      const transmit = Math.max(1.0, 100.0 * Math.pow(10, -parseFloat(absorbance))).toFixed(1);
+      el.lcdAbsorbanceVal.textContent = `${absorbance} A`;
+      el.lcdTransmitVal.textContent = `Transmitansi: ${transmit} %`;
+
+      if (state.concProd > 0.65) el.lcdColorDesc.textContent = 'Warna: Sangat Pekat';
+      else if (state.concProd < 0.35) el.lcdColorDesc.textContent = 'Warna: Pucat / Pudar';
+      else el.lcdColorDesc.textContent = 'Warna: Sedang / Seimbang';
+
+      // 4. Update 2D Molecular Box
+      if (molSim) {
+        molSim.update();
+        molSim.draw();
+      }
+
+      // 5. Append Chart Points
+      state.chartTime += dt;
+      if (state.chartPoints.length === 0 || state.chartTime - state.chartPoints[state.chartPoints.length - 1].t > 0.25) {
+        state.chartPoints.push({
+          t: state.chartTime,
+          reac: state.concReac,
+          prod: state.concProd
+        });
+        if (chartRenderer) chartRenderer.render();
+      }
+
+      animFrameId = requestAnimationFrame(simulationLoop);
+    }
+
+    /* =========================================================================
+     * 6. EVENT LISTENERS
+     * ========================================================================= */
+    function setupEventListeners() {
+      // System selection buttons
+      document.querySelectorAll('.btn-system').forEach(btn => {
+        btn.addEventListener('click', () => {
+          sound.playDropSound();
+          document.querySelectorAll('.btn-system').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.systemKey = btn.getAttribute('data-sys');
+          updateSystemUI();
+        });
+      });
+
+      // Bath temperature buttons
+      const bathButtons = [
+        { el: el.btnBathIce, temp: 0, label: '0 °C (Air Es - Dingin)' },
+        { el: el.btnBathRoom, temp: 25, label: '25 °C (Suhu Kamar)' },
+        { el: el.btnBathHot, temp: 80, label: '80 °C (Air Panas)' }
+      ];
+
+      bathButtons.forEach(b => {
+        b.el.addEventListener('click', () => {
+          sound.playDropSound();
+          bathButtons.forEach(x => x.el.classList.remove('active'));
+          b.el.classList.add('active');
+          state.temperature = b.temp;
+          el.valTempLabel.textContent = b.label;
+          el.bathLabelText.textContent = `PENANGAS AIR (${b.temp} °C)`;
+          applyEquilibriumShift('temp_change', 0, `Suhu diubah ke ${b.temp} °C`);
+          showToast(`Suhu penangas diatur ke ${b.temp} °C`);
+        });
+      });
+
+      // Volume slider (Gas Syringe)
+      el.sliderVolume.addEventListener('input', (e) => {
+        state.volumeMl = parseInt(e.target.value);
+        state.pressureAtm = (50.0 / state.volumeMl).toFixed(1);
+        el.valVolLabel.textContent = `${state.volumeMl} mL (P = ${state.pressureAtm} atm)`;
+
+        // Adjust syringe SVG plunger position
+        const deltaX = (state.volumeMl - 20) * 3.0;
+        el.gasPlunger.setAttribute('transform', `translate(${deltaX}, 0)`);
+        el.gasFillRect.setAttribute('width', `${deltaX + 80}`);
+
+        sound.playPistonHiss();
+        applyEquilibriumShift('volume_pressure', 0, `Volume diubah ke ${state.volumeMl} mL`);
+      });
+
+      // Re-equilibrate action button
+      el.btnReEquilibrate.addEventListener('click', () => {
+        sound.playChimeEquilibrium();
+        state.targetConcReac = 0.50;
+        state.targetConcProd = 0.50;
+        state.qc = state.kc;
+        state.shiftDirection = 'none';
+        updateShiftDisplay();
+        showToast('Sistem dipulihkan ke titik kesetimbangan stabil (v₁ = v₂).');
+      });
+
+      // Reset All button
+      el.btnResetAll.addEventListener('click', () => {
+        sound.playChimeEquilibrium();
+        state.chartPoints = [];
+        state.tableLog = [];
+        el.tableBody.innerHTML = '';
+        updateSystemUI();
+        showToast('Seluruh gangguan & riwayat praktikum berhasil di-reset.');
+      });
+
+      // Clear Log
+      el.btnClearLog.addEventListener('click', () => {
+        sound.playDropSound();
+        state.tableLog = [];
+        el.tableBody.innerHTML = '';
+        showToast('Tabel riwayat pengamatan dikosongkan.');
+      });
+
+      // Export CSV
+      el.btnExportCsv.addEventListener('click', () => {
+        sound.playDropSound();
+        if (state.tableLog.length === 0) {
+          showToast('Belum ada data pengamatan untuk diekspor!');
+          return;
+        }
+
+        let csv = 'Run,Sistem,Perlakuan/Aksi,Arah Pergeseran,Qc vs Kc,Warna Teramati\n';
+        state.tableLog.forEach(row => {
+          csv += `"${row.num}","${row.sys}","${row.stress}","${row.shift.replace('&rarr;', '->').replace('&larr;', '<-')}","${row.qckc}","${row.color}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Data_Praktikum_Kesetimbangan_Kimia_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('File CSV berhasil diunduh!');
+      });
+
+      // Save Chart PNG
+      el.btnSaveChart.addEventListener('click', () => {
+        sound.playDropSound();
+        const canvas = document.getElementById('kineticsChart');
+        const link = document.createElement('a');
+        link.download = `Grafik_Kesetimbangan_Kimia_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('Grafik berhasil disimpan sebagai gambar PNG!');
+      });
+
+      // Sound Toggle
+      el.btnSoundToggle.addEventListener('click', () => {
+        const isNowOn = sound.toggleMute();
+        el.soundText.textContent = isNowOn ? 'Suara: ON' : 'Suara: MUTE';
+        el.btnSoundToggle.style.opacity = isNowOn ? '1' : '0.6';
+      });
+
+      // Guide Modal
+      el.btnGuideModal.addEventListener('click', () => {
+        sound.playDropSound();
+        el.guideModal.classList.add('show');
+      });
+
+      el.btnCloseModal.addEventListener('click', () => {
+        sound.playDropSound();
+        el.guideModal.classList.remove('show');
+      });
+
+      el.guideModal.addEventListener('click', (e) => {
+        if (e.target === el.guideModal) el.guideModal.classList.remove('show');
+      });
+    }
+
+    /* Initialize Virtual Lab on DOM Ready */
+    window.addEventListener('DOMContentLoaded', () => {
+      molSim = new MolecularEquilibriumSimulator('molCanvas');
+      chartRenderer = new EquilibriumChartRenderer('kineticsChart');
+      setupEventListeners();
+      updateSystemUI();
+      animFrameId = requestAnimationFrame(simulationLoop);
+    });
+
+  </script>
+</body>
+</html>
