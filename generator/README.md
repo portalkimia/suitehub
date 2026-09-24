@@ -26,17 +26,10 @@ Aplikasi **Generator Administrasi Kimia AI** dirancang khusus untuk guru Kimia S
 - Langkah inti (Memahami, Mengaplikasi, Merefleksi) dirancang otomatis mengikuti alur sintaks model yang dipilih.
 
 ### 3. 🚀 Integrasi & Sinkronisasi Media PortalKimia
-- Terhubung langsung dengan 8 simulasi interaktif dari suite **Portal-Bahan-Ajar-Kimia**:
-  1. *Sejarah Perkembangan SPU* (`SejarahSPU.html`)
-  2. *Penentuan Periode dan Golongan Unsur* (`PeriodeGolongan.html`)
-  3. *Bilangan Kuantum & Orbital 3D* (`BilanganKuantum.html`)
-  4. *Konfigurasi Elektron Mekanika Kuantum* (`KonfigurasiKuantum.html`)
-  5. *Konfigurasi Elektron Model Bohr* (`KonfigurasiBohr.html`)
-  6. *Virtual Lab Titrasi Asam Basa* (`Laboratorium_Kimia_Virtual.html`)
-  7. *Simulasi Interaktif Sel Volta* (`SelVolta.html`)
-  8. *Simulasi Interaktif Sel Elektrolisis* (`SelElektrolisis.html`)
-- **Sinkronisasi Dinamis**: Dilengkapi tombol `🔄 Sinkronkan Media` yang membaca file `portal_media_manifest.json` serta memori `localStorage` (`chemportal_materials`). Jika Anda menambahkan media baru pada Portal Media, materi di generator akan langsung diperbarui secara otomatis.
-
+- Katalog bawaan berisi **75 media pembelajaran** untuk kelas 10, 11, 12, dan kategori umum.
+- Tersedia pula **18 praktikum virtual Deep Dive** dengan filter katalog tersendiri.
+- Setiap entri membawa topik, kelas/fase, tujuan, kegiatan, asesmen, serta tautan media yang dapat diterapkan langsung ke generator AI.
+- Manifest `portal_media_manifest.json` dimuat otomatis dan dapat diperbarui melalui tombol `🔄 Sinkronkan Media`.
 ### 4. 📂 Upload / Drag & Drop Berkas (Multimodal)
 - Kotak unggah berkas rujukan yang mendukung:
   - Berkas interaktif `.html` (diekstraksi teks dan konten pembelajarannya secara otomatis di browser).
@@ -86,3 +79,12 @@ Bila Anda sudah pernah men-deploy `Code.gs` sebelumnya:
 
 > [!NOTE]
 > URL Web App Anda tetap sama persis, sehingga Anda **tidak perlu mengubah URL** di antarmuka GitHub Pages.
+
+## 🔐 Keamanan Backend
+
+- API key Gemini tidak disimpan di `Code.gs`; simpan sebagai Script Property `GEMINI_API_KEY`.
+- Semua aksi POST memerlukan token guru dari Script Property `GENERATOR_ACCESS_TOKEN`.
+- Jalankan fungsi `buatTokenAksesGuru()` dari editor GAS untuk membuat token baru.
+- Token frontend hanya disimpan selama sesi tab browser.`r`n- Backend membatasi maksimal 20 proses per menit.
+- Ikuti langkah lengkap pada `PANDUAN_KEAMANAN_BACKEND.md`.
+
