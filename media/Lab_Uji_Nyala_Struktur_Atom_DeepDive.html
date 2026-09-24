@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorium Virtual Struktur Atom & Uji Nyala Api — Standar PhET / Labster</title>
+  <style>
+    :root {
+      --bg-dark: #070a13;
+      --card-bg: rgba(17, 24, 39, 0.88);
+      --card-border: #2e384d;
+      --accent-cyan: #00f2fe;
+      --accent-blue: #38bdf8;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #c084fc;
+      --accent-emerald: #10b981;
+      --text-main: #f3f4f6;
+      --text-muted: #94a3b8;
+      --lcd-bg: #03131a;
+      --lcd-text: #22d3ee;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(245, 158, 11, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 85% 80%, rgba(192, 132, 252, 0.08) 0%, transparent 35%);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: rgba(11, 15, 25, 0.95);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent-amber), var(--accent-rose), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge-lab {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid var(--accent-amber);
+      color: var(--accent-amber);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mode-nav {
+      display: flex;
+      gap: 8px;
+      background: rgba(30, 41, 59, 0.8);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .mode-btn.active {
+      color: #090d16;
+      background: var(--accent-amber);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-audio {
+      background: rgba(22, 27, 34, 0.9);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .btn-audio.active {
+      border-color: var(--accent-amber);
+      color: var(--accent-amber);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 16px;
+      padding: 16px 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    @media (max-width: 1100px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Stage Viewport */
+    .stage-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stage-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      min-height: 480px;
+      overflow: hidden;
+    }
+
+    .stage-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      z-index: 10;
+    }
+
+    .stage-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent-amber);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .viewport-canvas {
+      width: 100%;
+      height: 430px;
+      border-radius: 8px;
+      background: #040711;
+      box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.95);
+    }
+
+    /* Bottom LCD Instrument Bar */
+    .lcd-panel {
+      background: var(--lcd-bg);
+      border: 1px solid #164e63;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: inset 0 0 16px rgba(34, 211, 238, 0.06);
+    }
+
+    .lcd-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lcd-lbl {
+      font-size: 0.72rem;
+      color: #67e8f9;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .lcd-val {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+    }
+
+    .lcd-val.alt {
+      color: #facc15;
+      text-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
+    }
+
+    .lcd-val.warn {
+      color: #f43f5e;
+      text-shadow: 0 0 8px rgba(244, 63, 94, 0.6);
+    }
+
+    /* Right Sidebar Controls */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .control-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-heading {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+    }
+
+    .card-heading span {
+      color: var(--accent-amber);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-label .val {
+      color: var(--accent-cyan);
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    select, input[type="range"] {
+      width: 100%;
+    }
+
+    select {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    select:focus {
+      border-color: var(--accent-amber);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-amber);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-amber), #ea580c);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: #334155;
+    }
+
+    /* Theoretical Insight */
+    .info-card {
+      background: rgba(17, 24, 39, 0.5);
+      border: 1px dashed #334155;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .info-card strong {
+      color: var(--accent-amber);
+    }
+
+    /* Observation Table */
+    .table-container {
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      background: #090d16;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    th, td {
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--text-muted);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td {
+      color: var(--text-main);
+      font-family: monospace;
+    }
+
+    footer {
+      background: #070a13;
+      border-top: 1px solid var(--card-border);
+      padding: 8px 24px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    /* === PORTAL BACK NAVIGATION BUTTONS === */
+    .nav-back-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .btn-back-hub, .btn-back-portal {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+      line-height: 1;
+      height: 32px;
+      box-sizing: border-box;
+    }
+    .btn-back-hub {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .btn-back-hub:hover {
+      background: rgba(16, 185, 129, 0.3);
+      border-color: #34d399;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    }
+    .btn-back-portal {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+    .btn-back-portal:hover {
+      background: rgba(99, 102, 241, 0.3);
+      border-color: #818cf8;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+    }
+    @media (max-width: 640px) {
+      .text-hide-mobile { display: none; }
+      .btn-back-hub, .btn-back-portal { padding: 6px 8px; font-size: 10px; }
+      .nav-back-group { margin-right: 6px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-title">
+      <!-- Navigation Back Button to PortalKimia Media & Lab Virtual -->
+      <div class="nav-back-group">
+        <a href="LaboratoriumVirtual.html" class="btn-back-hub" title="Kembali ke Katalog Laboratorium Virtual" onclick="handlePortalBack(event, 'LaboratoriumVirtual.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Katalog Lab</span>
+        </a>
+        <a href="index.html" class="btn-back-portal" title="Kembali ke Beranda PortalKimia Media" onclick="handlePortalBack(event, 'index.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="text-hide-mobile">Portal Media</span>
+        </a>
+      </div>
+
+      <h1>Laboratorium Virtual Struktur Atom & Uji Nyala Api</h1>
+      <span class="badge-lab">🔥 PhET / Labster Standard</span>
+    </div>
+
+    <!-- Mode Navigation Tabs -->
+    <nav class="mode-nav">
+      <button class="mode-btn active" id="btnModeFlame" onclick="setLabMode('flame')">
+        🔥 Uji Nyala Api Bunsen
+      </button>
+      <button class="mode-btn" id="btnModeBohr" onclick="setLabMode('bohr')">
+        ⚛️ Model Atom Bohr & Transisi Kuantum
+      </button>
+      <button class="mode-btn" id="btnModeSpectra" onclick="setLabMode('spectra')">
+        🌈 Spektrum Garis Emisi Diskrit
+      </button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="btn-audio active" id="btnAudioToggle" title="Toggle Sound FX" onclick="toggleAudio()">
+        🔊
+      </button>
+      <button class="btn-action btn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="exportDataCSV()">
+        📥 Ekspor CSV
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN LAB AREA -->
+  <main>
+    <!-- Visual Stage Viewport (Left) -->
+    <section class="stage-container">
+      <div class="stage-card">
+        <!-- Stage Top Bar -->
+        <div class="stage-header-bar">
+          <div class="stage-title" id="stageTitle">
+            <span>🔥</span> UJI NYALA EMISI ATOM DENGAN PEMBAKAR BUNSEN
+          </div>
+          <div id="stageSubBadge" style="font-size:0.75rem; color:#94a3b8; font-family:monospace;">
+            SUHU NYALA: 1350 °C (API OKSIDASI BIRU)
+          </div>
+        </div>
+
+        <!-- 60 FPS HTML5 Canvas Viewport -->
+        <canvas id="labCanvas" class="viewport-canvas" width="880" height="430"></canvas>
+      </div>
+
+      <!-- Real-time LCD Multi-meter Monitor -->
+      <div class="lcd-panel" id="bottomLcdBar">
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd1">Kation Logam Diuji:</span>
+          <span class="lcd-val" id="valLcd1">Natrium (Na⁺)</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd2">Warna Karakteristik Nyala:</span>
+          <span class="lcd-val alt" id="valLcd2">Kuning Emas Terang</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd3">Panjang Gelombang Emisi (λ):</span>
+          <span class="lcd-val warn" id="valLcd3">589.0 nm (D-Line)</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd4">Energi Foton Kuantum (ΔE):</span>
+          <span class="lcd-val" id="valLcd4" style="color:#10b981;">2.10 eV (3.37 × 10⁻¹⁹ J)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sidebar Controls (Right) -->
+    <aside class="sidebar">
+
+      <!-- Dynamic Mode Controls -->
+      <div class="control-card">
+        <div class="card-heading">
+          <span>⚙️</span> Parameter Eksperimen
+        </div>
+
+        <!-- MODE 1: FLAME TEST CONTROLS -->
+        <div id="controlsFlame" class="mode-control-block">
+          <div class="form-group">
+            <label class="form-label">Pilih Garam Sampel Kation Logam:</label>
+            <select id="selFlameCation" onchange="updateFlameCation()">
+              <option value="Na" selected>Natrium (NaCl - Kuning Emas Terang 589 nm)</option>
+              <option value="Li">Litium (LiCl - Merah Karmin / Crimson 671 nm)</option>
+              <option value="K">Kalium (KCl - Ungu Muda / Lilac-Violet 766 nm)</option>
+              <option value="Ca">Kalsium (CaCl₂ - Jingga Merah Bata 622 nm)</option>
+              <option value="Sr">Stronsium (SrCl₂ - Merah Darah / Scarlet 660 nm)</option>
+              <option value="Ba">Barium (BaCl₂ - Hijau Apel Muda 524 nm)</option>
+              <option value="Cu">Tembaga(II) (CuCl₂ - Hijau Zamrud Kebiruan 510 nm)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Lubang Udara Bunsen (Air Collar):</span>
+              <span class="val" id="valAirCollar">Terbuka Penuh (Api Biru)</span>
+            </label>
+            <input type="range" id="rngAirCollar" min="0" max="100" value="100" oninput="updateAirCollar(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-secondary" onclick="cleanWireHCl()">
+              🧪 Bersihkan Kawat HCl
+            </button>
+            <button class="btn-action btn-secondary" onclick="dipSalt()">
+              🥄 Ambil Garam Sampel
+            </button>
+          </div>
+
+          <div class="btn-row" style="margin-top:8px;">
+            <button class="btn-action btn-primary" id="btnInsertFlame" onclick="insertWireIntoFlame()">
+              🔥 Masukkan Kawat ke Api
+            </button>
+            <button class="btn-action btn-secondary" id="btnCobaltGlass" onclick="toggleCobaltGlass()">
+              🟦 Kaca Kobalt: OFF
+            </button>
+          </div>
+
+          <div class="btn-row" style="margin-top:8px;">
+            <button class="btn-action btn-secondary" onclick="logObservation()">
+              📝 Catat Data
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 2: BOHR MODEL CONTROLS -->
+        <div id="controlsBohr" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Atom Unsur yang Diamati:</label>
+            <select id="selBohrElement" onchange="updateBohrElement()">
+              <option value="Na">Natrium (Z = 11: Transisi 3p → 3s)</option>
+              <option value="Li">Litium (Z = 3: Transisi 2p → 2s)</option>
+              <option value="K">Kalium (Z = 19: Transisi 4p → 4s)</option>
+              <option value="H">Hidrogen (Deret Balmer n=3,4,5 → n=2)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Eksitasi Tingkat Energi Kuantum:</span>
+              <span class="val" id="valBohrLevel">Tingkat n = 3 → n = 2</span>
+            </label>
+            <div class="btn-row">
+              <button class="btn-action btn-secondary" onclick="triggerQuantumJump('excite')">
+                ⚡ Eksitasi (Serap Energi Panas)
+              </button>
+              <button class="btn-action btn-primary" onclick="triggerQuantumJump('emit')">
+                ✨ Emisi Foton (De-eksitasi)
+              </button>
+            </div>
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-secondary" onclick="logObservation()">
+              📝 Catat Data
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 3: SPECTRA CONTROLS -->
+        <div id="controlsSpectra" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Bandingkan Spektrum Emisi Kation:</label>
+            <select id="selSpectraElement" onchange="updateSpectraElement()">
+              <option value="Na">Natrium (Duplet D-Line Tajam 589.0 nm)</option>
+              <option value="Li">Litium (Garis Merah Menonjol 670.8 nm)</option>
+              <option value="K">Kalium (Garis Violet 404 nm & Inframerah 766 nm)</option>
+              <option value="Ba">Barium (Banyak Garis Spektrum Hijau-Kuning)</option>
+              <option value="Sr">Stronsium (Rapatan Garis Merah-Jingga)</option>
+              <option value="continuous">Cahaya Putih Kontinu (Matahari / Tungsten)</option>
+            </select>
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-secondary" onclick="logObservation()">
+              📝 Catat Data
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Theory Explanation Card -->
+      <div class="info-card" id="panelTheory">
+        <strong>Uji Nyala Api & Teori Kuantum:</strong> Energi termal nyala Bunsen mengeksitasi elektron terluar kation logam ke tingkat energi yang lebih tinggi. Ketika elektron kembali turun ke tingkat energi dasar (*ground state*), energi dilepaskan seketika dalam bentuk foton cahaya tampak dengan panjang gelombang diskrit: $\Delta E = h \cdot \nu = \frac{h \cdot c}{\lambda}$.
+      </div>
+
+      <!-- Observation History Table -->
+      <div class="control-card">
+        <div class="card-heading">
+          <span>📋</span> Riwayat Pengamatan Spektrokimia
+        </div>
+        <div class="table-container">
+          <table id="tblObservations">
+            <thead>
+              <tr>
+                <th>Kation / Unsur</th>
+                <th>Warna Nyala Api</th>
+                <th>λ Emisi (nm)</th>
+                <th>Energi Foton (eV)</th>
+              </tr>
+            </thead>
+            <tbody id="tblBody">
+              <!-- Logs populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>Laboratorium Spektroskopi Atom — Simulasi Uji Nyala & Transisi Kuantum 60 FPS</div>
+    <div>Sistem Bebas Kuis & Bebas LKS — Mode Eksplorasi Eksperimen Murni</div>
+  </footer>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    /* ==========================================================================
+       VIRTUAL LAB STRUKTUR ATOM & UJI NYALA API - ENGINE LENGKAP
+       ========================================================================== */
+
+    // Audio Engine via Web Audio API
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('btnAudioToggle');
+      if (audioEnabled) {
+        btn.classList.add('active');
+        btn.textContent = '🔊';
+        playSound('sizzle');
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '🔇';
+      }
+    }
+
+    function playSound(type) {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+
+        if (type === 'sizzle') {
+          // Acid dip hiss
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(1600, now);
+          osc.frequency.exponentialRampToValueAtTime(300, now + 0.15);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'flame') {
+          // Flame roar noise burst
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(90, now);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        } else if (type === 'photon') {
+          // High crystal quantum bell chime
+          [880, 1318.5, 1760].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.05);
+            gain.gain.setValueAtTime(0.18, now + i * 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.45);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.05);
+            osc.stop(now + i * 0.05 + 0.45);
+          });
+        }
+      } catch (e) {
+        console.warn("Audio error", e);
+      }
+    }
+
+    // STATE VARIABLES
+    let activeMode = 'flame'; // 'flame' | 'bohr' | 'spectra'
+    let canvas, ctx2d;
+
+    // Cations Database
+    const CATIONS = {
+      Na: {
+        symbol: 'Na⁺',
+        name: 'Natrium',
+        colorName: 'Kuning Emas Terang',
+        lambdaNm: 589.0,
+        energyEv: 2.10,
+        flameRgb: [255, 200, 10],
+        spectralLines: [589.0, 589.6]
+      },
+      Li: {
+        symbol: 'Li⁺',
+        name: 'Litium',
+        colorName: 'Merah Karmin (Crimson)',
+        lambdaNm: 670.8,
+        energyEv: 1.85,
+        flameRgb: [230, 20, 50],
+        spectralLines: [670.8, 610.3]
+      },
+      K: {
+        symbol: 'K⁺',
+        name: 'Kalium',
+        colorName: 'Ungu Muda (Lilac-Violet)',
+        lambdaNm: 766.5,
+        energyEv: 1.62,
+        flameRgb: [180, 120, 240],
+        spectralLines: [404.4, 404.7, 766.5, 769.9]
+      },
+      Ca: {
+        symbol: 'Ca²⁺',
+        name: 'Kalsium',
+        colorName: 'Jingga Merah Bata',
+        lambdaNm: 622.0,
+        energyEv: 1.99,
+        flameRgb: [255, 90, 20],
+        spectralLines: [422.7, 559.0, 622.0]
+      },
+      Sr: {
+        symbol: 'Sr²⁺',
+        name: 'Stronsium',
+        colorName: 'Merah Darah (Scarlet)',
+        lambdaNm: 660.0,
+        energyEv: 1.88,
+        flameRgb: [240, 30, 30],
+        spectralLines: [407.8, 460.7, 660.0, 680.0]
+      },
+      Ba: {
+        symbol: 'Ba²⁺',
+        name: 'Barium',
+        colorName: 'Hijau Apel Muda',
+        lambdaNm: 524.2,
+        energyEv: 2.36,
+        flameRgb: [140, 230, 40],
+        spectralLines: [455.4, 493.4, 524.2, 553.5]
+      },
+      Cu: {
+        symbol: 'Cu²⁺',
+        name: 'Tembaga(II)',
+        colorName: 'Hijau Zamrud Kebiruan',
+        lambdaNm: 510.5,
+        energyEv: 2.43,
+        flameRgb: [20, 220, 160],
+        spectralLines: [324.7, 327.4, 510.5, 521.8]
+      }
+    };
+
+    // Mode 1: Flame State
+    const flameState = {
+      cationKey: 'Na',
+      airCollarPct: 100, // 100 = full blue oxidizing flame, 0 = luminous safety flame
+      wireState: 'clean', // 'clean' | 'salted' | 'in_flame'
+      flameBurnProgress: 0,
+      cobaltGlassActive: false,
+      flameParticles: []
+    };
+
+    // Mode 2: Bohr Model State
+    const bohrState = {
+      elementKey: 'Na',
+      electronLevel: 1, // 1 = ground (e.g. 3s), 2 = excited (e.g. 3p)
+      animatingJump: false,
+      jumpProgress: 0,
+      emittedPhotons: []
+    };
+
+    // Mode 3: Spectra State
+    const spectraState = {
+      elementKey: 'Na'
+    };
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      canvas = document.getElementById('labCanvas');
+      ctx2d = canvas.getContext('2d');
+
+      initFlameParticles();
+      updateFlameCation();
+      updateMetricDisplays();
+
+      requestAnimationFrame(mainAnimationLoop);
+
+      setTimeout(() => {
+        logObservation();
+      }, 600);
+    });
+
+    // MODE SWITCHER
+    function setLabMode(mode) {
+      activeMode = mode;
+      playSound('sizzle');
+
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      if (mode === 'flame') document.getElementById('btnModeFlame').classList.add('active');
+      if (mode === 'bohr') document.getElementById('btnModeBohr').classList.add('active');
+      if (mode === 'spectra') document.getElementById('btnModeSpectra').classList.add('active');
+
+      document.querySelectorAll('.mode-control-block').forEach(p => p.style.display = 'none');
+      const stageTitle = document.getElementById('stageTitle');
+      const panelTheory = document.getElementById('panelTheory');
+      const subBadge = document.getElementById('stageSubBadge');
+
+      if (mode === 'flame') {
+        document.getElementById('controlsFlame').style.display = 'block';
+        stageTitle.innerHTML = '<span>🔥</span> UJI NYALA EMISI ATOM DENGAN PEMBAKAR BUNSEN';
+        subBadge.textContent = 'SUHU NYALA: 1350 °C (API OKSIDASI BIRU)';
+        panelTheory.innerHTML = '<strong>Uji Nyala Api Kation:</strong> Metode kualitatif identifikasi kation logam alkali dan alkali tanah. Kation dipanaskan dalam nyala api Bunsen, mengeksitasi elektron valensi. De-eksitasi kembali ke tingkat dasar memancarkan spektrum warna khas yang dapat dilihat mata secara langsung.';
+      } else if (mode === 'bohr') {
+        document.getElementById('controlsBohr').style.display = 'block';
+        stageTitle.innerHTML = '<span>⚛️</span> MODEL ATOM BOHR: EKSITASI & EMISI FOTON KUANTUM';
+        subBadge.textContent = 'TRANSISI ELEKTRON ANTARKULIT ENERGI';
+        panelTheory.innerHTML = '<strong>Model Atom Bohr:</strong> Elektron mengelilingi inti pada tingkat energi stasioner tertentu ($n = 1, 2, 3...$). Energi foton yang dipancarkan tepat sama dengan selisih energi kedua lintasan: $\Delta E = E_2 - E_1 = h \\cdot \\nu = \\frac{h \\cdot c}{\\lambda}$.';
+      } else if (mode === 'spectra') {
+        document.getElementById('controlsSpectra').style.display = 'block';
+        stageTitle.innerHTML = '<span>🌈</span> SPEKTROSKOP: SPEKTRUM EMISI GARIS DISKRIT';
+        subBadge.textContent = 'SPEKTRUM DISKRIT KISI DIFRAKSI';
+        panelTheory.innerHTML = '<strong>Spektrum Emisi Atom:</strong> Berbeda dengan cahaya matahari yang menghasilkan spektrum kontinu pelangi, gas atau uap atom panas menghasilkan garis-garis emisi diskrit yang berfungsi sebagai "sidik jari optik" unik bagi setiap unsur kimia.';
+      }
+
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // MODE 1: FLAME FUNCTIONS
+    // ==========================================
+    function initFlameParticles() {
+      flameState.flameParticles = [];
+      for (let i = 0; i < 60; i++) {
+        flameState.flameParticles.push({
+          x: 0,
+          y: 0,
+          vx: (Math.random() - 0.5) * 2,
+          vy: -3 - Math.random() * 4,
+          life: Math.random()
+        });
+      }
+    }
+
+    function updateFlameCation() {
+      flameState.cationKey = document.getElementById('selFlameCation').value;
+      playSound('sizzle');
+      updateMetricDisplays();
+    }
+
+    function updateAirCollar(val) {
+      flameState.airCollarPct = parseInt(val);
+      const lbl = document.getElementById('valAirCollar');
+      const badge = document.getElementById('stageSubBadge');
+      if (flameState.airCollarPct > 70) {
+        lbl.textContent = 'Terbuka Penuh (Api Biru Panas)';
+        badge.textContent = 'SUHU NYALA: 1350 °C (API OKSIDASI BIRU)';
+      } else if (flameState.airCollarPct > 25) {
+        lbl.textContent = 'Setengah Terbuka';
+        badge.textContent = 'SUHU NYALA: 900 °C (API CAMPURAN)';
+      } else {
+        lbl.textContent = 'Tertutup (Api Kuning Berjelaga)';
+        badge.textContent = 'SUHU NYALA: 450 °C (API KESELAMATAN)';
+      }
+    }
+
+    function cleanWireHCl() {
+      flameState.wireState = 'clean';
+      flameState.flameBurnProgress = 0;
+      playSound('sizzle');
+      alert("Kawat Nikrom dicelupkan ke botol asam HCl pekat. Permukaan kawat bersih dari residu garam!");
+    }
+
+    function dipSalt() {
+      flameState.wireState = 'salted';
+      flameState.flameBurnProgress = 0;
+      playSound('sizzle');
+      const c = CATIONS[flameState.cationKey];
+      alert(`Kawat Nikrom mengambil serbuk garam ${c.name} (${c.symbol})! Siap dimasukkan ke api.`);
+    }
+
+    function insertWireIntoFlame() {
+      if (flameState.wireState !== 'salted') {
+        alert("Ambil serbuk garam sampel terlebih dahulu dengan tombol 'Ambil Garam Sampel'!");
+        return;
+      }
+      flameState.wireState = 'in_flame';
+      flameState.flameBurnProgress = 1.0;
+      playSound('flame');
+      setTimeout(() => playSound('photon'), 250);
+      updateMetricDisplays();
+      logObservation();
+    }
+
+    function toggleCobaltGlass() {
+      flameState.cobaltGlassActive = !flameState.cobaltGlassActive;
+      playSound('sizzle');
+      const btn = document.getElementById('btnCobaltGlass');
+      btn.textContent = `🟦 Kaca Kobalt: ${flameState.cobaltGlassActive ? 'ON' : 'OFF'}`;
+      btn.classList.toggle('btn-primary', flameState.cobaltGlassActive);
+      btn.classList.toggle('btn-secondary', !flameState.cobaltGlassActive);
+    }
+
+    // ==========================================
+    // MODE 2: BOHR MODEL FUNCTIONS
+    // ==========================================
+    function updateBohrElement() {
+      bohrState.elementKey = document.getElementById('selBohrElement').value;
+      bohrState.electronLevel = 1;
+      bohrState.animatingJump = false;
+      bohrState.emittedPhotons = [];
+      playSound('sizzle');
+      updateMetricDisplays();
+    }
+
+    function triggerQuantumJump(type) {
+      if (type === 'excite') {
+        bohrState.electronLevel = 2; // Jump to excited shell
+        playSound('sizzle');
+        document.getElementById('valBohrLevel').textContent = 'Tingkat n = 3 (Tereksitasi)';
+      } else {
+        if (bohrState.electronLevel === 2) {
+          bohrState.electronLevel = 1; // Fall back to ground shell
+          playSound('photon');
+          document.getElementById('valBohrLevel').textContent = 'Tingkat n = 2 (Dasar Ground State)';
+
+          // Spawn emitted photon wave packet
+          const c = CATIONS[flameState.cationKey] || CATIONS['Na'];
+          bohrState.emittedPhotons.push({
+            x: 0,
+            y: 0,
+            angle: Math.random() * Math.PI * 2,
+            dist: 0,
+            color: `rgb(${c.flameRgb[0]}, ${c.flameRgb[1]}, ${c.flameRgb[2]})`
+          });
+        } else {
+          alert("Elektron sudah berada di tingkat dasar. Lakukan 'Eksitasi' terlebih dahulu!");
+        }
+      }
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // MODE 3: SPECTRA FUNCTIONS
+    // ==========================================
+    function updateSpectraElement() {
+      spectraState.elementKey = document.getElementById('selSpectraElement').value;
+      playSound('sizzle');
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // METRICS DISPLAY UPDATE
+    // ==========================================
+    function updateMetricDisplays() {
+      const lbl1 = document.getElementById('lblLcd1');
+      const val1 = document.getElementById('valLcd1');
+      const lbl2 = document.getElementById('lblLcd2');
+      const val2 = document.getElementById('valLcd2');
+      const lbl3 = document.getElementById('lblLcd3');
+      const val3 = document.getElementById('valLcd3');
+      const lbl4 = document.getElementById('lblLcd4');
+      const val4 = document.getElementById('valLcd4');
+
+      const c = CATIONS[flameState.cationKey] || CATIONS['Na'];
+
+      if (activeMode === 'flame') {
+        lbl1.textContent = 'Kation Logam Diuji:';
+        lbl2.textContent = 'Warna Karakteristik Nyala:';
+        lbl3.textContent = 'Panjang Gelombang Emisi:';
+        lbl4.textContent = 'Energi Foton Kuantum:';
+
+        val1.textContent = `${c.name} (${c.symbol})`;
+        val2.textContent = (flameState.cobaltGlassActive && flameState.cationKey === 'K') ? 'Ungu Lilac Terang (Kaca Kobalt)' : c.colorName;
+        val3.textContent = `${c.lambdaNm.toFixed(1)} nm`;
+        val4.textContent = `${c.energyEv.toFixed(2)} eV`;
+        val4.style.color = '#10b981';
+
+      } else if (activeMode === 'bohr') {
+        lbl1.textContent = 'Unsur Atom Diamati:';
+        lbl2.textContent = 'Keadaan Kuantum:';
+        lbl3.textContent = 'Selisih Energi (ΔE):';
+        lbl4.textContent = 'Frekuensi Foton (ν):';
+
+        val1.textContent = bohrState.elementKey;
+        val2.textContent = (bohrState.electronLevel === 2) ? 'EKSITASI (Kulit Luar)' : 'DASAR (Ground State)';
+        val2.style.color = (bohrState.electronLevel === 2) ? '#f59e0b' : '#38bdf8';
+        val3.textContent = `${c.energyEv.toFixed(2)} eV`;
+        val4.textContent = `${((c.energyEv * 1.602e-19) / 6.626e-34 / 1e14).toFixed(2)} × 10¹⁴ Hz`;
+
+      } else if (activeMode === 'spectra') {
+        lbl1.textContent = 'Sumber Spektrum:';
+        lbl2.textContent = 'Tipe Spektrum Emisi:';
+        lbl3.textContent = 'Garis Dominan:';
+        lbl4.textContent = 'Karakteristik Spektroskopi:';
+
+        val1.textContent = spectraState.elementKey;
+        val2.textContent = (spectraState.elementKey === 'continuous') ? 'Spektrum Kontinu (Pelangi)' : 'Spektrum Garis Diskrit';
+        val3.textContent = `${c.lambdaNm} nm`;
+        val4.textContent = 'Sidik Jari Optik Diskrit';
+      }
+    }
+
+    // ==========================================
+    // OBSERVATION LOGGING & CSV
+    // ==========================================
+    function logObservation() {
+      const tbody = document.getElementById('tblBody');
+      const tr = document.createElement('tr');
+
+      const c = CATIONS[flameState.cationKey] || CATIONS['Na'];
+      const kation = `${c.name} (${c.symbol})`;
+      const warna = c.colorName;
+      const lambda = `${c.lambdaNm} nm`;
+      const ev = `${c.energyEv} eV`;
+
+      tr.innerHTML = `
+        <td><strong>${kation}</strong></td>
+        <td>${warna}</td>
+        <td>${lambda}</td>
+        <td>${ev}</td>
+      `;
+
+      tbody.insertBefore(tr, tbody.firstChild);
+      playSound('sizzle');
+    }
+
+    function exportDataCSV() {
+      let csv = "Kation_Logam,Warna_Nyala_Api,Panjang_Gelombang_Emisi_nm,Energi_Foton_eV\n";
+      const rows = document.querySelectorAll("#tblBody tr");
+      if (rows.length === 0) {
+        alert("Belum ada data pengamatan yang dicatat. Klik 'Catat Data' terlebih dahulu!");
+        return;
+      }
+      rows.forEach(r => {
+        const cols = r.querySelectorAll("td");
+        if (cols.length >= 4) {
+          const k = cols[0].innerText.replace(/,/g, '');
+          const w = cols[1].innerText.replace(/,/g, '');
+          const l = cols[2].innerText.replace(/,/g, '');
+          const e = cols[3].innerText.replace(/,/g, '');
+          csv += `"${k}","${w}","${l}","${e}"\n`;
+        }
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Data_Uji_Nyala_Struktur_Atom_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      playSound('photon');
+    }
+
+    // ==========================================
+    // 60 FPS MAIN ANIMATION LOOP
+    // ==========================================
+    function mainAnimationLoop() {
+      ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (activeMode === 'flame') {
+        renderFlameStage();
+      } else if (activeMode === 'bohr') {
+        renderBohrStage();
+      } else if (activeMode === 'spectra') {
+        renderSpectraStage();
+      }
+
+      requestAnimationFrame(mainAnimationLoop);
+    }
+
+    // 1. RENDER FLAME TEST STAGE
+    function renderFlameStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Darkroom lab ambient
+      ctx2d.fillStyle = '#030611';
+      ctx2d.fillRect(0, 0, W, H);
+
+      // Lab Ceramic Bench
+      ctx2d.fillStyle = '#1e293b';
+      ctx2d.fillRect(60, H - 45, W - 120, 24);
+
+      // Bunsen Burner Apparatus (Centered)
+      const bX = W / 2 - 25;
+      const bY = 240;
+      const bW = 50;
+      const bH = 150;
+
+      // Heavy Cast Iron Base
+      ctx2d.fillStyle = '#334155';
+      ctx2d.beginPath();
+      ctx2d.moveTo(bX - 35, bY + bH);
+      ctx2d.lineTo(bX + bW + 35, bY + bH);
+      ctx2d.lineTo(bX + bW + 15, bY + bH - 22);
+      ctx2d.lineTo(bX - 15, bY + bH - 22);
+      ctx2d.closePath();
+      ctx2d.fill();
+
+      // Brass Barrel Chimney
+      ctx2d.fillStyle = '#b45309';
+      ctx2d.fillRect(bX + 12, bY + 30, 26, bH - 52);
+
+      // Air Collar Ring
+      ctx2d.fillStyle = '#78350f';
+      ctx2d.fillRect(bX + 8, bY + bH - 55, 34, 18);
+      // Air holes on collar
+      const holeW = 12 * (flameState.airCollarPct / 100);
+      ctx2d.fillStyle = '#0f172a';
+      ctx2d.fillRect(bX + 19, bY + bH - 52, holeW, 12);
+
+      // Gas tube inlet on base
+      ctx2d.fillStyle = '#64748b';
+      ctx2d.fillRect(bX - 45, bY + bH - 16, 20, 8);
+
+      // DYNAMIC 60 FPS FLAME PLASMA RENDERING
+      const flameTipY = bY + 30;
+      const isOxidizing = flameState.airCollarPct > 50;
+
+      // Base Flame Color
+      let flameCoreColor = 'rgba(56, 189, 248, 0.85)'; // Blue inner cone
+      let flameOuterColor = 'rgba(30, 58, 138, 0.4)';
+
+      if (!isOxidizing) {
+        // Yellow safety flame
+        flameCoreColor = 'rgba(250, 204, 21, 0.9)';
+        flameOuterColor = 'rgba(249, 115, 22, 0.5)';
+      }
+
+      // If wire with salt is inside flame, metal cation colors the flame!
+      if (flameState.wireState === 'in_flame' && flameState.flameBurnProgress > 0) {
+        const c = CATIONS[flameState.cationKey];
+        const rgb = c.flameRgb;
+
+        if (flameState.cobaltGlassActive && flameState.cationKey === 'K') {
+          flameCoreColor = 'rgba(192, 132, 252, 0.95)'; // Intense lilac through cobalt
+          flameOuterColor = 'rgba(147, 51, 234, 0.5)';
+        } else {
+          flameCoreColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.95)`;
+          flameOuterColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.35)`;
+        }
+
+        flameState.flameBurnProgress -= 0.002;
+        if (flameState.flameBurnProgress <= 0) {
+          flameState.wireState = 'clean';
+        }
+      }
+
+      // Draw Outer Diffuse Flame Teardrop
+      ctx2d.save();
+      const flameH = 150 + Math.sin(Date.now() * 0.015) * 8;
+      const flameW = 40 + Math.cos(Date.now() * 0.02) * 4;
+
+      const grad = ctx2d.createRadialGradient(bX + 25, flameTipY - 40, 10, bX + 25, flameTipY - 60, flameH * 0.7);
+      grad.addColorStop(0, flameCoreColor);
+      grad.addColorStop(0.7, flameOuterColor);
+      grad.addColorStop(1, 'transparent');
+
+      ctx2d.fillStyle = grad;
+      ctx2d.beginPath();
+      ctx2d.moveTo(bX + 12, flameTipY);
+      ctx2d.quadraticCurveTo(bX - flameW / 2, flameTipY - flameH * 0.5, bX + 25, flameTipY - flameH);
+      ctx2d.quadraticCurveTo(bX + 50 + flameW / 2, flameTipY - flameH * 0.5, bX + 38, flameTipY);
+      ctx2d.closePath();
+      ctx2d.fill();
+
+      // Inner intense blue cone (if oxidizing)
+      if (isOxidizing && flameState.wireState !== 'in_flame') {
+        ctx2d.fillStyle = 'rgba(34, 211, 238, 0.9)';
+        ctx2d.beginPath();
+        ctx2d.moveTo(bX + 16, flameTipY);
+        ctx2d.lineTo(bX + 25, flameTipY - 55);
+        ctx2d.lineTo(bX + 34, flameTipY);
+        ctx2d.closePath();
+        ctx2d.fill();
+      }
+
+      ctx2d.restore();
+
+      // Nichrome Wire Loop Apparatus
+      const wireX = (flameState.wireState === 'in_flame') ? (bX + 32) : (bX + 160);
+      const wireY = (flameState.wireState === 'in_flame') ? (flameTipY - 65) : (H - 80);
+
+      // Glass handle
+      ctx2d.fillStyle = 'rgba(200, 230, 255, 0.6)';
+      ctx2d.fillRect(wireX + 45, wireY - 4, 120, 8);
+      ctx2d.strokeStyle = '#ffffff';
+      ctx2d.lineWidth = 1;
+      ctx2d.strokeRect(wireX + 45, wireY - 4, 120, 8);
+
+      // Nichrome wire stem
+      ctx2d.strokeStyle = '#cbd5e1';
+      ctx2d.lineWidth = 2.5;
+      ctx2d.beginPath();
+      ctx2d.moveTo(wireX + 45, wireY);
+      ctx2d.lineTo(wireX, wireY);
+      // Loop loop at tip
+      ctx2d.arc(wireX - 6, wireY, 6, 0, Math.PI * 2);
+      ctx2d.stroke();
+
+      // Salt specks on loop if salted
+      if (flameState.wireState === 'salted') {
+        ctx2d.fillStyle = '#ffffff';
+        ctx2d.beginPath();
+        ctx2d.arc(wireX - 6, wireY, 4, 0, Math.PI * 2);
+        ctx2d.fill();
+      }
+
+      // Cobalt Blue Glass Plate Overlay if Active
+      if (flameState.cobaltGlassActive) {
+        ctx2d.fillStyle = 'rgba(29, 78, 216, 0.45)';
+        ctx2d.fillRect(bX - 60, flameTipY - flameH - 20, 170, flameH + 50);
+        ctx2d.strokeStyle = '#1e40af';
+        ctx2d.lineWidth = 4;
+        ctx2d.strokeRect(bX - 60, flameTipY - flameH - 20, 170, flameH + 50);
+
+        ctx2d.fillStyle = '#93c5fd';
+        ctx2d.font = 'bold 11px monospace';
+        ctx2d.fillText('FILTER KACA KOBALT', bX - 50, flameTipY - flameH - 30);
+      }
+    }
+
+    // 2. RENDER BOHR MODEL STAGE
+    function renderBohrStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#030611';
+      ctx2d.fillRect(0, 0, W, H);
+
+      const cx = W / 2;
+      const cy = H / 2;
+
+      // Nucleus Center
+      ctx2d.fillStyle = '#ef4444';
+      ctx2d.beginPath();
+      ctx2d.arc(cx, cy, 22, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.fillStyle = '#ffffff';
+      ctx2d.font = 'bold 11px sans-serif';
+      ctx2d.textAlign = 'center';
+      ctx2d.textBaseline = 'middle';
+      ctx2d.fillText(bohrState.elementKey, cx, cy);
+
+      // Concentric Bohr Quantum Orbits (n = 1, 2, 3, 4)
+      const radii = [65, 110, 160, 205];
+      ctx2d.lineWidth = 1.5;
+
+      radii.forEach((r, idx) => {
+        ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx2d.setLineDash([4, 4]);
+        ctx2d.beginPath();
+        ctx2d.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx2d.stroke();
+
+        ctx2d.fillStyle = '#64748b';
+        ctx2d.font = '10px monospace';
+        ctx2d.fillText(`n = ${idx + 1}`, cx + r - 16, cy - 8);
+      });
+      ctx2d.setLineDash([]);
+
+      // Orbiting Valence Electron
+      const currentShellRadius = (bohrState.electronLevel === 1) ? radii[1] : radii[2];
+      const angle = Date.now() * 0.002;
+      const ex = cx + Math.cos(angle) * currentShellRadius;
+      const ey = cy + Math.sin(angle) * currentShellRadius;
+
+      ctx2d.fillStyle = '#00f2fe';
+      ctx2d.beginPath();
+      ctx2d.arc(ex, ey, 7, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.strokeStyle = '#ffffff';
+      ctx2d.stroke();
+
+      // Emitted Photon Wave Packets flying away
+      bohrState.emittedPhotons.forEach((p, idx) => {
+        p.dist += 3.5;
+        const px = cx + Math.cos(p.angle) * (radii[1] + p.dist);
+        const py = cy + Math.sin(p.angle) * (radii[1] + p.dist);
+
+        ctx2d.strokeStyle = p.color;
+        ctx2d.lineWidth = 3;
+        ctx2d.beginPath();
+        ctx2d.arc(px, py, 12, p.angle - 0.8, p.angle + 0.8);
+        ctx2d.stroke();
+      });
+
+      // Filter out vanished photons
+      bohrState.emittedPhotons = bohrState.emittedPhotons.filter(p => p.dist < 260);
+      ctx2d.textAlign = 'left';
+    }
+
+    // 3. RENDER SPECTRA STAGE
+    function renderSpectraStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#030611';
+      ctx2d.fillRect(0, 0, W, H);
+
+      // Spectroscope Eyepiece Viewport (Center)
+      const specX = 80;
+      const specY = 120;
+      const specW = W - 160;
+      const specH = 140;
+
+      // Dark spectroscope slit background
+      ctx2d.fillStyle = '#000000';
+      ctx2d.fillRect(specX, specY, specW, specH);
+      ctx2d.strokeStyle = '#475569';
+      ctx2d.lineWidth = 3;
+      ctx2d.strokeRect(specX, specY, specW, specH);
+
+      // Wavelength scale graduations (380 - 750 nm)
+      ctx2d.fillStyle = '#94a3b8';
+      ctx2d.font = '10px monospace';
+      for (let lam = 400; lam <= 750; lam += 50) {
+        const x = specX + ((lam - 380) / (750 - 380)) * specW;
+        ctx2d.fillRect(x, specY + specH, 1.5, 8);
+        ctx2d.fillText(lam + ' nm', x - 18, specY + specH + 22);
+      }
+
+      // Draw Emission Lines
+      if (spectraState.elementKey === 'continuous') {
+        // Continuous rainbow spectrum
+        for (let px = 0; px < specW; px++) {
+          const lam = 380 + (px / specW) * (750 - 380);
+          ctx2d.fillStyle = wavelengthToHex(lam);
+          ctx2d.fillRect(specX + px, specY, 1, specH);
+        }
+      } else {
+        // Discrete line spectrum of chosen cation
+        const c = CATIONS[spectraState.elementKey] || CATIONS['Na'];
+        c.spectralLines.forEach(lineLam => {
+          const lx = specX + ((lineLam - 380) / (750 - 380)) * specW;
+          const lineCol = wavelengthToHex(lineLam);
+
+          // Glow halo
+          ctx2d.fillStyle = lineCol;
+          ctx2d.globalAlpha = 0.3;
+          ctx2d.fillRect(lx - 4, specY, 9, specH);
+          ctx2d.globalAlpha = 1.0;
+
+          // Sharp bright line
+          ctx2d.fillStyle = lineCol;
+          ctx2d.fillRect(lx - 1, specY, 3, specH);
+
+          // Line wavelength tag
+          ctx2d.fillText(lineLam.toFixed(1), lx - 14, specY - 8);
+        });
+      }
+    }
+
+    function wavelengthToHex(wavelength) {
+      let r, g, b;
+      if (wavelength >= 380 && wavelength < 440) {
+        r = -(wavelength - 440) / (440 - 380); g = 0.0; b = 1.0;
+      } else if (wavelength >= 440 && wavelength < 490) {
+        r = 0.0; g = (wavelength - 440) / (490 - 440); b = 1.0;
+      } else if (wavelength >= 490 && wavelength < 510) {
+        r = 0.0; g = 1.0; b = -(wavelength - 510) / (510 - 490);
+      } else if (wavelength >= 510 && wavelength < 580) {
+        r = (wavelength - 510) / (580 - 510); g = 1.0; b = 0.0;
+      } else if (wavelength >= 580 && wavelength < 645) {
+        r = 1.0; g = -(wavelength - 645) / (645 - 580); b = 0.0;
+      } else if (wavelength >= 645 && wavelength <= 750) {
+        r = 1.0; g = 0.0; b = 0.0;
+      } else {
+        r = 0.0; g = 0.0; b = 0.0;
+      }
+      return `rgb(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)})`;
+    }
+  
+    function handlePortalBack(e, target) {
+      if (window.location.hostname.includes('script.google.com') || window.location.href.includes('/exec')) {
+        e.preventDefault();
+        const pageName = target.replace(/\.html$/i, '');
+        const currentBase = window.location.href.split('?')[0];
+        window.location.href = `${currentBase}?page=${encodeURIComponent(pageName === 'index' ? 'Index' : pageName)}`;
+      }
+    }
+
+  </script>
+</body>
+</html>

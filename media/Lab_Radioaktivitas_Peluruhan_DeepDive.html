@@ -1,0 +1,2031 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorium Virtual Radioaktivitas & Peluruhan Inti — Standar PhET / Labster</title>
+  <style>
+    :root {
+      --bg-dark: #070a13;
+      --card-bg: rgba(17, 24, 39, 0.88);
+      --card-border: #2e384d;
+      --accent-cyan: #00f2fe;
+      --accent-blue: #38bdf8;
+      --accent-yellow: #facc15;
+      --accent-orange: #fb923c;
+      --accent-red: #f87171;
+      --accent-green: #4ade80;
+      --accent-purple: #c084fc;
+      --text-main: #f3f4f6;
+      --text-muted: #94a3b8;
+      --lcd-bg: #03131a;
+      --lcd-text: #22d3ee;
+      --lcd-warn: #fbbf24;
+      --lcd-alarm: #ef4444;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(0, 242, 254, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 90% 85%, rgba(250, 204, 21, 0.06) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: rgba(11, 15, 25, 0.95);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent-yellow), var(--accent-orange), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge-lab {
+      background: rgba(250, 204, 21, 0.15);
+      border: 1px solid var(--accent-yellow);
+      color: var(--accent-yellow);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mode-nav {
+      display: flex;
+      gap: 8px;
+      background: rgba(30, 41, 59, 0.8);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .mode-btn.active {
+      color: #090d16;
+      background: var(--accent-yellow);
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-audio {
+      background: rgba(22, 27, 34, 0.9);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .btn-audio.active {
+      border-color: var(--accent-yellow);
+      color: var(--accent-yellow);
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.3);
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 16px;
+      padding: 16px 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    @media (max-width: 1100px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Stage Viewport */
+    .stage-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stage-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      min-height: 480px;
+      overflow: hidden;
+    }
+
+    .stage-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      z-index: 10;
+    }
+
+    .stage-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent-yellow);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .viewport-canvas {
+      width: 100%;
+      height: 430px;
+      border-radius: 8px;
+      background: #050811;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Bottom LCD Instrument Bar */
+    .lcd-panel {
+      background: var(--lcd-bg);
+      border: 1px solid #164e63;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: inset 0 0 16px rgba(34, 211, 238, 0.06);
+    }
+
+    .lcd-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lcd-lbl {
+      font-size: 0.72rem;
+      color: #67e8f9;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .lcd-val {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+    }
+
+    .lcd-val.alert {
+      color: var(--lcd-alarm);
+      text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+    }
+
+    .lcd-val.warn {
+      color: var(--lcd-warn);
+      text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+    }
+
+    /* Right Sidebar Controls */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .control-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-heading {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+    }
+
+    .card-heading span {
+      color: var(--accent-yellow);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-label .val {
+      color: var(--accent-cyan);
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    select, input[type="range"] {
+      width: 100%;
+    }
+
+    select {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    select:focus {
+      border-color: var(--accent-yellow);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-yellow);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-yellow), var(--accent-orange));
+      color: #090d16;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 14px rgba(250, 204, 21, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: #334155;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    /* Theoretical Insight */
+    .info-card {
+      background: rgba(17, 24, 39, 0.5);
+      border: 1px dashed #334155;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .info-card strong {
+      color: var(--accent-yellow);
+    }
+
+    /* Observation Table */
+    .table-container {
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      background: #090d16;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    th, td {
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--text-muted);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td {
+      color: var(--text-main);
+      font-family: monospace;
+    }
+
+    footer {
+      background: #070a13;
+      border-top: 1px solid var(--card-border);
+      padding: 8px 24px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    /* === PORTAL BACK NAVIGATION BUTTONS === */
+    .nav-back-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .btn-back-hub, .btn-back-portal {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+      line-height: 1;
+      height: 32px;
+      box-sizing: border-box;
+    }
+    .btn-back-hub {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .btn-back-hub:hover {
+      background: rgba(16, 185, 129, 0.3);
+      border-color: #34d399;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    }
+    .btn-back-portal {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+    .btn-back-portal:hover {
+      background: rgba(99, 102, 241, 0.3);
+      border-color: #818cf8;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+    }
+    @media (max-width: 640px) {
+      .text-hide-mobile { display: none; }
+      .btn-back-hub, .btn-back-portal { padding: 6px 8px; font-size: 10px; }
+      .nav-back-group { margin-right: 6px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-title">
+      <!-- Navigation Back Button to PortalKimia Media & Lab Virtual -->
+      <div class="nav-back-group">
+        <a href="LaboratoriumVirtual.html" class="btn-back-hub" title="Kembali ke Katalog Laboratorium Virtual" onclick="handlePortalBack(event, 'LaboratoriumVirtual.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Katalog Lab</span>
+        </a>
+        <a href="index.html" class="btn-back-portal" title="Kembali ke Beranda PortalKimia Media" onclick="handlePortalBack(event, 'index.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="text-hide-mobile">Portal Media</span>
+        </a>
+      </div>
+
+      <h1>Laboratorium Virtual Radioaktivitas & Peluruhan Inti</h1>
+      <span class="badge-lab">☢️ PhET / Labster Standard</span>
+    </div>
+
+    <!-- Mode Navigation Tabs -->
+    <nav class="mode-nav">
+      <button class="mode-btn active" id="btnModeShield" onclick="setLabMode('shield')">
+        🛡️ Daya Tembus & Perisai
+      </button>
+      <button class="mode-btn" id="btnModeHalflife" onclick="setLabMode('halflife')">
+        ⏳ Kinetika Waktu Paruh
+      </button>
+      <button class="mode-btn" id="btnModeCloud" onclick="setLabMode('cloud')">
+        ☁️ Kamar Kabut (Cloud Chamber)
+      </button>
+      <button class="mode-btn" id="btnModeDecayEq" onclick="setLabMode('decayeq')">
+        ⚛️ Penyetaraan Reaksi Inti
+      </button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="btn-audio active" id="btnAudioToggle" title="Toggle Sound FX" onclick="toggleAudio()">
+        🔊
+      </button>
+      <button class="btn-action btn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="exportDataCSV()">
+        📥 Ekspor CSV
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN LAB AREA -->
+  <main>
+    <!-- Visual Stage (Left) -->
+    <section class="stage-container">
+      <div class="stage-card">
+        <!-- Stage Top Bar -->
+        <div class="stage-header-bar">
+          <div class="stage-title" id="stageTitle">
+            <span>🛡️</span> UJI DAYA TEMBUS SINAR ALFA, BETA, DAN GAMMA TERHADAP PERISAI
+          </div>
+          <div id="stageSubBadge" style="font-size:0.75rem; color:#94a3b8; font-family:monospace;">
+            DETEKTOR: GEIGER-MÜLLER TUBE GM-71
+          </div>
+        </div>
+
+        <!-- 60 FPS HTML5 Canvas Viewport -->
+        <canvas id="labCanvas" class="viewport-canvas" width="880" height="430"></canvas>
+      </div>
+
+      <!-- Real-time LCD Multi-meter Monitor -->
+      <div class="lcd-panel" id="bottomLcdBar">
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd1">Laju Cacahan Detektor (CPM):</span>
+          <span class="lcd-val" id="valLcd1">4,820 CPM</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd2">Laju Dosis Radiasi (µSv/h):</span>
+          <span class="lcd-val warn" id="valLcd2">12.4 µSv/h</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd3">Tingkat Penyerapan Perisai (%):</span>
+          <span class="lcd-val" id="valLcd3" style="color:#4ade80;">0.0 % (Lolosan Penuh)</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd4">Status Paparan:</span>
+          <span class="lcd-val" id="valLcd4" style="font-size:1rem; color:#facc15;">TERDETEKSI</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sidebar Controls (Right) -->
+    <aside class="sidebar">
+
+      <!-- Dynamic Mode Controls -->
+      <div class="control-card">
+        <div class="card-heading">
+          <span>⚙️</span> Parameter Eksperimen
+        </div>
+
+        <!-- MODE 1: PENETRATION & SHIELDING CONTROLS -->
+        <div id="controlsShield" class="mode-control-block">
+          <div class="form-group">
+            <label class="form-label">Sumber Radioisotop:</label>
+            <select id="selShieldSource" onchange="updateShieldSource()">
+              <option value="Am241">Amerisium-241 (Pemancar Partikel Alfa α - He²⁺)</option>
+              <option value="Sr90">Stronsium-90 (Pemancar Partikel Beta β⁻ - Elektron)</option>
+              <option value="Co60">Kobalt-60 (Pemancar Foton Sinar Gamma γ - Radiasi EM)</option>
+              <option value="Mix">Campuran Tiga Sumber (α + β + γ Simultan)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">Material Perisai Penghalang (Barrier):</label>
+            <select id="selShieldBarrier" onchange="updateShieldBarrier()">
+              <option value="none">Tanpa Penghalang (Hanya Kolom Udara)</option>
+              <option value="paper">Selembar Kertas HVS (Tebal 0.1 mm)</option>
+              <option value="al1">Pelat Aluminium Tipis (Tebal 1 mm)</option>
+              <option value="al5">Pelat Aluminium Tebal (Tebal 5 mm)</option>
+              <option value="pb5">Balok Timbal / Lead Pb (Tebal 5 mm)</option>
+              <option value="pb25">Balok Timbal Tebal / Lead Pb (Tebal 25 mm)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Jarak Detektor GM dari Sumber:</span>
+              <span class="val" id="valDistance">10 cm</span>
+            </label>
+            <input type="range" id="rngDistance" min="4" max="30" value="10" oninput="updateDistance(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" id="btnShutterToggle" onclick="toggleShutter()">
+              ☢️ Buka Shutter Radiasi
+            </button>
+            <button class="btn-action btn-secondary" onclick="logObservation()">
+              📝 Catat Data
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 2: HALF-LIFE CONTROLS -->
+        <div id="controlsHalflife" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Pilihan Radioisotop & Waktu Paruh:</label>
+            <select id="selHalflifeIsotope" onchange="updateHalflifeIsotope()">
+              <option value="sim_fast">Isotop Simulasi Cepat (t½ = 5.0 Detik - Demo Realtime)</option>
+              <option value="sim_medium">Isotop Simulasi Sedang (t½ = 12.0 Detik)</option>
+              <option value="I131">Iodin-131 (t½ = 8.0 Hari - Kedokteran Nuklir)</option>
+              <option value="P32">Fosfor-32 (t½ = 14.3 Hari - Radioterapi Biologi)</option>
+              <option value="C14">Karbon-14 (t½ = 5.730 Tahun - Penanggalan Fosil)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Jumlah Inti Awal (N₀):</span>
+              <span class="val" id="valInitialNuclei">400 Inti</span>
+            </label>
+            <select id="selInitialNuclei" onchange="updateInitialNuclei()">
+              <option value="100">100 Atom Inti (Kisi 10 × 10)</option>
+              <option value="400" selected>400 Atom Inti (Kisi 20 × 20)</option>
+            </select>
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" id="btnDecayStart" onclick="toggleDecaySimulation()">
+              ▶️ Mulai Peluruhan
+            </button>
+            <button class="btn-action btn-danger" onclick="resetDecaySimulation()">
+              🔄 Reset Kisi Inti
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 3: CLOUD CHAMBER CONTROLS -->
+        <div id="controlsCloud" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Sumber Radiasi dalam Kamar Kabut:</label>
+            <select id="selCloudSource" onchange="updateCloudSource()">
+              <option value="alpha">Partikel Alfa α (Inti He-4: Jejak Tebal & Lurus)</option>
+              <option value="beta">Partikel Beta β⁻ (Elektron Cepat: Jejak Tipis & Zig-zag)</option>
+              <option value="gamma">Sinar Gamma γ (Foton EM: Jejak Sekunder Jarang)</option>
+              <option value="mix">Semua Partikel Bercampur (Kosmik & Radioaktif)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Medan Magnetik Transversal (B-Field):</span>
+              <span class="val" id="valBField">0.0 Tesla (OFF)</span>
+            </label>
+            <input type="range" id="rngBField" min="-1.5" max="1.5" step="0.25" value="0.0" oninput="updateBField(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-secondary" id="btnChamberTemp" onclick="toggleChamberTemp()">
+              ❄️ Pendingin Es Kering: AKTIF (-78°C)
+            </button>
+            <button class="btn-action btn-secondary" onclick="clearCloudTracks()">
+              🧹 Bersihkan Jejak
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 4: DECAY EQUATIONS BALANCING CONTROLS -->
+        <div id="controlsDecayEq" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Tipe Transmutasi & Reaksi Inti:</label>
+            <select id="selDecayEqType" onchange="updateDecayEq()">
+              <option value="alpha_U238">Peluruhan Alfa: U-238 → Th-234 + α</option>
+              <option value="alpha_Ra226">Peluruhan Alfa: Ra-226 → Rn-222 + α</option>
+              <option value="beta_C14">Peluruhan Beta Negatif: C-14 → N-14 + β⁻</option>
+              <option value="beta_I131">Peluruhan Beta & Gamma: I-131 → Xe-131 + β⁻ + γ</option>
+              <option value="positron_C11">Peluruhan Positron (β⁺): C-11 → B-11 + β⁺</option>
+              <option value="fission_U235">Fisi Nuklir Berantai: U-235 + n → Ba-141 + Kr-92 + 3n</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">Analisis Hukum Kekekalan Nuklir:</label>
+            <div id="boxDecayMath" style="background:#090d16; border:1px solid #1e293b; padding:10px; border-radius:6px; font-family:monospace; font-size:0.8rem; line-height:1.6; color:#67e8f9;">
+              <!-- Formula inserted by JS -->
+            </div>
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" onclick="animateNuclearReaction()">
+              💥 Simulasikan Tumbukan / Fisi
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Theory Explanation Card -->
+      <div class="info-card" id="panelTheory">
+        <strong>Daya Tembus Radiasi:</strong> Partikel Alfa ($\alpha$) berdaya ionisasi sangat kuat namun daya tembusnya paling lemah (tertahan kertas). Partikel Beta ($\beta$) mampu menembus kertas tetapi diserap aluminium. Sinar Gamma ($\gamma$) berdaya tembus sangat tinggi, membutuhkan timbal tebal untuk meredam intensitasnya.
+      </div>
+
+      <!-- Observation History Table -->
+      <div class="control-card">
+        <div class="card-heading">
+          <span>📋</span> Riwayat Pengamatan Radiometri
+        </div>
+        <div class="table-container">
+          <table id="tblObservations">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Sumber / Isotop</th>
+                <th>Kondisi / Perisai</th>
+                <th>Cacahan & Hasil</th>
+              </tr>
+            </thead>
+            <tbody id="tblBody">
+              <!-- Logs populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>Laboratorium Sains Nuklir & Radiokimia — Simulasi Fisika Inti 60 FPS</div>
+    <div>Sistem Bebas Kuis & Bebas LKS — Mode Eksplorasi Eksperimen Murni</div>
+  </footer>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    /* ==========================================================================
+       VIRTUAL LAB RADIOAKTIVITAS & PELURUHAN INTI - ENGINE LENGKAP
+       ========================================================================== */
+
+    // Audio Engine via Web Audio API
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('btnAudioToggle');
+      if (audioEnabled) {
+        btn.classList.add('active');
+        btn.textContent = '🔊';
+        playGeigerClick();
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '🔇';
+      }
+    }
+
+    // Authentic Geiger-Müller Pulse Click Generator
+    function playGeigerClick() {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        
+        // High frequency sharp noise burst mimicking Townsend avalanche
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1400 + Math.random() * 800, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.008);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.008);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.009);
+      } catch (e) {
+        console.warn("Geiger audio error", e);
+      }
+    }
+
+    function playSound(type) {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+
+        if (type === 'switch') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.setValueAtTime(160, now + 0.03);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'fission') {
+          // Deep explosive thunder boom
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(90, now);
+          osc.frequency.exponentialRampToValueAtTime(30, now + 0.5);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.6);
+        } else if (type === 'chime') {
+          [523.25, 659.25, 783.99].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.08);
+            gain.gain.setValueAtTime(0.2, now + i * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.5);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.08);
+            osc.stop(now + i * 0.08 + 0.5);
+          });
+        }
+      } catch (e) {
+        console.warn("Sound error", e);
+      }
+    }
+
+    // STATE VARIABLES
+    let activeMode = 'shield'; // 'shield' | 'halflife' | 'cloud' | 'decayeq'
+    let canvas, ctx2d;
+
+    // Mode 1: Shielding State
+    const shieldState = {
+      source: 'Am241', // 'Am241' | 'Sr90' | 'Co60' | 'Mix'
+      barrier: 'none', // 'none' | 'paper' | 'al1' | 'al5' | 'pb5' | 'pb25'
+      distanceCm: 10,
+      shutterOpen: true,
+      lastClickTime: 0,
+      cpm: 4820,
+      doseRate: 12.4,
+      particles: []
+    };
+
+    // Mode 2: Half-Life Kinetics State
+    const halflifeState = {
+      isotope: 'sim_fast',
+      halfLifeSec: 5.0,
+      gridDim: 20, // 20x20 = 400
+      totalNuclei: 400,
+      undecayedCount: 400,
+      nucleiGrid: [],
+      isRunning: false,
+      startTime: 0,
+      elapsedTime: 0,
+      historyCurve: []
+    };
+
+    // Mode 3: Cloud Chamber State
+    const cloudState = {
+      source: 'alpha',
+      bFieldT: 0.0,
+      tracks: []
+    };
+
+    // Mode 4: Nuclear Equation State
+    const decayEqState = {
+      type: 'alpha_U238',
+      animPhase: 0,
+      isFissionExploding: false
+    };
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      canvas = document.getElementById('labCanvas');
+      ctx2d = canvas.getContext('2d');
+
+      initShieldParticles();
+      initHalflifeGrid();
+      updateDecayEq();
+      updateMetricDisplays();
+      requestAnimationFrame(mainAnimationLoop);
+
+      // Initial auto log
+      setTimeout(() => {
+        logObservation();
+      }, 600);
+    });
+
+    // MODE SWITCHER
+    function setLabMode(mode) {
+      activeMode = mode;
+      playSound('switch');
+
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      if (mode === 'shield') document.getElementById('btnModeShield').classList.add('active');
+      if (mode === 'halflife') document.getElementById('btnModeHalflife').classList.add('active');
+      if (mode === 'cloud') document.getElementById('btnModeCloud').classList.add('active');
+      if (mode === 'decayeq') document.getElementById('btnModeDecayEq').classList.add('active');
+
+      document.querySelectorAll('.mode-control-block').forEach(p => p.style.display = 'none');
+      const stageTitle = document.getElementById('stageTitle');
+      const panelTheory = document.getElementById('panelTheory');
+
+      if (mode === 'shield') {
+        document.getElementById('controlsShield').style.display = 'block';
+        stageTitle.innerHTML = '<span>🛡️</span> UJI DAYA TEMBUS SINAR ALFA, BETA, DAN GAMMA TERHADAP PERISAI';
+        panelTheory.innerHTML = '<strong>Daya Tembus Radiasi:</strong> Partikel Alfa ($\\alpha$) bermassa besar dan bermuatan $+2$, mudah diserap oleh selembar kertas. Partikel Beta ($\\beta^-$) berupa elektron berkecepatan tinggi, menembus kertas namun diserap pelat aluminium. Sinar Gamma ($\\gamma$) adalah radiasi elektromagnetik berenergi sangat tinggi tanpa massa, membutuhkan balok timbal ($Pb$) padat untuk meredam kekuatannya.';
+      } else if (mode === 'halflife') {
+        document.getElementById('controlsHalflife').style.display = 'block';
+        stageTitle.innerHTML = '<span>⏳</span> KINETIKA WAKTU PARUH (t½) & PELURUHAN STOKASTIK INTI';
+        panelTheory.innerHTML = '<strong>Waktu Paruh ($t_{1/2}$):</strong> Waktu yang diperlukan agar separuh dari jumlah inti atom radioaktif awal meluruh menjadi inti anak stabil ($N(t) = N_0 \\cdot (1/2)^{t/t_{1/2}}$). Setiap atom meluruh secara acak (stokastik), namun secara statistik membentuk kurva peluruhan eksponensial orde satu.';
+      } else if (mode === 'cloud') {
+        document.getElementById('controlsCloud').style.display = 'block';
+        stageTitle.innerHTML = '<span>☁️</span> SIMULATOR KAMAR KABUT WILSON & DEFLEKSI MEDAN MAGNETIK';
+        panelTheory.innerHTML = '<strong>Kamar Kabut:</strong> Ruang uap alkohol jenuh bersuhu $-78^\\circ\\text{C}$. Partikel radiasi mengionisasi atom udara di jalurnya, menyebabkan uap terkondensasi membentuk jejak kabut putih. Dalam medan magnet ($B$), partikel alfa dan beta berbelok ke arah berlawanan karena perbedaan muatan dan rasio $q/m$.';
+      } else if (mode === 'decayeq') {
+        document.getElementById('controlsDecayEq').style.display = 'block';
+        stageTitle.innerHTML = '<span>⚛️</span> SIMULATOR REAKSI TRANSMUTASI & FISI NUKLIR';
+        panelTheory.innerHTML = '<strong>Hukum Kekekalan Nuklir:</strong> Pada setiap reaksi inti, jumlah nomor massa ($A$) dan jumlah muatan/nomor atom ($Z$) sebelum dan sesudah reaksi harus sama. Defek massa ($\\Delta m$) dikonversikan menjadi energi kinetik dan radiasi sinar gamma ($E = \\Delta m \\cdot c^2$).';
+      }
+
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // MODE 1: SHIELDING FUNCTIONS
+    // ==========================================
+    function initShieldParticles() {
+      shieldState.particles = [];
+      for (let i = 0; i < 45; i++) {
+        spawnShieldParticle();
+      }
+    }
+
+    function spawnShieldParticle() {
+      let type = 'alpha';
+      if (shieldState.source === 'Am241') type = 'alpha';
+      else if (shieldState.source === 'Sr90') type = 'beta';
+      else if (shieldState.source === 'Co60') type = 'gamma';
+      else {
+        const r = Math.random();
+        type = (r < 0.33) ? 'alpha' : ((r < 0.66) ? 'beta' : 'gamma');
+      }
+
+      shieldState.particles.push({
+        x: 175,
+        y: 195 + (Math.random() - 0.5) * 35,
+        vx: (type === 'alpha' ? 3.5 : (type === 'beta' ? 7.0 : 12.0)) + Math.random() * 1.5,
+        vy: (Math.random() - 0.5) * 1.2,
+        type: type,
+        stopped: false,
+        absorbed: false
+      });
+    }
+
+    function updateShieldSource() {
+      shieldState.source = document.getElementById('selShieldSource').value;
+      playSound('switch');
+      calculateShieldRadiometry();
+      updateMetricDisplays();
+    }
+
+    function updateShieldBarrier() {
+      shieldState.barrier = document.getElementById('selShieldBarrier').value;
+      playSound('switch');
+      calculateShieldRadiometry();
+      updateMetricDisplays();
+    }
+
+    function updateDistance(val) {
+      shieldState.distanceCm = parseInt(val);
+      document.getElementById('valDistance').textContent = val + ' cm';
+      calculateShieldRadiometry();
+      updateMetricDisplays();
+    }
+
+    function toggleShutter() {
+      shieldState.shutterOpen = !shieldState.shutterOpen;
+      playSound('switch');
+      const btn = document.getElementById('btnShutterToggle');
+      if (shieldState.shutterOpen) {
+        btn.textContent = '☢️ Tutup Shutter Radiasi';
+        btn.className = 'btn-action btn-danger';
+      } else {
+        btn.textContent = '☢️ Buka Shutter Radiasi';
+        btn.className = 'btn-action btn-primary';
+      }
+      calculateShieldRadiometry();
+      updateMetricDisplays();
+    }
+
+    function calculateShieldRadiometry() {
+      if (!shieldState.shutterOpen) {
+        shieldState.cpm = 22 + Math.floor(Math.random() * 8); // Background natural radiation
+        shieldState.doseRate = 0.12;
+        return;
+      }
+
+      // Base intensity at 10 cm
+      let baseCPM = 0;
+      let alphaPass = 1.0;
+      let betaPass = 1.0;
+      let gammaPass = 1.0;
+
+      // Distance attenuation (Inverse Square Law 1/r^2)
+      const distFactor = Math.pow(10 / shieldState.distanceCm, 1.8);
+
+      // Barrier Transmission Factors
+      if (shieldState.barrier === 'none') {
+        alphaPass = (shieldState.distanceCm > 6) ? 0.05 : 0.95; // Air absorbs alpha after ~5 cm
+        betaPass = 0.98;
+        gammaPass = 0.99;
+      } else if (shieldState.barrier === 'paper') {
+        alphaPass = 0.0; // Paper completely blocks alpha!
+        betaPass = 0.95;
+        gammaPass = 0.99;
+      } else if (shieldState.barrier === 'al1') {
+        alphaPass = 0.0;
+        betaPass = 0.40; // 1 mm Al reduces beta
+        gammaPass = 0.98;
+      } else if (shieldState.barrier === 'al5') {
+        alphaPass = 0.0;
+        betaPass = 0.01; // 5 mm Al stops beta
+        gammaPass = 0.95;
+      } else if (shieldState.barrier === 'pb5') {
+        alphaPass = 0.0;
+        betaPass = 0.0;
+        gammaPass = 0.45; // 5 mm lead attenuates gamma
+      } else if (shieldState.barrier === 'pb25') {
+        alphaPass = 0.0;
+        betaPass = 0.0;
+        gammaPass = 0.08; // 25 mm lead stops 92% gamma
+      }
+
+      if (shieldState.source === 'Am241') {
+        baseCPM = 5200 * alphaPass * distFactor;
+      } else if (shieldState.source === 'Sr90') {
+        baseCPM = 4400 * betaPass * distFactor;
+      } else if (shieldState.source === 'Co60') {
+        baseCPM = 3800 * gammaPass * distFactor;
+      } else {
+        // Mixed
+        baseCPM = (2000 * alphaPass + 1800 * betaPass + 1600 * gammaPass) * distFactor;
+      }
+
+      // Add background
+      shieldState.cpm = Math.max(18, Math.round(baseCPM + 20 + (Math.random() - 0.5) * 40));
+      shieldState.doseRate = parseFloat(((shieldState.cpm / 380)).toFixed(2));
+    }
+
+    // ==========================================
+    // MODE 2: HALF-LIFE FUNCTIONS
+    // ==========================================
+    function initHalflifeGrid() {
+      halflifeState.nucleiGrid = [];
+      const total = halflifeState.totalNuclei;
+      halflifeState.undecayedCount = total;
+      halflifeState.historyCurve = [{ t: 0, count: total }];
+
+      for (let i = 0; i < total; i++) {
+        halflifeState.nucleiGrid.push({
+          decayed: false,
+          decayTime: null
+        });
+      }
+    }
+
+    function updateHalflifeIsotope() {
+      halflifeState.isotope = document.getElementById('selHalflifeIsotope').value;
+      if (halflifeState.isotope === 'sim_fast') halflifeState.halfLifeSec = 5.0;
+      else if (halflifeState.isotope === 'sim_medium') halflifeState.halfLifeSec = 12.0;
+      else if (halflifeState.isotope === 'I131') halflifeState.halfLifeSec = 8.0;
+      else if (halflifeState.isotope === 'P32') halflifeState.halfLifeSec = 14.3;
+      else halflifeState.halfLifeSec = 57.3; // scaled for C14
+
+      resetDecaySimulation();
+      playSound('switch');
+    }
+
+    function updateInitialNuclei() {
+      halflifeState.totalNuclei = parseInt(document.getElementById('selInitialNuclei').value);
+      halflifeState.gridDim = (halflifeState.totalNuclei === 100) ? 10 : 20;
+      document.getElementById('valInitialNuclei').textContent = halflifeState.totalNuclei + ' Inti';
+      resetDecaySimulation();
+      playSound('switch');
+    }
+
+    function toggleDecaySimulation() {
+      halflifeState.isRunning = !halflifeState.isRunning;
+      playSound('switch');
+      const btn = document.getElementById('btnDecayStart');
+      if (halflifeState.isRunning) {
+        btn.textContent = '⏸️ Jeda Peluruhan';
+        btn.className = 'btn-action btn-danger';
+        halflifeState.startTime = performance.now() - (halflifeState.elapsedTime * 1000);
+      } else {
+        btn.textContent = '▶️ Lanjutkan Peluruhan';
+        btn.className = 'btn-action btn-primary';
+      }
+    }
+
+    function resetDecaySimulation() {
+      halflifeState.isRunning = false;
+      halflifeState.elapsedTime = 0;
+      initHalflifeGrid();
+      const btn = document.getElementById('btnDecayStart');
+      btn.textContent = '▶️ Mulai Peluruhan';
+      btn.className = 'btn-action btn-primary';
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // MODE 3: CLOUD CHAMBER FUNCTIONS
+    // ==========================================
+    function updateCloudSource() {
+      cloudState.source = document.getElementById('selCloudSource').value;
+      playSound('switch');
+      clearCloudTracks();
+    }
+
+    function updateBField(val) {
+      cloudState.bFieldT = parseFloat(val);
+      document.getElementById('valBField').textContent = parseFloat(val).toFixed(2) + ' Tesla';
+      playSound('switch');
+      updateMetricDisplays();
+    }
+
+    function toggleChamberTemp() {
+      playSound('switch');
+    }
+
+    function clearCloudTracks() {
+      cloudState.tracks = [];
+      playSound('switch');
+    }
+
+    // ==========================================
+    // MODE 4: DECAY EQUATIONS FUNCTIONS
+    // ==========================================
+    function updateDecayEq() {
+      decayEqState.type = document.getElementById('selDecayEqType').value;
+      playSound('switch');
+
+      const box = document.getElementById('boxDecayMath');
+      if (decayEqState.type === 'alpha_U238') {
+        box.innerHTML = `
+          <strong>Persamaan Reaksi:</strong><br>
+          <span style="color:#facc15; font-size:0.95rem;">²³⁸₉₂U → ²³⁴₉₀Th + ⁴₂α (²³⁴Th + ⁴He)</span><br><br>
+          <strong>Kekekalan Massa (A):</strong> 238 = 234 + 4  [SETARA ✓]<br>
+          <strong>Kekekalan Muatan (Z):</strong> 92 = 90 + 2   [SETARA ✓]<br>
+          <strong>Energi Reaksi (Q):</strong> +4.27 MeV (Eksotermik)
+        `;
+      } else if (decayEqState.type === 'alpha_Ra226') {
+        box.innerHTML = `
+          <strong>Persamaan Reaksi:</strong><br>
+          <span style="color:#facc15; font-size:0.95rem;">²²⁶₈₈Ra → ²²²₈₆Rn + ⁴₂α (Gas Radon)</span><br><br>
+          <strong>Kekekalan Massa (A):</strong> 226 = 222 + 4  [SETARA ✓]<br>
+          <strong>Kekekalan Muatan (Z):</strong> 88 = 86 + 2   [SETARA ✓]<br>
+          <strong>Energi Reaksi (Q):</strong> +4.87 MeV (Eksotermik)
+        `;
+      } else if (decayEqState.type === 'beta_C14') {
+        box.innerHTML = `
+          <strong>Persamaan Reaksi:</strong><br>
+          <span style="color:#facc15; font-size:0.95rem;">¹⁴₆C → ¹⁴₇N + ⁰₋₁β⁻ + v̄ₑ (Antineutrino)</span><br><br>
+          <strong>Kekekalan Massa (A):</strong> 14 = 14 + 0  [SETARA ✓]<br>
+          <strong>Kekekalan Muatan (Z):</strong> 6 = 7 + (-1) [SETARA ✓]<br>
+          <strong>Mekanisme:</strong> 1 Neutron berubah menjadi 1 Proton + 1 Elektron
+        `;
+      } else if (decayEqState.type === 'beta_I131') {
+        box.innerHTML = `
+          <strong>Persamaan Reaksi:</strong><br>
+          <span style="color:#facc15; font-size:0.95rem;">¹³¹₅₃I → ¹³¹₅₄Xe + ⁰₋₁β⁻ + γ (Foton EM)</span><br><br>
+          <strong>Kekekalan Massa (A):</strong> 131 = 131 + 0 [SETARA ✓]<br>
+          <strong>Kekekalan Muatan (Z):</strong> 53 = 54 + (-1) [SETARA ✓]<br>
+          <strong>Aplikasi Medis:</strong> Terapi Kanker Kelenjar Tiroid
+        `;
+      } else if (decayEqState.type === 'positron_C11') {
+        box.innerHTML = `
+          <strong>Persamaan Reaksi:</strong><br>
+          <span style="color:#facc15; font-size:0.95rem;">¹¹₆C → ¹¹₅B + ⁰₊₁β⁺ + vₑ (Neutrino)</span><br><br>
+          <strong>Kekekalan Massa (A):</strong> 11 = 11 + 0  [SETARA ✓]<br>
+          <strong>Kekekalan Muatan (Z):</strong> 6 = 5 + 1   [SETARA ✓]<br>
+          <strong>Aplikasi PET-Scan:</strong> Emisi Positron untuk Tomografi Medis
+        `;
+      } else if (decayEqState.type === 'fission_U235') {
+        box.innerHTML = `
+          <strong>Reaksi Fisi Terinduksi Neutron:</strong><br>
+          <span style="color:#facc15; font-size:0.95rem;">²³⁵₉₂U + ¹₀n → ¹⁴¹₅₆Ba + ⁹²₃₆Kr + 3 ¹₀n + Energi</span><br><br>
+          <strong>Kekekalan Massa:</strong> 235 + 1 = 141 + 92 + 3(1) = 236 [SETARA ✓]<br>
+          <strong>Kekekalan Muatan:</strong> 92 + 0 = 56 + 36 + 0 = 92 [SETARA ✓]<br>
+          <strong>Energi Reaksi:</strong> ~200 MeV per satu pembelahan inti!
+        `;
+      }
+
+      updateMetricDisplays();
+    }
+
+    function animateNuclearReaction() {
+      decayEqState.animPhase = 0;
+      decayEqState.isFissionExploding = true;
+      playSound('fission');
+      setTimeout(() => playSound('chime'), 700);
+    }
+
+    // ==========================================
+    // METRICS DISPLAY
+    // ==========================================
+    function updateMetricDisplays() {
+      const lbl1 = document.getElementById('lblLcd1');
+      const val1 = document.getElementById('valLcd1');
+      const lbl2 = document.getElementById('lblLcd2');
+      const val2 = document.getElementById('valLcd2');
+      const lbl3 = document.getElementById('lblLcd3');
+      const val3 = document.getElementById('valLcd3');
+      const lbl4 = document.getElementById('lblLcd4');
+      const val4 = document.getElementById('valLcd4');
+
+      if (activeMode === 'shield') {
+        lbl1.textContent = 'Laju Cacahan Detektor (CPM):';
+        lbl2.textContent = 'Laju Dosis Radiasi (µSv/h):';
+        lbl3.textContent = 'Efisiensi Perisai (%):';
+        lbl4.textContent = 'Status Paparan:';
+
+        val1.textContent = shieldState.cpm.toLocaleString() + ' CPM';
+        val2.textContent = shieldState.doseRate.toFixed(2) + ' µSv/h';
+
+        let eff = 0;
+        if (shieldState.barrier === 'paper') eff = (shieldState.source === 'Am241') ? 100 : (shieldState.source === 'Mix' ? 35 : 2);
+        else if (shieldState.barrier === 'al1') eff = (shieldState.source === 'Am241' || shieldState.source === 'Sr90') ? 85 : 15;
+        else if (shieldState.barrier === 'al5') eff = (shieldState.source === 'Co60') ? 8 : 99;
+        else if (shieldState.barrier === 'pb5') eff = 75;
+        else if (shieldState.barrier === 'pb25') eff = 96;
+
+        val3.textContent = eff + ' % Diserap';
+        val4.textContent = (shieldState.doseRate > 10.0) ? 'BAHAYA TINGGI' : (shieldState.doseRate > 1.0 ? 'SEDANG' : 'AMAN (LATAR)');
+        val4.style.color = (shieldState.doseRate > 10.0) ? '#ef4444' : (shieldState.doseRate > 1.0 ? '#facc15' : '#4ade80');
+
+      } else if (activeMode === 'halflife') {
+        lbl1.textContent = 'Inti Induk Tersisa [N(t)]:';
+        lbl2.textContent = 'Waktu Paruh (t½):';
+        lbl3.textContent = 'Waktu Berlalu (t):';
+        lbl4.textContent = 'Fraksi Sisa:';
+
+        const percent = ((halflifeState.undecayedCount / halflifeState.totalNuclei) * 100).toFixed(1);
+        val1.textContent = `${halflifeState.undecayedCount} / ${halflifeState.totalNuclei} (${percent}%)`;
+        val2.textContent = halflifeState.halfLifeSec + ' Detik';
+        val3.textContent = halflifeState.elapsedTime.toFixed(1) + ' s';
+        val4.textContent = (halflifeState.undecayedCount / halflifeState.totalNuclei).toFixed(3);
+        val4.style.color = '#38bdf8';
+
+      } else if (activeMode === 'cloud') {
+        lbl1.textContent = 'Partikel Uji:';
+        lbl2.textContent = 'Kekuatan Medan B:';
+        lbl3.textContent = 'Suhu Dasar Kamar:';
+        lbl4.textContent = 'Karakter Jejak Kabut:';
+
+        val1.textContent = cloudState.source.toUpperCase();
+        val2.textContent = cloudState.bFieldT.toFixed(2) + ' Tesla';
+        val3.textContent = '-78.5 °C (Es Kering)';
+        
+        let desc = 'Lurus Tebal';
+        if (cloudState.source === 'beta') desc = 'Tipis Berkelok';
+        if (cloudState.source === 'gamma') desc = 'Sekunder Jarang';
+        val4.textContent = desc;
+        val4.style.color = '#facc15';
+
+      } else if (activeMode === 'decayeq') {
+        lbl1.textContent = 'Tipe Reaksi Inti:';
+        lbl2.textContent = 'Energi Q (MeV):';
+        lbl3.textContent = 'Kekekalan Massa (A):';
+        lbl4.textContent = 'Kekekalan Muatan (Z):';
+
+        val1.textContent = decayEqState.type.replace('_', ' ').toUpperCase();
+        val2.textContent = (decayEqState.type === 'fission_U235') ? '+200.0 MeV' : '+4.27 MeV';
+        val3.textContent = 'SEIMBANG (Σ A = Konsisten)';
+        val4.textContent = 'SEIMBANG (Σ Z = Konsisten)';
+        val3.style.color = '#4ade80';
+        val4.style.color = '#4ade80';
+      }
+    }
+
+    // ==========================================
+    // OBSERVATION LOGGING & CSV
+    // ==========================================
+    function logObservation() {
+      const tbody = document.getElementById('tblBody');
+      const tr = document.createElement('tr');
+
+      let modeName = '';
+      let sourceName = '';
+      let cond = '';
+      let res = '';
+
+      if (activeMode === 'shield') {
+        modeName = 'Daya Tembus';
+        sourceName = document.getElementById('selShieldSource').options[document.getElementById('selShieldSource').selectedIndex].text.split(' ')[0];
+        cond = `Perisai: ${shieldState.barrier}, Jarak: ${shieldState.distanceCm} cm`;
+        res = `${shieldState.cpm} CPM (${shieldState.doseRate} µSv/h)`;
+      } else if (activeMode === 'halflife') {
+        modeName = 'Waktu Paruh';
+        sourceName = halflifeState.isotope;
+        cond = `t = ${halflifeState.elapsedTime.toFixed(1)} s (t½=${halflifeState.halfLifeSec}s)`;
+        res = `Sisa: ${halflifeState.undecayedCount}/${halflifeState.totalNuclei} (${((halflifeState.undecayedCount/halflifeState.totalNuclei)*100).toFixed(1)}%)`;
+      } else if (activeMode === 'cloud') {
+        modeName = 'Kamar Kabut';
+        sourceName = `Partikel ${cloudState.source}`;
+        cond = `B-Field: ${cloudState.bFieldT} T`;
+        res = `Defleksi: ${cloudState.bFieldT !== 0 ? 'Membelok' : 'Lurus'}`;
+      } else if (activeMode === 'decayeq') {
+        modeName = 'Reaksi Inti';
+        sourceName = decayEqState.type;
+        cond = 'Penyetaraan Massa & Muatan';
+        res = 'Hukum Kekekalan Terpenuhi';
+      }
+
+      tr.innerHTML = `
+        <td><strong>${modeName}</strong></td>
+        <td>${sourceName}</td>
+        <td>${cond}</td>
+        <td>${res}</td>
+      `;
+
+      tbody.insertBefore(tr, tbody.firstChild);
+      playSound('switch');
+    }
+
+    function exportDataCSV() {
+      let csv = "Mode,Sumber_Radioisotop,Kondisi_Perisai,Hasil_Cacahan_Radiometri\n";
+      const rows = document.querySelectorAll("#tblBody tr");
+      if (rows.length === 0) {
+        alert("Belum ada data pengamatan yang dicatat. Klik 'Catat Data' terlebih dahulu!");
+        return;
+      }
+      rows.forEach(r => {
+        const cols = r.querySelectorAll("td");
+        if (cols.length >= 4) {
+          const m = cols[0].innerText.replace(/,/g, '');
+          const s = cols[1].innerText.replace(/,/g, '');
+          const c = cols[2].innerText.replace(/,/g, '');
+          const res = cols[3].innerText.replace(/,/g, '');
+          csv += `"${m}","${s}","${c}","${res}"\n`;
+        }
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Data_Radiokimia_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      playSound('chime');
+    }
+
+    // ==========================================
+    // 60 FPS MAIN ANIMATION LOOP
+    // ==========================================
+    function mainAnimationLoop() {
+      ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (activeMode === 'shield') {
+        renderShieldStage();
+      } else if (activeMode === 'halflife') {
+        renderHalflifeStage();
+      } else if (activeMode === 'cloud') {
+        renderCloudStage();
+      } else if (activeMode === 'decayeq') {
+        renderDecayEqStage();
+      }
+
+      requestAnimationFrame(mainAnimationLoop);
+    }
+
+    // 1. RENDER SHIELDING STAGE
+    function renderShieldStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Dark lab background
+      ctx2d.fillStyle = '#060913';
+      ctx2d.fillRect(0, 0, W, H);
+
+      // Lab Optical Rail / Ruler Bench
+      const benchY = H - 65;
+      ctx2d.fillStyle = '#1e293b';
+      ctx2d.fillRect(40, benchY, W - 80, 24);
+      ctx2d.strokeStyle = '#475569';
+      ctx2d.strokeRect(40, benchY, W - 80, 24);
+
+      // Metric graduations along rail
+      ctx2d.fillStyle = '#94a3b8';
+      ctx2d.font = '8px monospace';
+      for (let x = 60; x <= W - 100; x += 30) {
+        ctx2d.fillRect(x, benchY, 1.5, 6);
+        ctx2d.fillText(((x - 60) / 18).toFixed(0) + 'cm', x - 6, benchY + 16);
+      }
+
+      // 1. Lead Collimator Castle (Source Housing)
+      const sourceX = 100;
+      const sourceY = 160;
+      const sourceW = 75;
+      const sourceH = 110;
+
+      // Thick lead box
+      ctx2d.fillStyle = '#334155';
+      ctx2d.fillRect(sourceX, sourceY, sourceW, sourceH);
+      ctx2d.strokeStyle = '#64748b';
+      ctx2d.lineWidth = 3;
+      ctx2d.strokeRect(sourceX, sourceY, sourceW, sourceH);
+
+      // Collimator aperture channel
+      ctx2d.fillStyle = '#090d16';
+      ctx2d.fillRect(sourceX + sourceW - 10, sourceY + 40, 14, 30);
+
+      // Shutter door
+      if (!shieldState.shutterOpen) {
+        ctx2d.fillStyle = '#ef4444';
+        ctx2d.fillRect(sourceX + sourceW - 4, sourceY + 36, 8, 38);
+      }
+
+      // Trefoil Radiation Warning Sign
+      drawTrefoil(sourceX + sourceW / 2, sourceY + 55, 16);
+      ctx2d.fillStyle = '#facc15';
+      ctx2d.font = 'bold 9px monospace';
+      ctx2d.textAlign = 'center';
+      ctx2d.fillText(shieldState.source.toUpperCase(), sourceX + sourceW / 2, sourceY + 98);
+      ctx2d.textAlign = 'left';
+
+      // 2. Shield Barrier Slot
+      const barrierX = 350;
+      const barrierY = 130;
+      let barrierColor = 'rgba(255,255,255,0.05)';
+      let barrierW = 12;
+      let barrierName = 'Tanpa Perisai';
+
+      if (shieldState.barrier === 'paper') {
+        barrierColor = '#f8fafc';
+        barrierW = 4;
+        barrierName = 'Kertas HVS (0.1 mm)';
+      } else if (shieldState.barrier === 'al1') {
+        barrierColor = '#94a3b8';
+        barrierW = 8;
+        barrierName = 'Aluminium (1 mm)';
+      } else if (shieldState.barrier === 'al5') {
+        barrierColor = '#64748b';
+        barrierW = 20;
+        barrierName = 'Aluminium (5 mm)';
+      } else if (shieldState.barrier === 'pb5') {
+        barrierColor = '#475569';
+        barrierW = 22;
+        barrierName = 'Timbal Pb (5 mm)';
+      } else if (shieldState.barrier === 'pb25') {
+        barrierColor = '#1e293b';
+        barrierW = 55;
+        barrierName = 'Timbal Pb (25 mm)';
+      }
+
+      if (shieldState.barrier !== 'none') {
+        ctx2d.fillStyle = barrierColor;
+        ctx2d.fillRect(barrierX, barrierY, barrierW, 160);
+        ctx2d.strokeStyle = '#cbd5e1';
+        ctx2d.lineWidth = 1.5;
+        ctx2d.strokeRect(barrierX, barrierY, barrierW, 160);
+
+        ctx2d.fillStyle = '#94a3b8';
+        ctx2d.font = '10px sans-serif';
+        ctx2d.textAlign = 'center';
+        ctx2d.fillText(barrierName, barrierX + barrierW / 2, barrierY - 10);
+        ctx2d.textAlign = 'left';
+      }
+
+      // 3. Geiger-Müller Detector Tube
+      const geigerX = 350 + (shieldState.distanceCm * 14);
+      const geigerY = 175;
+      const geigerW = 140;
+      const geigerH = 65;
+
+      // Stainless Steel cylinder
+      const tubeGrad = ctx2d.createLinearGradient(geigerX, geigerY, geigerX, geigerY + geigerH);
+      tubeGrad.addColorStop(0, '#64748b');
+      tubeGrad.addColorStop(0.5, '#cbd5e1');
+      tubeGrad.addColorStop(1, '#334155');
+      ctx2d.fillStyle = tubeGrad;
+      ctx2d.fillRect(geigerX, geigerY, geigerW, geigerH);
+      ctx2d.strokeStyle = '#94a3b8';
+      ctx2d.lineWidth = 2;
+      ctx2d.strokeRect(geigerX, geigerY, geigerW, geigerH);
+
+      // Mica thin entry window
+      ctx2d.fillStyle = '#06b6d4';
+      ctx2d.fillRect(geigerX - 6, geigerY + 12, 6, geigerH - 24);
+
+      // Digital Pulse LED on detector
+      const now = performance.now();
+      const isPulsing = (now - shieldState.lastClickTime < 60);
+      ctx2d.fillStyle = isPulsing ? '#ef4444' : '#1e293b';
+      ctx2d.beginPath();
+      ctx2d.arc(geigerX + geigerW - 20, geigerY + 20, 6, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.strokeStyle = '#ef4444';
+      ctx2d.stroke();
+
+      ctx2d.fillStyle = '#0f172a';
+      ctx2d.font = 'bold 9px monospace';
+      ctx2d.fillText('GM TUBE-71', geigerX + 16, geigerY + 38);
+
+      // 4. Particle Radiation Stream
+      if (shieldState.shutterOpen) {
+        shieldState.particles.forEach((p, idx) => {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          // Check barrier absorption
+          if (shieldState.barrier !== 'none' && p.x >= barrierX && p.x <= barrierX + barrierW + 5) {
+            if (p.type === 'alpha') {
+              p.absorbed = true; // Alpha stopped by any barrier
+            } else if (p.type === 'beta') {
+              if (shieldState.barrier !== 'paper' && shieldState.barrier !== 'al1') {
+                p.absorbed = true; // Beta stopped by Al-5 and Lead
+              } else if (shieldState.barrier === 'al1' && Math.random() < 0.6) {
+                p.absorbed = true;
+              }
+            } else if (p.type === 'gamma') {
+              if (shieldState.barrier === 'pb25' && Math.random() < 0.92) {
+                p.absorbed = true;
+              } else if (shieldState.barrier === 'pb5' && Math.random() < 0.55) {
+                p.absorbed = true;
+              }
+            }
+          }
+
+          // Check Geiger entrance hit
+          if (p.x >= geigerX - 6 && p.x <= geigerX + 20 && !p.absorbed && !p.stopped) {
+            p.stopped = true;
+            shieldState.lastClickTime = now;
+            // Play sound with stochastic probability
+            if (Math.random() < 0.4) playGeigerClick();
+          }
+
+          // Respawn particle if out of bounds or absorbed
+          if (p.x > W - 40 || p.absorbed || p.stopped) {
+            shieldState.particles[idx] = {
+              x: sourceX + sourceW,
+              y: sourceY + 45 + (Math.random() - 0.5) * 20,
+              vx: (p.type === 'alpha' ? 3.5 : (p.type === 'beta' ? 7.0 : 12.0)) + Math.random() * 1.5,
+              vy: (Math.random() - 0.5) * 1.2,
+              type: p.type,
+              stopped: false,
+              absorbed: false
+            };
+          }
+
+          // Draw Particle
+          if (!p.absorbed && !p.stopped) {
+            if (p.type === 'alpha') {
+              // Alpha: Big yellow double sphere He-4
+              ctx2d.fillStyle = '#facc15';
+              ctx2d.beginPath();
+              ctx2d.arc(p.x, p.y, 4, 0, Math.PI * 2);
+              ctx2d.fill();
+            } else if (p.type === 'beta') {
+              // Beta: Small cyan electron with trail
+              ctx2d.fillStyle = '#38bdf8';
+              ctx2d.beginPath();
+              ctx2d.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+              ctx2d.fill();
+            } else {
+              // Gamma: High frequency wave packet / purple photon
+              ctx2d.strokeStyle = '#c084fc';
+              ctx2d.lineWidth = 2;
+              ctx2d.beginPath();
+              ctx2d.moveTo(p.x - 8, p.y);
+              ctx2d.lineTo(p.x - 4, p.y - 3);
+              ctx2d.lineTo(p.x, p.y + 3);
+              ctx2d.lineTo(p.x + 4, p.y);
+              ctx2d.stroke();
+            }
+          }
+        });
+      }
+
+      // Legend of particles
+      drawParticleLegend(sourceX, sourceY + sourceH + 20);
+    }
+
+    function drawTrefoil(cx, cy, r) {
+      ctx2d.save();
+      ctx2d.fillStyle = '#facc15';
+      ctx2d.beginPath();
+      ctx2d.arc(cx, cy, r * 0.25, 0, Math.PI * 2);
+      ctx2d.fill();
+
+      for (let i = 0; i < 3; i++) {
+        const angle = (i * 120 - 90) * Math.PI / 180;
+        ctx2d.beginPath();
+        ctx2d.arc(cx, cy, r, angle - 0.52, angle + 0.52);
+        ctx2d.arc(cx, cy, r * 0.45, angle + 0.52, angle - 0.52, true);
+        ctx2d.closePath();
+        ctx2d.fill();
+      }
+      ctx2d.restore();
+    }
+
+    function drawParticleLegend(x, y) {
+      ctx2d.fillStyle = '#facc15';
+      ctx2d.beginPath();
+      ctx2d.arc(x + 10, y + 8, 4, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.fillStyle = '#cbd5e1';
+      ctx2d.font = '9px sans-serif';
+      ctx2d.fillText('Alfa (α)', x + 20, y + 11);
+
+      ctx2d.fillStyle = '#38bdf8';
+      ctx2d.beginPath();
+      ctx2d.arc(x + 80, y + 8, 2.5, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.fillText('Beta (β⁻)', x + 90, y + 11);
+
+      ctx2d.fillStyle = '#c084fc';
+      ctx2d.fillText('~ γ Foton', x + 150, y + 11);
+    }
+
+    // 2. RENDER HALF-LIFE STAGE
+    function renderHalflifeStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#060913';
+      ctx2d.fillRect(0, 0, W, H);
+
+      // Left: 2D Atom Lattice Grid
+      const gridX = 40;
+      const gridY = 40;
+      const gridW = 340;
+      const gridH = 340;
+
+      ctx2d.fillStyle = '#0d1527';
+      ctx2d.fillRect(gridX, gridY, gridW, gridH);
+      ctx2d.strokeStyle = '#1e293b';
+      ctx2d.strokeRect(gridX, gridY, gridW, gridH);
+
+      // Update Kinetics if running
+      if (halflifeState.isRunning) {
+        halflifeState.elapsedTime = (performance.now() - halflifeState.startTime) / 1000;
+        const decayConstant = 0.693 / halflifeState.halfLifeSec;
+        const decayProbPerFrame = 1 - Math.exp(-decayConstant * (1 / 60));
+
+        let currentUndecayed = 0;
+        halflifeState.nucleiGrid.forEach(n => {
+          if (!n.decayed) {
+            if (Math.random() < decayProbPerFrame) {
+              n.decayed = true;
+              if (Math.random() < 0.25) playGeigerClick();
+            } else {
+              currentUndecayed++;
+            }
+          }
+        });
+        halflifeState.undecayedCount = currentUndecayed;
+
+        // Record curve history
+        if (Math.random() < 0.15) {
+          halflifeState.historyCurve.push({
+            t: halflifeState.elapsedTime,
+            count: halflifeState.undecayedCount
+          });
+        }
+
+        if (halflifeState.undecayedCount === 0) {
+          halflifeState.isRunning = false;
+          playSound('chime');
+        }
+      }
+
+      // Draw Nuclei Grid
+      const dim = halflifeState.gridDim;
+      const cellSize = gridW / dim;
+      const radius = cellSize * 0.35;
+
+      halflifeState.nucleiGrid.forEach((n, idx) => {
+        const col = idx % dim;
+        const row = Math.floor(idx / dim);
+        const cx = gridX + col * cellSize + cellSize / 2;
+        const cy = gridY + row * cellSize + cellSize / 2;
+
+        ctx2d.beginPath();
+        ctx2d.arc(cx, cy, radius, 0, Math.PI * 2);
+        if (!n.decayed) {
+          ctx2d.fillStyle = '#ef4444'; // Parent undecayed radioactive nucleus
+        } else {
+          ctx2d.fillStyle = '#334155'; // Daughter stable nucleus
+        }
+        ctx2d.fill();
+      });
+
+      // Grid Label
+      ctx2d.fillStyle = '#94a3b8';
+      ctx2d.font = 'bold 11px sans-serif';
+      ctx2d.fillText('Kisi Atom Radioaktif (Merah = Induk, Abu = Anak)', gridX, gridY + gridH + 20);
+
+      // Right: Exponential Decay Graph
+      const graphX = 420;
+      const graphY = 50;
+      const graphW = 420;
+      const graphH = 310;
+
+      ctx2d.fillStyle = '#090d19';
+      ctx2d.fillRect(graphX, graphY, graphW, graphH);
+      ctx2d.strokeStyle = '#334155';
+      ctx2d.strokeRect(graphX, graphY, graphW, graphH);
+
+      // Axis Lines
+      ctx2d.strokeStyle = '#64748b';
+      ctx2d.lineWidth = 1.5;
+      ctx2d.beginPath();
+      ctx2d.moveTo(graphX, graphY + graphH);
+      ctx2d.lineTo(graphX + graphW, graphY + graphH);
+      ctx2d.moveTo(graphX, graphY);
+      ctx2d.lineTo(graphX, graphY + graphH);
+      ctx2d.stroke();
+
+      // Half-life markers (50%, 25%, 12.5%)
+      const markers = [
+        { label: '100%', ratio: 1.0 },
+        { label: '50% (1 t½)', ratio: 0.5 },
+        { label: '25% (2 t½)', ratio: 0.25 },
+        { label: '12.5% (3 t½)', ratio: 0.125 }
+      ];
+
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx2d.fillStyle = '#94a3b8';
+      ctx2d.font = '9px monospace';
+      markers.forEach(m => {
+        const y = graphY + graphH - (m.ratio * graphH);
+        ctx2d.beginPath();
+        ctx2d.moveTo(graphX, y);
+        ctx2d.lineTo(graphX + graphW, y);
+        ctx2d.stroke();
+        ctx2d.fillText(m.label, graphX + 6, y - 4);
+      });
+
+      // Theoretical smooth decay line
+      ctx2d.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx2d.lineWidth = 2;
+      ctx2d.setLineDash([4, 4]);
+      ctx2d.beginPath();
+      const maxTime = halflifeState.halfLifeSec * 4.0;
+      for (let px = 0; px <= graphW; px += 4) {
+        const tVal = (px / graphW) * maxTime;
+        const nVal = Math.pow(0.5, tVal / halflifeState.halfLifeSec);
+        const py = graphY + graphH - (nVal * graphH);
+        if (px === 0) ctx2d.moveTo(graphX + px, py);
+        else ctx2d.lineTo(graphX + px, py);
+      }
+      ctx2d.stroke();
+      ctx2d.setLineDash([]);
+
+      // Experimental live curve
+      if (halflifeState.historyCurve.length > 1) {
+        ctx2d.strokeStyle = '#facc15';
+        ctx2d.lineWidth = 2.5;
+        ctx2d.beginPath();
+        halflifeState.historyCurve.forEach((pt, i) => {
+          const px = graphX + Math.min(graphW, (pt.t / maxTime) * graphW);
+          const py = graphY + graphH - ((pt.count / halflifeState.totalNuclei) * graphH);
+          if (i === 0) ctx2d.moveTo(px, py);
+          else ctx2d.lineTo(px, py);
+        });
+        ctx2d.stroke();
+      }
+
+      ctx2d.fillStyle = '#facc15';
+      ctx2d.fillText('Kurva Peluruhan Orde-1 N(t) = N₀(½)^(t/t½)', graphX + 120, graphY + 24);
+    }
+
+    // 3. RENDER CLOUD CHAMBER STAGE
+    function renderCloudStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#030712';
+      ctx2d.fillRect(0, 0, W, H);
+
+      const cx = W / 2;
+      const cy = H / 2;
+      const chamberR = 180;
+
+      // Dark Chamber Basin
+      ctx2d.save();
+      ctx2d.beginPath();
+      ctx2d.arc(cx, cy, chamberR, 0, Math.PI * 2);
+      ctx2d.fillStyle = '#050b14';
+      ctx2d.fill();
+      ctx2d.clip();
+
+      // Alcohol supersaturated vapor ambient
+      ctx2d.fillStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx2d.fillRect(cx - chamberR, cy - chamberR, chamberR * 2, chamberR * 2);
+
+      // Spawn new tracks randomly
+      if (Math.random() < 0.12) {
+        const angle = Math.random() * Math.PI * 2;
+        const type = (cloudState.source === 'mix') ? 
+          (Math.random() < 0.5 ? 'alpha' : 'beta') : cloudState.source;
+
+        cloudState.tracks.push({
+          x: cx + (Math.random() - 0.5) * 60,
+          y: cy + (Math.random() - 0.5) * 60,
+          angle: angle,
+          length: (type === 'alpha' ? 65 : 120) + Math.random() * 20,
+          type: type,
+          curv: cloudState.bFieldT * (type === 'alpha' ? 0.005 : -0.04),
+          life: 1.0
+        });
+
+        if (Math.random() < 0.4) playGeigerClick();
+      }
+
+      // Draw and decay condensation tracks
+      cloudState.tracks.forEach((tr, i) => {
+        ctx2d.save();
+        ctx2d.globalAlpha = tr.life;
+
+        if (tr.type === 'alpha') {
+          // Thick, dense white track
+          ctx2d.strokeStyle = '#ffffff';
+          ctx2d.lineWidth = 4.5;
+          ctx2d.beginPath();
+          ctx2d.moveTo(tr.x, tr.y);
+          for (let step = 0; step < tr.length; step += 8) {
+            const currentAngle = tr.angle + step * tr.curv;
+            const px = tr.x + Math.cos(currentAngle) * step;
+            const py = tr.y + Math.sin(currentAngle) * step;
+            ctx2d.lineTo(px, py);
+          }
+          ctx2d.stroke();
+        } else if (tr.type === 'beta') {
+          // Thin, tortuous/zig-zag track
+          ctx2d.strokeStyle = '#e0f2fe';
+          ctx2d.lineWidth = 1.8;
+          ctx2d.beginPath();
+          ctx2d.moveTo(tr.x, tr.y);
+          for (let step = 0; step < tr.length; step += 6) {
+            const jitter = (Math.random() - 0.5) * 0.15;
+            const currentAngle = tr.angle + step * tr.curv + jitter;
+            const px = tr.x + Math.cos(currentAngle) * step;
+            const py = tr.y + Math.sin(currentAngle) * step;
+            ctx2d.lineTo(px, py);
+          }
+          ctx2d.stroke();
+        }
+
+        ctx2d.restore();
+        tr.life -= 0.015;
+      });
+
+      // Filter out vanished tracks
+      cloudState.tracks = cloudState.tracks.filter(t => t.life > 0);
+
+      ctx2d.restore();
+
+      // Outer Chamber Bezel
+      ctx2d.strokeStyle = '#334155';
+      ctx2d.lineWidth = 14;
+      ctx2d.beginPath();
+      ctx2d.arc(cx, cy, chamberR + 7, 0, Math.PI * 2);
+      ctx2d.stroke();
+
+      // Magnetic field vectors indicator (B-field)
+      if (cloudState.bFieldT !== 0) {
+        ctx2d.fillStyle = '#38bdf8';
+        ctx2d.font = 'bold 12px monospace';
+        const sign = cloudState.bFieldT > 0 ? '⊗ B MASUK' : '⊙ B KELUAR';
+        ctx2d.fillText(`${sign} (${cloudState.bFieldT} T)`, cx - 50, cy + chamberR + 28);
+      }
+    }
+
+    // 4. RENDER DECAY EQUATIONS & FISSION
+    function renderDecayEqStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#060913';
+      ctx2d.fillRect(0, 0, W, H);
+
+      const cx = W / 2;
+      const cy = H / 2 - 20;
+
+      if (decayEqState.isFissionExploding) {
+        decayEqState.animPhase += 0.03;
+
+        // Shockwave flash
+        const rad = decayEqState.animPhase * 180;
+        ctx2d.strokeStyle = `rgba(250, 204, 21, ${Math.max(0, 1 - decayEqState.animPhase * 0.6)})`;
+        ctx2d.lineWidth = 6;
+        ctx2d.beginPath();
+        ctx2d.arc(cx, cy, rad, 0, Math.PI * 2);
+        ctx2d.stroke();
+
+        // Flying fission fragments (Ba-141 & Kr-92)
+        const d1 = decayEqState.animPhase * 140;
+        // Barium fragment
+        ctx2d.fillStyle = '#38bdf8';
+        ctx2d.beginPath();
+        ctx2d.arc(cx - d1, cy - d1 * 0.4, 22, 0, Math.PI * 2);
+        ctx2d.fill();
+        ctx2d.fillStyle = '#ffffff';
+        ctx2d.font = 'bold 10px sans-serif';
+        ctx2d.fillText('¹⁴¹Ba', cx - d1 - 12, cy - d1 * 0.4 + 4);
+
+        // Krypton fragment
+        ctx2d.fillStyle = '#4ade80';
+        ctx2d.beginPath();
+        ctx2d.arc(cx + d1, cy + d1 * 0.4, 18, 0, Math.PI * 2);
+        ctx2d.fill();
+        ctx2d.fillText('⁹²Kr', cx + d1 - 10, cy + d1 * 0.4 + 4);
+
+        // 3 Released fast neutrons
+        for (let i = 0; i < 3; i++) {
+          const angle = (i * 120 + 30) * Math.PI / 180;
+          const nx = cx + Math.cos(angle) * (d1 * 1.5);
+          const ny = cy + Math.sin(angle) * (d1 * 1.5);
+          ctx2d.fillStyle = '#facc15';
+          ctx2d.beginPath();
+          ctx2d.arc(nx, ny, 5, 0, Math.PI * 2);
+          ctx2d.fill();
+        }
+
+        if (decayEqState.animPhase > 1.6) {
+          decayEqState.isFissionExploding = false;
+        }
+      } else {
+        // Idle display of parent heavy nucleus
+        ctx2d.fillStyle = '#ef4444';
+        ctx2d.beginPath();
+        ctx2d.arc(cx, cy, 40, 0, Math.PI * 2);
+        ctx2d.fill();
+
+        ctx2d.fillStyle = '#ffffff';
+        ctx2d.font = 'bold 14px sans-serif';
+        ctx2d.textAlign = 'center';
+        ctx2d.fillText('²³⁵U', cx, cy + 5);
+        ctx2d.font = '10px monospace';
+        ctx2d.fillText('Inti Berat Stabil Semu', cx, cy + 60);
+        ctx2d.textAlign = 'left';
+      }
+    }
+  
+    function handlePortalBack(e, target) {
+      if (window.location.hostname.includes('script.google.com') || window.location.href.includes('/exec')) {
+        e.preventDefault();
+        const pageName = target.replace(/\.html$/i, '');
+        const currentBase = window.location.href.split('?')[0];
+        window.location.href = `${currentBase}?page=${encodeURIComponent(pageName === 'index' ? 'Index' : pageName)}`;
+      }
+    }
+
+  </script>
+</body>
+</html>

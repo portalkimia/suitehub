@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Lab: Sifat Koligatif Larutan • PortalKimia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-space: #090d16;
+      --bg-bench: #131926;
+      --bg-panel: rgba(19, 25, 38, 0.92);
+      --bg-glass: rgba(28, 36, 54, 0.7);
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-bright: rgba(16, 185, 129, 0.4);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --primary-glow: rgba(16, 185, 129, 0.35);
+      --accent-cyan: #38bdf8;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      --lcd-bg: #03140f;
+      --lcd-text: #10f2a7;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.6);
+      --font-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === HEADER LAB BAR === */
+    header.lab-header {
+      background: rgba(15, 20, 31, 0.96);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 18px var(--primary-glow);
+    }
+
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+
+    .brand-title h1 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title h1 span.badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--border-bright);
+      color: #a7f3d0;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-header {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .btn-header.primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .btn-header.primary:hover {
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+    }
+
+    /* === MAIN LAYOUT CONTAINER === */
+    main.lab-workbench {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 350px 1fr 380px;
+      gap: 16px;
+      padding: 16px 20px;
+      max-width: 1740px;
+      margin: 0 auto;
+      width: 100%;
+      height: calc(100vh - 67px);
+      min-height: 720px;
+    }
+
+    /* Common Glass Panel */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-header h2 svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--primary);
+    }
+
+    .panel-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* 4 Colligative Properties Tabs */
+    .colligative-tab-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .btn-colligative {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 9px 8px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-colligative:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-colligative.active {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(16, 185, 129, 0.1));
+      border: 1px solid var(--border-bright);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-colligative .tab-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .btn-colligative.active .tab-title {
+      color: #a7f3d0;
+    }
+
+    .btn-colligative .tab-symbol {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    /* Solute Selector Grid */
+    .solute-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .btn-solute {
+      background: #141c2c;
+      border: 1px solid var(--border-glass);
+      border-radius: 8px;
+      padding: 7px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .btn-solute span.i-factor {
+      font-size: 8px;
+      font-family: var(--font-mono);
+      opacity: 0.8;
+    }
+
+    .btn-solute:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #fff;
+    }
+
+    .btn-solute.active {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: rgba(16, 185, 129, 0.7);
+      color: #a7f3d0;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Control Cards & Sliders */
+    .card-control {
+      background: #0d131f;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .control-label span.val {
+      font-family: var(--font-mono);
+      color: #10f2a7;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #10b981;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--primary-glow);
+      border: 2px solid #fff;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Equation Display Box */
+    .eq-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+
+    .eq-box .eq-title {
+      font-size: 9px;
+      font-weight: 700;
+      color: #10b981;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* === CENTER STAGE (APPARATUS STUDIO & SUB-MICROSCOPIC VIEW) === */
+    section.lab-center-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    /* Top: Molecular Collision Canvas 2D */
+    .mol-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .mol-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mol-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mol-title svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--accent-cyan);
+    }
+
+    .mol-viewport-wrap {
+      display: grid;
+      grid-template-columns: 1fr 160px;
+      gap: 10px;
+      height: 115px;
+    }
+
+    canvas#molCanvas {
+      width: 100%;
+      height: 100%;
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+    }
+
+    /* Molecular Explanation Mini Card */
+    .mol-info-card {
+      background: #080d1a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 9px;
+      font-family: var(--font-mono);
+      line-height: 1.4;
+    }
+
+    /* Main Apparatus Studio Viewport */
+    .apparatus-studio {
+      flex: 1;
+      background: radial-gradient(circle at 50% 30%, #172033 0%, #0c111c 100%);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Benchtop Surface Base */
+    .benchtop-surface {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border-top: 2px solid #334155;
+      box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    /* SVG Apparatus Canvas */
+    svg.apparatus-svg {
+      width: 100%;
+      height: 100%;
+      max-height: 480px;
+      z-index: 10;
+    }
+
+    /* Floating Workbench Control Bar */
+    .bench-control-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-glass);
+      padding: 8px 16px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 30;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .btn-act {
+      border: 1px solid var(--border-glass);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-act:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .btn-act.btn-heat-on {
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(244, 63, 94, 0.4);
+    }
+
+    .control-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* === RIGHT PANEL (DIGITAL SENSORS, MATH & DATA LOG) === */
+    /* Digital LCD Instrument Meter */
+    .lcd-meter-box {
+      background: #020907;
+      border: 2px solid #064e3b;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.95);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lcd-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(16, 242, 167, 0.6);
+      letter-spacing: 1px;
+    }
+
+    .lcd-digits-large {
+      font-family: var(--font-mono);
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 14px rgba(16, 242, 167, 0.7);
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+
+    .lcd-status-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(16, 242, 167, 0.15);
+      color: #10f2a7;
+    }
+
+    /* Mathematical Calculation Card */
+    .math-calc-card {
+      background: #0d131f;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .calc-row span.val {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Live Colligative Curve Chart Box */
+    .chart-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+
+    .chart-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    canvas#colligativeChart {
+      width: 100%;
+      height: 155px;
+      border-radius: 6px;
+      background: #030712;
+    }
+
+    /* Data Table Log */
+    .log-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 120px;
+    }
+
+    .log-table-wrap {
+      overflow-y: auto;
+      flex: 1;
+      max-height: 135px;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    table.data-table th {
+      background: #111723;
+      padding: 6px 8px;
+      text-align: left;
+      color: #94a3b8;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      font-size: 10px;
+    }
+
+    table.data-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      font-size: 10px;
+    }
+
+    table.data-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* MODAL STYLES */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      max-width: 620px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-card p, .modal-card ul {
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .modal-card ul {
+      padding-left: 20px;
+    }
+
+    .modal-card li {
+      margin-bottom: 6px;
+    }
+
+    /* FLOATING TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--primary);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 200;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 1280px) {
+      main.lab-workbench {
+        grid-template-columns: 320px 1fr 350px;
+      }
+    }
+    @media (max-width: 1080px) {
+      body { overflow-y: auto; }
+      main.lab-workbench {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .apparatus-studio { height: 440px; }
+    }
+  
+    /* === PORTAL BACK NAVIGATION BUTTONS === */
+    .nav-back-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .btn-back-hub, .btn-back-portal {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+      line-height: 1;
+      height: 32px;
+      box-sizing: border-box;
+    }
+    .btn-back-hub {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .btn-back-hub:hover {
+      background: rgba(16, 185, 129, 0.3);
+      border-color: #34d399;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    }
+    .btn-back-portal {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+    .btn-back-portal:hover {
+      background: rgba(99, 102, 241, 0.3);
+      border-color: #818cf8;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+    }
+    @media (max-width: 640px) {
+      .text-hide-mobile { display: none; }
+      .btn-back-hub, .btn-back-portal { padding: 6px 8px; font-size: 10px; }
+      .nav-back-group { margin-right: 6px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- HEADER LAB -->
+  <header class="lab-header">
+    <div class="brand-section">
+      <!-- Navigation Back Button to PortalKimia Media & Lab Virtual -->
+      <div class="nav-back-group">
+        <a href="LaboratoriumVirtual.html" class="btn-back-hub" title="Kembali ke Katalog Laboratorium Virtual" onclick="handlePortalBack(event, 'LaboratoriumVirtual.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Katalog Lab</span>
+        </a>
+        <a href="index.html" class="btn-back-portal" title="Kembali ke Beranda PortalKimia Media" onclick="handlePortalBack(event, 'index.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="text-hide-mobile">Portal Media</span>
+        </a>
+      </div>
+
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <h1>
+          Virtual Lab: Sifat Koligatif Larutan
+          <span class="badge">Standar PhET / Labster</span>
+        </h1>
+        <p>Eksperimen Penurunan Tekanan Uap, Kenaikan Titik Didih, Penurunan Titik Beku &amp; Tekanan Osmotik</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" id="btn-sound-toggle" title="Nyalakan/Matikan Suara">
+        <svg id="sound-icon-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+        <span id="sound-text">Suara: ON</span>
+      </button>
+
+      <button class="btn-header" id="btn-guide-modal">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        Panduan Lab
+      </button>
+
+      <button class="btn-header" id="btn-export-csv" title="Ekspor Data Pengamatan ke Format CSV">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Ekspor CSV
+      </button>
+
+      <button class="btn-header primary" id="btn-reset-all" title="Reset Percobaan ke Air Murni">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Reset Pelarut
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN LAB WORKBENCH -->
+  <main class="lab-workbench">
+
+    <!-- LEFT PANEL: PROPERTY SELECTOR & SOLUTE CONTROLS -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Sifat Koligatif &amp; Zat Terlarut
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- 1. Colligative Property Selector Tabs -->
+        <div>
+          <div class="section-title">Pilih Sifat Koligatif:</div>
+          <div class="colligative-tab-grid">
+            <button class="btn-colligative active" data-prop="boiling_point">
+              <span class="tab-title">1. Kenaikan Titik Didih</span>
+              <span class="tab-symbol">&Delta;Tb = m &bull; Kb &bull; i</span>
+            </button>
+            <button class="btn-colligative" data-prop="freezing_point">
+              <span class="tab-title">2. Penurunan Titik Beku</span>
+              <span class="tab-symbol">&Delta;Tf = m &bull; Kf &bull; i</span>
+            </button>
+            <button class="btn-colligative" data-prop="vapor_pressure">
+              <span class="tab-title">3. Penurunan Tekanan Uap</span>
+              <span class="tab-symbol">&Delta;P = P&deg; &bull; Xt</span>
+            </button>
+            <button class="btn-colligative" data-prop="osmotic_pressure">
+              <span class="tab-title">4. Tekanan Osmotik</span>
+              <span class="tab-symbol">&pi; = M &bull; R &bull; T &bull; i</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Solute Selection (Nonelectrolyte vs Electrolyte) -->
+        <div class="card-control">
+          <div class="section-title">
+            <span>Pilih Jenis Zat Terlarut:</span>
+            <span id="label-solute-vanthoff" style="color: #10f2a7; font-family: var(--font-mono); font-size: 10px;">Faktor i = 1.0 (Nonelektrolit)</span>
+          </div>
+          <div class="solute-grid">
+            <button class="btn-solute active" data-solute="sucrose"><span>Sukrosa</span><span class="i-factor">i = 1 (Non)</span></button>
+            <button class="btn-solute" data-solute="glucose"><span>Glukosa</span><span class="i-factor">i = 1 (Non)</span></button>
+            <button class="btn-solute" data-solute="urea"><span>Urea</span><span class="i-factor">i = 1 (Non)</span></button>
+            <button class="btn-solute" data-solute="nacl"><span>NaCl</span><span class="i-factor">i = 2 (Garam)</span></button>
+            <button class="btn-solute" data-solute="cacl2"><span>CaCl₂</span><span class="i-factor">i = 3 (Garam)</span></button>
+            <button class="btn-solute" data-solute="al2so43"><span>Al₂(SO₄)₃</span><span class="i-factor">i = 5 (Garam)</span></button>
+          </div>
+        </div>
+
+        <!-- 3. Solute Mass & Molality Slider -->
+        <div class="card-control">
+          <div class="control-row">
+            <div class="control-label">
+              <span>Massa Zat Terlarut (g)</span>
+              <span class="val" id="val-mass-solute">68.4 g (0.40 m)</span>
+            </div>
+            <input type="range" id="slider-mass-solute" min="0" max="250" step="5" value="68.4">
+            <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; font-family: var(--font-mono);">
+              <span>0 g (Air Murni)</span>
+              <span>125 g</span>
+              <span>250 g</span>
+            </div>
+          </div>
+          <!-- Solvent Mass Slider -->
+          <div class="control-row" style="margin-top: 4px;">
+            <div class="control-label">
+              <span>Massa Pelarut Air (H₂O)</span>
+              <span class="val" id="val-mass-solvent">500 g</span>
+            </div>
+            <input type="range" id="slider-mass-solvent" min="200" max="1000" step="50" value="500">
+          </div>
+        </div>
+
+        <!-- 4. Dynamic Formula Card -->
+        <div class="eq-box" id="colligative-formula-card">
+          <div class="eq-title">
+            <span id="eq-prop-title">Kenaikan Titik Didih (Kb = 0.52 &deg;C/m)</span>
+            <span id="eq-const-val" style="color: #38bdf8;">Tb&deg; = 100.00 &deg;C</span>
+          </div>
+          <div style="font-size: 10px; color: #a7f3d0; margin-bottom: 2px;" id="eq-main-formula">
+            &Delta;Tb = m &bull; Kb &bull; i &rarr; Tb = 100.00 &deg;C + &Delta;Tb
+          </div>
+          <div style="font-size: 9px; color: #94a3b8;" id="eq-explanation-text">
+            Zat terlarut menurunkan tekanan uap sehingga larutan membutuhkan suhu lebih tinggi untuk mendidih.
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- CENTER STAGE: SUB-MICROSCOPIC MOLECULES & APPARATUS STUDIO -->
+    <section class="lab-center-stage">
+
+      <!-- TOP: 2D SUB-MICROSCOPIC COLLIGATIVE SIMULATOR CANVAS -->
+      <div class="mol-box">
+        <div class="mol-header">
+          <div class="mol-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Jendela Molekuler 2D: Penghalangan Partikel Terlarut
+          </div>
+          <div style="font-size: 10px; color: var(--text-muted); display: flex; gap: 10px;">
+            <span style="color: #38bdf8;">&bull; Molekul Pelarut Air</span>
+            <span style="color: #f59e0b;">&bull; Partikel Zat Terlarut</span>
+          </div>
+        </div>
+
+        <div class="mol-viewport-wrap">
+          <canvas id="molCanvas" width="480" height="115"></canvas>
+          <div class="mol-info-card">
+            <div>
+              <span style="color: #94a3b8; display: block; margin-bottom: 2px;">TOTAL PARTIKEL EFEKTIF:</span>
+              <span id="val-total-particles" style="color: #10f2a7; font-weight: 700; font-size: 11px;">0.40 mol partikel</span>
+            </div>
+            <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+              <span style="color: #94a3b8; display: block; margin-bottom: 2px;">FRAKSI MOL TERLARUT (Xt):</span>
+              <span id="val-xt-display" style="color: #38bdf8; font-weight: 700;">Xt = 0.0072</span>
+            </div>
+            <div style="font-size: 8px; color: #64748b;">
+              Efek koligatif sebanding dengan kerapatan partikel terlarut.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN APPARATUS STUDIO -->
+      <div class="apparatus-studio" id="studio-container">
+
+        <!-- SVG APPARATUS CANVAS -->
+        <svg class="apparatus-svg" viewBox="0 0 700 480" id="apparatus-svg">
+          <defs>
+            <!-- Glass Shading & Liquids -->
+            <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
+              <stop offset="15%" stop-color="rgba(255,255,255,0.08)"/>
+              <stop offset="85%" stop-color="rgba(255,255,255,0.04)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0.3)"/>
+            </linearGradient>
+
+            <linearGradient id="waterLiquidGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="rgba(56, 189, 248, 0.25)"/>
+              <stop offset="100%" stop-color="rgba(14, 116, 144, 0.5)"/>
+            </linearGradient>
+
+            <linearGradient id="mercuryGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#94a3b8"/>
+              <stop offset="50%" stop-color="#e2e8f0"/>
+              <stop offset="100%" stop-color="#64748b"/>
+            </linearGradient>
+
+            <linearGradient id="iceBathGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="rgba(224, 242, 254, 0.4)"/>
+              <stop offset="100%" stop-color="rgba(186, 230, 253, 0.7)"/>
+            </linearGradient>
+          </defs>
+
+          <!-- 1. APPARATUS FOR TAB 1: BOILING POINT ELEVATION (Hotplate + Beaker + Bubbles) -->
+          <g id="apparatus-boiling" transform="translate(230, 160)">
+            <!-- Hotplate Base -->
+            <rect x="20" y="240" width="200" height="30" rx="6" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+            <rect x="35" y="235" width="170" height="8" rx="2" fill="#ef4444" id="hotplate-burner-element"/>
+            <circle cx="120" cy="255" r="7" fill="#334155" stroke="#cbd5e1" stroke-width="1.5"/>
+
+            <!-- Glass Beaker 500 mL -->
+            <path id="boiling-liquid" d="M 42 110 L 198 110 L 198 230 C 198 236, 42 236, 42 230 Z" fill="url(#waterLiquidGrad)"/>
+            <path d="M 38 60 L 38 232 C 38 240, 202 240, 202 232 L 202 60" fill="url(#glassGrad)" stroke="rgba(255,255,255,0.75)" stroke-width="2.2"/>
+            <ellipse cx="120" cy="60" rx="82" ry="8" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+
+            <!-- Digital Thermometer Immersion Probe -->
+            <g transform="translate(150, 0)">
+              <rect x="0" y="20" width="8" height="190" rx="3" fill="rgba(255,255,255,0.5)" stroke="#fff" stroke-width="1"/>
+              <rect id="boiling-mercury-stem" x="2" y="50" width="4" height="158" fill="#ef4444"/>
+              <circle cx="4" cy="210" r="6" fill="#ef4444"/>
+            </g>
+
+            <!-- Dynamic Boiling Bubbles Layer -->
+            <g id="boiling-bubbles-layer"></g>
+            <text x="120" y="295" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">BEAKER PEMANAS TITIK DIDIH</text>
+          </g>
+
+          <!-- 2. APPARATUS FOR TAB 2: FREEZING POINT DEPRESSION (Ice Bath Chamber) -->
+          <g id="apparatus-freezing" transform="translate(210, 160)" opacity="0">
+            <!-- Insulated Outer Ice Bath Chamber -->
+            <rect x="10" y="80" width="260" height="160" rx="10" fill="url(#iceBathGrad)" stroke="#38bdf8" stroke-width="2"/>
+            <text x="140" y="225" fill="#0369a1" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">PENANGAS ES GARAM (-10 &deg;C)</text>
+
+            <!-- Inner Test Tube With Sample Solution -->
+            <g transform="translate(115, 20)">
+              <rect x="10" y="20" width="30" height="190" rx="15" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+              <!-- Liquid / Freezing Ice Slush -->
+              <path id="freezing-liquid" d="M 12 80 L 38 80 L 38 195 C 38 205, 12 205, 12 195 Z" fill="#93c5fd" opacity="0.7"/>
+              <!-- Ice Crystals Shimmer -->
+              <polygon points="20,120 25,110 30,120 25,130" fill="#fff" opacity="0.8"/>
+              <polygon points="15,150 20,140 25,150 20,160" fill="#fff" opacity="0.8"/>
+              <!-- Probe -->
+              <rect x="22" y="0" width="6" height="180" rx="2" fill="#ef4444"/>
+            </g>
+            <text x="140" y="275" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">TABUNG PEMBEKUAN TITIK BEKU</text>
+          </g>
+
+          <!-- 3. APPARATUS FOR TAB 3: VAPOR PRESSURE MANOMETER (Sealed Flask + U-Tube) -->
+          <g id="apparatus-vapor" transform="translate(180, 150)" opacity="0">
+            <!-- Sealed Erlenmeyer Flask with Liquid -->
+            <path d="M 42 120 L -8 216 C -12 228, -2 236, 12 236 L 108 236 C 122 236, 132 228, 128 216 L 78 120"
+                  fill="url(#waterLiquidGrad)" stroke="rgba(255,255,255,0.75)" stroke-width="2.2"/>
+            <rect x="42" y="70" width="36" height="50" fill="url(#glassGrad)" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <!-- Rubber Stopper with Delivery Tube -->
+            <polygon points="40,74 80,74 74,94 46,94" fill="#334155"/>
+            <!-- Connecting Glass Tube to Manometer -->
+            <path d="M 60 80 L 60 40 Q 60 20 80 20 L 190 20 Q 210 20 210 40 L 210 100"
+                  fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="6" stroke-linecap="round"/>
+
+            <!-- U-Tube Mercury Manometer on Right -->
+            <g transform="translate(200, 70)">
+              <!-- U-Tube Glass -->
+              <path d="M 10 30 L 10 140 Q 10 170 40 170 Q 70 170 70 140 L 70 30"
+                    fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="14" stroke-linecap="round"/>
+              <!-- Mercury Column Left and Right -->
+              <!-- Left arm mercury level (pressed down by vapor pressure) -->
+              <rect id="manometer-left-hg" x="5" y="110" width="10" height="40" fill="url(#mercuryGrad)"/>
+              <!-- Right arm mercury level (pushed up by vapor pressure) -->
+              <rect id="manometer-right-hg" x="65" y="80" width="10" height="70" fill="url(#mercuryGrad)"/>
+              <text x="40" y="195" fill="#cbd5e1" font-size="8" font-family="monospace" text-anchor="middle">&Delta;h (mmHg)</text>
+            </g>
+            <text x="150" y="275" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">MANOMETER TEKANAN UAP JENUH</text>
+          </g>
+
+          <!-- 4. APPARATUS FOR TAB 4: OSMOMETER (Vertical Column + Semipermeable Membrane) -->
+          <g id="apparatus-osmosis" transform="translate(230, 150)" opacity="0">
+            <!-- Outer Beaker with Pure Solvent Water -->
+            <rect x="20" y="120" width="200" height="120" rx="8" fill="url(#waterLiquidGrad)" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+            <text x="35" y="225" fill="#38bdf8" font-size="8" font-family="monospace">Air Murni</text>
+
+            <!-- Inverted Thistle Funnel Tube (Osmometer) -->
+            <g transform="translate(100, 20)">
+              <!-- Vertical Tube Stem -->
+              <rect x="15" y="0" width="10" height="160" rx="2" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+              <!-- Rising Liquid Level inside stem -->
+              <rect id="osmometer-liquid-col" x="16" y="80" width="8" height="80" fill="#10b981"/>
+              <!-- Flared Bottom Bell Head -->
+              <path d="M 15 160 L -10 190 L 50 190 L 25 160 Z" fill="rgba(16, 185, 129, 0.4)" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"/>
+              <!-- Semipermeable Membrane at base -->
+              <line x1="-10" y1="190" x2="50" y2="190" stroke="#f59e0b" stroke-width="3" stroke-dasharray="3,2"/>
+              <text x="20" y="205" fill="#f59e0b" font-size="8" font-family="monospace" font-weight="bold" text-anchor="middle">MEMBRAN</text>
+            </g>
+            <text x="120" y="275" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">OSMOMETER TEKANAN OSMOTIK</text>
+          </g>
+        </svg>
+
+        <!-- Surface Benchtop Base -->
+        <div class="benchtop-surface"></div>
+
+        <!-- Floating Tactile Control Bar -->
+        <div class="bench-control-bar">
+          <button class="btn-act btn-heat-on" id="btn-toggle-heating" title="Nyalakan / Matikan Pemanas Hotplate">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+            </svg>
+            <span id="btn-heat-text">Pemanas / Pembeku: AKTIF</span>
+          </button>
+
+          <div class="control-divider"></div>
+
+          <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; color: #94a3b8;">
+            <span>STATUS PELARUT:</span>
+            <span id="solvent-status-label" style="color: #10f2a7; font-weight: 700;">LARUTAN HOMOGEN</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: DIGITAL LCD SENSORS, MATH & DATA LOG -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Sensor Digital &amp; Kalkulator Koligatif
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- Digital Instrument LCD Sensor Display -->
+        <div class="lcd-meter-box">
+          <div class="lcd-top-bar">
+            <span id="lcd-sensor-title">TITIK DIDIH LARUTAN (Tb)</span>
+            <span class="lcd-status-badge" id="badge-colligative-status">&Delta;Tb = +0.42 &deg;C</span>
+          </div>
+          <div class="lcd-digits-large" id="lcd-main-reading">100.42 &deg;C</div>
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748b; font-family: var(--font-mono);">
+            <span>Presisi: &plusmn; 0.01</span>
+            <span id="lcd-pure-reference" style="color: #38bdf8;">Air Murni: 100.00 &deg;C</span>
+          </div>
+        </div>
+
+        <!-- Mathematical Calculation Card -->
+        <div class="math-calc-card">
+          <div class="calc-row">
+            <span style="color: #94a3b8;">Molalitas Larutan (m):</span>
+            <span class="val" id="calc-val-m">0.400 mol/kg</span>
+          </div>
+          <div class="calc-row">
+            <span style="color: #94a3b8;">Faktor van 't Hoff (i):</span>
+            <span class="val" id="calc-val-i">1.00</span>
+          </div>
+          <div class="calc-row">
+            <span style="color: #94a3b8;" id="calc-label-const">Tetapan Kb Air:</span>
+            <span class="val" id="calc-val-const">0.52 &deg;C/m</span>
+          </div>
+          <div class="calc-row" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
+            <span style="color: #94a3b8;" id="calc-label-delta">Perubahan Nilai (&Delta;Tb):</span>
+            <span class="val" id="calc-val-delta" style="color: #38bdf8;">+ 0.416 &deg;C</span>
+          </div>
+          <div class="calc-row" style="border-top: 1px solid rgba(16, 185, 129, 0.3); padding-top: 4px;">
+            <span style="color: #a7f3d0; font-weight: 700;" id="calc-label-final">Titik Didih Akhir (Tb):</span>
+            <span class="val" id="calc-val-final" style="color: #10f2a7; font-size: 13px;">100.416 &deg;C</span>
+          </div>
+        </div>
+
+        <!-- Live Colligative Curve Chart Box -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <span class="chart-title" id="chart-panel-title">Kurva Perubahan Koligatif</span>
+            <button id="btn-save-chart" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 10px;" title="Unduh Gambar PNG">
+              Unduh PNG
+            </button>
+          </div>
+          <canvas id="colligativeChart" width="340" height="155"></canvas>
+          <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; font-family: var(--font-mono); padding: 0 4px;">
+            <span>0 g Terlarut</span>
+            <span>250 g Terlarut</span>
+          </div>
+        </div>
+
+        <!-- Data Table Log -->
+        <div class="log-box">
+          <div style="padding: 6px 10px; background: #0f1624; border-bottom: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Riwayat Pengamatan</span>
+            <button id="btn-clear-log" style="background: none; border: none; color: #ef4444; font-size: 10px; cursor: pointer;">Hapus</button>
+          </div>
+          <div class="log-table-wrap">
+            <table class="data-table" id="table-log">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Sifat</th>
+                  <th>Zat Terlarut</th>
+                  <th>i</th>
+                  <th>m (molal)</th>
+                  <th>Hasil</th>
+                </tr>
+              </thead>
+              <tbody id="table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- MODAL PANDUAN PRAKTIKUM -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal-card">
+      <h3>🔬 Panduan Praktikum Virtual Sifat Koligatif Larutan</h3>
+      <p>Praktikum ini menyajikan simulasi laboratorium sifat koligatif larutan nonelektrolit dan elektrolit:</p>
+      <ul>
+        <li><b>Definisi Sifat Koligatif:</b> Sifat fisik larutan yang hanya ditentukan oleh <b>jumlah partikel zat terlarut</b> dalam larutan, bukan oleh jenis zat terlarutnya.</li>
+        <li><b>Faktor van 't Hoff ($i$):</b> Untuk zat elektrolit yang terionisasi, jumlah partikel bertambah menjadi $i = 1 + (n - 1)\alpha$. Pada larutan elektrolit kuat ($\alpha = 1$), faktor $i$ sama dengan jumlah ion ($n$). Misal $NaCl$ ($i=2$) dan $CaCl_2$ ($i=3$), sehingga efek koligatifnya 2 hingga 3 kali lebih besar dibandingkan zat nonelektrolit (gula/urea).</li>
+        <li><b>1. Penurunan Tekanan Uap ($\Delta P$):</b> Molekul zat terlarut di permukaan cairan menghalangi molekul pelarut menguap. Sesuai Hukum Raoult: $\Delta P = P^\circ \times X_t$.</li>
+        <li><b>2. Kenaikan Titik Didih ($\Delta T_b$):</b> Akibat tekanan uap turun, larutan membutuhkan suhu lebih tinggi agar tekanan uapnya mencapai 1 atm ($760\text{ mmHg}$). Rumus: $\Delta T_b = m \times K_b \times i$.</li>
+        <li><b>3. Penurunan Titik Beku ($\Delta T_f$):</b> Partikel terlarut mengganggu pembentukan kisi kristal es pelarut, sehingga larutan membeku pada suhu di bawah $0^\circ\text{C}$. Rumus: $\Delta T_f = m \times K_f \times i$.</li>
+        <li><b>4. Tekanan Osmotik ($\pi$):</b> Tekanan yang harus diberikan untuk menghentikan aliran pelarut murni melintasi membran semipermeabel menuju larutan. Rumus: $\pi = M \times R \times T \times i$.</li>
+      </ul>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-act btn-primary" id="btn-close-modal" style="padding: 8px 20px;">Tutup &amp; Mulai Praktikum</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST -->
+  <div class="toast" id="toastBox">Notifikasi</div>
+
+  <!-- JAVASCRIPT: ENGINE & SOUND SYNTHESIS -->
+  <script>
+    'use strict';
+
+    /* =========================================================================
+     * 1. NATIVE WEB AUDIO API SYNTHESIZER
+     * ========================================================================= */
+    class ColligativeAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.boilNode = null;
+        this.boilGain = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playClick() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(540, now);
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+
+      startBoiling() {
+        if (this.muted || this.boilNode) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const bufferSize = this.ctx.sampleRate * 2;
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        let b0 = 0, b1 = 0, b2 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99 * b0 + white * 0.05;
+          b1 = 0.95 * b1 + white * 0.1;
+          b2 = 0.85 * b2 + white * 0.25;
+          output[i] = (b0 + b1 + b2) * 0.15;
+        }
+
+        const whiteNoise = this.ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(450, this.ctx.currentTime);
+
+        this.boilGain = this.ctx.createGain();
+        this.boilGain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+
+        whiteNoise.connect(filter);
+        filter.connect(this.boilGain);
+        this.boilGain.connect(this.ctx.destination);
+
+        whiteNoise.start();
+        this.boilNode = whiteNoise;
+      }
+
+      stopBoiling() {
+        if (this.boilNode) {
+          try {
+            this.boilNode.stop();
+            this.boilNode.disconnect();
+          } catch(e) {}
+          this.boilNode = null;
+          this.boilGain = null;
+        }
+      }
+
+      playChime() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const freqs = [523.25, 659.25, 783.99]; // C5, E5, G5
+        const now = this.ctx.currentTime;
+
+        freqs.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const startTime = now + idx * 0.06;
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.08, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.3);
+        });
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        if (this.muted) this.stopBoiling();
+        return !this.muted;
+      }
+    }
+
+    const sound = new ColligativeAudioEngine();
+
+    /* =========================================================================
+     * 2. COLLIGATIVE PROPERTIES & SOLUTE DATA
+     * ========================================================================= */
+    const SOLUTES = {
+      sucrose: { name: 'Sukrosa', mr: 342.3, i: 1.0, isElectrolyte: false, desc: 'Nonelektrolit murni' },
+      glucose: { name: 'Glukosa', mr: 180.2, i: 1.0, isElectrolyte: false, desc: 'Nonelektrolit murni' },
+      urea: { name: 'Urea', mr: 60.06, i: 1.0, isElectrolyte: false, desc: 'Nonelektrolit murni' },
+      nacl: { name: 'Natrium Klorida (NaCl)', mr: 58.44, i: 2.0, isElectrolyte: true, desc: 'Elektrolit kuat (Na⁺ + Cl⁻)' },
+      cacl2: { name: 'Kalsium Klorida (CaCl₂)', mr: 110.98, i: 3.0, isElectrolyte: true, desc: 'Elektrolit kuat (Ca²⁺ + 2Cl⁻)' },
+      al2so43: { name: 'Aluminium Sulfat [Al₂(SO₄)₃]', mr: 342.15, i: 5.0, isElectrolyte: true, desc: 'Elektrolit kuat (2Al³⁺ + 3SO₄²⁻)' }
+    };
+
+    /* Simulation Runtime State */
+    const state = {
+      propertyKey: 'boiling_point', // 'boiling_point', 'freezing_point', 'vapor_pressure', 'osmotic_pressure'
+      soluteKey: 'sucrose',
+      massSoluteGrams: 68.4,
+      massSolventGrams: 500, // g H2O
+      isHeatingActive: true,
+
+      // Calculated parameters
+      molality: 0.40,
+      molarity: 0.38,
+      moleFractionSolute: 0.0072,
+      vanTHoffI: 1.0,
+
+      deltaValue: 0.416,
+      finalValue: 100.416,
+
+      // Animated bubbles pool
+      boilingBubbles: [],
+
+      // Table log
+      tableLog: []
+    };
+
+    /* =========================================================================
+     * 3. SUB-MICROSCOPIC MOLECULAR VIEW CANVAS (2D Particles)
+     * ========================================================================= */
+    class SubmicroscopicColligativeSimulator {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.init();
+      }
+
+      init() {
+        this.particles = [];
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        // Water solvent molecules (Blue)
+        for (let i = 0; i < 35; i++) {
+          this.particles.push({
+            x: 20 + Math.random() * (w - 40),
+            y: 25 + Math.random() * (h - 35),
+            vx: (Math.random() - 0.5) * 1.8,
+            vy: (Math.random() - 0.5) * 1.8,
+            r: 3.5,
+            isSolute: false
+          });
+        }
+
+        // Solute particles (Orange/Amber)
+        const soluteCount = Math.round(state.molality * state.vanTHoffI * 10);
+        for (let i = 0; i < Math.min(25, soluteCount); i++) {
+          this.particles.push({
+            x: 20 + Math.random() * (w - 40),
+            y: 35 + Math.random() * (h - 45),
+            vx: (Math.random() - 0.5) * 0.9,
+            vy: (Math.random() - 0.5) * 0.9,
+            r: 6.0,
+            isSolute: true
+          });
+        }
+      }
+
+      update() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        for (let i = 0; i < this.particles.length; i++) {
+          const p = this.particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x - p.r < 10) { p.x = 10 + p.r; p.vx *= -1; }
+          if (p.x + p.r > w - 10) { p.x = w - 10 - p.r; p.vx *= -1; }
+          if (p.y - p.r < 15) { p.y = 15 + p.r; p.vy *= -1; }
+          if (p.y + p.r > h - 10) { p.y = h - 10 - p.r; p.vy *= -1; }
+        }
+      }
+
+      draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Draw Liquid Surface Meniscus line top
+        this.ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(10, 16);
+        this.ctx.lineTo(this.canvas.width - 10, 16);
+        this.ctx.stroke();
+
+        this.ctx.fillStyle = '#64748b';
+        this.ctx.font = '8px monospace';
+        this.ctx.fillText('PERMUKAAN LARUTAN (FASE UAP DI ATAS)', 14, 11);
+
+        for (let i = 0; i < this.particles.length; i++) {
+          const p = this.particles[i];
+          this.ctx.beginPath();
+          this.ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+
+          if (p.isSolute) {
+            this.ctx.fillStyle = '#f59e0b';
+            this.ctx.shadowColor = 'rgba(245, 158, 11, 0.6)';
+          } else {
+            this.ctx.fillStyle = '#38bdf8';
+            this.ctx.shadowColor = 'rgba(56, 189, 248, 0.5)';
+          }
+          this.ctx.shadowBlur = 5;
+          this.ctx.fill();
+          this.ctx.shadowBlur = 0;
+        }
+      }
+    }
+
+    /* =========================================================================
+     * 4. LIVE COLLIGATIVE CHART CANVAS RENDERER
+     * ========================================================================= */
+    class ColligativeChartRenderer {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+      }
+
+      render() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const padL = 36;
+        const padR = 14;
+        const padT = 16;
+        const padB = 24;
+
+        this.ctx.clearRect(0, 0, w, h);
+
+        // Grid lines
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        this.ctx.lineWidth = 1;
+
+        // X-axis: 0 to 250 g
+        for (let i = 0; i <= 5; i++) {
+          const x = padL + (i / 5) * (w - padL - padR);
+          this.ctx.beginPath();
+          this.ctx.moveTo(x, padT);
+          this.ctx.lineTo(x, h - padB);
+          this.ctx.stroke();
+
+          this.ctx.fillStyle = '#64748b';
+          this.ctx.font = '8px monospace';
+          this.ctx.textAlign = 'center';
+          const massVal = Math.round(i * 50);
+          this.ctx.fillText(`${massVal}g`, x, h - 8);
+        }
+
+        // Draw theoretical curve line across mass range (0 to 250g)
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = '#10f2a7';
+        this.ctx.lineWidth = 2.5;
+
+        const solute = SOLUTES[state.soluteKey];
+        const solventKg = state.massSolventGrams / 1000.0;
+        let maxVal = 5.0;
+
+        if (state.propertyKey === 'boiling_point') maxVal = 4.0;
+        else if (state.propertyKey === 'freezing_point') maxVal = 12.0;
+        else if (state.propertyKey === 'vapor_pressure') maxVal = 5.0;
+        else maxVal = 50.0;
+
+        for (let g = 0; g <= 250; g += 5) {
+          const m = (g / solute.mr) / solventKg;
+          let delta = 0;
+          if (state.propertyKey === 'boiling_point') delta = m * 0.52 * solute.i;
+          else if (state.propertyKey === 'freezing_point') delta = m * 1.86 * solute.i;
+          else if (state.propertyKey === 'vapor_pressure') {
+            const nt = (g / solute.mr) * solute.i;
+            const np = state.massSolventGrams / 18.015;
+            delta = 23.76 * (nt / (np + nt));
+          } else {
+            delta = m * 0.0821 * 298.15 * solute.i;
+          }
+
+          const x = padL + (g / 250.0) * (w - padL - padR);
+          const y = (h - padB) - (Math.min(maxVal, delta) / maxVal) * (h - padT - padB);
+          if (g === 0) this.ctx.moveTo(x, y);
+          else this.ctx.lineTo(x, y);
+        }
+        this.ctx.stroke();
+
+        // Current operating point dot
+        const currG = state.massSoluteGrams;
+        const currX = padL + (currG / 250.0) * (w - padL - padR);
+        const currY = (h - padB) - (Math.min(maxVal, state.deltaValue) / maxVal) * (h - padT - padB);
+
+        this.ctx.beginPath();
+        this.ctx.arc(currX, currY, 5, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#f43f5e';
+        this.ctx.shadowColor = '#f43f5e';
+        this.ctx.shadowBlur = 8;
+        this.ctx.fill();
+        this.ctx.shadowBlur = 0;
+      }
+    }
+
+    /* =========================================================================
+     * 5. APPARATUS CONTROLLER & COLLIGATIVE ENGINE
+     * ========================================================================= */
+    let molSim = null;
+    let chartRenderer = null;
+    let animFrameId = null;
+    let lastTimestamp = 0;
+
+    const el = {
+      btnColligativeTabs: document.querySelectorAll('.btn-colligative'),
+      btnSoluteButtons: document.querySelectorAll('.btn-solute'),
+      labelSoluteVanthoff: document.getElementById('label-solute-vanthoff'),
+
+      sliderMassSolute: document.getElementById('slider-mass-solute'),
+      valMassSolute: document.getElementById('val-mass-solute'),
+      sliderMassSolvent: document.getElementById('slider-mass-solvent'),
+      valMassSolvent: document.getElementById('val-mass-solvent'),
+
+      eqPropTitle: document.getElementById('eq-prop-title'),
+      eqConstVal: document.getElementById('eq-const-val'),
+      eqMainFormula: document.getElementById('eq-main-formula'),
+      eqExplanationText: document.getElementById('eq-explanation-text'),
+
+      apparatusBoiling: document.getElementById('apparatus-boiling'),
+      apparatusFreezing: document.getElementById('apparatus-freezing'),
+      apparatusVapor: document.getElementById('apparatus-vapor'),
+      apparatusOsmosis: document.getElementById('apparatus-osmosis'),
+
+      boilingBubblesLayer: document.getElementById('boiling-bubbles-layer'),
+      manometerLeftHg: document.getElementById('manometer-left-hg'),
+      manometerRightHg: document.getElementById('manometer-right-hg'),
+      osmometerLiquidCol: document.getElementById('osmometer-liquid-col'),
+
+      btnToggleHeating: document.getElementById('btn-toggle-heating'),
+      btnHeatText: document.getElementById('btn-heat-text'),
+      solventStatusLabel: document.getElementById('solvent-status-label'),
+
+      lcdSensorTitle: document.getElementById('lcd-sensor-title'),
+      badgeColligativeStatus: document.getElementById('badge-colligative-status'),
+      lcdMainReading: document.getElementById('lcd-main-reading'),
+      lcdPureReference: document.getElementById('lcd-pure-reference'),
+
+      calcValM: document.getElementById('calc-val-m'),
+      calcValI: document.getElementById('calc-val-i'),
+      calcLabelConst: document.getElementById('calc-label-const'),
+      calcValConst: document.getElementById('calc-val-const'),
+      calcLabelDelta: document.getElementById('calc-label-delta'),
+      calcValDelta: document.getElementById('calc-val-delta'),
+      calcLabelFinal: document.getElementById('calc-label-final'),
+      calcValFinal: document.getElementById('calc-val-final'),
+
+      valTotalParticles: document.getElementById('val-total-particles'),
+      valXtDisplay: document.getElementById('val-xt-display'),
+      chartPanelTitle: document.getElementById('chart-panel-title'),
+
+      tableBody: document.getElementById('table-body'),
+      btnClearLog: document.getElementById('btn-clear-log'),
+      btnExportCsv: document.getElementById('btn-export-csv'),
+      btnSaveChart: document.getElementById('btn-save-chart'),
+      btnSoundToggle: document.getElementById('btn-sound-toggle'),
+      soundText: document.getElementById('sound-text'),
+      btnGuideModal: document.getElementById('btn-guide-modal'),
+      guideModal: document.getElementById('guideModal'),
+      btnCloseModal: document.getElementById('btn-close-modal'),
+      btnResetAll: document.getElementById('btn-reset-all'),
+      toastBox: document.getElementById('toastBox')
+    };
+
+    function showToast(msg) {
+      el.toastBox.textContent = msg;
+      el.toastBox.classList.add('show');
+      setTimeout(() => el.toastBox.classList.remove('show'), 3200);
+    }
+
+    // Initialize boiling bubbles
+    for (let i = 0; i < 20; i++) {
+      state.boilingBubbles.push({
+        x: 45 + Math.random() * 150,
+        y: 220 + Math.random() * 10,
+        r: 1.5 + Math.random() * 3.5,
+        speed: 1.5 + Math.random() * 2.5
+      });
+    }
+
+    /* Colligative Calculations Engine */
+    function calculateColligativeProperties() {
+      const solute = SOLUTES[state.soluteKey];
+      state.vanTHoffI = solute.i;
+
+      // 1. Moles & Molality
+      const molesSolute = state.massSoluteGrams / solute.mr;
+      const solventKg = state.massSolventGrams / 1000.0;
+      state.molality = molesSolute / solventKg;
+
+      // Molarity approx (assume density ~ 1.0 g/mL)
+      const solutionVolL = (state.massSolventGrams + state.massSoluteGrams * 0.7) / 1000.0;
+      state.molarity = molesSolute / solutionVolL;
+
+      // Mole Fraction of Solute (Xt)
+      const molesWater = state.massSolventGrams / 18.015;
+      const effectiveSoluteMoles = molesSolute * state.vanTHoffI;
+      state.moleFractionSolute = effectiveSoluteMoles / (molesWater + effectiveSoluteMoles);
+
+      // Total effective particles
+      el.valTotalParticles.textContent = `${effectiveSoluteMoles.toFixed(3)} mol partikel`;
+      el.valXtDisplay.textContent = `Xt = ${state.moleFractionSolute.toFixed(4)}`;
+
+      // 2. Compute Specific Colligative Property
+      if (state.propertyKey === 'boiling_point') {
+        // Delta Tb = m * Kb * i (Kb = 0.52 °C/m)
+        const kb = 0.52;
+        state.deltaValue = state.molality * kb * state.vanTHoffI;
+        state.finalValue = 100.00 + state.deltaValue;
+
+        el.lcdSensorTitle.textContent = 'TITIK DIDIH LARUTAN (Tb)';
+        el.badgeColligativeStatus.textContent = `ΔTb = +${state.deltaValue.toFixed(2)} °C`;
+        el.lcdMainReading.textContent = `${state.finalValue.toFixed(2)} °C`;
+        el.lcdPureReference.textContent = 'Air Murni (Tb°): 100.00 °C';
+
+        el.calcLabelConst.textContent = 'Tetapan Kb Air:';
+        el.calcValConst.textContent = '0.52 °C/m';
+        el.calcLabelDelta.textContent = 'Kenaikan Titik Didih (ΔTb):';
+        el.calcValDelta.textContent = `+ ${state.deltaValue.toFixed(3)} °C`;
+        el.calcLabelFinal.textContent = 'Titik Didih Larutan (Tb):';
+        el.calcValFinal.textContent = `${state.finalValue.toFixed(3)} °C`;
+
+      } else if (state.propertyKey === 'freezing_point') {
+        // Delta Tf = m * Kf * i (Kf = 1.86 °C/m)
+        const kf = 1.86;
+        state.deltaValue = state.molality * kf * state.vanTHoffI;
+        state.finalValue = 0.00 - state.deltaValue;
+
+        el.lcdSensorTitle.textContent = 'TITIK BEKU LARUTAN (Tf)';
+        el.badgeColligativeStatus.textContent = `ΔTf = -${state.deltaValue.toFixed(2)} °C`;
+        el.lcdMainReading.textContent = `${state.finalValue.toFixed(2)} °C`;
+        el.lcdPureReference.textContent = 'Air Murni (Tf°): 0.00 °C';
+
+        el.calcLabelConst.textContent = 'Tetapan Kf Air:';
+        el.calcValConst.textContent = '1.86 °C/m';
+        el.calcLabelDelta.textContent = 'Penurunan Titik Beku (ΔTf):';
+        el.calcValDelta.textContent = `- ${state.deltaValue.toFixed(3)} °C`;
+        el.calcLabelFinal.textContent = 'Titik Beku Larutan (Tf):';
+        el.calcValFinal.textContent = `${state.finalValue.toFixed(3)} °C`;
+
+      } else if (state.propertyKey === 'vapor_pressure') {
+        // Delta P = P0 * Xt (P0 at 25°C = 23.76 mmHg)
+        const p0 = 23.76;
+        state.deltaValue = p0 * state.moleFractionSolute;
+        state.finalValue = p0 - state.deltaValue;
+
+        el.lcdSensorTitle.textContent = 'TEKANAN UAP JENUH (P)';
+        el.badgeColligativeStatus.textContent = `ΔP = -${state.deltaValue.toFixed(2)} mmHg`;
+        el.lcdMainReading.textContent = `${state.finalValue.toFixed(2)} mmHg`;
+        el.lcdPureReference.textContent = 'Air Murni (P°): 23.76 mmHg';
+
+        el.calcLabelConst.textContent = 'Tekanan Uap Air Murni (P°):';
+        el.calcValConst.textContent = '23.76 mmHg';
+        el.calcLabelDelta.textContent = 'Penurunan Tekanan Uap (ΔP):';
+        el.calcValDelta.textContent = `- ${state.deltaValue.toFixed(3)} mmHg`;
+        el.calcLabelFinal.textContent = 'Tekanan Uap Larutan (P):';
+        el.calcValFinal.textContent = `${state.finalValue.toFixed(3)} mmHg`;
+
+        // Manometer height adjustment
+        const deltaH = (state.finalValue / 23.76) * 35;
+        el.manometerLeftHg.setAttribute('y', `${130 - deltaH}`);
+        el.manometerLeftHg.setAttribute('height', `${20 + deltaH}`);
+        el.manometerRightHg.setAttribute('y', `${90 + deltaH}`);
+        el.manometerRightHg.setAttribute('height', `${60 - deltaH}`);
+
+      } else if (state.propertyKey === 'osmotic_pressure') {
+        // Pi = M * R * T * i (R = 0.0821, T = 298.15 K)
+        const r = 0.0821;
+        const tempK = 298.15;
+        state.deltaValue = state.molarity * r * tempK * state.vanTHoffI;
+        state.finalValue = state.deltaValue;
+
+        el.lcdSensorTitle.textContent = 'TEKANAN OSMOTIK (π)';
+        el.badgeColligativeStatus.textContent = `π = ${state.finalValue.toFixed(2)} atm`;
+        el.lcdMainReading.textContent = `${state.finalValue.toFixed(2)} atm`;
+        el.lcdPureReference.textContent = 'Air Murni: 0.00 atm';
+
+        el.calcLabelConst.textContent = 'Konstanta Gas (R • T):';
+        el.calcValConst.textContent = '24.48 L•atm/mol';
+        el.calcLabelDelta.textContent = 'Molaritas Terlarut (M):';
+        el.calcValDelta.textContent = `${state.molarity.toFixed(3)} M`;
+        el.calcLabelFinal.textContent = 'Tekanan Osmotik (π):';
+        el.calcValFinal.textContent = `${state.finalValue.toFixed(2)} atm`;
+
+        // Osmometer liquid column rise
+        const hRise = Math.min(130, (state.finalValue / 30.0) * 120);
+        el.osmometerLiquidCol.setAttribute('y', `${150 - hRise}`);
+        el.osmometerLiquidCol.setAttribute('height', `${10 + hRise}`);
+      }
+
+      el.calcValM.textContent = `${state.molality.toFixed(3)} molal`;
+      el.calcValI.textContent = `${state.vanTHoffI.toFixed(2)}`;
+
+      if (chartRenderer) chartRenderer.render();
+      if (molSim) molSim.init();
+    }
+
+    function updateApparatusVisibility() {
+      el.apparatusBoiling.setAttribute('opacity', state.propertyKey === 'boiling_point' ? '1' : '0');
+      el.apparatusFreezing.setAttribute('opacity', state.propertyKey === 'freezing_point' ? '1' : '0');
+      el.apparatusVapor.setAttribute('opacity', state.propertyKey === 'vapor_pressure' ? '1' : '0');
+      el.apparatusOsmosis.setAttribute('opacity', state.propertyKey === 'osmotic_pressure' ? '1' : '0');
+
+      if (state.propertyKey === 'boiling_point') {
+        el.eqPropTitle.textContent = 'Kenaikan Titik Didih (Kb = 0.52 °C/m)';
+        el.eqConstVal.textContent = 'Tb° = 100.00 °C';
+        el.eqMainFormula.innerHTML = '&Delta;Tb = m &bull; Kb &bull; i &rarr; Tb = 100.00 &deg;C + &Delta;Tb';
+        el.eqExplanationText.textContent = 'Zat terlarut menurunkan tekanan uap sehingga air butuh suhu lebih tinggi untuk mendidih.';
+        el.chartPanelTitle.textContent = 'Kurva Kenaikan Titik Didih (ΔTb vs Massa)';
+        sound.startBoiling();
+      } else if (state.propertyKey === 'freezing_point') {
+        el.eqPropTitle.textContent = 'Penurunan Titik Beku (Kf = 1.86 °C/m)';
+        el.eqConstVal.textContent = 'Tf° = 0.00 °C';
+        el.eqMainFormula.innerHTML = '&Delta;Tf = m &bull; Kf &bull; i &rarr; Tf = 0.00 &deg;C - &Delta;Tf';
+        el.eqExplanationText.textContent = 'Zat terlarut mengganggu kerapatan kristal es sehingga larutan membeku di bawah 0°C.';
+        el.chartPanelTitle.textContent = 'Kurva Penurunan Titik Beku (ΔTf vs Massa)';
+        sound.stopBoiling();
+      } else if (state.propertyKey === 'vapor_pressure') {
+        el.eqPropTitle.textContent = 'Penurunan Tekanan Uap (Hukum Raoult)';
+        el.eqConstVal.textContent = 'P° = 23.76 mmHg';
+        el.eqMainFormula.innerHTML = '&Delta;P = P&deg; &bull; Xt &rarr; P = P&deg; - &Delta;P';
+        el.eqExplanationText.textContent = 'Partikel terlarut menempati permukaan larutan sehingga molekul pelarut terhalang menguap.';
+        el.chartPanelTitle.textContent = 'Kurva Penurunan Tekanan Uap (ΔP vs Massa)';
+        sound.stopBoiling();
+      } else {
+        el.eqPropTitle.textContent = 'Tekanan Osmotik (Persamaan van \'t Hoff)';
+        el.eqConstVal.textContent = 'R = 0.0821 L•atm/mol•K';
+        el.eqMainFormula.innerHTML = '&pi; = M &bull; R &bull; T &bull; i';
+        el.eqExplanationText.textContent = 'Pelarut murni merembes melalui pori membran semipermeabel menuju larutan pekat.';
+        el.chartPanelTitle.textContent = 'Kurva Tekanan Osmotik (π vs Massa)';
+        sound.stopBoiling();
+      }
+
+      calculateColligativeProperties();
+    }
+
+    function logColligativeRun() {
+      const runNum = state.tableLog.length + 1;
+      const solute = SOLUTES[state.soluteKey];
+      let propName = '';
+      let resultStr = '';
+
+      if (state.propertyKey === 'boiling_point') {
+        propName = 'Titik Didih (ΔTb)';
+        resultStr = `${state.finalValue.toFixed(2)} °C (+${state.deltaValue.toFixed(2)})`;
+      } else if (state.propertyKey === 'freezing_point') {
+        propName = 'Titik Beku (ΔTf)';
+        resultStr = `${state.finalValue.toFixed(2)} °C (-${state.deltaValue.toFixed(2)})`;
+      } else if (state.propertyKey === 'vapor_pressure') {
+        propName = 'Tekanan Uap (ΔP)';
+        resultStr = `${state.finalValue.toFixed(2)} mmHg (-${state.deltaValue.toFixed(2)})`;
+      } else {
+        propName = 'Tekanan Osmotik (π)';
+        resultStr = `${state.finalValue.toFixed(2)} atm`;
+      }
+
+      const entry = {
+        num: runNum,
+        prop: propName,
+        solute: `${solute.name} (${state.massSoluteGrams} g)`,
+        i: state.vanTHoffI.toFixed(1),
+        m: `${state.molality.toFixed(2)} m`,
+        res: resultStr
+      };
+
+      state.tableLog.push(entry);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:700; color:#10b981;">#${entry.num}</td>
+        <td>${entry.prop}</td>
+        <td style="color:#bae6fd;">${entry.solute}</td>
+        <td>${entry.i}</td>
+        <td>${entry.m}</td>
+        <td style="font-weight:700; color:#10f2a7;">${entry.res}</td>
+      `;
+      el.tableBody.prepend(tr);
+    }
+
+    /* Simulation Loop (60 FPS) */
+    function simulationLoop(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const dt = Math.min(0.08, (timestamp - lastTimestamp) / 1000.0);
+      lastTimestamp = timestamp;
+
+      // 1. Animate Boiling Bubbles
+      if (state.propertyKey === 'boiling_point' && state.isHeatingActive) {
+        let bHtml = '';
+        state.boilingBubbles.forEach(b => {
+          b.y -= b.speed;
+          if (b.y < 112) {
+            b.y = 230 + Math.random() * 5;
+            b.x = 45 + Math.random() * 150;
+          }
+          bHtml += `<circle cx="${b.x.toFixed(1)}" cy="${b.y.toFixed(1)}" r="${b.r.toFixed(1)}" fill="rgba(255,255,255,0.7)"/>`;
+        });
+        el.boilingBubblesLayer.innerHTML = bHtml;
+      }
+
+      // 2. Update Sub-microscopic Canvas
+      if (molSim) {
+        molSim.update();
+        molSim.draw();
+      }
+
+      animFrameId = requestAnimationFrame(simulationLoop);
+    }
+
+    /* =========================================================================
+     * 6. EVENT LISTENERS
+     * ========================================================================= */
+    function setupEventListeners() {
+      // Colligative Property Tabs
+      el.btnColligativeTabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+          el.btnColligativeTabs.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.propertyKey = btn.getAttribute('data-prop');
+          sound.playChime();
+          updateApparatusVisibility();
+          showToast(`Sifat Koligatif dialihkan: ${btn.querySelector('.tab-title').textContent}`);
+        });
+      });
+
+      // Solute Selection Buttons
+      el.btnSoluteButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          el.btnSoluteButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.soluteKey = btn.getAttribute('data-solute');
+          sound.playChime();
+
+          const sol = SOLUTES[state.soluteKey];
+          el.labelSoluteVanthoff.textContent = `Faktor i = ${sol.i.toFixed(1)} (${sol.isElectrolyte ? 'Elektrolit' : 'Nonelektrolit'})`;
+          calculateColligativeProperties();
+          logColligativeRun();
+          showToast(`Zat terlarut diubah ke ${sol.name} (i = ${sol.i})`);
+        });
+      });
+
+      // Solute Mass Slider
+      el.sliderMassSolute.addEventListener('input', (e) => {
+        state.massSoluteGrams = parseFloat(e.target.value);
+        const solute = SOLUTES[state.soluteKey];
+        const m = ((state.massSoluteGrams / solute.mr) / (state.massSolventGrams / 1000.0)).toFixed(2);
+        el.valMassSolute.textContent = `${state.massSoluteGrams.toFixed(1)} g (${m} m)`;
+        calculateColligativeProperties();
+      });
+
+      // Solvent Mass Slider
+      el.sliderMassSolvent.addEventListener('input', (e) => {
+        state.massSolventGrams = parseFloat(e.target.value);
+        el.valMassSolvent.textContent = `${state.massSolventGrams} g`;
+        calculateColligativeProperties();
+      });
+
+      // Heating Toggle Button
+      el.btnToggleHeating.addEventListener('click', () => {
+        sound.playClick();
+        state.isHeatingActive = !state.isHeatingActive;
+        if (state.isHeatingActive) {
+          el.btnToggleHeating.className = 'btn-act btn-heat-on';
+          el.btnHeatText.textContent = 'Pemanas / Pembeku: AKTIF';
+          if (state.propertyKey === 'boiling_point') sound.startBoiling();
+        } else {
+          el.btnToggleHeating.className = 'btn-act';
+          el.btnHeatText.textContent = 'Pemanas / Pembeku: MATI';
+          sound.stopBoiling();
+        }
+      });
+
+      // Reset All Button
+      el.btnResetAll.addEventListener('click', () => {
+        sound.playChime();
+        state.massSoluteGrams = 0;
+        state.massSolventGrams = 500;
+        el.sliderMassSolute.value = 0;
+        el.sliderMassSolvent.value = 500;
+        el.valMassSolute.textContent = '0.0 g (0.00 m)';
+        el.valMassSolvent.textContent = '500 g';
+        calculateColligativeProperties();
+        showToast('Pelarut dikembalikan ke kondisi murni (tanpa zat terlarut).');
+      });
+
+      // Clear Table Log
+      el.btnClearLog.addEventListener('click', () => {
+        sound.playClick();
+        state.tableLog = [];
+        el.tableBody.innerHTML = '';
+        showToast('Tabel riwayat pengamatan dikosongkan.');
+      });
+
+      // Export CSV
+      el.btnExportCsv.addEventListener('click', () => {
+        sound.playClick();
+        if (state.tableLog.length === 0) {
+          showToast('Belum ada data eksperimen untuk diekspor!');
+          return;
+        }
+
+        let csv = 'Run,Sifat Koligatif,Zat Terlarut,Faktor i,Molalitas,Hasil Terukur\n';
+        state.tableLog.forEach(row => {
+          csv += `"${row.num}","${row.prop}","${row.solute}","${row.i}","${row.m}","${row.res}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Data_Praktikum_Sifat_Koligatif_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('File CSV berhasil diunduh!');
+      });
+
+      // Save Chart PNG
+      el.btnSaveChart.addEventListener('click', () => {
+        sound.playClick();
+        const canvas = document.getElementById('colligativeChart');
+        const link = document.createElement('a');
+        link.download = `Grafik_Sifat_Koligatif_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('Grafik berhasil disimpan sebagai gambar PNG!');
+      });
+
+      // Audio Toggle
+      el.btnSoundToggle.addEventListener('click', () => {
+        const isNowOn = sound.toggleMute();
+        el.soundText.textContent = isNowOn ? 'Suara: ON' : 'Suara: MUTE';
+        el.btnSoundToggle.style.opacity = isNowOn ? '1' : '0.6';
+      });
+
+      // Guide Modal
+      el.btnGuideModal.addEventListener('click', () => {
+        sound.playClick();
+        el.guideModal.classList.add('show');
+      });
+
+      el.btnCloseModal.addEventListener('click', () => {
+        sound.playClick();
+        el.guideModal.classList.remove('show');
+      });
+
+      el.guideModal.addEventListener('click', (e) => {
+        if (e.target === el.guideModal) el.guideModal.classList.remove('show');
+      });
+    }
+
+    /* Initialize on DOM Ready */
+    window.addEventListener('DOMContentLoaded', () => {
+      molSim = new SubmicroscopicColligativeSimulator('molCanvas');
+      chartRenderer = new ColligativeChartRenderer('colligativeChart');
+      setupEventListeners();
+      updateApparatusVisibility();
+      logColligativeRun();
+      animFrameId = requestAnimationFrame(simulationLoop);
+    });
+
+  
+    function handlePortalBack(e, target) {
+      if (window.location.hostname.includes('script.google.com') || window.location.href.includes('/exec')) {
+        e.preventDefault();
+        const pageName = target.replace(/\.html$/i, '');
+        const currentBase = window.location.href.split('?')[0];
+        window.location.href = `${currentBase}?page=${encodeURIComponent(pageName === 'index' ? 'Index' : pageName)}`;
+      }
+    }
+
+  </script>
+</body>
+</html>

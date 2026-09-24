@@ -1,0 +1,2748 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Lab: Laju Reaksi & Teori Tumbukan • PortalKimia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-space: #090d16;
+      --bg-bench: #131926;
+      --bg-panel: rgba(19, 25, 38, 0.92);
+      --bg-glass: rgba(28, 36, 54, 0.7);
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-bright: rgba(249, 115, 22, 0.4);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #f97316;
+      --primary-hover: #ea580c;
+      --primary-glow: rgba(249, 115, 22, 0.35);
+      --accent-cyan: #06b6d4;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --lcd-bg: #03140f;
+      --lcd-text: #10f2a7;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.6);
+      --font-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === HEADER LAB BAR === */
+    header.lab-header {
+      background: rgba(15, 20, 31, 0.96);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f97316, #fb923c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 18px var(--primary-glow);
+    }
+
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+
+    .brand-title h1 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title h1 span.badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(249, 115, 22, 0.2);
+      border: 1px solid var(--border-bright);
+      color: #fed7aa;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-header {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .btn-header.primary {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .btn-header.primary:hover {
+      box-shadow: 0 6px 16px rgba(249, 115, 22, 0.5);
+    }
+
+    /* === MAIN LAYOUT CONTAINER === */
+    main.lab-workbench {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 340px 1fr 380px;
+      gap: 16px;
+      padding: 16px 20px;
+      max-width: 1720px;
+      margin: 0 auto;
+      width: 100%;
+      height: calc(100vh - 67px);
+      min-height: 720px;
+    }
+
+    /* Common Glass Panel */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-header h2 svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--primary);
+    }
+
+    .panel-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Mode Tabs */
+    .mode-tab-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: #0f1624;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-glass);
+    }
+
+    .mode-tab-btn {
+      padding: 9px 8px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .mode-tab-btn span.sub {
+      font-size: 9px;
+      font-weight: 500;
+      opacity: 0.75;
+    }
+
+    .mode-tab-btn.active {
+      background: linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(249, 115, 22, 0.15));
+      border: 1px solid var(--border-bright);
+      color: #fed7aa;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Section Headers in Panel */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .card-control {
+      background: #0d131f;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Sliders and Ranges */
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .control-label span.val {
+      font-family: var(--font-mono);
+      color: #fdba74;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f97316;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--primary-glow);
+      border: 2px solid #fff;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Surface Area Options (Mode B) */
+    .surface-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 5px;
+    }
+
+    .surface-btn {
+      background: #141c2c;
+      border: 1px solid var(--border-glass);
+      border-radius: 8px;
+      padding: 8px 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .surface-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: #94a3b8;
+    }
+
+    .surface-btn:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #fff;
+    }
+
+    .surface-btn.active {
+      background: rgba(6, 182, 212, 0.2);
+      border-color: rgba(6, 182, 212, 0.6);
+      color: #67e8f9;
+    }
+
+    .surface-btn.active svg {
+      stroke: #06b6d4;
+    }
+
+    /* Catalyst Toggle */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 4px;
+    }
+
+    .switch-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #cbd5e1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .switch-label span.sub {
+      font-size: 9px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider-toggle {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #1e293b;
+      transition: .3s;
+      border-radius: 24px;
+      border: 1px solid var(--border-glass);
+    }
+
+    .slider-toggle:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      bottom: 2px;
+      background-color: #fff;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider-toggle {
+      background-color: #10b981;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+
+    input:checked + .slider-toggle:before {
+      transform: translateX(20px);
+    }
+
+    /* Speed Control Multiplier */
+    .speed-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .speed-btn {
+      flex: 1;
+      padding: 5px 0;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      background: #141c2c;
+      border: 1px solid var(--border-glass);
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .speed-btn.active {
+      background: #f97316;
+      border-color: #ea580c;
+      color: #fff;
+    }
+
+    /* Equation Display Box */
+    .eq-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+
+    .eq-box .eq-title {
+      font-size: 9px;
+      font-weight: 700;
+      color: #f97316;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    /* === CENTER STAGE (APPARATUS & COLLISION SIMULATOR) === */
+    section.lab-center-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    /* Sub-microscopic Particle Box */
+    .particle-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .particle-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .particle-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .particle-title svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--accent-cyan);
+    }
+
+    .particle-legend {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .particle-viewport-wrap {
+      display: grid;
+      grid-template-columns: 1fr 140px;
+      gap: 10px;
+      height: 125px;
+    }
+
+    canvas#particleCanvas {
+      width: 100%;
+      height: 100%;
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+    }
+
+    /* Energy Profile Mini Card */
+    .energy-profile-card {
+      background: #080d1a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 9px;
+      font-family: var(--font-mono);
+    }
+
+    .ea-badge {
+      font-size: 10px;
+      font-weight: 700;
+      color: #f97316;
+    }
+
+    /* Main Apparatus Studio Viewport */
+    .apparatus-studio {
+      flex: 1;
+      background: radial-gradient(circle at 50% 30%, #172033 0%, #0c111c 100%);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Benchtop Surface Base */
+    .benchtop-surface {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border-top: 2px solid #334155;
+      box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    /* SVG Apparatus Canvas */
+    svg.apparatus-svg {
+      width: 100%;
+      height: 100%;
+      max-height: 480px;
+      z-index: 10;
+    }
+
+    /* Circular Top-Down Optical Loupe View (Mode A) */
+    .optical-loupe {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: #090e17;
+      border: 3px solid #38bdf8;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 16px rgba(56, 189, 248, 0.35);
+      z-index: 25;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loupe-header {
+      position: absolute;
+      top: 6px;
+      font-size: 8px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(3, 7, 18, 0.85);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .loupe-interior {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .cross-mark {
+      font-size: 64px;
+      font-weight: 900;
+      color: #000000;
+      line-height: 1;
+      transition: opacity 0.1s linear, filter 0.1s linear;
+      text-shadow: 0 0 2px rgba(0,0,0,0.8);
+    }
+
+    .loupe-turbidity-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(254, 240, 138, 0);
+      pointer-events: none;
+      backdrop-filter: blur(0px);
+      transition: background 0.1s linear, backdrop-filter 0.1s linear;
+    }
+
+    /* Floating Workbench Control Bar */
+    .bench-control-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-glass);
+      padding: 8px 16px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 30;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .btn-act {
+      border: 1px solid var(--border-glass);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-act:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .btn-act.btn-start {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .btn-act.btn-start:hover {
+      box-shadow: 0 6px 18px rgba(249, 115, 22, 0.55);
+    }
+
+    .btn-act.btn-stop {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+    }
+
+    .control-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* === RIGHT PANEL (DIGITAL STOPWATCH, RATE METERS & CURVE) === */
+    /* Digital LCD Stopwatch Screen */
+    .lcd-stopwatch-box {
+      background: #020907;
+      border: 2px solid #064e3b;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.95);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lcd-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(16, 242, 167, 0.6);
+      letter-spacing: 1px;
+    }
+
+    .lcd-digits-large {
+      font-family: var(--font-mono);
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 14px rgba(16, 242, 167, 0.7);
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+
+    .lcd-status-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(16, 242, 167, 0.15);
+      color: #10f2a7;
+    }
+
+    .lcd-status-badge.reacting {
+      background: rgba(249, 115, 22, 0.25);
+      color: #fed7aa;
+    }
+
+    .lcd-status-badge.finished {
+      background: rgba(16, 185, 129, 0.25);
+      color: #a7f3d0;
+    }
+
+    /* Reaction Metric Stats Grid */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .metric-card {
+      background: #0d131f;
+      border: 1px solid var(--border-glass);
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .metric-card span.m-label {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .metric-card span.m-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Live Kinetic Chart Canvas */
+    .chart-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+
+    .chart-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    canvas#kineticsChart {
+      width: 100%;
+      height: 155px;
+      border-radius: 6px;
+      background: #030712;
+    }
+
+    /* Data Table Log */
+    .log-box {
+      background: #0b0f17;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 120px;
+    }
+
+    .log-table-wrap {
+      overflow-y: auto;
+      flex: 1;
+      max-height: 135px;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    table.data-table th {
+      background: #111723;
+      padding: 6px 8px;
+      text-align: left;
+      color: #94a3b8;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      font-size: 10px;
+    }
+
+    table.data-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      font-size: 10px;
+    }
+
+    table.data-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* MODAL STYLES */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #0f1624;
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      max-width: 600px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #f97316;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-card p, .modal-card ul {
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .modal-card ul {
+      padding-left: 20px;
+    }
+
+    .modal-card li {
+      margin-bottom: 6px;
+    }
+
+    /* FLOATING TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--primary);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 200;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 1280px) {
+      main.lab-workbench {
+        grid-template-columns: 310px 1fr 340px;
+      }
+    }
+    @media (max-width: 1080px) {
+      body { overflow-y: auto; }
+      main.lab-workbench {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .apparatus-studio { height: 440px; }
+    }
+  
+    /* === PORTAL BACK NAVIGATION BUTTONS === */
+    .nav-back-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .btn-back-hub, .btn-back-portal {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+      line-height: 1;
+      height: 32px;
+      box-sizing: border-box;
+    }
+    .btn-back-hub {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .btn-back-hub:hover {
+      background: rgba(16, 185, 129, 0.3);
+      border-color: #34d399;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    }
+    .btn-back-portal {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+    .btn-back-portal:hover {
+      background: rgba(99, 102, 241, 0.3);
+      border-color: #818cf8;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+    }
+    @media (max-width: 640px) {
+      .text-hide-mobile { display: none; }
+      .btn-back-hub, .btn-back-portal { padding: 6px 8px; font-size: 10px; }
+      .nav-back-group { margin-right: 6px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- HEADER LAB -->
+  <header class="lab-header">
+    <div class="brand-section">
+      <!-- Navigation Back Button to PortalKimia Media & Lab Virtual -->
+      <div class="nav-back-group">
+        <a href="LaboratoriumVirtual.html" class="btn-back-hub" title="Kembali ke Katalog Laboratorium Virtual" onclick="handlePortalBack(event, 'LaboratoriumVirtual.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Katalog Lab</span>
+        </a>
+        <a href="index.html" class="btn-back-portal" title="Kembali ke Beranda PortalKimia Media" onclick="handlePortalBack(event, 'index.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="text-hide-mobile">Portal Media</span>
+        </a>
+      </div>
+
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <h1>
+          Virtual Lab: Laju Reaksi &amp; Teori Tumbukan
+          <span class="badge">Standar PhET / Labster</span>
+        </h1>
+        <p>Eksperimen Hilangnya Tanda Silang (Na₂S₂O₃ + HCl) &amp; Pengukuran Volume Gas Syringe (CaCO₃ + HCl)</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" id="btn-sound-toggle" title="Nyalakan/Matikan Suara">
+        <svg id="sound-icon-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+        <span id="sound-text">Suara: ON</span>
+      </button>
+
+      <button class="btn-header" id="btn-guide-modal">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        Panduan Lab
+      </button>
+
+      <button class="btn-header" id="btn-export-csv" title="Ekspor Data Pengamatan ke Format CSV">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Ekspor CSV
+      </button>
+
+      <button class="btn-header primary" id="btn-reset-all" title="Reset Seluruh Parameter & Kosongkan Data">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Reset Total
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN LAB WORKBENCH -->
+  <main class="lab-workbench">
+
+    <!-- LEFT PANEL: KINETIC CONTROLS & REACTION SETTINGS -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24">
+            <line x1="4" y1="21" x2="4" y2="14"/>
+            <line x1="4" y1="10" x2="4" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12" y2="3"/>
+            <line x1="20" y1="21" x2="20" y2="16"/>
+            <line x1="20" y1="12" x2="20" y2="3"/>
+            <line x1="1" y1="14" x2="7" y2="14"/>
+            <line x1="9" y1="8" x2="15" y2="8"/>
+            <line x1="17" y1="16" x2="23" y2="16"/>
+          </svg>
+          Kontrol Kinetika Reaksi
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- MODE SELECTOR TABS -->
+        <div>
+          <div class="section-title">Pilih Desain Eksperimen:</div>
+          <div class="mode-tab-group">
+            <button class="mode-tab-btn active" id="tab-mode-a">
+              <span>Mode A: Tanda 'X'</span>
+              <span class="sub">Hilangnya Silang S(s)</span>
+            </button>
+            <button class="mode-tab-btn" id="tab-mode-b">
+              <span>Mode B: Gas Syringe</span>
+              <span class="sub">Volume Gas CO₂(g)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- REACTION EQUATION BOX -->
+        <div class="eq-box" id="reaction-equation-card">
+          <div class="eq-title" id="eq-title-label">Reaksi Mode A (Presipitasi Belerang):</div>
+          <div id="eq-formula-text" style="color: #fed7aa; font-weight: 600;">
+            Na₂S₂O₃(aq) + 2HCl(aq) &rarr; 2NaCl + H₂O + SO₂(g) + S(s)&darr;
+          </div>
+          <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;" id="eq-desc-text">
+            Belerang koloidal ($S$) mengendap perlahan hingga menutupi tanda silang "X" di dasar labu.
+          </div>
+        </div>
+
+        <!-- CONTROL CARDS -->
+        <!-- 1. Suhu / Temperatur Slider -->
+        <div class="card-control">
+          <div class="control-row">
+            <div class="control-label">
+              <span>Suhu Reaksi (T)</span>
+              <span class="val" id="val-temp-label">25 °C</span>
+            </div>
+            <input type="range" id="slider-temp" min="15" max="75" step="1" value="25">
+            <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; font-family: var(--font-mono);">
+              <span>15 °C (Dingin)</span>
+              <span>45 °C</span>
+              <span>75 °C (Panas)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Konsentrasi Reaktan Slider -->
+        <div class="card-control">
+          <div class="control-row">
+            <div class="control-label">
+              <span id="label-conc-name">Konsentrasi Na₂S₂O₃</span>
+              <span class="val" id="val-conc-label">0.20 M</span>
+            </div>
+            <input type="range" id="slider-conc" min="0.05" max="0.50" step="0.05" value="0.20">
+            <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; font-family: var(--font-mono);">
+              <span id="conc-min-label">0.05 M</span>
+              <span id="conc-mid-label">0.25 M</span>
+              <span id="conc-max-label">0.50 M</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Luas Permukaan Bidang Sentuh (Hanya Mode B) -->
+        <div class="card-control" id="card-surface-area" style="display: none;">
+          <div class="control-row">
+            <div class="control-label">
+              <span>Luas Permukaan CaCO₃</span>
+              <span class="val" id="val-surface-label" style="color: #67e8f9;">Butiran Kasar</span>
+            </div>
+            <div class="surface-selector">
+              <button class="surface-btn" data-surface="chunk" id="surf-chunk">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                  <polyline points="2 17 12 22 22 17"/>
+                  <polyline points="2 12 12 17 22 12"/>
+                </svg>
+                <span>Bongkahan</span>
+              </button>
+              <button class="surface-btn active" data-surface="granule" id="surf-granule">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                  <circle cx="8" cy="8" r="3"/>
+                  <circle cx="16" cy="8" r="3"/>
+                  <circle cx="12" cy="16" r="3"/>
+                </svg>
+                <span>Butiran</span>
+              </button>
+              <button class="surface-btn" data-surface="powder" id="surf-powder">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                  <circle cx="6" cy="6" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="18" cy="6" r="1.5"/>
+                  <circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/>
+                  <circle cx="6" cy="18" r="1.5"/><circle cx="12" cy="18" r="1.5"/><circle cx="18" cy="18" r="1.5"/>
+                </svg>
+                <span>Serbuk</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Penambahan Katalisator Toggle -->
+        <div class="card-control">
+          <div class="toggle-row">
+            <div class="switch-label">
+              <span>Katalisator Tambahan</span>
+              <span class="sub" id="catalyst-subtext">Menurunkan rintangan Energi Aktivasi (Ea)</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggle-catalyst">
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 5. Kecepatan Simulasi -->
+        <div class="card-control">
+          <div class="control-label" style="margin-bottom: 6px;">
+            <span>Laju Animasi Simulasi:</span>
+          </div>
+          <div class="speed-group">
+            <button class="speed-btn active" data-speed="1">1× Real</button>
+            <button class="speed-btn" data-speed="2">2× Cepat</button>
+            <button class="speed-btn" data-speed="5">5× Kilat</button>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- CENTER STAGE: SUB-MICROSCOPIC COLLISION BOX & APPARATUS STUDIO -->
+    <section class="lab-center-stage">
+
+      <!-- TOP: SUB-MICROSCOPIC PARTICLE COLLISION BOX (Teori Tumbukan) -->
+      <div class="particle-box">
+        <div class="particle-header">
+          <div class="particle-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="2" x2="12" y2="6"/>
+              <line x1="12" y1="18" x2="12" y2="22"/>
+              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
+              <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+            </svg>
+            Jendela Molekuler 2D: Teori Tumbukan Efektif
+          </div>
+          <div class="particle-legend">
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #f43f5e;"></span>
+              <span>Reaktan A</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #38bdf8;"></span>
+              <span>Reaktan B</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #10b981;"></span>
+              <span>Produk</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="particle-viewport-wrap">
+          <canvas id="particleCanvas" width="480" height="125"></canvas>
+          <div class="energy-profile-card">
+            <div>
+              <span style="color: #94a3b8; display: block; margin-bottom: 2px;">STATUS TUMBUKAN:</span>
+              <span id="collision-eff-val" style="color: #67e8f9; font-weight: 700;">Efektif: 12.4%</span>
+            </div>
+            <div>
+              <span style="color: #94a3b8; display: block; margin-bottom: 2px;">ENERGI AKTIVASI (Ea):</span>
+              <span class="ea-badge" id="ea-val-display">55.0 kJ/mol</span>
+            </div>
+            <div style="font-size: 8px; color: #64748b;">
+              T &uarr; = Kecepatan partikel &uarr;<br>
+              Kat = Ambang Ea &darr;
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN APPARATUS STUDIO -->
+      <div class="apparatus-studio" id="studio-container">
+
+        <!-- Top-Down Optical Loupe View for Mode A (Cross X Observation) -->
+        <div class="optical-loupe" id="optical-loupe-view">
+          <span class="loupe-header">PANDANGAN DARI ATAS</span>
+          <div class="loupe-interior">
+            <span class="cross-mark" id="cross-mark-x">&times;</span>
+            <div class="loupe-turbidity-overlay" id="loupe-overlay"></div>
+          </div>
+        </div>
+
+        <!-- SVG APPARATUS CANVAS -->
+        <svg class="apparatus-svg" viewBox="0 0 700 480" id="apparatus-svg">
+          <defs>
+            <!-- Glass Shading & Liquid Gradients -->
+            <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.4)"/>
+              <stop offset="15%" stop-color="rgba(255,255,255,0.08)"/>
+              <stop offset="85%" stop-color="rgba(255,255,255,0.04)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0.3)"/>
+            </linearGradient>
+
+            <linearGradient id="sulfurLiquidGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="rgba(254, 240, 138, 0.25)"/>
+              <stop offset="100%" stop-color="rgba(250, 204, 21, 0.45)"/>
+            </linearGradient>
+
+            <linearGradient id="hclLiquidGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="rgba(224, 242, 254, 0.2)"/>
+              <stop offset="100%" stop-color="rgba(186, 230, 253, 0.35)"/>
+            </linearGradient>
+
+            <linearGradient id="syringePlungerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#334155"/>
+              <stop offset="50%" stop-color="#1e293b"/>
+              <stop offset="100%" stop-color="#0f172a"/>
+            </linearGradient>
+
+            <filter id="glassBlur">
+              <feGaussianBlur stdDeviation="2"/>
+            </filter>
+          </defs>
+
+          <!-- 1. BASE PAPER WITH "X" UNDER ERLENMEYER (Mode A) -->
+          <g id="paper-cross-assembly" transform="translate(180, 410)">
+            <!-- Filter Paper / Tile Base -->
+            <ellipse cx="60" cy="8" rx="75" ry="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+            <!-- Bold Black "X" Mark on Paper -->
+            <path id="svg-cross-x" d="M 38 -2 L 82 18 M 82 -2 L 38 18" stroke="#000" stroke-width="7" stroke-linecap="round"/>
+          </g>
+
+          <!-- 2. ERLENMEYER FLASK 250 mL -->
+          <g id="erlenmeyer-assembly" transform="translate(180, 210)">
+            <!-- Liquid Inside Flask (Dynamic Level & Turbidity) -->
+            <path id="flask-liquid" d="M 32 100 L 88 100 L 126 195 C 128 206, 120 214, 105 214 L 15 214 C 0 214, -8 206, -6 195 Z"
+                  fill="url(#hclLiquidGrad)"/>
+
+            <!-- Suspended Sulfur Precipitate Fog Layer -->
+            <path id="flask-sulfur-fog" d="M 32 100 L 88 100 L 126 195 C 128 206, 120 214, 105 214 L 15 214 C 0 214, -8 206, -6 195 Z"
+                  fill="#facc15" opacity="0"/>
+
+            <!-- Solid Particles at the Bottom (Mode B: CaCO3 chunks/granules/powder) -->
+            <g id="caco3-solids-group" opacity="0">
+              <!-- Rendered via JS based on surface type -->
+            </g>
+
+            <!-- Gas Bubbles Layer (Mode B Effervescence) -->
+            <g id="gas-bubbles-layer"></g>
+
+            <!-- Flask Glass Body Outline & Neck -->
+            <!-- Flask Neck -->
+            <rect x="42" y="20" width="36" height="80" fill="url(#glassGrad)" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+            <!-- Flask Rim Top Lip -->
+            <ellipse cx="60" cy="20" rx="20" ry="5" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+            <!-- Flask Conical Body -->
+            <path d="M 42 100 L -8 196 C -12 208, -2 216, 12 216 L 108 216 C 122 216, 132 208, 128 196 L 78 100"
+                  fill="url(#glassGrad)" stroke="rgba(255,255,255,0.7)" stroke-width="2.2"/>
+            <!-- Graduation Marks on Glass -->
+            <line x1="50" y1="120" x2="68" y2="120" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="72" y="123" fill="rgba(255,255,255,0.5)" font-size="8" font-family="monospace">200ml</text>
+            <line x1="44" y1="150" x2="65" y2="150" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="69" y="153" fill="rgba(255,255,255,0.5)" font-size="8" font-family="monospace">150ml</text>
+            <line x1="38" y1="180" x2="62" y2="180" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <text x="66" y="183" fill="rgba(255,255,255,0.5)" font-size="8" font-family="monospace">100ml</text>
+
+            <!-- Rubber Stopper & Delivery Tube (Only Active in Mode B) -->
+            <g id="stopper-assembly" opacity="0">
+              <!-- Rubber Stopper Placed in Neck -->
+              <polygon points="40,24 80,24 74,44 46,44" fill="#334155" stroke="#1e293b" stroke-width="1.5"/>
+              <!-- Glass Delivery Tube Going Up and Right -->
+              <path d="M 60 30 L 60 -10 Q 60 -30 80 -30 L 220 -30 Q 240 -30 240 -10 L 240 40"
+                    fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="6" stroke-linecap="round"/>
+              <path d="M 60 30 L 60 -10 Q 60 -30 80 -30 L 220 -30 Q 240 -30 240 -10 L 240 40"
+                    fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+            </g>
+          </g>
+
+          <!-- 3. GAS SYRINGE ASSEMBLY 100 mL (Active in Mode B) -->
+          <g id="gas-syringe-assembly" transform="translate(390, 230)" opacity="0">
+            <!-- Syringe Stand & Clamp -->
+            <rect x="180" y="80" width="10" height="130" fill="#475569"/>
+            <polygon points="175,60 195,60 190,80 180,80" fill="#334155"/>
+
+            <!-- Syringe Outer Glass Barrel (Scale: 0 to 100 mL) -->
+            <rect x="0" y="20" width="220" height="40" rx="3" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>
+            <!-- Syringe Nozzle Tip on Left (Connected to Delivery Tube) -->
+            <rect x="-24" y="32" width="24" height="16" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+            <!-- Syringe Flange Ring on Right -->
+            <rect x="218" y="14" width="8" height="52" rx="2" fill="rgba(255,255,255,0.5)"/>
+
+            <!-- Syringe Graduations & Labels -->
+            <!-- 0 mL -->
+            <line x1="8" y1="20" x2="8" y2="30" stroke="#cbd5e1" stroke-width="1.5"/>
+            <text x="5" y="42" fill="#cbd5e1" font-size="8" font-family="monospace">0</text>
+            <!-- 20 mL -->
+            <line x1="48" y1="20" x2="48" y2="28" stroke="#cbd5e1" stroke-width="1"/>
+            <text x="44" y="42" fill="#cbd5e1" font-size="8" font-family="monospace">20</text>
+            <!-- 40 mL -->
+            <line x1="88" y1="20" x2="88" y2="28" stroke="#cbd5e1" stroke-width="1"/>
+            <text x="84" y="42" fill="#cbd5e1" font-size="8" font-family="monospace">40</text>
+            <!-- 60 mL -->
+            <line x1="128" y1="20" x2="128" y2="28" stroke="#cbd5e1" stroke-width="1"/>
+            <text x="124" y="42" fill="#cbd5e1" font-size="8" font-family="monospace">60</text>
+            <!-- 80 mL -->
+            <line x1="168" y1="20" x2="168" y2="28" stroke="#cbd5e1" stroke-width="1"/>
+            <text x="164" y="42" fill="#cbd5e1" font-size="8" font-family="monospace">80</text>
+            <!-- 100 mL -->
+            <line x1="208" y1="20" x2="208" y2="30" stroke="#cbd5e1" stroke-width="1.5"/>
+            <text x="198" y="42" fill="#cbd5e1" font-size="8" font-family="monospace">100</text>
+            <text x="100" y="56" fill="#38bdf8" font-size="9" font-family="monospace" font-weight="bold">GAS SYRINGE (mL CO₂)</text>
+
+            <!-- Movable Syringe Plunger (Translates horizontally with gas volume) -->
+            <!-- 0 mL corresponds to x = 8, 100 mL corresponds to x = 208. deltaX = 200px max -->
+            <g id="syringe-plunger" transform="translate(8, 0)">
+              <!-- Black Rubber Piston Head (Width = 14px) -->
+              <rect x="0" y="21" width="14" height="38" rx="2" fill="#0f172a" stroke="#000" stroke-width="1"/>
+              <line x1="4" y1="21" x2="4" y2="59" stroke="#334155" stroke-width="1"/>
+              <!-- Plunger Shaft Running Out to the Right -->
+              <rect x="14" y="32" width="140" height="16" fill="url(#syringePlungerGrad)" stroke="#475569" stroke-width="1"/>
+              <!-- Plunger Thumb Handle at the Far End -->
+              <rect x="150" y="18" width="8" height="44" rx="2" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1"/>
+            </g>
+          </g>
+
+          <!-- 4. REAGENT POURING FLASK ANIMATION -->
+          <g id="pouring-beaker" transform="translate(290, 80)" opacity="0">
+            <!-- Tilted Flask Shape -->
+            <path d="M 0 0 L 35 45 L -5 45 Z" fill="rgba(148, 163, 184, 0.5)" stroke="#fff" stroke-width="1.5"/>
+            <!-- Stream of poured liquid into flask neck -->
+            <path d="M 0 0 Q -30 50 -50 130" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+          </g>
+        </svg>
+
+        <!-- Surface Benchtop Base -->
+        <div class="benchtop-surface"></div>
+
+        <!-- Floating Tactile Control Bar -->
+        <div class="bench-control-bar">
+          <button class="btn-act btn-start" id="btn-start-action" title="Mulai Reaksi & Stopwatch">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span id="btn-start-text">Mulai Reaksi</span>
+          </button>
+
+          <button class="btn-act" id="btn-pause-action" title="Jeda / Lanjut Simulasi">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+            </svg>
+            Jeda
+          </button>
+
+          <div class="control-divider"></div>
+
+          <button class="btn-act" id="btn-reset-reaction" title="Kosongkan Labu & Reset Reagen">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            </svg>
+            Reset Reaksi
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: DIGITAL STOPWATCH, KINETIC CURVE & DATA LOG -->
+    <aside class="glass-panel">
+      <div class="panel-header">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 14 14"/>
+          </svg>
+          Sensor Digital &amp; Analitik Kinetika
+        </h2>
+      </div>
+
+      <div class="panel-body">
+        <!-- Digital LCD Stopwatch Device -->
+        <div class="lcd-stopwatch-box">
+          <div class="lcd-top-bar">
+            <span>STOPWATCH DIGITAL</span>
+            <span class="lcd-status-badge" id="timer-status-badge">SIAP</span>
+          </div>
+          <div class="lcd-digits-large" id="lcd-timer-display">00:00.00</div>
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748b; font-family: var(--font-mono);">
+            <span>Presisi: 0.01 detik</span>
+            <span id="label-mode-badge" style="color: #f97316;">Mode: Tanda 'X'</span>
+          </div>
+        </div>
+
+        <!-- Metric Grid -->
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span class="m-label" id="metric-label-progress">Kekeruhan / Opasitas X</span>
+            <span class="m-val" id="metric-val-progress" style="color: #fed7aa;">0.0 %</span>
+          </div>
+          <div class="metric-card">
+            <span class="m-label" id="metric-label-rate">Laju Reaksi (1/t)</span>
+            <span class="m-val" id="metric-val-rate" style="color: #38bdf8;">-- s⁻¹</span>
+          </div>
+        </div>
+
+        <!-- Live Kinetic Chart Canvas -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <span class="chart-title" id="chart-main-title">Kurva Kekeruhan vs Waktu</span>
+            <button id="btn-save-chart" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 10px;" title="Unduh Gambar PNG">
+              Unduh PNG
+            </button>
+          </div>
+          <canvas id="kineticsChart" width="340" height="155"></canvas>
+          <div style="display: flex; justify-content: space-between; font-size: 9px; color: #64748b; font-family: var(--font-mono); padding: 0 4px;">
+            <span>t = 0 s</span>
+            <span id="chart-max-t-label">t = 60 s</span>
+          </div>
+        </div>
+
+        <!-- Data Table Log -->
+        <div class="log-box">
+          <div style="padding: 6px 10px; background: #0f1624; border-bottom: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Riwayat Eksperimen</span>
+            <button id="btn-clear-log" style="background: none; border: none; color: #ef4444; font-size: 10px; cursor: pointer;">Hapus</button>
+          </div>
+          <div class="log-table-wrap">
+            <table class="data-table" id="table-log">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Mode</th>
+                  <th>T (°C)</th>
+                  <th>[C] / Bentuk</th>
+                  <th>Kat</th>
+                  <th>Waktu (s)</th>
+                  <th>Laju</th>
+                </tr>
+              </thead>
+              <tbody id="table-body">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- MODAL PANDUAN PRAKTIKUM -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal-card">
+      <h3>⚡ Panduan Praktikum Virtual Kinetika Reaksi</h3>
+      <p>Praktikum ini menyajikan simulasi laboratorium laju reaksi dan teori tumbukan partikel:</p>
+      <ul>
+        <li><b>Mode A (Hilangnya Tanda Silang 'X'):</b> Reaksi $Na_2S_2O_3 + 2HCl \rightarrow 2NaCl + H_2O + SO_2 + S(s)$. Endapan belerang koloidal kuning terbentuk secara gradual. Catat waktu ($t$) sejak larutan dicampur hingga tanda silang "X" di dasar labu tepat tidak terlihat dari atas. Laju reaksi berbanding terbalik dengan waktu ($v = 1/t$).</li>
+        <li><b>Mode B (Pengumpulan Gas Syringe):</b> Reaksi $CaCO_3(s) + 2HCl(aq) \rightarrow CaCl_2 + H_2O + CO_2(g)$. Gas karbon dioksida mendesak jarum suntik (*gas syringe*) hingga mencapai volume terukur ($mL$). Laju reaksi ditentukan dari kemiringan kurva volume terhadap waktu ($v = \Delta V / \Delta t$).</li>
+        <li><b>Pengaruh Luas Permukaan:</b> Pada Mode B, bandingkan laju reaksi antara <i>Bongkahan</i>, <i>Butiran</i>, dan <i>Serbuk Halus</i>. Serbuk memiliki bidang sentuh partikel terbesar sehingga frekuensi tumbukan jauh lebih tinggi.</li>
+        <li><b>Pengaruh Suhu &amp; Teori Arrhenius:</b> Peningkatan suhu mempercepat energi kinetik rata-rata partikel ($v_{rms} \propto \sqrt{T}$), sehingga fraksi molekul yang melampaui Energi Aktivasi ($E \ge E_a$) meningkat pesat.</li>
+        <li><b>Katalisator:</b> Menyediakan jalur reaksi alternatif dengan Energi Aktivasi ($E_a$) yang lebih rendah, sehingga mempercepat laju tanpa ikut terkonsumsi.</li>
+      </ul>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn-act btn-start" id="btn-close-modal" style="padding: 8px 20px;">Tutup &amp; Mulai Eksperimen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST -->
+  <div class="toast" id="toastBox">Notifikasi</div>
+
+  <!-- JAVASCRIPT: ENGINE & SIMULATION LOGIC -->
+  <script>
+    'use strict';
+
+    /* =========================================================================
+     * 1. NATIVE WEB AUDIO API SYNTHESIZER (Effervescence, Chime, Beep, Pour)
+     * ========================================================================= */
+    class KineticAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.effervescenceNode = null;
+        this.effervescenceGain = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playPourSound() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(620, now + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(260, now + 0.28);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.28);
+      }
+
+      playClick() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+
+      playCompletionChime() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const freqs = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        freqs.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const startTime = now + idx * 0.08;
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.12, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.4);
+        });
+      }
+
+      startEffervescence() {
+        if (this.muted || this.effervescenceNode) return;
+        this.init();
+        if (!this.ctx) return;
+
+        // Generate synthetic pink/white noise buffer for bubbling hiss
+        const bufferSize = this.ctx.sampleRate * 2;
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        let b0 = 0, b1 = 0, b2 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99 * b0 + white * 0.05;
+          b1 = 0.95 * b1 + white * 0.1;
+          b2 = 0.85 * b2 + white * 0.25;
+          output[i] = (b0 + b1 + b2) * 0.2;
+        }
+
+        const whiteNoise = this.ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        // Bandpass filter to sound like gentle bubbling fizzy effervescence
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1400, this.ctx.currentTime);
+        filter.Q.setValueAtTime(2.0, this.ctx.currentTime);
+
+        this.effervescenceGain = this.ctx.createGain();
+        this.effervescenceGain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+
+        whiteNoise.connect(filter);
+        filter.connect(this.effervescenceGain);
+        this.effervescenceGain.connect(this.ctx.destination);
+
+        whiteNoise.start();
+        this.effervescenceNode = whiteNoise;
+      }
+
+      setEffervescenceRate(rateRatio) {
+        if (!this.effervescenceGain || !this.ctx) return;
+        const clamped = Math.max(0, Math.min(1, rateRatio));
+        this.effervescenceGain.gain.setValueAtTime(clamped * 0.15, this.ctx.currentTime);
+      }
+
+      stopEffervescence() {
+        if (this.effervescenceNode) {
+          try {
+            this.effervescenceNode.stop();
+            this.effervescenceNode.disconnect();
+          } catch (e) {}
+          this.effervescenceNode = null;
+          this.effervescenceGain = null;
+        }
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        if (this.muted) {
+          this.stopEffervescence();
+        }
+        return !this.muted;
+      }
+    }
+
+    const sound = new KineticAudioEngine();
+
+    /* =========================================================================
+     * 2. STATE MANAGEMENT & KINETIC CONSTANTS
+     * ========================================================================= */
+    const state = {
+      mode: 'mode_a', // 'mode_a' (Disappearing X) or 'mode_b' (Gas Syringe)
+      temperature: 25, // °C
+      concentration: 0.20, // M (Na2S2O3 for Mode A, HCl for Mode B)
+      surfaceArea: 'granule', // 'chunk', 'granule', 'powder' (Mode B)
+      catalyst: false,
+      speedMultiplier: 1,
+
+      // Simulation Runtime State
+      isRunning: false,
+      isPaused: false,
+      isCompleted: false,
+      elapsedSeconds: 0,
+      targetTime: 20.0, // Computed target time for reaction completion
+
+      // Real-time parameters
+      turbidityPercent: 0, // 0 - 100 % (Mode A)
+      gasVolumeMl: 0,      // 0 - 100 mL (Mode B)
+      instantRate: 0,
+
+      // Data Logs & Multi-Run Overlays
+      historyRuns: [], // Stores previous curve points for overlay
+      currentPoints: [], // { t, val }
+      tableLog: []
+    };
+
+    /* Kinetic Model Calculations */
+    function calculateKineticRateParams() {
+      // 1. Temperature Effect (Arrhenius / van 't Hoff approx: 2^(deltaT / 10))
+      const deltaT = state.temperature - 25;
+      const tempFactor = Math.pow(2.1, deltaT / 10.0);
+
+      // 2. Catalyst Effect (Cuts Ea, speeds up reaction by 3.5x)
+      const catalystFactor = state.catalyst ? 3.5 : 1.0;
+
+      if (state.mode === 'mode_a') {
+        // Mode A: Na2S2O3 + HCl
+        // Rate v = k * [Na2S2O3]^1.0
+        // Base time at 25°C, 0.20 M = ~22 seconds
+        const concFactor = state.concentration / 0.20;
+        const rateFactor = concFactor * tempFactor * catalystFactor;
+        const totalDuration = Math.max(2.5, 22.0 / rateFactor);
+        return {
+          totalDuration,
+          baseRate: 1.0 / totalDuration,
+          ea: state.catalyst ? 36.0 : 58.5
+        };
+      } else {
+        // Mode B: CaCO3 + HCl -> CO2
+        // Surface area factor
+        let surfaceFactor = 1.0;
+        if (state.surfaceArea === 'chunk') surfaceFactor = 0.35;
+        else if (state.surfaceArea === 'granule') surfaceFactor = 1.0;
+        else if (state.surfaceArea === 'powder') surfaceFactor = 3.2;
+
+        const concFactor = Math.pow(state.concentration / 1.0, 1.1);
+        const rateFactor = surfaceFactor * concFactor * tempFactor * catalystFactor;
+        const totalDuration = Math.max(3.0, 32.0 / rateFactor);
+        return {
+          totalDuration,
+          baseRate: 85.0 / totalDuration, // mL/s avg
+          ea: state.catalyst ? 32.0 : 54.0
+        };
+      }
+    }
+
+    /* =========================================================================
+     * 3. SUB-MICROSCOPIC COLLISION THEORY SIMULATOR (Canvas 2D)
+     * ========================================================================= */
+    class ParticleCollisionSimulator {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.sparks = [];
+        this.effectiveCollisions = 0;
+        this.totalCollisions = 0;
+        this.lastStatsReset = Date.now();
+        this.initParticles();
+      }
+
+      initParticles() {
+        this.particles = [];
+        // Particle count scales with concentration (20 to 60)
+        const count = Math.round(20 + (state.concentration / 0.5) * 35);
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        for (let i = 0; i < count; i++) {
+          const isA = (i % 2 === 0);
+          this.particles.push({
+            x: 10 + Math.random() * (w - 20),
+            y: 10 + Math.random() * (h - 20),
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+            radius: 4.5,
+            type: isA ? 'A' : 'B', // A (Red/Pink), B (Cyan/Blue), P (Product Green)
+            reacted: false
+          });
+        }
+      }
+
+      update() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        // Speed multiplier derived from Temperature (Kelvin velocity v ~ sqrt(T))
+        const tempKelvin = state.temperature + 273.15;
+        const baseSpeed = Math.sqrt(tempKelvin / 298.15) * 1.6;
+
+        // Effective collision threshold (reduced when catalyst is present)
+        const eaThreshold = state.catalyst ? 1.4 : 2.4;
+
+        // Move and bounce off boundaries
+        for (let i = 0; i < this.particles.length; i++) {
+          const p = this.particles[i];
+          p.x += p.vx * baseSpeed;
+          p.y += p.vy * baseSpeed;
+
+          if (p.x - p.radius < 0) { p.x = p.radius; p.vx *= -1; }
+          if (p.x + p.radius > w) { p.x = w - p.radius; p.vx *= -1; }
+          if (p.y - p.radius < 0) { p.y = p.radius; p.vy *= -1; }
+          if (p.y + p.radius > h) { p.y = h - p.radius; p.vy *= -1; }
+        }
+
+        // Particle-to-particle collisions
+        for (let i = 0; i < this.particles.length; i++) {
+          for (let j = i + 1; j < this.particles.length; j++) {
+            const p1 = this.particles[i];
+            const p2 = this.particles[j];
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < p1.radius + p2.radius) {
+              // Collision detected
+              this.totalCollisions++;
+
+              // Elastic collision impulse
+              const nx = dx / dist;
+              const ny = dy / dist;
+              const kx = p1.vx - p2.vx;
+              const ky = p1.vy - p2.vy;
+              const p = 2 * (nx * kx + ny * ky) / 2;
+
+              p1.vx -= p * nx;
+              p1.vy -= p * ny;
+              p2.vx += p * nx;
+              p2.vy += p * ny;
+
+              // Check if collision is effective (Opposite types A + B and energy >= Ea)
+              const relVelocity = Math.sqrt(kx * kx + ky * ky) * baseSpeed;
+              if (p1.type !== p2.type && relVelocity >= eaThreshold) {
+                this.effectiveCollisions++;
+                // Create spark burst at collision point
+                this.createSpark((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+
+                // If running, turn into product particle briefly
+                if (state.isRunning && !p1.reacted && Math.random() < 0.2) {
+                  p1.type = 'P';
+                  p1.reacted = true;
+                }
+              }
+            }
+          }
+        }
+
+        // Update sparks
+        for (let i = this.sparks.length - 1; i >= 0; i--) {
+          const s = this.sparks[i];
+          s.x += s.vx;
+          s.y += s.vy;
+          s.life -= 0.08;
+          if (s.life <= 0) this.sparks.splice(i, 1);
+        }
+
+        // Reset collision counters periodically to compute live percentage
+        if (Date.now() - this.lastStatsReset > 1500) {
+          const pct = this.totalCollisions > 0 
+            ? ((this.effectiveCollisions / this.totalCollisions) * 100).toFixed(1)
+            : '0.0';
+          const effElem = document.getElementById('collision-eff-val');
+          if (effElem) effElem.textContent = `Efektif: ${pct}%`;
+
+          this.totalCollisions = 0;
+          this.effectiveCollisions = 0;
+          this.lastStatsReset = Date.now();
+        }
+      }
+
+      createSpark(x, y) {
+        if (this.sparks.length > 25) return;
+        for (let k = 0; k < 4; k++) {
+          this.sparks.push({
+            x, y,
+            vx: (Math.random() - 0.5) * 3,
+            vy: (Math.random() - 0.5) * 3,
+            life: 1.0,
+            color: '#fbbf24'
+          });
+        }
+      }
+
+      draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Draw Particles
+        for (let i = 0; i < this.particles.length; i++) {
+          const p = this.particles[i];
+          this.ctx.beginPath();
+          this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+
+          if (p.type === 'A') {
+            this.ctx.fillStyle = '#f43f5e';
+            this.ctx.shadowColor = 'rgba(244, 63, 94, 0.6)';
+          } else if (p.type === 'B') {
+            this.ctx.fillStyle = '#38bdf8';
+            this.ctx.shadowColor = 'rgba(56, 189, 248, 0.6)';
+          } else {
+            this.ctx.fillStyle = '#10b981';
+            this.ctx.shadowColor = 'rgba(16, 185, 129, 0.8)';
+          }
+          this.ctx.shadowBlur = 6;
+          this.ctx.fill();
+          this.ctx.shadowBlur = 0;
+        }
+
+        // Draw Sparks
+        for (let i = 0; i < this.sparks.length; i++) {
+          const s = this.sparks[i];
+          this.ctx.beginPath();
+          this.ctx.arc(s.x, s.y, 2, 0, Math.PI * 2);
+          this.ctx.fillStyle = `rgba(251, 191, 36, ${s.life})`;
+          this.ctx.fill();
+        }
+      }
+    }
+
+    /* =========================================================================
+     * 4. LIVE KINETIC CHART CANVAS RENDERER
+     * ========================================================================= */
+    class KineticChartRenderer {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+      }
+
+      render() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const padL = 34;
+        const padR = 14;
+        const padT = 16;
+        const padB = 24;
+
+        this.ctx.clearRect(0, 0, w, h);
+
+        // Grid lines
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        this.ctx.lineWidth = 1;
+
+        // Horizontals
+        for (let i = 0; i <= 4; i++) {
+          const y = padT + (i / 4) * (h - padT - padB);
+          this.ctx.beginPath();
+          this.ctx.moveTo(padL, y);
+          this.ctx.lineTo(w - padR, y);
+          this.ctx.stroke();
+
+          // Y-axis labels
+          this.ctx.fillStyle = '#64748b';
+          this.ctx.font = '8px monospace';
+          this.ctx.textAlign = 'right';
+          if (state.mode === 'mode_a') {
+            const val = 100 - i * 25;
+            this.ctx.fillText(`${val}%`, padL - 4, y + 3);
+          } else {
+            const val = 100 - i * 25;
+            this.ctx.fillText(`${val}`, padL - 4, y + 3);
+          }
+        }
+
+        // Verticals
+        for (let i = 0; i <= 5; i++) {
+          const x = padL + (i / 5) * (w - padL - padR);
+          this.ctx.beginPath();
+          this.ctx.moveTo(x, padT);
+          this.ctx.lineTo(x, h - padB);
+          this.ctx.stroke();
+
+          // X-axis labels
+          this.ctx.fillStyle = '#64748b';
+          this.ctx.font = '8px monospace';
+          this.ctx.textAlign = 'center';
+          const maxT = 60;
+          const tVal = Math.round((i / 5) * maxT);
+          this.ctx.fillText(`${tVal}s`, x, h - 8);
+        }
+
+        const maxT = 60.0;
+        const maxVal = 100.0;
+
+        // Helper to convert data point to pixel
+        const toPix = (pt) => ({
+          x: padL + (Math.min(pt.t, maxT) / maxT) * (w - padL - padR),
+          y: (h - padB) - (Math.min(pt.val, maxVal) / maxVal) * (h - padT - padB)
+        });
+
+        // 1. Draw Past History Runs (Overlay Lines)
+        state.historyRuns.forEach((run, idx) => {
+          if (!run.points || run.points.length < 2) return;
+          this.ctx.beginPath();
+          this.ctx.strokeStyle = run.color || 'rgba(148, 163, 184, 0.4)';
+          this.ctx.lineWidth = 1.5;
+          this.ctx.setLineDash([3, 3]);
+
+          const p0 = toPix(run.points[0]);
+          this.ctx.moveTo(p0.x, p0.y);
+          for (let k = 1; k < run.points.length; k++) {
+            const p = toPix(run.points[k]);
+            this.ctx.lineTo(p.x, p.y);
+          }
+          this.ctx.stroke();
+          this.ctx.setLineDash([]);
+        });
+
+        // 2. Draw Current Active Run Curve
+        if (state.currentPoints.length > 1) {
+          this.ctx.beginPath();
+          const lineColor = (state.mode === 'mode_a') ? '#f97316' : '#06b6d4';
+          this.ctx.strokeStyle = lineColor;
+          this.ctx.lineWidth = 2.5;
+
+          const p0 = toPix(state.currentPoints[0]);
+          this.ctx.moveTo(p0.x, p0.y);
+          for (let k = 1; k < state.currentPoints.length; k++) {
+            const p = toPix(state.currentPoints[k]);
+            this.ctx.lineTo(p.x, p.y);
+          }
+          this.ctx.stroke();
+
+          // Current tip glow dot
+          const lastP = toPix(state.currentPoints[state.currentPoints.length - 1]);
+          this.ctx.beginPath();
+          this.ctx.arc(lastP.x, lastP.y, 4, 0, Math.PI * 2);
+          this.ctx.fillStyle = lineColor;
+          this.ctx.shadowColor = lineColor;
+          this.ctx.shadowBlur = 8;
+          this.ctx.fill();
+          this.ctx.shadowBlur = 0;
+        }
+      }
+    }
+
+    /* =========================================================================
+     * 5. APPARATUS & EXPERIMENT SIMULATION ENGINE
+     * ========================================================================= */
+    let particleSim = null;
+    let chartRenderer = null;
+    let animFrameId = null;
+    let lastTimestamp = 0;
+
+    // DOM Elements Cache
+    const el = {
+      tabModeA: document.getElementById('tab-mode-a'),
+      tabModeB: document.getElementById('tab-mode-b'),
+      eqTitle: document.getElementById('eq-title-label'),
+      eqFormula: document.getElementById('eq-formula-text'),
+      eqDesc: document.getElementById('eq-desc-text'),
+      sliderTemp: document.getElementById('slider-temp'),
+      valTempLabel: document.getElementById('val-temp-label'),
+      sliderConc: document.getElementById('slider-conc'),
+      valConcLabel: document.getElementById('val-conc-label'),
+      labelConcName: document.getElementById('label-conc-name'),
+      concMinLabel: document.getElementById('conc-min-label'),
+      concMidLabel: document.getElementById('conc-mid-label'),
+      concMaxLabel: document.getElementById('conc-max-label'),
+      cardSurface: document.getElementById('card-surface-area'),
+      valSurfaceLabel: document.getElementById('val-surface-label'),
+      surfChunk: document.getElementById('surf-chunk'),
+      surfGranule: document.getElementById('surf-granule'),
+      surfPowder: document.getElementById('surf-powder'),
+      toggleCatalyst: document.getElementById('toggle-catalyst'),
+      eaValDisplay: document.getElementById('ea-val-display'),
+      opticalLoupe: document.getElementById('optical-loupe-view'),
+      crossMarkX: document.getElementById('cross-mark-x'),
+      loupeOverlay: document.getElementById('loupe-overlay'),
+      paperCrossAssembly: document.getElementById('paper-cross-assembly'),
+      stopperAssembly: document.getElementById('stopper-assembly'),
+      gasSyringeAssembly: document.getElementById('gas-syringe-assembly'),
+      syringePlunger: document.getElementById('syringe-plunger'),
+      flaskLiquid: document.getElementById('flask-liquid'),
+      flaskSulfurFog: document.getElementById('flask-sulfur-fog'),
+      caco3Solids: document.getElementById('caco3-solids-group'),
+      gasBubblesLayer: document.getElementById('gas-bubbles-layer'),
+      pouringBeaker: document.getElementById('pouring-beaker'),
+      btnStartAction: document.getElementById('btn-start-action'),
+      btnStartText: document.getElementById('btn-start-text'),
+      btnPauseAction: document.getElementById('btn-pause-action'),
+      btnResetReaction: document.getElementById('btn-reset-reaction'),
+      btnResetAll: document.getElementById('btn-reset-all'),
+      lcdTimerDisplay: document.getElementById('lcd-timer-display'),
+      timerStatusBadge: document.getElementById('timer-status-badge'),
+      labelModeBadge: document.getElementById('label-mode-badge'),
+      metricLabelProgress: document.getElementById('metric-label-progress'),
+      metricValProgress: document.getElementById('metric-val-progress'),
+      metricLabelRate: document.getElementById('metric-label-rate'),
+      metricValRate: document.getElementById('metric-val-rate'),
+      chartMainTitle: document.getElementById('chart-main-title'),
+      tableBody: document.getElementById('table-body'),
+      btnClearLog: document.getElementById('btn-clear-log'),
+      btnExportCsv: document.getElementById('btn-export-csv'),
+      btnSaveChart: document.getElementById('btn-save-chart'),
+      btnSoundToggle: document.getElementById('btn-sound-toggle'),
+      soundText: document.getElementById('sound-text'),
+      btnGuideModal: document.getElementById('btn-guide-modal'),
+      guideModal: document.getElementById('guideModal'),
+      btnCloseModal: document.getElementById('btn-close-modal'),
+      toastBox: document.getElementById('toastBox')
+    };
+
+    function showToast(msg) {
+      el.toastBox.textContent = msg;
+      el.toastBox.classList.add('show');
+      setTimeout(() => el.toastBox.classList.remove('show'), 3200);
+    }
+
+    // Dynamic Bubbles Generator for Mode B Effervescence
+    const bubblePool = [];
+    for (let i = 0; i < 30; i++) {
+      bubblePool.push({
+        x: 10 + Math.random() * 95,
+        y: 195 + Math.random() * 15,
+        r: 1.5 + Math.random() * 2.5,
+        speed: 1.0 + Math.random() * 2.5,
+        active: false
+      });
+    }
+
+    function renderSolidsInFlask() {
+      el.caco3Solids.innerHTML = '';
+      if (state.mode !== 'mode_b') {
+        el.caco3Solids.setAttribute('opacity', '0');
+        return;
+      }
+      el.caco3Solids.setAttribute('opacity', '1');
+
+      if (state.surfaceArea === 'chunk') {
+        // Large chunks of limestone
+        el.caco3Solids.innerHTML = `
+          <polygon points="20,205 35,190 55,195 50,212 25,212" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+          <polygon points="60,208 80,192 100,202 95,214 62,214" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
+        `;
+      } else if (state.surfaceArea === 'granule') {
+        // Coarse granules
+        let html = '';
+        for (let i = 0; i < 14; i++) {
+          const cx = 20 + (i % 7) * 12 + (Math.sin(i) * 3);
+          const cy = 202 + Math.floor(i / 7) * 7;
+          html += `<ellipse cx="${cx}" cy="${cy}" rx="4.5" ry="3.5" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>`;
+        }
+        el.caco3Solids.innerHTML = html;
+      } else {
+        // Fine powder bed
+        el.caco3Solids.innerHTML = `
+          <ellipse cx="60" cy="208" rx="46" ry="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+          <ellipse cx="60" cy="206" rx="38" ry="4" fill="#e2e8f0"/>
+        `;
+      }
+    }
+
+    function updateModeUI() {
+      if (state.mode === 'mode_a') {
+        el.tabModeA.classList.add('active');
+        el.tabModeB.classList.remove('active');
+        el.cardSurface.style.display = 'none';
+
+        el.eqTitle.textContent = "Reaksi Mode A (Presipitasi Belerang):";
+        el.eqFormula.innerHTML = "Na₂S₂O₃(aq) + 2HCl(aq) &rarr; 2NaCl + H₂O + SO₂(g) + S(s)&darr;";
+        el.eqDesc.textContent = "Belerang koloidal (S) mengendap perlahan hingga menutupi tanda silang 'X' di dasar labu.";
+
+        el.labelConcName.textContent = "Konsentrasi Na₂S₂O₃";
+        el.sliderConc.min = "0.05";
+        el.sliderConc.max = "0.50";
+        el.sliderConc.step = "0.05";
+        el.sliderConc.value = state.concentration = 0.20;
+        el.valConcLabel.textContent = "0.20 M";
+        el.concMinLabel.textContent = "0.05 M";
+        el.concMidLabel.textContent = "0.25 M";
+        el.concMaxLabel.textContent = "0.50 M";
+
+        el.opticalLoupe.style.display = 'flex';
+        el.paperCrossAssembly.setAttribute('opacity', '1');
+        el.stopperAssembly.setAttribute('opacity', '0');
+        el.gasSyringeAssembly.setAttribute('opacity', '0');
+
+        el.labelModeBadge.textContent = "Mode: Tanda 'X'";
+        el.metricLabelProgress.textContent = "Kekeruhan / Opasitas X";
+        el.metricLabelRate.textContent = "Laju Reaksi (1/t)";
+        el.chartMainTitle.textContent = "Kurva Kekeruhan Koloid vs Waktu";
+      } else {
+        el.tabModeB.classList.add('active');
+        el.tabModeA.classList.remove('active');
+        el.cardSurface.style.display = 'block';
+
+        el.eqTitle.textContent = "Reaksi Mode B (Produksi Gas CO₂):";
+        el.eqFormula.innerHTML = "CaCO₃(s) + 2HCl(aq) &rarr; CaCl₂(aq) + H₂O(l) + CO₂(g)&uarr;";
+        el.eqDesc.textContent = "Gas karbon dioksida mengalir melalui selang dan mendesak piston syringe gas kaca.";
+
+        el.labelConcName.textContent = "Konsentrasi HCl";
+        el.sliderConc.min = "0.20";
+        el.sliderConc.max = "2.00";
+        el.sliderConc.step = "0.10";
+        el.sliderConc.value = state.concentration = 1.00;
+        el.valConcLabel.textContent = "1.00 M";
+        el.concMinLabel.textContent = "0.20 M";
+        el.concMidLabel.textContent = "1.00 M";
+        el.concMaxLabel.textContent = "2.00 M";
+
+        el.opticalLoupe.style.display = 'none';
+        el.paperCrossAssembly.setAttribute('opacity', '0');
+        el.stopperAssembly.setAttribute('opacity', '1');
+        el.gasSyringeAssembly.setAttribute('opacity', '1');
+
+        el.labelModeBadge.textContent = "Mode: Gas Syringe";
+        el.metricLabelProgress.textContent = "Volume Gas CO₂";
+        el.metricLabelRate.textContent = "Laju Sesaat (dV/dt)";
+        el.chartMainTitle.textContent = "Kurva Volume Gas CO₂ (mL) vs Waktu";
+      }
+
+      const params = calculateKineticRateParams();
+      el.eaValDisplay.textContent = `${params.ea.toFixed(1)} kJ/mol`;
+      renderSolidsInFlask();
+      resetReactionState();
+    }
+
+    function resetReactionState() {
+      state.isRunning = false;
+      state.isPaused = false;
+      state.isCompleted = false;
+      state.elapsedSeconds = 0;
+      state.turbidityPercent = 0;
+      state.gasVolumeMl = 0;
+      state.currentPoints = [];
+      sound.stopEffervescence();
+
+      el.lcdTimerDisplay.textContent = '00:00.00';
+      el.timerStatusBadge.textContent = 'SIAP';
+      el.timerStatusBadge.className = 'lcd-status-badge';
+      el.btnStartAction.className = 'btn-act btn-start';
+      el.btnStartText.textContent = 'Mulai Reaksi';
+
+      // Visual resets
+      el.crossMarkX.style.opacity = '1';
+      el.crossMarkX.style.filter = 'blur(0px)';
+      el.loupeOverlay.style.background = 'rgba(254, 240, 138, 0)';
+      el.loupeOverlay.style.backdropFilter = 'blur(0px)';
+      el.flaskSulfurFog.setAttribute('opacity', '0');
+      el.syringePlunger.setAttribute('transform', 'translate(8, 0)');
+      el.gasBubblesLayer.innerHTML = '';
+
+      if (state.mode === 'mode_a') {
+        el.metricValProgress.textContent = '0.0 %';
+        el.metricValRate.textContent = '-- s⁻¹';
+      } else {
+        el.metricValProgress.textContent = '0.0 mL';
+        el.metricValRate.textContent = '0.00 mL/s';
+      }
+
+      if (chartRenderer) chartRenderer.render();
+      if (particleSim) particleSim.initParticles();
+    }
+
+    function startReaction() {
+      if (state.isRunning && !state.isPaused) return;
+
+      if (state.isCompleted) {
+        resetReactionState();
+      }
+
+      sound.playPourSound();
+      state.isRunning = true;
+      state.isPaused = false;
+      state.isCompleted = false;
+
+      el.timerStatusBadge.textContent = 'BEREAKSI';
+      el.timerStatusBadge.className = 'lcd-status-badge reacting';
+      el.btnStartText.textContent = 'Bereaksi...';
+
+      // Animate pouring flask briefly
+      el.pouringBeaker.setAttribute('opacity', '1');
+      setTimeout(() => el.pouringBeaker.setAttribute('opacity', '0'), 700);
+
+      const params = calculateKineticRateParams();
+      state.targetTime = params.totalDuration;
+
+      if (state.mode === 'mode_b') {
+        sound.startEffervescence();
+      }
+
+      showToast(`Reaksi dimulai! Laju diperkirakan t ~ ${state.targetTime.toFixed(1)} s`);
+    }
+
+    function pauseReaction() {
+      if (!state.isRunning || state.isCompleted) return;
+      state.isPaused = !state.isPaused;
+      if (state.isPaused) {
+        sound.stopEffervescence();
+        el.timerStatusBadge.textContent = 'JEDA';
+        el.btnPauseAction.textContent = 'Lanjut';
+      } else {
+        if (state.mode === 'mode_b') sound.startEffervescence();
+        el.timerStatusBadge.textContent = 'BEREAKSI';
+        el.btnPauseAction.textContent = 'Jeda';
+      }
+    }
+
+    function completeReaction() {
+      state.isRunning = false;
+      state.isPaused = false;
+      state.isCompleted = true;
+      sound.stopEffervescence();
+      sound.playCompletionChime();
+
+      el.timerStatusBadge.textContent = 'SELESAI';
+      el.timerStatusBadge.className = 'lcd-status-badge finished';
+      el.btnStartText.textContent = 'Mulai Baru';
+
+      // Log record to data table
+      const runNum = state.historyRuns.length + 1;
+      const timeStr = state.elapsedSeconds.toFixed(2);
+      let conditionStr = '';
+      let rateStr = '';
+
+      if (state.mode === 'mode_a') {
+        conditionStr = `${state.concentration.toFixed(2)} M`;
+        const rateVal = (1.0 / state.elapsedSeconds).toFixed(4);
+        rateStr = `${rateVal} s⁻¹`;
+      } else {
+        const surfNames = { chunk: 'Bongkahan', granule: 'Butiran', powder: 'Serbuk' };
+        conditionStr = `${surfNames[state.surfaceArea]} (${state.concentration.toFixed(1)} M)`;
+        const rateAvg = (state.gasVolumeMl / state.elapsedSeconds).toFixed(2);
+        rateStr = `${rateAvg} mL/s`;
+      }
+
+      const logEntry = {
+        num: runNum,
+        mode: state.mode === 'mode_a' ? "Mode A (X)" : "Mode B (Gas)",
+        temp: state.temperature,
+        condition: conditionStr,
+        catalyst: state.catalyst ? 'Ya' : 'Tidak',
+        time: timeStr,
+        rate: rateStr
+      };
+
+      state.tableLog.push(logEntry);
+      addTableRow(logEntry);
+
+      // Save current curve into historyRuns for multi-run overlay
+      const runColor = (state.mode === 'mode_a')
+        ? `hsla(${(runNum * 47) % 360}, 85%, 60%, 0.45)`
+        : `hsla(${(runNum * 65 + 180) % 360}, 85%, 60%, 0.45)`;
+
+      state.historyRuns.push({
+        points: [...state.currentPoints],
+        color: runColor
+      });
+
+      if (state.mode === 'mode_a') {
+        showToast(`Tanda 'X' telah hilang sepenuhnya! Waktu reaksi: ${timeStr} detik.`);
+      } else {
+        showToast(`Syringe gas terisi penuh 100 mL! Waktu reaksi: ${timeStr} detik.`);
+      }
+    }
+
+    function addTableRow(entry) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight: 700; color: #f97316;">#${entry.num}</td>
+        <td>${entry.mode}</td>
+        <td>${entry.temp} °C</td>
+        <td>${entry.condition}</td>
+        <td>${entry.catalyst}</td>
+        <td style="font-weight: 700; color: #10f2a7;">${entry.time}</td>
+        <td style="color: #38bdf8;">${entry.rate}</td>
+      `;
+      el.tableBody.prepend(tr);
+    }
+
+    /* Simulation Heartbeat Loop (60 FPS) */
+    function simulationLoop(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const dt = Math.min(0.1, (timestamp - lastTimestamp) / 1000.0);
+      lastTimestamp = timestamp;
+
+      // 1. Update sub-microscopic collision box
+      if (particleSim) {
+        particleSim.update();
+        particleSim.draw();
+      }
+
+      // 2. Reaction kinetics progress
+      if (state.isRunning && !state.isPaused && !state.isCompleted) {
+        state.elapsedSeconds += dt * state.speedMultiplier;
+
+        // Format LCD stopwatch
+        const mins = Math.floor(state.elapsedSeconds / 60);
+        const secs = Math.floor(state.elapsedSeconds % 60);
+        const centis = Math.floor((state.elapsedSeconds * 100) % 100);
+        el.lcdTimerDisplay.textContent = 
+          `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centis).padStart(2, '0')}`;
+
+        if (state.mode === 'mode_a') {
+          // Progress: 0 to 100%
+          const progress = Math.min(1.0, state.elapsedSeconds / state.targetTime);
+          state.turbidityPercent = progress * 100.0;
+
+          // Visual optical loupe updates
+          const opacityVal = (1.0 - progress);
+          const blurVal = (progress * 8.0).toFixed(1);
+          el.crossMarkX.style.opacity = Math.max(0, opacityVal).toString();
+          el.crossMarkX.style.filter = `blur(${blurVal}px)`;
+          el.loupeOverlay.style.background = `rgba(250, 204, 21, ${(progress * 0.95).toFixed(2)})`;
+          el.loupeOverlay.style.backdropFilter = `blur(${blurVal}px)`;
+
+          // Flask body fog
+          el.flaskSulfurFog.setAttribute('opacity', (progress * 0.9).toFixed(2));
+
+          el.metricValProgress.textContent = `${state.turbidityPercent.toFixed(1)} %`;
+          const currentRate = (1.0 / Math.max(0.1, state.elapsedSeconds)).toFixed(3);
+          el.metricValRate.textContent = `${currentRate} s⁻¹`;
+
+          state.currentPoints.push({
+            t: state.elapsedSeconds,
+            val: state.turbidityPercent
+          });
+
+          if (progress >= 1.0) {
+            completeReaction();
+          }
+
+        } else {
+          // Mode B: Gas Syringe
+          // First-order saturation curve: V(t) = 100 * (1 - exp(-k * t))
+          const k = 2.4 / state.targetTime;
+          const gasVol = 100.0 * (1.0 - Math.exp(-k * state.elapsedSeconds));
+          state.gasVolumeMl = Math.min(100.0, gasVol);
+
+          // Syringe plunger physical movement (0 to 200px displacement)
+          const plungerDisplacement = 8 + (state.gasVolumeMl / 100.0) * 195;
+          el.syringePlunger.setAttribute('transform', `translate(${plungerDisplacement.toFixed(1)}, 0)`);
+
+          // Bubbles dynamic animation inside flask
+          let bubbleHtml = '';
+          const bubbleRate = Math.max(0.1, 1.0 - (state.gasVolumeMl / 100.0));
+          sound.setEffervescenceRate(bubbleRate);
+
+          bubblePool.forEach(b => {
+            b.y -= b.speed * state.speedMultiplier * 0.7;
+            if (b.y < 115) {
+              b.y = 195 + Math.random() * 15;
+              b.x = 20 + Math.random() * 80;
+            }
+            bubbleHtml += `<circle cx="${b.x.toFixed(1)}" cy="${b.y.toFixed(1)}" r="${b.r.toFixed(1)}" fill="rgba(255,255,255,0.7)"/>`;
+          });
+          el.gasBubblesLayer.innerHTML = bubbleHtml;
+
+          el.metricValProgress.textContent = `${state.gasVolumeMl.toFixed(1)} mL`;
+          const instantRateVal = (k * 100.0 * Math.exp(-k * state.elapsedSeconds)).toFixed(2);
+          el.metricValRate.textContent = `${instantRateVal} mL/s`;
+
+          state.currentPoints.push({
+            t: state.elapsedSeconds,
+            val: state.gasVolumeMl
+          });
+
+          if (state.gasVolumeMl >= 99.2) {
+            state.gasVolumeMl = 100.0;
+            completeReaction();
+          }
+        }
+
+        // Render chart at throttled intervals
+        if (chartRenderer) chartRenderer.render();
+      }
+
+      animFrameId = requestAnimationFrame(simulationLoop);
+    }
+
+    /* =========================================================================
+     * 6. EVENT LISTENERS & USER CONTROLS
+     * ========================================================================= */
+    function setupEventListeners() {
+      // Mode tabs
+      el.tabModeA.addEventListener('click', () => {
+        sound.playClick();
+        state.mode = 'mode_a';
+        updateModeUI();
+      });
+
+      el.tabModeB.addEventListener('click', () => {
+        sound.playClick();
+        state.mode = 'mode_b';
+        updateModeUI();
+      });
+
+      // Temperature slider
+      el.sliderTemp.addEventListener('input', (e) => {
+        state.temperature = parseInt(e.target.value);
+        el.valTempLabel.textContent = `${state.temperature} °C`;
+        const params = calculateKineticRateParams();
+        el.eaValDisplay.textContent = `${params.ea.toFixed(1)} kJ/mol`;
+      });
+
+      // Concentration slider
+      el.sliderConc.addEventListener('input', (e) => {
+        state.concentration = parseFloat(e.target.value);
+        el.valConcLabel.textContent = `${state.concentration.toFixed(2)} M`;
+        if (particleSim) particleSim.initParticles();
+      });
+
+      // Surface area buttons (Mode B)
+      const surfButtons = [el.surfChunk, el.surfGranule, el.surfPowder];
+      surfButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          sound.playClick();
+          surfButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.surfaceArea = btn.getAttribute('data-surface');
+          const names = { chunk: 'Bongkahan', granule: 'Butiran', powder: 'Serbuk Halus' };
+          el.valSurfaceLabel.textContent = names[state.surfaceArea];
+          renderSolidsInFlask();
+        });
+      });
+
+      // Catalyst toggle
+      el.toggleCatalyst.addEventListener('change', (e) => {
+        sound.playClick();
+        state.catalyst = e.target.checked;
+        const params = calculateKineticRateParams();
+        el.eaValDisplay.textContent = `${params.ea.toFixed(1)} kJ/mol`;
+        showToast(state.catalyst ? 'Katalis aktif! Energi Aktivasi (Ea) turun.' : 'Katalis dimatikan.');
+      });
+
+      // Speed multipliers
+      document.querySelectorAll('.speed-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          sound.playClick();
+          document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.speedMultiplier = parseInt(btn.getAttribute('data-speed'));
+        });
+      });
+
+      // Action buttons
+      el.btnStartAction.addEventListener('click', () => {
+        if (!state.isRunning || state.isCompleted) {
+          startReaction();
+        }
+      });
+
+      el.btnPauseAction.addEventListener('click', () => {
+        sound.playClick();
+        pauseReaction();
+      });
+
+      el.btnResetReaction.addEventListener('click', () => {
+        sound.playClick();
+        resetReactionState();
+        showToast('Labu reaksi telah dibersihkan & diisi ulang.');
+      });
+
+      el.btnResetAll.addEventListener('click', () => {
+        sound.playClick();
+        state.historyRuns = [];
+        state.tableLog = [];
+        el.tableBody.innerHTML = '';
+        el.sliderTemp.value = 25;
+        state.temperature = 25;
+        el.valTempLabel.textContent = '25 °C';
+        el.toggleCatalyst.checked = false;
+        state.catalyst = false;
+        resetReactionState();
+        showToast('Seluruh riwayat dan parameter telah di-reset ke nilai awal.');
+      });
+
+      // Table Clear
+      el.btnClearLog.addEventListener('click', () => {
+        sound.playClick();
+        state.tableLog = [];
+        state.historyRuns = [];
+        el.tableBody.innerHTML = '';
+        if (chartRenderer) chartRenderer.render();
+        showToast('Tabel riwayat pengamatan dikosongkan.');
+      });
+
+      // CSV Export
+      el.btnExportCsv.addEventListener('click', () => {
+        sound.playClick();
+        if (state.tableLog.length === 0) {
+          showToast('Belum ada data pengamatan untuk diekspor!');
+          return;
+        }
+
+        let csv = 'Run,Mode,Suhu (C),Konsentrasi/Bentuk,Katalis,Waktu (s),Laju Reaksi\n';
+        state.tableLog.forEach(row => {
+          csv += `"${row.num}","${row.mode}","${row.temp}","${row.condition}","${row.catalyst}","${row.time}","${row.rate}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Data_Praktikum_Laju_Reaksi_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('File CSV berhasil diunduh!');
+      });
+
+      // Chart PNG Download
+      el.btnSaveChart.addEventListener('click', () => {
+        sound.playClick();
+        const canvas = document.getElementById('kineticsChart');
+        const link = document.createElement('a');
+        link.download = `Grafik_Kinetika_Reaksi_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('Grafik kurva berhasil disimpan sebagai gambar PNG!');
+      });
+
+      // Audio Toggle
+      el.btnSoundToggle.addEventListener('click', () => {
+        const isNowOn = sound.toggleMute();
+        el.soundText.textContent = isNowOn ? 'Suara: ON' : 'Suara: MUTE';
+        el.btnSoundToggle.style.opacity = isNowOn ? '1' : '0.6';
+      });
+
+      // Guide Modal
+      el.btnGuideModal.addEventListener('click', () => {
+        sound.playClick();
+        el.guideModal.classList.add('show');
+      });
+
+      el.btnCloseModal.addEventListener('click', () => {
+        sound.playClick();
+        el.guideModal.classList.remove('show');
+      });
+
+      el.guideModal.addEventListener('click', (e) => {
+        if (e.target === el.guideModal) {
+          el.guideModal.classList.remove('show');
+        }
+      });
+    }
+
+    /* Initialize Virtual Lab on DOM Ready */
+    window.addEventListener('DOMContentLoaded', () => {
+      particleSim = new ParticleCollisionSimulator('particleCanvas');
+      chartRenderer = new KineticChartRenderer('kineticsChart');
+      setupEventListeners();
+      updateModeUI();
+      animFrameId = requestAnimationFrame(simulationLoop);
+    });
+
+  
+    function handlePortalBack(e, target) {
+      if (window.location.hostname.includes('script.google.com') || window.location.href.includes('/exec')) {
+        e.preventDefault();
+        const pageName = target.replace(/\.html$/i, '');
+        const currentBase = window.location.href.split('?')[0];
+        window.location.href = `${currentBase}?page=${encodeURIComponent(pageName === 'index' ? 'Index' : pageName)}`;
+      }
+    }
+
+  </script>
+</body>
+</html>

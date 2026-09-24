@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorium Virtual Sistem Koloid — Edisi Standar PhET / Labster</title>
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: rgba(22, 27, 34, 0.85);
+      --card-border: #30363d;
+      --accent-cyan: #00f2fe;
+      --accent-blue: #4facfe;
+      --accent-purple: #9d4edd;
+      --accent-amber: #f7b731;
+      --accent-red: #ff4757;
+      --accent-green: #2ed573;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --lcd-bg: #05141b;
+      --lcd-text: #00ffcc;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(0, 242, 254, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 85% 80%, rgba(157, 78, 221, 0.08) 0%, transparent 35%);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: rgba(13, 17, 23, 0.95);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge-lab {
+      background: rgba(0, 242, 254, 0.15);
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+    }
+
+    .mode-nav {
+      display: flex;
+      gap: 8px;
+      background: rgba(33, 38, 45, 0.8);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .mode-btn.active {
+      color: #0d1117;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+    }
+
+    .btn-audio {
+      background: rgba(22, 27, 34, 0.9);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .btn-audio.active {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+      box-shadow: 0 0 10px rgba(46, 213, 115, 0.3);
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 16px;
+      padding: 16px 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    @media (max-width: 1100px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Stage */
+    .stage-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stage-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      min-height: 480px;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .stage-header-bar {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .stage-header-bar > * {
+      pointer-events: auto;
+    }
+
+    .stage-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dark-chamber-toggle {
+      background: rgba(13, 17, 23, 0.85);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .dark-chamber-toggle.active {
+      border-color: var(--accent-amber);
+      color: var(--accent-amber);
+    }
+
+    .viewport-canvas {
+      width: 100%;
+      height: 440px;
+      border-radius: 8px;
+      background: #06090e;
+    }
+
+    /* Right Control Sidebar */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .control-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-heading {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+    }
+
+    .card-heading span {
+      color: var(--accent-cyan);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-label .val {
+      color: var(--accent-cyan);
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    select, input[type="range"] {
+      width: 100%;
+    }
+
+    select {
+      background: #161b22;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    select:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      height: 6px;
+      background: #21262d;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0, 242, 254, 0.6);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      color: #06090e;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 14px rgba(0, 242, 254, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #21262d;
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: #30363d;
+    }
+
+    .btn-danger {
+      background: rgba(255, 71, 87, 0.15);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 71, 87, 0.25);
+    }
+
+    /* LCD Digital Readout Box */
+    .lcd-panel {
+      background: var(--lcd-bg);
+      border: 1px solid #005f73;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: inset 0 0 12px rgba(0, 255, 204, 0.05);
+    }
+
+    .lcd-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .lcd-lbl {
+      font-size: 0.75rem;
+      color: #64dfdf;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .lcd-val {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 6px rgba(0, 255, 204, 0.6);
+    }
+
+    .lcd-val.alt {
+      color: #ffb703;
+      text-shadow: 0 0 6px rgba(255, 183, 3, 0.6);
+    }
+
+    .lcd-val.warn {
+      color: var(--accent-red);
+      text-shadow: 0 0 6px rgba(255, 71, 87, 0.6);
+    }
+
+    /* Info Badge / Science Explanation */
+    .info-card {
+      background: rgba(22, 27, 34, 0.5);
+      border: 1px dashed #30363d;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .info-card strong {
+      color: var(--accent-cyan);
+    }
+
+    /* Observation Log Table */
+    .table-container {
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      background: #0d1117;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    th, td {
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 1px solid #21262d;
+    }
+
+    th {
+      background: #161b22;
+      color: var(--text-muted);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td {
+      color: var(--text-main);
+      font-family: monospace;
+    }
+
+    /* Bottom Status Footer */
+    footer {
+      background: #090d16;
+      border-top: 1px solid var(--card-border);
+      padding: 8px 24px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    /* === PORTAL BACK NAVIGATION BUTTONS === */
+    .nav-back-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .btn-back-hub, .btn-back-portal {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+      line-height: 1;
+      height: 32px;
+      box-sizing: border-box;
+    }
+    .btn-back-hub {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .btn-back-hub:hover {
+      background: rgba(16, 185, 129, 0.3);
+      border-color: #34d399;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    }
+    .btn-back-portal {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+    .btn-back-portal:hover {
+      background: rgba(99, 102, 241, 0.3);
+      border-color: #818cf8;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+    }
+    @media (max-width: 640px) {
+      .text-hide-mobile { display: none; }
+      .btn-back-hub, .btn-back-portal { padding: 6px 8px; font-size: 10px; }
+      .nav-back-group { margin-right: 6px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-title">
+      <!-- Navigation Back Button to PortalKimia Media & Lab Virtual -->
+      <div class="nav-back-group">
+        <a href="LaboratoriumVirtual.html" class="btn-back-hub" title="Kembali ke Katalog Laboratorium Virtual" onclick="handlePortalBack(event, 'LaboratoriumVirtual.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Katalog Lab</span>
+        </a>
+        <a href="index.html" class="btn-back-portal" title="Kembali ke Beranda PortalKimia Media" onclick="handlePortalBack(event, 'index.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="text-hide-mobile">Portal Media</span>
+        </a>
+      </div>
+
+      <h1>Laboratorium Virtual Sistem Koloid</h1>
+      <span class="badge-lab">PhET / Labster Standard</span>
+    </div>
+
+    <!-- Mode Navigation Tabs -->
+    <nav class="mode-nav">
+      <button class="mode-btn active" id="btnModeTyndall" onclick="setLabMode('tyndall')">
+        🔦 Efek Tyndall
+      </button>
+      <button class="mode-btn" id="btnModeElectro" onclick="setLabMode('electro')">
+        ⚡ Elektroforesis
+      </button>
+      <button class="mode-btn" id="btnModeCoag" onclick="setLabMode('coag')">
+        🧪 Koagulasi
+      </button>
+      <button class="mode-btn" id="btnModeBrown" onclick="setLabMode('brown')">
+        🔬 Gerak Brown
+      </button>
+    </nav>
+
+    <div style="display:flex; align-items:center; gap:10px;">
+      <button class="btn-audio active" id="btnAudioToggle" title="Toggle Sound FX" onclick="toggleAudio()">
+        🔊
+      </button>
+      <button class="btn-action btn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="exportDataCSV()">
+        📥 Ekspor CSV
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN LAB AREA -->
+  <main>
+    <!-- Visual Stage (Left) -->
+    <section class="stage-container">
+      <div class="stage-card" id="stageMain">
+        <!-- Top bar controls in stage -->
+        <div class="stage-header-bar">
+          <div class="stage-title" id="stageTitle">
+            <span>🔦</span> SIMULATOR EFEK TYNDALL & HAMBURAN RAYLEIGH
+          </div>
+          <button class="dark-chamber-toggle" id="btnDarkToggle" onclick="toggleDarkChamber()">
+            🌙 Ruang Gelap: <strong id="lblDarkState">AKTIF</strong>
+          </button>
+        </div>
+
+        <!-- 60 FPS HTML5 Canvas Viewport -->
+        <canvas id="labCanvas" class="viewport-canvas" width="880" height="440"></canvas>
+      </div>
+
+      <!-- Real-time Quantitative Data Monitor -->
+      <div class="lcd-panel" id="bottomLcdBar">
+        <div class="lcd-row">
+          <span class="lcd-lbl" id="lblMetric1">Intensitas Hamburan 90° (NTU):</span>
+          <span class="lcd-val" id="valMetric1">184.2 NTU</span>
+          <span class="lcd-lbl" id="lblMetric2">Transmitansi Sinar Berkas (%T):</span>
+          <span class="lcd-val alt" id="valMetric2">72.4 %</span>
+          <span class="lcd-lbl" id="lblMetric3">Status Sistem:</span>
+          <span class="lcd-val" id="valMetric3" style="font-size:0.95rem; color:#00ffcc;">KOLOID TERDISPERSI</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sidebar Controls (Right) -->
+    <aside class="sidebar">
+      
+      <!-- Panel 1: Dynamic Mode Controls -->
+      <div class="control-card" id="controlPanelDynamic">
+        <!-- Content will be injected or toggled via JS according to active mode -->
+        <div class="card-heading">
+          <span>⚙️</span> Parameter Eksperimen
+        </div>
+
+        <!-- MODE 1: TYNDALL CONTROLS -->
+        <div id="controlsTyndall" class="mode-control-block">
+          <div class="form-group">
+            <label class="form-label">Jenis Sampel Cairan:</label>
+            <select id="selTyndallSample" onchange="updateTyndallSample()">
+              <optgroup label="Koloid (Ukuran 1 - 100 nm)">
+                <option value="feoh3">Sol Fe(OH)3 (Besi III Hidroksida - Merah Cokelat)</option>
+                <option value="milk">Susu Encer (Emulsi Lemak - Putih Susu)</option>
+                <option value="starch">Sol Kanji / Pati (Hidrofil - Keruh Opalesen)</option>
+                <option value="as2s3">Sol As2S3 (Arsenik Trisulfida - Kuning)</option>
+              </optgroup>
+              <optgroup label="Larutan Sejati (Ukuran < 1 nm)">
+                <option value="nacl">Larutan Garam NaCl (Jernih Transparan)</option>
+                <option value="cuso4">Larutan CuSO4 (Biru Jernih Homogen)</option>
+                <option value="sugar">Larutan Gula Sukrosa (Bening Murni)</option>
+              </optgroup>
+              <optgroup label="Suspensi Kasar (Ukuran > 100 nm)">
+                <option value="clay">Suspensi Air Tanah / Lempung (Keruh Mengendap)</option>
+                <option value="chalk">Suspensi Air Kapur CaCO3 (Putih Kasar)</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Warna Laser Berkas:</span>
+              <span class="val" id="valLaserColor">Hijau (532 nm)</span>
+            </label>
+            <select id="selLaserWavelength" onchange="updateLaserColor()">
+              <option value="green">Laser Hijau Nd:YAG (λ = 532 nm - Hamburan Kuat)</option>
+              <option value="red">Laser Merah He-Ne (λ = 650 nm - Hamburan Sedang)</option>
+              <option value="blue">Laser Biru-Violet (λ = 405 nm - Hamburan Sangat Kuat)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Daya & Intensitas Laser:</span>
+              <span class="val" id="valLaserPower">75 mW</span>
+            </label>
+            <input type="range" id="rngLaserPower" min="10" max="100" value="75" oninput="updateLaserPower(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" id="btnLaserToggle" onclick="toggleLaser()">
+              🔦 Matikan Laser
+            </button>
+            <button class="btn-action btn-secondary" onclick="logObservation()">
+              📝 Catat Data
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 2: ELECTROPHORESIS CONTROLS -->
+        <div id="controlsElectro" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Pilihan Sol Koloid Bermuatan:</label>
+            <select id="selElectroSol" onchange="updateElectroSol()">
+              <option value="feoh3">Sol Fe(OH)3 (Bermuatan Positif + [Kationik])</option>
+              <option value="as2s3">Sol As2S3 (Bermuatan Negatif - [Anionik])</option>
+              <option value="protein_acid">Larutan Protein Albumin (pH = 2.0 [Muatan +])</option>
+              <option value="protein_base">Larutan Protein Albumin (pH = 9.0 [Muatan -])</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Tegangan Catu Daya DC:</span>
+              <span class="val" id="valElectroVoltage">60 V</span>
+            </label>
+            <input type="range" id="rngElectroVoltage" min="0" max="120" step="5" value="60" oninput="updateElectroVoltage(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" id="btnPowerDC" onclick="toggleDCPower()">
+              ⚡ Nyalakan DC Power
+            </button>
+            <button class="btn-action btn-secondary" onclick="resetElectro()">
+              🔄 Reset Posisi
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 3: COAGULATION CONTROLS -->
+        <div id="controlsCoag" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Target Koloid yang Dikoagulasikan:</label>
+            <select id="selCoagColloid" onchange="updateCoagColloid()">
+              <option value="as2s3">Sol As2S3 (Koloid Bermuatan Negatif -)</option>
+              <option value="feoh3">Sol Fe(OH)3 (Koloid Bermuatan Positif +)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">Larutan Elektrolit Koagulan:</label>
+            <select id="selCoagElectrolyte" onchange="updateCoagElectrolyte()">
+              <!-- Populated dynamically via JS according to colloid charge -->
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Konsentrasi Elektrolit:</span>
+              <span class="val" id="valCoagConc">0.50 M</span>
+            </label>
+            <input type="range" id="rngCoagConc" min="0.05" max="2.00" step="0.05" value="0.50" oninput="updateCoagConc(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" id="btnAddDrops" onclick="addCoagulantDrops()">
+              💧 Teteskan Koagulan (1 mL)
+            </button>
+            <button class="btn-action btn-danger" onclick="resetCoagulation()">
+              🔄 Kuras Tabung
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 4: BROWNIAN MOTION CONTROLS -->
+        <div id="controlsBrown" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">
+              <span>Suhu Medium Suspensi (T):</span>
+              <span class="val" id="valBrownTemp">25 °C (298 K)</span>
+            </label>
+            <input type="range" id="rngBrownTemp" min="0" max="95" value="25" oninput="updateBrownTemp(this.value)">
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">Viskositas Medium Pendispersi (η):</label>
+            <select id="selBrownViscosity" onchange="updateBrownViscosity()">
+              <option value="water">Air Murni (η = 1.0 cP - Rendah)</option>
+              <option value="sugar_water">Larutan Sukrosa Encer (η = 2.5 cP - Sedang)</option>
+              <option value="glycerol">Gliserol 50% (η = 6.0 cP - Tinggi, Gerak Lambat)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Ukuran Diameter Partikel Koloid:</span>
+              <span class="val" id="valParticleRadius">25 nm</span>
+            </label>
+            <input type="range" id="rngParticleRadius" min="5" max="80" value="25" oninput="updateParticleRadius(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-secondary" id="btnTraceToggle" onclick="toggleBrownTrace()">
+              📈 Tampilkan Jejak (Trace)
+            </button>
+            <button class="btn-action btn-secondary" id="btnWaterMolecules" onclick="toggleWaterMolecules()">
+              💧 Partikel Pelarut H2O
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Panel 2: Theoretical Insight & Law -->
+      <div class="info-card" id="panelTheory">
+        <strong>Efek Tyndall:</strong> Gejala penghamburan berkas sinar oleh partikel-partikel koloid. Berkas cahaya nampak jelas karena ukuran partikel koloid ($1-100\text{ nm}$) sebanding dengan panjang gelombang cahaya tampak, sesuai Hukum Hamburan Rayleigh ($I \propto 1/\lambda^4$).
+      </div>
+
+      <!-- Panel 3: Observation Log -->
+      <div class="control-card">
+        <div class="card-heading">
+          <span>📋</span> Riwayat Pengamatan Eksperimen
+        </div>
+        <div class="table-container">
+          <table id="tblObservations">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Sampel / Reagen</th>
+                <th>Parameter</th>
+                <th>Hasil & Fenomena</th>
+              </tr>
+            </thead>
+            <tbody id="tblBody">
+              <!-- Logs injected here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>Laboratorium Sains Terpadu — Simulasi Kimia Fisik Koloid Dinamis</div>
+    <div>Sistem Bebas Kuis & Bebas LKS — Mode Eksplorasi Murni</div>
+  </footer>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    /* ==========================================================================
+       VIRTUAL LAB SISTEM KOLOID - SIMULATOR FISIK & ENGINE 60 FPS
+       ========================================================================== */
+
+    // Sound FX Engine via Web Audio API
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('btnAudioToggle');
+      if (audioEnabled) {
+        btn.classList.add('active');
+        btn.textContent = '🔊';
+        playSound('laser');
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '🔇';
+      }
+    }
+
+    function playSound(type) {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+
+        if (type === 'laser') {
+          // Sharp optical click & high freq chirp
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.exponentialRampToValueAtTime(1760, now + 0.08);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        } else if (type === 'drop') {
+          // Liquid pipette droplet sound
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(540, now);
+          osc.frequency.exponentialRampToValueAtTime(820, now + 0.06);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } else if (type === 'switch') {
+          // Mechanical switch click
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.setValueAtTime(110, now + 0.03);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.07);
+        } else if (type === 'coagulate') {
+          // Low resonant thud & harmonic chord
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc1.type = 'triangle';
+          osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(130, now);
+          osc2.frequency.setValueAtTime(260, now);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(ctx.destination);
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.45);
+          osc2.stop(now + 0.45);
+        } else if (type === 'chime') {
+          // Success bell
+          [523.25, 659.25, 783.99].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.08);
+            gain.gain.setValueAtTime(0.2, now + i * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.5);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.08);
+            osc.stop(now + i * 0.08 + 0.5);
+          });
+        }
+      } catch (e) {
+        console.warn("Audio play error", e);
+      }
+    }
+
+    // STATE VARIABLES
+    let activeMode = 'tyndall'; // 'tyndall' | 'electro' | 'coag' | 'brown'
+    let darkChamber = true;
+    let canvas, ctx2d;
+    let animFrameId = null;
+
+    // Mode 1: Tyndall State
+    const tyndallState = {
+      sample: 'feoh3',
+      laserOn: true,
+      wavelength: 'green', // 'green' | 'red' | 'blue'
+      powerMw: 75,
+      angleDeg: 90
+    };
+
+    // Mode 2: Electrophoresis State
+    const electroState = {
+      sol: 'feoh3',
+      dcPower: false,
+      voltage: 60,
+      boundaryOffset: 0, // -100 to +100
+      migrationRate: 0
+    };
+
+    // Mode 3: Coagulation State
+    const coagState = {
+      colloid: 'as2s3',
+      electrolyte: 'AlCl3',
+      concM: 0.50,
+      totalDropsMl: 0,
+      coagulatedPercent: 0,
+      isFullyCoagulated: false
+    };
+
+    // Mode 4: Brownian Motion State
+    const brownState = {
+      tempC: 25,
+      viscosity: 'water',
+      radiusNm: 25,
+      showTrace: true,
+      showWater: true,
+      particles: [],
+      waterMolecules: [],
+      traceHistory: []
+    };
+
+    // Initialize Canvas & Engine
+    window.addEventListener('DOMContentLoaded', () => {
+      canvas = document.getElementById('labCanvas');
+      ctx2d = canvas.getContext('2d');
+      initBrownianParticles();
+      populateCoagElectrolytes();
+      updateMetricDisplays();
+      requestAnimationFrame(mainAnimationLoop);
+
+      // Auto log initial setup
+      setTimeout(() => {
+        logObservation();
+      }, 500);
+    });
+
+    // MODE SWITCHER
+    function setLabMode(mode) {
+      activeMode = mode;
+      playSound('switch');
+
+      // Update Header Buttons
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      if (mode === 'tyndall') document.getElementById('btnModeTyndall').classList.add('active');
+      if (mode === 'electro') document.getElementById('btnModeElectro').classList.add('active');
+      if (mode === 'coag') document.getElementById('btnModeCoag').classList.add('active');
+      if (mode === 'brown') document.getElementById('btnModeBrown').classList.add('active');
+
+      // Update Sidebar Control Panels
+      document.querySelectorAll('.mode-control-block').forEach(p => p.style.display = 'none');
+      const stageTitle = document.getElementById('stageTitle');
+      const panelTheory = document.getElementById('panelTheory');
+
+      if (mode === 'tyndall') {
+        document.getElementById('controlsTyndall').style.display = 'block';
+        stageTitle.innerHTML = '<span>🔦</span> SIMULATOR EFEK TYNDALL & HAMBURAN RAYLEIGH';
+        panelTheory.innerHTML = '<strong>Efek Tyndall:</strong> Gejala penghamburan berkas sinar oleh partikel-partikel koloid. Berkas cahaya nampak jelas karena ukuran partikel koloid (1 - 100 nm) sebanding dengan panjang gelombang cahaya tampak, sesuai Hukum Hamburan Rayleigh ($I \\propto 1/\\lambda^4$).';
+      } else if (mode === 'electro') {
+        document.getElementById('controlsElectro').style.display = 'block';
+        stageTitle.innerHTML = '<span>⚡</span> APARATUR ELEKTROFORESIS KOLOID & MEDAN DC';
+        panelTheory.innerHTML = '<strong>Elektroforesis:</strong> Pergerakan partikel koloid bermuatan di bawah pengaruh medan listrik DC. Partikel sol kationik bermigrasi ke Katoda (-), sedangkan partikel sol anionik bermigrasi ke Anoda (+). Membuktikan bahwa koloid memiliki muatan listrik pada permukaannya.';
+      } else if (mode === 'coag') {
+        document.getElementById('controlsCoag').style.display = 'block';
+        stageTitle.innerHTML = '<span>🧪</span> PENGUJIAN KOAGULASI & ATURAN SCHULZE-HARDY';
+        panelTheory.innerHTML = '<strong>Aturan Schulze-Hardy:</strong> Daya koagulasi suatu ion elektrolit terhadap koloid bermuatan berlawanan berbanding lurus dengan pangkat enam dari valensi ion tersebut ($P \\propto z^6$). Ion $Al^{3+}$ (trivalen) mengkoagulasikan sol negatif jauh lebih cepat daripada ion $Ba^{2+}$ atau $Na^+$.';
+      } else if (mode === 'brown') {
+        document.getElementById('controlsBrown').style.display = 'block';
+        stageTitle.innerHTML = '<span>🔬</span> ULTRAMIKROSKOP: GERAK BROWN 60 FPS';
+        panelTheory.innerHTML = '<strong>Gerak Brown:</strong> Gerak zig-zag acak tak henti partikel koloid yang disebabkan oleh tumbukan tak berimbang dari molekul-molekul medium pendispersi (air). Gerak Brown menjaga partikel koloid tetap melayang dan tidak mengendap oleh gaya gravitasi.';
+      }
+
+      updateMetricDisplays();
+    }
+
+    function toggleDarkChamber() {
+      darkChamber = !darkChamber;
+      playSound('switch');
+      const lbl = document.getElementById('lblDarkState');
+      const btn = document.getElementById('btnDarkToggle');
+      if (darkChamber) {
+        lbl.textContent = 'AKTIF';
+        btn.classList.add('active');
+      } else {
+        lbl.textContent = 'NONAKTIF (LAMPU MENYALA)';
+        btn.classList.remove('active');
+      }
+    }
+
+    // ==========================================
+    // MODE 1: TYNDALL FUNCTIONS
+    // ==========================================
+    function updateTyndallSample() {
+      tyndallState.sample = document.getElementById('selTyndallSample').value;
+      playSound('drop');
+      updateMetricDisplays();
+    }
+
+    function updateLaserColor() {
+      tyndallState.wavelength = document.getElementById('selLaserWavelength').value;
+      const lbl = document.getElementById('valLaserColor');
+      if (tyndallState.wavelength === 'green') lbl.textContent = 'Hijau (532 nm)';
+      if (tyndallState.wavelength === 'red') lbl.textContent = 'Merah (650 nm)';
+      if (tyndallState.wavelength === 'blue') lbl.textContent = 'Biru-Violet (405 nm)';
+      playSound('laser');
+      updateMetricDisplays();
+    }
+
+    function updateLaserPower(val) {
+      tyndallState.powerMw = parseInt(val);
+      document.getElementById('valLaserPower').textContent = val + ' mW';
+      updateMetricDisplays();
+    }
+
+    function toggleLaser() {
+      tyndallState.laserOn = !tyndallState.laserOn;
+      playSound('laser');
+      const btn = document.getElementById('btnLaserToggle');
+      if (tyndallState.laserOn) {
+        btn.textContent = '🔦 Matikan Laser';
+        btn.className = 'btn-action btn-primary';
+      } else {
+        btn.textContent = '🔦 Nyalakan Laser';
+        btn.className = 'btn-action btn-secondary';
+      }
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // MODE 2: ELECTROPHORESIS FUNCTIONS
+    // ==========================================
+    function updateElectroSol() {
+      electroState.sol = document.getElementById('selElectroSol').value;
+      electroState.boundaryOffset = 0;
+      playSound('drop');
+      updateMetricDisplays();
+    }
+
+    function updateElectroVoltage(val) {
+      electroState.voltage = parseInt(val);
+      document.getElementById('valElectroVoltage').textContent = val + ' V';
+      updateMetricDisplays();
+    }
+
+    function toggleDCPower() {
+      electroState.dcPower = !electroState.dcPower;
+      playSound('switch');
+      const btn = document.getElementById('btnPowerDC');
+      if (electroState.dcPower) {
+        btn.textContent = '⚡ Matikan DC Power';
+        btn.className = 'btn-action btn-danger';
+      } else {
+        btn.textContent = '⚡ Nyalakan DC Power';
+        btn.className = 'btn-action btn-primary';
+      }
+      updateMetricDisplays();
+    }
+
+    function resetElectro() {
+      electroState.boundaryOffset = 0;
+      playSound('switch');
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // MODE 3: COAGULATION FUNCTIONS
+    // ==========================================
+    function updateCoagColloid() {
+      coagState.colloid = document.getElementById('selCoagColloid').value;
+      populateCoagElectrolytes();
+      resetCoagulation();
+      playSound('drop');
+    }
+
+    function populateCoagElectrolytes() {
+      const sel = document.getElementById('selCoagElectrolyte');
+      sel.innerHTML = '';
+      if (coagState.colloid === 'as2s3') {
+        // Colloid is negative (-) -> Gegenion is Cation (+)
+        sel.innerHTML = `
+          <option value="AlCl3">AlCl3 (Kation Al3+ [Valensi z = 3] - Koagulan Sangat Kuat)</option>
+          <option value="BaCl2">BaCl2 (Kation Ba2+ [Valensi z = 2] - Koagulan Sedang)</option>
+          <option value="NaCl">NaCl (Kation Na+ [Valensi z = 1] - Koagulan Lemah)</option>
+        `;
+      } else {
+        // Colloid is positive (+) -> Gegenion is Anion (-)
+        sel.innerHTML = `
+          <option value="K3PO4">K3PO4 (Anion PO4 3- [Valensi z = 3] - Koagulan Sangat Kuat)</option>
+          <option value="K2SO4">K2SO4 (Anion SO4 2- [Valensi z = 2] - Koagulan Sedang)</option>
+          <option value="KCl">KCl (Anion Cl- [Valensi z = 1] - Koagulan Lemah)</option>
+        `;
+      }
+      coagState.electrolyte = sel.value;
+    }
+
+    function updateCoagElectrolyte() {
+      coagState.electrolyte = document.getElementById('selCoagElectrolyte').value;
+      playSound('switch');
+    }
+
+    function updateCoagConc(val) {
+      coagState.concM = parseFloat(val);
+      document.getElementById('valCoagConc').textContent = parseFloat(val).toFixed(2) + ' M';
+    }
+
+    function addCoagulantDrops() {
+      playSound('drop');
+      coagState.totalDropsMl += 1.0;
+
+      // Determine valence z
+      let z = 1;
+      if (coagState.electrolyte === 'AlCl3' || coagState.electrolyte === 'K3PO4') z = 3;
+      else if (coagState.electrolyte === 'BaCl2' || coagState.electrolyte === 'K2SO4') z = 2;
+      else z = 1;
+
+      // Schulze-Hardy power factor: z^6
+      // z=1: 1, z=2: 64, z=3: 729
+      const powerFactor = Math.pow(z, 5) * coagState.concM;
+      const increment = Math.min(100, powerFactor * 12);
+      coagState.coagulatedPercent = Math.min(100, coagState.coagulatedPercent + increment);
+
+      if (coagState.coagulatedPercent >= 98 && !coagState.isFullyCoagulated) {
+        coagState.isFullyCoagulated = true;
+        playSound('coagulate');
+        setTimeout(() => playSound('chime'), 400);
+      }
+
+      updateMetricDisplays();
+    }
+
+    function resetCoagulation() {
+      coagState.totalDropsMl = 0;
+      coagState.coagulatedPercent = 0;
+      coagState.isFullyCoagulated = false;
+      playSound('switch');
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // MODE 4: BROWNIAN MOTION FUNCTIONS
+    // ==========================================
+    function initBrownianParticles() {
+      brownState.particles = [];
+      const numParticles = 24;
+      for (let i = 0; i < numParticles; i++) {
+        brownState.particles.push({
+          x: 200 + Math.random() * 480,
+          y: 80 + Math.random() * 280,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          color: (i === 0) ? '#ffcc00' : '#4facfe',
+          isHero: (i === 0) // Hero particle tracked with trace
+        });
+      }
+
+      brownState.waterMolecules = [];
+      for (let i = 0; i < 90; i++) {
+        brownState.waterMolecules.push({
+          x: 180 + Math.random() * 520,
+          y: 60 + Math.random() * 320,
+          vx: (Math.random() - 0.5) * 6,
+          vy: (Math.random() - 0.5) * 6
+        });
+      }
+
+      brownState.traceHistory = [];
+    }
+
+    function updateBrownTemp(val) {
+      brownState.tempC = parseInt(val);
+      const kelvin = brownState.tempC + 273;
+      document.getElementById('valBrownTemp').textContent = `${val} °C (${kelvin} K)`;
+      updateMetricDisplays();
+    }
+
+    function updateBrownViscosity() {
+      brownState.viscosity = document.getElementById('selBrownViscosity').value;
+      playSound('switch');
+      updateMetricDisplays();
+    }
+
+    function updateParticleRadius(val) {
+      brownState.radiusNm = parseInt(val);
+      document.getElementById('valParticleRadius').textContent = `${val} nm`;
+      updateMetricDisplays();
+    }
+
+    function toggleBrownTrace() {
+      brownState.showTrace = !brownState.showTrace;
+      playSound('switch');
+      const btn = document.getElementById('btnTraceToggle');
+      if (brownState.showTrace) {
+        btn.classList.add('btn-primary');
+        btn.classList.remove('btn-secondary');
+        btn.textContent = '📈 Sembunyikan Jejak';
+      } else {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+        btn.textContent = '📈 Tampilkan Jejak';
+        brownState.traceHistory = [];
+      }
+    }
+
+    function toggleWaterMolecules() {
+      brownState.showWater = !brownState.showWater;
+      playSound('switch');
+      const btn = document.getElementById('btnWaterMolecules');
+      if (brownState.showWater) {
+        btn.classList.add('btn-primary');
+        btn.classList.remove('btn-secondary');
+        btn.textContent = '💧 Sembunyikan H2O';
+      } else {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+        btn.textContent = '💧 Partikel Pelarut H2O';
+      }
+    }
+
+    // ==========================================
+    // METRICS & LCD UPDATE
+    // ==========================================
+    function updateMetricDisplays() {
+      const lbl1 = document.getElementById('lblMetric1');
+      const val1 = document.getElementById('valMetric1');
+      const lbl2 = document.getElementById('lblMetric2');
+      const val2 = document.getElementById('valMetric2');
+      const lbl3 = document.getElementById('lblMetric3');
+      const val3 = document.getElementById('valMetric3');
+
+      if (activeMode === 'tyndall') {
+        lbl1.textContent = 'Hamburan 90° (NTU):';
+        lbl2.textContent = 'Transmitansi (%T):';
+        lbl3.textContent = 'Kategori Sistem:';
+
+        let ntu = 0;
+        let trans = 99.5;
+        let cat = 'LARUTAN SEJATI';
+
+        if (tyndallState.sample === 'feoh3') { ntu = 184.2; trans = 72.4; cat = 'KOLOID (SOL HIDROFOB)'; }
+        else if (tyndallState.sample === 'milk') { ntu = 320.5; trans = 45.1; cat = 'KOLOID (EMULSI LEMAK)'; }
+        else if (tyndallState.sample === 'starch') { ntu = 142.8; trans = 81.0; cat = 'KOLOID (SOL HIDROFIL)'; }
+        else if (tyndallState.sample === 'as2s3') { ntu = 196.4; trans = 70.8; cat = 'KOLOID (SOL ANIONIK)'; }
+        else if (tyndallState.sample === 'nacl' || tyndallState.sample === 'sugar' || tyndallState.sample === 'cuso4') {
+          ntu = 0.4; trans = 99.8; cat = 'LARUTAN SEJATI (HOMOGEN)';
+        } else {
+          ntu = 980.0; trans = 8.5; cat = 'SUSPENSI KASAR (HETEROGEN)';
+        }
+
+        // Adjust for laser wavelength & power
+        if (!tyndallState.laserOn) {
+          ntu = 0.0;
+        } else {
+          let waveFactor = 1.0;
+          if (tyndallState.wavelength === 'blue') waveFactor = 1.8;
+          if (tyndallState.wavelength === 'red') waveFactor = 0.6;
+          ntu = (ntu * waveFactor * (tyndallState.powerMw / 75)).toFixed(1);
+        }
+
+        val1.textContent = ntu + ' NTU';
+        val2.textContent = trans.toFixed(1) + ' %';
+        val3.textContent = cat;
+        val3.style.color = (cat.includes('KOLOID')) ? '#00ffcc' : (cat.includes('LARUTAN') ? '#4facfe' : '#ffb703');
+
+      } else if (activeMode === 'electro') {
+        lbl1.textContent = 'Tegangan Medan Listrik:';
+        lbl2.textContent = 'Arah Migrasi Partikel:';
+        lbl3.textContent = 'Muatan Permukaan Koloid:';
+
+        val1.textContent = electroState.voltage + ' Volt DC';
+        
+        let charge = '+';
+        let direction = 'Katoda (Kutub -)';
+        if (electroState.sol === 'feoh3' || electroState.sol === 'protein_acid') {
+          charge = 'POSITIF (+) [Kationik]';
+          direction = 'Menuju Katoda (-)';
+        } else {
+          charge = 'NEGATIF (-) [Anionik]';
+          direction = 'Menuju Anoda (+)';
+        }
+
+        val2.textContent = electroState.dcPower ? direction : 'Diam (Medan OFF)';
+        val3.textContent = charge;
+        val3.style.color = charge.includes('POSITIF') ? '#ff6b6b' : '#4dabf7';
+
+      } else if (activeMode === 'coag') {
+        lbl1.textContent = 'Volume Koagulan Diteteskan:';
+        lbl2.textContent = 'Tingkat Koagulasi Flok:';
+        lbl3.textContent = 'Daya Koagulasi (Schulze-Hardy):';
+
+        val1.textContent = coagState.totalDropsMl.toFixed(1) + ' mL';
+        val2.textContent = coagState.coagulatedPercent.toFixed(1) + ' %';
+        
+        let relPower = '1x';
+        if (coagState.electrolyte === 'AlCl3' || coagState.electrolyte === 'K3PO4') relPower = '729x (Ion Trivalen z=3)';
+        else if (coagState.electrolyte === 'BaCl2' || coagState.electrolyte === 'K2SO4') relPower = '64x (Ion Bivalen z=2)';
+        else relPower = '1x (Ion Univalen z=1)';
+
+        val3.textContent = relPower;
+        val3.style.color = (coagState.coagulatedPercent >= 95) ? '#2ed573' : '#ffb703';
+
+      } else if (activeMode === 'brown') {
+        lbl1.textContent = 'Energi Kinetik Rata-Rata:';
+        lbl2.textContent = 'Koefisien Difusi (D):';
+        lbl3.textContent = 'Frekuensi Tumbukan Molekul:';
+
+        const kelvin = brownState.tempC + 273;
+        let viscFactor = 1.0;
+        if (brownState.viscosity === 'sugar_water') viscFactor = 2.5;
+        if (brownState.viscosity === 'glycerol') viscFactor = 6.0;
+
+        const diffCoeff = ((1.38e-23 * kelvin) / (6 * Math.PI * (viscFactor * 0.001) * (brownState.radiusNm * 1e-9)) * 1e12).toFixed(2);
+        const collisionRate = ((kelvin / 298) * (1 / viscFactor) * 4.8).toFixed(1);
+
+        val1.textContent = (kelvin * 0.0138).toFixed(2) + ' × 10⁻²¹ J';
+        val2.textContent = diffCoeff + ' µm²/s';
+        val3.textContent = collisionRate + ' × 10²⁰ /s';
+      }
+    }
+
+    // ==========================================
+    // OBSERVATION LOG TABLE
+    // ==========================================
+    function logObservation() {
+      const tbody = document.getElementById('tblBody');
+      const tr = document.createElement('tr');
+
+      let modeName = '';
+      let sampleName = '';
+      let param = '';
+      let result = '';
+
+      if (activeMode === 'tyndall') {
+        modeName = 'Efek Tyndall';
+        sampleName = document.getElementById('selTyndallSample').options[document.getElementById('selTyndallSample').selectedIndex].text;
+        param = `Laser: ${tyndallState.wavelength} (${tyndallState.powerMw} mW)`;
+        result = `Hamburan: ${document.getElementById('valMetric1').textContent}, %T: ${document.getElementById('valMetric2').textContent}`;
+      } else if (activeMode === 'electro') {
+        modeName = 'Elektroforesis';
+        sampleName = document.getElementById('selElectroSol').options[document.getElementById('selElectroSol').selectedIndex].text;
+        param = `Tegangan: ${electroState.voltage} V DC`;
+        result = `Migrasi: ${document.getElementById('valMetric2').textContent} (${document.getElementById('valMetric3').textContent})`;
+      } else if (activeMode === 'coag') {
+        modeName = 'Koagulasi';
+        sampleName = `Sol ${coagState.colloid.toUpperCase()} + ${coagState.electrolyte}`;
+        param = `Konsentrasi: ${coagState.concM} M, Vol: ${coagState.totalDropsMl} mL`;
+        result = `Presipitasi: ${coagState.coagulatedPercent.toFixed(1)}% (Daya: ${document.getElementById('valMetric3').textContent})`;
+      } else if (activeMode === 'brown') {
+        modeName = 'Gerak Brown';
+        sampleName = `Partikel d=${brownState.radiusNm*2}nm (${brownState.viscosity})`;
+        param = `Suhu: ${brownState.tempC}°C`;
+        result = `D = ${document.getElementById('valMetric2').textContent}, Ek = ${document.getElementById('valMetric1').textContent}`;
+      }
+
+      tr.innerHTML = `
+        <td><strong>${modeName}</strong></td>
+        <td>${sampleName}</td>
+        <td>${param}</td>
+        <td>${result}</td>
+      `;
+
+      tbody.insertBefore(tr, tbody.firstChild);
+      playSound('drop');
+    }
+
+    function exportDataCSV() {
+      let csv = "Mode,Sampel_Reagen,Parameter,Hasil_Pengamatan\n";
+      const rows = document.querySelectorAll("#tblBody tr");
+      if (rows.length === 0) {
+        alert("Belum ada data pengamatan yang dicatat. Klik 'Catat Data' terlebih dahulu!");
+        return;
+      }
+      rows.forEach(r => {
+        const cols = r.querySelectorAll("td");
+        if (cols.length >= 4) {
+          const m = cols[0].innerText.replace(/,/g, '');
+          const s = cols[1].innerText.replace(/,/g, '');
+          const p = cols[2].innerText.replace(/,/g, '');
+          const res = cols[3].innerText.replace(/,/g, '');
+          csv += `"${m}","${s}","${p}","${res}"\n`;
+        }
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Data_Eksperimen_Koloid_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      playSound('chime');
+    }
+
+    // ==========================================
+    // 60 FPS CANVAS RENDERING SYSTEM
+    // ==========================================
+    function mainAnimationLoop() {
+      ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (activeMode === 'tyndall') {
+        renderTyndallStage();
+      } else if (activeMode === 'electro') {
+        renderElectrophoresisStage();
+      } else if (activeMode === 'coag') {
+        renderCoagulationStage();
+      } else if (activeMode === 'brown') {
+        renderBrownianStage();
+      }
+
+      animFrameId = requestAnimationFrame(mainAnimationLoop);
+    }
+
+    // 1. RENDER TYNDALL STAGE
+    function renderTyndallStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Dark Chamber Ambient Background
+      if (darkChamber) {
+        ctx2d.fillStyle = '#05080f';
+        ctx2d.fillRect(0, 0, W, H);
+      } else {
+        ctx2d.fillStyle = '#111827';
+        ctx2d.fillRect(0, 0, W, H);
+      }
+
+      // Wooden / Steel Lab Bench
+      ctx2d.fillStyle = '#1e293b';
+      ctx2d.fillRect(0, H - 40, W, 40);
+      ctx2d.fillStyle = '#0f172a';
+      ctx2d.fillRect(0, H - 42, W, 2);
+
+      // Glass Cuvette / Beaker Container
+      const cuvetteX = 340;
+      const cuvetteY = 100;
+      const cuvetteW = 200;
+      const cuvetteH = 260;
+
+      // Liquid in Beaker
+      let liquidColor = 'rgba(255, 255, 255, 0.05)';
+      let scatterColor = 'rgba(255, 255, 255, 0.8)';
+      let hasBeamScattering = false;
+      let beamOpacity = 0.0;
+
+      if (tyndallState.sample === 'feoh3') {
+        liquidColor = 'rgba(180, 50, 20, 0.45)';
+        hasBeamScattering = true;
+        beamOpacity = 0.75;
+      } else if (tyndallState.sample === 'milk') {
+        liquidColor = 'rgba(240, 245, 255, 0.7)';
+        hasBeamScattering = true;
+        beamOpacity = 0.95;
+      } else if (tyndallState.sample === 'starch') {
+        liquidColor = 'rgba(200, 220, 240, 0.35)';
+        hasBeamScattering = true;
+        beamOpacity = 0.65;
+      } else if (tyndallState.sample === 'as2s3') {
+        liquidColor = 'rgba(240, 200, 20, 0.45)';
+        hasBeamScattering = true;
+        beamOpacity = 0.75;
+      } else if (tyndallState.sample === 'cuso4') {
+        liquidColor = 'rgba(0, 150, 255, 0.35)';
+        hasBeamScattering = false;
+        beamOpacity = 0.05;
+      } else if (tyndallState.sample === 'nacl' || tyndallState.sample === 'sugar') {
+        liquidColor = 'rgba(200, 240, 255, 0.12)';
+        hasBeamScattering = false;
+        beamOpacity = 0.02;
+      } else {
+        // Clay / chalk suspension
+        liquidColor = 'rgba(120, 100, 80, 0.85)';
+        hasBeamScattering = true;
+        beamOpacity = 0.98;
+      }
+
+      // Draw Beaker Liquid Body
+      ctx2d.fillStyle = liquidColor;
+      ctx2d.fillRect(cuvetteX, cuvetteY + 20, cuvetteW, cuvetteH - 20);
+
+      // Beaker Glass Wall Outline
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx2d.lineWidth = 3;
+      ctx2d.strokeRect(cuvetteX, cuvetteY, cuvetteW, cuvetteH);
+
+      // Beaker Graduations
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx2d.lineWidth = 1.5;
+      for (let y = cuvetteY + 40; y < cuvetteY + cuvetteH - 20; y += 30) {
+        ctx2d.beginPath();
+        ctx2d.moveTo(cuvetteX, y);
+        ctx2d.lineTo(cuvetteX + 24, y);
+        ctx2d.stroke();
+      }
+
+      // Laser Module Box (Left)
+      const laserX = 60;
+      const laserY = 210;
+      const laserW = 100;
+      const laserH = 50;
+
+      ctx2d.fillStyle = '#334155';
+      ctx2d.fillRect(laserX, laserY, laserW, laserH);
+      ctx2d.strokeStyle = '#64748b';
+      ctx2d.lineWidth = 2;
+      ctx2d.strokeRect(laserX, laserY, laserW, laserH);
+
+      // Laser Aperture Nozzle
+      ctx2d.fillStyle = '#0f172a';
+      ctx2d.fillRect(laserX + laserW, laserY + 18, 14, 14);
+
+      // Laser Brand Label
+      ctx2d.fillStyle = '#94a3b8';
+      ctx2d.font = 'bold 9px monospace';
+      ctx2d.fillText('LASER OPTICS', laserX + 12, laserY + 24);
+      ctx2d.fillStyle = tyndallState.laserOn ? '#22c55e' : '#ef4444';
+      ctx2d.beginPath();
+      ctx2d.arc(laserX + 85, laserY + 14, 4, 0, Math.PI * 2);
+      ctx2d.fill();
+
+      // Laser Beam Propagation
+      if (tyndallState.laserOn) {
+        let beamColorCore = '#22c55e';
+        let beamColorGlow = 'rgba(34, 197, 94, 0.4)';
+        if (tyndallState.wavelength === 'red') {
+          beamColorCore = '#ef4444';
+          beamColorGlow = 'rgba(239, 68, 68, 0.4)';
+        } else if (tyndallState.wavelength === 'blue') {
+          beamColorCore = '#3b82f6';
+          beamColorGlow = 'rgba(59, 130, 246, 0.4)';
+        }
+
+        const beamY = laserY + 25;
+
+        // 1. Air Segment (Laser Box to Cuvette) - invisible or very faint in clean air
+        ctx2d.strokeStyle = darkChamber ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)';
+        ctx2d.lineWidth = 2;
+        ctx2d.beginPath();
+        ctx2d.moveTo(laserX + laserW + 14, beamY);
+        ctx2d.lineTo(cuvetteX, beamY);
+        ctx2d.stroke();
+
+        // 2. Inside Cuvette Segment (TYNDALL SCATTERING BEAM)
+        if (hasBeamScattering) {
+          // Intense cone/cylinder of scattered light
+          const powerRatio = tyndallState.powerMw / 100;
+          ctx2d.save();
+
+          // Outer diffused cone
+          const grad = ctx2d.createLinearGradient(cuvetteX, beamY - 14, cuvetteX, beamY + 14);
+          grad.addColorStop(0, 'transparent');
+          grad.addColorStop(0.5, beamColorGlow);
+          grad.addColorStop(1, 'transparent');
+          ctx2d.fillStyle = grad;
+          ctx2d.globalAlpha = beamOpacity * powerRatio;
+          ctx2d.fillRect(cuvetteX, beamY - 16, cuvetteW, 32);
+
+          // Intense core path
+          ctx2d.strokeStyle = beamColorCore;
+          ctx2d.lineWidth = 3.5;
+          ctx2d.globalAlpha = 0.95 * powerRatio;
+          ctx2d.beginPath();
+          ctx2d.moveTo(cuvetteX, beamY);
+          ctx2d.lineTo(cuvetteX + cuvetteW, beamY);
+          ctx2d.stroke();
+
+          // Rayleigh scattered micro-specks (glints of colloid particles)
+          ctx2d.fillStyle = '#ffffff';
+          for (let i = 0; i < 28; i++) {
+            const rx = cuvetteX + 8 + (Math.sin(i * 99 + Date.now() * 0.002) * 0.5 + 0.5) * (cuvetteW - 16);
+            const ry = beamY + (Math.cos(i * 33 + Date.now() * 0.003)) * 12;
+            const rSize = (Math.sin(i + Date.now() * 0.005) * 0.5 + 0.5) * 2 + 1;
+            ctx2d.beginPath();
+            ctx2d.arc(rx, ry, rSize, 0, Math.PI * 2);
+            ctx2d.fill();
+          }
+
+          ctx2d.restore();
+        } else {
+          // True Solution: Light passes straight through without scattering path!
+          // Only tiny dots at entry and exit glass surfaces
+          ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+          ctx2d.lineWidth = 1;
+          ctx2d.beginPath();
+          ctx2d.moveTo(cuvetteX, beamY);
+          ctx2d.lineTo(cuvetteX + cuvetteW, beamY);
+          ctx2d.stroke();
+
+          // Entry and exit glint
+          ctx2d.fillStyle = beamColorCore;
+          ctx2d.beginPath();
+          ctx2d.arc(cuvetteX, beamY, 2.5, 0, Math.PI * 2);
+          ctx2d.arc(cuvetteX + cuvetteW, beamY, 2.5, 0, Math.PI * 2);
+          ctx2d.fill();
+        }
+
+        // 3. Exiting Beam hitting Projection Screen (Right)
+        const screenX = W - 100;
+        ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx2d.lineWidth = 2;
+        ctx2d.beginPath();
+        ctx2d.moveTo(cuvetteX + cuvetteW, beamY);
+        ctx2d.lineTo(screenX, beamY);
+        ctx2d.stroke();
+
+        // Projection Target Screen
+        ctx2d.fillStyle = '#1e293b';
+        ctx2d.fillRect(screenX, 120, 20, 220);
+        ctx2d.strokeStyle = '#475569';
+        ctx2d.strokeRect(screenX, 120, 20, 220);
+
+        // Projected Spot on Screen
+        if (hasBeamScattering && tyndallState.sample !== 'clay') {
+          // Dimmer spot due to scattering
+          ctx2d.fillStyle = beamColorCore;
+          ctx2d.globalAlpha = 0.5;
+          ctx2d.beginPath();
+          ctx2d.arc(screenX, beamY, 6, 0, Math.PI * 2);
+          ctx2d.fill();
+          ctx2d.globalAlpha = 1.0;
+        } else if (!hasBeamScattering) {
+          // Sharp intense bright laser dot!
+          ctx2d.fillStyle = beamColorCore;
+          ctx2d.shadowColor = beamColorCore;
+          ctx2d.shadowBlur = 12;
+          ctx2d.beginPath();
+          ctx2d.arc(screenX, beamY, 7, 0, Math.PI * 2);
+          ctx2d.fill();
+          ctx2d.shadowBlur = 0;
+        }
+      }
+
+      // Photodiode Scatter Sensor (Above at 90°)
+      const sensorX = cuvetteX + cuvetteW / 2 - 25;
+      const sensorY = cuvetteY - 45;
+      ctx2d.fillStyle = '#475569';
+      ctx2d.fillRect(sensorX, sensorY, 50, 30);
+      ctx2d.strokeStyle = '#94a3b8';
+      ctx2d.strokeRect(sensorX, sensorY, 50, 30);
+      ctx2d.fillStyle = '#00ffcc';
+      ctx2d.font = '9px monospace';
+      ctx2d.fillText('DETEKTOR 90°', sensorX + 4, sensorY - 6);
+
+      // Label below Beaker
+      ctx2d.fillStyle = '#cbd5e1';
+      ctx2d.font = 'bold 12px sans-serif';
+      ctx2d.textAlign = 'center';
+      const sampleText = document.getElementById('selTyndallSample').options[document.getElementById('selTyndallSample').selectedIndex].text;
+      ctx2d.fillText(sampleText, cuvetteX + cuvetteW / 2, cuvetteY + cuvetteH + 24);
+      ctx2d.textAlign = 'left';
+    }
+
+    // 2. RENDER ELECTROPHORESIS STAGE
+    function renderElectrophoresisStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#0a0f1d';
+      ctx2d.fillRect(0, 0, W, H);
+
+      // Lab Stand Support Base
+      ctx2d.fillStyle = '#334155';
+      ctx2d.fillRect(W / 2 - 180, H - 40, 360, 20);
+      ctx2d.fillRect(W / 2 - 10, 60, 20, H - 100);
+
+      // U-Tube Glass Vessel Coordinates
+      const centerX = W / 2;
+      const tubeY = 120;
+      const armDistance = 140;
+      const tubeRadius = 26;
+      const armHeight = 180;
+
+      const leftX = centerX - armDistance;
+      const rightX = centerX + armDistance;
+
+      // Update Migration Offset if DC Power is ON
+      if (electroState.dcPower && electroState.voltage > 0) {
+        const rate = (electroState.voltage / 100) * 0.15;
+        // Fe(OH)3 is positive -> moves towards CATHODE (Negative pole). Left is cathode (-)
+        // As2S3 is negative -> moves towards ANODE (Positive pole). Right is anode (+)
+        if (electroState.sol === 'feoh3' || electroState.sol === 'protein_acid') {
+          // Left arm (Cathode -) rises, Right arm (Anode +) drops
+          if (electroState.boundaryOffset < 50) electroState.boundaryOffset += rate;
+        } else {
+          // Moves towards Right arm (Anode +)
+          if (electroState.boundaryOffset > -50) electroState.boundaryOffset -= rate;
+        }
+      }
+
+      // Draw U-Tube Liquid
+      // Lower Colloid layer and Upper Buffer layer
+      let solColor = (electroState.sol === 'feoh3') ? 'rgba(185, 50, 20, 0.7)' : 'rgba(240, 200, 20, 0.7)';
+      if (electroState.sol.includes('protein')) solColor = 'rgba(100, 180, 255, 0.6)';
+
+      ctx2d.save();
+      ctx2d.lineWidth = tubeRadius * 2;
+      ctx2d.lineCap = 'round';
+
+      // U-bend Path
+      ctx2d.beginPath();
+      ctx2d.moveTo(leftX, tubeY + 30 - electroState.boundaryOffset);
+      ctx2d.lineTo(leftX, tubeY + armHeight);
+      ctx2d.arcTo(leftX, tubeY + armHeight + 50, centerX, tubeY + armHeight + 50, 40);
+      ctx2d.arcTo(rightX, tubeY + armHeight + 50, rightX, tubeY + armHeight, 40);
+      ctx2d.lineTo(rightX, tubeY + 30 + electroState.boundaryOffset);
+      ctx2d.strokeStyle = solColor;
+      ctx2d.stroke();
+
+      // Upper Clear Buffer layer in both arms
+      ctx2d.strokeStyle = 'rgba(200, 230, 255, 0.2)';
+      ctx2d.beginPath();
+      ctx2d.moveTo(leftX, tubeY - 20);
+      ctx2d.lineTo(leftX, tubeY + 30 - electroState.boundaryOffset);
+      ctx2d.stroke();
+
+      ctx2d.beginPath();
+      ctx2d.moveTo(rightX, tubeY - 20);
+      ctx2d.lineTo(rightX, tubeY + 30 + electroState.boundaryOffset);
+      ctx2d.stroke();
+
+      // Outer Glass Tube Boundary
+      ctx2d.lineWidth = 3;
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx2d.beginPath();
+      // Outer border left arm
+      ctx2d.moveTo(leftX - tubeRadius, tubeY - 20);
+      ctx2d.lineTo(leftX - tubeRadius, tubeY + armHeight);
+      ctx2d.arcTo(leftX - tubeRadius, tubeY + armHeight + 50 + tubeRadius, centerX, tubeY + armHeight + 50 + tubeRadius, 40 + tubeRadius);
+      ctx2d.arcTo(rightX + tubeRadius, tubeY + armHeight + 50 + tubeRadius, rightX + tubeRadius, tubeY + armHeight, 40 + tubeRadius);
+      ctx2d.lineTo(rightX + tubeRadius, tubeY - 20);
+      // Inner border
+      ctx2d.moveTo(leftX + tubeRadius, tubeY - 20);
+      ctx2d.lineTo(leftX + tubeRadius, tubeY + armHeight);
+      ctx2d.arcTo(leftX + tubeRadius, tubeY + armHeight + 50 - tubeRadius, centerX, tubeY + armHeight + 50 - tubeRadius, Math.max(10, 40 - tubeRadius));
+      ctx2d.arcTo(rightX - tubeRadius, tubeY + armHeight + 50 - tubeRadius, rightX - tubeRadius, tubeY + armHeight, Math.max(10, 40 - tubeRadius));
+      ctx2d.lineTo(rightX - tubeRadius, tubeY - 20);
+      ctx2d.stroke();
+
+      ctx2d.restore();
+
+      // Electrodes immersed in arms
+      // Left: Cathode (-)
+      ctx2d.fillStyle = '#64748b';
+      ctx2d.fillRect(leftX - 5, tubeY - 30, 10, 80);
+      // Right: Anode (+)
+      ctx2d.fillRect(rightX - 5, tubeY - 30, 10, 80);
+
+      // Electrical Cables to DC Power Source
+      ctx2d.lineWidth = 3;
+      // Negative Cable (Blue/Black)
+      ctx2d.strokeStyle = '#3b82f6';
+      ctx2d.beginPath();
+      ctx2d.moveTo(leftX, tubeY - 30);
+      ctx2d.bezierCurveTo(leftX - 60, tubeY - 80, centerX - 120, tubeY - 80, centerX - 60, 40);
+      ctx2d.stroke();
+
+      // Positive Cable (Red)
+      ctx2d.strokeStyle = '#ef4444';
+      ctx2d.beginPath();
+      ctx2d.moveTo(rightX, tubeY - 30);
+      ctx2d.bezierCurveTo(rightX + 60, tubeY - 80, centerX + 120, tubeY - 80, centerX + 60, 40);
+      ctx2d.stroke();
+
+      // DC Power Box Top
+      ctx2d.fillStyle = '#1e293b';
+      ctx2d.fillRect(centerX - 80, 15, 160, 45);
+      ctx2d.strokeStyle = '#475569';
+      ctx2d.strokeRect(centerX - 80, 15, 160, 45);
+
+      ctx2d.fillStyle = electroState.dcPower ? '#00ffcc' : '#64748b';
+      ctx2d.font = 'bold 12px monospace';
+      ctx2d.fillText(`DC: ${electroState.voltage} V [${electroState.dcPower ? 'ON' : 'OFF'}]`, centerX - 60, 42);
+
+      // Electrode Polarity Badges
+      ctx2d.fillStyle = '#3b82f6';
+      ctx2d.beginPath();
+      ctx2d.arc(leftX, tubeY - 45, 12, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.fillStyle = '#ffffff';
+      ctx2d.font = 'bold 14px sans-serif';
+      ctx2d.textAlign = 'center';
+      ctx2d.fillText('–', leftX, tubeY - 40);
+
+      ctx2d.fillStyle = '#ef4444';
+      ctx2d.beginPath();
+      ctx2d.arc(rightX, tubeY - 45, 12, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.fillStyle = '#ffffff';
+      ctx2d.fillText('+', rightX, tubeY - 40);
+
+      // Migration Indicator Arrows
+      if (electroState.dcPower) {
+        ctx2d.fillStyle = '#facc15';
+        ctx2d.font = 'bold 11px sans-serif';
+        if (electroState.sol === 'feoh3' || electroState.sol === 'protein_acid') {
+          ctx2d.fillText('▲ Permukaan Koloid (+) Naik ke Katoda (–)', leftX, tubeY + 200);
+        } else {
+          ctx2d.fillText('▲ Permukaan Koloid (–) Naik ke Anoda (+)', rightX, tubeY + 200);
+        }
+      }
+      ctx2d.textAlign = 'left';
+    }
+
+    // 3. RENDER COAGULATION STAGE
+    function renderCoagulationStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#0a0f1d';
+      ctx2d.fillRect(0, 0, W, H);
+
+      // Wooden Test Tube Rack
+      ctx2d.fillStyle = '#334155';
+      ctx2d.fillRect(W / 2 - 140, H - 40, 280, 20);
+      ctx2d.fillRect(W / 2 - 100, 160, 200, 12);
+
+      // Large Glass Reaction Tube
+      const tubeX = W / 2 - 35;
+      const tubeY = 110;
+      const tubeW = 70;
+      const tubeH = 240;
+
+      // Colloid Liquid Body
+      let baseColor = (coagState.colloid === 'as2s3') ? 'rgba(240, 200, 20, 0.6)' : 'rgba(185, 50, 20, 0.6)';
+      
+      // As coagulation proceeds, supernatant clarifies (becomes more transparent)
+      const clearRatio = coagState.coagulatedPercent / 100;
+      const supernatantAlpha = Math.max(0.1, 0.6 * (1 - clearRatio * 0.8));
+      
+      ctx2d.save();
+      ctx2d.fillStyle = (coagState.colloid === 'as2s3') ? `rgba(240, 200, 20, ${supernatantAlpha})` : `rgba(185, 50, 20, ${supernatantAlpha})`;
+      
+      // Tube base curve
+      ctx2d.beginPath();
+      ctx2d.rect(tubeX, tubeY + 40, tubeW, tubeH - 75);
+      ctx2d.arc(tubeX + tubeW / 2, tubeY + tubeH - 35, tubeW / 2, 0, Math.PI);
+      ctx2d.fill();
+
+      // Precipitate / Coagulated Sludge Bed at Bottom
+      if (coagState.coagulatedPercent > 0) {
+        const bedHeight = (coagState.coagulatedPercent / 100) * 45;
+        ctx2d.fillStyle = (coagState.colloid === 'as2s3') ? '#ca8a04' : '#7f1d1d';
+        ctx2d.beginPath();
+        ctx2d.ellipse(tubeX + tubeW / 2, tubeY + tubeH - 30, tubeW / 2 - 4, bedHeight / 2, 0, 0, Math.PI * 2);
+        ctx2d.fill();
+
+        // Falling floc particles
+        ctx2d.fillStyle = (coagState.colloid === 'as2s3') ? '#eab308' : '#991b1b';
+        for (let i = 0; i < 16; i++) {
+          const fx = tubeX + 10 + (Math.sin(i * 12 + Date.now() * 0.001) * 0.5 + 0.5) * (tubeW - 20);
+          const fy = tubeY + 60 + ((i * 15 + Date.now() * 0.04) % (tubeH - 90));
+          ctx2d.beginPath();
+          ctx2d.arc(fx, fy, 2.5 + (i % 3), 0, Math.PI * 2);
+          ctx2d.fill();
+        }
+      }
+
+      // Glass Tube Border
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx2d.lineWidth = 3;
+      ctx2d.beginPath();
+      ctx2d.moveTo(tubeX, tubeY);
+      ctx2d.lineTo(tubeX, tubeY + tubeH - 35);
+      ctx2d.arc(tubeX + tubeW / 2, tubeY + tubeH - 35, tubeW / 2, Math.PI, 0, true);
+      ctx2d.lineTo(tubeX + tubeW, tubeY);
+      ctx2d.stroke();
+      ctx2d.restore();
+
+      // Dropper Pipette Above
+      const dropX = tubeX + tubeW / 2;
+      const dropY = 40;
+      ctx2d.fillStyle = '#64748b';
+      ctx2d.fillRect(dropX - 6, dropY, 12, 45);
+      ctx2d.fillStyle = '#ef4444'; // rubber bulb
+      ctx2d.beginPath();
+      ctx2d.arc(dropX, dropY - 8, 14, 0, Math.PI * 2);
+      ctx2d.fill();
+
+      // Electrolyte Drops falling
+      ctx2d.fillStyle = '#38bdf8';
+      ctx2d.beginPath();
+      ctx2d.arc(dropX, dropY + 55, 4, 0, Math.PI * 2);
+      ctx2d.fill();
+
+      // Status Banner
+      ctx2d.fillStyle = '#ffffff';
+      ctx2d.font = 'bold 13px sans-serif';
+      ctx2d.textAlign = 'center';
+      if (coagState.coagulatedPercent >= 95) {
+        ctx2d.fillStyle = '#22c55e';
+        ctx2d.fillText('✓ KOAGULASI TOTAL (FLOK MENGENDAP SEMPURNA)', W / 2, tubeY + tubeH + 20);
+      } else if (coagState.coagulatedPercent > 0) {
+        ctx2d.fillStyle = '#facc15';
+        ctx2d.fillText(`Proses Agregasi Partikel... (${coagState.coagulatedPercent.toFixed(0)}%)`, W / 2, tubeY + tubeH + 20);
+      } else {
+        ctx2d.fillStyle = '#94a3b8';
+        ctx2d.fillText('Koloid Stabil Bermuatan (Belum Menggumpal)', W / 2, tubeY + tubeH + 20);
+      }
+      ctx2d.textAlign = 'left';
+    }
+
+    // 4. RENDER BROWNIAN STAGE
+    function renderBrownianStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Microscope Circular Field of View
+      ctx2d.fillStyle = '#030712';
+      ctx2d.fillRect(0, 0, W, H);
+
+      const cx = W / 2;
+      const cy = H / 2;
+      const fovRadius = 185;
+
+      // Darkfield Microscope Background Circle
+      ctx2d.save();
+      ctx2d.beginPath();
+      ctx2d.arc(cx, cy, fovRadius, 0, Math.PI * 2);
+      ctx2d.fillStyle = '#050b14';
+      ctx2d.fill();
+      ctx2d.clip();
+
+      // Kinetic Temperature & Viscosity Multiplier
+      const kelvin = brownState.tempC + 273;
+      let viscFactor = 1.0;
+      if (brownState.viscosity === 'sugar_water') viscFactor = 2.5;
+      if (brownState.viscosity === 'glycerol') viscFactor = 6.0;
+
+      const speedFactor = ((kelvin / 298) * (1 / viscFactor)) * (30 / brownState.radiusNm);
+
+      // Water Molecules (Small fast background dots)
+      if (brownState.showWater) {
+        ctx2d.fillStyle = 'rgba(56, 189, 248, 0.4)';
+        brownState.waterMolecules.forEach(w => {
+          w.x += w.vx * speedFactor * 1.5;
+          w.y += w.vy * speedFactor * 1.5;
+
+          // Boundary bounce in FOV circle
+          const dist = Math.hypot(w.x - cx, w.y - cy);
+          if (dist > fovRadius - 10) {
+            w.vx = -w.vx;
+            w.vy = -w.vy;
+          }
+
+          ctx2d.beginPath();
+          ctx2d.arc(w.x, w.y, 1.5, 0, Math.PI * 2);
+          ctx2d.fill();
+        });
+      }
+
+      // Hero Particle Trace History
+      if (brownState.showTrace && brownState.traceHistory.length > 1) {
+        ctx2d.strokeStyle = 'rgba(250, 204, 21, 0.7)';
+        ctx2d.lineWidth = 2;
+        ctx2d.beginPath();
+        ctx2d.moveTo(brownState.traceHistory[0].x, brownState.traceHistory[0].y);
+        for (let i = 1; i < brownState.traceHistory.length; i++) {
+          ctx2d.lineTo(brownState.traceHistory[i].x, brownState.traceHistory[i].y);
+        }
+        ctx2d.stroke();
+      }
+
+      // Colloidal Particles
+      brownState.particles.forEach((p, idx) => {
+        // Random thermal impulses (bombardment)
+        p.vx += (Math.random() - 0.5) * 1.8 * speedFactor;
+        p.vy += (Math.random() - 0.5) * 1.8 * speedFactor;
+
+        // Viscous damping
+        p.vx *= 0.92;
+        p.vy *= 0.92;
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Keep inside FOV
+        const dist = Math.hypot(p.x - cx, p.y - cy);
+        if (dist > fovRadius - 20) {
+          const angle = Math.atan2(p.y - cy, p.x - cx);
+          p.x = cx + Math.cos(angle) * (fovRadius - 22);
+          p.y = cy + Math.sin(angle) * (fovRadius - 22);
+          p.vx = -p.vx * 0.8;
+          p.vy = -p.vy * 0.8;
+        }
+
+        // Record hero trace
+        if (p.isHero && brownState.showTrace) {
+          if (Math.random() < 0.3) {
+            brownState.traceHistory.push({ x: p.x, y: p.y });
+            if (brownState.traceHistory.length > 90) brownState.traceHistory.shift();
+          }
+        }
+
+        // Draw Particle Sphere with 3D highlight
+        const rad = Math.max(4, brownState.radiusNm / 4);
+        const grad = ctx2d.createRadialGradient(p.x - rad * 0.3, p.y - rad * 0.3, rad * 0.1, p.x, p.y, rad);
+        if (p.isHero) {
+          grad.addColorStop(0, '#fef08a');
+          grad.addColorStop(1, '#eab308');
+        } else {
+          grad.addColorStop(0, '#93c5fd');
+          grad.addColorStop(1, '#2563eb');
+        }
+
+        ctx2d.fillStyle = grad;
+        ctx2d.beginPath();
+        ctx2d.arc(p.x, p.y, rad, 0, Math.PI * 2);
+        ctx2d.fill();
+      });
+
+      ctx2d.restore();
+
+      // Outer Microscope Metal Bezel
+      ctx2d.strokeStyle = '#334155';
+      ctx2d.lineWidth = 14;
+      ctx2d.beginPath();
+      ctx2d.arc(cx, cy, fovRadius + 7, 0, Math.PI * 2);
+      ctx2d.stroke();
+
+      ctx2d.strokeStyle = '#64748b';
+      ctx2d.lineWidth = 2;
+      ctx2d.strokeRect(10, 10, W - 20, H - 20);
+
+      // On-screen scale bar
+      ctx2d.fillStyle = '#ffffff';
+      ctx2d.font = '10px monospace';
+      ctx2d.fillRect(cx - 50, cy + fovRadius - 25, 100, 3);
+      ctx2d.textAlign = 'center';
+      ctx2d.fillText('Skala Ultramikroskop: 100 nm', cx, cy + fovRadius - 10);
+      ctx2d.textAlign = 'left';
+    }
+  
+    function handlePortalBack(e, target) {
+      if (window.location.hostname.includes('script.google.com') || window.location.href.includes('/exec')) {
+        e.preventDefault();
+        const pageName = target.replace(/\.html$/i, '');
+        const currentBase = window.location.href.split('?')[0];
+        window.location.href = `${currentBase}?page=${encodeURIComponent(pageName === 'index' ? 'Index' : pageName)}`;
+      }
+    }
+
+  </script>
+</body>
+</html>

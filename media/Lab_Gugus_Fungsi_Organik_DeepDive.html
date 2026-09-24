@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorium Virtual Identifikasi Gugus Fungsi Organik — Standar PhET / Labster</title>
+  <style>
+    :root {
+      --bg-dark: #070a14;
+      --card-bg: rgba(17, 24, 39, 0.88);
+      --card-border: #2e384d;
+      --accent-cyan: #00f2fe;
+      --accent-blue: #38bdf8;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      --text-main: #f3f4f6;
+      --text-muted: #94a3b8;
+      --lcd-bg: #03131a;
+      --lcd-text: #22d3ee;
+      --silver-glow: #e2e8f0;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 12% 18%, rgba(16, 185, 129, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 88% 82%, rgba(0, 242, 254, 0.07) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: rgba(11, 15, 25, 0.95);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge-lab {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--accent-emerald);
+      color: var(--accent-emerald);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mode-nav {
+      display: flex;
+      gap: 8px;
+      background: rgba(30, 41, 59, 0.8);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .mode-btn.active {
+      color: #090d16;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-audio {
+      background: rgba(22, 27, 34, 0.9);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .btn-audio.active {
+      border-color: var(--accent-emerald);
+      color: var(--accent-emerald);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 16px;
+      padding: 16px 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    @media (max-width: 1100px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Stage Viewport */
+    .stage-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stage-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      min-height: 480px;
+      overflow: hidden;
+    }
+
+    .stage-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      z-index: 10;
+    }
+
+    .stage-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent-emerald);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .viewport-canvas {
+      width: 100%;
+      height: 430px;
+      border-radius: 8px;
+      background: #050811;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Bottom LCD Instrument Bar */
+    .lcd-panel {
+      background: var(--lcd-bg);
+      border: 1px solid #065f46;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: inset 0 0 16px rgba(16, 185, 129, 0.06);
+    }
+
+    .lcd-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lcd-lbl {
+      font-size: 0.72rem;
+      color: #6ee7b7;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .lcd-val {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #34d399;
+      text-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    }
+
+    .lcd-val.alt {
+      color: #38bdf8;
+      text-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+    }
+
+    .lcd-val.warn {
+      color: #f59e0b;
+      text-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    }
+
+    /* Right Sidebar Controls */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .control-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-heading {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+    }
+
+    .card-heading span {
+      color: var(--accent-emerald);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-label .val {
+      color: var(--accent-cyan);
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    select, input[type="range"] {
+      width: 100%;
+    }
+
+    select {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    select:focus {
+      border-color: var(--accent-emerald);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-emerald), #059669);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: #334155;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--accent-rose);
+      color: var(--accent-rose);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    /* Molecule Structure Box */
+    .struct-box {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+
+    .struct-formula {
+      font-family: monospace;
+      font-size: 1.05rem;
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    .struct-desc {
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .struct-desc strong {
+      color: var(--accent-emerald);
+    }
+
+    /* Theoretical Insight */
+    .info-card {
+      background: rgba(17, 24, 39, 0.5);
+      border: 1px dashed #334155;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .info-card strong {
+      color: var(--accent-emerald);
+    }
+
+    /* Observation Table */
+    .table-container {
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      background: #090d16;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    th, td {
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--text-muted);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td {
+      color: var(--text-main);
+      font-family: monospace;
+    }
+
+    footer {
+      background: #070a14;
+      border-top: 1px solid var(--card-border);
+      padding: 8px 24px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    /* === PORTAL BACK NAVIGATION BUTTONS === */
+    .nav-back-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .btn-back-hub, .btn-back-portal {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+      line-height: 1;
+      height: 32px;
+      box-sizing: border-box;
+    }
+    .btn-back-hub {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .btn-back-hub:hover {
+      background: rgba(16, 185, 129, 0.3);
+      border-color: #34d399;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    }
+    .btn-back-portal {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+    .btn-back-portal:hover {
+      background: rgba(99, 102, 241, 0.3);
+      border-color: #818cf8;
+      color: #ffffff;
+      transform: translateX(-2px);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+    }
+    @media (max-width: 640px) {
+      .text-hide-mobile { display: none; }
+      .btn-back-hub, .btn-back-portal { padding: 6px 8px; font-size: 10px; }
+      .nav-back-group { margin-right: 6px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-title">
+      <!-- Navigation Back Button to PortalKimia Media & Lab Virtual -->
+      <div class="nav-back-group">
+        <a href="LaboratoriumVirtual.html" class="btn-back-hub" title="Kembali ke Katalog Laboratorium Virtual" onclick="handlePortalBack(event, 'LaboratoriumVirtual.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Katalog Lab</span>
+        </a>
+        <a href="index.html" class="btn-back-portal" title="Kembali ke Beranda PortalKimia Media" onclick="handlePortalBack(event, 'index.html')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="text-hide-mobile">Portal Media</span>
+        </a>
+      </div>
+
+      <h1>Laboratorium Virtual Identifikasi Gugus Fungsi Organik</h1>
+      <span class="badge-lab">🧪 PhET / Labster Standard</span>
+    </div>
+
+    <!-- Mode Navigation Tabs -->
+    <nav class="mode-nav">
+      <button class="mode-btn active" id="btnModeTollens" onclick="setLabMode('tollens')">
+        🪞 Uji Cermin Perak Tollens
+      </button>
+      <button class="mode-btn" id="btnModeFehling" onclick="setLabMode('fehling')">
+        🧱 Uji Fehling / Cu₂O
+      </button>
+      <button class="mode-btn" id="btnModeIodoform" onclick="setLabMode('iodoform')">
+        🟡 Uji Iodoform (Metil Keton)
+      </button>
+      <button class="mode-btn" id="btnModeEster" onclick="setLabMode('ester')">
+        🍌 Esterifikasi & Uji Aroma
+      </button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="btn-audio active" id="btnAudioToggle" title="Toggle Sound FX" onclick="toggleAudio()">
+        🔊
+      </button>
+      <button class="btn-action btn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="exportDataCSV()">
+        📥 Ekspor CSV
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN LAB AREA -->
+  <main>
+    <!-- Visual Stage Viewport (Left) -->
+    <section class="stage-container">
+      <div class="stage-card">
+        <!-- Stage Top Bar -->
+        <div class="stage-header-bar">
+          <div class="stage-title" id="stageTitle">
+            <span>🪞</span> REAKSI OKSIDASI ALDEHID DENGAN PEREAKSI TOLLENS [Ag(NH₃)₂]⁺
+          </div>
+          <div id="stageSubBadge" style="font-size:0.75rem; color:#94a3b8; font-family:monospace;">
+            PENANGAS AIR: 65.0 °C (WATER BATH)
+          </div>
+        </div>
+
+        <!-- 60 FPS HTML5 Canvas Viewport -->
+        <canvas id="labCanvas" class="viewport-canvas" width="880" height="430"></canvas>
+      </div>
+
+      <!-- Real-time LCD Multi-meter Monitor -->
+      <div class="lcd-panel" id="bottomLcdBar">
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd1">Senyawa Organik Sampel:</span>
+          <span class="lcd-val" id="valLcd1">Asetaldehida (CH₃CHO)</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd2">Suhu Penangas Air:</span>
+          <span class="lcd-val warn" id="valLcd2">65.0 °C</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd3">Hasil Observasi Visual:</span>
+          <span class="lcd-val alt" id="valLcd3">Cermin Perak Mengilap (Ag)</span>
+        </div>
+        <div class="lcd-col">
+          <span class="lcd-lbl" id="lblLcd4">Kesimpulan Gugus:</span>
+          <span class="lcd-val" id="valLcd4" style="color:#10b981;">POSITIF ALDEHID (-CHO)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sidebar Controls (Right) -->
+    <aside class="sidebar">
+
+      <!-- Dynamic Mode Controls -->
+      <div class="control-card">
+        <div class="card-heading">
+          <span>⚙️</span> Parameter Eksperimen
+        </div>
+
+        <!-- MODE 1: TOLLENS CONTROLS -->
+        <div id="controlsTollens" class="mode-control-block">
+          <div class="form-group">
+            <label class="form-label">Pilih Senyawa Organik Sampel:</label>
+            <select id="selTollensSample" onchange="updateTollensSample()">
+              <optgroup label="Aldehid (Alkanal)">
+                <option value="acetaldehyde">Asetaldehida / Etanal (CH₃CHO)</option>
+                <option value="formaldehyde">Formaldehida / Metanal (HCHO)</option>
+                <option value="benzaldehyde">Benzaldehida (C₆H₅CHO)</option>
+                <option value="glucose">Glukosa (Aldoheksosa / Gula Pereduksi)</option>
+              </optgroup>
+              <optgroup label="Keton (Alkanon)">
+                <option value="acetone">Aseton / Propanon (CH₃COCH₃)</option>
+                <option value="cyclohexanone">Sikloheksanon</option>
+              </optgroup>
+              <optgroup label="Alkohol & Lainnya">
+                <option value="ethanol">Etanol (CH₃CH₂OH - Alkohol Primer)</option>
+                <option value="sucrose">Sukrosa (Gula Non-Pereduksi)</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="struct-box" id="boxStructTollens">
+            <!-- Molecule structure info populated dynamically -->
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Suhu Penangas Air (Water Bath):</span>
+              <span class="val" id="valTollensTemp">65 °C</span>
+            </label>
+            <input type="range" id="rngTollensTemp" min="25" max="85" value="65" oninput="updateTollensTemp(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" id="btnTollensReact" onclick="startTollensReaction()">
+              💧 Tambah Tollens & Panaskan
+            </button>
+            <button class="btn-action btn-secondary" onclick="logObservation()">
+              📝 Catat Data
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 2: FEHLING CONTROLS -->
+        <div id="controlsFehling" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Pilih Senyawa Organik Sampel:</label>
+            <select id="selFehlingSample" onchange="updateFehlingSample()">
+              <option value="acetaldehyde">Asetaldehida (CH₃CHO - Aldehid Alifatik)</option>
+              <option value="glucose">Larutan Glukosa (Aldosa - Gula Pereduksi)</option>
+              <option value="fructose">Larutan Fruktosa (Ketosa Mengalami Enolisasi)</option>
+              <option value="acetone">Aseton (CH₃COCH₃ - Keton)</option>
+              <option value="benzaldehyde">Benzaldehida (Aldehid Aromatik - Lambat)</option>
+              <option value="sucrose">Larutan Sukrosa (Disakarida Non-Pereduksi)</option>
+            </select>
+          </div>
+
+          <div class="struct-box" id="boxStructFehling">
+            <!-- Populated via JS -->
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">
+              <span>Suhu Pemanasan:</span>
+              <span class="val" id="valFehlingTemp">75 °C</span>
+            </label>
+            <input type="range" id="rngFehlingTemp" min="30" max="95" value="75" oninput="updateFehlingTemp(this.value)">
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" id="btnFehlingReact" onclick="startFehlingReaction()">
+              💧 Teteskan Fehling A+B
+            </button>
+            <button class="btn-action btn-secondary" onclick="logObservation()">
+              📝 Catat Data
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 3: IODOFORM CONTROLS -->
+        <div id="controlsIodoform" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Pilih Senyawa Organik Sampel:</label>
+            <select id="selIodoformSample" onchange="updateIodoformSample()">
+              <optgroup label="Metil Keton / Metil Karbonil (Positif)">
+                <option value="acetone">Aseton / Propanon (CH₃-CO-CH₃)</option>
+                <option value="acetaldehyde">Asetaldehida (CH₃-CHO)</option>
+                <option value="2-pentanone">2-Pentanon (CH₃-CO-C₃H₇)</option>
+                <option value="acetophenone">Asetofenon (C₆H₅-CO-CH₃)</option>
+              </optgroup>
+              <optgroup label="Alkohol Mengandung CH₃-CH(OH)- (Positif)">
+                <option value="ethanol">Etanol (CH₃-CH₂-OH)</option>
+                <option value="2-propanol">2-Propanol / Isopropil Alkohol</option>
+              </optgroup>
+              <optgroup label="Senyawa Negatif (Tanpa CH₃-C=O)">
+                <option value="methanol">Metanol (CH₃-OH)</option>
+                <option value="formaldehyde">Formaldehida (H-CHO)</option>
+                <option value="3-pentanone">3-Pentanon (C₂H₅-CO-C₂H₅)</option>
+                <option value="1-propanol">1-Propanol (CH₃-CH₂-CH₂-OH)</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="struct-box" id="boxStructIodoform">
+            <!-- Populated via JS -->
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" id="btnIodoformReact" onclick="startIodoformReaction()">
+              🧪 Tambah I₂ + NaOH
+            </button>
+            <button class="btn-action btn-secondary" onclick="logObservation()">
+              📝 Catat Data
+            </button>
+          </div>
+        </div>
+
+        <!-- MODE 4: ESTERIFICATION CONTROLS -->
+        <div id="controlsEster" class="mode-control-block" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Komponen Asam Karboksilat (R-COOH):</label>
+            <select id="selEsterAcid" onchange="updateEsterReaction()">
+              <option value="acetic">Asam Asetat / Cuka (CH₃COOH)</option>
+              <option value="salicylic">Asam Salisilat (C₇H₆O₃)</option>
+              <option value="butyric">Asam Butirat (C₃H₇COOH)</option>
+              <option value="benzoic">Asam Benzoat (C₆H₅COOH)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:8px;">
+            <label class="form-label">Komponen Alkohol (R'-OH):</label>
+            <select id="selEsterAlcohol" onchange="updateEsterReaction()">
+              <option value="ethanol">Etanol (C₂H₅OH)</option>
+              <option value="methanol">Metanol (CH₃OH)</option>
+              <option value="isopentanol">Isoamil Alkohol / Isopentanol (C₅H₁₁OH)</option>
+              <option value="octanol">1-Oktanol (C₈H₁₇OH)</option>
+            </select>
+          </div>
+
+          <div class="struct-box" id="boxStructEster">
+            <!-- Populated via JS -->
+          </div>
+
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn-action btn-primary" id="btnEsterReact" onclick="startEsterReaction()">
+              🔥 Panaskan (+ H₂SO₄ Pekat)
+            </button>
+            <button class="btn-action btn-secondary" onclick="logObservation()">
+              📝 Catat Data
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Theory Explanation Card -->
+      <div class="info-card" id="panelTheory">
+        <strong>Uji Cermin Perak Tollens:</strong> Membedakan Aldehid dari Keton. Ion diamina perak(I) $[Ag(NH_3)_2]^+$ direduksi oleh aldehid menjadi endapan perak mengilap ($Ag$) yang menempel pada dinding tabung membentuk cermin perak, sementara aldehid teroksidasi menjadi asam karboksilat.
+      </div>
+
+      <!-- Observation History Table -->
+      <div class="control-card">
+        <div class="card-heading">
+          <span>📋</span> Riwayat Pengamatan Organoleptik & Reaksi
+        </div>
+        <div class="table-container">
+          <table id="tblObservations">
+            <thead>
+              <tr>
+                <th>Uji</th>
+                <th>Sampel / Reagen</th>
+                <th>Kondisi Reaksi</th>
+                <th>Hasil & Kesimpulan</th>
+              </tr>
+            </thead>
+            <tbody id="tblBody">
+              <!-- Logs populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>Laboratorium Sains Kimia Organik — Simulasi Identifikasi Gugus Fungsi 60 FPS</div>
+    <div>Sistem Bebas Kuis & Bebas LKS — Mode Eksplorasi Eksperimen Murni</div>
+  </footer>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    /* ==========================================================================
+       VIRTUAL LAB IDENTIFIKASI GUGUS FUNGSI ORGANIK - ENGINE LENGKAP
+       ========================================================================== */
+
+    // Audio Engine via Web Audio API
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('btnAudioToggle');
+      if (audioEnabled) {
+        btn.classList.add('active');
+        btn.textContent = '🔊';
+        playSound('drop');
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '🔇';
+      }
+    }
+
+    function playSound(type) {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+
+        if (type === 'drop') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(620, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.05);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        } else if (type === 'boil') {
+          // Bubbling liquid noise
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(140 + Math.random() * 80, now);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'switch') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(260, now);
+          osc.frequency.setValueAtTime(130, now + 0.03);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.07);
+        } else if (type === 'silver') {
+          // Sparkly harmonic mirror sound
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.07);
+            gain.gain.setValueAtTime(0.18, now + i * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.6);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.07);
+            osc.stop(now + i * 0.07 + 0.6);
+          });
+        }
+      } catch (e) {
+        console.warn("Audio error", e);
+      }
+    }
+
+    // STATE VARIABLES
+    let activeMode = 'tollens'; // 'tollens' | 'fehling' | 'iodoform' | 'ester'
+    let canvas, ctx2d;
+
+    // Mode 1: Tollens State
+    const tollensState = {
+      sample: 'acetaldehyde',
+      tempC: 65,
+      reactProgress: 0, // 0 to 1
+      isReacting: false,
+      isPositive: true
+    };
+
+    // Mode 2: Fehling State
+    const fehlingState = {
+      sample: 'acetaldehyde',
+      tempC: 75,
+      reactProgress: 0,
+      isReacting: false,
+      isPositive: true
+    };
+
+    // Mode 3: Iodoform State
+    const iodoformState = {
+      sample: 'acetone',
+      reactProgress: 0,
+      isReacting: false,
+      isPositive: true
+    };
+
+    // Mode 4: Esterification State
+    const esterState = {
+      acid: 'acetic',
+      alcohol: 'ethanol',
+      reactProgress: 0,
+      isReacting: false,
+      esterName: 'Etil Asetat',
+      esterAroma: 'Permen Karet / Balon Buah'
+    };
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      canvas = document.getElementById('labCanvas');
+      ctx2d = canvas.getContext('2d');
+
+      updateTollensSample();
+      updateFehlingSample();
+      updateIodoformSample();
+      updateEsterReaction();
+      updateMetricDisplays();
+
+      requestAnimationFrame(mainAnimationLoop);
+
+      setTimeout(() => {
+        logObservation();
+      }, 600);
+    });
+
+    // MODE SWITCHER
+    function setLabMode(mode) {
+      activeMode = mode;
+      playSound('switch');
+
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      if (mode === 'tollens') document.getElementById('btnModeTollens').classList.add('active');
+      if (mode === 'fehling') document.getElementById('btnModeFehling').classList.add('active');
+      if (mode === 'iodoform') document.getElementById('btnModeIodoform').classList.add('active');
+      if (mode === 'ester') document.getElementById('btnModeEster').classList.add('active');
+
+      document.querySelectorAll('.mode-control-block').forEach(p => p.style.display = 'none');
+      const stageTitle = document.getElementById('stageTitle');
+      const panelTheory = document.getElementById('panelTheory');
+      const subBadge = document.getElementById('stageSubBadge');
+
+      if (mode === 'tollens') {
+        document.getElementById('controlsTollens').style.display = 'block';
+        stageTitle.innerHTML = '<span>🪞</span> REAKSI OKSIDASI ALDEHID DENGAN PEREAKSI TOLLENS [Ag(NH₃)₂]⁺';
+        subBadge.textContent = `PENANGAS AIR: ${tollensState.tempC}.0 °C (WATER BATH)`;
+        panelTheory.innerHTML = '<strong>Uji Cermin Perak Tollens:</strong> Membedakan Aldehid dari Keton. Ion diamina perak(I) $[Ag(NH_3)_2]^+$ direduksi oleh aldehid menjadi endapan perak mengilap ($Ag$) yang menempel pada dinding tabung membentuk cermin perak, sementara aldehid teroksidasi menjadi asam karboksilat.';
+      } else if (mode === 'fehling') {
+        document.getElementById('controlsFehling').style.display = 'block';
+        stageTitle.innerHTML = '<span>🧱</span> REDUKSI ION TEMBAGA(II) DENGAN PEREAKSI FEHLING A+B';
+        subBadge.textContent = `PENANGAS AIR: ${fehlingState.tempC}.0 °C`;
+        panelTheory.innerHTML = '<strong>Uji Fehling:</strong> Larutan alkalis kompleks tembaga(II) tartrat berwarna biru tua direduksi oleh gugus aldehid menghasilkan endapan merah bata Tembaga(I) Oksida ($Cu_2O$). Keton alifatik dan gula non-pereduksi tidak dapat mereduksi Fehling.';
+      } else if (mode === 'iodoform') {
+        document.getElementById('controlsIodoform').style.display = 'block';
+        stageTitle.innerHTML = '<span>🟡</span> UJI SPESIFIK GUGUS METIL KETON & METIL KARBINOL (IODOFORM)';
+        subBadge.textContent = 'SUHU KAMAR: 25.0 °C (+ I₂ / KI + NaOH)';
+        panelTheory.innerHTML = '<strong>Uji Iodoform (Lieben):</strong> Reaksi halogenasi dan pemutusan ikatan karbon pada gugus $CH_3-C=O$ atau $CH_3-CH(OH)-$ menghasilkan endapan hablur kristal kuning Triiodometana ($CHI_3$) yang memiliki bau khas antiseptik pembersih luka.';
+      } else if (mode === 'ester') {
+        document.getElementById('controlsEster').style.display = 'block';
+        stageTitle.innerHTML = '<span>🍌</span> SINTESIS ESTERIFIKASI FISCHER & PENGUJIAN AROMA BUAH';
+        subBadge.textContent = 'KATALIS: H₂SO₄ PEKAT (PENANGAS 70 °C)';
+        panelTheory.innerHTML = '<strong>Reaksi Esterifikasi:</strong> Reaksi kesetimbangan antara asam karboksilat dengan alkohol berkatalis asam sulfat pekat menghasilkan senyawa ester dengan aroma khas harum buah-buahan atau tumbuhan aromatik.';
+      }
+
+      updateMetricDisplays();
+    }
+
+    // ==========================================
+    // MODE 1: TOLLENS LOGIC
+    // ==========================================
+    function updateTollensSample() {
+      tollensState.sample = document.getElementById('selTollensSample').value;
+      tollensState.reactProgress = 0;
+      tollensState.isReacting = false;
+      playSound('drop');
+
+      const isAldehyde = ['acetaldehyde', 'formaldehyde', 'benzaldehyde', 'glucose'].includes(tollensState.sample);
+      tollensState.isPositive = isAldehyde;
+
+      const box = document.getElementById('boxStructTollens');
+      if (tollensState.sample === 'acetaldehyde') {
+        box.innerHTML = `<span class="struct-formula">CH₃–CHO</span><div class="struct-desc">Gugus: <strong>Aldehid (-CHO)</strong>. Teroksidasi menjadi asam asetat. <em>Positif Cermin Perak</em>.</div>`;
+      } else if (tollensState.sample === 'formaldehyde') {
+        box.innerHTML = `<span class="struct-formula">H–CHO</span><div class="struct-desc">Gugus: <strong>Aldehid (-CHO)</strong>. Oksidator sangat kuat. <em>Positif Cermin Perak Tebal</em>.</div>`;
+      } else if (tollensState.sample === 'glucose') {
+        box.innerHTML = `<span class="struct-formula">C₆H₁₂O₆ (Aldosa)</span><div class="struct-desc">Gugus: <strong>Aldehid Hemiasetal</strong>. Gula pereduksi. <em>Positif Cermin Perak</em>.</div>`;
+      } else if (tollensState.sample === 'acetone') {
+        box.innerHTML = `<span class="struct-formula">CH₃–CO–CH₃</span><div class="struct-desc">Gugus: <strong>Keton (-CO-)</strong>. Tidak memiliki H pada karbonil. <em>Negatif (Larutan Tetap Bening)</em>.</div>`;
+      } else {
+        box.innerHTML = `<span class="struct-formula">${tollensState.sample.toUpperCase()}</span><div class="struct-desc">Tidak memiliki hidrogen karbonil aktif. <em>Negatif Tollens</em>.</div>`;
+      }
+
+      updateMetricDisplays();
+    }
+
+    function updateTollensTemp(val) {
+      tollensState.tempC = parseInt(val);
+      document.getElementById('valTollensTemp').textContent = val + ' °C';
+      document.getElementById('stageSubBadge').textContent = `PENANGAS AIR: ${val}.0 °C (WATER BATH)`;
+      updateMetricDisplays();
+    }
+
+    function startTollensReaction() {
+      tollensState.isReacting = true;
+      tollensState.reactProgress = 0;
+      playSound('drop');
+    }
+
+    // ==========================================
+    // MODE 2: FEHLING LOGIC
+    // ==========================================
+    function updateFehlingSample() {
+      fehlingState.sample = document.getElementById('selFehlingSample').value;
+      fehlingState.reactProgress = 0;
+      fehlingState.isReacting = false;
+      playSound('drop');
+
+      const isPos = ['acetaldehyde', 'glucose', 'fructose'].includes(fehlingState.sample);
+      fehlingState.isPositive = isPos;
+
+      const box = document.getElementById('boxStructFehling');
+      if (fehlingState.sample === 'acetaldehyde') {
+        box.innerHTML = `<span class="struct-formula">CH₃–CHO</span><div class="struct-desc">Gugus: <strong>Aldehid Alifatik</strong>. Mereduksi Cu²⁺ → Cu₂O (Merah Bata).</div>`;
+      } else if (fehlingState.sample === 'glucose') {
+        box.innerHTML = `<span class="struct-formula">C₆H₁₂O₆ (Glukosa)</span><div class="struct-desc">Gula pereduksi aldosa. <em>Positif Endapan Merah Bata Pekat</em>.</div>`;
+      } else if (fehlingState.sample === 'fructose') {
+        box.innerHTML = `<span class="struct-formula">C₆H₁₂O₆ (Fruktosa)</span><div class="struct-desc">Ketosa dalam suasana basa mengalami tautomeri keto-enol menjadi aldosa. <em>Positif Lambat</em>.</div>`;
+      } else if (fehlingState.sample === 'acetone') {
+        box.innerHTML = `<span class="struct-formula">CH₃–CO–CH₃</span><div class="struct-desc">Keton rantai lurus. Tidak dapat mereduksi Cu²⁺. <em>Negatif (Tetap Biru)</em>.</div>`;
+      } else {
+        box.innerHTML = `<span class="struct-formula">${fehlingState.sample.toUpperCase()}</span><div class="struct-desc">Gula non-pereduksi / aromatik. <em>Negatif Fehling</em>.</div>`;
+      }
+
+      updateMetricDisplays();
+    }
+
+    function updateFehlingTemp(val) {
+      fehlingState.tempC = parseInt(val);
+      document.getElementById('valFehlingTemp').textContent = val + ' °C';
+      document.getElementById('stageSubBadge').textContent = `PENANGAS AIR: ${val}.0 °C`;
+      updateMetricDisplays();
+    }
+
+    function startFehlingReaction() {
+      fehlingState.isReacting = true;
+      fehlingState.reactProgress = 0;
+      playSound('drop');
+    }
+
+    // ==========================================
+    // MODE 3: IODOFORM LOGIC
+    // ==========================================
+    function updateIodoformSample() {
+      iodoformState.sample = document.getElementById('selIodoformSample').value;
+      iodoformState.reactProgress = 0;
+      iodoformState.isReacting = false;
+      playSound('drop');
+
+      const isPos = ['acetone', 'acetaldehyde', '2-pentanone', 'acetophenone', 'ethanol', '2-propanol'].includes(iodoformState.sample);
+      iodoformState.isPositive = isPos;
+
+      const box = document.getElementById('boxStructIodoform');
+      if (isPos) {
+        box.innerHTML = `<span class="struct-formula">${iodoformState.sample.toUpperCase()}</span><div class="struct-desc">Mengandung gugus <strong>CH₃–C=O</strong> atau <strong>CH₃–CH(OH)–</strong>. <em>Positif Endapan Kuning CHI₃</em>.</div>`;
+      } else {
+        box.innerHTML = `<span class="struct-formula">${iodoformState.sample.toUpperCase()}</span><div class="struct-desc">Tidak memiliki gugus metil karbonil/karbinol. <em>Negatif (Larutan Kuning Iodin Larut)</em>.</div>`;
+      }
+
+      updateMetricDisplays();
+    }
+
+    function startIodoformReaction() {
+      iodoformState.isReacting = true;
+      iodoformState.reactProgress = 0;
+      playSound('drop');
+    }
+
+    // ==========================================
+    // MODE 4: ESTERIFICATION LOGIC
+    // ==========================================
+    function updateEsterReaction() {
+      esterState.acid = document.getElementById('selEsterAcid').value;
+      esterState.alcohol = document.getElementById('selEsterAlcohol').value;
+      esterState.reactProgress = 0;
+      esterState.isReacting = false;
+      playSound('switch');
+
+      // Determine product name and aroma
+      if (esterState.acid === 'acetic' && esterState.alcohol === 'ethanol') {
+        esterState.esterName = 'Etil Asetat';
+        esterState.esterAroma = 'Balon Permen Karet / Pembersih Kutek';
+      } else if (esterState.acid === 'acetic' && esterState.alcohol === 'isopentanol') {
+        esterState.esterName = 'Isoamil Asetat (Isopentil Asetat)';
+        esterState.esterAroma = 'Pisang Ambon Matang (Banana Flavor)';
+      } else if (esterState.acid === 'salicylic' && esterState.alcohol === 'methanol') {
+        esterState.esterName = 'Metil Salisilat';
+        esterState.esterAroma = 'Minyak Gandapura / Balsem Otot';
+      } else if (esterState.acid === 'butyric' && esterState.alcohol === 'ethanol') {
+        esterState.esterName = 'Etil Butirat';
+        esterState.esterAroma = 'Nanas Manis Segar (Pineapple)';
+      } else if (esterState.acid === 'benzoic' && esterState.alcohol === 'ethanol') {
+        esterState.esterName = 'Etil Benzoat';
+        esterState.esterAroma = 'Bunga Buah Aromatik Manis';
+      } else {
+        esterState.esterName = 'Alkil Ester Campuran';
+        esterState.esterAroma = 'Wangi Buah Ester Alifatik';
+      }
+
+      const box = document.getElementById('boxStructEster');
+      box.innerHTML = `
+        <span class="struct-formula">${esterState.esterName}</span>
+        <div class="struct-desc">Aroma Terbentuk: <strong>${esterState.esterAroma}</strong>.<br>Lapisan minyak terapung di atas air dingin.</div>
+      `;
+
+      updateMetricDisplays();
+    }
+
+    function startEsterReaction() {
+      esterState.isReacting = true;
+      esterState.reactProgress = 0;
+      playSound('drop');
+    }
+
+    // ==========================================
+    // METRICS DISPLAY UPDATE
+    // ==========================================
+    function updateMetricDisplays() {
+      const lbl1 = document.getElementById('lblLcd1');
+      const val1 = document.getElementById('valLcd1');
+      const lbl2 = document.getElementById('lblLcd2');
+      const val2 = document.getElementById('valLcd2');
+      const lbl3 = document.getElementById('lblLcd3');
+      const val3 = document.getElementById('valLcd3');
+      const lbl4 = document.getElementById('lblLcd4');
+      const val4 = document.getElementById('valLcd4');
+
+      if (activeMode === 'tollens') {
+        lbl1.textContent = 'Senyawa Organik Sampel:';
+        lbl2.textContent = 'Suhu Penangas Air:';
+        lbl3.textContent = 'Hasil Observasi Visual:';
+        lbl4.textContent = 'Kesimpulan Gugus:';
+
+        val1.textContent = tollensState.sample.toUpperCase();
+        val2.textContent = tollensState.tempC + '.0 °C';
+
+        if (tollensState.reactProgress >= 0.95 && tollensState.isPositive) {
+          val3.textContent = 'Cermin Perak Mengilap (Ag)';
+          val4.textContent = 'POSITIF ALDEHID (-CHO)';
+          val4.style.color = '#10b981';
+        } else if (tollensState.reactProgress >= 0.95 && !tollensState.isPositive) {
+          val3.textContent = 'Larutan Bening Tanpa Cermin';
+          val4.textContent = 'BUKAN ALDEHID (KETON / NON)';
+          val4.style.color = '#94a3b8';
+        } else {
+          val3.textContent = 'Menunggu Pemanasan...';
+          val4.textContent = 'ANALISIS BERJALAN';
+          val4.style.color = '#f59e0b';
+        }
+
+      } else if (activeMode === 'fehling') {
+        lbl1.textContent = 'Senyawa Organik Sampel:';
+        lbl2.textContent = 'Suhu Pemanasan:';
+        lbl3.textContent = 'Hasil Observasi Visual:';
+        lbl4.textContent = 'Kesimpulan Gugus:';
+
+        val1.textContent = fehlingState.sample.toUpperCase();
+        val2.textContent = fehlingState.tempC + '.0 °C';
+
+        if (fehlingState.reactProgress >= 0.95 && fehlingState.isPositive) {
+          val3.textContent = 'Endapan Merah Bata (Cu₂O)';
+          val4.textContent = 'POSITIF GULA PEREDUKSI / ALDEHID';
+          val4.style.color = '#10b981';
+        } else if (fehlingState.reactProgress >= 0.95 && !fehlingState.isPositive) {
+          val3.textContent = 'Larutan Tetap Biru Tua';
+          val4.textContent = 'NEGATIF REDUKSI';
+          val4.style.color = '#94a3b8';
+        } else {
+          val3.textContent = 'Menunggu Pemanasan...';
+          val4.textContent = 'ANALISIS BERJALAN';
+          val4.style.color = '#f59e0b';
+        }
+
+      } else if (activeMode === 'iodoform') {
+        lbl1.textContent = 'Senyawa Organik Sampel:';
+        lbl2.textContent = 'Pereaksi Penguji:';
+        lbl3.textContent = 'Hasil Endapan Kristal:';
+        lbl4.textContent = 'Aroma & Kesimpulan:';
+
+        val1.textContent = iodoformState.sample.toUpperCase();
+        val2.textContent = 'Larutan I₂ / KI + NaOH 10%';
+
+        if (iodoformState.reactProgress >= 0.95 && iodoformState.isPositive) {
+          val3.textContent = 'Endapan Kuning Pucat (CHI₃)';
+          val4.textContent = 'POSITIF METIL KETON (Bau Antiseptik)';
+          val4.style.color = '#10b981';
+        } else if (iodoformState.reactProgress >= 0.95 && !iodoformState.isPositive) {
+          val3.textContent = 'Tidak Ada Endapan (Bening)';
+          val4.textContent = 'NEGATIF METIL KETON';
+          val4.style.color = '#94a3b8';
+        } else {
+          val3.textContent = 'Menunggu Pencampuran...';
+          val4.textContent = 'ANALISIS BERJALAN';
+          val4.style.color = '#f59e0b';
+        }
+
+      } else if (activeMode === 'ester') {
+        lbl1.textContent = 'Produk Ester Terbentuk:';
+        lbl2.textContent = 'Katalisator & Suhu:';
+        lbl3.textContent = 'Aroma Organoleptik:';
+        lbl4.textContent = 'Fasa Pemisahan:';
+
+        val1.textContent = esterState.esterName;
+        val2.textContent = 'H₂SO₄ Pekat (70 °C)';
+        val3.textContent = esterState.esterAroma;
+        val4.textContent = (esterState.reactProgress >= 0.9) ? 'Minyak Ester Terapung di Air' : 'Pemanasan Reaktor...';
+        val4.style.color = '#38bdf8';
+      }
+    }
+
+    // ==========================================
+    // OBSERVATION LOGGING & CSV
+    // ==========================================
+    function logObservation() {
+      const tbody = document.getElementById('tblBody');
+      const tr = document.createElement('tr');
+
+      let uji = '';
+      let sampel = '';
+      let cond = '';
+      let res = '';
+
+      if (activeMode === 'tollens') {
+        uji = 'Uji Tollens';
+        sampel = document.getElementById('selTollensSample').options[document.getElementById('selTollensSample').selectedIndex].text;
+        cond = `Water Bath: ${tollensState.tempC} °C`;
+        res = document.getElementById('valLcd3').textContent + ' → ' + document.getElementById('valLcd4').textContent;
+      } else if (activeMode === 'fehling') {
+        uji = 'Uji Fehling';
+        sampel = document.getElementById('selFehlingSample').options[document.getElementById('selFehlingSample').selectedIndex].text;
+        cond = `Pemanasan: ${fehlingState.tempC} °C`;
+        res = document.getElementById('valLcd3').textContent + ' → ' + document.getElementById('valLcd4').textContent;
+      } else if (activeMode === 'iodoform') {
+        uji = 'Uji Iodoform';
+        sampel = document.getElementById('selIodoformSample').options[document.getElementById('selIodoformSample').selectedIndex].text;
+        cond = 'I₂ / KI + NaOH Suhu Kamar';
+        res = document.getElementById('valLcd3').textContent + ' → ' + document.getElementById('valLcd4').textContent;
+      } else if (activeMode === 'ester') {
+        uji = 'Esterifikasi';
+        sampel = `${esterState.acid} + ${esterState.alcohol}`;
+        cond = 'Katalis H₂SO₄ pekat (70 °C)';
+        res = `${esterState.esterName} (${esterState.esterAroma})`;
+      }
+
+      tr.innerHTML = `
+        <td><strong>${uji}</strong></td>
+        <td>${sampel}</td>
+        <td>${cond}</td>
+        <td>${res}</td>
+      `;
+
+      tbody.insertBefore(tr, tbody.firstChild);
+      playSound('drop');
+    }
+
+    function exportDataCSV() {
+      let csv = "Uji_Gugus_Fungsi,Sampel_Organik,Kondisi_Eksperimen,Hasil_Observasi_dan_Kesimpulan\n";
+      const rows = document.querySelectorAll("#tblBody tr");
+      if (rows.length === 0) {
+        alert("Belum ada data pengamatan yang dicatat. Klik 'Catat Data' terlebih dahulu!");
+        return;
+      }
+      rows.forEach(r => {
+        const cols = r.querySelectorAll("td");
+        if (cols.length >= 4) {
+          const u = cols[0].innerText.replace(/,/g, '');
+          const s = cols[1].innerText.replace(/,/g, '');
+          const c = cols[2].innerText.replace(/,/g, '');
+          const res = cols[3].innerText.replace(/,/g, '');
+          csv += `"${u}","${s}","${c}","${res}"\n`;
+        }
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Data_Identifikasi_Gugus_Fungsi_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      playSound('silver');
+    }
+
+    // ==========================================
+    // 60 FPS MAIN ANIMATION LOOP
+    // ==========================================
+    function mainAnimationLoop() {
+      ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (activeMode === 'tollens') {
+        renderTollensStage();
+      } else if (activeMode === 'fehling') {
+        renderFehlingStage();
+      } else if (activeMode === 'iodoform') {
+        renderIodoformStage();
+      } else if (activeMode === 'ester') {
+        renderEsterStage();
+      }
+
+      requestAnimationFrame(mainAnimationLoop);
+    }
+
+    // 1. RENDER TOLLENS STAGE
+    function renderTollensStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Dark laboratory bench
+      ctx2d.fillStyle = '#060913';
+      ctx2d.fillRect(0, 0, W, H);
+
+      // Lab stand & bench
+      ctx2d.fillStyle = '#1e293b';
+      ctx2d.fillRect(100, H - 45, W - 200, 24);
+
+      // Update reaction progress
+      if (tollensState.isReacting && tollensState.reactProgress < 1.0) {
+        tollensState.reactProgress += (tollensState.tempC / 65) * 0.005;
+        if (Math.random() < 0.08) playSound('boil');
+
+        if (tollensState.reactProgress >= 1.0) {
+          tollensState.reactProgress = 1.0;
+          tollensState.isReacting = false;
+          if (tollensState.isPositive) playSound('silver');
+          updateMetricDisplays();
+        }
+      }
+
+      // Large Glass Water Bath Beaker (Center)
+      const bathX = W / 2 - 130;
+      const bathY = 120;
+      const bathW = 260;
+      const bathH = 240;
+
+      // Water inside beaker
+      ctx2d.fillStyle = 'rgba(56, 189, 248, 0.15)';
+      ctx2d.fillRect(bathX + 10, bathY + 50, bathW - 20, bathH - 55);
+
+      // Convection bubbles in water bath
+      ctx2d.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      for (let i = 0; i < 18; i++) {
+        const bx = bathX + 25 + (Math.sin(i * 44 + Date.now() * 0.002) * 0.5 + 0.5) * (bathW - 50);
+        const by = bathY + 60 + ((i * 18 + Date.now() * 0.03) % (bathH - 70));
+        ctx2d.beginPath();
+        ctx2d.arc(bx, by, 2 + (i % 3), 0, Math.PI * 2);
+        ctx2d.fill();
+      }
+
+      // Beaker Glass Body
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx2d.lineWidth = 3;
+      ctx2d.strokeRect(bathX, bathY, bathW, bathH);
+
+      // Digital Thermometer Probe inserted in bath
+      ctx2d.fillStyle = '#64748b';
+      ctx2d.fillRect(bathX + 30, bathY - 20, 8, bathH - 20);
+      ctx2d.fillStyle = '#ef4444';
+      ctx2d.beginPath();
+      ctx2d.arc(bathX + 34, bathY + bathH - 30, 8, 0, Math.PI * 2);
+      ctx2d.fill();
+
+      // Test Tube Immersed in Bath
+      const tubeX = W / 2 - 25;
+      const tubeY = 70;
+      const tubeW = 50;
+      const tubeH = 260;
+
+      // Solution inside test tube
+      const prog = tollensState.reactProgress;
+      let solColor = 'rgba(240, 245, 255, 0.2)'; // Clear Tollens initial
+
+      if (tollensState.isPositive) {
+        // Turns progressively greyish -> dark silver
+        solColor = `rgba(${Math.round(240 - prog * 100)}, ${Math.round(245 - prog * 100)}, ${Math.round(255 - prog * 90)}, ${0.2 + prog * 0.6})`;
+      }
+
+      ctx2d.fillStyle = solColor;
+      ctx2d.beginPath();
+      ctx2d.rect(tubeX + 3, tubeY + 60, tubeW - 6, tubeH - 85);
+      ctx2d.arc(tubeX + tubeW / 2, tubeY + tubeH - 25, (tubeW - 6) / 2, 0, Math.PI);
+      ctx2d.fill();
+
+      // SILVER MIRROR COATING on Inner Tube Walls
+      if (tollensState.isPositive && prog > 0.2) {
+        const mirrorAlpha = (prog - 0.2) / 0.8;
+        ctx2d.save();
+        ctx2d.globalAlpha = mirrorAlpha;
+
+        // Shiny metallic gradient
+        const mirrorGrad = ctx2d.createLinearGradient(tubeX, 0, tubeX + tubeW, 0);
+        mirrorGrad.addColorStop(0, '#94a3b8');
+        mirrorGrad.addColorStop(0.3, '#f8fafc');
+        mirrorGrad.addColorStop(0.5, '#cbd5e1');
+        mirrorGrad.addColorStop(0.8, '#f1f5f9');
+        mirrorGrad.addColorStop(1, '#64748b');
+
+        ctx2d.fillStyle = mirrorGrad;
+        ctx2d.beginPath();
+        // Left wall lining
+        ctx2d.rect(tubeX + 3, tubeY + 60, 6, tubeH - 85);
+        // Right wall lining
+        ctx2d.rect(tubeX + tubeW - 9, tubeY + 60, 6, tubeH - 85);
+        // Bottom dome lining
+        ctx2d.arc(tubeX + tubeW / 2, tubeY + tubeH - 25, (tubeW - 6) / 2, 0, Math.PI);
+        ctx2d.fill();
+
+        // Shimmering specular highlights (Reflection)
+        ctx2d.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx2d.fillRect(tubeX + 16, tubeY + 80, 5, tubeH - 120);
+
+        ctx2d.restore();
+      }
+
+      // Glass Test Tube Outline
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx2d.lineWidth = 3;
+      ctx2d.beginPath();
+      ctx2d.moveTo(tubeX, tubeY);
+      ctx2d.lineTo(tubeX, tubeY + tubeH - 25);
+      ctx2d.arc(tubeX + tubeW / 2, tubeY + tubeH - 25, tubeW / 2, Math.PI, 0, true);
+      ctx2d.lineTo(tubeX + tubeW, tubeY);
+      ctx2d.stroke();
+
+      // Test Tube Rim Lip
+      ctx2d.strokeRect(tubeX - 4, tubeY - 5, tubeW + 8, 5);
+
+      // Dropper Pipette Above
+      if (tollensState.isReacting && prog < 0.2) {
+        ctx2d.fillStyle = '#64748b';
+        ctx2d.fillRect(W / 2 - 4, 15, 8, 40);
+        ctx2d.fillStyle = '#38bdf8';
+        ctx2d.beginPath();
+        ctx2d.arc(W / 2, 58, 3.5, 0, Math.PI * 2);
+        ctx2d.fill();
+      }
+
+      // Status text banner
+      ctx2d.fillStyle = '#ffffff';
+      ctx2d.font = 'bold 12px sans-serif';
+      ctx2d.textAlign = 'center';
+      if (tollensState.isPositive && prog >= 0.95) {
+        ctx2d.fillStyle = '#38bdf8';
+        ctx2d.fillText('✨ CERMIN PERAK KILAP LOGAM (Ag) MENEMPEL DI DINDING TABUNG', W / 2, bathY + bathH + 28);
+      } else if (!tollensState.isPositive && prog >= 0.95) {
+        ctx2d.fillStyle = '#94a3b8';
+        ctx2d.fillText('Hasil Negatif: Larutan Tetap Bening (Tidak Terbentuk Cermin)', W / 2, bathY + bathH + 28);
+      } else if (tollensState.isReacting) {
+        ctx2d.fillStyle = '#f59e0b';
+        ctx2d.fillText(`Proses Pemanasan & Reduksi Ag⁺... (${(prog * 100).toFixed(0)}%)`, W / 2, bathY + bathH + 28);
+      } else {
+        ctx2d.fillStyle = '#64748b';
+        ctx2d.fillText('Tekan "Tambah Tollens & Panaskan" untuk memulai', W / 2, bathY + bathH + 28);
+      }
+      ctx2d.textAlign = 'left';
+    }
+
+    // 2. RENDER FEHLING STAGE
+    function renderFehlingStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#060913';
+      ctx2d.fillRect(0, 0, W, H);
+
+      ctx2d.fillStyle = '#1e293b';
+      ctx2d.fillRect(100, H - 45, W - 200, 24);
+
+      if (fehlingState.isReacting && fehlingState.reactProgress < 1.0) {
+        fehlingState.reactProgress += (fehlingState.tempC / 75) * 0.005;
+        if (Math.random() < 0.08) playSound('boil');
+
+        if (fehlingState.reactProgress >= 1.0) {
+          fehlingState.reactProgress = 1.0;
+          fehlingState.isReacting = false;
+          if (fehlingState.isPositive) playSound('silver');
+          updateMetricDisplays();
+        }
+      }
+
+      // Water Bath Beaker
+      const bathX = W / 2 - 130;
+      const bathY = 120;
+      const bathW = 260;
+      const bathH = 240;
+
+      ctx2d.fillStyle = 'rgba(56, 189, 248, 0.15)';
+      ctx2d.fillRect(bathX + 10, bathY + 50, bathW - 20, bathH - 55);
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx2d.lineWidth = 3;
+      ctx2d.strokeRect(bathX, bathY, bathW, bathH);
+
+      // Test Tube
+      const tubeX = W / 2 - 25;
+      const tubeY = 70;
+      const tubeW = 50;
+      const tubeH = 260;
+      const prog = fehlingState.reactProgress;
+
+      // Color transition: Deep Royal Blue (Cu2+) -> Muddy Green -> Brick Red (Cu2O)
+      let r = 20, g = 60, b = 220;
+      if (fehlingState.isPositive) {
+        if (prog < 0.5) {
+          // Blue to Greenish
+          const p = prog / 0.5;
+          r = Math.round(20 + p * 60);
+          g = Math.round(60 + p * 80);
+          b = Math.round(220 - p * 120);
+        } else {
+          // Greenish to Brick Red
+          const p = (prog - 0.5) / 0.5;
+          r = Math.round(80 + p * 120); // 200
+          g = Math.round(140 - p * 100); // 40
+          b = Math.round(100 - p * 80);  // 20
+        }
+      }
+
+      ctx2d.fillStyle = `rgb(${r}, ${g}, ${b})`;
+      ctx2d.beginPath();
+      ctx2d.rect(tubeX + 3, tubeY + 60, tubeW - 6, tubeH - 85);
+      ctx2d.arc(tubeX + tubeW / 2, tubeY + tubeH - 25, (tubeW - 6) / 2, 0, Math.PI);
+      ctx2d.fill();
+
+      // Brick-red precipitate bed at bottom
+      if (fehlingState.isPositive && prog > 0.6) {
+        const bedH = ((prog - 0.6) / 0.4) * 25;
+        ctx2d.fillStyle = '#b91c1c'; // Dense Cu2O solid
+        ctx2d.beginPath();
+        ctx2d.ellipse(tubeX + tubeW / 2, tubeY + tubeH - 22, (tubeW - 8) / 2, bedH / 2, 0, 0, Math.PI * 2);
+        ctx2d.fill();
+      }
+
+      // Tube glass outline
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx2d.lineWidth = 3;
+      ctx2d.beginPath();
+      ctx2d.moveTo(tubeX, tubeY);
+      ctx2d.lineTo(tubeX, tubeY + tubeH - 25);
+      ctx2d.arc(tubeX + tubeW / 2, tubeY + tubeH - 25, tubeW / 2, Math.PI, 0, true);
+      ctx2d.lineTo(tubeX + tubeW, tubeY);
+      ctx2d.stroke();
+
+      // Banner text
+      ctx2d.fillStyle = '#ffffff';
+      ctx2d.font = 'bold 12px sans-serif';
+      ctx2d.textAlign = 'center';
+      if (fehlingState.isPositive && prog >= 0.95) {
+        ctx2d.fillStyle = '#ef4444';
+        ctx2d.fillText('🧱 TERBENTUK ENDAPAN MERAH BATA TEMBAGA(I) OKSIDA (Cu₂O)', W / 2, bathY + bathH + 28);
+      } else if (!fehlingState.isPositive && prog >= 0.95) {
+        ctx2d.fillStyle = '#38bdf8';
+        ctx2d.fillText('Hasil Negatif: Larutan Tetap Berwarna Biru Tua (Tanpa Cu₂O)', W / 2, bathY + bathH + 28);
+      } else if (fehlingState.isReacting) {
+        ctx2d.fillStyle = '#f59e0b';
+        ctx2d.fillText(`Mereduksi Cu²⁺ Kompleks... (${(prog * 100).toFixed(0)}%)`, W / 2, bathY + bathH + 28);
+      } else {
+        ctx2d.fillStyle = '#64748b';
+        ctx2d.fillText('Tekan "Teteskan Fehling A+B" untuk mereaksikan', W / 2, bathY + bathH + 28);
+      }
+      ctx2d.textAlign = 'left';
+    }
+
+    // 3. RENDER IODOFORM STAGE
+    function renderIodoformStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#060913';
+      ctx2d.fillRect(0, 0, W, H);
+
+      ctx2d.fillStyle = '#1e293b';
+      ctx2d.fillRect(100, H - 45, W - 200, 24);
+
+      if (iodoformState.isReacting && iodoformState.reactProgress < 1.0) {
+        iodoformState.reactProgress += 0.007;
+        if (iodoformState.reactProgress >= 1.0) {
+          iodoformState.reactProgress = 1.0;
+          iodoformState.isReacting = false;
+          if (iodoformState.isPositive) playSound('silver');
+          updateMetricDisplays();
+        }
+      }
+
+      // Wooden Test Tube Rack (Centered)
+      const rackX = W / 2 - 100;
+      const rackY = 160;
+      ctx2d.fillStyle = '#334155';
+      ctx2d.fillRect(rackX, rackY, 200, 14);
+
+      // Reaction Tube
+      const tubeX = W / 2 - 25;
+      const tubeY = 90;
+      const tubeW = 50;
+      const tubeH = 240;
+      const prog = iodoformState.reactProgress;
+
+      // Solution color
+      let solCol = 'rgba(234, 179, 8, 0.25)'; // initial iodine yellowish
+      if (!iodoformState.isPositive && prog > 0.5) {
+        solCol = 'rgba(250, 204, 21, 0.1)'; // decolored/clear
+      }
+
+      ctx2d.fillStyle = solCol;
+      ctx2d.beginPath();
+      ctx2d.rect(tubeX + 3, tubeY + 50, tubeW - 6, tubeH - 75);
+      ctx2d.arc(tubeX + tubeW / 2, tubeY + tubeH - 25, (tubeW - 6) / 2, 0, Math.PI);
+      ctx2d.fill();
+
+      // Yellow Iodoform Micro-crystals (CHI3)
+      if (iodoformState.isPositive && prog > 0.3) {
+        ctx2d.fillStyle = '#facc15';
+        for (let i = 0; i < 28; i++) {
+          const cx = tubeX + 8 + (Math.sin(i * 19 + Date.now() * 0.001) * 0.5 + 0.5) * (tubeW - 16);
+          const cy = tubeY + 80 + ((i * 12 + Date.now() * 0.015) % (tubeH - 110));
+          ctx2d.beginPath();
+          ctx2d.arc(cx, cy, 2, 0, Math.PI * 2);
+          ctx2d.fill();
+        }
+
+        // Heavy sludge at bottom
+        const sludgeH = ((prog - 0.3) / 0.7) * 22;
+        ctx2d.fillStyle = '#eab308';
+        ctx2d.beginPath();
+        ctx2d.ellipse(tubeX + tubeW / 2, tubeY + tubeH - 22, (tubeW - 8) / 2, sludgeH / 2, 0, 0, Math.PI * 2);
+        ctx2d.fill();
+      }
+
+      // Tube glass outline
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx2d.lineWidth = 3;
+      ctx2d.beginPath();
+      ctx2d.moveTo(tubeX, tubeY);
+      ctx2d.lineTo(tubeX, tubeY + tubeH - 25);
+      ctx2d.arc(tubeX + tubeW / 2, tubeY + tubeH - 25, tubeW / 2, Math.PI, 0, true);
+      ctx2d.lineTo(tubeX + tubeW, tubeY);
+      ctx2d.stroke();
+
+      // Banner text
+      ctx2d.fillStyle = '#ffffff';
+      ctx2d.font = 'bold 12px sans-serif';
+      ctx2d.textAlign = 'center';
+      if (iodoformState.isPositive && prog >= 0.95) {
+        ctx2d.fillStyle = '#facc15';
+        ctx2d.fillText('🟡 ENDAPAN KRISTAL KUNING IODOFORM (CHI₃) + BAU ANTISEPTIK', W / 2, tubeY + tubeH + 30);
+      } else if (!iodoformState.isPositive && prog >= 0.95) {
+        ctx2d.fillStyle = '#94a3b8';
+        ctx2d.fillText('Hasil Negatif: Tidak Terbentuk Hablur Kuning (Bukan Metil Keton)', W / 2, tubeY + tubeH + 30);
+      } else if (iodoformState.isReacting) {
+        ctx2d.fillStyle = '#f59e0b';
+        ctx2d.fillText('Reaksi Halogenasi I₂ / NaOH Berjalan...', W / 2, tubeY + tubeH + 30);
+      }
+      ctx2d.textAlign = 'left';
+    }
+
+    // 4. RENDER ESTERIFICATION STAGE
+    function renderEsterStage() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      ctx2d.fillStyle = '#060913';
+      ctx2d.fillRect(0, 0, W, H);
+
+      ctx2d.fillStyle = '#1e293b';
+      ctx2d.fillRect(100, H - 45, W - 200, 24);
+
+      if (esterState.isReacting && esterState.reactProgress < 1.0) {
+        esterState.reactProgress += 0.006;
+        if (Math.random() < 0.08) playSound('boil');
+
+        if (esterState.reactProgress >= 1.0) {
+          esterState.reactProgress = 1.0;
+          esterState.isReacting = false;
+          playSound('silver');
+          updateMetricDisplays();
+        }
+      }
+
+      // Cold Water Beaker for Odor Examination
+      const beakerX = W / 2 - 110;
+      const beakerY = 130;
+      const beakerW = 220;
+      const beakerH = 220;
+      const prog = esterState.reactProgress;
+
+      // Clear water layer
+      ctx2d.fillStyle = 'rgba(56, 189, 248, 0.2)';
+      ctx2d.fillRect(beakerX + 8, beakerY + 40, beakerW - 16, beakerH - 45);
+
+      // Floating Ester Oil Film Layer on Top of Water
+      if (prog > 0.4) {
+        const oilH = ((prog - 0.4) / 0.6) * 16;
+        ctx2d.fillStyle = 'rgba(250, 204, 21, 0.65)'; // Fragrant organic ester layer
+        ctx2d.fillRect(beakerX + 8, beakerY + 40, beakerW - 16, oilH);
+
+        // Aromatic scent wave particles emanating upwards
+        ctx2d.fillStyle = 'rgba(244, 63, 94, 0.5)';
+        for (let i = 0; i < 8; i++) {
+          const sx = beakerX + 30 + (i * 22);
+          const sy = beakerY + 25 - ((Date.now() * 0.03 + i * 20) % 60);
+          ctx2d.beginPath();
+          ctx2d.arc(sx, sy, 3, 0, Math.PI * 2);
+          ctx2d.fill();
+        }
+      }
+
+      // Beaker Glass Body
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx2d.lineWidth = 3;
+      ctx2d.strokeRect(beakerX, beakerY, beakerW, beakerH);
+
+      // Label on Beaker
+      ctx2d.fillStyle = '#ffffff';
+      ctx2d.font = 'bold 12px sans-serif';
+      ctx2d.textAlign = 'center';
+      if (prog >= 0.95) {
+        ctx2d.fillStyle = '#34d399';
+        ctx2d.fillText(`🍌 LAPISAN ESTER: ${esterState.esterName.toUpperCase()}`, W / 2, beakerY + beakerH + 28);
+        ctx2d.fillStyle = '#f43f5e';
+        ctx2d.fillText(`Aroma Khas: "${esterState.esterAroma}"`, W / 2, beakerY + beakerH + 46);
+      } else if (esterState.isReacting) {
+        ctx2d.fillStyle = '#f59e0b';
+        ctx2d.fillText('Pemanasan Kondensasi Fischer Berlangsung...', W / 2, beakerY + beakerH + 28);
+      } else {
+        ctx2d.fillStyle = '#64748b';
+        ctx2d.fillText('Klik "Panaskan (+ H₂SO₄ Pekat)" untuk mensintesis', W / 2, beakerY + beakerH + 28);
+      }
+      ctx2d.textAlign = 'left';
+    }
+  
+    function handlePortalBack(e, target) {
+      if (window.location.hostname.includes('script.google.com') || window.location.href.includes('/exec')) {
+        e.preventDefault();
+        const pageName = target.replace(/\.html$/i, '');
+        const currentBase = window.location.href.split('?')[0];
+        window.location.href = `${currentBase}?page=${encodeURIComponent(pageName === 'index' ? 'Index' : pageName)}`;
+      }
+    }
+
+  </script>
+</body>
+</html>

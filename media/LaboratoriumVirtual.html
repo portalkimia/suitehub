@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html class="dark" lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Laboratorium Virtual Kimia SMA &bull; PortalKimia</title>
+
+  <!-- PWA Manifest & Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#090d16">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: auto; }
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+    .light ::-webkit-scrollbar-thumb { background: #d4d4d8; }
+    .light ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+    
+    /* Material Icon utility */
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .glass-panel {
+      background: rgba(18, 18, 21, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .light .glass-panel {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .lab-card {
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .lab-card:hover {
+      transform: translateY(-4px);
+    }
+  </style>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Tailwind Configuration matching Google Stitch Obsidian & Light Mode -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#a78bfa",
+            "primary-container": "#7c3aed",
+            "primary-fixed": "#ede9fe",
+            "primary-fixed-dim": "#c4b5fd",
+            "on-primary": "#0a0012",
+            "on-primary-container": "#ede9fe",
+            
+            "tertiary": "#34d399",
+            "tertiary-container": "#065f46",
+            "tertiary-fixed": "#bbf7d0",
+            "tertiary-fixed-dim": "#6ee7b7",
+            "on-tertiary": "#001a12",
+            "on-tertiary-container": "#bbf7d0",
+
+            "secondary": "#71717a",
+            "secondary-container": "#27272a",
+            "secondary-fixed": "#a1a1aa",
+            "secondary-fixed-dim": "#71717a",
+            "on-secondary": "#09090b",
+            "on-secondary-container": "#a1a1aa",
+
+            "background": "#09090b",
+            "surface": "#0c0c0f",
+            "surface-dim": "#0c0c0f",
+            "surface-bright": "#18181b",
+            "surface-container-lowest": "#09090b",
+            "surface-container-low": "#0f0f12",
+            "surface-container": "#121215",
+            "surface-container-high": "#18181b",
+            "surface-container-highest": "#1e1e22",
+            
+            "outline": "#52525b",
+            "outline-variant": "#27272a",
+            
+            "on-background": "#fafafa",
+            "on-surface": "#fafafa",
+            "on-surface-variant": "#a1a1aa",
+            
+            "error": "#ef4444",
+            "error-container": "#3b1111",
+            "on-error": "#1a0000",
+            "on-error-container": "#fca5a5"
+          },
+          fontFamily: {
+            sans: ["Geist", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Prevent FOUC Theme Script -->
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('chemportal_theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+
+<body class="bg-slate-50 dark:bg-background font-sans text-slate-900 dark:text-on-surface antialiased min-h-screen flex flex-col transition-colors duration-200 selection:bg-emerald-500/30 selection:text-emerald-400">
+
+  <!-- ==================== STITCH FIXED NAVBAR ==================== -->
+  <header class="fixed top-0 w-full z-40 bg-white/85 dark:bg-background/85 backdrop-blur-md border-b border-slate-200 dark:border-outline-variant transition-colors">
+    <div class="h-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between">
+      
+      <!-- Brand & Logo PortalKimia -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2.5 group focus:outline-none" title="Kembali ke Beranda Media Pembelajaran">
+          <div class="relative w-9 h-9 rounded-xl bg-slate-900 p-1 flex items-center justify-center shrink-0 border border-slate-700/60 shadow-sm group-hover:border-emerald-500/50 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-full h-full object-contain" fill="none">
+              <rect width="100" height="100" rx="22" fill="#18181b"/>
+              <path d="M50 18 L50 36 M38 36 L62 36" stroke="#34d399" stroke-width="4" stroke-linecap="round"/>
+              <path d="M42 36 L25 72 C22 78 26 84 33 84 L67 84 C74 84 78 78 75 72 L58 36 Z" stroke="#34d399" stroke-width="4" stroke-linejoin="round" fill="none"/>
+              <path d="M30 68 Q50 62 70 68 L67 82 L33 82 Z" fill="#059669" fill-opacity="0.35"/>
+              <circle cx="45" cy="74" r="3" fill="#6ee7b7"/>
+              <circle cx="55" cy="66" r="2.5" fill="#a7f3d0"/>
+              <circle cx="50" cy="54" r="2" fill="#34d399"/>
+              <circle cx="68" cy="30" r="4" fill="#34d399" fill-opacity="0.8"/>
+              <circle cx="32" cy="24" r="3" fill="#6ee7b7" fill-opacity="0.6"/>
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5">
+              <span class="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-on-surface">
+                Portal<span class="text-emerald-600 dark:text-tertiary">Kimia</span>
+              </span>
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-tertiary rounded-md border border-emerald-500/30">
+                LAB VIRTUAL
+              </span>
+            </div>
+            <span class="text-[10px] text-slate-500 dark:text-on-surface-variant font-medium -mt-1 hidden xs:block">
+              Pusat Praktikum Kimia Interaktif SMA
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Twin Segmented Navigation Switch -->
+      <nav class="hidden md:flex items-center gap-1 p-1 bg-slate-100 dark:bg-surface-container rounded-xl border border-slate-200 dark:border-outline-variant text-xs font-medium">
+        <a href="index.html" class="px-3.5 py-1.5 text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:bg-slate-200/60 dark:hover:bg-surface-container-high transition-all rounded-lg flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">menu_book</span>
+          <span>Bahan Ajar &amp; Simulasi</span>
+        </a>
+        <a href="LaboratoriumVirtual.html" class="px-3.5 py-1.5 text-emerald-700 dark:text-tertiary bg-white dark:bg-surface-container-high font-bold rounded-lg shadow-sm flex items-center gap-1.5 border border-emerald-500/30">
+          <span class="material-symbols-outlined text-[16px]">biotech</span>
+          <span>Laboratorium Virtual (18 LAB)</span>
+        </a>
+      </nav>
+
+      <!-- Right Controls: Portal Utama, Utilitas, Theme Toggle -->
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        
+        <!-- Tombol Kembali ke Portal Utama -->
+        <a href="../" 
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-primary/10 hover:bg-purple-100 dark:hover:bg-primary/20 text-purple-700 dark:text-primary border border-purple-200 dark:border-primary/30 text-xs font-semibold tracking-wide transition-all shadow-sm" 
+           title="Kembali ke Beranda PortalKimia Suite">
+          <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+          <span class="hidden sm:inline">Portal Utama</span>
+        </a>
+
+        <!-- Utilitas Kimia Modal Button -->
+        <button 
+          onclick="openChemToolsModal()" 
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-tertiary/10 hover:bg-emerald-100 dark:hover:bg-tertiary/20 text-emerald-700 dark:text-tertiary border border-emerald-200 dark:border-tertiary/30 text-xs font-semibold tracking-wide transition-all shadow-sm cursor-pointer"
+          title="Kalkulator Mr &amp; Penyetara Reaksi">
+          <span class="material-symbols-outlined text-[16px]">biotech</span>
+          <span class="hidden sm:inline">Utilitas Kimia</span>
+        </button>
+
+        <!-- Theme Toggle Button -->
+        <button 
+          id="theme-toggle-btn"
+          onclick="toggleAppTheme()" 
+          class="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 dark:bg-surface-container border border-slate-200 dark:border-outline-variant text-slate-600 dark:text-on-surface-variant hover:text-slate-900 dark:hover:text-on-surface hover:border-slate-300 dark:hover:border-outline transition-all cursor-pointer shadow-sm" 
+          title="Alihkan Mode Terang / Gelap">
+          <span class="material-symbols-outlined text-[19px] dark:hidden text-amber-500">light_mode</span>
+          <span class="material-symbols-outlined text-[19px] hidden dark:inline text-tertiary">dark_mode</span>
+        </button>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="w-full pt-16 bg-slate-50 dark:bg-background flex-1 transition-colors pb-16">
+    
+    <!-- Top Ambient Glow -->
+    <div class="relative w-full overflow-hidden">
+      <div class="absolute -top-40 left-1/3 w-[650px] h-[350px] bg-emerald-500/10 dark:bg-tertiary/10 blur-[130px] pointer-events-none rounded-full"></div>
+      <div class="absolute top-20 right-10 w-72 h-72 bg-violet-500/10 dark:bg-primary/5 blur-[100px] pointer-events-none rounded-full"></div>
+
+      <!-- Hero Section -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-8 sm:pt-10 pb-6 sm:pb-8">
+        
+        <!-- Breadcrumbs & Badges -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <div class="flex items-center gap-2 flex-wrap text-xs">
+            <a href="index.html" class="text-slate-500 dark:text-on-surface-variant hover:text-emerald-500 transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">home</span>
+              <span>PortalKimia</span>
+            </a>
+            <span class="text-slate-400">/</span>
+            <span class="font-semibold text-emerald-600 dark:text-tertiary">Laboratorium Virtual Terpadu</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-tertiary/10 text-emerald-700 dark:text-tertiary text-xs font-semibold tracking-wide border border-emerald-500/30 shadow-sm">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-tertiary animate-pulse"></span>
+              18 Modul Praktikum Digital &bull; PhET &amp; Labster Grade
+            </span>
+          </div>
+        </div>
+
+        <!-- Main Title & Intro -->
+        <div class="max-w-3xl space-y-2 mb-6">
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-on-surface leading-tight">
+            Katalog Laboratorium <br class="hidden sm:block">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 dark:from-tertiary dark:via-cyan-400 dark:to-primary">
+              Virtual Kimia SMA
+            </span>
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-on-surface-variant leading-relaxed">
+            Halaman khusus untuk bereksperimen di laboratorium digital interaktif berstandar internasional. Seluruh instrumen buret presisi, voltmeter, spektrofotometer, kalorimeter, dan visualisasi 3D berjalan 100% offline dengan lembar kerja terintegrasi.
+          </p>
+        </div>
+
+        <!-- Quick Class Selector Filter Bar (Siswa langsung fokus pada kelasnya) -->
+        <div class="flex flex-wrap items-center gap-2 pt-1 pb-1">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-1">Pilih Jenjang:</span>
+          <button onclick="setLabGradeFilter('ALL')" id="lab-grade-ALL" class="lab-grade-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm flex items-center gap-1.5 cursor-pointer">
+            <span class="material-symbols-outlined text-[15px]">apps</span>
+            <span>Semua Kelas (18 Lab)</span>
+          </button>
+          <button onclick="setLabGradeFilter('Kelas 10')" id="lab-grade-10" class="lab-grade-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white dark:bg-surface-container text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-outline-variant hover:border-violet-500 hover:text-violet-600 dark:hover:text-violet-400 flex items-center gap-1.5 shadow-sm cursor-pointer">
+            <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+            <span>Kelas X (Fase E)</span>
+          </button>
+          <button onclick="setLabGradeFilter('Kelas 11')" id="lab-grade-11" class="lab-grade-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white dark:bg-surface-container text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-outline-variant hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 flex items-center gap-1.5 shadow-sm cursor-pointer">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>Kelas XI (Fase F)</span>
+          </button>
+          <button onclick="setLabGradeFilter('Kelas 12')" id="lab-grade-12" class="lab-grade-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white dark:bg-surface-container text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-outline-variant hover:border-rose-500 hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1.5 shadow-sm cursor-pointer">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+            <span>Kelas XII (Fase F)</span>
+          </button>
+          <button onclick="setLabGradeFilter('FAV')" id="lab-grade-FAV" class="lab-grade-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white dark:bg-surface-container text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-outline-variant hover:border-amber-400 hover:text-amber-500 flex items-center gap-1.5 shadow-sm cursor-pointer">
+            <span class="material-symbols-outlined text-[15px] text-amber-400">star</span>
+            <span>Favorit Saya (<span id="count-fav">0</span>)</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== SEARCH & FILTER TOOLBAR ==================== -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 mb-6">
+      <div class="bg-white dark:bg-surface-container rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-outline-variant shadow-sm space-y-3.5">
+        
+        <!-- Search Console Bar -->
+        <div class="relative">
+          <span class="material-symbols-outlined text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px]">search</span>
+          <input 
+            type="text" 
+            id="search-lab-input" 
+            oninput="handleLabFilter()" 
+            placeholder="Cari simulasi (contoh: titrasi, sel volta, VSEPR, kalorimeter, laju reaksi, daya hantar, spektro)..." 
+            class="w-full bg-slate-50 dark:bg-surface-container-low text-slate-900 dark:text-on-surface placeholder:text-slate-400 pl-11 pr-10 py-2.5 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 border border-slate-200/80 dark:border-outline-variant/40 transition-all"
+          >
+          <button 
+            id="btn-clear-lab-search" 
+            onclick="clearLabSearch()" 
+            class="hidden absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <!-- Category Domain Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
+          <button onclick="setCategoryFilter('ALL')" id="cat-btn-ALL" class="cat-pill active px-3.5 py-1.5 rounded-xl font-bold transition-all shrink-0 bg-emerald-600 text-white shadow-sm cursor-pointer">
+            Semua Domain (<span id="count-all">18</span>)
+          </button>
+          <button onclick="setCategoryFilter('larutan')" id="cat-btn-larutan" class="cat-pill px-3.5 py-1.5 rounded-xl font-medium transition-all shrink-0 bg-slate-100 dark:bg-surface-container-high text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-surface-bright cursor-pointer">
+            🧪 Larutan &amp; Asam-Basa (<span id="count-larutan">7</span>)
+          </button>
+          <button onclick="setCategoryFilter('elektrokimia')" id="cat-btn-elektrokimia" class="cat-pill px-3.5 py-1.5 rounded-xl font-medium transition-all shrink-0 bg-slate-100 dark:bg-surface-container-high text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-surface-bright cursor-pointer">
+            ⚡ Elektrokimia &amp; Redoks (<span id="count-elektrokimia">3</span>)
+          </button>
+          <button onclick="setCategoryFilter('kinetika')" id="cat-btn-kinetika" class="cat-pill px-3.5 py-1.5 rounded-xl font-medium transition-all shrink-0 bg-slate-100 dark:bg-surface-container-high text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-surface-bright cursor-pointer">
+            ⏱️ Kinetika &amp; Termokimia (<span id="count-kinetika">3</span>)
+          </button>
+          <button onclick="setCategoryFilter('atom')" id="cat-btn-atom" class="cat-pill px-3.5 py-1.5 rounded-xl font-medium transition-all shrink-0 bg-slate-100 dark:bg-surface-container-high text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-surface-bright cursor-pointer">
+            ⚛️ Struktur Atom &amp; 3D (<span id="count-atom">3</span>)
+          </button>
+          <button onclick="setCategoryFilter('analitik')" id="cat-btn-analitik" class="cat-pill px-3.5 py-1.5 rounded-xl font-medium transition-all shrink-0 bg-slate-100 dark:bg-surface-container-high text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-surface-bright cursor-pointer">
+            🌈 Spektroskopi (<span id="count-analitik">1</span>)
+          </button>
+          <button onclick="setCategoryFilter('organik')" id="cat-btn-organik" class="cat-pill px-3.5 py-1.5 rounded-xl font-medium transition-all shrink-0 bg-slate-100 dark:bg-surface-container-high text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-surface-bright cursor-pointer">
+            ⚗️ Kimia Organik (<span id="count-organik">1</span>)
+          </button>
+        </div>
+
+        <!-- Last Visited Lab Banner (Dynamic) -->
+        <div id="last-visited-lab-banner" class="hidden"></div>
+
+        <!-- Catalog Toolbar Header -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-outline-variant/30 text-xs">
+          <span id="lab-counter-label" class="text-slate-500 dark:text-slate-400 font-medium">
+            Menampilkan <span class="text-emerald-600 dark:text-tertiary font-bold">18</span> dari 18 laboratorium virtual
+          </span>
+
+          <div class="flex items-center gap-2">
+            <!-- Expand / Collapse All (Folder view only) -->
+            <div id="accordion-controls" class="flex items-center gap-1.5">
+              <button onclick="toggleAllLabAccordions(true)" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-container-high transition-colors cursor-pointer">
+                ＋ Buka Semua
+              </button>
+              <span class="text-slate-300 dark:text-slate-600">|</span>
+              <button onclick="toggleAllLabAccordions(false)" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-container-high transition-colors cursor-pointer">
+                － Tutup Semua
+              </button>
+            </div>
+
+            <span class="text-slate-300 dark:text-slate-600">|</span>
+
+            <!-- View Switcher -->
+            <div class="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-surface-container-low border border-slate-200 dark:border-outline-variant">
+              <button 
+                id="view-btn-folder" 
+                onclick="switchLabViewMode('folder')" 
+                class="px-2.5 py-1 rounded-md text-[11px] font-bold transition-all bg-white dark:bg-surface-container text-emerald-600 dark:text-tertiary shadow-sm flex items-center gap-1 cursor-pointer">
+                <span class="material-symbols-outlined text-[14px]">folder</span>
+                <span>Folder Jenjang</span>
+              </button>
+              <button 
+                id="view-btn-grid" 
+                onclick="switchLabViewMode('grid')" 
+                class="px-2.5 py-1 rounded-md text-[11px] font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer">
+                <span class="material-symbols-outlined text-[14px]">grid_view</span>
+                <span>Grid Kartu</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== 18 LAB CARDS CONTAINER ==================== -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+      <!-- Dynamic render target for folder/grid view -->
+      <div id="virtual-lab-container" class="space-y-4">
+        <!-- Rendered by JavaScript -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden text-center py-16 space-y-3">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 dark:bg-surface-container text-slate-400 flex items-center justify-center text-3xl">
+          🔍
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Laboratorium Tidak Ditemukan</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+          Tidak ada modul praktikum virtual yang cocok dengan kriteria pencarian Anda. Coba gunakan kata kunci umum seperti <code class="text-emerald-600 dark:text-emerald-400 font-mono">titrasi</code>, <code class="text-emerald-600 dark:text-emerald-400 font-mono">volta</code>, atau setel ulang filter.
+        </p>
+        <button onclick="resetFilters()" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 transition-all cursor-pointer">
+          Setel Ulang Filter
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="w-full bg-white dark:bg-surface-container border-t border-slate-200 dark:border-outline-variant/60 py-6 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-on-surface-variant">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-800 dark:text-slate-200">PortalKimia Virtual Labs</span>
+        <span>&bull;</span>
+        <span>SMA Progresif Bumi Shalawat</span>
+        <span>&bull;</span>
+        <span>Tito Vanzal, S.Pd.</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="index.html" class="hover:text-emerald-500 transition-colors">Beranda Media</a>
+        <a href="../" class="hover:text-emerald-500 transition-colors">Portal Utama Suite</a>
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="hover:text-emerald-500 transition-colors flex items-center gap-1">
+          <span>Ke Atas</span>
+          <span class="material-symbols-outlined text-[15px]">arrow_upward</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== DETAIL / GUIDELINE MODAL ==================== -->
+  <div id="modal-lab-guide" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-slate-200 dark:border-outline-variant/60 flex items-start justify-between gap-3 bg-slate-50 dark:bg-surface-container-high">
+        <div class="flex items-center gap-3">
+          <div id="modal-icon-box" class="w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0 text-xl font-bold">
+            <!-- Icon -->
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="modal-badge-grade" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-200 dark:bg-surface text-slate-700 dark:text-slate-300">Kelas 11</span>
+              <span id="modal-badge-category" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400">Larutan</span>
+            </div>
+            <h3 id="modal-title" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mt-1 leading-snug">
+              Nama Laboratorium
+            </h3>
+          </div>
+        </div>
+        <button onclick="closeLabGuideModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
+          <span class="material-symbols-outlined text-[22px]">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+        <div>
+          <h4 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] mb-1">Deskripsi Eksperimen</h4>
+          <p id="modal-desc" class="leading-relaxed"></p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] mb-1.5">Alat &amp; Instrumen Virtual</h4>
+          <div id="modal-tools-list" class="flex flex-wrap gap-1.5">
+            <!-- Tools badges -->
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-surface-container-low border border-slate-200 dark:border-outline-variant/40 space-y-2">
+          <h4 class="font-bold text-emerald-600 dark:text-tertiary uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">psychology</span>
+            <span>Tujuan Pembelajaran (Kurikulum Merdeka)</span>
+          </h4>
+          <p id="modal-outcome" class="text-xs leading-relaxed text-slate-600 dark:text-slate-300"></p>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-violet-50 dark:bg-primary/10 border border-violet-200 dark:border-primary/20 space-y-2">
+          <h4 class="font-bold text-violet-700 dark:text-primary uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">menu_book</span>
+            <span>Petunjuk Pelaksanaan Praktikum</span>
+          </h4>
+          <ul id="modal-instructions" class="text-xs list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300">
+            <li>Gunakan komputer / laptop atau tablet untuk pengalaman laboratorium interaktif yang optimal.</li>
+            <li>Catat data pengamatan pada tabel yang disediakan atau klik tombol <strong>Ekspor CSV</strong> untuk pengolahan lebih lanjut.</li>
+            <li>Uji pemahaman Anda melalui kuis evaluasi interaktif yang terdapat di bagian bawah simulator.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-slate-200 dark:border-outline-variant/60 flex items-center justify-between gap-3 bg-slate-50 dark:bg-surface-container-high">
+        <button onclick="closeLabGuideModal()" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-outline-variant text-slate-600 dark:text-slate-300 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-surface-bright">
+          Tutup
+        </button>
+        <div class="flex items-center gap-2">
+          <a id="modal-open-newtab-btn" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-surface-container text-slate-800 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-surface-bright text-xs font-semibold flex items-center gap-1.5 transition-all">
+            <span>Tab Baru</span>
+            <span class="material-symbols-outlined text-[15px]">open_in_new</span>
+          </a>
+          <a id="modal-launch-btn" href="#" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-900/30 transition-all">
+            <span>Buka Laboratorium</span>
+            <span class="material-symbols-outlined text-[16px]">science</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== UTILITAS KIMIA MODAL ==================== -->
+  <div id="modal-chem-tools" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
+      <div class="p-4 border-b border-slate-200 dark:border-outline-variant/60 flex items-center justify-between">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <span class="material-symbols-outlined text-emerald-500">biotech</span>
+          <span>Utilitas &amp; Kalkulator Kimia</span>
+        </h3>
+        <button onclick="closeChemToolsModal()" class="text-slate-400 hover:text-white">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <div class="p-4 space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Hitung Massa Molar (Mr) Cepat:</label>
+          <div class="flex gap-2">
+            <input type="text" id="quick-formula-input" placeholder="Contoh: H2SO4, Ca(OH)2, CuSO4.5H2O" class="w-full bg-slate-100 dark:bg-surface-container-low px-3 py-2 rounded-lg border border-slate-300 dark:border-outline-variant text-slate-800 dark:text-slate-200">
+            <button onclick="calculateQuickMr()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-500 shrink-0">Hitung</button>
+          </div>
+          <div id="quick-mr-result" class="mt-2 p-2.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-tertiary font-mono font-bold hidden"></div>
+        </div>
+        <div class="p-3 rounded-lg bg-slate-100 dark:bg-surface-container-low border border-slate-200 dark:border-outline-variant text-slate-600 dark:text-slate-400 space-y-1">
+          <p class="font-bold text-slate-700 dark:text-slate-300">Konstanta Kimia Penting:</p>
+          <p>&bull; Tetapan Faraday (\(F\)) = 96.485 C/mol e⁻</p>
+          <p>&bull; Tetapan Gas Ideal (\(R\)) = 0.082057 L&middot;atm/(mol&middot;K) = 8.314 J/(mol&middot;K)</p>
+          <p>&bull; Bilangan Avogadro (\(N_A\)) = 6.022 &times; 10²³ partikel/mol</p>
+          <p>&bull; Tetapan Air (\(K_w\)) pada 25&deg;C = 1.0 &times; 10⁻¹⁴</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATION ==================== -->
+  <div id="lab-toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-slate-900/90 text-white dark:bg-surface-bright dark:text-on-surface border border-slate-700/60 shadow-xl text-xs font-medium backdrop-blur-sm">
+    <span id="lab-toast-icon" class="material-symbols-outlined text-amber-400 text-[18px]">star</span>
+    <span id="lab-toast-msg">Laboratorium ditambahkan ke favorit</span>
+  </div>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    // 18 VIRTUAL LABS COMPREHENSIVE DATASET
+    const VIRTUAL_LABS = [
+      {
+        id: "lab-titrasi-01",
+        title: "Virtual Lab Titrasi Asam-Basa Presisi Tinggi & Kurva pH",
+        file: "Lab_Titrasi_Asam_Basa_DeepDive.html",
+        category: "larutan",
+        categoryName: "Larutan & Asam-Basa",
+        grade: "Kelas 11",
+        gradeLabel: "Kelas XI • Fase F",
+        icon: "science",
+        color: "emerald",
+        badge: "PhET Standard",
+        description: "Eksperimen titrasi volumetri presisi tinggi dengan buret digital 0.05 mL, analit asam kuat/lemah (HCl, CH3COOH), titran basa (NaOH, NH3), indikator fenolftalein (PP), bromtimol biru (BTB), metil oranye (MO), dan penentuan titik ekuivalen via kurva pH realtime.",
+        tools: ["Buret Digital 0.05 mL", "pH-Meter 0.01 Resolusi", "Stirrer Magnetik", "Kurva pH Canvas 60 FPS", "Ekspor Data CSV"],
+        outcome: "Peserta didik mampu merancang prosedur titrasi asam-basa, menentukan volume titik ekuivalen, menghitung konsentrasi analit tidak diketahui, dan menganalisis bentuk kurva titrasi.",
+        searchTerms: "titrasi asam basa buret erlenmeyer ph meter fenolftalein naoh hcl ch3cooh netralisasi volumetri"
+      },
+      {
+        id: "lab-buffer-02",
+        title: "Virtual Lab Larutan Penyangga (Buffer) & Kapasitas Buffer",
+        file: "Lab_Larutan_Penyangga_DeepDive.html",
+        category: "larutan",
+        categoryName: "Larutan & Asam-Basa",
+        grade: "Kelas 11",
+        gradeLabel: "Kelas XI • Fase F",
+        icon: "opacity",
+        color: "cyan",
+        badge: "Labster Grade",
+        description: "Penyelidikan kesetimbangan sistem buffer asam (CH3COOH/CH3COO⁻) dan buffer basa (NH3/NH4⁺). Uji ketahanan pH terhadap penambahan sedikit asam kuat, basa kuat, atau pengenceran air, serta verifikasi persamaan Henderson-Hasselbalch.",
+        tools: ["Buret Mikro Reagen", "pH Sensor Digital", "Grafik Kapasitas Buffer", "Analisis Partikulat", "Ekspor Lembar Kerja"],
+        outcome: "Peserta didik memahami prinsip kerja larutan penyangga, menghitung pH buffer menggunakan persamaan Henderson-Hasselbalch, dan mengukur batas kapasitas buffer.",
+        searchTerms: "buffer penyangga henderson hasselbalch kapasitas buffer ch3cooh ch3coona nh3 nh4cl resistensi ph"
+      },
+      {
+        id: "lab-hidrolisis-03",
+        title: "Virtual Lab Hidrolisis Garam & Penentuan Karakter pH Larutan",
+        file: "Lab_Hidrolisis_Garam_DeepDive.html",
+        category: "larutan",
+        categoryName: "Larutan & Asam-Basa",
+        grade: "Kelas 11",
+        gradeLabel: "Kelas XI • Fase F",
+        icon: "grain",
+        color: "indigo",
+        badge: "PhET Standard",
+        description: "Simulasi kesetimbangan ionisasi garam dari asam/basa kuat dan lemah (NaCl, CH3COONa, NH4Cl, CH3COONH4). Perhitungan konstanta hidrolisis (Kh), derajat hidrolisis (\u03B1), dan visualisasi warna pita indikator pH universal.",
+        tools: ["Pita Indikator Universal", "pH Sensor Presisi", "Pemeriksa Spesies Ion", "Tabel Kh Otomatis"],
+        outcome: "Peserta didik mampu memprediksi sifat asam, basa, atau netral dari larutan garam serta menghitung pH hidrolisis berdasarkan nilai Ka dan Kb.",
+        searchTerms: "hidrolisis garam asam basa netral ch3coona nh4cl ch3coonh4 kh derajat hidrolisis kation anion"
+      },
+      {
+        id: "lab-ksp-04",
+        title: "Virtual Lab Kelarutan & Hasil Kali Kelarutan (Ksp)",
+        file: "Lab_Ksp_Kelarutan_DeepDive.html",
+        category: "larutan",
+        categoryName: "Larutan & Asam-Basa",
+        grade: "Kelas 11",
+        gradeLabel: "Kelas XI • Fase F",
+        icon: "scatter_plot",
+        color: "teal",
+        badge: "Labster Grade",
+        description: "Eksperimen kesetimbangan pengendapan garam sukar larut (AgCl, BaSO4, PbI2, CaCO3). Evaluasi perbandingan Qsp vs Ksp, penyelidikan efek ion senama (common ion effect), pengaruh suhu larutan, dan mikroskop kristalisasi presipitat.",
+        tools: ["Sensor Kekeruhan Turbidimeter", "Mikroskop Kristal Canvas", "Pengatur Suhu Termostat", "Plot Hubungan Qsp/Ksp"],
+        outcome: "Peserta didik dapat memprediksi terbentuknya endapan berdasarkan nilai Qsp dan Ksp, serta menjelaskan pengaruh penambahan ion senama terhadap kelarutan zat.",
+        searchTerms: "ksp kelarutan hasil kali kelarutan qsp endapan presipitasi agcl baso4 pbi2 ion senama kristal"
+      },
+      {
+        id: "lab-kalorimeter-05",
+        title: "Virtual Lab Termokimia & Kalorimeter Bom / Sederhana",
+        file: "Lab_Kalorimeter_Termokimia_DeepDive.html",
+        category: "kinetika",
+        categoryName: "Kinetika & Termokimia",
+        grade: "Kelas 11",
+        gradeLabel: "Kelas XI • Fase F",
+        icon: "local_fire_department",
+        color: "amber",
+        badge: "PhET Standard",
+        description: "Investigasi entalpi reaksi netralisasi, pelarutan garam, dan kalorimeter pembakaran. Dilengkapi termometer digital presisi 0.01 °C, plot grafik kurva suhu-waktu Canvas 2D, kalkulasi q = m·c·\u0394T + C·\u0394T, dan pembuktian Hukum Hess.",
+        tools: ["Kalorimeter Sederhana & Bom", "Termometer Digital 0.01 °C", "Pengaduk Mekanik", "Kurva Suhu-Waktu Canvas", "Kalkulator Hukum Hess"],
+        outcome: "Peserta didik terampil mengukur perubahan temperatur reaksi, menghitung kalor reaksi dan perubahan entalpi (\u0394H), serta membuktikan Hukum Hess.",
+        searchTerms: "kalorimeter termokimia entalpi delta h hukum hess kalor kapasitas kalor netralisasi endoterm eksoterm"
+      },
+      {
+        id: "lab-laju-06",
+        title: "Virtual Lab Kinetika Kimia & Faktor Laju Reaksi",
+        file: "Lab_Laju_Reaksi_DeepDive.html",
+        category: "kinetika",
+        categoryName: "Kinetika & Termokimia",
+        grade: "Kelas 11",
+        gradeLabel: "Kelas XI • Fase F",
+        icon: "speed",
+        color: "orange",
+        badge: "PhET Standard",
+        description: "Eksperimen investigasi faktor-faktor laju reaksi: konsentrasi reaktan, temperatur sistem, luas permukaan keping vs serbuk, dan pengaruh katalis. Menghadirkan simulasi tumbukan partikel 60 FPS, plot grafik konsentrasi vs waktu, dan penentuan orde reaksi.",
+        tools: ["Stopwatch Digital", "Simulator Tumbukan Canvas 60 FPS", "Waterbath Termostatik", "Grafik Konsentrasi-Waktu", "Fitting Orde Reaksi"],
+        outcome: "Peserta didik mampu menganalisis pengaruh faktor konsentrasi, luas permukaan, suhu, dan katalis terhadap frekuensi tumbukan efektif dan laju reaksi kimia.",
+        searchTerms: "laju reaksi kinetika kimia orde reaksi energi aktivasi tumbukan partikel konsentrasi suhu katalis luas permukaan"
+      },
+      {
+        id: "lab-kesetimbangan-07",
+        title: "Virtual Lab Kesetimbangan Kimia & Azas Le Chatelier",
+        file: "Lab_Kesetimbangan_Kimia_DeepDive.html",
+        category: "kinetika",
+        categoryName: "Kinetika & Termokimia",
+        grade: "Kelas 11",
+        gradeLabel: "Kelas XI • Fase F",
+        icon: "balance",
+        color: "yellow",
+        badge: "PhET Standard",
+        description: "Investigasi pergeseran kesetimbangan kimia berdasarkan Azas Le Chatelier pada reaksi Haber-Bosch (N2 + 3H2 <=> 2NH3) dan sistem dinitrogen tetroksida (N2O4 cokelat <=> 2NO2). Uji pengaruh variasi suhu, tekanan/volume silinder piston, dan konsentrasi zat.",
+        tools: ["Silinder Piston Tekanan", "Chamber Termostat Suhu", "Spektrometer Warna NO2", "Plot Dinamis Nilai Qc vs Kc"],
+        outcome: "Peserta didik dapat meramalkan arah pergeseran kesetimbangan bila diberikan gangguan konsentrasi, suhu, atau volume/tekanan menurut Azas Le Chatelier.",
+        searchTerms: "kesetimbangan kimia le chatelier haber bosch no2 n2o4 kc kp pergeseran kesetimbangan tekanan volume suhu"
+      },
+      {
+        id: "lab-volta-08",
+        title: "Virtual Lab Sel Volta & Deret Elektrokimia (Galvanik)",
+        file: "Lab_Sel_Volta_DeepDive.html",
+        category: "elektrokimia",
+        categoryName: "Elektrokimia & Redoks",
+        grade: "Kelas 12",
+        gradeLabel: "Kelas XII • Fase F",
+        icon: "electric_bolt",
+        color: "emerald",
+        badge: "Labster Grade",
+        description: "Simulasi sel galvanik/volta komprehensif dengan pasangan elektroda Zn, Cu, Fe, Ag, Mg. Voltmeter digital membaca potensial sel standar (E° sel = E° katoda - E° anoda), jembatan garam KCl/KNO3, animasi mikroskopik aliran elektron & migrasi ion, serta lampu beban menyala.",
+        tools: ["Voltmeter Digital Presisi", "Pilihan 5 Elektroda Logam", "Jembatan Garam Interaktif", "Indikator Beban Lampu Pijar", "Diagram Notasi Sel"],
+        outcome: "Peserta didik mampu merancang sel volta, membedakan kutub anoda dan katoda, menghitung nilai E° sel, serta menjelaskan fungsi jembatan garam.",
+        searchTerms: "sel volta sel galvanik potensial sel e0 anoda katoda zn cu jembatan garam deret volta reduksi oksidasi"
+      },
+      {
+        id: "lab-elektrolisis-09",
+        title: "Virtual Lab Sel Elektrolisis & Hukum Faraday",
+        file: "Lab_Elektrolisis_Faraday_DeepDive.html",
+        category: "elektrokimia",
+        categoryName: "Elektrokimia & Redoks",
+        grade: "Kelas 12",
+        gradeLabel: "Kelas XII • Fase F",
+        icon: "power",
+        color: "cyan",
+        badge: "Labster Grade",
+        description: "Eksperimen elektrolisis lelehan dan larutan (NaCl, CuSO4, KI, H2O) dengan catu daya arus DC variabel. Menampilkan animasi pelepasan gelembung gas di anoda/katoda, elektroda karbon inert vs aktif, timbangan analitik endapan logam, dan kalkulasi Hukum Faraday I & II.",
+        tools: ["Catu Daya DC Variabel (0-12 V)", "Ammeter Arus Real-time", "Timbangan Analitik 4 Desimal", "Buret Penampung Gas Anoda/Katoda"],
+        outcome: "Peserta didik memahami reaksi redoks non-spontan pada elektrolisis dan mampu menghitung massa zat yang diendapkan berdasarkan Hukum Faraday.",
+        searchTerms: "elektrolisis hukum faraday catu daya anoda katoda cuso4 nacl ki endapan logam gas hidrogen oksigen"
+      },
+      {
+        id: "lab-koligatif-10",
+        title: "Virtual Lab Sifat Koligatif Larutan",
+        file: "Lab_Sifat_Koligatif_DeepDive.html",
+        category: "larutan",
+        categoryName: "Larutan & Asam-Basa",
+        grade: "Kelas 12",
+        gradeLabel: "Kelas XII • Fase F",
+        icon: "ac_unit",
+        color: "blue",
+        badge: "PhET Standard",
+        description: "Laboratorium terpadu untuk menyelidiki 4 sifat koligatif larutan: Penurunan Tekanan Uap (\u0394P), Kenaikan Titik Didih (\u0394Tb), Penurunan Titik Beku (\u0394Tf), dan Tekanan Osmotik (\u03C0). Menyajikan perbandingan larutan elektrolit vs non-elektrolit dengan faktor Van 't Hoff (i).",
+        tools: ["Termometer Cryo & Boil", "Manometer Tekanan Uap", "Tabung Osmometer Membran", "Diagram Fase P-T Dinamis"],
+        outcome: "Peserta didik dapat menghitung besaran sifat koligatif dan menjelaskan pengaruh jumlah partikel zat terlarut serta derajat ionisasi terhadap sifat fisik larutan.",
+        searchTerms: "sifat koligatif penurunan titik beku kenaikan titik didih tekanan osmotik tekanan uap van t hoff raoult delta tf delta tb"
+      },
+      {
+        id: "lab-redoks-11",
+        title: "Virtual Lab Penyetaraan Reaksi Redoks & Titrasi Redoks",
+        file: "Lab_Reaksi_Redoks_DeepDive.html",
+        category: "elektrokimia",
+        categoryName: "Elektrokimia & Redoks",
+        grade: "Kelas 12",
+        gradeLabel: "Kelas XII • Fase F",
+        icon: "published_with_changes",
+        color: "purple",
+        badge: "PhET Standard",
+        description: "Simulasi titrasi permanganometri kalium permanganat (KMnO4) sebagai auto-indikator terhadap larutan Fe2+ dan asam oksalat. Dilengkapi mesin kalkulator pintar penyetaraan reaksi redoks metode setengah reaksi (ion elektron) dan metode perubahan bilangan oksidasi (PBO).",
+        tools: ["Buret Titrasi Permanganometri", "Detektor Bilangan Oksidasi", "Solver Penyetara Reaksi Pintar", "Kurva Volume Redoks"],
+        outcome: "Peserta didik mampu menyetarakan persamaan reaksi redoks dalam suasana asam atau basa serta melakukan titrasi redoks permanganometri secara kuantitatif.",
+        searchTerms: "redoks reaksi redoks penyetaraan biloks pbo setengah reaksi permanganometri kmno4 fe2+ titrasi redoks"
+      },
+      {
+        id: "lab-koloid-12",
+        title: "Virtual Lab Sistem Koloid & Sifat Optik/Elektrokinetik",
+        file: "Lab_Sistem_Koloid_DeepDive.html",
+        category: "larutan",
+        categoryName: "Larutan & Asam-Basa",
+        grade: "Kelas 11",
+        gradeLabel: "Kelas XI • Fase F",
+        icon: "lens_blur",
+        color: "teal",
+        badge: "Labster Grade",
+        description: "Eksplorasi fenomena khas sistem koloid: Efek Tyndall berkas laser optik untuk membedakan larutan, koloid, dan suspensi; simulator mikroskopik Gerak Brown partikel 60 FPS; elektroforesis muatan sol; koagulasi penambahan elektrolit; dan adsorpsi koloid pelindung.",
+        tools: ["Laser Pointer Tyndall 532 nm", "Simulator Gerak Brown Canvas", "Tabung U Elektroforesis", "Reagen Koagulasi"],
+        outcome: "Peserta didik dapat membedakan sistem dispersi koloid dari larutan dan suspensi serta menjelaskan prinsip efek Tyndall, gerak Brown, elektroforesis, dan koagulasi.",
+        searchTerms: "koloid sistem koloid efek tyndall gerak brown elektroforesis koagulasi sol emulsi aerosol adsorpsi"
+      },
+      {
+        id: "lab-radioaktif-13",
+        title: "Virtual Lab Radioaktivitas, Waktu Paruh & Peluruhan Inti",
+        file: "Lab_Radioaktivitas_Peluruhan_DeepDive.html",
+        category: "atom",
+        categoryName: "Struktur Atom, 3D & Inti",
+        grade: "Kelas 12",
+        gradeLabel: "Kelas XII • Fase F",
+        icon: "radioactive",
+        color: "rose",
+        badge: "Labster Grade",
+        description: "Simulasi radiokimia & fisika inti: pencacah Geiger-Müller interaktif dilengkapi audio desah radiasi (Web Audio API), pengujian daya tembus partikel alfa (\u03B1), beta (\u03B2), gamma (\u03B3) terhadap perisai kertas, aluminium, dan timbal, serta kurva waktu paruh (t1/2) isotop radioaktif.",
+        tools: ["Detektor Geiger-Muller Audio", "Chamber Radiasi Partikel", "Material Perisai Penahan", "Plot Waktu Paruh Eksponensial"],
+        outcome: "Peserta didik mampu menganalisis jenis-jenis radiasi nuklir, menghitung peluruhan isotop radioaktif menggunakan rumus waktu paruh, dan memahami proteksi radiasi.",
+        searchTerms: "radioaktif radioaktivitas peluruhan inti waktu paruh alfa beta gamma geiger muller nuklir isotop c14 u238"
+      },
+      {
+        id: "lab-organik-14",
+        title: "Virtual Lab Identifikasi Gugus Fungsi Kimia Organik",
+        file: "Lab_Gugus_Fungsi_Organik_DeepDive.html",
+        category: "organik",
+        categoryName: "Kimia Organik",
+        grade: "Kelas 12",
+        gradeLabel: "Kelas XII • Fase F",
+        icon: "biotech",
+        color: "pink",
+        badge: "Labster Grade",
+        description: "Investigasi kualitatif senyawa karbon: uji Fehling & Tollens (cermin perak) untuk membedakan aldehida dan keton; uji Lucas untuk alkohol primer, sekunder, tersier; uji bromin/KMnO4 untuk ikatan rangkap alkena; dan reaksi esterifikasi pembentukan aroma buah khas.",
+        tools: ["Rak Tabung Reaksi Kimia", "Water Bath Pemanas Virtual", "Reagen Fehling, Tollens, Lucas", "Tabel Karakteristik Bau & Endapan"],
+        outcome: "Peserta didik terampil melakukan pengujian kimia kualitatif untuk mengidentifikasi keberadaan gugus fungsi alkohol, eter, aldehida, keton, asam karboksilat, dan ester.",
+        searchTerms: "gugus fungsi organik aldehida keton alkohol eter ester fehling tollens cermin perak lucas karboksilat"
+      },
+      {
+        id: "lab-spektro-15",
+        title: "Virtual Lab Spektrofotometri UV-Vis & Hukum Beer-Lambert",
+        file: "Lab_Spektrofotometri_BeerLambert_DeepDive.html",
+        category: "analitik",
+        categoryName: "Analitik & Spektroskopi",
+        grade: "Kelas 11",
+        gradeLabel: "Kelas XI & XII • Fase F",
+        icon: "prism",
+        color: "violet",
+        badge: "Labster Grade",
+        description: "Simulasi instrumen spektrofotometer UV-Vis: monokromator panjang gelombang cahaya tampak (\u03BB), kuvet kuarsa standar 1 cm dengan larutan analit (KMnO4, CuSO4, NiCl2), hukum Beer-Lambert (A = \u03B5·b·c), pengukuran absorbansi vs transmitansi, dan kurva kalibrasi regresi linier.",
+        tools: ["Monokromator Panjang Gelombang", "Kuvet Spektro 1 cm", "Detektor Transmitansi & Absorbansi", "Plot Regresi Linier Standar"],
+        outcome: "Peserta didik memahami prinsip kerja spektrofotometer UV-Vis, menerapkan hukum Beer-Lambert, dan menentukan konsentrasi larutan analit melalui kurva kalibrasi.",
+        searchTerms: "spektrofotometri uv-vis beer lambert absorbansi transmitansi panjang gelombang kuvet kurva kalibrasi konsentrasi"
+      },
+      {
+        id: "lab-vsepr-16",
+        title: "Virtual Lab Geometri Molekul 3D & Teori VSEPR",
+        file: "Lab_Geometri_Molekul_VSEPR_DeepDive.html",
+        category: "atom",
+        categoryName: "Struktur Atom, 3D & Inti",
+        grade: "Kelas 10",
+        gradeLabel: "Kelas X & XI • Fase E/F",
+        icon: "hub",
+        color: "emerald",
+        badge: "PhET Standard",
+        description: "Pemodelan struktur molekul 3D interaktif yang dapat dirotasi bebas. Perhitungan domain elektron ikatan (PEI) dan bebas (PEB), klasifikasi tipe AXnEm, sudut ikatan teoritis vs terdistorsi, analisis polaritas, dan momen dipol pada molekul H2O, NH3, CH4, PCl5, SF6, XeF4.",
+        tools: ["Viewer Molekul 3D Canvas Interaktif", "Kalkulator Domain Elektron PEI/PEB", "Indikator Momen Dipol Vektor", "Tabel Lengkap Geometri Molekul"],
+        outcome: "Peserta didik dapat meramalkan bentuk geometri molekul berdasarkan teori VSEPR dan hibridisasi serta menentukan kepolaran suatu molekul berdasarkan momen dipol.",
+        searchTerms: "vsepr geometri molekul 3d bentuk molekul pei peb sudut ikatan polaritas momen dipol axn ch4 h2o nh3 sf6"
+      },
+      {
+        id: "lab-elektrolit-17",
+        title: "Virtual Lab Daya Hantar Listrik Larutan Elektrolit",
+        file: "Lab_Larutan_Elektrolit_DayaHantar_DeepDive.html",
+        category: "larutan",
+        categoryName: "Larutan & Asam-Basa",
+        grade: "Kelas 10",
+        gradeLabel: "Kelas X • Fase E",
+        icon: "lightbulb",
+        color: "amber",
+        badge: "PhET Standard",
+        description: "Eksperimen daya hantar listrik larutan: sirkuit baterai dan elektroda uji ke dalam berbagai larutan (elektrolit kuat, lemah, dan non-elektrolit). Amati kecerahan lampu pijar (terang, redup, padam), jumlah gelembung gas di elektroda, serta derajat ionisasi (\u03B1) pada tingkat sub-mikroskopik.",
+        tools: ["Rangkaian Uji Lampu Pijar", "Sepasang Elektroda Karbon", "Simulator Disosiasi Ion Canvas", "Koleksi Sampel Bahan Sehari-hari"],
+        outcome: "Peserta didik dapat mengidentifikasi sifat daya hantar listrik larutan elektrolit kuat, lemah, dan non-elektrolit berdasarkan nyala lampu dan pembentukan gas.",
+        searchTerms: "larutan elektrolit daya hantar listrik elektroda lampu pijar derajat ionisasi nacl ch3cooh gula urea kation anion"
+      },
+      {
+        id: "lab-ujinyala-18",
+        title: "Virtual Lab Uji Nyala Logam Alkali & Spektrum Emisi Atom",
+        file: "Lab_Uji_Nyala_Struktur_Atom_DeepDive.html",
+        category: "atom",
+        categoryName: "Struktur Atom, 3D & Inti",
+        grade: "Kelas 10",
+        gradeLabel: "Kelas X • Fase E",
+        icon: "flare",
+        color: "red",
+        badge: "PhET Standard",
+        description: "Laboratorium uji nyala api kualitatif menggunakan pembakar Bunsen dan kawat nikrom untuk identifikasi kation logam alkali dan alkali tanah (Li, Na, K, Ca, Sr, Ba, Cu). Dilengkapi simulasi eksitasi-deeksitasi elektron model Bohr dan analisis spektrum garis emisi prisma spektroskop.",
+        tools: ["Pembakar Bunsen Nyala Api Realtime", "Kawat Nikrom & HCl Pembersih", "Spektroskop Prisma Spektrum Garis", "Modul Detektif Sampel Garam"],
+        outcome: "Peserta didik dapat mengidentifikasi unsur logam berdasarkan warna khas uji nyala api dan menjelaskan hubungan warna nyala dengan transisi tingkat energi elektron Bohr.",
+        searchTerms: "uji nyala flame test bunsen alkali alkali tanah na k li ca ba cu warna api spektrum emisi bohr eksitasi"
+      }
+    ];
+
+    // Grade Configuration for Folder Mode
+    const GRADE_CONFIG = [
+      {
+        key: '10',
+        title: 'Praktikum Kimia Kelas X',
+        badge: 'Fase E',
+        subtitle: 'Konsep Dasar: Teori VSEPR 3D, Daya Hantar Elektrolit, & Uji Nyala Logam Alkali',
+        icon: 'school',
+        iconColor: 'text-violet-600 dark:text-violet-400',
+        iconBg: 'bg-violet-500/10 dark:bg-violet-500/20 border border-violet-500/20',
+        pillClass: 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border border-violet-300 dark:border-violet-700'
+      },
+      {
+        key: '11',
+        title: 'Praktikum Kimia Kelas XI',
+        badge: 'Fase F',
+        subtitle: 'Stoikiometri Larutan, Asam-Basa, Termokimia, Laju Reaksi, Kesetimbangan, Koloid, Spektro',
+        icon: 'biotech',
+        iconColor: 'text-amber-600 dark:text-amber-400',
+        iconBg: 'bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20',
+        pillClass: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700'
+      },
+      {
+        key: '12',
+        title: 'Praktikum Kimia Kelas XII',
+        badge: 'Fase F',
+        subtitle: 'Sel Volta, Elektrolisis, Sifat Koligatif, Reaksi Redoks, Radioaktivitas, Gugus Fungsi',
+        icon: 'science',
+        iconColor: 'text-rose-600 dark:text-rose-400',
+        iconBg: 'bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/20',
+        pillClass: 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-700'
+      }
+    ];
+
+    // State
+    let currentCategory = 'ALL';
+    let currentGrade = 'ALL';
+    let currentSearch = '';
+    let currentLabViewMode = 'folder'; // 'folder' | 'grid'
+    let accordionStates = {
+      '10': false,
+      '11': false,
+      '12': false
+    };
+
+    // Favorites Management (localStorage: portalkimia_fav_labs)
+    function getLabFavorites() {
+      try {
+        const raw = localStorage.getItem('portalkimia_fav_labs');
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function isLabFavorite(id) {
+      return getLabFavorites().includes(id);
+    }
+
+    function toggleLabFavorite(id, e) {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+      let favs = getLabFavorites();
+      const lab = VIRTUAL_LABS.find(l => l.id === id);
+      const isNowFav = !favs.includes(id);
+
+      if (isNowFav) {
+        favs.push(id);
+        showToast('Ditambahkan ke laboratorium favorit! ⭐', 'star');
+      } else {
+        favs = favs.filter(fId => fId !== id);
+        showToast('Dihapus dari favorit', 'star_border');
+      }
+
+      try {
+        localStorage.setItem('portalkimia_fav_labs', JSON.stringify(favs));
+      } catch (e) {}
+
+      updateFavoriteCountUI();
+      renderVirtualLabs();
+    }
+
+    function updateFavoriteCountUI() {
+      const countEl = document.getElementById('count-fav');
+      if (countEl) {
+        countEl.textContent = getLabFavorites().length;
+      }
+    }
+
+    // Last Visited Lab Tracking (localStorage: portalkimia_last_visited_lab)
+    function recordLastVisitedLab(labId) {
+      const lab = VIRTUAL_LABS.find(l => l.id === labId);
+      if (!lab) return;
+      try {
+        const data = {
+          id: lab.id,
+          title: lab.title,
+          file: lab.file,
+          grade: lab.gradeLabel,
+          icon: lab.icon,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('portalkimia_last_visited_lab', JSON.stringify(data));
+      } catch (e) {}
+    }
+
+    function renderLastVisitedLabBanner() {
+      const banner = document.getElementById('last-visited-lab-banner');
+      if (!banner) return;
+      try {
+        const raw = localStorage.getItem('portalkimia_last_visited_lab');
+        if (!raw) {
+          banner.classList.add('hidden');
+          return;
+        }
+        const item = JSON.parse(raw);
+        banner.className = 'p-3 rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-500/25 flex items-center justify-between gap-3 text-xs';
+        banner.innerHTML = `
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-tertiary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[18px]">history</span>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
+                <span class="font-bold text-emerald-600 dark:text-tertiary uppercase">Lanjutkan Praktikum Terakhir:</span>
+                <span>&bull;</span>
+                <span>${item.grade}</span>
+              </div>
+              <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">${item.title}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <a href="${resolveLabUrl(item.file)}" onclick="recordLastVisitedLab('${item.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-all cursor-pointer">
+              <span>Buka</span>
+              <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </a>
+            <button onclick="dismissLastVisitedLabBanner()" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg cursor-pointer" title="Tutup banner">
+              <span class="material-symbols-outlined text-[16px]">close</span>
+            </button>
+          </div>
+        `;
+        banner.classList.remove('hidden');
+      } catch (e) {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function dismissLastVisitedLabBanner() {
+      try {
+        localStorage.removeItem('portalkimia_last_visited_lab');
+      } catch (e) {}
+      const banner = document.getElementById('last-visited-lab-banner');
+      if (banner) banner.classList.add('hidden');
+    }
+
+    // Toast Notification Helper
+    let toastTimer = null;
+    function showToast(msg, icon = 'info') {
+      const toast = document.getElementById('lab-toast');
+      const msgEl = document.getElementById('lab-toast-msg');
+      const iconEl = document.getElementById('lab-toast-icon');
+      if (!toast || !msgEl || !iconEl) return;
+
+      msgEl.textContent = msg;
+      iconEl.textContent = icon;
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+
+    // View Mode Switcher ('folder' | 'grid')
+    function switchLabViewMode(mode) {
+      currentLabViewMode = mode;
+      const btnFolder = document.getElementById('view-btn-folder');
+      const btnGrid = document.getElementById('view-btn-grid');
+      const accControls = document.getElementById('accordion-controls');
+
+      if (mode === 'folder') {
+        if (btnFolder) {
+          btnFolder.className = 'px-2.5 py-1 rounded-md text-[11px] font-bold transition-all bg-white dark:bg-surface-container text-emerald-600 dark:text-tertiary shadow-sm flex items-center gap-1 cursor-pointer';
+        }
+        if (btnGrid) {
+          btnGrid.className = 'px-2.5 py-1 rounded-md text-[11px] font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer';
+        }
+        if (accControls) accControls.classList.remove('hidden');
+      } else {
+        if (btnFolder) {
+          btnFolder.className = 'px-2.5 py-1 rounded-md text-[11px] font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 cursor-pointer';
+        }
+        if (btnGrid) {
+          btnGrid.className = 'px-2.5 py-1 rounded-md text-[11px] font-bold transition-all bg-white dark:bg-surface-container text-emerald-600 dark:text-tertiary shadow-sm flex items-center gap-1 cursor-pointer';
+        }
+        if (accControls) accControls.classList.add('hidden');
+      }
+      renderVirtualLabs();
+    }
+
+    // Accordion Toggle Handlers
+    function toggleLabAccordion(gradeKey) {
+      accordionStates[gradeKey] = !accordionStates[gradeKey];
+      updateAccordionDOM(gradeKey);
+    }
+
+    function updateAccordionDOM(gradeKey) {
+      const body = document.getElementById(`accordion-body-${gradeKey}`);
+      const chevron = document.getElementById(`accordion-chevron-${gradeKey}`);
+      const status = document.getElementById(`accordion-status-${gradeKey}`);
+      if (!body) return;
+
+      const isOpen = accordionStates[gradeKey];
+      if (isOpen) {
+        body.classList.remove('hidden');
+        if (chevron) chevron.classList.add('rotate-180');
+        if (status) status.textContent = 'Terbuka';
+      } else {
+        body.classList.add('hidden');
+        if (chevron) chevron.classList.remove('rotate-180');
+        if (status) status.textContent = 'Tertutup';
+      }
+    }
+
+    function toggleAllLabAccordions(open) {
+      ['10', '11', '12'].forEach(key => {
+        accordionStates[key] = open;
+        updateAccordionDOM(key);
+      });
+    }
+
+    // Slim Card Generator (Height ~180px, No rainbow cards, Uniform Obsidian style)
+    function createLabCardHtml(lab) {
+      const isFav = isLabFavorite(lab.id);
+      
+      let gradeBadgeStyle = 'bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/30';
+      if (lab.grade.includes('11')) {
+        gradeBadgeStyle = 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30';
+      } else if (lab.grade.includes('12')) {
+        gradeBadgeStyle = 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30';
+      }
+
+      return `
+        <div class="lab-card group relative flex flex-col justify-between rounded-2xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant p-4 shadow-sm hover:shadow-md hover:border-emerald-500/50 transition-all">
+          <!-- Card Header & Badges -->
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2.5">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${gradeBadgeStyle} border">
+                  ${lab.gradeLabel}
+                </span>
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 dark:bg-surface-container-high text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-outline-variant/40">
+                  ${lab.categoryName}
+                </span>
+              </div>
+              <!-- Favorite Star Toggle -->
+              <button 
+                type="button"
+                onclick="toggleLabFavorite('${lab.id}', event)" 
+                class="p-1 rounded-lg text-slate-400 hover:text-amber-400 transition-colors cursor-pointer ${isFav ? 'text-amber-400' : ''}" 
+                title="${isFav ? 'Hapus dari Favorit' : 'Simpan ke Favorit'}">
+                <span class="material-symbols-outlined text-[19px] leading-none" style="font-variation-settings: 'FILL' ${isFav ? 1 : 0}">star</span>
+              </button>
+            </div>
+
+            <!-- Title & Icon -->
+            <div class="flex items-start gap-2.5 mb-2">
+              <div class="w-9 h-9 rounded-xl bg-emerald-500/10 dark:bg-tertiary/10 text-emerald-600 dark:text-tertiary flex items-center justify-center shrink-0 border border-emerald-500/20 group-hover:scale-105 transition-transform shadow-inner">
+                <span class="material-symbols-outlined text-[20px]">${lab.icon}</span>
+              </div>
+              <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-snug line-clamp-2">
+                ${lab.title}
+              </h3>
+            </div>
+
+            <!-- Description (compact 2 lines) -->
+            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mb-3">
+              ${lab.description}
+            </p>
+          </div>
+
+          <!-- Bottom Actions -->
+          <div class="pt-2.5 border-t border-slate-100 dark:border-outline-variant/40 flex items-center justify-between gap-2">
+            <button 
+              type="button"
+              onclick="openLabGuideModal('${lab.id}')" 
+              class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-bright transition-all flex items-center gap-1 cursor-pointer"
+              title="Lembar Kerja & Panduan">
+              <span class="material-symbols-outlined text-[15px]">info</span>
+              <span>Panduan</span>
+            </button>
+
+            <div class="flex items-center gap-1.5">
+              <a 
+                href="${resolveLabUrl(lab.file)}" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                onclick="recordLastVisitedLab('${lab.id}')"
+                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-bright transition-all" 
+                title="Buka Tab Baru">
+                <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+              </a>
+              
+              <a 
+                href="${resolveLabUrl(lab.file)}" 
+                onclick="recordLastVisitedLab('${lab.id}')"
+                class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 shadow-sm hover:shadow transition-all active:scale-95 cursor-pointer"
+                title="Mulai Praktikum">
+                <span>Buka Lab</span>
+                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Filter Logic & Render
+    function getFilteredLabs() {
+      const favs = getLabFavorites();
+      return VIRTUAL_LABS.filter(lab => {
+        // Category filter
+        if (currentCategory !== 'ALL' && lab.category !== currentCategory) return false;
+        
+        // Grade filter
+        if (currentGrade === 'FAV') {
+          if (!favs.includes(lab.id)) return false;
+        } else if (currentGrade !== 'ALL') {
+          if (currentGrade === 'Kelas 10' && !lab.grade.includes('10')) return false;
+          if (currentGrade === 'Kelas 11' && !lab.grade.includes('11')) return false;
+          if (currentGrade === 'Kelas 12' && !lab.grade.includes('12')) return false;
+        }
+
+        // Search query
+        if (currentSearch) {
+          const q = currentSearch.toLowerCase();
+          const matchTitle = lab.title.toLowerCase().includes(q);
+          const matchDesc = lab.description.toLowerCase().includes(q);
+          const matchTerms = lab.searchTerms.toLowerCase().includes(q);
+          const matchCat = lab.categoryName.toLowerCase().includes(q);
+          const matchTools = lab.tools.some(t => t.toLowerCase().includes(q));
+          if (!matchTitle && !matchDesc && !matchTerms && !matchCat && !matchTools) return false;
+        }
+
+        return true;
+      });
+    }
+
+    // Main Render Function
+    function renderVirtualLabs() {
+      const container = document.getElementById('virtual-lab-container');
+      const emptyState = document.getElementById('empty-state');
+      if (!container) return;
+
+      const filtered = getFilteredLabs();
+
+      // Update counters
+      const counterLabel = document.getElementById('lab-counter-label');
+      if (counterLabel) {
+        counterLabel.innerHTML = `Menampilkan <span class="text-emerald-600 dark:text-tertiary font-bold">${filtered.length}</span> dari ${VIRTUAL_LABS.length} laboratorium virtual`;
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        if (emptyState) emptyState.classList.remove('hidden');
+        return;
+      }
+
+      if (emptyState) emptyState.classList.add('hidden');
+
+      // If user typed a search query, automatically open all accordions to show matches
+      if (currentSearch) {
+        accordionStates['10'] = true;
+        accordionStates['11'] = true;
+        accordionStates['12'] = true;
+      }
+
+      // Render by View Mode
+      if (currentLabViewMode === 'grid') {
+        container.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${filtered.map(createLabCardHtml).join('')}
+          </div>
+        `;
+      } else {
+        // Folder View Mode (Grouped into Grade Accordions)
+        const accordionsHtml = GRADE_CONFIG.map(cfg => {
+          const labsInGrade = filtered.filter(l => l.grade.includes(cfg.key));
+          if (labsInGrade.length === 0) return '';
+
+          const isOpen = accordionStates[cfg.key];
+
+          return `
+            <div class="lab-accordion rounded-2xl bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant overflow-hidden shadow-sm transition-all" id="accordion-${cfg.key}">
+              <button 
+                type="button"
+                onclick="toggleLabAccordion('${cfg.key}')" 
+                class="w-full p-4 sm:p-5 flex items-center justify-between gap-3 text-left hover:bg-slate-50/80 dark:hover:bg-surface-bright/40 transition-colors cursor-pointer">
+                <div class="flex items-center gap-3.5 min-w-0">
+                  <div class="w-10 h-10 rounded-xl ${cfg.iconBg} flex items-center justify-center ${cfg.iconColor} shrink-0">
+                    <span class="material-symbols-outlined text-[22px]">${cfg.icon}</span>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                        ${cfg.title}
+                      </h3>
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${cfg.pillClass}">
+                        ${labsInGrade.length} Laboratorium
+                      </span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">
+                      ${cfg.subtitle}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-xs font-semibold text-slate-400 hidden md:inline" id="accordion-status-${cfg.key}">
+                    ${isOpen ? 'Terbuka' : 'Tertutup'}
+                  </span>
+                  <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-surface-container-high flex items-center justify-center text-slate-500 dark:text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}" id="accordion-chevron-${cfg.key}">
+                    <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                  </div>
+                </div>
+              </button>
+              <div id="accordion-body-${cfg.key}" class="${isOpen ? '' : 'hidden'} p-4 sm:p-5 pt-0 border-t border-slate-100 dark:border-outline-variant/30">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
+                  ${labsInGrade.map(createLabCardHtml).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        container.innerHTML = accordionsHtml || `
+          <div class="text-center py-10 text-slate-400 text-xs">
+            Tidak ada laboratorium dalam jenjang yang dipilih.
+          </div>
+        `;
+      }
+    }
+
+    // Dynamic Category Counts Updater
+    function updateCategoryPillCounts() {
+      const allCount = VIRTUAL_LABS.length;
+      const larutanCount = VIRTUAL_LABS.filter(l => l.category === 'larutan').length;
+      const elektroCount = VIRTUAL_LABS.filter(l => l.category === 'elektrokimia').length;
+      const kinetikaCount = VIRTUAL_LABS.filter(l => l.category === 'kinetika').length;
+      const atomCount = VIRTUAL_LABS.filter(l => l.category === 'atom').length;
+      const analitikCount = VIRTUAL_LABS.filter(l => l.category === 'analitik').length;
+      const organikCount = VIRTUAL_LABS.filter(l => l.category === 'organik').length;
+
+      const setEl = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+      setEl('count-all', allCount);
+      setEl('count-larutan', larutanCount);
+      setEl('count-elektrokimia', elektroCount);
+      setEl('count-kinetika', kinetikaCount);
+      setEl('count-atom', atomCount);
+      setEl('count-analitik', analitikCount);
+      setEl('count-organik', organikCount);
+    }
+
+    // Universal URL Resolver for GAS (Google Apps Script) and GitHub / Localhost
+    function resolveLabUrl(filename) {
+      if (window.location.hostname.includes('script.google.com') || window.location.href.includes('/exec')) {
+        const baseName = filename.replace(/\.html$/i, '');
+        const currentBase = window.location.href.split('?')[0];
+        return `${currentBase}?page=${encodeURIComponent(baseName)}`;
+      }
+      return filename;
+    }
+
+    // Filter Handlers
+    function setLabGradeFilter(grade) {
+      currentGrade = grade;
+      document.querySelectorAll('.lab-grade-pill').forEach(btn => {
+        btn.className = 'lab-grade-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white dark:bg-surface-container text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-outline-variant hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1.5 shadow-sm cursor-pointer';
+      });
+
+      const activeBtnId = grade === 'ALL' ? 'lab-grade-ALL' : (grade === 'FAV' ? 'lab-grade-FAV' : `lab-grade-${grade.replace('Kelas ', '')}`);
+      const activeBtn = document.getElementById(activeBtnId);
+      if (activeBtn) {
+        activeBtn.className = 'lab-grade-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm flex items-center gap-1.5 cursor-pointer';
+      }
+
+      // Automatically expand chosen grade accordion
+      if (grade === 'Kelas 10') accordionStates['10'] = true;
+      if (grade === 'Kelas 11') accordionStates['11'] = true;
+      if (grade === 'Kelas 12') accordionStates['12'] = true;
+
+      renderVirtualLabs();
+    }
+
+    function setCategoryFilter(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        btn.classList.remove('active', 'bg-emerald-600', 'text-white', 'shadow-sm');
+        btn.classList.add('bg-slate-100', 'dark:bg-surface-container-high', 'text-slate-600', 'dark:text-slate-300');
+      });
+      const activeBtn = document.getElementById(`cat-btn-${cat}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-100', 'dark:bg-surface-container-high', 'text-slate-600', 'dark:text-slate-300');
+        activeBtn.classList.add('active', 'bg-emerald-600', 'text-white', 'shadow-sm');
+      }
+      renderVirtualLabs();
+    }
+
+    function handleLabFilter() {
+      const searchInput = document.getElementById('search-lab-input');
+      const clearBtn = document.getElementById('btn-clear-lab-search');
+
+      currentSearch = searchInput ? searchInput.value.trim() : '';
+
+      if (clearBtn) {
+        if (currentSearch) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+
+      renderVirtualLabs();
+    }
+
+    function clearLabSearch() {
+      const searchInput = document.getElementById('search-lab-input');
+      if (searchInput) searchInput.value = '';
+      currentSearch = '';
+      const clearBtn = document.getElementById('btn-clear-lab-search');
+      if (clearBtn) clearBtn.classList.add('hidden');
+      renderVirtualLabs();
+    }
+
+    function resetFilters() {
+      currentCategory = 'ALL';
+      currentGrade = 'ALL';
+      currentSearch = '';
+      const searchInput = document.getElementById('search-lab-input');
+      if (searchInput) searchInput.value = '';
+      const clearBtn = document.getElementById('btn-clear-lab-search');
+      if (clearBtn) clearBtn.classList.add('hidden');
+      
+      setLabGradeFilter('ALL');
+      setCategoryFilter('ALL');
+    }
+
+    // Guide Modal
+    function openLabGuideModal(labId) {
+      const lab = VIRTUAL_LABS.find(l => l.id === labId);
+      if (!lab) return;
+
+      const modal = document.getElementById('modal-lab-guide');
+      const title = document.getElementById('modal-title');
+      const desc = document.getElementById('modal-desc');
+      const gradeBadge = document.getElementById('modal-badge-grade');
+      const catBadge = document.getElementById('modal-badge-category');
+      const iconBox = document.getElementById('modal-icon-box');
+      const toolsList = document.getElementById('modal-tools-list');
+      const outcome = document.getElementById('modal-outcome');
+      const launchBtn = document.getElementById('modal-launch-btn');
+      const newTabBtn = document.getElementById('modal-open-newtab-btn');
+
+      title.textContent = lab.title;
+      desc.textContent = lab.description;
+      gradeBadge.textContent = lab.gradeLabel;
+      catBadge.textContent = lab.categoryName;
+      outcome.textContent = lab.outcome;
+
+      iconBox.className = `w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0 bg-emerald-600 shadow-md`;
+      iconBox.innerHTML = `<span class="material-symbols-outlined text-[24px]">${lab.icon}</span>`;
+
+      toolsList.innerHTML = lab.tools.map(tool => `
+        <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-surface-container-low text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-outline-variant">
+          ${tool}
+        </span>
+      `).join('');
+
+      launchBtn.href = resolveLabUrl(lab.file);
+      launchBtn.onclick = () => recordLastVisitedLab(lab.id);
+      newTabBtn.href = resolveLabUrl(lab.file);
+      newTabBtn.onclick = () => recordLastVisitedLab(lab.id);
+
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLabGuideModal() {
+      const modal = document.getElementById('modal-lab-guide');
+      if (modal) modal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Utilitas Modal
+    function openChemToolsModal() {
+      const modal = document.getElementById('modal-chem-tools');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeChemToolsModal() {
+      const modal = document.getElementById('modal-chem-tools');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // Simple Mr Calculator
+    function calculateQuickMr() {
+      const input = document.getElementById('quick-formula-input');
+      const resBox = document.getElementById('quick-mr-result');
+      if (!input || !resBox) return;
+
+      const formula = input.value.trim();
+      if (!formula) return;
+
+      const weights = {
+        H: 1.008, He: 4.003, Li: 6.941, Be: 9.012, B: 10.81, C: 12.011, N: 14.007,
+        O: 15.999, F: 18.998, Ne: 20.180, Na: 22.990, Mg: 24.305, Al: 26.982, Si: 28.086,
+        P: 30.974, S: 32.065, Cl: 35.453, K: 39.098, Ar: 39.948, Ca: 40.078, Cr: 51.996,
+        Mn: 54.938, Fe: 55.845, Co: 58.933, Ni: 58.693, Cu: 63.546, Zn: 65.38, Br: 79.904,
+        Ag: 107.868, I: 126.904, Ba: 137.327, Pb: 207.2, U: 238.029
+      };
+
+      try {
+        let clean = formula.replace(/\s+/g, '');
+        // Expand hydrate e.g. CuSO4.5H2O
+        let totalMr = 0;
+        if (clean.includes('.')) {
+          const parts = clean.split('.');
+          totalMr += parseSimpleFormula(parts[0], weights);
+          const hydrateMatch = parts[1].match(/^(\d*)(.*)$/);
+          const mult = hydrateMatch[1] ? parseInt(hydrateMatch[1]) : 1;
+          totalMr += mult * parseSimpleFormula(hydrateMatch[2], weights);
+        } else {
+          totalMr = parseSimpleFormula(clean, weights);
+        }
+
+        resBox.textContent = `Mr (${formula}) = ${totalMr.toFixed(3)} g/mol`;
+        resBox.classList.remove('hidden');
+      } catch (e) {
+        resBox.textContent = `Formula tidak dikenali atau format tanda kurung belum didukung.`;
+        resBox.classList.remove('hidden');
+      }
+    }
+
+    function parseSimpleFormula(str, weights) {
+      // Expand parentheses e.g. Ca(OH)2
+      let expanded = str;
+      const parenRegex = /\(([^()]+)\)(\d+)/g;
+      while (parenRegex.test(expanded)) {
+        expanded = expanded.replace(parenRegex, (m, inner, count) => inner.repeat(parseInt(count)));
+      }
+
+      let total = 0;
+      const elemRegex = /([A-Z][a-z]*)(\d*)/g;
+      let match;
+      while ((match = elemRegex.exec(expanded)) !== null) {
+        const elem = match[1];
+        const count = match[2] ? parseInt(match[2]) : 1;
+        if (weights[elem]) {
+          total += weights[elem] * count;
+        }
+      }
+      return total;
+    }
+
+    // Theme Toggle Function
+    function toggleAppTheme() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        localStorage.setItem('chemportal_theme', 'light');
+      } else {
+        html.classList.remove('light');
+        html.classList.add('dark');
+        localStorage.setItem('chemportal_theme', 'dark');
+      }
+    }
+
+    // Init on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      updateCategoryPillCounts();
+      updateFavoriteCountUI();
+      renderLastVisitedLabBanner();
+      renderVirtualLabs();
+
+      // Keyboard Esc to close modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeLabGuideModal();
+          closeChemToolsModal();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
