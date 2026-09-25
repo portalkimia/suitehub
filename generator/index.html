@@ -670,11 +670,12 @@
               <span style="font-size: 0.78rem; font-weight: 700; color: var(--obs-text-primary);">Quick Tags Materi Kimia:</span>
             </div>
             <!-- Tab Filter Jenjang -->
-            <div class="d-flex gap-1">
+            <div class="d-flex gap-1 flex-wrap">
               <button type="button" class="btn btn-sm py-0 px-2 rounded-pill text-xs" id="tabQuickAll" onclick="filterQuickTags('ALL')" style="font-size: 0.7rem; background: var(--obs-surface-highest); color: var(--obs-text-primary);">Semua</button>
               <button type="button" class="btn btn-sm py-0 px-2 rounded-pill text-xs" id="tabQuickE" onclick="filterQuickTags('10')" style="font-size: 0.7rem; color: var(--obs-text-secondary);">Fase E (10)</button>
               <button type="button" class="btn btn-sm py-0 px-2 rounded-pill text-xs" id="tabQuickF11" onclick="filterQuickTags('11')" style="font-size: 0.7rem; color: var(--obs-text-secondary);">Fase F (11)</button>
               <button type="button" class="btn btn-sm py-0 px-2 rounded-pill text-xs" id="tabQuickF12" onclick="filterQuickTags('12')" style="font-size: 0.7rem; color: var(--obs-text-secondary);">Fase F (12)</button>
+              <button type="button" class="btn btn-sm py-0 px-2 rounded-pill text-xs" id="tabQuickLab" onclick="filterQuickTags('LAB')" style="font-size: 0.7rem; color: var(--obs-primary);">🧪 Lab Virtual</button>
               <button type="button" class="btn btn-sm py-0 px-2 rounded-pill text-xs" id="tabQuickMedia" onclick="filterQuickTags('MEDIA')" style="font-size: 0.7rem; color: var(--obs-tertiary);">⚡ Terhubung Media</button>
             </div>
           </div>
@@ -717,24 +718,14 @@
             </select>
           </div>
 
-          <div class="col-md-6 mb-3">
-            <label class="form-label" for="aiProvider">Model AI untuk menyusun modul</label>
-            <select id="aiProvider" class="form-select border-violet" onchange="aturKeteranganAIProvider()">
-              <option value="auto">Otomatis: Gemini → DeepSeek V4.1 Flash (cadangan berbayar)</option>
-              <option value="gemini">Gemini saja (rantai model Gemini)</option>
-              <option value="deepseek">DeepSeek V4.1 Flash langsung (berbayar)</option>
-            </select>
-            <div id="aiProviderNotice" class="small mt-2 text-warning" role="status"></div>
-          </div>
-
-          <div class="col-md-4 mb-3">
+          <div class="col-md-3 mb-3">
             <label class="form-label" for="aiKelas">
               <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">school</span>
               Jenjang / Kelas
             </label>
             <input type="text" id="aiKelas" class="form-control" placeholder="Contoh: 12" oninput="sinkronKelasKeForm()">
           </div>
-          <div class="col-md-5 mb-3">
+          <div class="col-md-6 mb-3">
             <label class="form-label" for="aiTopik">
               <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">science</span>
               Topik / Materi
@@ -757,6 +748,19 @@
               <option value="8">8 Pertemuan</option>
               <option value="9">9 Pertemuan</option>
             </select>
+          </div>
+
+          <div class="col-12 mb-3">
+            <label class="form-label" for="aiProvider">
+              <span class="material-symbols-outlined text-violet" style="font-size: 16px;">neurology</span>
+              Model AI untuk Menyusun Modul
+            </label>
+            <select id="aiProvider" class="form-select border-violet" onchange="aturKeteranganAIProvider()">
+              <option value="auto">Otomatis: Gemini → DeepSeek V4.1 Flash (cadangan berbayar)</option>
+              <option value="gemini">Gemini saja (rantai model Gemini)</option>
+              <option value="deepseek">DeepSeek V4.1 Flash langsung (berbayar)</option>
+            </select>
+            <div id="aiProviderNotice" class="small mt-2 text-warning" role="status"></div>
           </div>
         </div>
 
@@ -4119,22 +4123,23 @@
 
     function filterQuickTags(filter) {
       activeQuickFilter = filter;
-      ['tabQuickAll', 'tabQuickE', 'tabQuickF11', 'tabQuickF12', 'tabQuickMedia'].forEach(id => {
+      ['tabQuickAll', 'tabQuickE', 'tabQuickF11', 'tabQuickF12', 'tabQuickLab', 'tabQuickMedia'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
           el.style.background = 'transparent';
-          el.style.color = 'var(--obs-text-secondary)';
+          el.style.color = (id === 'tabQuickMedia') ? 'var(--obs-tertiary)' : (id === 'tabQuickLab' ? 'var(--obs-primary)' : 'var(--obs-text-secondary)');
         }
       });
 
       const activeBtnId = filter === 'ALL' ? 'tabQuickAll' : 
                           filter === '10' ? 'tabQuickE' : 
                           filter === '11' ? 'tabQuickF11' : 
-                          filter === '12' ? 'tabQuickF12' : 'tabQuickMedia';
+                          filter === '12' ? 'tabQuickF12' : 
+                          filter === 'LAB' ? 'tabQuickLab' : 'tabQuickMedia';
       const activeBtn = document.getElementById(activeBtnId);
       if (activeBtn) {
         activeBtn.style.background = 'var(--obs-surface-highest)';
-        activeBtn.style.color = (filter === 'MEDIA') ? 'var(--obs-tertiary)' : 'var(--obs-text-primary)';
+        activeBtn.style.color = (filter === 'MEDIA') ? 'var(--obs-tertiary)' : (filter === 'LAB' ? 'var(--obs-primary)' : 'var(--obs-text-primary)');
       }
 
       renderQuickTags();
@@ -5090,7 +5095,7 @@ var GeneratorCore = (function () {
   }
   function placeholders(text) { return Array.from(new Set(String(text).match(/\{\{[^{}]+\}\}/g)||[])); }
   function templateCheck(text) {
-    var fixed=['Nama','Topik','Kelas','Waktu','Tujuan','Model','Strategi','Metode','Kemitraan','Lingkungan','Digital','ListAsesmen','Dapus','Lampiran','Keimanan','Penalaran','Kolaborasi','Kesehatan','Kewargaan','Kreativitas','Kemandirian','Komunikasi','CP','SumberCP'];
+    var fixed=['Nama','Topik','Kelas','Waktu','Tujuan','Model','Strategi','Metode','Kemitraan','Lingkungan','Digital','ListAsesmen','Dapus','Lampiran','Keimanan','Penalaran','Kolaborasi','Kesehatan','Kewargaan','Kreativitas','Kemandirian','Komunikasi'];
     var found=placeholders(text), unknown=found.filter(function(p){var k=p.slice(2,-2);return fixed.indexOf(k)<0&&!/^(ITP|Asesmen|Aktivitas)([1-9]|1[0-4])$/.test(k)&&!/^(SubTopik|Ayat|Zona|Awal|Memahami|Mengaplikasi|Merefleksi|Penutup)[1-9]$/.test(k);});
     var missing=['Topik','Kelas','Tujuan'].filter(function(k){return found.indexOf('{{'+k+'}}')<0;});
     return {unknown:unknown,missing:missing,valid:!unknown.length&&!missing.length};
@@ -5136,7 +5141,7 @@ if(typeof module!=='undefined') module.exports=GeneratorCore;
   };
   window.muatKatalogMediaTersimpan=function(){portalMediaCatalog=GeneratorCore.validateManifest(DEFAULT_PORTALKIMIA_MEDIA).slice();renderDaftarMediaPortal();};
   window.sinkronkanMediaPortalTerbaru=async function(silent){try {var r=await fetch('portal_media_manifest.json',{cache:'no-cache'});if(!r.ok)throw Error('Katalog HTTP '+r.status);portalMediaCatalog=GeneratorCore.validateManifest(await r.json());renderDaftarMediaPortal();renderQuickTags();if(!silent)alert('Katalog diperbarui: '+portalMediaCatalog.length+' item.');}catch(e){if(!silent)alert('Menggunakan katalog bawaan. '+e.message);}};
-  window.renderQuickTags=function(){var container=document.getElementById('quickTagsList');if(!container)return;container.replaceChildren();portalMediaCatalog.filter(function(m){return activeQuickFilter==='ALL'||activeQuickFilter==='MEDIA'||m.grade===activeQuickFilter;}).forEach(function(m){var b=el('button',m.topic+' • '+m.grade,'quick-tag-pill');b.type='button';b.addEventListener('click',function(){terapkanMediaKeGenerator(m.id);});container.append(b);});};
+  window.renderQuickTags=function(){var container=document.getElementById('quickTagsList');if(!container)return;container.replaceChildren();portalMediaCatalog.filter(function(m){if(activeQuickFilter==='ALL')return true;if(activeQuickFilter==='LAB')return m.category==='Praktikum Virtual';if(activeQuickFilter==='MEDIA')return m.category==='Media Pembelajaran';return m.grade===activeQuickFilter;}).forEach(function(m){var prefix=m.category==='Praktikum Virtual'?'🧪 ':'';var b=el('button',prefix+m.topic+' • '+m.grade,'quick-tag-pill');b.type='button';b.addEventListener('click',function(){terapkanMediaKeGenerator(m.id);});container.append(b);});};
   var uploadGeneration=0;
   window.prosesFile=async function(file){var generation=++uploadGeneration;window.currentUploadedFile=null;if(!file)return;try {
     if(file.size>5*1024*1024)throw Error('Berkas maksimal 5 MB; teks maksimal 1 MB.');
