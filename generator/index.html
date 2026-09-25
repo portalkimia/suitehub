@@ -5374,7 +5374,16 @@
             selesaiAnimasiProgress(true, "Kerangka berhasil dirancang!");
             try {
               const data = typeof hasilJSON === 'string' ? JSON.parse(hasilJSON) : hasilJSON;
-              if (data.error) { alert("Gagal dari AI: " + data.error); return; }
+              const partial = (data && data.partialData) || data;
+              if (partial && typeof partial === 'object') {
+                if (partial.topik || partial.tujuan || partial.itp1 || partial.subTopik1 || partial.awal1) {
+                  isiDataSecaraOtomatis(partial, inputKelas);
+                }
+              }
+              if (data && data.error) {
+                alert("Perhatian dari Server: " + data.error + "\n\nIsian yang sempat dirancang oleh AI sebelum terputus telah otomatis kami masukkan ke formulir. Anda dapat melengkapi pertemuan yang belum selesai dengan mengklik tombol Micro AI Co-Pilot pada header pertemuan terkait.");
+                return;
+              }
               isiDataSecaraOtomatis(data, inputKelas);
               alert("Kerangka berhasil dirancang oleh AI! Silakan tinjau isian form.");
             } catch (e) {
@@ -5413,12 +5422,18 @@
         })
         .then(data => {
           tombolAI.disabled = false;
-          if (data.error) {
+          const partial = (data && data.partialData) || data;
+          if (partial && typeof partial === 'object') {
+            if (partial.topik || partial.tujuan || partial.itp1 || partial.subTopik1 || partial.awal1) {
+              isiDataSecaraOtomatis(partial, inputKelas);
+            }
+          }
+          if (data && data.error) {
             selesaiAnimasiProgress(false, "Respon Error dari Server");
-            alert("Respon Error dari Server: " + data.error);
+            alert("Perhatian dari Server: " + data.error + "\n\nIsian yang sempat dirancang oleh AI sebelum terputus telah otomatis kami masukkan ke formulir. Anda dapat melengkapi pertemuan yang belum selesai dengan mengklik tombol Micro AI Co-Pilot pada header pertemuan terkait.");
             return;
           }
-            selesaiAnimasiProgress(true, "Kerangka berhasil dirancang!");
+          selesaiAnimasiProgress(true, "Kerangka berhasil dirancang!");
           isiDataSecaraOtomatis(data, inputKelas);
           alert("Kerangka berhasil dirancang oleh AI via Backend GAS! Silakan tinjau form.");
         })
