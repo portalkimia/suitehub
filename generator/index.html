@@ -4283,7 +4283,7 @@
         if (faithText) {
           out += `     * Teks Ayat / Hadits & Hikmah:\n${faithText.split('\n').map(l => '       ' + l).join('\n')}\n`;
         }
-        out += `     * INSTRUKSI WAJIB: Tuliskan rujukan dan teks ayat/hadits ini secara utuh dan benar ke dalam dokumen modul ajar/lesson plan pada kolom ayat/hadist serta langkah pembelajaran berkesadaran/bermakna.\n`;
+        out += `     * INSTRUKSI MUTLAK AI: Masukkan rujukan resmi, teks Arab, dan terjemahan ayat/hadits ini HANYA pada field "ayat" (ayat1, ayat2, dst). DILARANG KERAS mencantumkan teks Arab, rujukan QS./HR., atau nomor surat ke dalam field kegiatan (awal, memahami, mengaplikasi, merefleksi, penutup) agar tidak ditolak validasi sistem. Pada field kegiatan, cukup deskripsikan aktivitas murid secara umum (misal: "Murid menyimak dan merenungkan pesan ayat yang telah ditentukan").\n`;
       } else {
         out += '   - Integrasi ayat/hadis: gunakan isi yang benar-benar ada pada media terpilih. Periksa ketepatan teks Arab/bacaan dan arti melalui sumber online tepercaya. Jika media tidak memuat kutipan, cari yang paling relevan dengan materi, sertakan sumbernya, dan jangan mengarang teks atau terjemahan.\n';
       }
@@ -4463,6 +4463,25 @@
     async function terapkanMediaKeGenerator(mediaId) {
       const media=portalMediaCatalog.find(function(m){return m.id===mediaId;})||cariMediaPortalByTopik(mediaId);
       if(!media)return;
+
+      // Selaraskan window.selectedPortalMedia dengan isi nyata aiBahanAjar
+      const bahanAjarVal = (document.getElementById('aiBahanAjar').value || '').trim();
+      if (!bahanAjarVal) {
+        window.selectedPortalMedia = [];
+        window.mediaTeacherNotes = '';
+        simpanUrutanMediaTerpilih();
+      } else if (Array.isArray(window.selectedPortalMedia) && window.selectedPortalMedia.length) {
+        const mediaMasihAda = window.selectedPortalMedia.filter(function(item) {
+          return bahanAjarVal.includes(item.id) || (item.title && bahanAjarVal.toLowerCase().includes(item.title.toLowerCase()));
+        });
+        if (mediaMasihAda.length !== window.selectedPortalMedia.length) {
+          window.selectedPortalMedia = mediaMasihAda;
+          simpanUrutanMediaTerpilih();
+        }
+      }
+      window.renderPortalMediaMeetings && window.renderPortalMediaMeetings();
+      window.renderDaftarMediaPortal && window.renderDaftarMediaPortal();
+
       if((window.selectedPortalMedia||[]).some(function(item){return item.id===media.id;})){alert('Media ini sudah dipilih untuk Pertemuan '+(window.selectedPortalMedia.findIndex(function(item){return item.id===media.id;})+1)+'.');return;}
       const limit=document.getElementById('jenisDokumen').value==='Lesson Plan'?2:9;
       if(window.selectedPortalMedia.length>=limit){alert('Jumlah media terpilih sudah mencapai batas '+limit+' pertemuan untuk jenis dokumen ini.');return;}
@@ -5142,6 +5161,10 @@
     function resetFormulir() {
       if (confirm("PERHATIAN: Apakah Anda yakin ingin MENGHAPUS SELURUH isian dari form ini?")) {
         localStorage.removeItem('draftModulKimia'); 
+        localStorage.removeItem('portalKimiaMediaTerpilih');
+        localStorage.removeItem('portalKimiaCatatanMedia');
+        window.selectedPortalMedia = [];
+        window.mediaTeacherNotes = '';
         document.getElementById('formModul').reset(); 
         document.getElementById('aiKelas').value = '';
         document.getElementById('aiTopik').value = '';
@@ -5150,10 +5173,14 @@
         document.getElementById('aiBahanAjar').value = '';
         document.getElementById('aiModelPembelajaran').value = 'Otomatis';
         document.getElementById('aiProvider').value = 'auto';
+        const areaHasil = document.getElementById('areaHasil');
+        if (areaHasil) areaHasil.innerHTML = '';
         aturKeteranganAIProvider();
         hapusFileTerunggah();
         aturTampilanDokumen();
         renderQuickTags();
+        window.renderPortalMediaMeetings && window.renderPortalMediaMeetings();
+        window.renderDaftarMediaPortal && window.renderDaftarMediaPortal();
         window.scrollTo({ top: 0, behavior: 'smooth' }); 
       }
     }
@@ -5171,6 +5198,19 @@
       sinkronkanMediaPortalTerbaru(true);
       muatDraft();
       aturKeteranganAIProvider();
+
+      const areaBahanAjar = document.getElementById('aiBahanAjar');
+      if (areaBahanAjar) {
+        areaBahanAjar.addEventListener('input', function() {
+          if (!this.value.trim() && window.selectedPortalMedia && window.selectedPortalMedia.length) {
+            window.selectedPortalMedia = [];
+            window.mediaTeacherNotes = '';
+            simpanUrutanMediaTerpilih();
+            window.renderPortalMediaMeetings && window.renderPortalMediaMeetings();
+            window.renderDaftarMediaPortal && window.renderDaftarMediaPortal();
+          }
+        });
+      }
     });
 
     // =========================================================================
