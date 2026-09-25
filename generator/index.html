@@ -717,6 +717,16 @@
             </select>
           </div>
 
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="aiProvider">Model AI untuk menyusun modul</label>
+            <select id="aiProvider" class="form-select border-violet" onchange="aturKeteranganAIProvider()">
+              <option value="auto">Otomatis: Gemini → DeepSeek V4.1 Flash (cadangan berbayar)</option>
+              <option value="gemini">Gemini saja (rantai model Gemini)</option>
+              <option value="deepseek">DeepSeek V4.1 Flash langsung (berbayar)</option>
+            </select>
+            <div id="aiProviderNotice" class="small mt-2 text-warning" role="status"></div>
+          </div>
+
           <div class="col-md-4 mb-3">
             <label class="form-label" for="aiKelas">
               <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">school</span>
@@ -1008,12 +1018,17 @@
         <div class="modal-body p-4">
           <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
             <p class="small text-muted m-0" style="color: var(--obs-text-secondary) !important;">
-              Pilih media interaktif untuk langsung mengisi Topik, Kelas, Pemanfaatan Digital, dan skenario lab virtual AI.
+              Pilih beberapa media secara berurutan. Media pertama menjadi Pertemuan 1, pilihan berikutnya menjadi pertemuan selanjutnya.
             </p>
             <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5 shrink-0" onclick="sinkronkanMediaPortalTerbaru()">
               <span class="material-symbols-outlined" style="font-size: 16px;">sync</span>
               <span>Sinkronkan Media</span>
             </button>
+          </div>
+
+          <div class="mb-3 p-3 border border-secondary rounded" id="mediaPertemuanTerpilihWrap">
+            <div class="fw-semibold small mb-2">Urutan media per pertemuan</div>
+            <div id="mediaPertemuanTerpilih" class="small text-muted">Belum ada media dipilih.</div>
           </div>
 
           <!-- Filter Pencarian Media -->
@@ -1146,6 +1161,7 @@
               <li>Set <strong>Execute as:</strong> <em>Me (email Anda)</em>.</li>
               <li>Set <strong>Who has access:</strong> <strong class="text-emerald">Anyone (Siapa saja)</strong> &mdash; <em>PENTING!</em></li>
               <li>Di Script Properties, simpan <code>GEMINI_API_KEY</code>.</li>
+              <li>Jika memilih DeepSeek atau mode otomatis, simpan juga <code>DEEPSEEK_API_KEY</code> di Script Properties. Kuncinya jangan ditempel di halaman atau chat.</li>
               <li>Jalankan <code>buatTokenAksesGuru_()</code>, salin token dari log eksekusi, lalu tempelkan di atas.</li>
               <li>Salin URL Web App dan tempelkan di atas.</li>
             </ol>
@@ -3882,7 +3898,7 @@
       out += `--- 5 KRITERIA PENILAIAN MODUL AJAR / LESSON PLAN SEKOLAH ---\n`;
       out += `1. KESELARASAN & PROFIL LULUSAN:\n`;
       out += `   - TUJUAN PEMBELAJARAN (Wajib dijadikan rujukan utama): "${media.tujuan}"\n`;
-      out += '   - Kutipan ayat/hadis diisi server dari pustaka pilihan guru.\n';
+      out += '   - Integrasi ayat/hadis: gunakan isi yang benar-benar ada pada media terpilih. Periksa ketepatan teks Arab/bacaan dan arti melalui sumber online tepercaya. Jika media tidak memuat kutipan, cari yang paling relevan dengan materi, sertakan sumbernya, dan jangan mengarang teks atau terjemahan.\n';
       out += `   - DIMENSI PROFIL LULUSAN: Beriman & Bertakwa kepada Tuhan YME (Tadabbur Sains Ilahi), Bernalar Kritis (Analisis Variabel Simulasi), Mandiri (Eksplorasi LKS Mandiri), dan Gotong Royong (Diskusi Tim Penyelidikan Virtual).\n\n`;
       
       out += `2. KERANGKA & DESAIN PEMBELAJARAN:\n`;
@@ -3963,39 +3979,105 @@
 
     function renderDaftarMediaPortal() {}
 
-    function terapkanMediaKeGenerator(mediaId) {
-      const media = portalMediaCatalog.find(m => m.id === mediaId) || cariMediaPortalByTopik(mediaId);
-      if (!media) return;
+    window.selectedPortalMedia = window.selectedPortalMedia || [];
+    window.mediaTeacherNotes = window.mediaTeacherNotes || '';
 
-      // 1. Masukkan ke kontrol AI (Jenjang/Kelas, Topik, dan Kotak Instruksi Tambahan Bahan Ajar)
-      document.getElementById('aiKelas').value = media.grade;
-      document.getElementById('aiTopik').value = media.topic || media.title;
-      
-      // 2. Susun dan masukkan paket rujukan pedagogis 5 kriteria ke kotak Bahan Ajar / Instruksi Tambahan AI
-      const areaBahan = document.getElementById('aiBahanAjar');
-      areaBahan.value = susunPaketPedagogisMedia(media);
+    async function muatBagianKeislamanMedia(media) {
+      try {
+        const pathParts=String(media.url||'').split('/');
+        if(pathParts[0]!=='..'||pathParts[1]!=='media'||!pathParts[pathParts.length-1].endsWith('.html')||pathParts.slice(2).some(part=>!part||part==='.'||part==='..'||!/^[A-Za-z0-9_.-]+$/.test(part)))return '';
+        const response=await fetch(media.url,{cache:'no-cache'});
+        if(!response.ok)throw Error('Media tidak dapat dibaca: '+response.status);
+        const source=await response.text();
+        const doc=new DOMParser().parseFromString(source,'text/html');
+        doc.querySelectorAll('script,style,svg,iframe,object,form,button').forEach(node=>node.remove());
+        const headings=Array.from(doc.querySelectorAll('h1,h2,h3,h4')).filter(node=>/integrasi nilai keislaman|tadabbur ayat|mutiara hadits|mutiara hadis/i.test(node.textContent||''));
+        const sections=headings.map(node=>node.closest('section')||node.parentElement).filter(Boolean);
+        return sections.map(node=>(node.innerText||node.textContent||'').replace(/\s+/g,' ').trim()).filter(Boolean).join('\n').slice(0,6000);
+      } catch(error) { return ''; }
+    }
 
-      // 3. Sinkronkan HANYA identitas judul dasar form (Topik & Kelas), TIDAK mengisi kolom isi agar di-generate utuh oleh AI
-      if (document.getElementsByName('kelas')[0]) document.getElementsByName('kelas')[0].value = media.grade;
-      if (document.getElementsByName('topik')[0]) document.getElementsByName('topik')[0].value = media.topic || media.title;
+    function susunInstruksiMediaTerpilih() {
+      const selected=window.selectedPortalMedia||[];
+      const packets=selected.map(function(item,index){
+        const media=portalMediaCatalog.find(function(m){return m.id===item.id;})||item;
+        return '[MEDIA PERTEMUAN '+(index+1)+']\n'+susunPaketPedagogisMedia(media);
+      });
+      if(window.mediaTeacherNotes)packets.push('[CATATAN TAMBAHAN GURU]\n'+window.mediaTeacherNotes);
+      return packets.join('\n\n');
+    }
 
-      // Simpan perubahan ke draft
+    function simpanUrutanMediaTerpilih() {
+      localStorage.setItem('portalKimiaMediaTerpilih',JSON.stringify((window.selectedPortalMedia||[]).map(function(item){return item.id;})));
+      localStorage.setItem('portalKimiaCatatanMedia',window.mediaTeacherNotes||'');
+    }
+
+    window.restorePortalMediaSelections=async function(){
+      try {
+        const ids=JSON.parse(localStorage.getItem('portalKimiaMediaTerpilih')||'[]');
+        if(!Array.isArray(ids)||!ids.length)return;
+        window.mediaTeacherNotes=localStorage.getItem('portalKimiaCatatanMedia')||'';
+        for(const id of ids.slice(0,9)){
+          const media=portalMediaCatalog.find(function(m){return m.id===id;});
+          if(!media)continue;
+          const item=Object.assign({},media,{mediaFaithContent:''});
+          window.selectedPortalMedia.push(item);
+          item.mediaFaithContent=await muatBagianKeislamanMedia(media);
+        }
+        if(window.selectedPortalMedia.length){
+          const count=Math.max(Number(document.getElementById('aiPertemuan').value)||1,window.selectedPortalMedia.length);
+          document.getElementById('aiPertemuan').value=String(count);
+          document.getElementById('aiBahanAjar').value=susunInstruksiMediaTerpilih();
+          const first=window.selectedPortalMedia[0];
+          document.getElementById('aiKelas').value=first.grade;
+          document.getElementById('aiTopik').value=first.topic||first.title;
+          window.renderPortalMediaMeetings&&window.renderPortalMediaMeetings();
+          window.renderDaftarMediaPortal&&window.renderDaftarMediaPortal();
+          simpanDraft();
+        }
+      } catch(error) { console.warn('Pilihan media sebelumnya tidak dapat dipulihkan.',error); }
+    };
+
+    function hapusMediaTerpilih(mediaId) {
+      window.selectedPortalMedia=window.selectedPortalMedia.filter(function(item){return item.id!==mediaId;});
+      simpanUrutanMediaTerpilih();
+      document.getElementById('aiBahanAjar').value=susunInstruksiMediaTerpilih();
+      if(window.selectedPortalMedia.length){
+        const first=window.selectedPortalMedia[0];
+        document.getElementById('aiKelas').value=first.grade;
+        document.getElementById('aiTopik').value=first.topic||first.title;
+      } else if(window.mediaTeacherNotes) document.getElementById('aiBahanAjar').value=window.mediaTeacherNotes;
+      window.renderPortalMediaMeetings&&window.renderPortalMediaMeetings();
+      window.renderDaftarMediaPortal&&window.renderDaftarMediaPortal();
       simpanDraft();
+    }
 
-      // Tutup modal jika terbuka
-      const modalEl = document.getElementById('modalMediaPortal');
-      if (modalEl) {
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        if (modal) modal.hide();
+    async function terapkanMediaKeGenerator(mediaId) {
+      const media=portalMediaCatalog.find(function(m){return m.id===mediaId;})||cariMediaPortalByTopik(mediaId);
+      if(!media)return;
+      if((window.selectedPortalMedia||[]).some(function(item){return item.id===media.id;})){alert('Media ini sudah dipilih untuk Pertemuan '+(window.selectedPortalMedia.findIndex(function(item){return item.id===media.id;})+1)+'.');return;}
+      const limit=document.getElementById('jenisDokumen').value==='Lesson Plan'?2:9;
+      if(window.selectedPortalMedia.length>=limit){alert('Jumlah media terpilih sudah mencapai batas '+limit+' pertemuan untuk jenis dokumen ini.');return;}
+      if(!window.selectedPortalMedia.length){
+        const existing=document.getElementById('aiBahanAjar').value.trim();
+        window.mediaTeacherNotes=existing&&!existing.includes('[RUJUKAN PEDAGOGIS KHUSUS')?existing:'';
       }
-
-      // Sorot panel AI (Topik, Kelas, Bahan Ajar) agar guru melihat rujukan telah masuk ke kotak instruksi AI
-      highlightInputFields(['aiTopik', 'aiKelas', 'aiBahanAjar']);
-
-      // Gulir lembut ke area kontrol AI
-      document.getElementById('aiBahanAjar')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      alert("Rujukan pedagogis \"" + media.title + "\" berhasil dimasukkan ke kotak Bahan Ajar / Instruksi Tambahan AI!\n\nSeluruh rujukan 5 Kriteria Penilaian Sekolah (Tujuan Pembelajaran, Integrasi Ayat & Tadabbur, Sintaks 3 Fase Memahami-Mengaplikasi-Merefleksi, dan Asesmen) telah siap di kotak AI.\n\nSilakan klik tombol \"Generate Kerangka Otomatis\" untuk merancang dokumen secara utuh.");
+      const item=Object.assign({},media,{mediaFaithContent:''});
+      window.selectedPortalMedia.push(item);
+      item.mediaFaithContent=await muatBagianKeislamanMedia(media);
+      document.getElementById('aiKelas').value=window.selectedPortalMedia[0].grade;
+      document.getElementById('aiTopik').value=window.selectedPortalMedia[0].topic||window.selectedPortalMedia[0].title;
+      const meetingCount=document.getElementById('aiPertemuan');
+      if(Number(meetingCount.value)<window.selectedPortalMedia.length)meetingCount.value=String(window.selectedPortalMedia.length);
+      document.getElementById('aiBahanAjar').value=susunInstruksiMediaTerpilih();
+      if(document.getElementsByName('kelas')[0])document.getElementsByName('kelas')[0].value=window.selectedPortalMedia[0].grade;
+      if(document.getElementsByName('topik')[0])document.getElementsByName('topik')[0].value=window.selectedPortalMedia[0].topic||window.selectedPortalMedia[0].title;
+      simpanUrutanMediaTerpilih();
+      window.renderPortalMediaMeetings&&window.renderPortalMediaMeetings();
+      window.renderDaftarMediaPortal&&window.renderDaftarMediaPortal();
+      simpanDraft();
+      // Biarkan modal terbuka agar guru dapat memilih media berikutnya secara berurutan.
+      window.renderPortalMediaMeetings&&window.renderPortalMediaMeetings();
     }
     // =========================================================================
     // 2. QUICK TAGS MANAGEMENT
@@ -4569,6 +4651,15 @@
     // =========================================================================
     // 8. AUTO-SAVE & DRAFT
     // =========================================================================
+    function aturKeteranganAIProvider() {
+      const provider=document.getElementById('aiProvider')?.value||'auto';
+      const note=document.getElementById('aiProviderNotice');
+      if(!note)return;
+      if(provider==='deepseek') note.textContent='DeepSeek V4.1 Flash memakai API berbayar; biaya dihitung dari token. Pastikan saldo API tersedia. File PDF perlu Gemini; kutipan ayat/hadis yang tidak disertai sumber akan ditandai belum terverifikasi.';
+      else if(provider==='auto') note.textContent='Gemini dicoba lebih dahulu. Jika Gemini kehabisan kuota (429) atau layanan mengalami gangguan (5xx), sistem mencoba DeepSeek berbayar dan memakai saldo API DeepSeek. PDF perlu Gemini; kutipan ayat/hadis tanpa sumber akan ditandai belum terverifikasi.';
+      else note.textContent='Hanya model Gemini yang digunakan. Tidak ada fallback berbayar ke DeepSeek.';
+    }
+
     function simpanDraft() {
       const form = document.getElementById('formModul');
       if (!form) return;
@@ -4582,6 +4673,7 @@
       draft.jenisDokumen = document.getElementById('jenisDokumen').value;
       draft.aiBahanAjar = document.getElementById('aiBahanAjar').value;
       draft.aiModelPembelajaran = document.getElementById('aiModelPembelajaran').value;
+      draft.aiProvider = document.getElementById('aiProvider')?.value || 'auto';
       
       const ceklisFields = ['keimanan', 'penalaran', 'kolaborasi', 'kesehatan', 'kewargaan', 'kreativitas', 'kemandirian', 'komunikasi'];
       ceklisFields.forEach(item => {
@@ -4609,6 +4701,7 @@
           if (data.jenisDokumen) document.getElementById('jenisDokumen').value = data.jenisDokumen;
           if (data.aiBahanAjar) document.getElementById('aiBahanAjar').value = data.aiBahanAjar;
           if (data.aiModelPembelajaran) document.getElementById('aiModelPembelajaran').value = data.aiModelPembelajaran;
+          if (data.aiProvider) document.getElementById('aiProvider').value = data.aiProvider;
           
           for (let key in data) {
             const elemen = document.getElementsByName(key)[0];
@@ -4634,6 +4727,8 @@
         document.getElementById('jenisDokumen').value = 'Modul Ajar';
         document.getElementById('aiBahanAjar').value = '';
         document.getElementById('aiModelPembelajaran').value = 'Otomatis';
+        document.getElementById('aiProvider').value = 'auto';
+        aturKeteranganAIProvider();
         hapusFileTerunggah();
         aturTampilanDokumen();
         renderQuickTags();
@@ -4649,9 +4744,11 @@
       updateBackendStatusUI();
       if (getGeneratorAccessToken()) ujiKoneksiBackendOtomatis();
       muatKatalogMediaTersimpan();
+      restorePortalMediaSelections();
       renderQuickTags();
       sinkronkanMediaPortalTerbaru(true);
       muatDraft();
+      aturKeteranganAIProvider();
     });
 
     // =========================================================================
@@ -4777,6 +4874,11 @@
         }
       }
       
+      if((window.selectedPortalMedia||[]).length>Number(inputPertemuan)){
+        alert('Jumlah media terpilih melebihi jumlah pertemuan. Tambah jumlah pertemuan atau hapus media yang tidak digunakan.');
+        return;
+      }
+
       const dataInstruksi = {
         ...generatorContext(),
         jenisDokumen: inputJenis,
@@ -4801,7 +4903,7 @@
               const data = typeof hasilJSON === 'string' ? JSON.parse(hasilJSON) : hasilJSON;
               if (data.error) { alert("Gagal dari AI: " + data.error); return; }
               isiDataSecaraOtomatis(data, inputKelas);
-              alert("Kerangka berhasil dirancang oleh Gemini AI! Silakan tinjau isian form.");
+              alert("Kerangka berhasil dirancang oleh AI! Silakan tinjau isian form.");
             } catch (e) {
               alert("Kesalahan membaca data AI: " + e.message);
             }
@@ -4845,7 +4947,7 @@
           }
             selesaiAnimasiProgress(true, "Kerangka berhasil dirancang!");
           isiDataSecaraOtomatis(data, inputKelas);
-          alert("Kerangka berhasil dirancang oleh Gemini AI via Backend GAS! Silakan tinjau form.");
+          alert("Kerangka berhasil dirancang oleh AI via Backend GAS! Silakan tinjau form.");
         })
         .catch(err => {
           tombolAI.disabled = false;
@@ -4942,15 +5044,9 @@
 /* Shared deterministic validation, embedded in HTML and GAS by build-generator-v2.py. */
 var GeneratorCore = (function () {
   'use strict';
-  var library = [
-    {id:'q55-9',reference:'QS. Ar-Rahman 55:9',arabic:'وَأَقِيمُوا۟ ٱلْوَزْنَ بِٱلْقِسْطِ وَلَا تُخْسِرُوا۟ ٱلْمِيزَانَ',translation:'Dan tegakkanlah keseimbangan itu dengan adil dan janganlah kamu mengurangi keseimbangan itu.',language:'Indonesia',source:'https://quran.com/id/ar-rahman/9',verifiedOn:'2026-09-24',scope:'Ayat lengkap; refleksi keadilan dan kejujuran pengukuran, bukan penjelasan hukum kesetimbangan kimia.'},
-    {id:'bukhari-1',reference:'Sahih al-Bukhari 1 (kutipan awal)',arabic:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ',translation:'The reward of deeds depends upon the intentions',language:'English (teks sumber)',source:'https://sunnah.com/bukhari:1',verifiedOn:'2026-09-24',scope:'Kutipan awal hadis sahih, bukan hadis lengkap. Refleksi niat belajar; bukan klaim ilmiah.'}
-  ];
   var prefixes=['subTopik','ayat','zona','awal','memahami','mengaplikasi','merefleksi','penutup'];
   var strings=['topik','kelas','waktu','tujuan','model','strategi','metode','kemitraan','lingkungan','digital','listAsesmen','dapus','lampiran'];
   var bools=['keimanan','penalaran','kolaborasi','kesehatan','kewargaan','kreativitas','kemandirian','komunikasi'];
-  function reference(id) { return library.filter(function(x){return x.id===id;})[0] || null; }
-  function citation(id) { var r=reference(id); if(!r) return ''; return r.reference+'\n'+r.arabic+'\nTerjemahan ('+r.language+'): '+r.translation+'\nSumber: '+r.source+'\nCatatan konteks: '+r.scope; }
   function keys() { var result=strings.slice(); for(var i=1;i<=14;i++) ['itp','asesmen','aktivitas'].forEach(function(p){result.push(p+i);}); for(var j=1;j<=9;j++) prefixes.forEach(function(p){result.push(p+j);}); return result; }
   function validateAI(raw, mode, count, number) {
     var data=typeof raw==='string'?JSON.parse(raw):raw;
@@ -4999,7 +5095,7 @@ var GeneratorCore = (function () {
     var missing=['Topik','Kelas','Tujuan'].filter(function(k){return found.indexOf('{{'+k+'}}')<0;});
     return {unknown:unknown,missing:missing,valid:!unknown.length&&!missing.length};
   }
-  return {library:library,reference:reference,citation:citation,validateAI:validateAI,canonical:canonical,validateFile:validateFile,validateManifest:validateManifest,placeholders:placeholders,templateCheck:templateCheck};
+  return {validateAI:validateAI,canonical:canonical,validateFile:validateFile,validateManifest:validateManifest,placeholders:placeholders,templateCheck:templateCheck};
 })();
 if(typeof module!=='undefined') module.exports=GeneratorCore;
 
@@ -5019,6 +5115,12 @@ if(typeof module!=='undefined') module.exports=GeneratorCore;
     area.append(el('p','Dokumen tersedia di Google Drive. Permintaan ulang membuka dokumen yang sama.','alert alert-success'));
     [[doc,'Buka Google Docs'],[pdf,'Unduh PDF']].forEach(function(pair){var a=el('a',pair[1],'btn btn-success m-2');a.href=pair[0];a.target='_blank';a.rel='noopener noreferrer';area.append(a);});
   };
+  window.renderPortalMediaMeetings=function(){
+    var area=document.getElementById('mediaPertemuanTerpilih');if(!area)return;area.replaceChildren();
+    var selected=window.selectedPortalMedia||[];
+    if(!selected.length){area.append(el('span','Belum ada media dipilih.'));return;}
+    selected.forEach(function(item,index){var row=el('div',undefined,'d-flex justify-content-between align-items-center gap-2 py-1');row.append(el('span','Pertemuan '+(index+1)+': '+item.title));var remove=el('button','Hapus','btn btn-sm btn-outline-danger');remove.type='button';remove.addEventListener('click',function(){hapusMediaTerpilih(item.id);});row.append(remove);area.append(row);});
+  };
   window.renderDaftarMediaPortal=function(){
     var grid=document.getElementById('gridKartuMedia');if(!grid)return;
     grid.replaceChildren();var q=document.getElementById('cariMediaInput').value.toLowerCase();
@@ -5026,7 +5128,8 @@ if(typeof module!=='undefined') module.exports=GeneratorCore;
     if(!list.length)grid.append(el('p','Tidak ada media yang cocok dengan pencarian: '+q));
     list.forEach(function(m){var col=el('div',undefined,'col-md-6'),card=el('article',undefined,'p-3 border rounded h-100');card.append(el('small',m.category+' • '+(m.grade==='Umum'?'Umum':'Kelas '+m.grade)),el('h6',m.title),el('p',m.description,'small'));
       var url=safeLink(m.url,false);if(url){var link=el('a','Buka media','btn btn-sm btn-outline-secondary me-2');link.href=url;link.target='_blank';link.rel='noopener noreferrer';card.append(link);}
-      var btn=el('button','Terapkan','btn btn-sm btn-primary');btn.type='button';btn.addEventListener('click',function(){terapkanMediaKeGenerator(m.id);});card.append(btn);col.append(card);grid.append(col);
+      var selected=(window.selectedPortalMedia||[]).findIndex(function(item){return item.id===m.id;});
+      var btn=el('button',selected>=0?'Dipilih • Pertemuan '+(selected+1):'Pilih pertemuan selanjutnya','btn btn-sm '+(selected>=0?'btn-outline-secondary':'btn-primary'));btn.type='button';btn.disabled=selected>=0;btn.addEventListener('click',function(){terapkanMediaKeGenerator(m.id);});card.append(btn);col.append(card);grid.append(col);
     });
     var media=portalMediaCatalog.filter(function(m){return m.category==='Media Pembelajaran';}).length,lab=portalMediaCatalog.length-media;
     [['badgeJumlahMedia',portalMediaCatalog.length],['labelTotalMediaInfo',media+' Media • '+lab+' Praktikum Virtual'],['jumlahKatalogSemua',portalMediaCatalog.length],['jumlahKatalogMedia',media],['jumlahKatalogLab',lab]].forEach(function(p){document.getElementById(p[0]).textContent=p[1];});
@@ -5051,7 +5154,7 @@ if(typeof module!=='undefined') module.exports=GeneratorCore;
   function privacy(){if(window.hasUploadedReference&&!document.getElementById('privacyConsent').checked){alert('Pastikan berkas tidak mengandung data pribadi siswa, lalu centang konfirmasi.');return false;}return true;}
   var oldAI=window.mintaBantuanAI,oldPoles=window.eksekusiPolesCopilot;
   window.mintaBantuanAI=function(){if(privacy())oldAI();};window.eksekusiPolesCopilot=function(){if(privacy())oldPoles();};
-  window.generatorContext=function(){var contextText=(document.getElementById('aiTopik').value+' '+document.getElementById('aiBahanAjar').value);return {referenceId:/ukur|massa|timbang|stoikiometri|kesetimbangan|konsentrasi|analitik/i.test(contextText)?'q55-9':'bukhari-1',hasUploadedFile:!!window.hasUploadedReference,privacyConsent:!window.hasUploadedReference||document.getElementById('privacyConsent').checked};};
+  window.generatorContext=function(){var selected=window.selectedPortalMedia||[];return {aiProvider:document.getElementById('aiProvider')?.value||'auto',mediaSelected:selected.length>0,mediaByMeeting:selected.map(function(item,index){return {meeting:index+1,id:item.id,title:item.title,topic:item.topic||item.title,grade:item.grade,description:item.description||'',tujuan:item.tujuan||'',digital:item.digital||'',kegiatan:item.kegiatan||{},asesmen:item.asesmen||{},mediaFaithContent:String(item.mediaFaithContent||'')};}),hasUploadedFile:!!window.hasUploadedReference,privacyConsent:!window.hasUploadedReference||document.getElementById('privacyConsent').checked};};
   var oldFill=window.isiDataSecaraOtomatis,oldFillPoles=window.terapkanHasilPoles;
   window.isiDataSecaraOtomatis=function(data,kelas){try{var checked=GeneratorCore.validateAI(data,'full',Number(document.getElementById('aiPertemuan').value));
     for(var i=1;i<=14;i++)['itp','asesmen','aktivitas'].forEach(function(p){document.getElementsByName(p+i)[0].value='';});
