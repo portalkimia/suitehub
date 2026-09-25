@@ -652,7 +652,7 @@
             <!-- SAKELAR ON/OFF KONEKSI PORTALKIMIA -->
             <div class="d-flex align-items-center gap-1.5 px-2.5 py-1 rounded-pill" id="kontainerSwitchPortalKimia" style="background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.4);" title="Aktifkan/Nonaktifkan integrasi otomatis dengan katalog media PortalKimia">
               <div class="form-check form-switch m-0 d-flex align-items-center gap-1.5 p-0">
-                <input class="form-check-input m-0 cursor-pointer" type="checkbox" id="switchKoneksiPortalKimia" onchange="toggleKoneksiPortalKimia(this.checked)" checked style="cursor: pointer; width: 2.1rem; height: 1.1rem;">
+                <input class="form-check-input m-0 cursor-pointer" type="checkbox" id="switchKoneksiPortalKimia" onchange="toggleKoneksiPortalKimia(this.checked)" style="cursor: pointer; width: 2.1rem; height: 1.1rem;">
                 <label class="form-check-label user-select-none" for="switchKoneksiPortalKimia" id="labelSwitchPortalKimia" style="font-size: 0.75rem; font-weight: 600; color: var(--obs-tertiary); cursor: pointer;">
                   PortalKimia ON
                 </label>
@@ -4357,17 +4357,60 @@
     window.isUploadedReferenceActive = isUploadedReferenceActive;
 
     function isPortalKimiaEnabled() {
-      const sw = document.getElementById('switchKoneksiPortalKimia');
-      if (sw) return sw.checked;
+      // 1. Cek parameter URL terlebih dahulu (?portalkimia=off / ?mode=standalone)
+      try {
+        const url = new URL(window.location.href);
+        const pUrl = (url.searchParams.get('portalkimia') || url.searchParams.get('mode') || '').toLowerCase();
+        if (pUrl === 'off' || pUrl === 'false' || pUrl === 'standalone' || pUrl === 'mandiri') {
+          return false;
+        }
+        if (pUrl === 'on' || pUrl === 'true') {
+          return true;
+        }
+        if (window.location.hash && window.location.hash.includes('?')) {
+          const hp = new URLSearchParams(window.location.hash.split('?')[1]);
+          const pH = (hp.get('portalkimia') || hp.get('mode') || '').toLowerCase();
+          if (pH === 'off' || pH === 'false' || pH === 'standalone' || pH === 'mandiri') {
+            return false;
+          }
+          if (pH === 'on' || pH === 'true') {
+            return true;
+          }
+        }
+      } catch (e) {}
+
+      // 2. Cek localStorage
       const stored = localStorage.getItem('portalKimiaIntegrationEnabled');
-      return stored !== 'false';
+      if (stored === 'false') return false;
+      if (stored === 'true') return true;
+
+      // 3. Fallback elemen switch jika sudah diubah oleh user secara eksplisit
+      const sw = document.getElementById('switchKoneksiPortalKimia');
+      if (sw && sw.dataset && sw.dataset.userToggled === 'true') return sw.checked;
+
+      // 4. Default awal
+      return true;
     }
     window.isPortalKimiaEnabled = isPortalKimiaEnabled;
 
     function toggleKoneksiPortalKimia(aktif) {
       const sw = document.getElementById('switchKoneksiPortalKimia');
-      if (sw) sw.checked = !!aktif;
+      if (sw) {
+        sw.checked = !!aktif;
+        if (!sw.dataset) sw.dataset = {};
+        sw.dataset.userToggled = 'true';
+      }
       localStorage.setItem('portalKimiaIntegrationEnabled', aktif ? 'true' : 'false');
+
+      // Jika URL memiliki parameter portalkimia, perbarui parameter di bar URL tanpa reload
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('portalkimia') || url.searchParams.has('mode')) {
+          url.searchParams.set('portalkimia', aktif ? 'on' : 'off');
+          window.history.replaceState({}, '', url.toString());
+        }
+      } catch (e) {}
+
       updateKoneksiPortalKimiaUI();
 
       if (!aktif) {
@@ -4388,6 +4431,9 @@
 
     function updateKoneksiPortalKimiaUI() {
       const aktif = isPortalKimiaEnabled();
+      const sw = document.getElementById('switchKoneksiPortalKimia');
+      if (sw) sw.checked = aktif;
+
       const label = document.getElementById('labelSwitchPortalKimia');
       const kontainer = document.getElementById('kontainerSwitchPortalKimia');
       const btnKatalog = document.getElementById('btnKatalogMediaPortal');
