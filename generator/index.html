@@ -643,13 +643,23 @@
     <!-- KOTAK KENDALI AI GEMINI -->
     <div class="card ai-card">
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-1">
+        <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
           <div class="d-flex align-items-center gap-2">
             <span class="material-symbols-outlined text-violet" style="font-size: 24px;">psychology</span>
             <h5 class="card-title m-0">Asisten AI Perancang Dokumen</h5>
           </div>
-          <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-sm btn-outline-info d-flex align-items-center gap-1.5" onclick="bukaModalMediaPortal()" style="border-radius: 20px; font-size: 0.76rem; border-color: rgba(52,211,153,0.4); color: var(--obs-tertiary);">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- SAKELAR ON/OFF KONEKSI PORTALKIMIA -->
+            <div class="d-flex align-items-center gap-1.5 px-2.5 py-1 rounded-pill" id="kontainerSwitchPortalKimia" style="background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.4);" title="Aktifkan/Nonaktifkan integrasi otomatis dengan katalog media PortalKimia">
+              <div class="form-check form-switch m-0 d-flex align-items-center gap-1.5 p-0">
+                <input class="form-check-input m-0 cursor-pointer" type="checkbox" id="switchKoneksiPortalKimia" onchange="toggleKoneksiPortalKimia(this.checked)" checked style="cursor: pointer; width: 2.1rem; height: 1.1rem;">
+                <label class="form-check-label user-select-none" for="switchKoneksiPortalKimia" id="labelSwitchPortalKimia" style="font-size: 0.75rem; font-weight: 600; color: var(--obs-tertiary); cursor: pointer;">
+                  PortalKimia ON
+                </label>
+              </div>
+            </div>
+
+            <button type="button" id="btnKatalogMediaPortal" class="btn btn-sm btn-outline-info d-flex align-items-center gap-1.5" onclick="bukaModalMediaPortal()" style="border-radius: 20px; font-size: 0.76rem; border-color: rgba(52,211,153,0.4); color: var(--obs-tertiary);">
               <span class="material-symbols-outlined" style="font-size: 16px;">science</span>
               <span>Media PortalKimia (<strong id="badgeJumlahMedia">93</strong>)</span>
             </button>
@@ -658,7 +668,7 @@
             </span>
           </div>
         </div>
-        <p class="small mb-3 mt-1" style="color: var(--obs-text-secondary);">
+        <p class="small mb-3 mt-1" id="subKeteranganAsistenAI" style="color: var(--obs-text-secondary);">
           Gunakan Quick Tags, tentukan model pembelajaran, unggah berkas rujukan, atau tautkan media interaktif PortalKimia.
         </p>
 
@@ -4256,6 +4266,13 @@
     }
 
     function bukaModalMediaPortal() {
+      if (!isPortalKimiaEnabled()) {
+        if (confirm("Koneksi ke PortalKimia saat ini sedang nonaktif (Mode Mandiri/Rekan Kerja).\n\nAktifkan koneksi PortalKimia sekarang untuk memilih media dari katalog?")) {
+          toggleKoneksiPortalKimia(true);
+        } else {
+          return;
+        }
+      }
       renderDaftarMediaPortal();
       const modal = new bootstrap.Modal(document.getElementById('modalMediaPortal'));
       modal.show();
@@ -4325,7 +4342,86 @@
       return out;
     }
 
+    function isUploadedReferenceActive() {
+      if (window.hasUploadedReference || window.currentUploadedFile) return true;
+      const el = document.getElementById('aiBahanAjar');
+      const val = (el ? el.value : '').trim();
+      if (val.includes('[BERKAS RUJUKAN EKSTERNAL') || 
+          val.includes('[BERKAS EKSTRAKSI:') || 
+          val.includes('[Ekstraksi bahan:') || 
+          val.includes('[Lampiran Dokumen Multimodal:')) {
+        return true;
+      }
+      return false;
+    }
+    window.isUploadedReferenceActive = isUploadedReferenceActive;
+
+    function isPortalKimiaEnabled() {
+      const sw = document.getElementById('switchKoneksiPortalKimia');
+      if (sw) return sw.checked;
+      const stored = localStorage.getItem('portalKimiaIntegrationEnabled');
+      return stored !== 'false';
+    }
+    window.isPortalKimiaEnabled = isPortalKimiaEnabled;
+
+    function toggleKoneksiPortalKimia(aktif) {
+      const sw = document.getElementById('switchKoneksiPortalKimia');
+      if (sw) sw.checked = !!aktif;
+      localStorage.setItem('portalKimiaIntegrationEnabled', aktif ? 'true' : 'false');
+      updateKoneksiPortalKimiaUI();
+
+      if (!aktif) {
+        window.selectedPortalMedia = [];
+        window.mediaTeacherNotes = '';
+        simpanUrutanMediaTerpilih();
+        window.renderPortalMediaMeetings && window.renderPortalMediaMeetings();
+        window.renderDaftarMediaPortal && window.renderDaftarMediaPortal();
+        
+        const areaBahan = document.getElementById('aiBahanAjar');
+        if (areaBahan && areaBahan.value.includes('[RUJUKAN PEDAGOGIS KHUSUS - MEDIA INTERAKTIF PORTALKIMIA')) {
+          areaBahan.value = '';
+        }
+      }
+      simpanDraft();
+    }
+    window.toggleKoneksiPortalKimia = toggleKoneksiPortalKimia;
+
+    function updateKoneksiPortalKimiaUI() {
+      const aktif = isPortalKimiaEnabled();
+      const label = document.getElementById('labelSwitchPortalKimia');
+      const kontainer = document.getElementById('kontainerSwitchPortalKimia');
+      const btnKatalog = document.getElementById('btnKatalogMediaPortal');
+      const subKet = document.getElementById('subKeteranganAsistenAI');
+      const quickMediaBtn = document.getElementById('tabQuickMedia');
+
+      if (label) {
+        label.textContent = aktif ? 'PortalKimia ON' : 'PortalKimia OFF';
+        label.style.color = aktif ? 'var(--obs-tertiary)' : 'var(--obs-text-muted)';
+      }
+      if (kontainer) {
+        kontainer.style.borderColor = aktif ? 'rgba(52,211,153,0.4)' : 'var(--obs-border)';
+        kontainer.style.background = aktif ? 'rgba(52,211,153,0.08)' : 'var(--obs-surface-high)';
+      }
+      if (btnKatalog) {
+        btnKatalog.style.opacity = aktif ? '1' : '0.5';
+        btnKatalog.style.borderColor = aktif ? 'rgba(52,211,153,0.4)' : 'var(--obs-border)';
+        btnKatalog.title = aktif ? 'Buka Katalog Media Interaktif PortalKimia' : 'Koneksi PortalKimia Nonaktif (Mode Mandiri)';
+      }
+      if (quickMediaBtn) {
+        quickMediaBtn.style.opacity = aktif ? '1' : '0.5';
+      }
+      if (subKet) {
+        if (aktif) {
+          subKet.textContent = 'Gunakan Quick Tags, tentukan model pembelajaran, unggah berkas rujukan, atau tautkan media interaktif PortalKimia.';
+        } else {
+          subKet.textContent = 'Mode Mandiri: Rancang modul secara bebas menggunakan topik umum atau unggah berkas materi sendiri tanpa intervensi katalog PortalKimia.';
+        }
+      }
+    }
+    window.updateKoneksiPortalKimiaUI = updateKoneksiPortalKimiaUI;
+
     function cariMediaPortalByTopik(topik) {
+      if (!isPortalKimiaEnabled()) return null;
       if (!topik) return null;
       const t = topik.toLowerCase().trim();
       return portalMediaCatalog.find(m => {
@@ -4406,6 +4502,7 @@
 
     window.restorePortalMediaSelections=async function(){
       try {
+        if (!isPortalKimiaEnabled()) return;
         const ids=JSON.parse(localStorage.getItem('portalKimiaMediaTerpilih')||'[]');
         if(!Array.isArray(ids)||!ids.length)return;
         window.mediaTeacherNotes=localStorage.getItem('portalKimiaCatatanMedia')||'';
@@ -4461,6 +4558,10 @@
     }
 
     async function terapkanMediaKeGenerator(mediaId) {
+      if (!isPortalKimiaEnabled()) {
+        alert("Koneksi ke PortalKimia sedang nonaktif (Mode Mandiri/Rekan Kerja).\n\nSilakan aktifkan sakelar 'PortalKimia ON' di pojok kanan kartu Asisten AI terlebih dahulu jika ingin menautkan media katalog.");
+        return;
+      }
       const media=portalMediaCatalog.find(function(m){return m.id===mediaId;})||cariMediaPortalByTopik(mediaId);
       if(!media)return;
 
@@ -4589,6 +4690,12 @@
       sinkronTopikKeForm();
       sinkronKelasKeForm();
 
+      if (!isPortalKimiaEnabled()) {
+        renderQuickTags();
+        simpanDraft();
+        return;
+      }
+
       let media = null;
       if (mediaId) {
         media = portalMediaCatalog.find(m => m.id === mediaId);
@@ -4649,17 +4756,20 @@
       e.stopPropagation();
       document.getElementById('dropzoneArea')?.classList.remove('dragover');
       if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
-        prosesFile(e.dataTransfer.files[0]);
+        (window.prosesFile || prosesFile)(e.dataTransfer.files[0]);
       }
     }
 
     function handleFileSelect(e) {
       if (e.target.files && e.target.files[0]) {
-        prosesFile(e.target.files[0]);
+        (window.prosesFile || prosesFile)(e.target.files[0]);
       }
     }
 
     function prosesFile(file) {
+      if (window.prosesFile && window.prosesFile !== prosesFile) {
+        return window.prosesFile(file);
+      }
       if (!file) return;
 
       const fileName = file.name;
@@ -4669,13 +4779,21 @@
       // Tampilkan info preview file
       document.getElementById('filePreviewContainer').style.display = 'flex';
       document.getElementById('filePreviewName').innerText = fileName;
-      document.getElementById('filePreviewSize').innerText = `${fileSize} • Terlampir untuk analisis Gemini`;
+      document.getElementById('filePreviewSize').innerText = `${fileSize} • Terlampir untuk analisis AI`;
 
       const iconEl = document.getElementById('filePreviewIcon');
       if (['html', 'htm'].includes(fileExt)) iconEl.innerText = 'code';
       else if (['png', 'jpg', 'jpeg', 'webp'].includes(fileExt)) iconEl.innerText = 'image';
       else if (fileExt === 'pdf') iconEl.innerText = 'picture_as_pdf';
       else iconEl.innerText = 'description';
+
+      window.hasUploadedReference = true;
+      window.uploadedFileName = fileName;
+      window.selectedPortalMedia = [];
+      window.mediaTeacherNotes = '';
+      simpanUrutanMediaTerpilih();
+      window.renderPortalMediaMeetings && window.renderPortalMediaMeetings();
+      window.renderDaftarMediaPortal && window.renderDaftarMediaPortal();
 
       // 1. JIKA BERKAS HTML / TEKS / MD: Ekstraksi teks langsung di browser
       if (['html', 'htm', 'txt', 'md'].includes(fileExt)) {
@@ -4689,15 +4807,18 @@
               const doc = parser.parseFromString(isiTeks, 'text/html');
               doc.querySelectorAll('script, style, svg, nav, footer').forEach(el => el.remove());
               isiTeks = (doc.body.innerText || doc.body.textContent || '').replace(/\s+/g, ' ').trim();
-              if (isiTeks.length > 5000) isiTeks = isiTeks.substring(0, 5000) + "... [ekstraksi dipotong]";
+              if (isiTeks.length > 50000) isiTeks = isiTeks.substring(0, 50000) + "... [ekstraksi dipotong]";
             } catch(eParse) {}
           }
 
           const areaBahan = document.getElementById('aiBahanAjar');
-          const prefix = `[BERKAS EKSTRAKSI: ${fileName}]\n`;
-          if (!areaBahan.value.includes(prefix)) {
-            areaBahan.value = prefix + isiTeks + (areaBahan.value ? "\n\n" + areaBahan.value : "");
-          }
+          const prefix = `[BERKAS RUJUKAN EKSTERNAL GURU: ${fileName}]\n` +
+            `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n` +
+            `- Berkas ini diunggah langsung oleh guru sebagai media/materi pembelajaran mandiri (BUKAN media katalog internal PortalKimia).\n` +
+            `- Rancang tujuan pembelajaran, pemanfaatan digital (digital), ITP, dan aktivitas murid secara spesifik dan akurat berdasarkan isi materi berkas "${fileName}" ini.\n` +
+            `- Pada field pemanfaatan digital, deskripsikan media dari berkas ini; JANGAN menggunakan nama berkas atau deskripsi media katalog PortalKimia lain meskipun topiknya mirip.\n\n` +
+            `--- ISI MATERI BERKAS UNGGAHAN ---\n`;
+          areaBahan.value = prefix + isiTeks;
 
           window.currentUploadedFile = null;
           simpanDraft();
@@ -4717,9 +4838,10 @@
           };
 
           const areaBahan = document.getElementById('aiBahanAjar');
-          if (!areaBahan.value) {
-            areaBahan.value = `[Lampiran Dokumen Multimodal: ${fileName}]\nInstruksi: Analisis dokumen terlampir ini untuk merancang tujuan pembelajaran, ITP, dan langkah kegiatan kimia.`;
-          }
+          areaBahan.value = `[BERKAS RUJUKAN EKSTERNAL GURU (LAMPIRAN): ${fileName}]\n` +
+            `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n` +
+            `- Berkas lampiran ini diunggah langsung oleh guru (BUKAN media katalog internal PortalKimia).\n` +
+            `- Analisis berkas lampiran "${fileName}" ini untuk merancang tujuan pembelajaran, pemanfaatan digital, ITP, dan aktivitas murid secara spesifik.`;
           simpanDraft();
         };
         reader.readAsDataURL(file);
@@ -4728,8 +4850,14 @@
 
     function hapusFileTerunggah() {
       window.currentUploadedFile = null;
+      window.hasUploadedReference = false;
+      window.uploadedFileName = '';
       document.getElementById('fileUploadInput').value = '';
       document.getElementById('filePreviewContainer').style.display = 'none';
+      const area = document.getElementById('aiBahanAjar');
+      if (area && (area.value.includes('[BERKAS RUJUKAN EKSTERNAL') || area.value.includes('[BERKAS EKSTRAKSI:') || area.value.includes('[Ekstraksi bahan:') || area.value.includes('[Lampiran Dokumen Multimodal:'))) {
+        area.value = '';
+      }
       simpanDraft();
     }
 
@@ -5189,6 +5317,23 @@
     document.addEventListener('change', simpanDraft);
     
     window.addEventListener('DOMContentLoaded', function() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('portalkimia') || urlParams.has('mode')) {
+          const p = (urlParams.get('portalkimia') || urlParams.get('mode') || '').toLowerCase();
+          if (p === 'off' || p === 'false' || p === 'standalone' || p === 'mandiri') {
+            localStorage.setItem('portalKimiaIntegrationEnabled', 'false');
+          } else if (p === 'on' || p === 'true') {
+            localStorage.setItem('portalKimiaIntegrationEnabled', 'true');
+          }
+        }
+      } catch (e) {}
+
+      const isEnabled = isPortalKimiaEnabled();
+      const swEl = document.getElementById('switchKoneksiPortalKimia');
+      if (swEl) swEl.checked = isEnabled;
+      updateKoneksiPortalKimiaUI();
+
       initTheme();
       updateBackendStatusUI();
       if (getGeneratorAccessToken()) ujiKoneksiBackendOtomatis();
@@ -5250,17 +5395,24 @@
       }
 
       // Deteksi apakah topik ini cocok dengan media PortalKimia
+      const hasUploadedRef = isUploadedReferenceActive();
+      const isPortalOn = isPortalKimiaEnabled();
+      const hasExplicitSelectedMedia = isPortalOn && Array.isArray(window.selectedPortalMedia) && window.selectedPortalMedia.length > 0;
       const curTopik = (data.topik || document.getElementById('aiTopik')?.value || '').toLowerCase();
-      const matchedMedia = cariMediaPortalByTopik(curTopik);
 
-      // Jika ada media yang cocok, pastikan field esensial 100% selaras dengan rubrik sekolah & media
-      if (matchedMedia) {
+      // matchedMedia HANYA aktif jika PortalKimia ON dan BUKAN berkas unggahan eksternal
+      const matchedMedia = (isPortalOn && !hasUploadedRef && hasExplicitSelectedMedia)
+        ? window.selectedPortalMedia[0]
+        : (isPortalOn && !hasUploadedRef ? cariMediaPortalByTopik(curTopik) : null);
+
+      // Jika ada media yang cocok (dan BUKAN berkas unggahan eksternal), pastikan field esensial selaras dengan rubrik sekolah & media
+      if (matchedMedia && !hasUploadedRef && isPortalOn) {
         const elTujuan = document.getElementsByName('tujuan')[0];
         if (elTujuan && (!elTujuan.value || elTujuan.value.includes("[Isi"))) {
           elTujuan.value = matchedMedia.tujuan;
         }
         const elDigital = document.getElementsByName('digital')[0];
-        if (elDigital && (!elDigital.value || elDigital.value.includes("[Isi") || !elDigital.value.includes("PortalKimia"))) {
+        if (elDigital && (!elDigital.value || elDigital.value.includes("[Isi") || (hasExplicitSelectedMedia && !elDigital.value.includes("PortalKimia")))) {
           elDigital.value = matchedMedia.digital;
         }
         const elAsesmen = document.getElementsByName('listAsesmen')[0];
@@ -5279,10 +5431,10 @@
       if (document.getElementsByName('keimanan')[0]) {
         document.getElementsByName('keimanan')[0].checked = true;
       }
-      if (matchedMedia && document.getElementsByName('penalaran')[0]) {
+      if (matchedMedia && !hasUploadedRef && isPortalOn && document.getElementsByName('penalaran')[0]) {
         document.getElementsByName('penalaran')[0].checked = true;
       }
-      if (matchedMedia && document.getElementsByName('kolaborasi')[0]) {
+      if (matchedMedia && !hasUploadedRef && isPortalOn && document.getElementsByName('kolaborasi')[0]) {
         document.getElementsByName('kolaborasi')[0].checked = true;
       }
       
@@ -5310,7 +5462,7 @@
       for (let j = 1; j <= 9; j++) {
         const elAyat = document.getElementsByName('ayat' + j)[0];
         if (elAyat && (!elAyat.value || elAyat.value.includes("[Isi") || elAyat.value.includes("belum dapat diverifikasi") || elAyat.value.trim() === '')) {
-          const selItem = (window.selectedPortalMedia && window.selectedPortalMedia[j - 1]) || (j === 1 ? matchedMedia : null);
+          const selItem = (isPortalOn && window.selectedPortalMedia && window.selectedPortalMedia[j - 1]) || (isPortalOn && !hasUploadedRef && j === 1 ? matchedMedia : null);
           if (selItem && selItem.keislaman && selItem.keislaman.ref) {
             elAyat.value = selItem.keislaman.ref;
           }
@@ -5338,16 +5490,26 @@
       }
 
       // Deteksi otomatis jika topik selaras dengan salah satu media PortalKimia
-      const matchingMedia = cariMediaPortalByTopik(inputTopik);
-      if (matchingMedia) {
-        // Jika bahan ajar belum memuat paket 5 kriteria penilaian, susun otomatis
-        if (!inputBahanAjar || !inputBahanAjar.includes("5 KRITERIA PENILAIAN")) {
-          inputBahanAjar = susunPaketPedagogisMedia(matchingMedia, inputBahanAjar);
-          document.getElementById('aiBahanAjar').value = inputBahanAjar;
+      const hasUploadedRef = isUploadedReferenceActive();
+      const isPortalOn = isPortalKimiaEnabled();
+      const hasExplicitSelectedMedia = isPortalOn && Array.isArray(window.selectedPortalMedia) && window.selectedPortalMedia.length > 0;
+
+      // PENTING: Jika PortalKimia OFF atau pengguna mengunggah berkas eksternal, JANGAN PERNAH menyuntikkan paket media PortalKimia
+      if (isPortalOn && !hasUploadedRef) {
+        let matchingMedia = null;
+        if (!hasExplicitSelectedMedia && (!inputBahanAjar || !inputBahanAjar.trim())) {
+          matchingMedia = cariMediaPortalByTopik(inputTopik);
+        }
+        if (matchingMedia) {
+          // Jika bahan ajar belum memuat paket 5 kriteria penilaian, susun otomatis
+          if (!inputBahanAjar || !inputBahanAjar.includes("5 KRITERIA PENILAIAN")) {
+            inputBahanAjar = susunPaketPedagogisMedia(matchingMedia, inputBahanAjar);
+            document.getElementById('aiBahanAjar').value = inputBahanAjar;
+          }
         }
       }
       
-      if((window.selectedPortalMedia||[]).length>Number(inputPertemuan)){
+      if(isPortalOn && (window.selectedPortalMedia||[]).length>Number(inputPertemuan)){
         alert('Jumlah media terpilih melebihi jumlah pertemuan. Tambah jumlah pertemuan atau hapus media yang tidak digunakan.');
         return;
       }
@@ -5635,25 +5797,32 @@ if(typeof module!=='undefined') module.exports=GeneratorCore;
   };
   window.muatKatalogMediaTersimpan=function(){portalMediaCatalog=GeneratorCore.validateManifest(DEFAULT_PORTALKIMIA_MEDIA).slice();renderDaftarMediaPortal();};
   window.sinkronkanMediaPortalTerbaru=async function(silent){try {var r=await fetch('portal_media_manifest.json',{cache:'no-cache'});if(!r.ok)throw Error('Katalog HTTP '+r.status);portalMediaCatalog=GeneratorCore.validateManifest(await r.json());renderDaftarMediaPortal();renderQuickTags();if(!silent)alert('Katalog diperbarui: '+portalMediaCatalog.length+' item.');}catch(e){if(!silent)alert('Menggunakan katalog bawaan. '+e.message);}};
-  window.renderQuickTags=function(){var container=document.getElementById('quickTagsList');if(!container)return;container.replaceChildren();portalMediaCatalog.filter(function(m){if(activeQuickFilter==='ALL')return true;if(activeQuickFilter==='LAB')return m.category==='Praktikum Virtual';if(activeQuickFilter==='MEDIA')return m.category==='Media Pembelajaran';return m.grade===activeQuickFilter;}).forEach(function(m){var prefix=m.category==='Praktikum Virtual'?'🧪 ':'';var b=el('button',prefix+m.topic+' • '+m.grade,'quick-tag-pill');b.type='button';b.addEventListener('click',function(){terapkanMediaKeGenerator(m.id);});container.append(b);});};
+  window.renderQuickTags=function(){var container=document.getElementById('quickTagsList');if(!container)return;container.replaceChildren();var portalAktif=window.isPortalKimiaEnabled?window.isPortalKimiaEnabled():true;portalMediaCatalog.filter(function(m){if(activeQuickFilter==='ALL')return true;if(activeQuickFilter==='LAB')return m.category==='Praktikum Virtual';if(activeQuickFilter==='MEDIA')return m.category==='Media Pembelajaran';return m.grade===activeQuickFilter;}).forEach(function(m){var prefix=(portalAktif&&m.category==='Praktikum Virtual')?'🧪 ':'';var b=el('button',prefix+m.topic+' • '+m.grade,'quick-tag-pill');b.type='button';b.addEventListener('click',function(){pilihQuickTag(m.topic,m.grade,m.id);});container.append(b);});};
   var uploadGeneration=0;
   window.prosesFile=async function(file){var generation=++uploadGeneration;window.currentUploadedFile=null;if(!file)return;try {
     if(file.size>5*1024*1024)throw Error('Berkas maksimal 5 MB; teks maksimal 1 MB.');
     var bytes=new Uint8Array(await file.arrayBuffer());if(generation!==uploadGeneration)return;
     var mime=GeneratorCore.validateFile(file.name,file.type,bytes),area=document.getElementById('aiBahanAjar');
+    window.selectedPortalMedia=[];window.mediaTeacherNotes='';simpanUrutanMediaTerpilih();
+    window.renderPortalMediaMeetings&&window.renderPortalMediaMeetings();window.renderDaftarMediaPortal&&window.renderDaftarMediaPortal();
     if(mime.startsWith('text/')){
       var content=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
       if(mime==='text/html'){var parsed=new DOMParser().parseFromString(content,'text/html');parsed.querySelectorAll('script,style,svg,iframe,object,nav,footer').forEach(function(n){n.remove();});content=parsed.body.textContent||'';}
-      area.value='[Ekstraksi bahan: '+file.name+']\n'+content.slice(0,50000);window.currentUploadedFile=null;
-    }else {var binary='';for(var i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));window.currentUploadedFile={name:file.name,mimeType:mime,base64:btoa(binary)};}
+      var instruksi='[BERKAS RUJUKAN EKSTERNAL GURU: '+file.name+']\nINSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n- Berkas ini diunggah langsung oleh guru sebagai media rujukan mandiri (BUKAN media katalog internal PortalKimia).\n- Rancang tujuan pembelajaran, pemanfaatan digital (digital), ITP, dan aktivitas murid secara spesifik dan akurat berdasarkan isi materi berkas "'+file.name+'" ini.\n- Pada field pemanfaatan digital, deskripsikan media dari berkas ini; JANGAN menggunakan nama berkas atau deskripsi media katalog PortalKimia lain meskipun topiknya mirip.\n\n--- ISI MATERI BERKAS UNGGAHAN ---\n';
+      area.value=instruksi+content.slice(0,48000);window.currentUploadedFile=null;
+    }else {
+      var binary='';for(var i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));
+      window.currentUploadedFile={name:file.name,mimeType:mime,base64:btoa(binary)};
+      area.value='[BERKAS RUJUKAN EKSTERNAL GURU (LAMPIRAN): '+file.name+']\nINSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n- Berkas lampiran ini diunggah langsung oleh guru (BUKAN media katalog internal PortalKimia).\n- Analisis berkas lampiran "'+file.name+'" ini untuk merancang tujuan pembelajaran, pemanfaatan digital, ITP, dan aktivitas murid secara spesifik.';
+    }
     document.getElementById('filePreviewContainer').style.display='flex';document.getElementById('filePreviewName').textContent=file.name;document.getElementById('filePreviewSize').textContent=(file.size/1024).toFixed(1)+' KB • periksa privasi sebelum mengirim';
-    window.hasUploadedReference=true;document.getElementById('privacyUploadNotice').style.display='block';document.getElementById('privacyConsent').checked=false;simpanDraft();
+    window.hasUploadedReference=true;window.uploadedFileName=file.name;document.getElementById('privacyUploadNotice').style.display='block';document.getElementById('privacyConsent').checked=false;simpanDraft();
   }catch(e){if(generation===uploadGeneration){hapusFileTerunggah();alert(e.message);}}};
-  var oldRemove=window.hapusFileTerunggah;window.hapusFileTerunggah=function(){uploadGeneration++;window.hasUploadedReference=false;document.getElementById('privacyUploadNotice').style.display='none';document.getElementById('privacyConsent').checked=false;oldRemove();};
+  var oldRemove=window.hapusFileTerunggah;window.hapusFileTerunggah=function(){uploadGeneration++;window.hasUploadedReference=false;window.uploadedFileName='';window.currentUploadedFile=null;document.getElementById('privacyUploadNotice').style.display='none';document.getElementById('privacyConsent').checked=false;oldRemove();};
   function privacy(){if(window.hasUploadedReference&&!document.getElementById('privacyConsent').checked){alert('Pastikan berkas tidak mengandung data pribadi siswa, lalu centang konfirmasi.');return false;}return true;}
   var oldAI=window.mintaBantuanAI,oldPoles=window.eksekusiPolesCopilot;
   window.mintaBantuanAI=function(){if(privacy())oldAI();};window.eksekusiPolesCopilot=function(){if(privacy())oldPoles();};
-  window.generatorContext=function(){var selected=window.selectedPortalMedia||[];return {aiProvider:document.getElementById('aiProvider')?.value||'auto',mediaSelected:selected.length>0,mediaByMeeting:selected.map(function(item,index){return {meeting:index+1,id:item.id,title:item.title,topic:item.topic||item.title,grade:item.grade,description:item.description||'',tujuan:item.tujuan||'',digital:item.digital||'',kegiatan:item.kegiatan||{},asesmen:item.asesmen||{},mediaFaithContent:String(item.mediaFaithContent||(item.keislaman&&item.keislaman.text)||'')};}),hasUploadedFile:!!window.hasUploadedReference,privacyConsent:!window.hasUploadedReference||document.getElementById('privacyConsent').checked};};
+  window.generatorContext=function(){var portalAktif=window.isPortalKimiaEnabled?window.isPortalKimiaEnabled():true;var selected=portalAktif?(window.selectedPortalMedia||[]):[];return {aiProvider:document.getElementById('aiProvider')?.value||'auto',mediaSelected:selected.length>0,mediaByMeeting:selected.map(function(item,index){return {meeting:index+1,id:item.id,title:item.title,topic:item.topic||item.title,grade:item.grade,description:item.description||'',tujuan:item.tujuan||'',digital:item.digital||'',kegiatan:item.kegiatan||{},asesmen:item.asesmen||{},mediaFaithContent:String(item.mediaFaithContent||(item.keislaman&&item.keislaman.text)||'')};}),hasUploadedFile:!!(window.hasUploadedReference||(window.isUploadedReferenceActive&&window.isUploadedReferenceActive())),privacyConsent:!window.hasUploadedReference||document.getElementById('privacyConsent').checked};};
   var oldFill=window.isiDataSecaraOtomatis,oldFillPoles=window.terapkanHasilPoles;
   window.isiDataSecaraOtomatis=function(data,kelas){try{var checked=GeneratorCore.validateAI(data,'full',Number(document.getElementById('aiPertemuan').value));
     for(var i=1;i<=14;i++)['itp','asesmen','aktivitas'].forEach(function(p){document.getElementsByName(p+i)[0].value='';});
