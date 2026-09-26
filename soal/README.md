@@ -44,6 +44,17 @@ Karena aplikasi ini 100% *client-side*, Anda dapat mengunggah folder ini ke repo
 
 ---
 
+## DeepSeek V4.1 Flash (opsional, berbayar)
+
+Pilih DeepSeek V4.1 Flash pada daftar model. Model ini menggunakan API berbayar DeepSeek (deepseek-flash); kunci API tidak dimasukkan ke browser.
+
+Sebelum digunakan, buka proyek Apps Script backend, lalu pilih Project Settings → Script Properties dan tambahkan:
+- Property: DEEPSEEK_API_KEY
+- Value: API key DeepSeek Anda
+
+Simpan properti, lalu deploy ulang Web App GAS sebagai versi baru. Gemini tetap dapat dipilih seperti biasa. Pemakaian DeepSeek akan ditagihkan oleh DeepSeek sesuai harga API yang berlaku.
+
+---
 ## 📂 Struktur Berkas
 
 ```
@@ -55,3 +66,11 @@ Generator-Soal-Kimia/
 ├── Buka-Aplikasi.bat # Peluncur cepat 1-klik di Windows
 └── README.md         # Dokumentasi panduan penggunaan
 ```
+
+## Simpan paket ke Google Docs lintas perangkat
+
+Tombol **Simpan ke Google Docs** membuat dokumen paket latihan (termasuk Paket A/B, kunci, pembahasan, dan kisi-kisi) pada Drive yang digunakan Apps Script. Dokumen dapat dibuka dari perangkat lain yang masuk ke akun Drive yang sama.
+
+Sebelum digunakan, di Apps Script buka **Project Settings → Script Properties** dan tambahkan `GENERATOR_DOCS_TOKEN` berisi token acak minimal 24 karakter. Deploy ulang Web App setelah memperbarui `Code.gs`. Saat pertama menyimpan di setiap browser, masukkan token yang sama; token hanya disimpan pada localStorage browser tersebut. `requestId` mencegah dokumen ganda ketika permintaan dicoba ulang.
+
+Verifikasi kunci hitungan tersedia sebagai audit AI opsional. Hasilnya membantu menemukan ketidaksesuaian; guru tetap perlu meninjau hasil sebelum membagikan soal.

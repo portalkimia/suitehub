@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PortalKimia — Generator Soal Kimia AI (Gemini 3.7 &amp; 3.6 Flash)</title>
+  <title>PortalKimia — Generator Soal Kimia AI</title>
 
   <!-- PWA & Mobile Meta Tags -->
   <meta name="theme-color" content="#09090b">
@@ -190,11 +190,13 @@
           
           <!-- Pilihan Model Gemini -->
           <div>
-            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Model Gemini AI:</label>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Model AI:</label>
             <select id="modelSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
               <option value="gemini-3.7-flash" selected>Gemini 3.7 Flash (Flagship - Penalaran Tinggi)</option>
               <option value="gemini-3.6-flash">Gemini 3.6 Flash (Cepat &amp; Efisien)</option>
+              <option value="deepseek-flash">DeepSeek V4.1 Flash (API berbayar)</option>
             </select>
+            <p class="mt-1.5 text-[10px] leading-relaxed text-amber-300">DeepSeek menggunakan API berbayar. Kunci API harus disimpan pada Script Properties di backend GAS.</p>
           </div>
 
           <!-- Jenjang Pendidikan -->
@@ -356,11 +358,14 @@
           </div>
         </div>
 
-        <div class="pt-2 flex justify-end">
+        <div class="pt-2 flex flex-wrap justify-between gap-2">
+          <button type="button" id="btnOpenQuestionBankFromConfig" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-950/50 hover:bg-indigo-900/70 border border-indigo-500/40 text-indigo-200 font-semibold text-xs">
+            <i data-lucide="library" class="w-4 h-4"></i><span>Buka Bank Soal</span>
+          </button>
           <button type="submit" id="btnGenerate"
                   class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-violet-900/40 transition-all cursor-pointer">
             <i data-lucide="sparkles" class="w-4 h-4"></i>
-            <span>Buat Soal dengan Gemini AI</span>
+            <span>Buat Soal dengan AI</span>
           </button>
         </div>
       </form>
@@ -419,6 +424,13 @@
               <i data-lucide="cloud" class="w-3.5 h-3.5 text-purple-400"></i>
               <span>Simpan ke Cloud</span>
             </button>
+            <button id="btnSaveGeneratedToDocs" type="button" title="Simpan paket latihan dan pembahasan ke Google Docs untuk dibuka lintas perangkat"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i><span>Simpan ke Google Docs</span>
+            </button>
+            <button id="btnOpenQuestionBank" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-950/50 hover:bg-indigo-900/60 text-indigo-300 border border-indigo-500/40 text-xs font-bold transition-all">
+              <i data-lucide="library" class="w-3.5 h-3.5"></i><span>Kelola Bank Soal</span>
+            </button>
           </div>
         </div>
 
@@ -465,6 +477,19 @@
           </div>
         </div>
 
+        <section id="qualityAuditPanel" class="glass-card p-4 sm:p-5 mt-4 no-print">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h4 class="text-sm font-bold text-white">Pemeriksaan Mutu Soal</h4>
+              <p class="text-[11px] text-zinc-400">Pemeriksaan struktur otomatis dan kesetaraan Paket A–B; hasilnya tetap perlu ditinjau guru.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button id="btnRunQualityAudit" type="button" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-semibold">Periksa struktur</button>
+              <button id="btnAuditChemistry" type="button" class="px-3 py-1.5 rounded-lg bg-amber-950/60 hover:bg-amber-900/70 border border-amber-700/50 text-amber-200 text-xs font-semibold">Verifikasi kunci hitungan dengan AI (opsional)</button>
+            </div>
+          </div>
+          <div id="qualityAuditReport" class="mt-3 space-y-2 text-xs" aria-live="polite"></div>
+        </section>
         <!-- Navigation Tabs: Guru vs Siswa vs Kisi-Kisi -->
         <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-zinc-800" role="tablist">
           <button id="tab-teacher" type="button" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-violet-600/20 text-violet-300 border border-violet-500/40">
@@ -593,7 +618,7 @@
           <div class="flex items-center gap-2.5">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <div>
-              <span class="text-xs font-bold text-zinc-200 block">AI Gemini &amp; Backend GAS</span>
+              <span class="text-xs font-bold text-zinc-200 block">AI Gemini, DeepSeek &amp; Backend GAS</span>
               <span class="text-[11px] text-zinc-400 block" id="diagEndpointText">Tersambung ke Google Apps Script (SOAL_API)</span>
             </div>
           </div>
@@ -605,11 +630,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
           <div class="p-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
             <span class="text-[10px] text-zinc-400 block">Model AI:</span>
-            <span class="font-bold text-indigo-300">Gemini 3.7 &amp; 3.6 Flash</span>
+            <span class="font-bold text-indigo-300">Gemini 3.7/3.6 Flash &amp; DeepSeek V4.1 Flash</span>
           </div>
           <div class="p-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
-            <span class="text-[10px] text-zinc-400 block">Kunci API Gemini:</span>
-            <span class="font-bold text-emerald-300">Tersimpan di Code.gs</span>
+            <span class="text-[10px] text-zinc-400 block">Penyimpanan kunci DeepSeek:</span>
+            <span class="font-bold text-emerald-300">DeepSeek di Script Properties GAS</span>
           </div>
           <div class="p-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
             <span class="text-[10px] text-zinc-400 block">Google Spreadsheet Bank Soal:</span>
@@ -632,7 +657,7 @@
             </button>
           </div>
           <div id="diagPingResult" class="text-[11px] font-medium text-emerald-400 bg-zinc-950/70 p-2.5 rounded-lg border border-zinc-800 font-mono">
-            Klik tombol "Uji Sekarang" untuk mengukur latensi respon ke AI Gemini.
+            Klik tombol "Uji Sekarang" untuk mengukur latensi respon ke AI.
           </div>
         </div>
       </div>
@@ -648,6 +673,61 @@
   <!-- ========================================================================
        FOOTER (PortalKimia Suite Standard)
        ======================================================================== -->
+  <div id="questionEditorModal" class="fixed inset-0 z-50 hidden no-print overflow-y-auto p-4 bg-zinc-950/90 backdrop-blur-sm">
+    <div class="max-w-3xl mx-auto my-8 glass-card border border-zinc-700 rounded-2xl p-4 sm:p-6">
+      <div class="flex items-start justify-between gap-3 border-b border-zinc-800 pb-3">
+        <div><h3 class="text-lg font-bold text-white">Edit Soal</h3><p class="text-xs text-zinc-400">Perubahan hanya berlaku pada soal ini dan ikut terbawa saat diekspor atau disimpan.</p></div>
+        <button id="btnCancelQuestionEdit" type="button" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs">Batal</button>
+      </div>
+      <div class="space-y-3 mt-4">
+        <label class="block text-xs font-semibold text-zinc-300">Pertanyaan
+          <textarea id="editQuestionText" rows="5" class="mt-1 w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs"></textarea>
+        </label>
+        <label class="block text-xs font-semibold text-zinc-300">Pilihan jawaban (satu opsi per baris: A. teks)
+          <textarea id="editOptionsText" rows="6" class="mt-1 w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs"></textarea>
+        </label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label class="block text-xs font-semibold text-zinc-300">Kunci jawaban
+            <input id="editAnswerKey" class="mt-1 w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs">
+          </label>
+          <label class="block text-xs font-semibold text-zinc-300">Tips / miskonsepsi
+            <input id="editQuestionTip" class="mt-1 w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs">
+          </label>
+        </div>
+        <label class="block text-xs font-semibold text-zinc-300">Pembahasan (satu langkah per baris)
+          <textarea id="editExplanationText" rows="4" class="mt-1 w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs"></textarea>
+        </label>
+      </div>
+      <div class="flex justify-end gap-2 mt-4">
+        <button id="btnSaveQuestionEdit" type="button" class="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold">Simpan perubahan</button>
+      </div>
+    </div>
+  </div>
+  <div id="questionBankModal" class="fixed inset-0 z-50 hidden no-print overflow-y-auto p-4 bg-zinc-950/90 backdrop-blur-sm">
+    <div class="max-w-5xl mx-auto my-6 glass-card border border-zinc-700 rounded-2xl p-4 sm:p-6">
+      <div class="flex items-start justify-between gap-3 border-b border-zinc-800 pb-3">
+        <div><h3 class="text-lg font-bold text-white">Bank Soal Kimia</h3><p class="text-xs text-zinc-400">Cari paket yang tersimpan di browser ini, buka kembali, impor JSON, atau pilih soal untuk paket baru.</p></div>
+        <button id="btnCloseQuestionBank" type="button" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs">Tutup</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mt-4">
+        <input id="bankSearchInput" type="search" placeholder="Cari topik, label, atau isi soal…" class="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs">
+        <select id="bankTopicFilter" class="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs"><option value="">Semua materi</option></select>
+        <select id="bankGradeFilter" class="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs"><option value="">Semua jenjang</option></select>
+        <select id="bankDifficultyFilter" class="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs"><option value="">Semua kesulitan</option></select>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-2 mt-3">
+        <span id="bankStatusText" class="text-xs text-zinc-400">Bank belum dimuat.</span>
+        <div class="flex gap-2">
+          <label class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs cursor-pointer">Impor JSON
+            <input id="bankImportJson" type="file" accept=".json,application/json" class="hidden">
+          </label>
+          <button id="btnRefreshQuestionBank" type="button" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs">Muat ulang</button>
+          <button id="btnBuildFromBank" type="button" class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold">Buat paket dari soal pilihan</button>
+        </div>
+      </div>
+      <div id="questionBankList" class="mt-3 space-y-3 max-h-[65vh] overflow-y-auto pr-1"></div>
+    </div>
+  </div>
   <footer class="relative z-20 border-t border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md px-4 sm:px-6 lg:px-12 py-4 mt-8 no-print">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-400">
       <div class="flex items-center gap-2">

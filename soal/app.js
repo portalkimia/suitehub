@@ -1028,6 +1028,7 @@ async function generateQuiz() {
   }
 
   const model = document.getElementById("modelSelect").value;
+  const useDirectGemini = Boolean(apiKey) && model.indexOf("gemini-") === 0;
   const grade = document.getElementById("gradeSelect").value;
   const qType = document.getElementById("questionTypeSelect").value;
   const stimulus = document.getElementById("stimulusSelect").value;
@@ -1045,6 +1046,17 @@ async function generateQuiz() {
   const includeParallel = document.getElementById("chkIncludeParallel").checked;
   const includeVisuals = document.getElementById("chkIncludeVisuals").checked;
   const includeSolutions = document.getElementById("chkIncludeSolutions") ? document.getElementById("chkIncludeSolutions").checked : false;
+  // DeepSeek uses a separate output budget; Gemini remains at its existing limit.
+  const deepSeekOutputTokenBudget = Math.min(
+    131072,
+    Math.max(
+      8192,
+      4096 +
+        numQuestions * (includeSolutions ? 1300 : 800) * (includeParallel ? 2 : 1) +
+        (includeKisiKisi ? 3000 : 0) +
+        (includeVisuals ? 2000 : 0)
+    )
+  );
 
   // UI State Loading
   const loadingState = document.getElementById("loadingState");
@@ -1177,8 +1189,8 @@ INSTRUKSI KHUSUS FITUR:
   try {
     let parsedPkg;
 
-    if (apiKey) {
-      // MODE 1: Direct Client-Side (Kecepatan Maksimal langsung dari browser)
+    if (useDirectGemini) {
+      // MODE 1: Direct Client-Side Gemini bila pengguna menyimpan kunci Gemini lokal
       let endpointUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
       const requestBody = {
         contents: [
@@ -1261,7 +1273,7 @@ INSTRUKSI KHUSUS FITUR:
         prompt: userPrompt,
         systemInstruction: BASE_CHEMISTRY_PROMPT,
         schema: quizJsonSchema,
-        maxOutputTokens: 8192
+        maxOutputTokens: model === "deepseek-flash" ? deepSeekOutputTokenBudget : 8192
       };
 
       let response = await fetch(gasUrl, {
@@ -1317,6 +1329,13 @@ INSTRUKSI KHUSUS FITUR:
       });
     }
 
+    parsedPkg.generator_settings = {
+      requested_count: numQuestions,
+      retained_count: savedQuestions.length,
+      requested_parallel: includeParallel,
+      requested_solutions: includeSolutions,
+      question_type: qType
+    };
     parsedPkg = sanitizeQuizPackage(parsedPkg);
 
     // Pastikan parsedPkg.daftar_soal selalu Array
@@ -1389,6 +1408,7 @@ function renderResults(pkg) {
 
   const resultsSection = document.getElementById("resultsSection");
   resultsSection.classList.remove("hidden");
+  runStructuralQualityAudit();
 
   // KaTeX rendering
   if (window.renderMathInElement) {
@@ -1503,6 +1523,8 @@ function renderTeacherQuestions(questions) {
             <i data-lucide="${isPinned ? 'check' : 'bookmark'}" class="w-3.5 h-3.5"></i>
             <span>${isPinned ? '⭐ Disimpan' : '📌 Tandai Soal'}</span>
           </button>
+          <button type="button" class="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px]" onclick="editQuestionByNumber(${soal.nomor})">Edit</button>
+          <button type="button" class="px-2.5 py-1 rounded-lg bg-indigo-950 hover:bg-indigo-900 text-indigo-200 text-[10px]" onclick="regenerateQuestionByNumber(${soal.nomor})">Buat ulang</button>
           <span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[10px] font-bold">${soal.tingkat_kesulitan}</span>
           <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">${soal.subtopik}</span>
         </div>
@@ -1944,6 +1966,17 @@ function initExportListeners() {
   if (btnSaveCloud) {
     btnSaveCloud.addEventListener("click", async () => {
       if (!currentPackage) return;
+      const existingLabels = currentPackage.metadata && Array.isArray(currentPackage.metadata.labels) ? currentPackage.metadata.labels.join(", ") : "";
+      const labels = prompt("Tambahkan label untuk pencarian bank soal (pisahkan dengan koma):", existingLabels);
+      if (labels === null) return;
+      currentPackage.metadata = Object.assign({}, currentPackage.metadata || {}, {
+        labels: labels.split(",").map(function(tag) { return tag.trim(); }).filter(Boolean),
+        topik_materi: currentPackage.topik_utama,
+        kelas: currentPackage.jenjang,
+        tingkat_kesulitan: currentPackage.daftar_soal && currentPackage.daftar_soal[0] ? currentPackage.daftar_soal[0].tingkat_kesulitan : "Campuran",
+        model_stimulus: currentPackage.stimulus_model
+      });
+      const localSaved = saveCurrentPackageToLocalBank(labels);
       const gasUrl = getGasUrl();
       if (!gasUrl) {
         alert("⚠️ Backend Google Apps Script belum dikonfigurasi di config.js.");
@@ -1967,7 +2000,7 @@ function initExportListeners() {
 
         const result = await resp.json();
         if (result.status === "ok") {
-          alert(`✅ BERHASIL DISIMPAN KE CLOUD!\n\nPaket soal telah tercatat ke Google Spreadsheet Bank Soal.\n${result.spreadsheetUrl ? 'Buka: ' + result.spreadsheetUrl : ''}`);
+          alert(`✅ BERHASIL DISIMPAN KE CLOUD!\n\nGoogle Spreadsheet Bank Soal berhasil diperbarui. ${localSaved ? 'Salinan lokal juga tersimpan di browser.' : 'Salinan lokal gagal disimpan karena ruang browser penuh.'}\n${result.spreadsheetUrl ? 'Buka: ' + result.spreadsheetUrl : ''}`);
         } else {
           alert(`❌ Gagal menyimpan ke Spreadsheet: ${result.message || 'Terjadi kesalahan di server GAS'}`);
         }
@@ -1980,6 +2013,50 @@ function initExportListeners() {
       }
     });
   }
+  const btnSaveDocs = document.getElementById("btnSaveGeneratedToDocs");
+  let docsSaveRequestId = null;
+  let docsSavePackageSignature = "";
+  if (btnSaveDocs) btnSaveDocs.addEventListener("click", async function() {
+    if (!currentPackage) return;
+    const gasUrl = getGasUrl();
+    if (!gasUrl) { alert("Backend Google Apps Script belum dikonfigurasi di config.js."); return; }
+    const tokenKey = "portal_generator_docs_token";
+    let teacherToken = localStorage.getItem(tokenKey);
+    if (!teacherToken) {
+      teacherToken = prompt("Masukkan token guru Google Docs dari Script Properties GAS (GENERATOR_DOCS_TOKEN). Token disimpan hanya di browser ini.");
+      if (!teacherToken) return;
+      teacherToken = teacherToken.trim();
+      localStorage.setItem(tokenKey, teacherToken);
+    }
+    const signature = JSON.stringify(currentPackage);
+    if (signature !== docsSavePackageSignature || !docsSaveRequestId) {
+      docsSavePackageSignature = signature;
+      docsSaveRequestId = "docs-" + Date.now() + "-" + Math.random().toString(36).slice(2, 12);
+    }
+    btnSaveDocs.disabled = true;
+    const oldText = btnSaveDocs.textContent;
+    btnSaveDocs.textContent = "Menyimpan ke Docs…";
+    try {
+      const response = await fetch(gasUrl, {
+        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "buatGoogleDoc", teacherToken: teacherToken, requestId: docsSaveRequestId, dataSoal: currentPackage })
+      });
+      const result = await response.json();
+      if (result.status !== "ok") {
+        if (/token guru docs tidak valid/i.test(result.message || "")) localStorage.removeItem(tokenKey);
+        throw new Error(result.message || "GAS gagal membuat Google Docs.");
+      }
+      docsSaveRequestId = null;
+      docsSavePackageSignature = "";
+      alert((result.alreadySaved ? "Dokumen sebelumnya ditemukan." : "Paket berhasil disimpan ke Google Docs.") + "\n" + (result.docUrl || ""));
+      if (result.docUrl) window.open(result.docUrl, "_blank", "noopener");
+    } catch (err) {
+      alert("Gagal menyimpan ke Google Docs: " + err.message + "\nJika token belum disetel, tambahkan GENERATOR_DOCS_TOKEN pada Script Properties GAS dan masukkan token yang sama di sini.");
+    } finally {
+      btnSaveDocs.disabled = false;
+      btnSaveDocs.textContent = oldText;
+    }
+  });
 }
 
 // EXCEL QUIZIZZ EXPORTER (.xlsx via SheetJS)
@@ -2439,4 +2516,466 @@ function exportToJsonFile(pkg) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+const LOCAL_QUESTION_BANK_KEY = "portalkimia_question_bank_v1";
+let localQuestionBank = [];
+let selectedBankQuestions = new Set();
+let editingQuestionRef = null;
+
+function initQualityAndBankTools() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(LOCAL_QUESTION_BANK_KEY) || "[]");
+    localQuestionBank = Array.isArray(stored) ? stored : [];
+  } catch (err) { localQuestionBank = []; }
+
+  ["btnOpenQuestionBank", "btnOpenQuestionBankFromConfig"].forEach(function(id) {
+    const button = document.getElementById(id);
+    if (button) button.addEventListener("click", openQuestionBank);
+  });
+  const modal = document.getElementById("questionBankModal");
+  const close = document.getElementById("btnCloseQuestionBank");
+  if (close) close.addEventListener("click", function() { modal.classList.add("hidden"); });
+  if (modal) modal.addEventListener("click", function(event) {
+    if (event.target === modal) modal.classList.add("hidden");
+  });
+  ["bankSearchInput", "bankTopicFilter", "bankGradeFilter", "bankDifficultyFilter"].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", renderQuestionBank);
+      el.addEventListener("change", renderQuestionBank);
+    }
+  });
+  const refresh = document.getElementById("btnRefreshQuestionBank");
+  if (refresh) refresh.addEventListener("click", renderQuestionBank);
+  const build = document.getElementById("btnBuildFromBank");
+  if (build) build.addEventListener("click", buildPackageFromBankSelection);
+  const importer = document.getElementById("bankImportJson");
+  if (importer) importer.addEventListener("change", importQuestionBankJson);
+  const cancelEdit = document.getElementById("btnCancelQuestionEdit");
+  if (cancelEdit) cancelEdit.addEventListener("click", closeQuestionEditor);
+  const saveEdit = document.getElementById("btnSaveQuestionEdit");
+  if (saveEdit) saveEdit.addEventListener("click", saveEditedQuestion);
+  const editorModal = document.getElementById("questionEditorModal");
+  if (editorModal) editorModal.addEventListener("click", function(event) {
+    if (event.target === editorModal) closeQuestionEditor();
+  });  const audit = document.getElementById("btnRunQualityAudit");
+  if (audit) audit.addEventListener("click", runStructuralQualityAudit);
+  const calc = document.getElementById("btnAuditChemistry");
+  if (calc) calc.addEventListener("click", runChemistryCalculationAudit);
+}
+document.addEventListener("DOMContentLoaded", initQualityAndBankTools);
+
+function qualityText(container, text, tone) {
+  const row = document.createElement("div");
+  row.className = "rounded-lg border px-3 py-2 " + (tone === "ok"
+    ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200"
+    : tone === "error"
+      ? "border-rose-500/30 bg-rose-500/10 text-rose-200"
+      : "border-amber-500/25 bg-amber-500/10 text-amber-200");
+  row.textContent = text;
+  container.appendChild(row);
+}
+function normalizeAuditText(value) {
+  return String(value || "").toLowerCase().replace(/\$[^$]*\$/g, " ")
+    .replace(/<[^>]*>/g, " ").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+}
+function looksLikeCalculationQuestion(question) {
+  const text = normalizeAuditText(question && question.pertanyaan);
+  return /\b(hitung|hitunglah|berapa|tentukan nilai|massa|mol|konsentrasi|molaritas|volume|ph|poh|entalpi|potensial|orde reaksi|laju reaksi|kalor|energi|ksp|ka|kb|mr|ar|faraday|elektrolisis|arus listrik|waktu reaksi|jumlah zat)\b/i.test(text);
+}
+function auditQuestionList(list, label, expectedCount, requireSolutions) {
+  const issues = [];
+  const questions = Array.isArray(list) ? list : [];
+  if (Number.isFinite(expectedCount) && questions.length !== expectedCount) {
+    issues.push({ tone: "warn", text: label + ": ada " + questions.length + " soal; diharapkan " + expectedCount + "." });
+  }
+  const seen = new Map();
+  questions.forEach(function(q, i) {
+    const number = q && q.nomor ? q.nomor : i + 1;
+    if (!q || !String(q.pertanyaan || "").trim()) {
+      issues.push({ tone: "error", text: label + " nomor " + number + ": pertanyaan kosong." });
+      return;
+    }
+    const options = Array.isArray(q.pilihan_jawaban) ? q.pilihan_jawaban : [];
+    const essay = /esai|uraian/i.test(String(q.tipe_soal || ""));
+    if (!options.length && !essay) issues.push({ tone: "warn", text: label + " nomor " + number + ": opsi jawaban belum tersedia." });
+    if (options.length) {
+      const labels = options.map(function(opt) { return String(opt.label || "").trim().toUpperCase(); });
+      if (options.length !== 5) issues.push({ tone: "warn", text: label + " nomor " + number + ": ada " + options.length + " opsi; standar paket ini A–E." });
+      if (new Set(labels).size !== labels.length) issues.push({ tone: "error", text: label + " nomor " + number + ": label opsi berulang." });
+      const key = String(q.kunci_jawaban || "").trim().toUpperCase();
+      if (!key || options.filter(function(opt) { return String(opt.label || "").trim().toUpperCase() === key; }).length !== 1) {
+        issues.push({ tone: "error", text: label + " nomor " + number + ": kunci tidak cocok dengan tepat satu opsi." });
+      }
+      const texts = options.map(function(opt) { return normalizeAuditText(opt.teks); });
+      if (new Set(texts).size !== texts.length) issues.push({ tone: "warn", text: label + " nomor " + number + ": ada opsi dengan teks duplikat." });
+    }
+    const stem = normalizeAuditText(q.pertanyaan);
+    if (stem && seen.has(stem)) issues.push({ tone: "warn", text: label + " nomor " + number + ": pertanyaan sama dengan nomor " + seen.get(stem) + "." });
+    else if (stem) seen.set(stem, number);
+    const explanation = Array.isArray(q.pembahasan_langkah) && q.pembahasan_langkah.some(function(step) { return String(step || "").trim(); });
+    if (requireSolutions && !explanation) issues.push({ tone: "warn", text: label + " nomor " + number + ": pembahasan diminta tetapi belum diisi." });
+  });
+  return issues;
+}
+function getPackageQualityIssues(pkg) {
+  if (!pkg) return [{ tone: "warn", text: "Belum ada paket soal untuk diperiksa." }];
+  const issues = [];
+  const settings = pkg.generator_settings || {};
+  const count = Number(settings.requested_count);
+  const retained = Number(settings.retained_count) || 0;
+  issues.push.apply(issues, auditQuestionList(pkg.daftar_soal, "Paket A",
+    Number.isFinite(count) ? count + retained : NaN, settings.requested_solutions === true));
+  if (Array.isArray(pkg.daftar_soal_paket_b)) {
+    issues.push.apply(issues, auditQuestionList(pkg.daftar_soal_paket_b, "Paket B",
+      Number.isFinite(count) && settings.requested_parallel ? count : NaN, settings.requested_solutions === true));
+    const allA = pkg.daftar_soal || [], b = pkg.daftar_soal_paket_b;
+    const retained = Number(settings.retained_count) || 0;
+    const a = allA.slice(retained);
+    if (a.length !== b.length) issues.push({ tone: "warn", text: "Soal baru Paket A (" + a.length + ") dan Paket B (" + b.length + ") memiliki jumlah berbeda." });
+    for (let i = 0; i < Math.min(a.length, b.length); i++) {
+      if (normalizeAuditText(a[i].subtopik) !== normalizeAuditText(b[i].subtopik))
+        issues.push({ tone: "warn", text: "Pasangan A–B nomor " + (i + 1) + ": subtopiknya berbeda." });
+      if (normalizeAuditText(a[i].tingkat_kesulitan) !== normalizeAuditText(b[i].tingkat_kesulitan))
+        issues.push({ tone: "warn", text: "Pasangan A–B nomor " + (i + 1) + ": label kesulitannya berbeda." });
+      if (normalizeAuditText(a[i].pertanyaan) === normalizeAuditText(b[i].pertanyaan))
+        issues.push({ tone: "error", text: "Pasangan A–B nomor " + (i + 1) + ": pertanyaannya identik." });
+      const la = String(a[i].pertanyaan || "").length, lb = String(b[i].pertanyaan || "").length;
+      if (Math.max(la, lb) / Math.max(1, Math.min(la, lb)) > 2.2)
+        issues.push({ tone: "warn", text: "Pasangan A–B nomor " + (i + 1) + ": panjang stimulus jauh berbeda." });
+    }
+  }
+  return issues;
+}
+function runStructuralQualityAudit() {
+  const report = document.getElementById("qualityAuditReport");
+  if (!report) return;
+  report.replaceChildren();
+  const issues = getPackageQualityIssues(currentPackage);
+  if (!issues.length) {
+    qualityText(report, "Struktur lolos pemeriksaan dasar. Ini belum membuktikan ketepatan ilmiah atau kesetaraan semantik.", "ok");
+    return;
+  }
+  const errors = issues.filter(function(issue) { return issue.tone === "error"; }).length;
+  qualityText(report, "Ditemukan " + errors + " masalah struktur dan " + (issues.length - errors) + " catatan untuk ditinjau.", errors ? "error" : "warn");
+  issues.slice(0, 30).forEach(function(issue) { qualityText(report, issue.text, issue.tone); });
+  if (issues.length > 30) qualityText(report, "Tampilan dibatasi; masih ada " + (issues.length - 30) + " catatan.", "warn");
+}
+function buildQuestionSchema() {
+  return {
+    type: "OBJECT",
+    required: ["nomor", "tipe_soal", "topik", "subtopik", "tingkat_kesulitan", "pertanyaan", "pilihan_jawaban", "kunci_jawaban"],
+    properties: {
+      nomor: { type: "INTEGER" }, tipe_soal: { type: "STRING" }, topik: { type: "STRING" },
+      subtopik: { type: "STRING" }, tingkat_kesulitan: { type: "STRING" }, pertanyaan: { type: "STRING" },
+      ilustrasi_svg: { type: "STRING" }, caption_ilustrasi: { type: "STRING" },
+      pilihan_jawaban: { type: "ARRAY", items: { type: "OBJECT", required: ["label", "teks"], properties: { label: { type: "STRING" }, teks: { type: "STRING" } } } },
+      kunci_jawaban: { type: "STRING" }, pembahasan_langkah: { type: "ARRAY", items: { type: "STRING" } },
+      tips_atau_jebakan: { type: "STRING" }
+    }
+  };
+}
+async function callConfiguredQuestionAI(prompt, schema, maxOutputTokens) {
+  const model = document.getElementById("modelSelect").value;
+  const apiKey = localStorage.getItem("portal_gemini_api_key");
+  const gasUrl = getGasUrl();
+  if (apiKey && model.indexOf("gemini-") === 0) {
+    const requestBody = {
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      systemInstruction: { parts: [{ text: BASE_CHEMISTRY_PROMPT }] },
+      generationConfig: { responseMimeType: "application/json", responseSchema: schema, maxOutputTokens: maxOutputTokens || 4096 }
+    };
+    let response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(requestBody)
+    });
+    if (!response.ok && model === "gemini-3.7-flash" && [429, 503].includes(response.status)) {
+      response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=" + apiKey, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(requestBody)
+      });
+    }
+    const result = await response.json().catch(function() { return {}; });
+    if (!response.ok) throw new Error(result.error && result.error.message ? result.error.message : "Gemini HTTP " + response.status);
+    const content = result.candidates && result.candidates[0] && result.candidates[0].content && result.candidates[0].content.parts
+      ? result.candidates[0].content.parts.map(function(part) { return part.text || ""; }).join("")
+      : "";
+    if (!content) throw new Error("Model tidak mengembalikan JSON.");
+    return JSON.parse(content);
+  }
+  const response = await fetch(gasUrl, {
+    method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "panggilGemini", model: model, prompt: prompt, systemInstruction: BASE_CHEMISTRY_PROMPT, schema: schema, maxOutputTokens: maxOutputTokens || 4096 })
+  });
+  const result = await response.json();
+  if (result.status === "error") throw new Error(result.message || "Backend AI gagal.");
+  if (result.data && typeof result.data === "object") return result.data;
+  if (typeof result.raw === "string") return JSON.parse(result.raw);
+  throw new Error("Backend tidak mengembalikan objek JSON.");
+}
+function getActiveQuestionList() {
+  if (!currentPackage) return [];
+  return activeParallelTab === "B" && Array.isArray(currentPackage.daftar_soal_paket_b)
+    ? currentPackage.daftar_soal_paket_b : (currentPackage.daftar_soal || []);
+}
+function editQuestionByNumber(number) {
+  const q = getActiveQuestionList().find(function(item) { return Number(item.nomor) === Number(number); });
+  if (!q) return;
+  editingQuestionRef = q;
+  document.getElementById("editQuestionText").value = q.pertanyaan || "";
+  document.getElementById("editOptionsText").value = (q.pilihan_jawaban || []).map(function(opt) { return opt.label + ". " + opt.teks; }).join("\n");
+  document.getElementById("editAnswerKey").value = q.kunci_jawaban || "";
+  document.getElementById("editQuestionTip").value = q.tips_atau_jebakan || "";
+  document.getElementById("editExplanationText").value = (q.pembahasan_langkah || []).join("\n");
+  document.getElementById("questionEditorModal").classList.remove("hidden");
+}
+function closeQuestionEditor() {
+  const modal = document.getElementById("questionEditorModal");
+  if (modal) modal.classList.add("hidden");
+  editingQuestionRef = null;
+}
+function saveEditedQuestion() {
+  if (!editingQuestionRef || !currentPackage) return;
+  const stem = document.getElementById("editQuestionText").value.trim();
+  const optionsText = document.getElementById("editOptionsText").value.trim();
+  const key = document.getElementById("editAnswerKey").value.trim().toUpperCase();
+  if (!stem) { alert("Pertanyaan tidak boleh kosong."); return; }
+  const options = optionsText ? optionsText.split(/\r?\n/).map(function(line, index) {
+    const match = line.trim().match(/^([A-E])[\s.):\-]+(.*)$/i);
+    return { label: match ? match[1].toUpperCase() : String.fromCharCode(65 + index), teks: match ? match[2].trim() : line.trim() };
+  }).filter(function(opt) { return opt.teks; }) : [];
+  if (options.length && !options.some(function(opt) { return opt.label === key; })) {
+    alert("Kunci jawaban harus cocok dengan salah satu opsi.");
+    return;
+  }
+  editingQuestionRef.pertanyaan = stem;
+  editingQuestionRef.pilihan_jawaban = options;
+  editingQuestionRef.kunci_jawaban = key;
+  editingQuestionRef.tips_atau_jebakan = document.getElementById("editQuestionTip").value.trim();
+  editingQuestionRef.pembahasan_langkah = document.getElementById("editExplanationText").value.split(/\r?\n/).map(function(line) { return line.trim(); }).filter(Boolean);
+  sanitizeQuizPackage(currentPackage);
+  closeQuestionEditor();
+  renderResults(currentPackage);
+}
+async function regenerateQuestionByNumber(number) {
+  const list = getActiveQuestionList();
+  const index = list.findIndex(function(item) { return Number(item.nomor) === Number(number); });
+  if (index < 0) return;
+  const old = list[index];
+  const instruction = prompt("Apa yang ingin diperbaiki pada soal ini? (Opsional)");
+  if (instruction === null) return;
+  if (!confirm("Buat ulang soal " + number + " Paket " + activeParallelTab + " dengan model terpilih? Permintaan ini memakai token API.")) return;
+  const promptText = "Buat ulang tepat satu soal kimia. Pertahankan materi, tipe, subtopik, dan tingkat kesulitan; buat butir baru yang berbeda. Ikuti aturan akurasi ilmiah dan notasi LaTeX. " +
+    "Instruksi guru: " + (instruction || "Perbaiki mutu dan kejernihan.") + "\nSoal asal JSON: " + JSON.stringify(old) +
+    "\nKembalikan satu objek JSON sesuai skema saja.";
+  try {
+    const replacement = await callConfiguredQuestionAI(promptText, buildQuestionSchema(), 4096);
+    const normalized = normalizeAndValidateQuizPackage({
+      judul: currentPackage.judul, jenjang: currentPackage.jenjang, topik_utama: currentPackage.topik_utama, daftar_soal: [replacement]
+    }, { topic: currentPackage.topik_utama, grade: currentPackage.jenjang, includeSolutions: !!(old.pembahasan_langkah && old.pembahasan_langkah.length) });
+    if (!normalized.daftar_soal.length) throw new Error("Model tidak menghasilkan soal pengganti.");
+    const next = normalized.daftar_soal[0];
+    next.nomor = old.nomor;
+    next.is_pinned = old.is_pinned === true;
+    list[index] = next;
+    sanitizeQuizPackage(currentPackage);
+    syncSavedQuestions();
+    updateSavedCountBadge();
+    renderResults(currentPackage);
+  } catch (err) { alert("Gagal membuat ulang soal: " + err.message); }
+}
+async function runChemistryCalculationAudit() {
+  if (!currentPackage) return;
+  const report = document.getElementById("qualityAuditReport");
+  const button = document.getElementById("btnAuditChemistry");
+  const questions = (currentPackage.daftar_soal || []).concat(currentPackage.daftar_soal_paket_b || [])
+    .filter(looksLikeCalculationQuestion).slice(0, 8);
+  if (!questions.length) { qualityText(report, "Tidak terdeteksi soal hitungan untuk diverifikasi.", "warn"); return; }
+  button.disabled = true;
+  const oldText = button.textContent;
+  button.textContent = "AI sedang memeriksa…";
+  qualityText(report, "Verifikasi mengirim " + questions.length + " soal, kunci, dan pembahasan ke model terpilih. Hasil AI adalah pemeriksaan bantu; tinjau ulang sebelum dibagikan. Pemakaian token/API dapat dikenakan biaya.", "warn");
+  const schema = { type: "OBJECT", required: ["items"], properties: { items: { type: "ARRAY", items: {
+    type: "OBJECT", required: ["nomor", "status", "kunci_seharusnya", "temuan", "saran"], properties: {
+      nomor: { type: "INTEGER" }, status: { type: "STRING" }, kunci_seharusnya: { type: "STRING" }, temuan: { type: "STRING" }, saran: { type: "STRING" }
+    }
+  } } } };
+  const compact = questions.map(function(q) {
+    return { nomor: q.nomor, pertanyaan: q.pertanyaan, opsi: q.pilihan_jawaban, kunci: q.kunci_jawaban, pembahasan: q.pembahasan_langkah };
+  });
+  try {
+    const result = await callConfiguredQuestionAI(
+      "Verifikasi kunci setiap soal kimia secara independen. Selesaikan soal sendiri tanpa mengandalkan kunci atau pembahasan yang diberikan. Untuk hitungan, tampilkan alur singkat beserta satuan, periksa persamaan reaksi dan angka penting. Cocokkan hasil dengan semua opsi. Status harus tepat salah satu dari KUNCI_SESUAI, KUNCI_TIDAK_SESUAI, atau PERLU_TINJAU. Jangan menebak; jika data tidak cukup, pakai PERLU_TINJAU. Isi kunci_seharusnya dengan label opsi yang benar atau KOSONG jika tidak dapat dipastikan. Jangan mengubah soal. JSON {items:[{nomor,status,kunci_seharusnya,temuan,saran}]} saja. Data: " + JSON.stringify(compact),
+      schema, Math.min(16384, 2048 + questions.length * 1600)
+    );
+    const items = Array.isArray(result.items) ? result.items : [];
+    if (!items.length) qualityText(report, "Model tidak mengembalikan hasil verifikasi yang dapat dibaca.", "warn");
+    items.forEach(function(item) {
+      const status = String(item.status || "PERLU_TINJAU").trim().toUpperCase();
+      const tone = status === "KUNCI_SESUAI" ? "ok" : (status === "KUNCI_TIDAK_SESUAI" ? "error" : "warn");
+      qualityText(report, "Verifikasi kunci nomor " + item.nomor + ": " + status + (item.kunci_seharusnya ? " (saran kunci: " + item.kunci_seharusnya + ")" : "") + ". " + (item.temuan || "") + (item.saran ? " Saran: " + item.saran : ""), tone);
+    });
+  } catch (err) { qualityText(report, "Verifikasi kunci gagal: " + err.message, "error"); }
+  finally { button.disabled = false; button.textContent = oldText; }
+}
+function persistLocalQuestionBank() {
+  try {
+    localQuestionBank = localQuestionBank.slice(0, 100);
+    localStorage.setItem(LOCAL_QUESTION_BANK_KEY, JSON.stringify(localQuestionBank));
+    return true;
+  } catch (err) { alert("Bank lokal tidak dapat disimpan; ruang penyimpanan browser mungkin penuh."); return false; }
+}
+function saveCurrentPackageToLocalBank(labels) {
+  if (!currentPackage) return;
+  const clone = JSON.parse(JSON.stringify(currentPackage));
+  clone.metadata = Object.assign({}, clone.metadata || {}, {
+    labels: String(labels || "").split(",").map(function(tag) { return tag.trim(); }).filter(Boolean)
+  });
+  localQuestionBank.unshift({ id: Date.now() + "-" + Math.random().toString(36).slice(2, 8), saved_at: new Date().toISOString(), package: clone });
+  const saved = persistLocalQuestionBank();
+  renderQuestionBankFilters();
+  return saved;
+}
+function setBankOptions(select, values, label) {
+  if (!select) return;
+  const current = select.value;
+  select.replaceChildren(new Option(label, ""));
+  values.forEach(function(value) { select.add(new Option(value, value)); });
+  if (values.includes(current)) select.value = current;
+}
+function renderQuestionBankFilters() {
+  const packages = localQuestionBank.map(function(item) { return item.package; }).filter(Boolean);
+  const getUnique = function(key) { return Array.from(new Set(packages.map(function(pkg) { return String(pkg[key] || "").trim(); }).filter(Boolean))).sort(); };
+  setBankOptions(document.getElementById("bankTopicFilter"), getUnique("topik_utama"), "Semua materi");
+  setBankOptions(document.getElementById("bankGradeFilter"), getUnique("jenjang"), "Semua jenjang");
+  const difficulties = Array.from(new Set(packages.flatMap(function(pkg) { return (pkg.daftar_soal || []).map(function(q) { return q.tingkat_kesulitan; }); }).filter(Boolean))).sort();
+  setBankOptions(document.getElementById("bankDifficultyFilter"), difficulties, "Semua kesulitan");
+}
+function openQuestionBank() {
+  const modal = document.getElementById("questionBankModal");
+  if (!modal) return;
+  modal.classList.remove("hidden");
+  renderQuestionBankFilters();
+  renderQuestionBank();
+}
+function renderQuestionBank() {
+  const list = document.getElementById("questionBankList");
+  const status = document.getElementById("bankStatusText");
+  if (!list || !status) return;
+  const searchEl = document.getElementById("bankSearchInput");
+  const query = String(searchEl && searchEl.value || "").trim().toLowerCase();
+  const topic = document.getElementById("bankTopicFilter").value;
+  const grade = document.getElementById("bankGradeFilter").value;
+  const difficulty = document.getElementById("bankDifficultyFilter").value;
+  list.replaceChildren();
+  const filtered = localQuestionBank.map(function(entry, index) { return { entry: entry, index: index, pkg: entry.package }; })
+    .filter(function(row) { return row.pkg; })
+    .filter(function(row) { return !topic || row.pkg.topik_utama === topic; })
+    .filter(function(row) { return !grade || row.pkg.jenjang === grade; })
+    .filter(function(row) { return !difficulty || (row.pkg.daftar_soal || []).some(function(q) { return q.tingkat_kesulitan === difficulty; }); })
+    .filter(function(row) { return !query || JSON.stringify(row.pkg).toLowerCase().includes(query); });
+  status.textContent = filtered.length + " paket ditampilkan dari " + localQuestionBank.length + " paket tersimpan pada browser ini.";
+  if (!filtered.length) {
+    const empty = document.createElement("p");
+    empty.className = "rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-xs text-zinc-400";
+    empty.textContent = "Belum ada paket yang cocok. Simpan paket ke cloud (sekaligus bank lokal) atau impor berkas JSON.";
+    list.appendChild(empty);
+  }
+  filtered.forEach(function(rowInfo) {
+    const row = rowInfo, pkg = row.pkg, packageIndex = row.index;
+    const card = document.createElement("section");
+    card.className = "rounded-xl border border-zinc-800 bg-zinc-900/50 p-3";
+    const top = document.createElement("div");
+    top.className = "flex flex-wrap items-start justify-between gap-2";
+    const details = document.createElement("div");
+    const title = document.createElement("h4");
+    title.className = "font-bold text-zinc-100 text-sm";
+    title.textContent = pkg.judul || pkg.topik_utama || "Paket Kimia";
+    const meta = document.createElement("p");
+    meta.className = "text-[11px] text-zinc-400 mt-1";
+    const tagList = pkg.metadata && Array.isArray(pkg.metadata.labels) ? pkg.metadata.labels.join(", ") : "";
+    meta.textContent = (pkg.topik_utama || "Kimia") + " • " + (pkg.jenjang || "Jenjang belum diisi") + " • " +
+      (row.entry.saved_at ? new Date(row.entry.saved_at).toLocaleDateString("id-ID") : "") + (tagList ? " • Label: " + tagList : "");
+    details.append(title, meta);
+    const actions = document.createElement("div");
+    actions.className = "flex gap-2";
+    const load = document.createElement("button");
+    load.type = "button"; load.className = "px-2.5 py-1 rounded bg-violet-600 hover:bg-violet-500 text-white text-[11px]";
+    load.textContent = "Muat paket";
+    load.addEventListener("click", function() { loadBankPackage(packageIndex); });
+    const remove = document.createElement("button");
+    remove.type = "button"; remove.className = "px-2.5 py-1 rounded bg-zinc-800 hover:bg-rose-900 text-zinc-300 text-[11px]";
+    remove.textContent = "Hapus";
+    remove.addEventListener("click", function() {
+      if (!confirm("Hapus paket ini dari bank lokal browser?")) return;
+      localQuestionBank.splice(packageIndex, 1);
+      selectedBankQuestions.clear();
+      persistLocalQuestionBank(); renderQuestionBankFilters(); renderQuestionBank();
+    });
+    actions.append(load, remove); top.append(details, actions); card.appendChild(top);
+    [["A", pkg.daftar_soal || []], ["B", pkg.daftar_soal_paket_b || []]].forEach(function(group) {
+      group[1].forEach(function(q, qi) {
+        const label = document.createElement("label");
+        label.className = "flex items-start gap-2 mt-2 rounded-lg border border-zinc-800/80 p-2 cursor-pointer hover:bg-zinc-800/50";
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox"; checkbox.dataset.bankQuestion = "1";
+        checkbox.dataset.packageIndex = String(packageIndex); checkbox.dataset.questionSet = group[0]; checkbox.dataset.questionIndex = String(qi);
+        const key = packageIndex + ":" + group[0] + ":" + qi;
+        checkbox.checked = selectedBankQuestions.has(key);
+        checkbox.addEventListener("change", function() {
+          if (checkbox.checked) selectedBankQuestions.add(key); else selectedBankQuestions.delete(key);
+        });
+        const text = document.createElement("span");
+        text.className = "text-xs text-zinc-300";
+        text.textContent = "Paket " + group[0] + ", nomor " + (q.nomor || qi + 1) + ": " + String(q.pertanyaan || "").slice(0, 220);
+        label.append(checkbox, text); card.appendChild(label);
+      });
+    });
+    list.appendChild(card);
+  });
+}
+function loadBankPackage(index) {
+  const entry = localQuestionBank[index];
+  if (!entry || !entry.package) return;
+  currentPackage = JSON.parse(JSON.stringify(entry.package));
+  activeParallelTab = "A"; syncSavedQuestions(); updateSavedCountBadge(); renderResults(currentPackage);
+  document.getElementById("questionBankModal").classList.add("hidden");
+}
+function buildPackageFromBankSelection() {
+  const checked = Array.from(document.querySelectorAll('[data-bank-question="1"]:checked'));
+  const questions = checked.map(function(box) {
+    const entry = localQuestionBank[Number(box.dataset.packageIndex)];
+    if (!entry || !entry.package) return null;
+    const list = box.dataset.questionSet === "B" ? entry.package.daftar_soal_paket_b : entry.package.daftar_soal;
+    const question = list && list[Number(box.dataset.questionIndex)];
+    return question ? JSON.parse(JSON.stringify(question)) : null;
+  }).filter(Boolean);
+  if (!questions.length) { alert("Pilih setidaknya satu soal dari bank."); return; }
+  const firstEntry = localQuestionBank[Number(checked[0].dataset.packageIndex)];
+  currentPackage = JSON.parse(JSON.stringify(firstEntry.package));
+  currentPackage.judul = "Paket Latihan Pilihan — " + (currentPackage.topik_utama || "Kimia");
+  currentPackage.daftar_soal = questions.map(function(q, index) { q.nomor = index + 1; q.is_pinned = false; return q; });
+  delete currentPackage.daftar_soal_paket_b; delete currentPackage.kisi_kisi_asesmen; delete currentPackage.generator_settings;
+  selectedBankQuestions.clear();
+  activeParallelTab = "A"; savedQuestions = []; updateSavedCountBadge(); renderResults(currentPackage);
+  document.getElementById("questionBankModal").classList.add("hidden");
+}
+async function importQuestionBankJson(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  try {
+    const parsed = JSON.parse(await file.text());
+    const packages = Array.isArray(parsed) ? parsed : [parsed];
+    let added = 0;
+    packages.forEach(function(pkg) {
+      const normalized = normalizeAndValidateQuizPackage(pkg, { includeSolutions: false });
+      if (!normalized.daftar_soal.length) return;
+      sanitizeQuizPackage(normalized);
+      normalized.metadata = Object.assign({}, normalized.metadata || {}, { labels: ["impor JSON"] });
+      localQuestionBank.unshift({ id: Date.now() + "-" + Math.random().toString(36).slice(2, 8), saved_at: new Date().toISOString(), package: normalized });
+      added++;
+    });
+    persistLocalQuestionBank(); renderQuestionBankFilters(); renderQuestionBank();
+    document.getElementById("bankStatusText").textContent = added + " paket berhasil diimpor.";
+  } catch (err) { alert("Berkas JSON tidak dapat dibaca: " + err.message); }
+  finally { event.target.value = ""; }
 }
