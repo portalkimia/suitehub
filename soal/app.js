@@ -1046,17 +1046,9 @@ async function generateQuiz() {
   const includeParallel = document.getElementById("chkIncludeParallel").checked;
   const includeVisuals = document.getElementById("chkIncludeVisuals").checked;
   const includeSolutions = document.getElementById("chkIncludeSolutions") ? document.getElementById("chkIncludeSolutions").checked : false;
-  // DeepSeek uses a separate output budget; Gemini remains at its existing limit.
-  const deepSeekOutputTokenBudget = Math.min(
-    131072,
-    Math.max(
-      8192,
-      4096 +
-        numQuestions * (includeSolutions ? 1300 : 800) * (includeParallel ? 2 : 1) +
-        (includeKisiKisi ? 3000 : 0) +
-        (includeVisuals ? 2000 : 0)
-    )
-  );
+  // DeepSeek V4.1 Flash accepts up to 393,216 output tokens; Gemini stays at its existing cap.
+  // This is a ceiling only: the API bills generated tokens, not the unused allowance.
+  const deepSeekOutputTokenBudget = 393216;
 
   // UI State Loading
   const loadingState = document.getElementById("loadingState");
