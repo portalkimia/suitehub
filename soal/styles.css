@@ -353,6 +353,13 @@ body {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    text-align: justify !important;
+    text-justify: inter-ideograph !important;
+  }
+
+  #printExamSheet p, #printExamSheet div {
+    text-align: justify !important;
+    text-justify: inter-ideograph !important;
   }
 
   .glass-card, .question-item, .kisi-kisi-card {
@@ -376,7 +383,8 @@ body {
 
   .chem-table-container {
     background: transparent !important;
-    border: 1px solid #000000 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
     box-shadow: none !important;
     margin: 8pt 0 !important;
     page-break-inside: avoid;
@@ -385,22 +393,23 @@ body {
   .chem-table {
     width: 100% !important;
     border-collapse: collapse !important;
-    color: #000000 !important;
-    font-size: 10pt !important;
+    color: #0f172a !important;
+    font-size: 9.5pt !important;
   }
 
   .chem-table th {
-    background: #f0f0f0 !important;
-    color: #000000 !important;
-    border: 1px solid #000000 !important;
-    padding: 4pt 6pt !important;
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 5pt 7pt !important;
     font-weight: bold !important;
+    text-align: center !important;
   }
 
   .chem-table td {
-    border: 1px solid #000000 !important;
-    color: #000000 !important;
-    padding: 4pt 6pt !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    padding: 4pt 7pt !important;
   }
 
   .chem-svg-wrapper {

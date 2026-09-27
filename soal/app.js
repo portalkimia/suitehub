@@ -888,21 +888,20 @@ function formatChemistryForWordHtml(text, inTable = false) {
   // 2. Normalisasi pecahan \frac{a}{b} -> (a)/b untuk Word
   s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "($1)/$2");
 
-  // 3. Hapus \text{...} berulang secara aman dengan batas iterasi maksimal
+  // 3. Hapus \text{...}, \mathrm{...}, \mathbf{...}, \ce{...} berulang
   let textLoop = 0;
-  while (/\\text\{[^{}]*\}/.test(s) && textLoop++ < 10) {
-    s = s.replace(/\\text\{([^{}]*)\}/g, "$1");
+  while (/\\(?:text|mathrm|mathbf|ce|operatorname)\{([^{}]*)\}/.test(s) && textLoop++ < 10) {
+    s = s.replace(/\\(?:text|mathrm|mathbf|ce|operatorname)\{([^{}]*)\}/g, "$1");
   }
-  // Bersihkan sisa tag \text tak seimbang
-  s = s.replace(/\\text\{/g, "").replace(/\\text\b/g, "");
+  s = s.replace(/\\(?:text|mathrm|mathbf|ce)\b/g, "");
 
   // 4. Subscripts: _{...} atau _angka/huruf variabel tunggal
   s = s.replace(/_\{([^{}]+)\}/g, "<sub>$1</sub>");
   s = s.replace(/_([0-9]+|[a-z]|\+|\-)/g, "<sub>$1</sub>");
 
   // 5. Superscripts & Derajat Celsius
-  s = s.replace(/\^\\circ/g, "&deg;");
-  s = s.replace(/\\circ/g, "&deg;");
+  s = s.replace(/\^\\circ\s*(?:C)?/g, "&deg;C");
+  s = s.replace(/\\circ\s*(?:C)?/g, "&deg;C");
   s = s.replace(/\^\{([^{}]+)\}/g, "<sup>$1</sup>");
   s = s.replace(/\^([0-9]+[\+\-]?|[\+\-]|[a-z])/g, "<sup>$1</sup>");
 
@@ -913,6 +912,8 @@ function formatChemistryForWordHtml(text, inTable = false) {
   s = s.replace(/\\rightarrow/g, "&rarr;"); // →
   s = s.replace(/\\to\b/g, "&rarr;");
   s = s.replace(/\\leftarrow/g, "&larr;");
+  s = s.replace(/<=>/g, "&#8652;");
+  s = s.replace(/->/g, "&rarr;");
 
   // 7. Simbol Termodinamika & Yunani
   s = s.replace(/\\Delta\s*H/g, "&Delta;H");
@@ -934,6 +935,9 @@ function formatChemistryForWordHtml(text, inTable = false) {
   s = s.replace(/\$\$/g, "");
   s = s.replace(/\$/g, "");
 
+  // 10. Bersihkan sisa backslash perintah LaTeX umum
+  s = s.replace(/\\[a-zA-Z]+/g, "");
+
   return s;
 }
 
@@ -948,20 +952,29 @@ function convertMarkdownTableToWordHtml(text) {
   const renderTable = (tbl) => {
     if (tbl.length < 2) return tbl.join("<br>");
     const headerRow = tbl[0];
-    const bodyRows = tbl.slice(2);
+    const startBody = (tbl.length > 1 && /^[|:\-\s]+$/.test(tbl[1])) ? 2 : 1;
+    const bodyRows = tbl.slice(startBody);
 
-    const splitCells = (row) => row.split("|").map(c => c.trim()).filter((c, i, arr) => i > 0 && i < arr.length);
+    const splitCells = (row) => {
+      let parts = row.split("|").map(c => c.trim());
+      if (parts.length > 0 && parts[0] === "") parts.shift();
+      if (parts.length > 0 && parts[parts.length - 1] === "") parts.pop();
+      return parts;
+    };
 
     let headers = splitCells(headerRow);
-    let html = `<table border="1" style="width: 100%; border-collapse: collapse; margin: 8pt 0; font-size: 10pt;"><thead><tr style="background-color: #f2f2f2;">`;
-    headers.forEach(h => html += `<th style="border: 1px solid #000; padding: 4pt 6pt; text-align: center; font-weight: bold;">${formatChemistryForWordHtml(h, true)}</th>`);
+    let html = `<table border="1" cellpadding="0" cellspacing="0" class="chem-word-table" style="width: 100%; border-collapse: collapse; margin: 6pt 0; font-size: 9.5pt; font-family: 'Segoe UI', Calibri, Arial, sans-serif; border: 1px solid #cbd5e1;"><thead><tr style="background-color: #f1f5f9;">`;
+    headers.forEach(h => html += `<th style="border: 1px solid #cbd5e1; padding: 5pt 8pt; text-align: center; font-weight: bold; background-color: #f1f5f9; color: #1e293b;">${formatChemistryForWordHtml(h, true)}</th>`);
     html += `</tr></thead><tbody>`;
 
     bodyRows.forEach(r => {
       let cells = splitCells(r);
       if (cells.length > 0) {
         html += `<tr>`;
-        cells.forEach(c => html += `<td style="border: 1px solid #000; padding: 4pt 6pt; text-align: left;">${formatChemistryForWordHtml(c, true)}</td>`);
+        cells.forEach(c => {
+          const isShort = c.length <= 15 || /^[0-9\s°C,.\-+±%]+$/.test(c);
+          html += `<td style="border: 1px solid #cbd5e1; padding: 4pt 8pt; text-align: ${isShort ? 'center' : 'left'}; vertical-align: middle;">${formatChemistryForWordHtml(c, true)}</td>`;
+        });
         html += `</tr>`;
       }
     });
@@ -972,7 +985,7 @@ function convertMarkdownTableToWordHtml(text) {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (line.startsWith("|") && line.endsWith("|")) {
+    if (line.includes("|") && (line.split("|").length >= 3)) {
       inTable = true;
       tableLines.push(line);
     } else {
@@ -2275,28 +2288,53 @@ function renderPrintLayout(pkg) {
     }
 
     const renderPrintQuestions = (questions, labelPaket) => {
-      let html = `<h4 style="margin: 12pt 0 6pt 0; text-decoration: underline; font-weight: bold; font-size: 11pt;">LEMBAR SOAL ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
+      let html = `<h4 style="margin: 14pt 0 8pt 0; text-decoration: underline; font-weight: bold; font-size: 11.5pt; color: #1e3a8a;">LEMBAR SOAL ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
       questions.forEach((soal) => {
         if (!soal) return;
+
+        const metaParts = [];
+        if (soal.topik) metaParts.push(`Elemen/Topik: ${soal.topik}`);
+        if (soal.subtopik) metaParts.push(`Subtopik: ${soal.subtopik}`);
+        if (soal.tingkat_kesulitan) metaParts.push(`Tingkat Kesulitan: ${soal.tingkat_kesulitan}`);
+        if (soal.tipe_soal) metaParts.push(`Bentuk: ${soal.tipe_soal}`);
+        const metaText = metaParts.join(" · ");
+
+        const parsed = splitQuestionContentForWord(soal);
+
         let optText = "";
         if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
           optText = soal.pilihan_jawaban.map(o => `
-            <div style="margin-left: 18pt; margin-top: 2pt;">
+            <div style="margin-left: 18pt; margin-top: 2.5pt; margin-bottom: 2.5pt; text-align: justify; line-height: 1.45;">
               <b>${o.label}.</b> ${o.teks}
             </div>
           `).join("");
         } else {
-          optText = `<div style="margin-left: 18pt; margin-top: 6pt; color: #555;">[Jawaban: ..........................................................................................................................]</div>`;
+          optText = `<div style="margin-left: 18pt; margin-top: 6pt; color: #64748b;">[Jawaban: ..........................................................................................................................]</div>`;
         }
 
-        const formattedQ = parseMarkdownTable(soal.pertanyaan || "");
         const svgHtml = (soal.ilustrasi_svg && soal.ilustrasi_svg.includes("<svg")) 
           ? renderSvgIllustration(soal.ilustrasi_svg, soal.caption_ilustrasi) 
           : "";
 
+        const hasStimulusBox = Boolean(parsed.stimulus || parsed.tableMarkdown);
+
         html += `
-          <div style="margin-bottom: 12pt; page-break-inside: avoid;">
-            <div style="font-weight: bold; margin-bottom: 3pt;">${soal.nomor}. ${formattedQ}</div>
+          <div style="margin-bottom: 14pt; page-break-inside: avoid;">
+            <div style="font-size: 9pt; color: #475569; margin-bottom: 3pt; line-height: 1.35;">
+              <b>${soal.nomor}.</b> ${metaText}
+            </div>
+
+            ${hasStimulusBox ? `
+              <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8pt 12pt; margin: 4pt 0 6pt 0;">
+                ${parsed.stimulus ? `<div style="text-align: justify; line-height: 1.45; margin-bottom: ${parsed.tableMarkdown ? '6pt' : '0'}; color: #1e293b; font-size: 10pt;">${parsed.stimulus}</div>` : ''}
+                ${parsed.tableMarkdown ? parseMarkdownTable(parsed.tableMarkdown) : ''}
+              </div>
+            ` : ''}
+
+            <div style="text-align: justify; line-height: 1.45; font-size: 10.5pt; margin: 4pt 0 4pt 0; color: #0f172a;">
+              ${parsed.prompt}
+            </div>
+
             ${svgHtml}
             ${optText}
           </div>
@@ -2306,20 +2344,20 @@ function renderPrintLayout(pkg) {
     };
 
     const renderPrintSolutions = (questions, labelPaket) => {
-      let html = `<h4 style="margin: 12pt 0 6pt 0; text-decoration: underline; font-weight: bold; font-size: 11pt;">KUNCI JAWABAN &amp; PEMBAHASAN ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
+      let html = `<h4 style="margin: 16pt 0 8pt 0; text-decoration: underline; font-weight: bold; font-size: 11.5pt; color: #991b1b;">KUNCI JAWABAN &amp; PEMBAHASAN (untuk guru) ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
       
       const hasDetailedSteps = questions.some(q => q && Array.isArray(q.pembahasan_langkah) && q.pembahasan_langkah.length > 0 && !q.pembahasan_langkah[0].toLowerCase().includes("mode fokus"));
 
       if (!hasDetailedSteps) {
         let cells = questions.map(q => `
-          <td style="border: 1px solid #333; padding: 4pt 8pt; text-align: center; font-size: 10pt;">
-            <b>No. ${q.nomor}</b><br><span style="font-weight: bold; font-size: 11pt; color: #16a34a;">${q.kunci_jawaban || '-'}</span>
+          <td style="border: 1px solid #cbd5e1; padding: 4pt 8pt; text-align: center; font-size: 10pt; background: #fff;">
+            <b>No. ${q.nomor}</b><br><span style="font-weight: bold; font-size: 11pt; color: #15803d;">${q.kunci_jawaban || '-'}</span>
           </td>
         `).join("");
         html += `
           <div style="margin: 6pt 0 12pt 0; page-break-inside: avoid;">
-            <p style="font-size: 9pt; color: #555; margin-bottom: 4pt;"><i>*Matriks Kunci Jawaban Singkat (Mode Naskah Soal):</i></p>
-            <table style="border-collapse: collapse; margin-top: 4pt;">
+            <p style="font-size: 9pt; color: #64748b; margin-bottom: 4pt; font-style: italic;">*Matriks Kunci Jawaban Singkat (Mode Naskah Soal):</p>
+            <table style="border-collapse: collapse; margin-top: 4pt; border: 1px solid #cbd5e1;">
               <tr>${cells}</tr>
             </table>
           </div>
@@ -2333,9 +2371,12 @@ function renderPrintLayout(pkg) {
         const steps = stepsList.map(st => `<li>${st}</li>`).join("");
         html += `
           <div style="margin-bottom: 10pt; page-break-inside: avoid;">
-            <div style="font-weight: bold;">Soal ${soal.nomor} — Kunci: <u>${soal.kunci_jawaban}</u></div>
-            <ul style="margin: 2pt 0; padding-left: 18pt;">${steps}</ul>
-            ${soal.tips_atau_jebakan ? `<div style="font-size: 9.5pt; font-style: italic; margin-left: 18pt; margin-top: 2pt;">Tips: ${soal.tips_atau_jebakan}</div>` : ''}
+            <div style="font-weight: bold; font-size: 10.5pt;">${soal.nomor}. Kunci: <u>${soal.kunci_jawaban || '-'}</u></div>
+            <div style="text-align: justify; line-height: 1.45; font-size: 10pt; margin: 2pt 0 4pt 0;">
+              <b>Pembahasan:</b>
+              <ul style="margin: 2pt 0 0 0; padding-left: 18pt;">${steps}</ul>
+            </div>
+            ${soal.tips_atau_jebakan ? `<div style="font-size: 9.5pt; font-style: italic; color: #475569; margin: 2pt 0 0 18pt; text-align: justify;">💡 Tips: ${soal.tips_atau_jebakan}</div>` : ''}
           </div>
         `;
       });
@@ -2678,6 +2719,43 @@ function exportToQuizizzExcel(pkg) {
   }
 }
 
+// HELPER PEMISAH KONTEN STIMULUS, TABEL, DAN PROMPT UNTUK WORD & PRINT
+function splitQuestionContentForWord(soal) {
+  if (!soal) return { stimulus: "", tableMarkdown: "", prompt: "" };
+  const rawText = String(soal.pertanyaan || "").trim();
+  const lines = rawText.split(/\r?\n/);
+  let inTable = false;
+  let beforeLines = [];
+  let tableLines = [];
+  let afterLines = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    const isTableLine = line.includes("|") && (line.split("|").length >= 3);
+    if (isTableLine) {
+      inTable = true;
+      tableLines.push(line);
+    } else {
+      if (inTable) {
+        afterLines.push(lines[i]);
+      } else {
+        beforeLines.push(lines[i]);
+      }
+    }
+  }
+
+  const hasTable = tableLines.length >= 2;
+  const stimulusText = soal.stimulus ? String(soal.stimulus).trim() : (hasTable ? beforeLines.join("\n").trim() : "");
+  const tableMarkdown = hasTable ? tableLines.join("\n") : "";
+  const promptText = hasTable ? afterLines.join("\n").trim() : (stimulusText ? afterLines.join("\n").trim() : rawText);
+
+  return {
+    stimulus: stimulusText,
+    tableMarkdown: tableMarkdown,
+    prompt: promptText || rawText
+  };
+}
+
 // WORD EXPORTER (.doc / .docx - STANDAR UKURAN KERTAS A4 & NOTASI KIMIA HTML)
 function exportToWordDocx(pkg) {
   if (!pkg) {
@@ -2723,17 +2801,31 @@ function exportToWordDocx(pkg) {
     const formatWordQuestions = (questions) => {
       return (questions || []).map((soal) => {
         if (!soal) return "";
+
+        // 1. Metadata Butir Soal (Elemen, Subtopik, Level)
+        const metaParts = [];
+        if (soal.topik) metaParts.push(`Elemen/Topik: ${soal.topik}`);
+        if (soal.subtopik) metaParts.push(`Subtopik: ${soal.subtopik}`);
+        if (soal.tingkat_kesulitan) metaParts.push(`Tingkat Kesulitan: ${soal.tingkat_kesulitan}`);
+        if (soal.tipe_soal) metaParts.push(`Bentuk: ${soal.tipe_soal}`);
+        const metaText = metaParts.join(" · ");
+
+        // 2. Pemisahan Komponen Soal (Stimulus, Tabel Markdown, Pertanyaan)
+        const parsed = splitQuestionContentForWord(soal);
+
+        // 3. Pilihan Jawaban
         let opts = "";
         if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
           opts = soal.pilihan_jawaban.map(o => `
-            <p style="margin-left: 20pt; margin-top: 2pt; margin-bottom: 2pt;">
+            <div style="margin-left: 20pt; margin-top: 3pt; margin-bottom: 3pt; text-align: justify; text-justify: inter-ideograph; line-height: 1.45; font-size: 11pt;">
               <b>${o.label}.</b> ${formatChemistryForWordHtml(o.teks)}
-            </p>
+            </div>
           `).join("");
         } else {
-          opts = `<p style="margin-left: 20pt; margin-top: 6pt; color: #555;">[Jawaban: .....................................................................................................]</p>`;
+          opts = `<div style="margin-left: 20pt; margin-top: 6pt; color: #64748b; font-size: 10pt;">[Jawaban: .....................................................................................................]</div>`;
         }
 
+        // 4. Ilustrasi SVG
         let svgWord = "";
         if (soal.ilustrasi_svg && soal.ilustrasi_svg.includes("<svg")) {
           let cleanSvg = soal.ilustrasi_svg.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
@@ -2743,14 +2835,30 @@ function exportToWordDocx(pkg) {
           svgWord = `
             <div style="text-align: center; margin: 8pt auto;">
               ${cleanSvg}
-              ${soal.caption_ilustrasi ? `<p style="font-size: 9pt; font-style: italic; color: #555; margin-top: 3pt;">Diagram: ${formatChemistryForWordHtml(soal.caption_ilustrasi)}</p>` : ''}
+              ${soal.caption_ilustrasi ? `<p style="font-size: 9pt; font-style: italic; color: #64748b; margin-top: 3pt; text-align: center;">Diagram: ${formatChemistryForWordHtml(soal.caption_ilustrasi)}</p>` : ''}
             </div>
           `;
         }
 
+        const hasStimulusBox = Boolean(parsed.stimulus || parsed.tableMarkdown);
+
         return `
-          <div style="margin-bottom: 12pt; page-break-inside: avoid;">
-            <p style="font-weight: bold; margin-bottom: 4pt;">${soal.nomor}. ${formatChemistryForWordHtml(soal.pertanyaan)}</p>
+          <div style="margin-bottom: 16pt; page-break-inside: avoid;">
+            <div style="font-size: 9pt; color: #475569; margin-bottom: 4pt; line-height: 1.35; font-family: 'Segoe UI', Calibri, Arial, sans-serif;">
+              <b>${soal.nomor}.</b> ${metaText}
+            </div>
+
+            ${hasStimulusBox ? `
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6pt; padding: 10pt 12pt; margin: 4pt 0 8pt 0;">
+                ${parsed.stimulus ? `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin-bottom: ${parsed.tableMarkdown ? '6pt' : '0'}; color: #1e293b; font-size: 10.5pt;">${formatChemistryForWordHtml(parsed.stimulus)}</div>` : ''}
+                ${parsed.tableMarkdown ? convertMarkdownTableToWordHtml(parsed.tableMarkdown) : ''}
+              </div>
+            ` : ''}
+
+            <div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin: 6pt 0 6pt 0; font-size: 11pt; color: #0f172a;">
+              ${formatChemistryForWordHtml(parsed.prompt)}
+            </div>
+
             ${svgWord}
             ${opts}
           </div>
@@ -2764,14 +2872,14 @@ function exportToWordDocx(pkg) {
 
       if (!hasDetailedSteps) {
         let cells = qList.map(q => `
-          <td style="padding: 6pt 10pt; text-align: center; border: 1px solid #333; font-size: 10pt;">
-            <b>No. ${q.nomor}</b><br><span style="font-size: 12pt; color: #27ae60; font-weight: bold;">${q.kunci_jawaban || '-'}</span>
+          <td style="padding: 6pt 10pt; text-align: center; border: 1px solid #cbd5e1; font-size: 10pt; background-color: #fff;">
+            <b>No. ${q.nomor}</b><br><span style="font-size: 12pt; color: #15803d; font-weight: bold;">${q.kunci_jawaban || '-'}</span>
           </td>
         `).join("");
         return `
           <div style="margin: 12pt 0; page-break-inside: avoid;">
-            <p style="font-size: 10pt; color: #555; margin-bottom: 6pt;"><i>*Matriks Kunci Jawaban Singkat (Mode Naskah Soal):</i></p>
-            <table style="border-collapse: collapse; margin-top: 6pt;">
+            <p style="font-size: 10pt; color: #64748b; margin-bottom: 6pt; font-style: italic; text-align: justify; text-justify: inter-ideograph;">*Matriks Kunci Jawaban Singkat (Mode Naskah Soal):</p>
+            <table cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin-top: 6pt; border: 1px solid #cbd5e1;">
               <tr>${cells}</tr>
             </table>
           </div>
@@ -2783,106 +2891,130 @@ function exportToWordDocx(pkg) {
         let steps = (Array.isArray(soal.pembahasan_langkah) ? soal.pembahasan_langkah : []).map(st => `<li>${formatChemistryForWordHtml(st)}</li>`).join("");
         return `
           <div style="margin-bottom: 12pt; page-break-inside: avoid;">
-            <p style="font-weight: bold; margin-bottom: 2pt;">Soal ${soal.nomor} — Kunci: <u>${soal.kunci_jawaban}</u></p>
-            <ul style="margin: 0; padding-left: 20pt;">${steps}</ul>
-            ${soal.tips_atau_jebakan ? `<p style="font-size: 10pt; font-style: italic; margin-left: 20pt; margin-top: 3pt;">💡 Tips: ${formatChemistryForWordHtml(soal.tips_atau_jebakan)}</p>` : ''}
+            <p style="font-weight: bold; margin-bottom: 2pt; font-size: 11pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph;">
+              ${soal.nomor}. Kunci: <u>${soal.kunci_jawaban || '-'}</u>
+            </p>
+            <div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; font-size: 10.5pt; color: #1e293b; margin: 2pt 0 4pt 0;">
+              <b>Pembahasan:</b>
+              <ul style="margin: 2pt 0 0 0; padding-left: 18pt;">${steps}</ul>
+            </div>
+            ${soal.tips_atau_jebakan ? `
+              <p style="font-size: 9.5pt; font-style: italic; color: #475569; margin: 2pt 0 0 18pt; text-align: justify; text-justify: inter-ideograph;">
+                💡 <b>Tips:</b> ${formatChemistryForWordHtml(soal.tips_atau_jebakan)}
+              </p>
+            ` : ''}
           </div>
         `;
       }).join("");
     };
 
-    let questionsPart = `<h3 style="color: #2980b9;">BAGIAN I: LEMBAR SOAL ${listB.length > 0 ? '(PAKET A)' : ''}</h3>` + formatWordQuestions(listA);
-    let solutionsPart = `<h3 style="color: #c0392b; text-align: center;">BAGIAN II: KUNCI JAWABAN &amp; PEMBAHASAN ${listB.length > 0 ? '(PAKET A)' : ''}</h3>` + formatWordSolutions(listA);
+    let questionsPart = `<h3 style="color: #1e3a8a; font-size: 13pt; font-weight: bold; margin-bottom: 12pt;">LEMBAR SOAL ${listB.length > 0 ? '(PAKET A)' : ''}</h3>` + formatWordQuestions(listA);
+    let solutionsPart = `<h3 style="color: #991b1b; font-size: 13pt; font-weight: bold; margin: 18pt 0 12pt 0; text-align: left; border-top: 1.5px solid #cbd5e1; padding-top: 12pt;">KUNCI JAWABAN &amp; PEMBAHASAN (untuk guru) ${listB.length > 0 ? '(PAKET A)' : ''}</h3>` + formatWordSolutions(listA);
 
     if (listB.length > 0) {
-      questionsPart += `<div class="page-break"></div><h3 style="color: #2980b9;">LEMBAR SOAL (PAKET B)</h3>` + formatWordQuestions(listB);
-      solutionsPart += `<div class="page-break"></div><h3 style="color: #c0392b; text-align: center;">KUNCI JAWABAN &amp; PEMBAHASAN (PAKET B)</h3>` + formatWordSolutions(listB);
+      questionsPart += `<div class="page-break"></div><h3 style="color: #1e3a8a; font-size: 13pt; font-weight: bold; margin-bottom: 12pt;">LEMBAR SOAL (PAKET B)</h3>` + formatWordQuestions(listB);
+      solutionsPart += `<div class="page-break"></div><h3 style="color: #991b1b; font-size: 13pt; font-weight: bold; margin: 18pt 0 12pt 0; text-align: left; border-top: 1.5px solid #cbd5e1; padding-top: 12pt;">KUNCI JAWABAN &amp; PEMBAHASAN (PAKET B)</h3>` + formatWordSolutions(listB);
     }
 
-  let kisiPart = "";
-  if (pkg.kisi_kisi_asesmen && pkg.kisi_kisi_asesmen.length > 0 && !exportSavedOnly) {
-    let rows = pkg.kisi_kisi_asesmen.map(k => `
-      <tr>
-        <td style="padding: 4pt; text-align: center; border: 1px solid #000;">${k.nomor}</td>
-        <td style="padding: 4pt; border: 1px solid #000;">${formatChemistryForWordHtml(k.cp_tp)}</td>
-        <td style="padding: 4pt; border: 1px solid #000;">${formatChemistryForWordHtml(k.indikator_soal)}</td>
-        <td style="padding: 4pt; text-align: center; border: 1px solid #000;">${k.level_kognitif}</td>
-        <td style="padding: 4pt; text-align: center; border: 1px solid #000;">${k.bentuk_soal}</td>
-        <td style="padding: 4pt; text-align: center; font-weight: bold; border: 1px solid #000;">${k.kunci_jawaban}</td>
-        <td style="padding: 4pt; text-align: center; border: 1px solid #000;">${k.skor || 10}</td>
-      </tr>
-    `).join("");
+    let kisiPart = "";
+    if (pkg.kisi_kisi_asesmen && pkg.kisi_kisi_asesmen.length > 0 && !exportSavedOnly) {
+      let rows = pkg.kisi_kisi_asesmen.map(k => `
+        <tr>
+          <td style="padding: 5pt; text-align: center; border: 1px solid #cbd5e1;">${k.nomor}</td>
+          <td style="padding: 5pt; border: 1px solid #cbd5e1; text-align: justify; text-justify: inter-ideograph;">${formatChemistryForWordHtml(k.cp_tp)}</td>
+          <td style="padding: 5pt; border: 1px solid #cbd5e1; text-align: justify; text-justify: inter-ideograph;">${formatChemistryForWordHtml(k.indikator_soal)}</td>
+          <td style="padding: 5pt; text-align: center; border: 1px solid #cbd5e1;">${k.level_kognitif}</td>
+          <td style="padding: 5pt; text-align: center; border: 1px solid #cbd5e1;">${k.bentuk_soal}</td>
+          <td style="padding: 5pt; text-align: center; font-weight: bold; border: 1px solid #cbd5e1;">${k.kunci_jawaban}</td>
+          <td style="padding: 5pt; text-align: center; border: 1px solid #cbd5e1;">${k.skor || 10}</td>
+        </tr>
+      `).join("");
 
-    kisiPart = `
-      <div class="page-break"></div>
-      <h3 style="color: #8e44ad; text-align: center;">LAMPIRAN: MATRIKS KISI-KISI &amp; KARTU SOAL ASESMEN</h3>
-      <div style="border-bottom: 1px solid #000; margin-bottom: 12pt;"></div>
-      <table border="1" style="width: 100%; border-collapse: collapse; font-size: 9pt;">
-        <thead>
-          <tr style="background: #f2f2f2;">
-            <th style="border: 1px solid #000; padding: 4pt; text-align: center;">No</th>
-            <th style="border: 1px solid #000; padding: 4pt;">Capaian / Tujuan Pembelajaran</th>
-            <th style="border: 1px solid #000; padding: 4pt;">Indikator Butir Soal</th>
-            <th style="border: 1px solid #000; padding: 4pt; text-align: center;">Level</th>
-            <th style="border: 1px solid #000; padding: 4pt; text-align: center;">Bentuk</th>
-            <th style="border: 1px solid #000; padding: 4pt; text-align: center;">Kunci</th>
-            <th style="border: 1px solid #000; padding: 4pt; text-align: center;">Skor</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    `;
-  }
-
-  const docContent = `
-    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-    <head>
-      <meta charset='utf-8'>
-      <title>${pkg.judul}</title>
-      <style>
-        @page Section1 {
-          size: 595.3pt 841.9pt; /* A4: 210mm x 297mm */
-          margin: 54.0pt 54.0pt 54.0pt 54.0pt; /* 1.9cm (0.75in) Margins */
-          mso-header-margin: 35.4pt;
-          mso-footer-margin: 35.4pt;
-          mso-paper-source: 0;
-        }
-        div.Section1 { page: Section1; }
-        body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.4; color: #000; }
-        h2 { text-align: center; font-size: 14pt; margin-bottom: 4pt; color: #1E3C72; }
-        .meta { text-align: center; font-size: 10pt; font-style: italic; margin-bottom: 15pt; border-bottom: 2px solid #000; padding-bottom: 8pt; }
-        .page-break { page-break-before: always; }
-        table { border-collapse: collapse; width: 100%; margin: 8pt 0; font-size: 10pt; }
-        th, td { border: 1px solid #000; padding: 4pt 6pt; }
-        th { background-color: #f2f2f2; text-align: center; font-weight: bold; }
-        sub { vertical-align: sub; font-size: 8pt; }
-        sup { vertical-align: super; font-size: 8pt; }
-      </style>
-    </head>
-    <body>
-      <div class="Section1">
-        <h2>${pkg.judul.toUpperCase()}</h2>
-        <div class='meta'>Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang} | Topik: ${pkg.topik_utama} | Pendekatan: ${pkg.stimulus_model || 'Kontekstual'}${exportSavedOnly ? ' (Koleksi Soal Pilihan Guru)' : ''}</div>
-        ${questionsPart}
-
+      kisiPart = `
         <div class="page-break"></div>
-        ${solutionsPart}
+        <h3 style="color: #0f172a; text-align: center; font-size: 13pt; font-weight: bold; margin-bottom: 8pt;">LAMPIRAN: MATRIKS KISI-KISI ASESMEN</h3>
+        <table border="1" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 9pt; border: 1px solid #cbd5e1;">
+          <thead>
+            <tr style="background-color: #f1f5f9;">
+              <th style="border: 1px solid #cbd5e1; padding: 5pt; text-align: center; font-weight: bold;">No</th>
+              <th style="border: 1px solid #cbd5e1; padding: 5pt;">Capaian / Tujuan Pembelajaran</th>
+              <th style="border: 1px solid #cbd5e1; padding: 5pt;">Indikator Butir Soal</th>
+              <th style="border: 1px solid #cbd5e1; padding: 5pt; text-align: center;">Level</th>
+              <th style="border: 1px solid #cbd5e1; padding: 5pt; text-align: center;">Bentuk</th>
+              <th style="border: 1px solid #cbd5e1; padding: 5pt; text-align: center;">Kunci</th>
+              <th style="border: 1px solid #cbd5e1; padding: 5pt; text-align: center;">Skor</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
 
-        ${kisiPart}
-      </div>
-    </body>
-    </html>
-  `;
+    const docContent = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>${pkg.judul || 'Paket Ulangan Harian Kimia'}</title>
+        <style>
+          @page Section1 {
+            size: 595.3pt 841.9pt; /* A4: 210mm x 297mm */
+            margin: 54.0pt 54.0pt 54.0pt 54.0pt; /* 1.9cm Margins */
+            mso-header-margin: 35.4pt;
+            mso-footer-margin: 35.4pt;
+            mso-paper-source: 0;
+          }
+          div.Section1 { page: Section1; }
+          body {
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.45;
+            color: #0f172a;
+            text-align: justify;
+            text-justify: inter-ideograph;
+          }
+          p, div, li, td {
+            text-align: justify;
+            text-justify: inter-ideograph;
+          }
+          p.MsoNormal, li.MsoNormal, div.MsoNormal {
+            text-align: justify;
+            text-justify: inter-ideograph;
+          }
+          h2 { text-align: center; font-size: 15pt; font-weight: bold; margin-bottom: 4pt; color: #0f172a; }
+          .meta { text-align: center; font-size: 9.5pt; color: #64748b; margin-bottom: 15pt; border-bottom: 1.5px solid #cbd5e1; padding-bottom: 8pt; font-style: italic; }
+          .page-break { page-break-before: always; }
+          table { border-collapse: collapse; width: 100%; margin: 8pt 0; font-size: 9.5pt; }
+          th, td { border: 1px solid #cbd5e1; padding: 5pt 7pt; }
+          th { background-color: #f1f5f9; text-align: center; font-weight: bold; color: #1e293b; }
+          sub { vertical-align: sub; font-size: 8pt; line-height: 0; }
+          sup { vertical-align: super; font-size: 8pt; line-height: 0; }
+          hr { border: none; border-top: 1.5px solid #cbd5e1; margin: 16pt 0; }
+        </style>
+      </head>
+      <body>
+        <div class="Section1">
+          <h2>${(pkg.judul || 'Paket Ulangan Harian Kimia').toUpperCase()}</h2>
+          <div class='meta'>Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang || 'SMA'} | Topik Pokok: ${pkg.topik_utama || 'Kimia'} | Pendekatan: ${pkg.stimulus_model || 'Kontekstual'}${exportSavedOnly ? ' (Koleksi Soal Pilihan Guru)' : ''}</div>
+          ${questionsPart}
 
-  const blob = new Blob(['\ufeff', docContent], { type: 'application/msword' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${(pkg.judul || "Asesmen_Kimia").replace(/\s+/g, "_")}${exportSavedOnly ? '_Pilihan' : ''}.doc`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+          <div class="page-break"></div>
+          ${solutionsPart}
+
+          ${kisiPart}
+        </div>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff', docContent], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${(pkg.judul || "Asesmen_Kimia").replace(/\s+/g, "_")}${exportSavedOnly ? '_Pilihan' : ''}.doc`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   } catch (err) {
     alert("❌ Gagal mengekspor dokumen Word: " + err.message);
   }
