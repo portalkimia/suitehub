@@ -1876,12 +1876,76 @@ INSTRUKSI KHUSUS FITUR:
     updateSavedCountBadge();
     activeParallelTab = 'A';
     renderResults(currentPackage);
+    autoBackupToCloudAndDocs(currentPackage);
   } catch (err) {
     if (!usageRecorded && aiPromptForUsage) recordAIUsage(actualModel, null, aiPromptForUsage, "", "gagal", aiStartedAt);
     alert("❌ Terjadi kesalahan saat membuat soal: " + err.message);
   } finally {
     loadingState.classList.add("hidden");
     btnGenerate.disabled = false;
+  }
+}
+
+// AUTO-BACKUP CLOUD & GOOGLE DOCS (Background Sync Otomatis)
+async function autoBackupToCloudAndDocs(pkg) {
+  if (!pkg || !pkg.daftar_soal || pkg.daftar_soal.length === 0) return;
+  const gasUrl = getGasUrl();
+  const token = getGeneratorAccessToken();
+  if (!gasUrl || !token) return;
+
+  const badge = document.getElementById("autoBackupBadge");
+  if (badge) {
+    badge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-950/60 border border-violet-500/40 text-violet-300 text-[11px] font-medium transition-all animate-pulse";
+    badge.innerHTML = `<i data-lucide="cloud-upload" class="w-3.5 h-3.5 text-violet-400"></i><span>Mencadangkan ke Cloud...</span>`;
+    badge.classList.remove("hidden");
+    if (window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
+  }
+
+  try {
+    const autoRequestId = "auto-doc-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+    const [resBank, resDocs] = await Promise.allSettled([
+      fetch(gasUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "simpanBankSoal",
+          teacherToken: token,
+          accessToken: token,
+          dataSoal: pkg
+        })
+      }).then(r => r.json()),
+      fetch(gasUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "buatGoogleDoc",
+          teacherToken: token,
+          accessToken: token,
+          requestId: autoRequestId,
+          dataSoal: pkg
+        })
+      }).then(r => r.json())
+    ]);
+
+    const bankOk = resBank.status === "fulfilled" && resBank.value && resBank.value.status === "ok";
+    const docsOk = resDocs.status === "fulfilled" && resDocs.value && resDocs.value.status === "ok";
+
+    if (badge) {
+      if (bankOk && docsOk) {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-[11px] font-medium transition-all";
+        badge.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i><span>Tersimpan di Cloud & Docs</span>`;
+        badge.title = "Paket soal otomatis tersimpan di Bank Soal Spreadsheet & Google Docs Drive";
+      } else if (bankOk || docsOk) {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-[11px] font-medium transition-all";
+        badge.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 text-cyan-400"></i><span>Tersimpan di Cloud</span>`;
+      } else {
+        badge.className = "hidden";
+      }
+      if (window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
+    }
+  } catch (err) {
+    console.warn("Auto-backup cloud background:", err);
+    if (badge) badge.className = "hidden";
   }
 }
 
@@ -2453,22 +2517,25 @@ function cleanLatex(text) {
 
 // EXPORT HANDLERS
 function initExportListeners() {
-  document.getElementById("btnPrintExam").addEventListener("click", () => {
-    if (!currentPackage) {
-      alert("⚠️ Data paket soal belum tersedia. Silakan buat soal terlebih dahulu.");
-      return;
-    }
-    const exportSavedOnly = document.getElementById("chkExportSavedOnly")?.checked;
-    if (exportSavedOnly && (!savedQuestions || savedQuestions.length === 0)) {
-      const chk = document.getElementById("chkExportSavedOnly");
-      if (chk) chk.checked = false;
-      alert("ℹ️ Catatan: Belum ada butir soal yang ditandai bintang (📌).\n\nSistem mencetak seluruh naskah soal agar lembar ujian tidak kosong.");
-    }
-    renderPrintLayout(currentPackage);
-    setTimeout(() => {
-      window.print();
-    }, 350);
-  });
+  const btnPrint = document.getElementById("btnPrintExam");
+  if (btnPrint) {
+    btnPrint.addEventListener("click", () => {
+      if (!currentPackage) {
+        alert("⚠️ Data paket soal belum tersedia. Silakan buat soal terlebih dahulu.");
+        return;
+      }
+      const exportSavedOnly = document.getElementById("chkExportSavedOnly")?.checked;
+      if (exportSavedOnly && (!savedQuestions || savedQuestions.length === 0)) {
+        const chk = document.getElementById("chkExportSavedOnly");
+        if (chk) chk.checked = false;
+        alert("ℹ️ Catatan: Belum ada butir soal yang ditandai bintang (📌).\n\nSistem mencetak seluruh naskah soal agar lembar ujian tidak kosong.");
+      }
+      renderPrintLayout(currentPackage);
+      setTimeout(() => {
+        window.print();
+      }, 350);
+    });
+  }
 
   document.getElementById("btnExportWord").addEventListener("click", () => {
     if (!currentPackage) {
@@ -2529,11 +2596,14 @@ function initExportListeners() {
       if (typeof window !== "undefined" && window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
 
       try {
+        const token = getGeneratorAccessToken();
         const resp = await fetch(gasUrl, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "simpanBankSoal",
+            accessToken: token,
+            teacherToken: token,
             dataSoal: currentPackage
           })
         });
@@ -2560,13 +2630,10 @@ function initExportListeners() {
     if (!currentPackage) return;
     const gasUrl = getGasUrl();
     if (!gasUrl) { alert("Backend Google Apps Script belum dikonfigurasi di config.js."); return; }
-    const tokenKey = "portal_generator_docs_token";
-    let teacherToken = localStorage.getItem(tokenKey);
+    const teacherToken = getGeneratorAccessToken() || localStorage.getItem("portal_generator_docs_token");
     if (!teacherToken) {
-      teacherToken = prompt("Masukkan token guru Google Docs dari Script Properties GAS (GENERATOR_DOCS_TOKEN). Token disimpan hanya di browser ini.");
-      if (!teacherToken) return;
-      teacherToken = teacherToken.trim();
-      localStorage.setItem(tokenKey, teacherToken);
+      alert("⚠️ Token akses guru belum diatur. Silakan masukkan token guru di pojok kanan atas.");
+      return;
     }
     const signature = JSON.stringify(currentPackage);
     if (signature !== docsSavePackageSignature || !docsSaveRequestId) {
@@ -2579,11 +2646,16 @@ function initExportListeners() {
     try {
       const response = await fetch(gasUrl, {
         method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "buatGoogleDoc", teacherToken: teacherToken, requestId: docsSaveRequestId, dataSoal: currentPackage })
+        body: JSON.stringify({
+          action: "buatGoogleDoc",
+          teacherToken: teacherToken,
+          accessToken: teacherToken,
+          requestId: docsSaveRequestId,
+          dataSoal: currentPackage
+        })
       });
       const result = await response.json();
       if (result.status !== "ok") {
-        if (/token guru docs tidak valid/i.test(result.message || "")) localStorage.removeItem(tokenKey);
         throw new Error(result.message || "GAS gagal membuat Google Docs.");
       }
       docsSaveRequestId = null;
@@ -2591,7 +2663,7 @@ function initExportListeners() {
       alert((result.alreadySaved ? "Dokumen sebelumnya ditemukan." : "Paket berhasil disimpan ke Google Docs.") + "\n" + (result.docUrl || ""));
       if (result.docUrl) window.open(result.docUrl, "_blank", "noopener");
     } catch (err) {
-      alert("Gagal menyimpan ke Google Docs: " + err.message + "\nJika token belum disetel, tambahkan GENERATOR_DOCS_TOKEN pada Script Properties GAS dan masukkan token yang sama di sini.");
+      alert("Gagal menyimpan ke Google Docs: " + err.message);
     } finally {
       btnSaveDocs.disabled = false;
       btnSaveDocs.textContent = oldText;
@@ -2871,17 +2943,24 @@ function exportToWordDocx(pkg) {
       const hasDetailedSteps = qList.some(q => q && Array.isArray(q.pembahasan_langkah) && q.pembahasan_langkah.length > 0 && !q.pembahasan_langkah[0].toLowerCase().includes("mode fokus"));
 
       if (!hasDetailedSteps) {
-        let cells = qList.map(q => `
-          <td style="padding: 6pt 10pt; text-align: center; border: 1px solid #cbd5e1; font-size: 10pt; background-color: #fff;">
-            <b>No. ${q.nomor}</b><br><span style="font-size: 12pt; color: #15803d; font-weight: bold;">${q.kunci_jawaban || '-'}</span>
-          </td>
-        `).join("");
+        const chunkSize = 10;
+        let tablesHtml = "";
+        for (let i = 0; i < qList.length; i += chunkSize) {
+          const chunk = qList.slice(i, i + chunkSize);
+          const colWidth = (100 / Math.max(chunk.length, 1)).toFixed(1);
+          const headers = chunk.map(q => `<th style="padding: 5pt 2pt; text-align: center; border: 1px solid #cbd5e1; font-size: 9pt; background-color: #f1f5f9; color: #334155; width: ${colWidth}%;">No. ${q.nomor}</th>`).join("");
+          const cells = chunk.map(q => `<td style="padding: 6pt 2pt; text-align: center; border: 1px solid #cbd5e1; font-size: 11pt; color: #15803d; font-weight: bold; background-color: #ffffff;">${q.kunci_jawaban || '-'}</td>`).join("");
+          tablesHtml += `
+            <table cellpadding="0" cellspacing="0" style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 4pt; margin-bottom: 8pt; border: 1px solid #cbd5e1;">
+              <tr>${headers}</tr>
+              <tr>${cells}</tr>
+            </table>
+          `;
+        }
         return `
           <div style="margin: 12pt 0; page-break-inside: avoid;">
             <p style="font-size: 10pt; color: #64748b; margin-bottom: 6pt; font-style: italic; text-align: justify; text-justify: inter-ideograph;">*Matriks Kunci Jawaban Singkat (Mode Naskah Soal):</p>
-            <table cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin-top: 6pt; border: 1px solid #cbd5e1;">
-              <tr>${cells}</tr>
-            </table>
+            ${tablesHtml}
           </div>
         `;
       }
