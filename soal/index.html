@@ -117,18 +117,15 @@
 
         <!-- Right: Actions & API Key & Profile -->
         <div class="flex items-center gap-2 sm:gap-3">
-          <!-- Active Model Tag -->
-          <span class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold" id="headerModelBadge">
-            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-            <span>Gemini 3.7 Flash</span>
+          
           </span>
 
-          <button id="btnShowAIUsage" type="button" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 text-[11px] font-semibold" title="Lihat ringkasan pemakaian AI"><i data-lucide="chart-no-axes-column-increasing" class="w-3.5 h-3.5"></i><span>Pemakaian AI</span></button>
+          <button id="btnShowAIUsage" type="button" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 text-[11px] font-semibold" title="Lihat ringkasan pemakaian AI" onclick="openAIUsageModal()"><i data-lucide="chart-no-axes-column-increasing" class="w-3.5 h-3.5"></i><span>Pemakaian AI</span></button>
 
           <!-- Tombol Token Guru & Status Terpusat Suite -->
           <button id="btnOpenConnectionModal" type="button" 
                   class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs font-semibold transition-all shadow-sm group"
-                  title="Token Akses Guru &amp; Status Kuota AI">
+                  title="Token Akses Guru &amp; Status Kuota AI" onclick="openConnectionModal()">
             <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="backendDot"></span>
             <i data-lucide="key-round" class="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" id="backendKeyIcon"></i>
             <span id="connectionStatusText">Token Belum Diatur</span>
@@ -612,7 +609,7 @@
             <p class="text-[11px] text-zinc-400">PortalKimia Suite • Multi-Device Terhubung</p>
           </div>
         </div>
-        <button id="closeConnectionModalBtn" class="text-zinc-400 hover:text-white p-1 rounded-lg">
+        <button id="closeConnectionModalBtn" class="text-zinc-400 hover:text-white p-1 rounded-lg" onclick="closeConnectionModal()">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -732,7 +729,7 @@
       </div>
 
       <div class="flex justify-end gap-2 mt-5 pt-3 border-t border-zinc-800">
-        <button id="btnCloseDiagModal" type="button" class="px-4 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold">
+        <button id="btnCloseDiagModal" type="button" class="px-4 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold" onclick="closeConnectionModal()">
           Tutup
         </button>
       </div>
@@ -805,7 +802,7 @@
     <section class="max-w-2xl mx-auto my-10 glass-card border border-zinc-700 rounded-2xl p-5">
       <div class="flex items-start justify-between gap-3 border-b border-zinc-800 pb-3">
         <div><h3 class="text-lg font-bold text-white">Ringkasan Pemakaian AI</h3><p class="text-xs text-zinc-400">Dicatat di browser ini. Token aktual ditampilkan jika disediakan oleh API; selain itu berupa perkiraan.</p></div>
-        <button id="btnCloseAIUsage" type="button" class="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-200 text-xs">Tutup</button>
+        <button id="btnCloseAIUsage" type="button" class="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-200 text-xs" onclick="closeAIUsageModal()">Tutup</button>
       </div>
       <div id="aiUsageSummary" class="mt-4 space-y-3"></div>
       <div class="flex justify-end mt-4"><button id="btnClearAIUsage" type="button" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-900 text-zinc-200 text-xs">Hapus riwayat pemakaian</button></div>
