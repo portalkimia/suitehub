@@ -69,7 +69,7 @@ Generator-Soal-Kimia/
 
 ## Simpan paket ke Google Docs lintas perangkat
 
-Tombol **Simpan ke Google Docs** membuat dokumen paket latihan (termasuk Paket A/B, kunci, pembahasan, dan kisi-kisi) pada Drive yang digunakan Apps Script. Dokumen dapat dibuka dari perangkat lain yang masuk ke akun Drive yang sama.
+Tombol **Simpan ke Google Docs** membuat dokumen paket latihan (termasuk Paket A/B, kunci, pembahasan, dan kisi-kisi) pada Drive yang digunakan Apps Script. Dokumen dapat dibuka dari perangkat lain yang masuk ke akun Drive yang sama. Paket terakhir juga dicadangkan otomatis di browser dan dipulihkan setelah refresh; draf tersebut hanya tersedia di browser/perangkat yang sama. Tombol simpan cloud menempatkan Spreadsheet bank dan dokumen Docs ke folder tujuan `FOLDER_ID_DRIVE`.
 
 Sebelum digunakan, di Apps Script buka **Project Settings → Script Properties** dan tambahkan `GENERATOR_DOCS_TOKEN` berisi token acak minimal 24 karakter. Deploy ulang Web App setelah memperbarui `Code.gs`. Saat pertama menyimpan di setiap browser, masukkan token yang sama; token hanya disimpan pada localStorage browser tersebut. `requestId` mencegah dokumen ganda ketika permintaan dicoba ulang.
 

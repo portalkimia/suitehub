@@ -123,13 +123,15 @@
             <span>Gemini 3.7 Flash</span>
           </span>
 
-          <!-- Tombol Tes Koneksi AI (Status Terpusat Suite) -->
+          <button id="btnShowAIUsage" type="button" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 text-[11px] font-semibold" title="Lihat ringkasan pemakaian AI"><i data-lucide="chart-no-axes-column-increasing" class="w-3.5 h-3.5"></i><span>Pemakaian AI</span></button>
+
+          <!-- Tombol Token Guru & Status Terpusat Suite -->
           <button id="btnOpenConnectionModal" type="button" 
-                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 border border-emerald-500/40 text-xs font-semibold transition-all shadow-sm group"
-                  title="Periksa koneksi AI Gemini &amp; Backend Cloud">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform"></i>
-            <span id="connectionStatusText">Tes Koneksi AI</span>
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs font-semibold transition-all shadow-sm group"
+                  title="Token Akses Guru &amp; Status Kuota AI">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="backendDot"></span>
+            <i data-lucide="key-round" class="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" id="backendKeyIcon"></i>
+            <span id="connectionStatusText">Token Belum Diatur</span>
           </button>
 
           <!-- User Profile Badge -->
@@ -485,8 +487,11 @@
             </div>
             <div class="flex flex-wrap gap-2">
               <button id="btnRunQualityAudit" type="button" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-semibold">Periksa struktur</button>
+              <button id="btnCheckDuplicates" type="button" class="px-3 py-1.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/70 border border-indigo-700/50 text-indigo-200 text-xs font-semibold">Periksa soal duplikat</button>
+              <button id="btnAuditLocalMath" type="button" class="px-3 py-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/70 border border-cyan-700/50 text-cyan-200 text-xs font-semibold">Cek hitungan lokal (tanpa API)</button>
               <button id="btnAuditChemistry" type="button" class="px-3 py-1.5 rounded-lg bg-amber-950/60 hover:bg-amber-900/70 border border-amber-700/50 text-amber-200 text-xs font-semibold">Verifikasi kunci hitungan dengan AI (opsional)</button>
             </div>
+            <p class="text-[11px] text-zinc-500 mt-2">Pemeriksa hitungan bekerja tanpa API. Cek duplikat membandingkan paket aktif dengan bank lokal dan hasil cloud yang sudah dimuat; kemiripan adalah petunjuk untuk ditinjau guru.</p>
           </div>
           <div id="qualityAuditReport" class="mt-3 space-y-2 text-xs" aria-live="polite"></div>
         </section>
@@ -614,6 +619,70 @@
 
       <!-- Diagnostic Info Grid -->
       <div class="mt-4 space-y-3.5">
+        <!-- Section: Token Akses Guru & Kuota Terpadu -->
+        <div class="p-3.5 rounded-xl bg-zinc-900/90 border border-zinc-700/80 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label for="inputAccessTokenSoal" class="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
+              <i data-lucide="key" class="w-4 h-4 text-emerald-400"></i>
+              <span>Token Akses Guru (Multi-Layanan)</span>
+            </label>
+            <span id="badgePeranTokenSoal" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700">Belum Diatur</span>
+          </div>
+          <div class="relative">
+            <input type="password" id="inputAccessTokenSoal" placeholder="Masukkan token guru (contoh: TK-BUDI-XXXX atau Token Master)" 
+                   class="w-full px-3 py-2 pr-10 rounded-xl bg-zinc-950 border border-zinc-700 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 font-mono">
+            <button type="button" id="btnToggleTokenVisibilitySoal" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white" title="Lihat/Sembunyikan Token">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="flex items-center justify-between text-[11px] gap-2">
+            <span class="text-zinc-400 leading-tight" id="tokenSaldoFeedbackSoal">1 token tersinkron untuk Modul Ajar &amp; Generator Soal</span>
+            <button type="button" id="btnSimpanDanUjiTokenSoal" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all shrink-0">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span>Simpan &amp; Uji</span>
+            </button>
+          </div>
+          <div id="tokenInfoCardSoal" class="hidden p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-500/30 text-xs space-y-1">
+            <div class="flex items-center justify-between text-emerald-300 font-bold">
+              <span id="tokenInfoNamaSoal">Nama Guru</span>
+              <span id="tokenInfoSaldoSoal" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">0x Kuota</span>
+            </div>
+            <div class="text-[11px] text-zinc-400" id="tokenInfoDetailSoal">Total Terpakai: 0x • Tersinkron dengan Modul Ajar</div>
+          </div>
+        </div>
+
+        <!-- Panel Admin Kelola Kuota Rekan Guru (Master Tito Vanzal) -->
+        <div id="panelAdminTokenGuruSoal" class="p-3.5 rounded-xl bg-zinc-900/90 border border-violet-500/40 space-y-3 hidden">
+          <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+            <div class="flex items-center gap-1.5 text-xs font-bold text-violet-300">
+              <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+              <span>Kelola Kuota Rekan Guru (Master Tito Vanzal)</span>
+            </div>
+            <button type="button" id="btnRefreshAdminTokensSoal" class="text-[11px] text-zinc-400 hover:text-white flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700">
+              <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+              <span>Segarkan</span>
+            </button>
+          </div>
+          <div class="text-[11px] text-zinc-400">Buat token baru atau atur sisa kesempatan generate rekan guru:</div>
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+            <div class="sm:col-span-6">
+              <input type="text" id="adminInputNamaGuruSoal" placeholder="Nama Guru (misal: Pak Budi)" class="w-full px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-700 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500">
+            </div>
+            <div class="sm:col-span-3">
+              <input type="number" id="adminInputSaldoAwalSoal" value="5" min="1" max="999" placeholder="Kuota" class="w-full px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-700 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500">
+            </div>
+            <div class="sm:col-span-3">
+              <button type="button" id="btnAdminTambahTokenSoal" class="w-full px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                <span>Buat</span>
+              </button>
+            </div>
+          </div>
+          <div id="adminTableAkunGuruContainerSoal" class="max-h-48 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-950/60 text-xs">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
         <div class="p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -706,10 +775,14 @@
   <div id="questionBankModal" class="fixed inset-0 z-50 hidden no-print overflow-y-auto p-4 bg-zinc-950/90 backdrop-blur-sm">
     <div class="max-w-5xl mx-auto my-6 glass-card border border-zinc-700 rounded-2xl p-4 sm:p-6">
       <div class="flex items-start justify-between gap-3 border-b border-zinc-800 pb-3">
-        <div><h3 class="text-lg font-bold text-white">Bank Soal Kimia</h3><p class="text-xs text-zinc-400">Cari paket yang tersimpan di browser ini, buka kembali, impor JSON, atau pilih soal untuk paket baru.</p></div>
+        <div><h3 class="text-lg font-bold text-white">Bank Soal Kimia</h3><p class="text-xs text-zinc-400">Cari bank lokal di browser ini atau bank cloud Google Spreadsheet. Pilih soal untuk menyusun paket baru.</p></div>
         <button id="btnCloseQuestionBank" type="button" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs">Tutup</button>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mt-4">
+      <div class="flex gap-2 mt-4">
+        <button id="btnBankLocal" type="button" aria-pressed="true" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold">Bank lokal</button>
+        <button id="btnBankCloud" type="button" aria-pressed="false" class="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-300 text-xs font-semibold">Bank cloud</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mt-3">
         <input id="bankSearchInput" type="search" placeholder="Cari topik, label, atau isi soal…" class="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs">
         <select id="bankTopicFilter" class="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs"><option value="">Semua materi</option></select>
         <select id="bankGradeFilter" class="px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs"><option value="">Semua jenjang</option></select>
@@ -727,6 +800,16 @@
       </div>
       <div id="questionBankList" class="mt-3 space-y-3 max-h-[65vh] overflow-y-auto pr-1"></div>
     </div>
+  </div>
+  <div id="aiUsageModal" class="fixed inset-0 z-[60] hidden no-print overflow-y-auto p-4 bg-zinc-950/90 backdrop-blur-sm">
+    <section class="max-w-2xl mx-auto my-10 glass-card border border-zinc-700 rounded-2xl p-5">
+      <div class="flex items-start justify-between gap-3 border-b border-zinc-800 pb-3">
+        <div><h3 class="text-lg font-bold text-white">Ringkasan Pemakaian AI</h3><p class="text-xs text-zinc-400">Dicatat di browser ini. Token aktual ditampilkan jika disediakan oleh API; selain itu berupa perkiraan.</p></div>
+        <button id="btnCloseAIUsage" type="button" class="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-200 text-xs">Tutup</button>
+      </div>
+      <div id="aiUsageSummary" class="mt-4 space-y-3"></div>
+      <div class="flex justify-end mt-4"><button id="btnClearAIUsage" type="button" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-900 text-zinc-200 text-xs">Hapus riwayat pemakaian</button></div>
+    </section>
   </div>
   <footer class="relative z-20 border-t border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md px-4 sm:px-6 lg:px-12 py-4 mt-8 no-print">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-400">
