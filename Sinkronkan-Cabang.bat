@@ -21,12 +21,25 @@ echo       - Backup LMS dan Backend GAS berhasil diamankan!
 
 echo.
 echo [3/4] Menyinkronkan Portal-Bahan-Ajar-Kimia (Media)...
-robocopy "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia" "C:\Users\Tito\Desktop\PortalKimia-Suite\media" /E /XD "Media_Pembelajaran_Kimia_Drive" "Stitch" /XF "*.gs" >nul
-echo       - Media Pembelajaran berhasil diperbarui!
+robocopy "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia" "C:\Users\Tito\Desktop\PortalKimia-Suite\media" /E /XD "Stitch" "scratch" ".system_generated" /XF "*.gs" >nul
+copy /Y "C:\Users\Tito\Desktop\PortalKimia-Suite\media\Guru.html" "C:\Users\Tito\Desktop\PortalKimia-Suite\media\guru.html" >nul
+if not exist "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite" mkdir "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite" >nul
+if exist "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Code.gs" (
+    copy /Y "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Code.gs" "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite\Media_Code.gs" >nul
+    if not exist "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\media" mkdir "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\media" >nul
+    copy /Y "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Code.gs" "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\media\Code.gs" >nul
+)
+echo       - Media Pembelajaran dan Backend GAS berhasil diperbarui!
 
 echo.
 echo [4/5] Menyinkronkan Generator Modul Ajar AI...
 robocopy "C:\Users\Tito\Desktop\Generator Modul Ajar" "C:\Users\Tito\Desktop\PortalKimia-Suite\generator" /E /XF "*.gs" >nul
+if exist "C:\Users\Tito\Desktop\Generator Modul Ajar\Code.gs" (
+    if not exist "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite" mkdir "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite" >nul
+    copy /Y "C:\Users\Tito\Desktop\Generator Modul Ajar\Code.gs" "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite\Generator_Code.gs" >nul
+    if not exist "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\generator" mkdir "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\generator" >nul
+    copy /Y "C:\Users\Tito\Desktop\Generator Modul Ajar\Code.gs" "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\generator\Code.gs" >nul
+)
 echo       - Generator Modul Ajar berhasil diperbarui!
 
 echo.
@@ -55,3 +68,4 @@ echo   [SELESAI] File frontend, backup lokal dan backend GAS tersinkron!
 echo ====================================================================
 echo.
 pause
+

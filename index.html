@@ -280,19 +280,36 @@
                 <p id="kbm-sub-title" class="text-[11px] text-slate-300 mt-0.5">Menyelaraskan jam aktif dan agenda KBM.</p>
               </div>
             </div>
-            <!-- Quick Link to LMS (Hanya Tampil di Mode Guru & Admin) -->
-            <a id="kbm-quick-lms-btn" href="./lms/" target="_blank" rel="noopener noreferrer" 
-               class="hidden shrink-0 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 items-center gap-1.5 transition-all" title="Buka LMS Kelas (Pengajar)">
-              <span>Buka LMS</span>
-              <svg class="w-3 h-3 text-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
-            </a>
+            <!-- Action Buttons Container -->
+            <div id="kbm-actions-container" class="flex flex-wrap items-center gap-2 shrink-0">
+              <!-- Quick Link to LMS (Hanya Tampil di Mode Admin) -->
+              <a id="kbm-quick-lms-btn" href="./lms/" target="_blank" rel="noopener noreferrer" 
+                 class="hidden shrink-0 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 items-center gap-1.5 transition-all" title="Buka LMS Kelas (Administrator)">
+                <span>Buka LMS</span>
+                <svg class="w-3 h-3 text-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+              </a>
 
-            <!-- Quick Link to Media (Khusus Mode Siswa) -->
-            <a id="kbm-student-explore-btn" href="./media/" 
-               class="hidden shrink-0 px-3 py-1.5 rounded-lg bg-purple-950/80 hover:bg-purple-900/90 text-purple-200 text-xs font-semibold border border-purple-500/40 items-center gap-1.5 transition-all" title="Buka Media Pembelajaran Interaktif">
-              <span>Buka Media</span>
-              <svg class="w-3 h-3 text-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
-            </a>
+              <!-- Action Link Guru: Generator Modul Ajar AI (Khusus Kamis & Jumat di Mode Guru) -->
+              <a id="kbm-guru-modul-btn" href="./generator/" target="_blank" rel="noopener noreferrer"
+                 class="hidden shrink-0 px-3 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 text-cyan-200 text-xs font-semibold border border-cyan-500/40 items-center gap-1.5 transition-all shadow-sm" title="Apakah sudah mengerjakan Lesson Plan dan Bahan Ajar? Buka Generator Modul Ajar">
+                <span>✨ Buka Generator Modul Ajar</span>
+                <svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+              </a>
+
+              <!-- Action Link Guru: Generator Soal Kimia AI (Setiap Hari di Mode Guru) -->
+              <a id="kbm-guru-soal-btn" href="./soal/" target="_blank" rel="noopener noreferrer"
+                 class="hidden shrink-0 px-3 py-1.5 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 text-indigo-200 text-xs font-semibold border border-indigo-500/40 items-center gap-1.5 transition-all shadow-sm" title="Ingin membuat latihan soal? Buka Generator Soal">
+                <span>📝 Buka Generator Soal</span>
+                <svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+              </a>
+
+              <!-- Quick Link to Media (Mode Siswa & Mode Guru) -->
+              <a id="kbm-student-explore-btn" href="./media/" 
+                 class="hidden shrink-0 px-3 py-1.5 rounded-lg bg-purple-950/80 hover:bg-purple-900/90 text-purple-200 text-xs font-semibold border border-purple-500/40 items-center gap-1.5 transition-all" title="Buka Media Pembelajaran Interaktif">
+                <span>Buka Media</span>
+                <svg class="w-3 h-3 text-purple-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+              </a>
+            </div>
           </div>
 
           <!-- Drawer Detail Jadwal Harian (Collapsible) -->
@@ -670,9 +687,13 @@
         if (idLower === "branch_media" || titleLower.includes("media") || catLower.includes("media") || urlLower.includes("media")) {
           roles = ["siswa", "guru", "admin"];
         } else if (idLower === "branch_lms" || urlLower.includes("lms")) {
-          roles = ["guru", "admin"];
+          roles = ["admin"]; // LMS Khusus Admin, tidak tampil di Mode Guru
         } else if (idLower === "branch_generator" || urlLower.includes("generator")) {
           roles = ["guru", "admin"];
+        } else if (idLower.includes("soal") || urlLower.includes("soal") || titleLower.includes("soal")) {
+          roles = ["guru", "admin"];
+        } else if (idLower.includes("olimpiade") || urlLower.includes("olimpiade") || titleLower.includes("olimpiade")) {
+          roles = ["siswa", "guru", "admin"];
         } else {
           // Cabang baru lainnya dapat diakses oleh semua peran secara default
           roles = ["siswa", "guru", "admin"];
@@ -714,7 +735,7 @@
         buttonText: "Buka LMS Kelas",
         theme: "emerald",
         icon: "academic-cap",
-        roles: ["guru", "admin"]
+        roles: ["admin"]
       },
       {
         id: "branch_media",
@@ -725,6 +746,18 @@
         url: "./media/",
         buttonText: "Buka Portal Media",
         theme: "purple",
+        icon: "flask",
+        roles: ["siswa", "guru", "admin"]
+      },
+      {
+        id: "branch_virtual_lab",
+        title: "Laboratorium Virtual Terpadu",
+        category: "Praktikum Digital",
+        description: "Katalog khusus 18 laboratorium virtual kimia SMA berstandar PhET & Labster: Titrasi, Sel Volta, Kalorimeter, VSEPR 3D, Spektrofotometri, dan Peluruhan.",
+        chips: ["18 Lab Virtual", "PhET Standard", "Offline Ready"],
+        url: "./media/LaboratoriumVirtual.html",
+        buttonText: "Masuk Lab Virtual",
+        theme: "emerald",
         icon: "flask",
         roles: ["siswa", "guru", "admin"]
       },
@@ -779,7 +812,15 @@
                 parsed.push(def);
               }
             });
-            return parsed.map(normalizeBranch);
+            // Bersihkan LMS agar tidak pernah membawa peran 'guru' dari cache lama
+            return parsed.map(b => {
+              const norm = normalizeBranch(b);
+              if (norm.id === "branch_lms") {
+                norm.roles = (norm.roles || []).filter(r => r !== "guru");
+                if (norm.roles.length === 0) norm.roles = ["admin"];
+              }
+              return norm;
+            });
           }
         }
       } catch (e) {
@@ -967,6 +1008,8 @@
       const resetDefaultBtn = document.getElementById("reset-default-branches-btn");
       const lmsBtn = document.getElementById("kbm-quick-lms-btn");
       const studentExploreBtn = document.getElementById("kbm-student-explore-btn");
+      const guruModulBtn = document.getElementById("kbm-guru-modul-btn");
+      const guruSoalBtn = document.getElementById("kbm-guru-soal-btn");
       const toggleSchedBtn = document.getElementById("toggle-schedule-detail-btn");
       const schedDrawer = document.getElementById("schedule-detail-drawer");
       const refreshBtn = document.getElementById("refresh-btn");
@@ -982,27 +1025,31 @@
         if (resetDefaultBtn) { resetDefaultBtn.classList.add("hidden"); resetDefaultBtn.classList.remove("flex"); }
         if (refreshBtn) refreshBtn.title = "Segarkan Data Portal";
 
-        // Mode Siswa: Sembunyikan tombol LMS & tombol detail jadwal mengajar guru
+        // Mode Siswa: Sembunyikan tombol LMS & tombol detail jadwal mengajar guru & tombol guru
         if (lmsBtn) { lmsBtn.classList.add("hidden"); lmsBtn.classList.remove("flex"); }
         if (studentExploreBtn) { studentExploreBtn.classList.remove("hidden"); studentExploreBtn.classList.add("flex"); }
+        if (guruModulBtn) { guruModulBtn.classList.add("hidden"); guruModulBtn.classList.remove("flex"); }
+        if (guruSoalBtn) { guruSoalBtn.classList.add("hidden"); guruSoalBtn.classList.remove("flex"); }
         if (toggleSchedBtn) toggleSchedBtn.classList.add("hidden");
         if (schedDrawer) schedDrawer.classList.add("hidden");
 
       } else if (activeRole === "guru") {
-        if (profileInitial) profileInitial.innerText = "TV";
-        if (profileName) profileName.innerText = "Tito Vanzal, S.Pd.";
-        if (profileSub) profileSub.innerText = "Guru Kimia & Wali Kelas";
-        if (heroBadgeText) heroBadgeText.innerText = "RUANG KERJA PENGAJAR";
-        if (heroHeadline) heroHeadline.innerHTML = `Selamat datang, <span class="gradient-title">Pak Tito</span>`;
-        if (heroSubtitle) heroSubtitle.innerText = "Akses terintegrasi administrasi wali kelas, rekap nilai & presensi LMS, lab media kimia, dan generator otomatis modul ajar.";
+        if (profileInitial) profileInitial.innerText = "⚗️";
+        if (profileName) profileName.innerText = "Rekan Guru Kimia";
+        if (profileSub) profileSub.innerText = "Komunitas MGMP Kimia SMA";
+        if (heroBadgeText) heroBadgeText.innerText = "RUANG KERJA MGMP KIMIA";
+        if (heroHeadline) heroHeadline.innerHTML = `Selamat datang, <span class="gradient-title">rekan MGMP Kimia</span>`;
+        if (heroSubtitle) heroSubtitle.innerText = "Akses terintegrasi media pembelajaran interaktif, laboratorium virtual, generator modul ajar AI Kurikulum Merdeka, generator soal AI, dan pembinaan olimpiade kimia.";
         if (addBranchTopBtn) addBranchTopBtn.classList.add("hidden");
         if (resetDefaultBtn) { resetDefaultBtn.classList.add("hidden"); resetDefaultBtn.classList.remove("flex"); }
-        if (refreshBtn) refreshBtn.title = "Segarkan Data dari Spreadsheet & LMS";
+        if (refreshBtn) refreshBtn.title = "Segarkan Data Portal";
 
-        // Mode Guru: Tampilkan tombol LMS & tombol jadwal KBM guru
-        if (lmsBtn) { lmsBtn.classList.remove("hidden"); lmsBtn.classList.add("flex"); }
-        if (studentExploreBtn) { studentExploreBtn.classList.add("hidden"); studentExploreBtn.classList.remove("flex"); }
-        if (toggleSchedBtn) toggleSchedBtn.classList.remove("hidden");
+        // Mode Guru: HILANGKAN LMS & JADWAL PRIBADI LAMA (Bukan untuk rekan MGMP)
+        // Tombol LMS disembunyikan total di mode guru
+        if (lmsBtn) { lmsBtn.classList.add("hidden"); lmsBtn.classList.remove("flex"); }
+        if (studentExploreBtn) { studentExploreBtn.classList.remove("hidden"); studentExploreBtn.classList.add("flex"); }
+        if (toggleSchedBtn) toggleSchedBtn.classList.add("hidden");
+        if (schedDrawer) schedDrawer.classList.add("hidden");
 
       } else if (activeRole === "admin") {
         if (profileInitial) profileInitial.innerText = "⚙️";
@@ -1018,6 +1065,8 @@
         // Mode Admin: Tampilkan tombol LMS & tombol jadwal
         if (lmsBtn) { lmsBtn.classList.remove("hidden"); lmsBtn.classList.add("flex"); }
         if (studentExploreBtn) { studentExploreBtn.classList.add("hidden"); studentExploreBtn.classList.remove("flex"); }
+        if (guruModulBtn) { guruModulBtn.classList.add("hidden"); guruModulBtn.classList.remove("flex"); }
+        if (guruSoalBtn) { guruSoalBtn.classList.add("hidden"); guruSoalBtn.classList.remove("flex"); }
         if (toggleSchedBtn) toggleSchedBtn.classList.remove("hidden");
       }
 
@@ -1121,15 +1170,20 @@
       if (!badgeLabel || !mainTitle) return;
 
       // =========================================================================
-      // KHUSUS MODE SISWA:
-      // Tampilkan status umum KBM sekolah (tanpa jadwal mengajar guru & tanpa LMS)
+      // 1. KHUSUS MODE SISWA:
+      // Status umum sekolah, hanya tombol Buka Media
       // =========================================================================
       if (activeRole === 'siswa') {
         const lmsBtn = document.getElementById("kbm-quick-lms-btn");
         const studentExploreBtn = document.getElementById("kbm-student-explore-btn");
+        const guruModulBtn = document.getElementById("kbm-guru-modul-btn");
+        const guruSoalBtn = document.getElementById("kbm-guru-soal-btn");
         const toggleSchedBtn = document.getElementById("toggle-schedule-detail-btn");
         const schedDrawer = document.getElementById("schedule-detail-drawer");
+
         if (lmsBtn) { lmsBtn.classList.add("hidden"); lmsBtn.classList.remove("flex"); }
+        if (guruModulBtn) { guruModulBtn.classList.add("hidden"); guruModulBtn.classList.remove("flex"); }
+        if (guruSoalBtn) { guruSoalBtn.classList.add("hidden"); guruSoalBtn.classList.remove("flex"); }
         if (studentExploreBtn) { studentExploreBtn.classList.remove("hidden"); studentExploreBtn.classList.add("flex"); }
         if (toggleSchedBtn) toggleSchedBtn.classList.add("hidden");
         if (schedDrawer) schedDrawer.classList.add("hidden");
@@ -1228,9 +1282,158 @@
       }
 
       // =========================================================================
-      // KHUSUS MODE GURU & ADMIN:
+      // 2. KHUSUS MODE GURU (REKAN MGMP KIMIA):
+      // Waktu aktif realtime seperti mode siswa (tanpa LMS pribadi & tanpa jadwal guru lama).
+      // Ditambahkan produktivitas pengajar:
+      // - Kamis & Jumat: Pengingat Lesson Plan & Bahan Ajar -> [Buka Generator Modul Ajar]
+      // - Setiap Hari: Pengingat Latihan Soal -> [Buka Generator Soal]
+      // - Selalu tersedia tombol -> [Buka Media]
+      // =========================================================================
+      if (activeRole === 'guru') {
+        const lmsBtn = document.getElementById("kbm-quick-lms-btn");
+        const studentExploreBtn = document.getElementById("kbm-student-explore-btn");
+        const guruModulBtn = document.getElementById("kbm-guru-modul-btn");
+        const guruSoalBtn = document.getElementById("kbm-guru-soal-btn");
+        const toggleSchedBtn = document.getElementById("toggle-schedule-detail-btn");
+        const schedDrawer = document.getElementById("schedule-detail-drawer");
+
+        if (lmsBtn) { lmsBtn.classList.add("hidden"); lmsBtn.classList.remove("flex"); }
+        if (toggleSchedBtn) toggleSchedBtn.classList.add("hidden");
+        if (schedDrawer) schedDrawer.classList.add("hidden");
+
+        // Di Mode Guru: Buka Media & Generator Soal aktif setiap hari
+        if (studentExploreBtn) { studentExploreBtn.classList.remove("hidden"); studentExploreBtn.classList.add("flex"); }
+        if (guruSoalBtn) { guruSoalBtn.classList.remove("hidden"); guruSoalBtn.classList.add("flex"); }
+
+        // Generator Modul Ajar aktif setiap hari Kamis dan Jumat
+        const isKamisJumat = (today === 'Kamis' || today === 'Jumat');
+        if (guruModulBtn) {
+          if (isKamisJumat) {
+            guruModulBtn.classList.remove("hidden");
+            guruModulBtn.classList.add("flex");
+          } else {
+            guruModulBtn.classList.add("hidden");
+            guruModulBtn.classList.remove("flex");
+          }
+        }
+
+        const getGuruPromptText = () => {
+          if (isKamisJumat) {
+            return `<span class="text-cyan-300 font-bold">📋 Apakah sudah mengerjakan Lesson Plan dan Bahan Ajar?</span> <span class="text-slate-300">• Ingin membuat latihan soal? Akses tombol aksi cepat di samping.</span>`;
+          } else {
+            return `<span class="text-indigo-300 font-bold">💡 Ingin membuat latihan soal?</span> <span class="text-slate-300">Buat paket soal HOTS berbasis AI atau buka modul simulasi kimia di samping.</span>`;
+          }
+        };
+
+        if (today === 'Minggu') {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "Libur Akhir Pekan";
+          periodInfo.innerText = "Hari Libur";
+          mainTitle.innerText = "Hari Libur — Persiapan Pekan Pembelajaran";
+          subTitle.innerHTML = getGuruPromptText();
+          iconBox.innerHTML = `<span>🌴</span>`;
+          return;
+        }
+
+        const lmsData = getLmsStorageData();
+        const slots = (lmsData?.jamPelajaran && lmsData.jamPelajaran[today]) ? lmsData.jamPelajaran[today] : (STANDARD_JAM_SLOTS[today] || []);
+
+        if (!slots || slots.length === 0) {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-950/80 border border-purple-500/30 text-purple-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "Ruang Kerja Guru";
+          periodInfo.innerText = today;
+          mainTitle.innerText = "Ruang Kerja & Kolaborasi MGMP Kimia";
+          subTitle.innerHTML = getGuruPromptText();
+          iconBox.innerHTML = `<span>⚗️</span>`;
+          return;
+        }
+
+        const firstSlot = slots[0];
+        const lastSlot = slots[slots.length - 1];
+
+        if (nowStr < firstSlot.mulai) {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-950/80 border border-indigo-500/30 text-indigo-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "Menjelang KBM";
+          periodInfo.innerText = `Mulai ${firstSlot.mulai} WIB`;
+          mainTitle.innerText = `KBM Hari ${today} Dimulai Pukul ${firstSlot.mulai} WIB`;
+          subTitle.innerHTML = getGuruPromptText();
+          iconBox.innerHTML = `<span>🌅</span>`;
+          return;
+        }
+
+        if (nowStr >= lastSlot.selesai) {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-800/90 border border-slate-700 text-slate-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "KBM Selesai";
+          periodInfo.innerText = `Selesai ${lastSlot.selesai} WIB`;
+          mainTitle.innerText = `Seluruh Jam Pelajaran Hari ${today} Telah Selesai`;
+          subTitle.innerHTML = getGuruPromptText();
+          iconBox.innerHTML = `<span>🏠</span>`;
+          return;
+        }
+
+        let currentSlot = null;
+        for (const s of slots) {
+          if (nowStr >= s.mulai && nowStr < s.selesai) {
+            currentSlot = s;
+            break;
+          }
+        }
+
+        if (currentSlot) {
+          if (currentSlot.type === 'istirahat') {
+            badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-950/80 border border-amber-500/30 text-amber-300 flex items-center gap-1.5";
+            badgeLabel.innerText = "Waktu Istirahat";
+            periodInfo.innerText = `${currentSlot.mulai} - ${currentSlot.selesai} WIB`;
+            mainTitle.innerText = `${currentSlot.label || 'Istirahat Sekolah'} Sedang Berlangsung`;
+            subTitle.innerHTML = getGuruPromptText();
+            iconBox.innerHTML = `<span>☕</span>`;
+            return;
+          }
+
+          if (currentSlot.type === 'kegiatan') {
+            badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 flex items-center gap-1.5";
+            badgeLabel.innerText = currentSlot.label || "Kegiatan Sekolah";
+            periodInfo.innerText = `${currentSlot.mulai} - ${currentSlot.selesai} WIB`;
+            mainTitle.innerText = `${currentSlot.label} (${currentSlot.mulai} - ${currentSlot.selesai})`;
+            subTitle.innerHTML = getGuruPromptText();
+            iconBox.innerHTML = `<span>👥</span>`;
+            return;
+          }
+
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-950/90 border border-purple-500/40 text-purple-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "Jam Pelajaran Sekolah";
+          periodInfo.innerText = `Jam ${currentSlot.jam} (${currentSlot.mulai} - ${currentSlot.selesai} WIB)`;
+          mainTitle.innerText = `Jam Pelajaran ke-${currentSlot.jam} Sedang Berlangsung`;
+          subTitle.innerHTML = getGuruPromptText();
+          iconBox.innerHTML = `<span>🧪</span>`;
+          return;
+        } else {
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-950/80 border border-purple-500/30 text-purple-300 flex items-center gap-1.5";
+          badgeLabel.innerText = "KBM Berlangsung";
+          periodInfo.innerText = today;
+          mainTitle.innerText = "Kegiatan Belajar Mengajar Aktif";
+          subTitle.innerHTML = getGuruPromptText();
+          iconBox.innerHTML = `<span>📚</span>`;
+          return;
+        }
+      }
+
+      // =========================================================================
+      // 3. KHUSUS MODE ADMIN:
       // Tampilkan status mengajar pribadi guru, agenda kelas, dan tombol LMS
       // =========================================================================
+      const lmsBtn = document.getElementById("kbm-quick-lms-btn");
+      const studentExploreBtn = document.getElementById("kbm-student-explore-btn");
+      const guruModulBtn = document.getElementById("kbm-guru-modul-btn");
+      const guruSoalBtn = document.getElementById("kbm-guru-soal-btn");
+      const toggleSchedBtn = document.getElementById("toggle-schedule-detail-btn");
+
+      if (lmsBtn) { lmsBtn.classList.remove("hidden"); lmsBtn.classList.add("flex"); }
+      if (studentExploreBtn) { studentExploreBtn.classList.add("hidden"); studentExploreBtn.classList.remove("flex"); }
+      if (guruModulBtn) { guruModulBtn.classList.add("hidden"); guruModulBtn.classList.remove("flex"); }
+      if (guruSoalBtn) { guruSoalBtn.classList.add("hidden"); guruSoalBtn.classList.remove("flex"); }
+      if (toggleSchedBtn) toggleSchedBtn.classList.remove("hidden");
+
       if (today === 'Minggu') {
         badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 flex items-center gap-1.5";
         badgeLabel.innerText = "Libur Akhir Pekan";
@@ -1347,8 +1550,8 @@
       const container = document.getElementById("schedule-timeline-list");
       if (!container) return;
 
-      if (activeRole === 'siswa') {
-        container.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-slate-400">Agenda mengajar hanya dapat diakses pada Mode Guru atau Admin.</div>`;
+      if (activeRole !== 'admin') {
+        container.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-slate-400">Agenda mengajar kelas hanya dapat diakses pada Mode Admin.</div>`;
         return;
       }
 
@@ -1734,13 +1937,29 @@
           const rawFetched = result.data.length > 0 ? result.data : DEFAULT_BRANCHES;
           const normalized = rawFetched.map(normalizeBranch);
 
-          // Pertahankan pengaturan roles lokal yang sudah dimodifikasi Admin
-          currentBranches = normalized.map(nb => {
-            const localMatch = currentBranches.find(cb => cb.id === nb.id);
-            if (localMatch && Array.isArray(localMatch.roles) && localMatch.roles.length > 0) {
-              return { ...nb, roles: localMatch.roles };
+          // Pastikan seluruh modul default penting (seperti lab virtual) selalu ada
+          DEFAULT_BRANCHES.forEach(def => {
+            if (!normalized.some(nb => nb.id === def.id || (nb.url && def.url && nb.url.toLowerCase() === def.url.toLowerCase()))) {
+              normalized.push(def);
             }
-            return nb;
+          });
+
+          // Prioritaskan roles resmi dari Google Apps Script / Spreadsheet
+          currentBranches = normalized.map(nb => {
+            let effectiveRoles = nb.roles;
+            // Jika branch dari server belum punya roles, gunakan roles dari memory lokal
+            if (!Array.isArray(effectiveRoles) || effectiveRoles.length === 0) {
+              const localMatch = currentBranches.find(cb => cb.id === nb.id);
+              if (localMatch && Array.isArray(localMatch.roles) && localMatch.roles.length > 0) {
+                effectiveRoles = localMatch.roles;
+              }
+            }
+            // Pengamanan multi-perangkat: LMS hanya boleh untuk admin (hapus peran guru)
+            if (nb.id === "branch_lms" || (nb.url && nb.url.toLowerCase().includes("lms"))) {
+              effectiveRoles = (effectiveRoles || []).filter(r => r !== "guru");
+              if (!effectiveRoles.includes("admin")) effectiveRoles.push("admin");
+            }
+            return { ...nb, roles: effectiveRoles };
           });
 
           saveBranchesToLocalStorage();
