@@ -313,6 +313,10 @@ async function ujiKoneksiDanToken(tokenToTest) {
     if (feedback) {
       feedback.innerHTML = '<span class="text-rose-400 font-semibold">❌ ' + (err.message || 'Verifikasi token gagal.') + '</span>';
     }
+    // Invalidate local cache on rejected token
+    window.currentUserAccount = null;
+    setGeneratorAccountInfo(null);
+    updateConnectionStatusUI();
     return null;
   } finally {
     if (btnUji) btnUji.disabled = false;
@@ -437,6 +441,38 @@ window.adminHapusAkunGuruSoal = adminHapusAkunGuruSoal;
 // =========================================================================
 // MODAL CONTROLLERS (GLOBAL ACCESS)
 // =========================================================================
+
+function switchConnectionModalTab(tab) {
+  const paneToken = document.getElementById("paneModalTokenGuru");
+  const paneDiag = document.getElementById("paneModalServerDiag");
+  const btnToken = document.getElementById("tabBtnTokenGuru");
+  const btnDiag = document.getElementById("tabBtnServerDiag");
+
+  if (tab === "diag") {
+    if (paneToken) paneToken.classList.add("hidden");
+    if (paneDiag) paneDiag.classList.remove("hidden");
+    if (btnToken) {
+      btnToken.className = "inline-flex items-center gap-1.5 px-3 py-2 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 font-semibold text-xs transition-colors";
+    }
+    if (btnDiag) {
+      btnDiag.className = "inline-flex items-center gap-1.5 px-3 py-2 border-b-2 border-emerald-500 text-emerald-300 font-bold text-xs transition-colors";
+    }
+  } else {
+    if (paneToken) paneToken.classList.remove("hidden");
+    if (paneDiag) paneDiag.classList.add("hidden");
+    if (btnToken) {
+      btnToken.className = "inline-flex items-center gap-1.5 px-3 py-2 border-b-2 border-emerald-500 text-emerald-300 font-bold text-xs transition-colors";
+    }
+    if (btnDiag) {
+      btnDiag.className = "inline-flex items-center gap-1.5 px-3 py-2 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 font-semibold text-xs transition-colors";
+    }
+  }
+  if (typeof window !== "undefined" && window.lucide && typeof window.lucide.createIcons === "function") {
+    window.lucide.createIcons();
+  }
+}
+window.switchConnectionModalTab = switchConnectionModalTab;
+
 function openConnectionModal() {
   const modal = document.getElementById("connectionModal");
   if (modal) {
