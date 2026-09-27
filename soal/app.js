@@ -49,6 +49,11 @@ PEDOMAN UTAMA:
      D. (4) saja
      E. Semua pernyataan benar
    - Untuk Sebab-Akibat (UTBK): Sajikan kalimat Pernyataan diikuti "SEBAB" dan Alasan, lalu gunakan opsi standar UTBK (A: Pernyataan benar, alasan benar, berhubungan; B: Keduanya benar tapi tidak berhubungan; C: Pernyataan benar, alasan salah; D: Pernyataan salah, alasan benar; E: Keduanya salah).
+
+5. STANDAR TES KEMAMPUAN AKADEMIK (TKA) & CAMPURAN MULTI-FORMAT:
+   - Jika tipe soal adalah TKA atau Campuran, variasikan format butir soal antara Pilihan Ganda Biasa, Hubungan Sebab-Akibat (Pernyataan & Alasan), dan PG Asosiasi (Pernyataan 1, 2, 3, dan 4).
+   - Pastikan opsi jawaban pada Sebab-Akibat dan Asosiasi mengikuti standar baku nasional secara konsisten.
+   - Jika tingkat kesulitan bertuliskan 'Campuran', distribusikan level kognitif secara bertingkat dan proporsional dari L1 (C1-C2 Pemahaman), L2 (C3 Aplikasi & Perhitungan), hingga L3 (C4-C5 Penalaran HOTS).
 `;
 
 // INITIALIZATION
@@ -1636,6 +1641,88 @@ async function generateQuiz() {
     properties: dynamicProperties
   };
 
+  // Distribusi Level Kognitif
+  let difficultyInstruction = `Tingkat Kesulitan: ${difficulty}`;
+  if (difficulty.includes("Campuran")) {
+    let l1Count, l3Count, l2Count;
+    if (difficulty.includes("HOTS")) {
+      l1Count = Math.max(0, Math.round(numQuestions * 0.10));
+      l3Count = Math.max(1, Math.round(numQuestions * 0.50));
+      l2Count = Math.max(1, numQuestions - l1Count - l3Count);
+    } else {
+      l1Count = Math.max(1, Math.round(numQuestions * 0.20));
+      l3Count = Math.max(1, Math.round(numQuestions * 0.30));
+      l2Count = Math.max(1, numQuestions - l1Count - l3Count);
+    }
+    const diffSum = l1Count + l2Count + l3Count;
+    if (diffSum !== numQuestions) {
+      l2Count += (numQuestions - diffSum);
+    }
+
+    difficultyInstruction = `DISTRIBUSI LEVEL KOGNITIF CAMPURAN (TOTAL ${numQuestions} BUTIR SOAL):
+- Level 1 (Pengetahuan & Pemahaman - C1/C2): Tepat ${l1Count} butir soal (menguji konsep dasar, rumus, tata nama, struktur).
+- Level 2 (Aplikasi & Perhitungan - C3): Tepat ${l2Count} butir soal (menguji stoikiometri, reaksi kimia, substitusi rumus kuantitatif, pH, elektrokimia).
+- Level 3 (Penalaran & Logika Tinggi HOTS - C4/C5/C6): Tepat ${l3Count} butir soal (menguji analisis grafik/kurva, data eksperimen anomali, evaluasi kesetimbangan/mekanisme, kimia hijau).
+ATURAN WAJIB:
+1. Susunlah urutan butir soal secara berjenjang dari mudah (soal L1 di awal), kemudian terapan sedang (soal L2 di tengah), lalu penalaran analitis mendalam (soal L3 di nomor-nomor akhir).
+2. Pada properti 'tingkat_kesulitan' di SETIAP butir soal, WAJIB dituliskan level aslinya secara spesifik: 'L1 (C2 - Pemahaman)', 'L2 (C3 - Aplikasi)', atau 'L3 (C4/C5 - Penalaran HOTS)'.`;
+  } else {
+    difficultyInstruction = `Tingkat Kesulitan: ${difficulty}. Semua butir soal berbobot ${difficulty}. Pada properti 'tingkat_kesulitan' di setiap butir soal tuliskan '${difficulty}'.`;
+  }
+
+  // Distribusi Format Tipe Soal
+  let typeInstruction = "";
+  if (qType.includes("TKA") || qType.includes("Campuran")) {
+    typeInstruction = `DISTRIBUSI FORMAT TIPE SOAL (STANDAR TKA & CAMPURAN MULTI-BENTUK):
+Dalam paket ${numQuestions} butir soal ini, variasikan bentuk soal mengikuti standar baku Tes Kemampuan Akademik (TKA) Saintek Kimia:
+1. TIPE 1 - PILIHAN GANDA BIASA (5 Opsi: A, B, C, D, E):
+   - Satu kunci jawaban benar dan 4 opsi distraktor bermutu tinggi.
+2. TIPE 2 - PILIHAN GANDA ASOSIASI / KOMBINASI PERNYATAAN (1, 2, 3, dan 4):
+   - Narasi soal menyajikan permasalahan ilmiah diikuti 4 nomor pernyataan (1), (2), (3), dan (4).
+   - Opsi jawaban WAJIB mengikuti standar baku nasional:
+     A. jika (1), (2), dan (3) benar
+     B. jika (1) dan (3) benar
+     C. jika (2) dan (4) benar
+     D. jika hanya (4) yang benar
+     E. jika semua pernyataan benar
+3. TIPE 3 - HUBUNGAN SEBAB-AKIBAT (PERNYATAAN - ALASAN):
+   - Narasi soal menyajikan kalimat PERNYATAAN diikuti kata 'SEBAB', lalu kalimat ALASAN.
+   - Opsi jawaban WAJIB mengikuti standar baku nasional:
+     A. Pernyataan benar, alasan benar, dan keduanya menunjukkan hubungan sebab-akibat
+     B. Pernyataan benar, alasan benar, tetapi keduanya tidak menunjukkan hubungan sebab-akibat
+     C. Pernyataan benar dan alasan salah
+     D. Pernyataan salah dan alasan benar
+     E. Pernyataan dan alasan keduanya salah
+${qType.includes("Tabel") || qType.includes("Esai") ? `4. TIPE 4 - PILIHAN GANDA KOMPLEKS TABEL / ANALISIS KASUS (Benar/Salah):
+   - Menyajikan tabel klaim/pernyataan untuk dianalisis kebenarannya.` : ''}
+
+ATURAN WAJIB FORMAT:
+- Sebarkan format-format di atas secara variatif dan proporsional di seluruh nomor soal dalam paket naskah ini (jangan monoton hanya 1 format).
+- Pada properti 'tipe_soal' di SETIAP butir soal, tuliskan jenis format spesifik butir tersebut (misal: 'Pilihan Ganda', 'Sebab-Akibat (Pernyataan-Alasan)', 'PG Kompleks (Asosiasi 1, 2, 3, 4)').`;
+  } else if (qType.includes("Sebab-Akibat")) {
+    typeInstruction = `FORMAT KHUSUS SEBAB-AKIBAT (PERNYATAAN - ALASAN):
+Setiap butir soal disusun dengan menyajikan kalimat Pernyataan, diikuti kata 'SEBAB', lalu kalimat Alasan.
+Pilihan jawaban WAJIB mengikuti format baku:
+A. Pernyataan benar, alasan benar, dan keduanya menunjukkan hubungan sebab-akibat
+B. Pernyataan benar, alasan benar, tetapi keduanya tidak menunjukkan hubungan sebab-akibat
+C. Pernyataan benar dan alasan salah
+D. Pernyataan salah dan alasan benar
+E. Pernyataan dan alasan keduanya salah
+Pada properti 'tipe_soal' tuliskan 'Sebab-Akibat (Pernyataan-Alasan)'.`;
+  } else if (qType.includes("1, 2, 3, 4") || qType.includes("Asosiasi")) {
+    typeInstruction = `FORMAT KHUSUS PG ASOSIASI (1, 2, 3, dan 4):
+Setiap butir soal menyajikan stimulus lalu 4 nomor pernyataan (1), (2), (3), dan (4).
+Pilihan jawaban WAJIB:
+A. jika (1), (2), dan (3) benar
+B. jika (1) dan (3) benar
+C. jika (2) dan (4) benar
+D. jika hanya (4) yang benar
+E. jika semua pernyataan benar
+Pada properti 'tipe_soal' tuliskan 'PG Kompleks (Asosiasi 1-2-3-4)'.`;
+  } else {
+    typeInstruction = `FORMAT SOAL: Susun seluruh butir soal dalam format '${qType}'. Pada properti 'tipe_soal' tuliskan '${qType}'.`;
+  }
+
   // Buat User Prompt
   const userPrompt = `
 Susun naskah soal asesmen kimia berkualitas tinggi dengan spesifikasi berikut:
@@ -1649,17 +1736,22 @@ Susun naskah soal asesmen kimia berkualitas tinggi dengan spesifikasi berikut:
 - Catatan Tambahan Guru: ${extraNotes || 'Sesuai standar asesmen kimia nasional'}
 
 INSTRUKSI KHUSUS FITUR:
-1. STIMULUS SOAL: Gunakan model pendekatan "${stimulus}". Awali pertanyaan dengan narasi kontekstual yang relevan dan menggugah nalar literasi sains.
-2. FORMAT TIPE SOAL: Buat butir soal dalam format "${qType}".
-3. TABEL & ILUSTRASI KIMIA: ${includeVisuals 
+1. PEDOMAN TINGKAT KESULITAN & LEVEL KOGNITIF:
+${difficultyInstruction}
+
+2. PEDOMAN FORMAT TIPE SOAL:
+${typeInstruction}
+
+3. STIMULUS SOAL: Gunakan model pendekatan "${stimulus}". Awali pertanyaan dengan narasi kontekstual yang relevan dan menggugah nalar literasi sains.
+4. TABEL & ILUSTRASI KIMIA: ${includeVisuals 
      ? 'Sertakan tabel data eksperimen (dalam format Markdown table rapi) atau diagram vektor SVG (pada properti ilustrasi_svg) HANYA untuk butir soal yang secara alamiah membutuhkan pengamatan data empiris / sajian visual (seperti laju reaksi, sel volta, titrasi, termokimia). JANGAN memaksakan tabel atau diagram pada seluruh butir soal jika tidak relevan, KECUALI jika catatan instruksi khusus guru di bawah secara eksplisit meminta tabel/diagram di setiap soal.' 
      : 'Tidak perlu menyertakan tabel atau diagram khusus.'}
-4. PAKET PARALEL: ${includeParallel ? 'WAJIB susun juga daftar_soal_paket_b sebanyak ' + numQuestions + ' butir soal paralel yang memiliki indikator setara dengan Paket A namun berbeda variabel/angka stoikiometrinya.' : 'Hanya susun Paket A.'}
-5. KISI-KISI ASESMEN: ${includeKisiKisi ? 'WAJIB susun matriks kisi_kisi_asesmen yang memetakan CP/TP, indikator soal, level kognitif Bloom (C2-C5), kunci, dan skor.' : 'Tidak perlu menyusun matriks kisi-kisi.'}
+5. PAKET PARALEL: ${includeParallel ? 'WAJIB susun juga daftar_soal_paket_b sebanyak ' + numQuestions + ' butir soal paralel yang memiliki indikator setara dengan Paket A namun berbeda variabel/angka stoikiometrinya.' : 'Hanya susun Paket A.'}
+6. KISI-KISI ASESMEN: ${includeKisiKisi ? 'WAJIB susun matriks kisi_kisi_asesmen yang memetakan CP/TP, indikator soal, level kognitif Bloom/Pusmendik (L1/C2, L2/C3, L3/C4-C5), bentuk soal spesifik, kunci, dan skor.' : 'Tidak perlu menyusun matriks kisi-kisi.'}
 
-6. FORMAT NOTASI RUMUS KIMIA: SETIAP rumus kimia senyawa/ion dan persamaan reaksi kimia (\\text{...}, \\rightarrow, \\frac) WAJIB DIAPIT TANDA DOLLAR INLINE: $...$ (Contoh: $\\text{KOH}$, $\\text{C}_x\\text{H}_{2x+2}$, $\\text{O}_2$, $\\text{C}_2\\text{H}_6$, $2\\text{H}_2 + \\text{O}_2 \\rightarrow 2\\text{H}_2\\text{O}$). JANGAN PERNAH menulis \\text atau \\rightarrow tanpa tanda dollar $! Kunci jawaban dan pembahasan juga wajib menggunakan tanda dollar untuk rumus kimia. Tulis persen dan angka desimal secara biasa tanpa dollar (50,0%).
+7. FORMAT NOTASI RUMUS KIMIA: SETIAP rumus kimia senyawa/ion dan persamaan reaksi kimia (\\text{...}, \\rightarrow, \\frac) WAJIB DIAPIT TANDA DOLLAR INLINE: $...$ (Contoh: $\\text{KOH}$, $\\text{C}_x\\text{H}_{2x+2}$, $\\text{O}_2$, $\\text{C}_2\\text{H}_6$, $2\\text{H}_2 + \\text{O}_2 \\rightarrow 2\\text{H}_2\\text{O}$). JANGAN PERNAH menulis \\text atau \\rightarrow tanpa tanda dollar $! Kunci jawaban dan pembahasan juga wajib menggunakan tanda dollar untuk rumus kimia. Tulis persen dan angka desimal secara biasa tanpa dollar (50,0%).
 
-7. PEMBUATAN JAWABAN & PEMBAHASAN: ${includeSolutions 
+8. PEMBUATAN JAWABAN & PEMBAHASAN: ${includeSolutions 
      ? 'WAJIB susun kunci_jawaban yang presisi dan susun pembahasan_langkah secara terperinci tahap demi tahap (step-by-step), mencakup rumus kimia, substitusi angka stoikiometri, dan analisis ilmiahnya.' 
      : 'DINONAKTIFKAN (FOKUS 100% MAKSIMAL PADA KUALITAS NASKAH SOAL). Pengajar TIDAK MEMERLUKAN langkah pembahasan panjang. KERAHKAN 100% KUOTA TOKEN DAN KAPASITAS PENALARAN AI UNTUK MENYUSUN BUTIR SOAL KIMIA TERBAIK: susun narasi stimulus kontekstual yang mendalam, sajikan tabel data eksperimen empiris, angka stoikiometri yang presisi, dan opsi jawaban dengan distraktor (pengecoh) yang cerdas dan menantang nalar siswa. Cukup berikan huruf kunci_jawaban singkat (misal: "A") dan KOSONGKAN pembahasan_langkah agar kuota token tidak terbuang!'}
 `;
@@ -2669,6 +2761,39 @@ function initExportListeners() {
       btnSaveDocs.textContent = oldText;
     }
   });
+
+  const btnClear = document.getElementById("btnClearPackage");
+  if (btnClear) {
+    btnClear.addEventListener("click", () => {
+      if (!currentPackage) {
+        alert("ℹ️ Halaman sudah dalam keadaan kosong.");
+        return;
+      }
+      const confirmClear = confirm(
+        "⚠️ PERINGATAN PENTING:\n\n" +
+        "Apakah Anda sudah mengunduh atau mencadangkan naskah soal ini (ke Word, Docs, atau Spreadsheet)?\n\n" +
+        "Jika belum diunduh, seluruh butir soal yang telah dibuat di layar ini akan dihapus permanen.\n\n" +
+        "Apakah Anda yakin ingin mengosongkan halaman untuk membuat naskah soal baru?"
+      );
+      if (!confirmClear) return;
+
+      currentPackage = null;
+      try {
+        localStorage.removeItem(LAST_GENERATED_DRAFT_KEY);
+      } catch (e) {}
+
+      const resultsSection = document.getElementById("resultsSection");
+      if (resultsSection) resultsSection.classList.add("hidden");
+
+      const qContainer = document.getElementById("questionsContainer");
+      if (qContainer) qContainer.innerHTML = "";
+
+      const autoBadge = document.getElementById("autoBackupBadge");
+      if (autoBadge) autoBadge.className = "hidden";
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
 }
 
 // EXCEL QUIZIZZ EXPORTER (.xlsx via SheetJS)

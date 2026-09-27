@@ -205,8 +205,9 @@
               <option value="SMA Kelas 11 (Fase F)" selected>SMA Kelas 11 (Fase F - Kurikulum Merdeka)</option>
               <option value="SMA Kelas 10 (Fase E)">SMA Kelas 10 (Fase E - Kurikulum Merdeka)</option>
               <option value="SMA Kelas 12 (Fase F)">SMA Kelas 12 (Fase F - Kurikulum Merdeka)</option>
-              <option value="SMP (Kelas 7-9)">SMP (IPA Kimia Dasar)</option>
+              <option value="TKA Saintek Kimia / Ujian Masuk PTN">Tes Kemampuan Akademik (TKA) Saintek Kimia / Ujian PTN</option>
               <option value="UTBK / SNBT">UTBK / SNBT (Penalaran Sains)</option>
+              <option value="SMP (Kelas 7-9)">SMP (IPA Kimia Dasar)</option>
               <option value="Olimpiade Sains (OSN)">Olimpiade Sains Nasional (OSN) Kimia</option>
             </select>
           </div>
@@ -215,9 +216,12 @@
           <div>
             <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Format Tipe Soal:</label>
             <select id="questionTypeSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
-              <option value="Pilihan Ganda Biasa (A-E)" selected>Pilihan Ganda Biasa (5 Opsi: A s.d. E)</option>
-              <option value="Pilihan Ganda Kompleks (Kombinasi Pernyataan)">PG Kompleks (Kombinasi Pernyataan 1, 2, 3, 4 - AKM)</option>
-              <option value="Sebab-Akibat / Asosiasi (UTBK)">Sebab-Akibat / Asosiasi (Pernyataan - Alasan Khas UTBK)</option>
+              <option value="Pilihan Ganda Biasa (A-E)">Pilihan Ganda Biasa (5 Opsi: A s.d. E)</option>
+              <option value="TKA Model Standar (Campuran Tipe 1 PG, Tipe 2 Asosiasi 1-2-3-4, Tipe 3 Sebab-Akibat)" selected>🎯 TKA Standar (Campuran Tipe 1 PG, Tipe 2 Asosiasi, Tipe 3 Sebab-Akibat)</option>
+              <option value="Campuran Semua Bentuk Soal (PG Biasa, PG Kompleks 1-2-3-4, Sebab-Akibat, Esai/Tabel)">🎲 Campuran Multi-Bentuk (PG, Kompleks 1-2-3-4, Sebab-Akibat, Esai)</option>
+              <option value="Pilihan Ganda Kompleks (Kombinasi Pernyataan 1, 2, 3, 4)">PG Kompleks (Kombinasi Pernyataan 1, 2, 3, 4 - Asosiasi)</option>
+              <option value="Pilihan Ganda Kompleks Matriks / Tabel (Benar-Salah)">PG Kompleks Tabel (Benar / Salah - AKM)</option>
+              <option value="Sebab-Akibat / Asosiasi (UTBK)">Sebab-Akibat / Hubungan Antar-Hal (Pernyataan - Alasan)</option>
               <option value="Esai / Uraian Perhitungan">Esai / Uraian Perhitungan Bertingkat</option>
             </select>
           </div>
@@ -278,10 +282,12 @@
           <div>
             <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Tingkat Kognitif / Kesulitan:</label>
             <select id="difficultySelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
-              <option value="Mudah">Mudah (C1-C2 - Konseptual &amp; Pemahaman)</option>
-              <option value="Sedang" selected>Sedang (C3 - Terapan &amp; Perhitungan Standar)</option>
-              <option value="Sulit / HOTS">Sulit / HOTS (C4-C5 - Penalaran &amp; Analisis Kasus)</option>
-              <option value="Olimpiade">Olimpiade (Masalah Non-Rutin &amp; Analitis)</option>
+              <option value="Campuran Proporsional (L1 Pemahaman ~20%, L2 Aplikasi ~50%, L3 Penalaran HOTS ~30%)" selected>⚖️ Campuran Proporsional (L1 Pemahaman ~20%, L2 Aplikasi ~50%, L3 Penalaran ~30%)</option>
+              <option value="Campuran HOTS Dominan (L2 Aplikasi ~40%, L3 Penalaran HOTS ~60%)">🔥 Campuran HOTS Dominan (L2 Aplikasi ~40%, L3 Penalaran ~60%)</option>
+              <option value="Mudah">Mudah (L1: C1-C2 - Konseptual &amp; Pemahaman)</option>
+              <option value="Sedang">Sedang (L2: C3 - Terapan &amp; Perhitungan Standar)</option>
+              <option value="Sulit / HOTS">Sulit / HOTS (L3: C4-C5 - Penalaran &amp; Analisis Kasus)</option>
+              <option value="Olimpiade">Olimpiade (Masalah Non-Rutin &amp; Analitis Mendalam)</option>
             </select>
           </div>
 
@@ -425,6 +431,11 @@
             </button>
             <button id="btnOpenQuestionBank" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-950/50 hover:bg-indigo-900/60 text-indigo-300 border border-indigo-500/40 text-xs font-bold transition-all">
               <i data-lucide="library" class="w-3.5 h-3.5"></i><span>Kelola Bank Soal</span>
+            </button>
+            <button id="btnClearPackage" type="button" title="Kosongkan halaman untuk menyusun paket soal baru"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/50 hover:bg-rose-900/60 text-rose-300 border border-rose-500/40 text-xs font-bold transition-all shadow-sm">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+              <span>Kosongkan Halaman</span>
             </button>
           </div>
         </div>
