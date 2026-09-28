@@ -319,6 +319,7 @@
         <p id="empty-results" class="text-xs text-on-surface-variant italic text-center py-6 hidden">
           Belum ada data pengumpulan tugas yang sesuai dengan filter di atas.
         </p>
+        <div id="results-more-wrap" class="text-center hidden"><button id="results-more" type="button" class="px-4 py-2 rounded-xl bg-surface-container-high border border-outline-variant text-xs font-semibold text-on-surface hover:border-primary">Tampilkan hasil berikutnya</button></div>
       </section>
 
       <!-- TAB 2: MANAJEMEN TUGAS KELAS -->
@@ -657,7 +658,7 @@
   <script>
     'use strict';
     const $ = id => document.getElementById(id);
-    let token = '', data = { results: [], tasks: [], participants: [], students: [], classes: [], media: [] }, selectedId = '';
+    let token = '', data = { results: [], tasks: [], participants: [], students: [], classes: [], media: [] }, selectedId = '', activeTabName = 'results', taskDataLoaded = false, studentDataLoaded = false, taskDataPromise = null, studentDataPromise = null, resultLimit = 80;
     const fallbackMediaCatalog = [
       {
         "id": "aldehida-keton-identifikasi-12",
@@ -1106,12 +1107,38 @@
       if ([...node.options].some(o => o.value === old)) node.value = old;
     }
 
-    async function refresh() {
-      data = await api('dashboard');
+    function showWorkspace() {
       $('workspace').classList.remove('hidden');
       $('login-panel').classList.add('hidden');
       $('logout').classList.remove('hidden');
+    }
+
+    async function refresh() {
+      data = await api('dashboardFast');
+      data.participants = []; data.students = [];
+      taskDataLoaded = false; studentDataLoaded = false;
+      showWorkspace();
       render();
+      if (activeTabName === 'tasks') await loadTaskData();
+      if (activeTabName === 'students') await loadStudentData();
+    }
+
+    function loadTaskData() {
+      if (taskDataLoaded) return Promise.resolve();
+      if (!taskDataPromise) taskDataPromise = api('taskData').then(rows => {
+        data.participants = rows || []; taskDataLoaded = true;
+        if (activeTabName === 'tasks') { renderTasks(); renderParticipants(); }
+      }).finally(() => { taskDataPromise = null; });
+      return taskDataPromise;
+    }
+
+    function loadStudentData() {
+      if (studentDataLoaded) return Promise.resolve();
+      if (!studentDataPromise) studentDataPromise = api('studentData').then(rows => {
+        data.students = rows || []; studentDataLoaded = true;
+        if (activeTabName === 'students') renderStudents();
+      }).finally(() => { studentDataPromise = null; });
+      return studentDataPromise;
     }
 
     function render() {
@@ -1149,9 +1176,8 @@
 
       if (!$('edit-task-id').value) renderClassChoices();
       renderResults();
-      renderTasks();
-      renderParticipants();
-      renderStudents();
+      if (activeTabName === 'tasks' && taskDataLoaded) { renderTasks(); renderParticipants(); }
+      if (activeTabName === 'students' && studentDataLoaded) renderStudents();
     }
 
     function filtered() {
@@ -1169,8 +1195,10 @@
       const tbody = $('results-body');
       tbody.replaceChildren();
       $('empty-results').classList.toggle('hidden', rows.length > 0);
+      $('results-more-wrap').classList.toggle('hidden', rows.length <= resultLimit);
+      $('results-more').textContent = 'Tampilkan 80 hasil berikutnya (' + Math.max(0, rows.length - resultLimit) + ' tersisa)';
 
-      rows.forEach(r => {
+      rows.slice(0, resultLimit).forEach(r => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-surface-container-high/60 transition-colors border-b border-outline-variant/30';
         
@@ -1297,10 +1325,13 @@
         list.innerHTML = '<p class="text-xs text-on-surface-variant italic py-4">Belum ada tugas yang dibuat. Buat tugas pertama pada formulir di sebelah kiri.</p>';
         return;
       }
+      const participantCounts = new Map();
+      data.participants.forEach(p => participantCounts.set(p.taskId, (participantCounts.get(p.taskId) || 0) + 1));
+      const tasksWithResults = new Set(data.results.map(r => r.taskId));
       data.tasks.forEach(t => {
-        const count = data.participants.filter(p => p.taskId === t['ID Pengumpulan']).length;
+        const count = participantCounts.get(t['ID Pengumpulan']) || 0;
         const taskActive = t.Status !== 'NONAKTIF';
-        const hasResults = data.results.some(r => r.taskId === t['ID Pengumpulan']);
+        const hasResults = tasksWithResults.has(t['ID Pengumpulan']);
         const box = document.createElement('div');
         box.className = 'p-4 rounded-xl bg-surface-container-high border border-outline-variant/60 space-y-2';
 
@@ -1565,10 +1596,12 @@
     $('login-form').onsubmit = e => {
       e.preventDefault();
       run(async () => {
-        const res = await api('login', { password: $('password').value });
+        const res = await api('loginDashboard', { password: $('password').value });
         token = res.token;
         $('password').value = '';
-        await refresh();
+        data = res.dashboard;
+        taskDataLoaded = false; studentDataLoaded = false; activeTabName = 'results';
+        showWorkspace(); render();
         $('message').classList.add('hidden');
       }, $('login-submit-btn'));
     };
@@ -1577,6 +1610,7 @@
       await api('logout');
       token = '';
       data = { results: [], tasks: [], participants: [], students: [], classes: [], media: [] };
+      taskDataLoaded = false; studentDataLoaded = false; activeTabName = 'results';
       $('workspace').classList.add('hidden');
       $('logout').classList.add('hidden');
       $('login-panel').classList.remove('hidden');
@@ -1586,11 +1620,13 @@
 
     $('refresh').onclick = e => run(refresh, e.target);
 
-    ['search', 'class-filter', 'task-filter', 'review-filter'].forEach(id => $(id).addEventListener('input', renderResults));
+    ['search', 'class-filter', 'task-filter', 'review-filter'].forEach(id => $(id).addEventListener('input', () => { resultLimit = 80; renderResults(); }));
+    $('results-more').onclick = () => { resultLimit += 80; renderResults(); };
     $('participant-task').onchange = renderParticipants;
     $('student-class-filter').onchange = renderStudents;
 
     function tab(name) {
+      activeTabName = name;
       $('results-panel').classList.toggle('hidden', name !== 'results');
       $('tasks-panel').classList.toggle('hidden', name !== 'tasks');
       $('students-panel').classList.toggle('hidden', name !== 'students');
@@ -1604,6 +1640,16 @@
           btn.className = 'px-4 py-2 rounded-xl flex items-center gap-1.5 transition-all text-xs font-bold cursor-pointer text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high';
         }
       });
+      if (name === 'tasks' && !taskDataLoaded) {
+        $('task-list').innerHTML = '<p class="text-xs text-on-surface-variant italic py-4">Memuat tugas dan peserta...</p>';
+        $('participant-body').replaceChildren();
+        loadTaskData().catch(e => say(e.message, true));
+      } else if (name === 'tasks') { renderTasks(); renderParticipants(); }
+      else if (name === 'students' && !studentDataLoaded) {
+        $('student-body').innerHTML = '<tr><td colspan="5" class="p-4 text-center text-on-surface-variant">Memuat daftar siswa...</td></tr>';
+        loadStudentData().catch(e => say(e.message, true));
+      } else if (name === 'students') renderStudents();
+      else renderResults();
     }
 
     $('tab-results').onclick = () => tab('results');
