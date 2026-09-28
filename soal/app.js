@@ -54,6 +54,15 @@ PEDOMAN UTAMA:
    - Jika tipe soal adalah TKA atau Campuran, variasikan format butir soal antara Pilihan Ganda Biasa, Hubungan Sebab-Akibat (Pernyataan & Alasan), dan PG Asosiasi (Pernyataan 1, 2, 3, dan 4).
    - Pastikan opsi jawaban pada Sebab-Akibat dan Asosiasi mengikuti standar baku nasional secara konsisten.
    - Jika tingkat kesulitan bertuliskan 'Campuran', distribusikan level kognitif secara bertingkat dan proporsional dari L1 (C1-C2 Pemahaman), L2 (C3 Aplikasi & Perhitungan), hingga L3 (C4-C5 Penalaran HOTS).
+
+6. KURIKULUM PEARSON EDEXCEL (100% BAHASA INGGRIS):
+   - Jika jenjang adalah Pearson Edexcel (Grade 10/11/12): SELURUH naskah soal (judul, pertanyaan, sub-soal, opsi, kunci, dan mark scheme) WAJIB 100% MENGGUNAKAN BAHASA INGGRIS (British English).
+   - Gunakan nomenklatur dan terminologi IUPAC resmi Edexcel: 'ethanoic acid' (BUKAN 'acetic acid'), 'propanoic acid', 'cm³', 'dm³', 'mol dm⁻³', 'limiting reagent', 'enthalpy change of neutralisation', 'Brønsted–Lowry', 'Kw = 1.0 x 10^-14 mol² dm⁻⁶', 'Ka'.
+   - Format butir soal mengikuti structured questions paper: pengantar kasus/reaksi diikuti sub-pertanyaan bertingkat a), b), c)... dengan poin nilai [1 mark], [2 marks], dll.
+
+7. FORMAT URAIAN TERSTRUKTUR & MODE TANPA STIMULUS:
+   - Untuk soal Esai / Uraian Terstruktur: Susun butir soal dengan sub-pertanyaan bertingkat: a), b), c)... Kosongkan pilihan_jawaban (isi array kosong []).
+   - Jika dipilih 'Tanpa Stimulus (Drilling Langsung)': DILARANG membuat cerita/narasi konteks panjang. Langsung ke pokok reaksi/perhitungan to the point demi efisiensi kertas saat dicetak.
 `;
 
 // INITIALIZATION
@@ -1519,6 +1528,9 @@ async function generateQuiz() {
   const grade = document.getElementById("gradeSelect").value;
   const qType = document.getElementById("questionTypeSelect").value;
   const stimulus = document.getElementById("stimulusSelect").value;
+  const isPearson = grade.toLowerCase().includes("pearson") || grade.toLowerCase().includes("edexcel");
+  const isNoStimulus = stimulus.toLowerCase().includes("tanpa stimulus");
+  const isStructured = qType.toLowerCase().includes("terstruktur") || qType.toLowerCase().includes("esai") || qType.toLowerCase().includes("uraian") || isPearson;
   const topicSelect = document.getElementById("topicSelect");
   const topic = topicSelect.value === "CUSTOM" 
     ? (document.getElementById("customTopicInput").value.trim() || "Kimia Umum")
@@ -1672,7 +1684,28 @@ ATURAN WAJIB:
 
   // Distribusi Format Tipe Soal
   let typeInstruction = "";
-  if (qType.includes("TKA") || qType.includes("Campuran")) {
+  if (isPearson) {
+    typeInstruction = `FORMAT KHUSUS PEARSON EDEXCEL INTERNATIONAL A-LEVEL (STRUCTURED EXAM PAPER):
+- Seluruh teks WAJIB 100% BAHASA INGGRIS (British English).
+- Setiap butir soal nomor 1, 2, 3... diawali ringkasan kasus/persamaan reaksi/data stoikiometri, kemudian dipecah menjadi sub-pertanyaan bertingkat:
+  a) ... [1 mark]
+  b) ... [2 marks]
+  c) ... [3 marks]
+- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []) karena bertipe structured questions.
+- Pada properti 'tipe_soal', tuliskan 'Structured Question'.
+- Pada properti 'kunci_jawaban', tuliskan jawaban ringkas per sub-soal.
+- Pada properti 'pembahasan_langkah', susun Mark Scheme resmi terperinci per sub-soal a), b), c) dengan kriteria alokasi poin.`;
+  } else if (qType.includes("Terstruktur")) {
+    typeInstruction = `FORMAT KHUSUS ESAI / URAIAN TERSTRUKTUR:
+- Setiap butir soal diawali pengantar reaksi/data kasus, lalu dipecah menjadi sub-pertanyaan bertingkat terstruktur:
+  a) ... [Skor: 1]
+  b) ... [Skor: 2]
+  c) ... [Skor: 3]
+- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []).
+- Pada properti 'tipe_soal', tuliskan 'Uraian Terstruktur'.
+- Pada properti 'kunci_jawaban', tuliskan ringkasan jawaban per sub-pertanyaan.
+- Pada properti 'pembahasan_langkah', sajikan rubrik penskoran dan tahapan pengerjaan per sub-soal.`;
+  } else if (qType.includes("TKA") || qType.includes("Campuran")) {
     typeInstruction = `DISTRIBUSI FORMAT TIPE SOAL (STANDAR TKA & CAMPURAN MULTI-BENTUK):
 Dalam paket ${numQuestions} butir soal ini, variasikan bentuk soal mengikuti standar baku Tes Kemampuan Akademik (TKA) Saintek Kimia:
 1. TIPE 1 - PILIHAN GANDA BIASA (5 Opsi: A, B, C, D, E):
@@ -1733,7 +1766,7 @@ Susun naskah soal asesmen kimia berkualitas tinggi dengan spesifikasi berikut:
 - Model Pendekatan Stimulus: ${stimulus}
 - Tingkat Kesulitan: ${difficulty}
 - Jumlah Butir Soal: ${numQuestions} butir soal
-- Catatan Tambahan Guru: ${extraNotes || 'Sesuai standar asesmen kimia nasional'}
+- Catatan Tambahan Guru: ${extraNotes || (isPearson ? 'Follow Pearson Edexcel International A-Level specifications' : 'Sesuai standar asesmen kimia nasional')}
 
 INSTRUKSI KHUSUS FITUR:
 1. PEDOMAN TINGKAT KESULITAN & LEVEL KOGNITIF:
@@ -1742,7 +1775,9 @@ ${difficultyInstruction}
 2. PEDOMAN FORMAT TIPE SOAL:
 ${typeInstruction}
 
-3. STIMULUS SOAL: Gunakan model pendekatan "${stimulus}". Awali pertanyaan dengan narasi kontekstual yang relevan dan menggugah nalar literasi sains.
+3. STIMULUS SOAL: ${isNoStimulus 
+     ? 'MODE TANPA STIMULUS / DRILLING LANGSUNG (HEMAT KERTAS): DILARANG MEMBUAT PARAGRAF CERITA / STIMULUS PANJANG! Langsung susun pertanyaan to the point pada pokok reaksi kimia, data stoikiometri, atau formula perhitungan yang diuji agar lembar naskah sangat hemat ruang kertas saat dicetak.' 
+     : 'Gunakan model pendekatan "' + stimulus + '". Awali pertanyaan dengan narasi kontekstual yang relevan dan menggugah nalar literasi sains.'}
 4. TABEL & ILUSTRASI KIMIA: ${includeVisuals 
      ? 'Sertakan tabel data eksperimen (dalam format Markdown table rapi) atau diagram vektor SVG (pada properti ilustrasi_svg) HANYA untuk butir soal yang secara alamiah membutuhkan pengamatan data empiris / sajian visual (seperti laju reaksi, sel volta, titrasi, termokimia). JANGAN memaksakan tabel atau diagram pada seluruh butir soal jika tidak relevan, KECUALI jika catatan instruksi khusus guru di bawah secara eksplisit meminta tabel/diagram di setiap soal.' 
      : 'Tidak perlu menyertakan tabel atau diagram khusus.'}
@@ -1754,6 +1789,10 @@ ${typeInstruction}
 8. PEMBUATAN JAWABAN & PEMBAHASAN: ${includeSolutions 
      ? 'WAJIB susun kunci_jawaban yang presisi dan susun pembahasan_langkah secara terperinci tahap demi tahap (step-by-step), mencakup rumus kimia, substitusi angka stoikiometri, dan analisis ilmiahnya.' 
      : 'DINONAKTIFKAN (FOKUS 100% MAKSIMAL PADA KUALITAS NASKAH SOAL). Pengajar TIDAK MEMERLUKAN langkah pembahasan panjang. KERAHKAN 100% KUOTA TOKEN DAN KAPASITAS PENALARAN AI UNTUK MENYUSUN BUTIR SOAL KIMIA TERBAIK: susun narasi stimulus kontekstual yang mendalam, sajikan tabel data eksperimen empiris, angka stoikiometri yang presisi, dan opsi jawaban dengan distraktor (pengecoh) yang cerdas dan menantang nalar siswa. Cukup berikan huruf kunci_jawaban singkat (misal: "A") dan KOSONGKAN pembahasan_langkah agar kuota token tidak terbuang!'}
+
+9. BAHASA & KURIKULUM: ${isPearson 
+     ? 'WAJIB 100% BAHASA INGGRIS (British English). Gunakan istilah dan tata nama kurikulum Pearson Edexcel International GCSE / A-Level (ethanoic acid, propanoic acid, cm³, dm³, mol dm⁻³, limiting reagent, Brønsted-Lowry, Ka, Kw = 1.0 x 10^-14 mol² dm⁻⁶). Judul naskah soal WAJIB Bahasa Inggris (misal: "PEARSON EDEXCEL INTERNATIONAL A-LEVEL ASSESSMENT - ' + topic.toUpperCase() + '").' 
+     : 'Bahasa Indonesia standar Kurikulum Merdeka / asesmen nasional.'}
 `;
 
   aiPromptForUsage = userPrompt + "\n" + BASE_CHEMISTRY_PROMPT + "\n" + JSON.stringify(quizJsonSchema);
@@ -2162,6 +2201,13 @@ function renderTeacherQuestions(questions) {
           </div>
         `;
       }).join("");
+    } else {
+      optionsHtml = `
+        <div class="p-2.5 rounded-lg bg-violet-950/20 border border-violet-500/20 text-xs text-violet-300 flex items-center gap-2 mb-2">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5 text-violet-400 shrink-0"></i>
+          <span><b>Soal Uraian / Terstruktur:</b> Lembar jawab bertitik-titik disiapkan otomatis saat dicetak atau diekspor ke Word/Docs.</span>
+        </div>
+      `;
     }
 
     // Render Tabel jika ada di pertanyaan
@@ -2411,10 +2457,28 @@ function renderKisiKisiTab(kisiList) {
 function renderPrintLayout(pkg) {
   if (!pkg) return;
   try {
+    const isPearson = (pkg.jenjang || "").toLowerCase().includes("pearson") || (pkg.jenjang || "").toLowerCase().includes("edexcel");
+    const isNoStimulus = (pkg.stimulus_model || "").toLowerCase().includes("tanpa stimulus");
+
+    const headerTitleElem = document.getElementById("printHeaderTitle");
+    if (headerTitleElem) {
+      headerTitleElem.textContent = isPearson ? "PEARSON EDEXCEL INTERNATIONAL A-LEVEL ASSESSMENT" : "PENILAIAN HARIAN / ASESMEN SUMATIF KIMIA";
+    }
     const metaElem = document.getElementById("printMetaText");
     if (metaElem) {
-      metaElem.textContent = `Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang || 'SMA'} | Topik: ${pkg.topik_utama || 'Kimia'}`;
+      metaElem.textContent = isPearson 
+        ? `Subject: Chemistry | Level: ${pkg.jenjang || 'Pearson Edexcel A-Level'} | Topic: ${pkg.topik_utama || 'Chemistry'}`
+        : `Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang || 'SMA'} | Topik: ${pkg.topik_utama || 'Kimia'}`;
     }
+
+    const lblName = document.getElementById("printLblName");
+    const lblNum = document.getElementById("printLblNum");
+    const lblClass = document.getElementById("printLblClass");
+    const lblDate = document.getElementById("printLblDate");
+    if (lblName) lblName.textContent = isPearson ? "NAME" : "Nama Siswa";
+    if (lblNum) lblNum.textContent = isPearson ? "STUDENT ID" : "Nomor Absen";
+    if (lblClass) lblClass.textContent = isPearson ? "CLASS" : "Kelas / Fase";
+    if (lblDate) lblDate.textContent = isPearson ? "DATE" : "Hari / Tanggal";
 
     const qContainer = document.getElementById("printQuestionsContent");
     const sContainer = document.getElementById("printSolutionsContent");
@@ -2444,35 +2508,44 @@ function renderPrintLayout(pkg) {
     }
 
     const renderPrintQuestions = (questions, labelPaket) => {
-      let html = `<h4 style="margin: 14pt 0 8pt 0; text-decoration: underline; font-weight: bold; font-size: 11.5pt; color: #1e3a8a;">LEMBAR SOAL ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
+      const paperHead = isPearson ? 'EXAMINATION PAPER' : 'LEMBAR SOAL';
+      let html = `<h4 style="margin: 14pt 0 8pt 0; text-decoration: underline; font-weight: bold; font-size: 11.5pt; color: #1e3a8a;">${paperHead} ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
       questions.forEach((soal) => {
         if (!soal) return;
 
         const metaParts = [];
-        if (soal.topik) metaParts.push(`Elemen/Topik: ${soal.topik}`);
-        if (soal.subtopik) metaParts.push(`Subtopik: ${soal.subtopik}`);
-        if (soal.tingkat_kesulitan) metaParts.push(`Tingkat Kesulitan: ${soal.tingkat_kesulitan}`);
-        if (soal.tipe_soal) metaParts.push(`Bentuk: ${soal.tipe_soal}`);
+        if (soal.topik) metaParts.push(isPearson ? `Topic: ${soal.topik}` : `Elemen/Topik: ${soal.topik}`);
+        if (soal.subtopik) metaParts.push(isPearson ? `Subtopic: ${soal.subtopik}` : `Subtopik: ${soal.subtopik}`);
+        if (soal.tingkat_kesulitan) metaParts.push(isPearson ? `Level: ${soal.tingkat_kesulitan}` : `Tingkat Kesulitan: ${soal.tingkat_kesulitan}`);
+        if (soal.tipe_soal) metaParts.push(isPearson ? `Type: ${soal.tipe_soal}` : `Bentuk: ${soal.tipe_soal}`);
         const metaText = metaParts.join(" · ");
 
-        const parsed = splitQuestionContentForWord(soal);
+        const parsed = splitQuestionContentForWord(soal, isNoStimulus);
+        const isStructuredOrEssay = (soal.tipe_soal || "").toLowerCase().includes("uraian") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("esai") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("structured") ||
+                                    isPearson ||
+                                    (!soal.pilihan_jawaban || soal.pilihan_jawaban.length === 0);
 
         let optText = "";
+        let promptTextHtml = "";
         if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
+          promptTextHtml = `<div style="text-align: justify; line-height: 1.45; font-size: 10.5pt; margin: 4pt 0 4pt 0; color: #0f172a;">${parseMarkdownTable(parsed.prompt)}</div>`;
           optText = soal.pilihan_jawaban.map(o => `
             <div style="margin-left: 18pt; margin-top: 2.5pt; margin-bottom: 2.5pt; text-align: justify; line-height: 1.45;">
               <b>${o.label}.</b> ${o.teks}
             </div>
           `).join("");
         } else {
-          optText = `<div style="margin-left: 18pt; margin-top: 6pt; color: #64748b;">[Jawaban: ..........................................................................................................................]</div>`;
+          promptTextHtml = formatPromptWithSubpartsAndDotsForWord(parsed.prompt, isStructuredOrEssay);
+          optText = "";
         }
 
         const svgHtml = (soal.ilustrasi_svg && soal.ilustrasi_svg.includes("<svg")) 
           ? renderSvgIllustration(soal.ilustrasi_svg, soal.caption_ilustrasi) 
           : "";
 
-        const hasStimulusBox = Boolean(parsed.stimulus || parsed.tableMarkdown);
+        const hasStimulusBox = Boolean(!isNoStimulus && (parsed.stimulus || parsed.tableMarkdown));
 
         html += `
           <div style="margin-bottom: 14pt; page-break-inside: avoid;">
@@ -2487,9 +2560,7 @@ function renderPrintLayout(pkg) {
               </div>
             ` : ''}
 
-            <div style="text-align: justify; line-height: 1.45; font-size: 10.5pt; margin: 4pt 0 4pt 0; color: #0f172a;">
-              ${parsed.prompt}
-            </div>
+            ${promptTextHtml}
 
             ${svgHtml}
             ${optText}
@@ -2500,7 +2571,8 @@ function renderPrintLayout(pkg) {
     };
 
     const renderPrintSolutions = (questions, labelPaket) => {
-      let html = `<h4 style="margin: 16pt 0 8pt 0; text-decoration: underline; font-weight: bold; font-size: 11.5pt; color: #991b1b;">KUNCI JAWABAN &amp; PEMBAHASAN (untuk guru) ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
+      const solHead = isPearson ? 'MARK SCHEME &amp; WORKED SOLUTIONS (For Teacher)' : 'KUNCI JAWABAN &amp; PEMBAHASAN (untuk guru)';
+      let html = `<h4 style="margin: 16pt 0 8pt 0; text-decoration: underline; font-weight: bold; font-size: 11.5pt; color: #991b1b;">${solHead} ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
       
       const hasDetailedSteps = questions.some(q => q && Array.isArray(q.pembahasan_langkah) && q.pembahasan_langkah.length > 0 && !q.pembahasan_langkah[0].toLowerCase().includes("mode fokus"));
 
@@ -2512,7 +2584,7 @@ function renderPrintLayout(pkg) {
         `).join("");
         html += `
           <div style="margin: 6pt 0 12pt 0; page-break-inside: avoid;">
-            <p style="font-size: 9pt; color: #64748b; margin-bottom: 4pt; font-style: italic;">*Matriks Kunci Jawaban Singkat (Mode Naskah Soal):</p>
+            <p style="font-size: 9pt; color: #64748b; margin-bottom: 4pt; font-style: italic;">*${isPearson ? 'Mark Scheme Summary Matrix (Exam Mode)' : 'Matriks Kunci Jawaban Singkat (Mode Naskah Soal)'}:</p>
             <table style="border-collapse: collapse; margin-top: 4pt; border: 1px solid #cbd5e1;">
               <tr>${cells}</tr>
             </table>
@@ -2527,24 +2599,27 @@ function renderPrintLayout(pkg) {
         const steps = stepsList.map(st => `<li>${st}</li>`).join("");
         html += `
           <div style="margin-bottom: 10pt; page-break-inside: avoid;">
-            <div style="font-weight: bold; font-size: 10.5pt;">${soal.nomor}. Kunci: <u>${soal.kunci_jawaban || '-'}</u></div>
+            <div style="font-weight: bold; font-size: 10.5pt;">${soal.nomor}. ${isPearson ? 'Key / Answer' : 'Kunci'}: <u>${soal.kunci_jawaban || '-'}</u></div>
             <div style="text-align: justify; line-height: 1.45; font-size: 10pt; margin: 2pt 0 4pt 0;">
-              <b>Pembahasan:</b>
+              <b>${isPearson ? 'Mark Scheme &amp; Worked Solutions:' : 'Pembahasan:'}</b>
               <ul style="margin: 2pt 0 0 0; padding-left: 18pt;">${steps}</ul>
             </div>
-            ${soal.tips_atau_jebakan ? `<div style="font-size: 9.5pt; font-style: italic; color: #475569; margin: 2pt 0 0 18pt; text-align: justify;">💡 Tips: ${soal.tips_atau_jebakan}</div>` : ''}
+            ${soal.tips_atau_jebakan ? `<div style="font-size: 9.5pt; font-style: italic; color: #475569; margin: 2pt 0 0 18pt; text-align: justify;">💡 ${isPearson ? 'Tip / Common Misconception' : 'Tips'}: ${soal.tips_atau_jebakan}</div>` : ''}
           </div>
         `;
       });
       return html;
     };
 
-    qContainer.innerHTML = renderPrintQuestions(questionsA, questionsB.length > 0 ? "PAKET A" : "");
-    sContainer.innerHTML = renderPrintSolutions(questionsA, questionsB.length > 0 ? "PAKET A" : "");
+    const labelSetA = questionsB.length > 0 ? (isPearson ? "SET A" : "PAKET A") : "";
+    const labelSetB = isPearson ? "SET B" : "PAKET B";
+
+    qContainer.innerHTML = renderPrintQuestions(questionsA, labelSetA);
+    sContainer.innerHTML = renderPrintSolutions(questionsA, labelSetA);
 
     if (questionsB.length > 0) {
-      qContainer.innerHTML += `<div class="page-break"></div>` + renderPrintQuestions(questionsB, "PAKET B");
-      sContainer.innerHTML += `<div class="page-break"></div>` + renderPrintSolutions(questionsB, "PAKET B");
+      qContainer.innerHTML += `<div class="page-break"></div>` + renderPrintQuestions(questionsB, labelSetB);
+      sContainer.innerHTML += `<div class="page-break"></div>` + renderPrintSolutions(questionsB, labelSetB);
     }
 
     // Render KaTeX untuk dokumen cetak
@@ -2917,7 +2992,7 @@ function exportToQuizizzExcel(pkg) {
 }
 
 // HELPER PEMISAH KONTEN STIMULUS, TABEL, DAN PROMPT UNTUK WORD & PRINT
-function splitQuestionContentForWord(soal) {
+function splitQuestionContentForWord(soal, isNoStimulus = false) {
   if (!soal) return { stimulus: "", tableMarkdown: "", prompt: "" };
   const rawText = String(soal.pertanyaan || "").trim();
   const lines = rawText.split(/\r?\n/);
@@ -2942,6 +3017,14 @@ function splitQuestionContentForWord(soal) {
   }
 
   const hasTable = tableLines.length >= 2;
+  if (isNoStimulus) {
+    return {
+      stimulus: "",
+      tableMarkdown: hasTable ? tableLines.join("\n") : "",
+      prompt: rawText
+    };
+  }
+
   const stimulusText = soal.stimulus ? String(soal.stimulus).trim() : (hasTable ? beforeLines.join("\n").trim() : "");
   const tableMarkdown = hasTable ? tableLines.join("\n") : "";
   const promptText = hasTable ? afterLines.join("\n").trim() : (stimulusText ? afterLines.join("\n").trim() : rawText);
@@ -2951,6 +3034,58 @@ function splitQuestionContentForWord(soal) {
     tableMarkdown: tableMarkdown,
     prompt: promptText || rawText
   };
+}
+
+/**
+ * FORMATTER SUB-PERTANYAAN URAIAN TERSTRUKTUR & GARIS LEMBAR JAWAB UNTUK WORD
+ * Mengubah baris sub-soal a), b), c) menjadi paragraf berbobot skor diikuti garis titik-titik
+ * untuk tempat siswa menulis jawaban tangan secara langsung (sesuai format exam paper Pearson Edexcel).
+ */
+function formatPromptWithSubpartsAndDotsForWord(promptText, isStructuredOrEssay = false) {
+  if (!promptText) return "";
+  let formatted = formatChemistryForWordHtml(promptText);
+
+  if (!isStructuredOrEssay) {
+    return `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin: 6pt 0 6pt 0; font-size: 11pt; color: #0f172a;">${formatted}</div>`;
+  }
+
+  // Cek apakah teks memuat sub-pertanyaan bertingkat a), b), c) atau a., b., c.
+  const lines = formatted.split(/<br\s*[\/]?>|\r?\n/);
+  const subpartRegex = /^\s*(?:<b>)?\s*([a-hA-H][\)\.])\s*(?:<\/b>)?\s*(.*)$/;
+  const hasSubparts = lines.some(l => subpartRegex.test(l.trim()));
+
+  const dotLine = `
+    <div style="font-family: 'Courier New', monospace; letter-spacing: 2px; color: #94a3b8; margin: 3pt 0 8pt 16pt; line-height: 1.8;">
+      ........................................................................................................................................<br>
+      ........................................................................................................................................
+    </div>
+  `;
+
+  if (hasSubparts) {
+    let out = [];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      const match = line.match(subpartRegex);
+      if (match) {
+        out.push(`<div style="margin-top: 6pt; margin-bottom: 2pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;"><b>${match[1]}</b> ${match[2]}</div>`);
+        out.push(dotLine);
+      } else {
+        out.push(`<div style="margin-top: 3pt; margin-bottom: 3pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;">${line}</div>`);
+      }
+    }
+    return out.join("");
+  } else {
+    // Soal esai biasa tanpa subparts: berikan 3 baris titik-titik di bawahnya
+    const bigDots = `
+      <div style="font-family: 'Courier New', monospace; letter-spacing: 2px; color: #94a3b8; margin: 6pt 0 12pt 16pt; line-height: 1.8;">
+        ................................................................................................................................................................<br>
+        ................................................................................................................................................................<br>
+        ................................................................................................................................................................
+      </div>
+    `;
+    return `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin: 6pt 0 6pt 0; font-size: 11pt; color: #0f172a;">${formatted}</div>` + bigDots;
+  }
 }
 
 // WORD EXPORTER (.doc / .docx - STANDAR UKURAN KERTAS A4 & NOTASI KIMIA HTML)
@@ -2995,31 +3130,43 @@ function exportToWordDocx(pkg) {
       return;
     }
 
+    const isPearson = (pkg.jenjang || "").toLowerCase().includes("pearson") || (pkg.jenjang || "").toLowerCase().includes("edexcel");
+    const isNoStimulus = (pkg.stimulus_model || "").toLowerCase().includes("tanpa stimulus");
+
     const formatWordQuestions = (questions) => {
       return (questions || []).map((soal) => {
         if (!soal) return "";
 
         // 1. Metadata Butir Soal (Elemen, Subtopik, Level)
         const metaParts = [];
-        if (soal.topik) metaParts.push(`Elemen/Topik: ${soal.topik}`);
-        if (soal.subtopik) metaParts.push(`Subtopik: ${soal.subtopik}`);
-        if (soal.tingkat_kesulitan) metaParts.push(`Tingkat Kesulitan: ${soal.tingkat_kesulitan}`);
-        if (soal.tipe_soal) metaParts.push(`Bentuk: ${soal.tipe_soal}`);
+        if (soal.topik) metaParts.push(isPearson ? `Topic: ${soal.topik}` : `Elemen/Topik: ${soal.topik}`);
+        if (soal.subtopik) metaParts.push(isPearson ? `Subtopic: ${soal.subtopik}` : `Subtopik: ${soal.subtopik}`);
+        if (soal.tingkat_kesulitan) metaParts.push(isPearson ? `Level: ${soal.tingkat_kesulitan}` : `Tingkat Kesulitan: ${soal.tingkat_kesulitan}`);
+        if (soal.tipe_soal) metaParts.push(isPearson ? `Type: ${soal.tipe_soal}` : `Bentuk: ${soal.tipe_soal}`);
         const metaText = metaParts.join(" · ");
 
         // 2. Pemisahan Komponen Soal (Stimulus, Tabel Markdown, Pertanyaan)
-        const parsed = splitQuestionContentForWord(soal);
+        const parsed = splitQuestionContentForWord(soal, isNoStimulus);
+        const isStructuredOrEssay = (soal.tipe_soal || "").toLowerCase().includes("uraian") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("esai") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("structured") ||
+                                    isPearson ||
+                                    (!soal.pilihan_jawaban || soal.pilihan_jawaban.length === 0);
 
-        // 3. Pilihan Jawaban
+        // 3. Pilihan Jawaban vs Dotted Lines
         let opts = "";
+        let promptHtml = "";
         if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
+          promptHtml = `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin: 6pt 0 6pt 0; font-size: 11pt; color: #0f172a;">${formatChemistryForWordHtml(parsed.prompt)}</div>`;
           opts = soal.pilihan_jawaban.map(o => `
             <div style="margin-left: 20pt; margin-top: 3pt; margin-bottom: 3pt; text-align: justify; text-justify: inter-ideograph; line-height: 1.45; font-size: 11pt;">
               <b>${o.label}.</b> ${formatChemistryForWordHtml(o.teks)}
             </div>
           `).join("");
         } else {
-          opts = `<div style="margin-left: 20pt; margin-top: 6pt; color: #64748b; font-size: 10pt;">[Jawaban: .....................................................................................................]</div>`;
+          // Uraian terstruktur atau essay dengan garis lembar jawab
+          promptHtml = formatPromptWithSubpartsAndDotsForWord(parsed.prompt, isStructuredOrEssay);
+          opts = "";
         }
 
         // 4. Ilustrasi SVG
@@ -3037,7 +3184,7 @@ function exportToWordDocx(pkg) {
           `;
         }
 
-        const hasStimulusBox = Boolean(parsed.stimulus || parsed.tableMarkdown);
+        const hasStimulusBox = Boolean(!isNoStimulus && (parsed.stimulus || parsed.tableMarkdown));
 
         return `
           <div style="margin-bottom: 16pt; page-break-inside: avoid;">
@@ -3052,9 +3199,7 @@ function exportToWordDocx(pkg) {
               </div>
             ` : ''}
 
-            <div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin: 6pt 0 6pt 0; font-size: 11pt; color: #0f172a;">
-              ${formatChemistryForWordHtml(parsed.prompt)}
-            </div>
+            ${promptHtml}
 
             ${svgWord}
             ${opts}
@@ -3084,7 +3229,7 @@ function exportToWordDocx(pkg) {
         }
         return `
           <div style="margin: 12pt 0; page-break-inside: avoid;">
-            <p style="font-size: 10pt; color: #64748b; margin-bottom: 6pt; font-style: italic; text-align: justify; text-justify: inter-ideograph;">*Matriks Kunci Jawaban Singkat (Mode Naskah Soal):</p>
+            <p style="font-size: 10pt; color: #64748b; margin-bottom: 6pt; font-style: italic; text-align: justify; text-justify: inter-ideograph;">*${isPearson ? 'Mark Scheme Summary Matrix (Exam Mode)' : 'Matriks Kunci Jawaban Singkat (Mode Naskah Soal)'}:</p>
             ${tablesHtml}
           </div>
         `;
@@ -3096,15 +3241,15 @@ function exportToWordDocx(pkg) {
         return `
           <div style="margin-bottom: 12pt; page-break-inside: avoid;">
             <p style="font-weight: bold; margin-bottom: 2pt; font-size: 11pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph;">
-              ${soal.nomor}. Kunci: <u>${soal.kunci_jawaban || '-'}</u>
+              ${soal.nomor}. ${isPearson ? 'Key / Answer' : 'Kunci'}: <u>${soal.kunci_jawaban || '-'}</u>
             </p>
             <div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; font-size: 10.5pt; color: #1e293b; margin: 2pt 0 4pt 0;">
-              <b>Pembahasan:</b>
+              <b>${isPearson ? 'Mark Scheme &amp; Worked Solutions:' : 'Pembahasan:'}</b>
               <ul style="margin: 2pt 0 0 0; padding-left: 18pt;">${steps}</ul>
             </div>
             ${soal.tips_atau_jebakan ? `
               <p style="font-size: 9.5pt; font-style: italic; color: #475569; margin: 2pt 0 0 18pt; text-align: justify; text-justify: inter-ideograph;">
-                💡 <b>Tips:</b> ${formatChemistryForWordHtml(soal.tips_atau_jebakan)}
+                💡 <b>${isPearson ? 'Tip / Common Misconception' : 'Tips'}:</b> ${formatChemistryForWordHtml(soal.tips_atau_jebakan)}
               </p>
             ` : ''}
           </div>
@@ -3112,12 +3257,17 @@ function exportToWordDocx(pkg) {
       }).join("");
     };
 
-    let questionsPart = `<h3 style="color: #1e3a8a; font-size: 13pt; font-weight: bold; margin-bottom: 12pt;">LEMBAR SOAL ${listB.length > 0 ? '(PAKET A)' : ''}</h3>` + formatWordQuestions(listA);
-    let solutionsPart = `<h3 style="color: #991b1b; font-size: 13pt; font-weight: bold; margin: 18pt 0 12pt 0; text-align: left; border-top: 1.5px solid #cbd5e1; padding-top: 12pt;">KUNCI JAWABAN &amp; PEMBAHASAN (untuk guru) ${listB.length > 0 ? '(PAKET A)' : ''}</h3>` + formatWordSolutions(listA);
+    const labelA = listB.length > 0 ? (isPearson ? ' (SET A)' : ' (PAKET A)') : '';
+    const labelB = isPearson ? ' (SET B)' : ' (PAKET B)';
+    const headSoal = isPearson ? 'EXAMINATION PAPER' : 'LEMBAR SOAL';
+    const headSol = isPearson ? 'MARK SCHEME &amp; WORKED SOLUTIONS (For Teacher)' : 'KUNCI JAWABAN &amp; PEMBAHASAN (untuk guru)';
+
+    let questionsPart = `<h3 style="color: #1e3a8a; font-size: 13pt; font-weight: bold; margin-bottom: 12pt;">${headSoal}${labelA}</h3>` + formatWordQuestions(listA);
+    let solutionsPart = `<h3 style="color: #991b1b; font-size: 13pt; font-weight: bold; margin: 18pt 0 12pt 0; text-align: left; border-top: 1.5px solid #cbd5e1; padding-top: 12pt;">${headSol}${labelA}</h3>` + formatWordSolutions(listA);
 
     if (listB.length > 0) {
-      questionsPart += `<div class="page-break"></div><h3 style="color: #1e3a8a; font-size: 13pt; font-weight: bold; margin-bottom: 12pt;">LEMBAR SOAL (PAKET B)</h3>` + formatWordQuestions(listB);
-      solutionsPart += `<div class="page-break"></div><h3 style="color: #991b1b; font-size: 13pt; font-weight: bold; margin: 18pt 0 12pt 0; text-align: left; border-top: 1.5px solid #cbd5e1; padding-top: 12pt;">KUNCI JAWABAN &amp; PEMBAHASAN (PAKET B)</h3>` + formatWordSolutions(listB);
+      questionsPart += `<div class="page-break"></div><h3 style="color: #1e3a8a; font-size: 13pt; font-weight: bold; margin-bottom: 12pt;">${headSoal}${labelB}</h3>` + formatWordQuestions(listB);
+      solutionsPart += `<div class="page-break"></div><h3 style="color: #991b1b; font-size: 13pt; font-weight: bold; margin: 18pt 0 12pt 0; text-align: left; border-top: 1.5px solid #cbd5e1; padding-top: 12pt;">${headSol}${labelB}</h3>` + formatWordSolutions(listB);
     }
 
     let kisiPart = "";
@@ -3197,8 +3347,24 @@ function exportToWordDocx(pkg) {
       </head>
       <body>
         <div class="Section1">
-          <h2>${(pkg.judul || 'Paket Ulangan Harian Kimia').toUpperCase()}</h2>
-          <div class='meta'>Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang || 'SMA'} | Topik Pokok: ${pkg.topik_utama || 'Kimia'} | Pendekatan: ${pkg.stimulus_model || 'Kontekstual'}${exportSavedOnly ? ' (Koleksi Soal Pilihan Guru)' : ''}</div>
+          <table style="width: 100%; border: none; border-bottom: 2px solid #0f172a; margin-bottom: 14pt; padding-bottom: 6pt;">
+            <tr>
+              <td style="border: none; padding: 0; vertical-align: top; width: 56%;">
+                <div style="font-size: 13pt; font-weight: bold; color: #0f172a; letter-spacing: 0.5px;">SMA PROGRESIF BUMI SHALAWAT</div>
+                <div style="font-size: 10.5pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt;">${(pkg.judul || (isPearson ? 'PEARSON EDEXCEL CHEMISTRY ASSESSMENT' : 'ASESMEN &amp; DRILLING SOAL KIMIA')).toUpperCase()}</div>
+                <div style="font-size: 9pt; color: #475569; margin-top: 2pt;">
+                  ${isPearson ? 'Subject: Chemistry' : 'Mata Pelajaran: Kimia'} | ${isPearson ? 'Level' : 'Jenjang'}: ${pkg.jenjang || 'SMA'} | ${isPearson ? 'Topic' : 'Materi'}: ${pkg.topik_utama || 'Kimia'}${exportSavedOnly ? (isPearson ? ' (Selected Set)' : ' (Koleksi Pilihan Guru)') : ''}
+                </div>
+              </td>
+              <td style="border: none; padding: 0; vertical-align: top; width: 44%; text-align: right;">
+                <div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9.5pt; line-height: 1.6; text-align: right; color: #1e293b;">
+                  <b>${isPearson ? 'NAME' : 'NAMA'} :</b> ....................................................<br>
+                  <b>${isPearson ? 'CLASS' : 'KELAS'}:</b> ....................................................<br>
+                  <b>${isPearson ? 'DATE' : 'TANGGAL'}:</b> ....................................................
+                </div>
+              </td>
+            </tr>
+          </table>
           ${questionsPart}
 
           <div class="page-break"></div>

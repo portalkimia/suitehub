@@ -205,6 +205,9 @@
               <option value="SMA Kelas 11 (Fase F)" selected>SMA Kelas 11 (Fase F - Kurikulum Merdeka)</option>
               <option value="SMA Kelas 10 (Fase E)">SMA Kelas 10 (Fase E - Kurikulum Merdeka)</option>
               <option value="SMA Kelas 12 (Fase F)">SMA Kelas 12 (Fase F - Kurikulum Merdeka)</option>
+              <option value="Pearson Edexcel Grade 10 (IGCSE / Pre-A Level)">🇬🇧 Grade 10 - Pearson Edexcel (IGCSE / Pre-A Level)</option>
+              <option value="Pearson Edexcel Grade 11 (International A-Level)">🇬🇧 Grade 11 - Pearson Edexcel (International AS / A-Level)</option>
+              <option value="Pearson Edexcel Grade 12 (International A2-Level)">🇬🇧 Grade 12 - Pearson Edexcel (International A2-Level)</option>
               <option value="TKA Saintek Kimia / Ujian Masuk PTN">Tes Kemampuan Akademik (TKA) Saintek Kimia / Ujian PTN</option>
               <option value="UTBK / SNBT">UTBK / SNBT (Penalaran Sains)</option>
               <option value="SMP (Kelas 7-9)">SMP (IPA Kimia Dasar)</option>
@@ -219,6 +222,7 @@
               <option value="Pilihan Ganda Biasa (A-E)">Pilihan Ganda Biasa (5 Opsi: A s.d. E)</option>
               <option value="TKA Model Standar (Campuran Tipe 1 PG, Tipe 2 Asosiasi 1-2-3-4, Tipe 3 Sebab-Akibat)" selected>🎯 TKA Standar (Campuran Tipe 1 PG, Tipe 2 Asosiasi, Tipe 3 Sebab-Akibat)</option>
               <option value="Campuran Semua Bentuk Soal (PG Biasa, PG Kompleks 1-2-3-4, Sebab-Akibat, Esai/Tabel)">🎲 Campuran Multi-Bentuk (PG, Kompleks 1-2-3-4, Sebab-Akibat, Esai)</option>
+              <option value="Esai / Uraian Terstruktur (Sub a, b, c & Garis Lembar Jawab)">📝 Esai / Uraian Terstruktur (Sub-pertanyaan a, b, c &amp; Garis Lembar Jawab)</option>
               <option value="Pilihan Ganda Kompleks (Kombinasi Pernyataan 1, 2, 3, 4)">PG Kompleks (Kombinasi Pernyataan 1, 2, 3, 4 - Asosiasi)</option>
               <option value="Pilihan Ganda Kompleks Matriks / Tabel (Benar-Salah)">PG Kompleks Tabel (Benar / Salah - AKM)</option>
               <option value="Sebab-Akibat / Asosiasi (UTBK)">Sebab-Akibat / Hubungan Antar-Hal (Pernyataan - Alasan)</option>
@@ -230,6 +234,7 @@
           <div>
             <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Model Stimulus Soal (Kontekstual):</label>
             <select id="stimulusSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+              <option value="Tanpa Stimulus (Drilling Soal Langsung & Hemat Kertas)">⚡ Tanpa Stimulus (Drilling Soal Langsung &amp; Hemat Kertas)</option>
               <option value="Kimia Hijau & Isu Lingkungan" selected>🌿 Kimia Hijau &amp; Isu Lingkungan (Baterai EV, Polusi, Efisiensi)</option>
               <option value="Kontekstual Kehidupan Sehari-hari">🏠 Kontekstual Sehari-hari (Antasida, Korosi, Bahan Rumah Tangga)</option>
               <option value="Proses Industri Kimia">🏭 Proses Industri Kimia (Amonia Haber-Bosch, Kontak Asam Sulfat)</option>
@@ -563,14 +568,14 @@
         <div class="kop-surat">
           <h3 style="margin: 0; font-weight: bold; text-transform: uppercase;" id="printHeaderTitle">PENILAIAN HARIAN / ASESMEN SUMATIF KIMIA</h3>
           <p style="margin: 3px 0 0 0; font-size: 10pt;" id="printMetaText">Mata Pelajaran: Kimia</p>
-          <div style="display: flex; justify-content: space-between; margin-top: 10pt; font-size: 10pt; text-align: left;">
+          <div id="printStudentIdentityBox" style="display: flex; justify-content: space-between; margin-top: 10pt; font-size: 10pt; text-align: left;">
             <div>
-              Nama Siswa : .....................................................<br>
-              Nomor Absen: .....................................................
+              <span id="printLblName">Nama Siswa</span> : .....................................................<br>
+              <span id="printLblNum">Nomor Absen</span>: .....................................................
             </div>
             <div>
-              Kelas / Fase: .....................................................<br>
-              Hari / Tanggal: .....................................................
+              <span id="printLblClass">Kelas / Fase</span>: .....................................................<br>
+              <span id="printLblDate">Hari / Tanggal</span>: .....................................................
             </div>
           </div>
         </div>
