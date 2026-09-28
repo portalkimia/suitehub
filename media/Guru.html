@@ -359,6 +359,14 @@
               </div>
 
               <div>
+                <label class="block text-xs font-semibold text-on-surface mb-1">Kode Kelas (opsional)</label>
+                <div id="task-class-codes" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <p class="text-[10px] text-on-surface-variant">Pilih kelas terlebih dahulu. Kode kosong dibuat otomatis.</p>
+                </div>
+                <span class="text-[10px] text-on-surface-variant block mt-1">Buat kode 6–24 karakter, unik untuk setiap kelas. Kode tugas yang sudah dibuat tidak dapat diubah.</span>
+              </div>
+
+              <div>
                 <label class="block text-xs font-semibold text-on-surface mb-1">Tenggat Waktu Pengumpulan</label>
                 <input id="task-due" type="datetime-local" class="w-full bg-surface-container-lowest border border-outline-variant/60 rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary">
               </div>
@@ -582,6 +590,25 @@
             </div>
 
             <form id="review-form" class="space-y-3">
+              <div class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 space-y-2">
+                <div>
+                  <h4 class="text-[11px] font-bold text-amber-300">Konfirmasi identitas pengumpul</h4>
+                  <p class="text-[10px] text-on-surface-variant">Kode kelas yang valid tetap mengizinkan pengumpulan. Jika nama tidak ditemukan di daftar siswa, koreksi atau konfirmasi nama dan NIS di sini.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <label class="text-[10px] font-semibold text-on-surface-variant">Nama siswa
+                    <input id="review-student-name" required maxlength="120" class="mt-1 w-full bg-surface-container-lowest border border-outline-variant/60 rounded-lg px-2.5 py-2 text-xs text-on-surface">
+                  </label>
+                  <label class="text-[10px] font-semibold text-on-surface-variant">NIS / Absen
+                    <input id="review-student-nis" maxlength="40" placeholder="Isi setelah diverifikasi" class="mt-1 w-full bg-surface-container-lowest border border-outline-variant/60 rounded-lg px-2.5 py-2 text-xs text-on-surface">
+                  </label>
+                </div>
+                <div class="text-[10px] text-on-surface-variant">Kelas dari kode tugas: <strong id="review-student-class" class="text-on-surface"></strong></div>
+                <label class="flex items-center gap-2 text-[10px] text-on-surface cursor-pointer">
+                  <input id="review-identity-confirmed" type="checkbox" class="rounded border-outline-variant text-primary focus:ring-0">
+                  <span>Saya sudah memastikan nama siswa ini</span>
+                </label>
+              </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="block text-[10px] font-mono uppercase text-on-surface-variant mb-1">Status Pemeriksaan</label>
@@ -631,308 +658,380 @@
     'use strict';
     const $ = id => document.getElementById(id);
     let token = '', data = { results: [], tasks: [], participants: [], students: [], classes: [], media: [] }, selectedId = '';
-    const fallbackMedia75 = [
-  {
-    "id": "aldehida-keton-identifikasi-12",
-    "title": "Aldehida, Keton, dan Uji Identifikasi Kimia (Tollens"
-  },
-  {
-    "id": "alkohol-eter-oksidasi-12",
-    "title": "Alkohol, Eter, Reaksi Oksidasi Bertingkat, dan Uji Identifikasi Kimia"
-  },
-  {
-    "id": "asam-amino-protein-12",
-    "title": "Asam Amino dan Protein: Struktur Zwitter-ion, Titik Isoelektrik, Ikatan Peptida, 4 Tingkatan Struktur Protein, Denaturasi, dan Uji Biokimia Protein"
-  },
-  {
-    "id": "asam-karboksilat-ester-hidrolisis-12",
-    "title": "Asam Karboksilat (Asam Alkanoat), Ester (Alkil Alkanoat), dan Reaksi Hidrolisis / Saponifikasi"
-  },
-  {
-    "id": "asas-le-chatelier-suhu-tekanan-11",
-    "title": "Asas Le Chatelier: Pengaruh Konsentrasi, Suhu, Tekanan, dan Volume"
-  },
-  {
-    "id": "bahan-bakar-oktan-emisi-12",
-    "title": "Bahan Bakar, Bilangan Oktan, Fenomena Knocking Mesin, Zat Aditif Ramah Lingkungan, dan Emisi Gas Buang Kendaraan Bermotor"
-  },
-  {
-    "id": "bentuk-molekul-vsepr-11",
-    "title": "Bentuk Geometri Molekul"
-  },
-  {
-    "id": "benzena-dan-turunannya-12",
-    "title": "Benzena dan Turunannya: Struktur Kekulé, Resonansi Aromatisitas, Tata Nama Monosubstitusi/Disubstitusi (o, m, p), dan Substitusi Elektrofilik Aromatik"
-  },
-  {
-    "id": "Bilangan_Kuantum_10_Fase_E",
-    "title": "Bilangan_Kuantum_SMA_Fase_E"
-  },
-  {
-    "id": "dna-rna-asam-nukleat-12",
-    "title": "Asam Nukleat: Struktur Nukleotida, Basa Purin-Pirimidin, Heliks Ganda DNA Watson-Crick, Pasangan Basa Komplementer, DNA vs RNA, dan Transkripsi Genetik"
-  },
-  {
-    "id": "energi-alternatif-nanoteknologi-10",
-    "title": "Energi Terbarukan Bahan Alam"
-  },
-  {
-    "id": "enzim-kinetika-sederhana-12",
-    "title": "Biokatalisator Enzim: Mekanisme Sisi Aktif (Induced Fit), Energi Aktivasi, Kinetika Michaelis-Menten (Vmax"
-  },
-  {
-    "id": "faktor-laju-reaksi-11",
-    "title": "Faktor-Faktor Laju Reaksi dan Teori Tumbukan Arrhenius"
-  },
-  {
-    "id": "gaya-antarmolekul-sifat-11",
-    "title": "Gaya Antarmolekul, Ikatan Hidrogen,"
-  },
-  {
-    "id": "gravimetri-penentuan-klorida-12",
-    "title": "Analisis Gravimetri: Metode Pengendapan Kuantitatif, Pembentukan Endapan AgCl, Pencucian, Pemijaran, dan Penentuan Kadar Klorida"
-  },
-  {
-    "id": "gugus-fungsi-tata-nama-12",
-    "title": "Gugus Fungsi Senyawa Karbon, Homolog, dan Tata Nama IUPAC"
-  },
-  {
-    "id": "hakikat-kimia-metode-ilmiah-10",
-    "title": "Hakikat Ilmu Kimia"
-  },
-  {
-    "id": "haloalkana-substitusi-eliminasi-12",
-    "title": "Haloalkana (Alkil Halida): Tata Nama, Sifat, Reaksi Substitusi Nukleofilik (SN1/SN2), dan Eliminasi (E1/E2)"
-  },
-  {
-    "id": "hibridisasi-orbital-sigma-pi-11",
-    "title": "Teori Hibridisasi Orbital, Ikatan Sigma (σ),"
-  },
-  {
-    "id": "Hidrokarbon_Alkana_Alkena_Alkuna_12_Fase_F",
-    "title": "Hidrokarbon_Alkana_Alkena_Alkuna_11_Fase_F"
-  },
-  {
-    "id": "hidrolisis-garam-ph-11",
-    "title": "Hidrolisis Garam, Jenis-Jenis Garam, dan Perhitungan pH"
-  },
-  {
-    "id": "hukum-faraday-elektrolisis-12",
-    "title": "Hukum Faraday I"
-  },
-  {
-    "id": "hukum-hess-energi-ikatan-11",
-    "title": "Hukum Hess, Diagram Tingkat Energi, dan Energi Ikatan Rata-Rata"
-  },
-  {
-    "id": "hukum-dasar-kimia-10",
-    "title": "Hukum-Hukum Dasar Kimia"
-  },
-  {
-    "id": "hukum-laju-orde-waktu-paruh-11",
-    "title": "Hukum Laju Reaksi, Orde Reaksi, dan Waktu Paruh (t₁/₂)"
-  },
-  {
-    "id": "ikatan-ion-kovalen-logam-11",
-    "title": "Ikatan Ion, Ikatan Kovalen,"
-  },
-  {
-    "id": "isomer-struktur-geometri-12",
-    "title": "Keisomeran Senyawa Karbon: Isomer Struktur (Rangka, Posisi, Gugus Fungsi) dan Isomer Ruang (Geometri Cis-Trans"
-  },
-  {
-    "id": "karbohidrat-uji-identifikasi-12",
-    "title": "Makromolekul Karbohidrat: Penggolongan Monosakarida, Disakarida, Polisakarida, Struktur Siklik Haworth, dan Uji Identifikasi Biokimia"
-  },
-  {
-    "id": "kelarutan-ksp-11",
-    "title": "Kelarutan (s) dan Tetapan Hasil Kali Kelarutan (Ksp)"
-  },
-  {
-    "id": "keselamatan-alat-lab-10",
-    "title": "Keselamatan Kerja di Laboratorium"
-  },
-  {
-    "id": "kesetimbangan-dinamis-kc-qc-11",
-    "title": "Kesetimbangan Kimia Dinamis, Tetapan Kesetimbangan (Kc"
-  },
-  {
-    "id": "kesetimbangan-le-chatelier-11",
-    "title": "Kesetimbangan Kimia Dinamis"
-  },
-  {
-    "id": "kimia-hijau-keberlanjutan-10",
-    "title": "Prinsip Kimia Hijau (Green Chemistry)"
-  },
-  {
-    "id": "kimia-unsur-golongan-utama-12",
-    "title": "Kimia Unsur Golongan Utama: Logam Alkali (IA), Alkali Tanah (IIA), Halogen (VIIA), Gas Mulia (VIIIA), Uji Nyala, dan Reaksi Pendesakan Halogen"
-  },
-  {
-    "id": "Konfigurasi_Elektron_Mekanika_Kuantum_10_Fase_E",
-    "title": "Konfigurasi_Elektron_Mekanika_Kuantum_SMA_Fase_E"
-  },
-  {
-    "id": "Konfigurasi_Elektron_Model_Bohr_10_Fase_E",
-    "title": "Konfigurasi_Elektron_Model_Bohr_SMA_Fase_E"
-  },
-  {
-    "id": "konsentrasi-pembuatan-larutan-11",
-    "title": "Konsentrasi Larutan, Pengenceran, dan Teknik Pembuatan Larutan Standar"
-  },
-  {
-    "id": "konsep-mol-stoikiometri-10",
-    "title": "Konsep Mol, Massa Molar,"
-  },
-  {
-    "id": "Konsep_Redoks_dan_Aturan_Biloks_12_Fase_F",
-    "title": "Konsep_Redoks_dan_Aturan_Biloks_XII_Fase_F"
-  },
-  {
-    "id": "Korosi_Logam_dan_Pencegahannya_12_Fase_F",
-    "title": "Korosi_Logam_dan_Pencegahannya_12_Fase_F"
-  },
-  {
-    "id": "kurva-kalibrasi-spektrofotometri-12",
-    "title": "Spektrofotometri UV-Vis dan Kurva Kalibrasi: Hukum Lambert-Beer (A = ε"
-  },
-  {
-    "id": "Laboratorium_Kimia_Virtual_Umum",
-    "title": "Laboratorium_Kimia_Virtual_SMA_Fase_F"
-  },
-  {
-    "id": "larutan-elektrolit-nonelektrolit-11",
-    "title": "Larutan Elektrolit, Nonelektrolit, dan Derajat Disosiasi (α)"
-  },
-  {
-    "id": "larutan-penyangga-kapasitas-11",
-    "title": "Larutan Penyangga (Buffer), Kapasitas Buffer, dan Peran Fisiologis"
-  },
-  {
-    "id": "lipid-lemak-sabun-12",
-    "title": "Biokimia Lipid: Klasifikasi Trigliserida, Asam Lemak Jenuh vs Tak Jenuh (Omega-3/6/9), Bilangan Iodin, Fosfolipid Membran, dan Saponifikasi Sabun"
-  },
-  {
-    "id": "materi-sifat-perubahan-10",
-    "title": "Klasifikasi Materi, Sifat,"
-  },
-  {
-    "id": "minyak-bumi-distilasi-12",
-    "title": "Minyak Bumi, Gas Alam, dan Distilasi Bertingkat (Fraksionasi): Proses Pembentukan, Fraksi Hidrokarbon, Titik Didih, dan Industri Petrokimia"
-  },
-  {
-    "id": "partikel-atom-isotop-10",
-    "title": "Partikel Penyusun Atom, Notasi Unsur, Isotop, Isobar,"
-  },
-  {
-    "id": "pencemaran-pengolahan-limbah-10",
-    "title": "Kimia Lingkungan, Polusi Air-Udara,"
-  },
-  {
-    "id": "pengendapan-selektif-ion-senama-11",
-    "title": "Pengaruh Ion Senama, Kuosien Kelarutan (Qsp), dan Pemisahan Pengendapan Selektif"
-  },
-  {
-    "id": "Penyetaraan_Reaksi_Redoks_Metode_Biloks_12_Fase_F",
-    "title": "Penyetaraan_Reaksi_Redoks_Metode_Biloks_XII_Fase_F"
-  },
-  {
-    "id": "Penyetaraan_Reaksi_Redoks_Metode_Setengah_Reaksi_12_Fase_F",
-    "title": "Penyetaraan_Reaksi_Redoks_Metode_Setengah_Reaksi_XII_Fase_F"
-  },
-  {
-    "id": "pereaksi-pembatas-kadar-10",
-    "title": "Pereaksi Pembatas, Persen Hasil Reaksi,"
-  },
-  {
-    "id": "Periode_dan_Golongan_10_Fase_E",
-    "title": "Periode_dan_Golongan_SMA_Fase_E"
-  },
-  {
-    "id": "persamaan-penyetaraan-reaksi-10",
-    "title": "Persamaan Reaksi Kimia"
-  },
-  {
-    "id": "polaritas-ikatan-molekul-11",
-    "title": "Polaritas Ikatan dan Kepolaran Molekul"
-  },
-  {
-    "id": "polimer-material-12",
-    "title": "Polimer Sintetis dan Alami: Polimerisasi Adisi"
-  },
-  {
-    "id": "radioaktivitas-waktu-paruh-12",
-    "title": "Radioaktivitas dan Waktu Paruh: Kestabilan Inti (N/Z), Sinar Alfa, Beta, Gamma, Kinetika Peluruhan Orde 1, dan Radioperunut Medis"
-  },
-  {
-    "id": "reaksi-inti-fisi-fusi-12",
-    "title": "Reaksi Inti Fisi dan Fusi: Defek Massa, Energi Ikat Inti (E = Δm"
-  },
-  {
-    "id": "reaksi-organik-esterifikasi-12",
-    "title": "Reaksi-Reaksi Senyawa Karbon: Substitusi, Adisi (Aturan Markovnikov), Eliminasi (Aturan Zaitsev), Redoks, dan Polimerisasi"
-  },
-  {
-    "id": "Sejarah_Perkembangan_SPU_10_Fase_E",
-    "title": "Sejarah_Perkembangan_SPU_SMA_Fase_E"
-  },
-  {
-    "id": "Sel_Elektrolisis_12_Fase_F",
-    "title": "Sel_Elektrolisis_SMA_Fase_F"
-  },
-  {
-    "id": "Sel_Volta_12_Fase_F",
-    "title": "Sel_Volta_SMA_Fase_F"
-  },
-  {
-    "id": "senyawa-kompleks-koordinasi-12",
-    "title": "Kimia Koordinasi dan Senyawa Kompleks: Asam-Basa Lewis, Ligan, Bilangan Koordinasi, Teori Medan Kristal (CFT), dan Tata Nama IUPAC"
-  },
-  {
-    "id": "Sifat_Keperiodikan_Unsur_10_Fase_E",
-    "title": "Sifat Keperiodikan Unsur (SPU)"
-  },
-  {
-    "id": "sifat-koligatif-larutan-11",
-    "title": "Sifat Koligatif Larutan: Penurunan Tekanan Uap, Kenaikan Titik Didih, Penurunan Titik Beku, dan Tekanan Osmotik"
-  },
-  {
-    "id": "sistem-koloid-penerapannya-11",
-    "title": "Sistem Koloid, Sifat-Sifat Koloid, dan Penerapannya dalam Kehidupan Sehari-hari"
-  },
-  {
-    "id": "struktur-lewis-oktet-11",
-    "title": "Struktur Lewis, Aturan Oktet, dan Pengecualian Oktet"
-  },
-  {
-    "id": "tata-nama-rumus-kimia-10",
-    "title": "Tata Nama Senyawa Anorganik"
-  },
-  {
-    "id": "teori-asam-basa-ph-11",
-    "title": "Teori Asam-Basa (Arrhenius, Brønsted-Lowry, Lewis) dan Perhitungan pH Larutan"
-  },
-  {
-    "id": "termokimia-kalorimetri-11",
-    "title": "Termokimia, Reaksi Eksoterm-Endoterm,"
-  },
-  {
-    "id": "titrasi-asam-basa-indikator-11",
-    "title": "Titrasi Asam-Basa, Kurva Titrasi, dan Pemilihan Indikator"
-  },
-  {
-    "id": "titrasi-redoks-kadar-besi-12",
-    "title": "Titrasi Redoks: Permanganometri (KMnO4), Penentuan Kadar Besi (Fe2+) Sampel, Autoindikator Titik Akhir, dan Stoikiometri Transfer Elektron"
-  },
-  {
-    "id": "unsur-periode-ketiga-oksidanya-12",
-    "title": "Unsur-Unsur Periode Ketiga: Keteraturan Sifat Fisik"
-  },
-  {
-    "id": "unsur-transisi-konfigurasi-sifat-12",
-    "title": "Kimia Logam Transisi Periode Keempat (Sc hingga Zn): Konfigurasi Elektron 3d, Tingkat Oksidasi Bervariasi, Sifat Magnetik, dan Keanekaragaman Warna Senyawa"
-  }
-];
+    const fallbackMediaCatalog = [
+      {
+        "id": "aldehida-keton-identifikasi-12",
+        "title": "Aldehida, Keton, dan Uji Identifikasi Kimia (Tollens & Fehling)"
+      },
+      {
+        "id": "alkohol-eter-oksidasi-12",
+        "title": "Alkohol, Eter, Reaksi Oksidasi Bertingkat, dan Uji Identifikasi Kimia"
+      },
+      {
+        "id": "asam-amino-protein-12",
+        "title": "Asam Amino dan Protein: Struktur Zwitter-ion, Titik Isoelektrik, Ikatan Peptida, 4 Tingkatan Struktur Prote…"
+      },
+      {
+        "id": "asam-karboksilat-ester-hidrolisis-12",
+        "title": "Asam Karboksilat (Asam Alkanoat), Ester (Alkil Alkanoat), dan Reaksi Hidrolisis / Saponifikasi"
+      },
+      {
+        "id": "asas-le-chatelier-suhu-tekanan-11",
+        "title": "Asas Le Chatelier: Pengaruh Konsentrasi, Suhu, Tekanan, dan Volume"
+      },
+      {
+        "id": "bahan-bakar-oktan-emisi-12",
+        "title": "Bahan Bakar, Bilangan Oktan, Fenomena Knocking Mesin, Zat Aditif Ramah Lingkungan, dan Emisi Gas Buang Kend…"
+      },
+      {
+        "id": "bentuk-molekul-vsepr-11",
+        "title": "Bentuk Geometri Molekul & Teori Domain Elektron (VSEPR)"
+      },
+      {
+        "id": "benzena-dan-turunannya-12",
+        "title": "Benzena dan Turunannya: Struktur Kekulé, Resonansi Aromatisitas, Tata Nama Monosubstitusi/Disubstitusi (o,…"
+      },
+      {
+        "id": "bilangan-kuantum",
+        "title": "Bilangan Kuantum"
+      },
+      {
+        "id": "dna-rna-asam-nukleat-12",
+        "title": "Asam Nukleat: Struktur Nukleotida, Basa Purin-Pirimidin, Heliks Ganda DNA Watson-Crick, Pasangan Basa Kompl…"
+      },
+      {
+        "id": "energi-alternatif-nanoteknologi-10",
+        "title": "Energi Terbarukan Bahan Alam & Pengantar Nanoteknologi"
+      },
+      {
+        "id": "enzim-kinetika-sederhana-12",
+        "title": "Biokatalisator Enzim: Mekanisme Sisi Aktif (Induced Fit), Energi Aktivasi, Kinetika Michaelis-Menten (Vmax…"
+      },
+      {
+        "id": "faktor-laju-reaksi-11",
+        "title": "Faktor-Faktor Laju Reaksi dan Teori Tumbukan Arrhenius"
+      },
+      {
+        "id": "gaya-antarmolekul-sifat-11",
+        "title": "Gaya Antarmolekul, Ikatan Hidrogen, & Sifat Fisis Zat"
+      },
+      {
+        "id": "gravimetri-penentuan-klorida-12",
+        "title": "Analisis Gravimetri: Metode Pengendapan Kuantitatif, Pembentukan Endapan AgCl, Pencucian, Pemijaran, dan Pe…"
+      },
+      {
+        "id": "gugus-fungsi-tata-nama-12",
+        "title": "Gugus Fungsi Senyawa Karbon, Homolog, dan Tata Nama IUPAC & Trivial"
+      },
+      {
+        "id": "hakikat-kimia-metode-ilmiah-10",
+        "title": "Hakikat Ilmu Kimia & Metode Ilmiah 10 Fase E"
+      },
+      {
+        "id": "haloalkana-substitusi-eliminasi-12",
+        "title": "Haloalkana (Alkil Halida): Tata Nama, Sifat, Reaksi Substitusi Nukleofilik (SN1/SN2), dan Eliminasi (E1/E2)"
+      },
+      {
+        "id": "hibridisasi-orbital-sigma-pi-11",
+        "title": "Teori Hibridisasi Orbital, Ikatan Sigma (σ), & Ikatan Pi (π)"
+      },
+      {
+        "id": "hidrokarbon",
+        "title": "Senyawa Hidrokarbon"
+      },
+      {
+        "id": "hidrolisis-garam-ph-11",
+        "title": "Hidrolisis Garam, Jenis-Jenis Garam, dan Perhitungan pH"
+      },
+      {
+        "id": "hukum-faraday-elektrolisis-12",
+        "title": "Hukum Faraday I & II: Stoikiometri Sel Elektrolisis, Muatan Listrik, Massa Ekuivalen, Penyaduran Logam (Ele…"
+      },
+      {
+        "id": "hukum-hess-energi-ikatan-11",
+        "title": "Hukum Hess, Diagram Tingkat Energi, dan Energi Ikatan Rata-Rata"
+      },
+      {
+        "id": "hukum-dasar-kimia-10",
+        "title": "Hukum-Hukum Dasar Kimia & Perhitungan Stoikiometri Awal"
+      },
+      {
+        "id": "hukum-laju-orde-waktu-paruh-11",
+        "title": "Hukum Laju Reaksi, Orde Reaksi, dan Waktu Paruh (t₁/₂)"
+      },
+      {
+        "id": "ikatan-ion-kovalen-logam-11",
+        "title": "Ikatan Ion, Ikatan Kovalen, & Ikatan Logam"
+      },
+      {
+        "id": "isomer-struktur-geometri-12",
+        "title": "Keisomeran Senyawa Karbon: Isomer Struktur (Rangka, Posisi, Gugus Fungsi) dan Isomer Ruang (Geometri Cis-Tr…"
+      },
+      {
+        "id": "karbohidrat-uji-identifikasi-12",
+        "title": "Makromolekul Karbohidrat: Penggolongan Monosakarida, Disakarida, Polisakarida, Struktur Siklik Haworth, dan…"
+      },
+      {
+        "id": "kelarutan-ksp-11",
+        "title": "Kelarutan (s) dan Tetapan Hasil Kali Kelarutan (Ksp)"
+      },
+      {
+        "id": "keselamatan-alat-lab-10",
+        "title": "Keselamatan Kerja di Laboratorium & Pengenalan Alat Kimia"
+      },
+      {
+        "id": "kesetimbangan-dinamis-kc-qc-11",
+        "title": "Kesetimbangan Kimia Dinamis, Tetapan Kesetimbangan (Kc & Kp), dan Kuosien Reaksi (Qc)"
+      },
+      {
+        "id": "kesetimbangan-le-chatelier-11",
+        "title": "Kesetimbangan Kimia Dinamis & Asas Le Chatelier 11 Fase F"
+      },
+      {
+        "id": "kimia-hijau-keberlanjutan-10",
+        "title": "Prinsip Kimia Hijau (Green Chemistry) & Pembangunan Berkelanjutan"
+      },
+      {
+        "id": "kimia-unsur-golongan-utama-12",
+        "title": "Kimia Unsur Golongan Utama: Logam Alkali (IA), Alkali Tanah (IIA), Halogen (VIIA), Gas Mulia (VIIIA), Uji N…"
+      },
+      {
+        "id": "konfigurasi-kuantum",
+        "title": "Konfigurasi Elektron Mekanika Kuantum"
+      },
+      {
+        "id": "konfigurasi-bohr",
+        "title": "Konfigurasi Elektron Model Bohr"
+      },
+      {
+        "id": "konsentrasi-pembuatan-larutan-11",
+        "title": "Konsentrasi Larutan, Pengenceran, dan Teknik Pembuatan Larutan Standar"
+      },
+      {
+        "id": "konsep-mol-stoikiometri-10",
+        "title": "Konsep Mol, Massa Molar, & Jembatan Perhitungan Stoikiometri"
+      },
+      {
+        "id": "konsep-redoks",
+        "title": "Konsep Redoks dan Bilangan Oksidasi"
+      },
+      {
+        "id": "korosi",
+        "title": "Korosi Logam"
+      },
+      {
+        "id": "kurva-kalibrasi-spektrofotometri-12",
+        "title": "Spektrofotometri UV-Vis dan Kurva Kalibrasi: Hukum Lambert-Beer (A = ε &bull; b &bull; c), Transmitansi, Pa…"
+      },
+      {
+        "id": "laboratorium-kimia",
+        "title": "Laboratorium Kimia Virtual"
+      },
+      {
+        "id": "larutan-elektrolit-nonelektrolit-11",
+        "title": "Larutan Elektrolit, Nonelektrolit, dan Derajat Disosiasi (α)"
+      },
+      {
+        "id": "larutan-penyangga-kapasitas-11",
+        "title": "Larutan Penyangga (Buffer), Kapasitas Buffer, dan Peran Fisiologis"
+      },
+      {
+        "id": "lipid-lemak-sabun-12",
+        "title": "Biokimia Lipid: Klasifikasi Trigliserida, Asam Lemak Jenuh vs Tak Jenuh (Omega-3/6/9), Bilangan Iodin, Fosf…"
+      },
+      {
+        "id": "materi-sifat-perubahan-10",
+        "title": "Klasifikasi Materi, Sifat, & Pemisahan Campuran"
+      },
+      {
+        "id": "minyak-bumi-distilasi-12",
+        "title": "Minyak Bumi, Gas Alam, dan Distilasi Bertingkat (Fraksionasi): Proses Pembentukan, Fraksi Hidrokarbon, Titi…"
+      },
+      {
+        "id": "partikel-atom-isotop-10",
+        "title": "Partikel Penyusun Atom, Notasi Unsur, Isotop, Isobar, & Isoton"
+      },
+      {
+        "id": "pencemaran-pengolahan-limbah-10",
+        "title": "Kimia Lingkungan, Polusi Air-Udara, & Pengolahan Limbah"
+      },
+      {
+        "id": "pengendapan-selektif-ion-senama-11",
+        "title": "Pengaruh Ion Senama, Kuosien Kelarutan (Qsp), dan Pemisahan Pengendapan Selektif"
+      },
+      {
+        "id": "redoks-biloks",
+        "title": "Penyetaraan Redoks Metode Biloks"
+      },
+      {
+        "id": "redoks-setengah-reaksi",
+        "title": "Penyetaraan Redoks Metode Setengah Reaksi"
+      },
+      {
+        "id": "pereaksi-pembatas-kadar-10",
+        "title": "Pereaksi Pembatas, Persen Hasil Reaksi, & Kadar Kemurnian"
+      },
+      {
+        "id": "periode-golongan",
+        "title": "Periode dan Golongan"
+      },
+      {
+        "id": "persamaan-penyetaraan-reaksi-10",
+        "title": "Persamaan Reaksi Kimia & Metode Penyetaraan Koefisien"
+      },
+      {
+        "id": "polaritas-ikatan-molekul-11",
+        "title": "Polaritas Ikatan dan Kepolaran Molekul"
+      },
+      {
+        "id": "polimer-material-12",
+        "title": "Polimer Sintetis dan Alami: Polimerisasi Adisi & Kondensasi, Termoplastik vs Termoset, Elastomer Karet Vulk…"
+      },
+      {
+        "id": "radioaktivitas-waktu-paruh-12",
+        "title": "Radioaktivitas dan Waktu Paruh: Kestabilan Inti (N/Z), Sinar Alfa, Beta, Gamma, Kinetika Peluruhan Orde 1,…"
+      },
+      {
+        "id": "reaksi-inti-fisi-fusi-12",
+        "title": "Reaksi Inti Fisi dan Fusi: Defek Massa, Energi Ikat Inti (E = Δm &bull; c²), Reaksi Berantai Reaktor PLTN,…"
+      },
+      {
+        "id": "reaksi-organik-esterifikasi-12",
+        "title": "Reaksi-Reaksi Senyawa Karbon: Substitusi, Adisi (Aturan Markovnikov), Eliminasi (Aturan Zaitsev), Redoks, d…"
+      },
+      {
+        "id": "sejarah-spu",
+        "title": "Sejarah Perkembangan SPU"
+      },
+      {
+        "id": "sel-elektrolisis",
+        "title": "Sel Elektrolisis"
+      },
+      {
+        "id": "sel-volta",
+        "title": "Sel Volta"
+      },
+      {
+        "id": "senyawa-kompleks-koordinasi-12",
+        "title": "Kimia Koordinasi dan Senyawa Kompleks: Asam-Basa Lewis, Ligan, Bilangan Koordinasi, Teori Medan Kristal (CF…"
+      },
+      {
+        "id": "sifat-keperiodikan",
+        "title": "Sifat Keperiodikan Unsur"
+      },
+      {
+        "id": "sifat-koligatif-larutan-11",
+        "title": "Sifat Koligatif Larutan: Penurunan Tekanan Uap, Kenaikan Titik Didih, Penurunan Titik Beku, dan Tekanan Osm…"
+      },
+      {
+        "id": "sistem-koloid-penerapannya-11",
+        "title": "Sistem Koloid, Sifat-Sifat Koloid, dan Penerapannya dalam Kehidupan Sehari-hari"
+      },
+      {
+        "id": "struktur-lewis-oktet-11",
+        "title": "Struktur Lewis, Aturan Oktet, dan Pengecualian Oktet"
+      },
+      {
+        "id": "tata-nama-rumus-kimia-10",
+        "title": "Tata Nama Senyawa Anorganik & Perumusan Rumus Kimia"
+      },
+      {
+        "id": "teori-asam-basa-ph-11",
+        "title": "Teori Asam-Basa (Arrhenius, Brønsted-Lowry, Lewis) dan Perhitungan pH Larutan"
+      },
+      {
+        "id": "termokimia-kalorimetri-11",
+        "title": "Termokimia, Reaksi Eksoterm-Endoterm, & Kalorimetri"
+      },
+      {
+        "id": "titrasi-asam-basa-indikator-11",
+        "title": "Titrasi Asam-Basa, Kurva Titrasi, dan Pemilihan Indikator"
+      },
+      {
+        "id": "titrasi-redoks-kadar-besi-12",
+        "title": "Titrasi Redoks: Permanganometri (KMnO4), Penentuan Kadar Besi (Fe2+) Sampel, Autoindikator Titik Akhir, dan…"
+      },
+      {
+        "id": "unsur-periode-ketiga-oksidanya-12",
+        "title": "Unsur-Unsur Periode Ketiga: Keteraturan Sifat Fisik & Kimia (Na ke Ar), Metaloid Silikon, dan Perubahan Sif…"
+      },
+      {
+        "id": "unsur-transisi-konfigurasi-sifat-12",
+        "title": "Kimia Logam Transisi Periode Keempat (Sc hingga Zn): Konfigurasi Elektron 3d, Tingkat Oksidasi Bervariasi,…"
+      },
+      {
+        "id": "lab-elektrolisis-faraday-deepdive",
+        "title": "Praktikum Virtual · Lab Elektrolisis Faraday DeepDive"
+      },
+      {
+        "id": "lab-geometri-molekul-vsepr-deepdive",
+        "title": "Praktikum Virtual · Lab Geometri Molekul VSEPR DeepDive"
+      },
+      {
+        "id": "lab-gugus-fungsi-organik-deepdive",
+        "title": "Praktikum Virtual · Lab Gugus Fungsi Organik DeepDive"
+      },
+      {
+        "id": "lab-hidrolisis-garam-deepdive",
+        "title": "Praktikum Virtual · Lab Hidrolisis Garam DeepDive"
+      },
+      {
+        "id": "lab-kalorimeter-termokimia-deepdive",
+        "title": "Praktikum Virtual · Lab Kalorimeter Termokimia DeepDive"
+      },
+      {
+        "id": "lab-kesetimbangan-kimia-deepdive",
+        "title": "Praktikum Virtual · Lab Kesetimbangan Kimia DeepDive"
+      },
+      {
+        "id": "lab-ksp-kelarutan-deepdive",
+        "title": "Praktikum Virtual · Lab Ksp Kelarutan DeepDive"
+      },
+      {
+        "id": "lab-laju-reaksi-deepdive",
+        "title": "Praktikum Virtual · Lab Laju Reaksi DeepDive"
+      },
+      {
+        "id": "lab-larutan-elektrolit-dayahantar-deepdive",
+        "title": "Praktikum Virtual · Lab Larutan Elektrolit DayaHantar DeepDive"
+      },
+      {
+        "id": "lab-larutan-penyangga-deepdive",
+        "title": "Praktikum Virtual · Lab Larutan Penyangga DeepDive"
+      },
+      {
+        "id": "lab-radioaktivitas-peluruhan-deepdive",
+        "title": "Praktikum Virtual · Lab Radioaktivitas Peluruhan DeepDive"
+      },
+      {
+        "id": "lab-reaksi-redoks-deepdive",
+        "title": "Praktikum Virtual · Lab Reaksi Redoks DeepDive"
+      },
+      {
+        "id": "lab-sel-volta-deepdive",
+        "title": "Praktikum Virtual · Lab Sel Volta Virtual"
+      },
+      {
+        "id": "lab-sifat-koligatif-deepdive",
+        "title": "Praktikum Virtual · Lab Sifat Koligatif Virtual"
+      },
+      {
+        "id": "lab-sistem-koloid-deepdive",
+        "title": "Praktikum Virtual · Lab Sistem Koloid DeepDive"
+      },
+      {
+        "id": "lab-spektrofotometri-beerlambert-deepdive",
+        "title": "Praktikum Virtual · Lab Spektrofotometri BeerLambert DeepDive"
+      },
+      {
+        "id": "lab-titrasi-asam-basa-deepdive",
+        "title": "Praktikum Virtual · Lab Titrasi Asam Basa DeepDive"
+      },
+      {
+        "id": "lab-uji-nyala-struktur-atom-deepdive",
+        "title": "Praktikum Virtual · Lab Uji Nyala Struktur Atom DeepDive"
+      }
+    ];
 
     
     // Endpoint GAS Web App resmi
@@ -1041,10 +1140,10 @@
       });
 
       // 2. Populate Dropdowns
-      options('class-filter', [...new Set([...data.results.map(r => r.className), ...data.classes])].sort().map(x => [x, x]), 'Semua Kelas');
-      options('task-filter', data.tasks.map(t => [t['ID Pengumpulan'], t.Judul]), 'Semua Tugas');
-      options('participant-task', data.tasks.map(t => [t['ID Pengumpulan'], t.Judul]));
-      const availableMedia = (data.media && data.media.length > 0) ? data.media : fallbackMedia75;
+      options('class-filter', data.classes.map(x => [x, x]), 'Semua Kelas');
+      options('task-filter', data.tasks.map(t => [t['ID Pengumpulan'], t.Judul + (t.Status === 'NONAKTIF' ? ' · Arsip' : '')]), 'Semua Tugas');
+      options('participant-task', data.tasks.map(t => [t['ID Pengumpulan'], t.Judul + (t.Status === 'NONAKTIF' ? ' · Arsip' : '')]));
+      const availableMedia = (data.media && data.media.length > 0) ? data.media : fallbackMediaCatalog;
       options('task-media', availableMedia.map(m => [m.id, m.title]));
       options('student-class-filter', data.classes.map(x => [x, x]), 'Semua Kelas');
 
@@ -1089,6 +1188,7 @@
           <td class="p-3">
             <strong class="text-on-surface font-semibold text-xs block">${r.name}</strong>
             <span class="text-[11px] text-on-surface-variant font-mono">${r.className} &bull; NIS: ${r.nis}</span>
+            ${r.identityConfirmed ? '' : '<span class="block mt-1 text-[10px] text-amber-300 font-semibold">Perlu konfirmasi nama / NIS</span>'}
           </td>
           <td class="p-3">
             <div class="text-xs text-on-surface font-medium">${r.task}</div>
@@ -1156,6 +1256,10 @@
       const detail = await api('detail', { id });
       selectedId = id;
       $('detail-title').textContent = detail.name + ' &bull; ' + detail.className + ' &bull; ' + detail.media;
+      $('review-student-name').value = detail.name || '';
+      $('review-student-nis').value = detail.nis || '';
+      $('review-student-class').textContent = detail.className || '-';
+      $('review-identity-confirmed').checked = detail.identityConfirmed === true;
       showAnswers(detail.answers);
 
       const aiContainer = $('analysis');
@@ -1195,6 +1299,8 @@
       }
       data.tasks.forEach(t => {
         const count = data.participants.filter(p => p.taskId === t['ID Pengumpulan']).length;
+        const taskActive = t.Status !== 'NONAKTIF';
+        const hasResults = data.results.some(r => r.taskId === t['ID Pengumpulan']);
         const box = document.createElement('div');
         box.className = 'p-4 rounded-xl bg-surface-container-high border border-outline-variant/60 space-y-2';
 
@@ -1203,7 +1309,7 @@
           try { classCodes = JSON.parse(t['Kode Kelas JSON'] || '{}'); } catch (_) {}
         }
 
-        const codesHtml = Object.entries(classCodes).map(([cls, code]) => `
+        const codesHtml = taskActive ? Object.entries(classCodes).map(([cls, code]) => `
           <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-lowest border border-outline-variant/60 font-mono text-xs">
             <span class="text-on-surface-variant font-sans font-semibold">${cls}:</span>
             <span class="text-amber-400 font-bold">${code}</span>
@@ -1211,7 +1317,7 @@
               <span class="material-symbols-outlined text-[15px]">content_copy</span>
             </button>
           </div>
-        `).join('');
+        `).join('') : '<span class="text-xs text-on-surface-variant">Kode kelas dinonaktifkan · data pengumpulan tetap tersimpan</span>';
 
         box.innerHTML = `
           <div class="flex items-start justify-between gap-2">
@@ -1219,8 +1325,8 @@
               <strong class="text-xs text-on-surface font-bold block">${t.Judul}</strong>
               <span class="text-[11px] text-on-surface-variant">${t.Kelas} &bull; ${count} Peserta</span>
             </div>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${t.Terbuka ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-slate-500/10 text-slate-400 border border-slate-500/30'}">
-              ${t.Terbuka ? 'Terbuka' : 'Ditutup'}
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${!taskActive ? 'bg-slate-500/10 text-slate-400 border border-slate-500/30' : t.Terbuka ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'}">
+              ${!taskActive ? 'Diarsipkan' : t.Terbuka ? 'Terbuka' : 'Ditutup'}
             </span>
           </div>
           <div class="text-[11px] text-on-surface-variant font-mono">
@@ -1229,9 +1335,7 @@
           ${codesHtml ? `<div class="pt-1"><span class="text-[10px] uppercase font-mono text-on-surface-variant font-bold block mb-1">Kode Kelas Tugas:</span><div class="flex flex-wrap gap-1.5">${codesHtml}</div></div>` : ''}
           <div class="pt-2 flex items-center justify-between border-t border-outline-variant/30 text-[10px] font-mono text-on-surface-variant">
             <span>ID: ${t['ID Pengumpulan'].slice(0, 16)}...</span>
-            <button type="button" class="btn-edit-t px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-xs font-semibold cursor-pointer">
-              Atur Tugas
-            </button>
+            ${taskActive ? `<div class="flex items-center gap-1.5"><button type="button" class="btn-edit-t px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-xs font-semibold cursor-pointer">Atur Tugas</button>${hasResults ? '<button type="button" class="btn-archive-t px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold cursor-pointer">Arsipkan</button>' : '<button type="button" class="btn-delete-t px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold cursor-pointer">Hapus</button>'}</div>` : '<span class="text-[10px] text-on-surface-variant">Riwayat tersimpan</span>'}
           </div>
         `;
         box.querySelectorAll('.btn-copy-c').forEach(btn => {
@@ -1244,7 +1348,15 @@
             }
           };
         });
-        box.querySelector('.btn-edit-t').onclick = () => editTask(t);
+        box.querySelector('.btn-edit-t')?.addEventListener('click', () => editTask(t));
+        box.querySelector('.btn-archive-t')?.addEventListener('click', () => {
+          if (!confirm('Arsipkan tugas ini dan nonaktifkan kodenya? Siswa tidak bisa mengirim lagi. Hasil dan analisis yang sudah tersimpan tetap dipertahankan. Kode dapat dipakai pada tugas baru.')) return;
+          run(async () => { await api('archiveTask', { id: t['ID Pengumpulan'] }); await refresh(); say('Tugas diarsipkan; kode dinonaktifkan dan dapat digunakan kembali.'); }, box.querySelector('.btn-archive-t'));
+        });
+        box.querySelector('.btn-delete-t')?.addEventListener('click', () => {
+          if (!confirm('Hapus tugas ini beserta daftar pesertanya secara permanen? Tombol ini hanya tersedia jika belum ada hasil pengumpulan.')) return;
+          run(async () => { await api('deleteTask', { id: t['ID Pengumpulan'] }); await refresh(); say('Tugas tanpa hasil berhasil dihapus; kodenya dapat digunakan kembali.'); }, box.querySelector('.btn-delete-t'));
+        });
         list.appendChild(box);
       });
     }
@@ -1254,7 +1366,34 @@
       catch (_) { return String(t.Kelas || '').split(',').map(x => x.trim()).filter(Boolean); }
     }
 
-    function renderClassChoices(selected = [], locked = false) {
+    function selectedTaskClasses() {
+      return [...document.querySelectorAll('input[name="task-class"]:checked')].map(x => x.value);
+    }
+
+    function currentTaskClassCodes() {
+      return Object.fromEntries([...document.querySelectorAll('input[name="task-class-code"]')].map(x => [x.dataset.class, x.value]));
+    }
+
+    function renderTaskClassCodes(classCodes = {}, locked = false) {
+      const host = $('task-class-codes');
+      host.replaceChildren();
+      const classes = selectedTaskClasses();
+      if (!classes.length) {
+        const note = document.createElement('p'); note.className = 'text-[10px] text-on-surface-variant';
+        note.textContent = 'Pilih kelas terlebih dahulu. Kode kosong dibuat otomatis.'; host.appendChild(note); return;
+      }
+      classes.forEach(name => {
+        const label = document.createElement('label'); label.className = 'block text-[10px] font-semibold text-on-surface-variant';
+        label.textContent = 'Kode ' + name;
+        const input = document.createElement('input'); input.name = 'task-class-code'; input.dataset.class = name;
+        input.value = classCodes[name] || ''; input.maxLength = 24; input.autocomplete = 'off'; input.readOnly = locked;
+        input.placeholder = 'Kosongkan untuk kode otomatis';
+        input.className = 'mt-1 w-full bg-surface-container-lowest border border-outline-variant/60 rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary';
+        label.appendChild(input); host.appendChild(label);
+      });
+    }
+
+    function renderClassChoices(selected = [], locked = false, classCodes = {}) {
       const host = $('task-classes');
       host.replaceChildren();
       if (!data.classes.length) {
@@ -1270,13 +1409,19 @@
         `;
         host.appendChild(label);
       });
+      host.querySelectorAll('input[name="task-class"]').forEach(input => input.addEventListener('change', () => {
+        const savedCodes = currentTaskClassCodes(); renderTaskClassCodes(savedCodes);
+      }));
+      renderTaskClassCodes(classCodes, locked);
     }
 
     function editTask(t) {
       $('edit-task-id').value = t['ID Pengumpulan'];
       $('task-heading').innerHTML = '<span class="material-symbols-outlined text-primary text-xl">edit</span> Atur Tugas: ' + t.Judul;
       $('task-title').value = t.Judul;
-      renderClassChoices(taskClasses(t), true);
+      let classCodes = {};
+      try { classCodes = JSON.parse(t['Kode Kelas JSON'] || '{}'); } catch (_) {}
+      renderClassChoices(taskClasses(t), true, classCodes);
       $('task-media').value = t['ID Media'];
       $('task-media').disabled = true;
       $('task-open').checked = t.Terbuka === true;
@@ -1477,13 +1622,15 @@
     $('task-form').onsubmit = e => {
       e.preventDefault();
       run(async () => {
-        const classes = [...document.querySelectorAll('input[name="task-class"]:checked')].map(x => x.value);
+        const classes = selectedTaskClasses();
+        const classCodes = currentTaskClassCodes();
         await api('saveTask', {
           task: {
             id: $('edit-task-id').value,
             title: $('task-title').value,
             mediaId: $('task-media').value,
             classes,
+            classCodes,
             due: $('task-due').value ? new Date($('task-due').value).toISOString() : '',
             open: $('task-open').checked,
             allowLate: $('task-late').checked
@@ -1512,10 +1659,13 @@
           id: selectedId,
           status: $('review-status').value,
           score: $('review-score').value,
-          note: $('review-note').value
+          note: $('review-note').value,
+          studentName: $('review-student-name').value,
+          nis: $('review-student-nis').value,
+          identityConfirmed: $('review-identity-confirmed').checked
         });
-        $('review-message').textContent = 'Pemeriksaan guru tersimpan!';
         await refresh();
+        $('review-message').textContent = 'Pemeriksaan, identitas, dan nilai tersimpan!';
       }, e.submitter);
     };
 
