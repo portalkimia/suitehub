@@ -2282,18 +2282,24 @@ window.PortalSubmission = (() => {
       laporanTeks: [config.title, siswa.nama + ' | ' + siswa.kelas, 'Nilai kuis: ' + score,
         ...['esai', 'lks', 'refleksi'].map(k => k.toUpperCase() + '\n' + Object.entries(jawaban[k]).map(([id, v]) => id + ': ' + v).join('\n'))].join('\n\n') };
   }
-  function notice(message, anchor) {
+  function notice(message, anchor, kind) {
     let el = document.getElementById('portal-submission-status');
     if (!el) {
       el = document.createElement('p');
       el.id = 'portal-submission-status';
       el.setAttribute('role', 'status');
       el.setAttribute('aria-live', 'polite');
-      el.style.cssText = 'padding:12px;margin:12px 0 0;border:1px solid #8b5cf6;border-radius:10px;font-size:13px;white-space:pre-wrap;color:#123d36;background:#f0fdfa';
+      el.style.cssText = 'display:block;padding:12px;margin:12px 0 0;border:2px solid #64748b;border-radius:10px;font-size:14px;font-weight:600;line-height:1.5;white-space:pre-wrap;color:#0f172a;background:#f8fafc';
     }
     const host = anchor?.closest?.('[data-pk-access]') || anchor?.parentElement || document.body;
     if (el.parentElement !== host) host.appendChild(el);
     el.textContent = message;
+    const isError = kind === 'error' || /gagal|tidak valid|tidak ditemukan|ditutup|berakhir|belum dapat|belum berhasil|ditolak|belum terkonfirmasi/i.test(message);
+    const isWorking = kind === 'working' || /sedang |memeriksa|mengirim|mencoba/i.test(message);
+    el.style.borderColor = isError ? '#dc2626' : isWorking ? '#d97706' : '#059669';
+    el.style.background = isError ? '#fef2f2' : isWorking ? '#fffbeb' : '#ecfdf5';
+    el.style.color = isError ? '#991b1b' : isWorking ? '#92400e' : '#065f46';
+    el.setAttribute('role', isError ? 'alert' : 'status');
   }
   function status(payload) {
     // Receipt-only JSONP: no answers or student identity travel in the URL.
@@ -2428,7 +2434,7 @@ window.PortalSubmission = (() => {
     const checkButton = document.getElementById('pk-check');
     busy=true;
     if(checkButton){checkButton.disabled=true;checkButton.textContent='Memeriksa tugas…';checkButton.setAttribute('aria-busy','true');}
-    notice('Sedang memeriksa kode kelas dan nama ke server…',checkButton);
+    notice('Sedang memeriksa kode kelas dan nama ke server…',checkButton,'working');
     try {
       if (!classCode && !assignmentId) throw Error('Masukkan Kode Kelas dari guru.');
       if (!studentName && !value('pk-access-code')) throw Error('Masukkan Nama Lengkap Anda.');
@@ -2461,9 +2467,9 @@ window.PortalSubmission = (() => {
       const pending=Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).map(read).find(p=>p?.context===contextKey());
       freeze(!!pending);
       document.querySelectorAll('[onclick*="submitToTeacherDatabase"],[onclick*="syncToPortalDatabase"]').forEach(b=>{b.disabled=false;b.textContent=pending?'Coba kirim ulang jawaban final':'Kirim jawaban final';});
-      notice(response.title+' · '+response.name+' ('+response.className+')\n'+(pending?'Jawaban final menunggu konfirmasi server. Tekan kirim untuk mencoba ulang.':'Pengumpulan dibatasi 1 kali per media. Silakan kerjakan dengan teliti.'));
+      notice('BERHASIL — Kode kelas dan nama terverifikasi.\n'+response.title+' · '+response.name+' ('+response.className+')\n'+(pending?'Jawaban final menunggu konfirmasi server. Tekan tombol kirim ulang untuk mencoba kembali.':'Anda dapat mulai mengerjakan. Pengumpulan dibatasi 1 kali per media.'),checkButton,'success');
       renderEvaluation();
-    } catch(e){notice(e.message || 'Gagal memeriksa tugas. Jawaban belum dihapus.',checkButton);}finally{busy=false;if(checkButton){checkButton.disabled=false;checkButton.textContent='Periksa Tugas';checkButton.removeAttribute('aria-busy');}}
+    } catch(e){notice('GAGAL — '+(e.message || 'Kode kelas dan nama belum berhasil diperiksa. Jawaban belum dihapus.'),checkButton,'error');}finally{busy=false;if(checkButton){checkButton.disabled=false;checkButton.textContent='Periksa Tugas';checkButton.removeAttribute('aria-busy');}}
   }
   function renderEvaluation() {
     const host=document.getElementById('pk-evaluation'); if(!host)return;

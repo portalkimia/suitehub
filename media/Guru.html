@@ -364,7 +364,7 @@
                 <div id="task-class-codes" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <p class="text-[10px] text-on-surface-variant">Pilih kelas terlebih dahulu. Kode kosong dibuat otomatis.</p>
                 </div>
-                <span class="text-[10px] text-on-surface-variant block mt-1">Buat kode 6–24 karakter, unik untuk setiap kelas. Kode tugas yang sudah dibuat tidak dapat diubah.</span>
+                <span class="text-[10px] text-on-surface-variant block mt-1">Buat kode 6–24 karakter, unik untuk setiap kelas. Kode yang dikosongkan tetap memakai kode lama atau dibuat otomatis.</span>
               </div>
 
               <div>
@@ -1424,7 +1424,7 @@
       });
     }
 
-    function renderClassChoices(selected = [], locked = false, classCodes = {}) {
+    function renderClassChoices(selected = [], locked = false, classCodes = {}, protectedClasses = []) {
       const host = $('task-classes');
       host.replaceChildren();
       if (!data.classes.length) {
@@ -1434,10 +1434,12 @@
       data.classes.forEach((name, i) => {
         const label = document.createElement('label');
         label.className = 'flex items-center gap-2 p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant/60 cursor-pointer hover:border-primary/50 text-xs text-on-surface';
-        label.innerHTML = `
-          <input type="checkbox" name="task-class" value="${name}" id="task-class-${i}" ${selected.includes(name) ? 'checked' : ''} ${locked ? 'disabled' : ''} class="rounded border-outline-variant text-primary focus:ring-0">
-          <span class="font-medium">${name}</span>
-        `;
+        const input = document.createElement('input'); input.type = 'checkbox'; input.name = 'task-class'; input.value = name;
+        input.id = 'task-class-' + i; input.checked = selected.includes(name); input.disabled = locked || protectedClasses.includes(name);
+        input.className = 'rounded border-outline-variant text-primary focus:ring-0';
+        const text = document.createElement('span'); text.className = 'font-medium';
+        text.textContent = name + (protectedClasses.includes(name) ? ' · sudah ada pengumpulan' : '');
+        label.append(input, text);
         host.appendChild(label);
       });
       host.querySelectorAll('input[name="task-class"]').forEach(input => input.addEventListener('change', () => {
@@ -1452,9 +1454,15 @@
       $('task-title').value = t.Judul;
       let classCodes = {};
       try { classCodes = JSON.parse(t['Kode Kelas JSON'] || '{}'); } catch (_) {}
-      renderClassChoices(taskClasses(t), true, classCodes);
+      const taskParticipants = data.participants.filter(p => p.taskId === t['ID Pengumpulan']);
+      const protectedClasses = [...new Set(taskParticipants.filter(p => p.submitted).map(p => p.className))];
+      renderClassChoices(taskClasses(t), false, classCodes, protectedClasses);
       $('task-media').value = t['ID Media'];
-      $('task-media').disabled = true;
+      const hasSubmissions = Number(t.submissionCount || 0) > 0;
+      $('task-media').disabled = hasSubmissions;
+      let mediaNote = $('task-media-note');
+      if (!mediaNote) { mediaNote = document.createElement('p'); mediaNote.id = 'task-media-note'; mediaNote.className = 'text-[10px] text-on-surface-variant mt-1'; $('task-media').after(mediaNote); }
+      mediaNote.textContent = hasSubmissions ? 'Media dikunci karena tugas sudah memiliki hasil; kelas lain dan kode tetap dapat diubah.' : 'Media, kelas, dan kode dapat diubah selama belum ada hasil pengumpulan.';
       $('task-open').checked = t.Terbuka === true;
       $('task-late').checked = t['Izinkan Terlambat'] === true;
       
@@ -1661,6 +1669,7 @@
       $('task-form').reset();
       $('edit-task-id').value = '';
       $('task-media').disabled = false;
+      const mediaNote = $('task-media-note'); if (mediaNote) mediaNote.textContent = '';
       $('task-heading').innerHTML = '<span class="material-symbols-outlined text-primary text-xl">add_task</span> Buat Tugas Baru';
       renderClassChoices();
     };
