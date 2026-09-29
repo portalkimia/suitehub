@@ -1674,11 +1674,15 @@ window.PortalSubmission = (() => {
       if (!active) throw new Error('Periksa ID tugas dan kode pribadi terlebih dahulu.');
       const key = contextKey();
       let pending = Object.keys(localStorage).filter(k => k.startsWith(PREFIX)).map(read).find(p => p?.context === key);
-      if (!pending && quizState.some(x => x === null)) throw new Error('Jawab seluruh soal evaluasi sebelum mengirim.');
+      const quiz = Array.isArray(questions) ? questions : questionsNow;
+      const submittedAnswers = Array.isArray(answers) && answers.length === quiz.length ? answers : quizState;
+      if (!pending && quiz.length && (submittedAnswers.length !== quiz.length || submittedAnswers.some(x => x === null || x === undefined || x === ''))) {
+        throw new Error('Jawab seluruh soal evaluasi sebelum mengirim.');
+      }
       if (!pending && !window.confirm('Kirim jawaban FINAL?\n\nPastikan seluruh LKS, esai, dan evaluasi sudah lengkap. Setelah OK, jawaban dikunci. Draf di browser akan dihapus hanya setelah server memastikan jawaban tersimpan. Perubahan berikutnya memerlukan izin guru.')) return;
       let payload = pending?.payload;
       if (!payload) {
-        const content = collect(config, quizState.length ? quizState : answers, questions);
+        const content = collect(config, submittedAnswers, quiz);
         const seed = active.assignmentId + '|' + (active.name || '').toLowerCase() + '|' + active.studentAccessCode + '|' + active.revision;
         const digest = async text => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))), x=>x.toString(16).padStart(2,'0')).join('').slice(0,48);
         payload = { ...content, schemaVersion: 3, mediaVersion: 'submission-v3-final', assignmentId: active.assignmentId,
@@ -1779,8 +1783,10 @@ window.PortalSubmission = (() => {
       if(!response.open || (response.due && Date.now()>new Date(response.due).getTime()&&!response.allowLate)){active=null;freeze(true);throw Error('Pengumpulan ditutup atau tenggat telah berakhir. Hubungi guru.');}
       for(const [id,v] of [['student-name',response.name],['student-class',response.className],['student-nis',response.nis]]){const e=document.getElementById(id);if(e)e.value=v;}
       const saved=read('pk_quiz_'+contextKey());
-      quizState=Array.isArray(saved)&&saved.length===questionsNow.length?saved:questionsNow.map(()=>null);
-      adapters?.setAnswers(quizState.slice());
+      const hasSavedQuiz=Array.isArray(saved)&&saved.length===questionsNow.length;
+      quizState=hasSavedQuiz?saved:questionsNow.map(()=>null);
+      // Do not overwrite answers entered in the media's own quiz UI when no Portal quiz draft exists.
+      if(hasSavedQuiz)adapters?.setAnswers(quizState.slice());
       const pending=Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).map(read).find(p=>p?.context===contextKey());
       freeze(!!pending);
       document.querySelectorAll('[onclick*="submitToTeacherDatabase"],[onclick*="syncToPortalDatabase"]').forEach(b=>{b.disabled=false;b.textContent=pending?'Coba kirim ulang jawaban final':'Kirim jawaban final';});
