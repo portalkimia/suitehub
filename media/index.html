@@ -1200,7 +1200,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenjang / Fase *</label>
-            <select id="manual-item-grade" required class="w-full px-3 py-2 bg-slate-50 dark:bg-surface-container-low border border-slate-200 dark:border-outline-variant rounded-xl text-slate-900 dark:text-on-surface focus:outline-none focus:ring-2 focus:ring-violet-500 cursor-pointer">
+            <select id="manual-item-grade" onchange="populateManualChapterOptions()" required class="w-full px-3 py-2 bg-slate-50 dark:bg-surface-container-low border border-slate-200 dark:border-outline-variant rounded-xl text-slate-900 dark:text-on-surface focus:outline-none focus:ring-2 focus:ring-violet-500 cursor-pointer">
               <option value="Kelas 10">Kelas 10 (Fase E)</option>
               <option value="Kelas 11">Kelas 11 (Fase F)</option>
               <option value="Kelas 12">Kelas 12 (Fase F)</option>
@@ -1234,6 +1234,11 @@
           </div>
         </div>
 
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1" for="manual-item-chapter">Pindahkan ke bab</label>
+          <select id="manual-item-chapter" class="w-full px-3 py-2 bg-slate-50 dark:bg-surface-container-low border border-slate-200 dark:border-outline-variant rounded-xl text-slate-900 dark:text-on-surface"></select>
+          <p class="text-xs text-slate-500 mt-1">Pilih bab pada kelas yang dipilih. Pilihan otomatis mengelompokkan media berdasarkan materi.</p>
+        </div>
         <div>
           <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">URL Berkas / Link Drive *</label>
           <input type="text" id="manual-item-url" required placeholder="https://drive.google.com/file/d/... atau nama file lokal (contoh: SelVolta.html)" class="w-full px-3 py-2 bg-slate-50 dark:bg-surface-container-low border border-slate-200 dark:border-outline-variant rounded-xl text-slate-900 dark:text-on-surface focus:outline-none focus:ring-2 focus:ring-violet-500 font-mono text-xs">
@@ -2230,8 +2235,30 @@
         : normalizeGradeKey(itemGrade).key === selectedKey;
     }
 
+    function readCatalogOverrides(key) {
+      try { const data = JSON.parse(localStorage.getItem(key) || '{}'); return data && typeof data === 'object' && !Array.isArray(data) ? data : {}; } catch (_) { return {}; }
+    }
+    function escapeCatalogText(text) {
+      return String(text || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function renameChapter(chapterId) {
+      if (!isTeacherMode) return;
+      const item = allMaterials.find(m => getMaterialChapter(m).id === chapterId);
+      if (!item) return;
+      const title = prompt('Ubah judul bab:', getMaterialChapter(item).name);
+      if (title === null) return;
+      const name = title.trim();
+      if (!name || name.length > 180) { alert('Isi judul bab antara 1–180 karakter.'); return; }
+      const overrides = readCatalogOverrides('chemportal_chapter_titles');
+      overrides[chapterId] = name;
+      try { localStorage.setItem('chemportal_chapter_titles', JSON.stringify(overrides)); }
+      catch (_) { alert('Judul belum tersimpan. Penyimpanan browser penuh atau tidak tersedia.'); return; }
+      renderMaterials();
+      showToast('Judul bab disimpan pada perangkat ini.', 'edit');
+    }
     function normalizeMaterialCurriculum(item) {
       if (!item) return item;
+      item = { ...item, ...readCatalogOverrides('chemportal_material_overrides')[String(item.id)] };
       const title = (item.title || '').trim();
       const lower = title.toLowerCase();
       let grade = item.grade || '';
@@ -2248,6 +2275,9 @@
           grade = 'Kelas 10 (Fase E)';
         }
       }
+
+      const recognizedGrade = normalizeGradeKey(grade);
+      if (recognizedGrade.key !== 'umum') grade = recognizedGrade.name;
 
       let topic = 'Umum';
       let pedagogicalScore = 9999;
@@ -2489,7 +2519,7 @@
         }
       }
 
-      const chapterMeta = {
+      let chapterMeta = {
         id: chapterId,
         name: chapterName,
         desc: chapterDesc,
@@ -2497,6 +2527,9 @@
         order: chapterOrder
       };
 
+      if (item.chapterOverride && item.chapterOverride.gradeKey === normalizeGradeKey(grade).key) {
+        chapterMeta = { ...item.chapterOverride };
+      }
       return {
         ...item,
         grade,
@@ -2512,8 +2545,9 @@
     }
 
     function getMaterialChapter(item) {
-      if (item && item.chapterMeta) return item.chapterMeta;
-      return normalizeMaterialCurriculum(item).chapterMeta;
+      const chapter = item && item.chapterMeta ? item.chapterMeta : normalizeMaterialCurriculum(item).chapterMeta;
+      const name = readCatalogOverrides('chemportal_chapter_titles')[chapter.id];
+      return name ? { ...chapter, name } : chapter;
     }
 
     function getCustomLearningOrder() {
@@ -2843,7 +2877,7 @@
                   </div>
                   <div class="min-w-0">
                     <h4 class="text-xs sm:text-sm font-headline font-bold text-slate-900 dark:text-on-surface truncate">
-                      ${chapMeta.name}
+                      ${escapeCatalogText(chapMeta.name)}
                     </h4>
                     <p class="text-[11px] text-slate-500 dark:text-on-surface-variant truncate">
                       ${chapMeta.desc}
@@ -2855,6 +2889,7 @@
                   ${isTeacherMode && sortedChapters.length > 1 ? `
                     <div class="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 p-1 rounded-xl border border-amber-300 dark:border-amber-800/60 mr-1" onclick="event.stopPropagation()">
                       <span class="text-[10px] font-bold text-amber-700 dark:text-amber-300 px-1 font-mono hidden sm:inline">Urutan Bab:</span>
+                      <button type="button" onclick="event.preventDefault(); event.stopPropagation(); renameChapter('${chapMeta.id}')" class="px-2 py-1 rounded-lg text-xs text-amber-800 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-800/50" title="Edit judul bab">Edit judul bab</button>
                       <button 
                         type="button"
                         onclick="moveChapterOrder('${chapMeta.id}', '${gradeMeta.key}', 'up')" 
@@ -3999,6 +4034,34 @@
       selectThumbnailPreset(suggested);
     }
 
+    function populateManualChapterOptions(selectedId) {
+      const select = document.getElementById('manual-item-chapter');
+      if (!select) return;
+      const gradeKey = normalizeGradeKey(document.getElementById('manual-item-grade').value).key;
+      const chapters = new Map();
+      allMaterials.filter(m => normalizeGradeKey(m.grade).key === gradeKey).forEach(m => {
+        const chapter = getMaterialChapter(m);
+        chapters.set(chapter.id, chapter);
+      });
+      select.replaceChildren();
+      const auto = document.createElement('option');
+      auto.value = ''; auto.textContent = 'Otomatis berdasarkan materi'; select.appendChild(auto);
+      [...chapters.values()].sort((a,b) => a.order - b.order).forEach(chapter => {
+        const option = document.createElement('option');
+        option.value = chapter.id; option.textContent = chapter.name; select.appendChild(option);
+      });
+      if (selectedId && chapters.has(selectedId)) select.value = selectedId;
+    }
+
+    function selectedManualChapter(grade) {
+      const id = document.getElementById('manual-item-chapter').value;
+      if (!id) return null;
+      const gradeKey = normalizeGradeKey(grade).key;
+      const target = allMaterials.find(m => normalizeGradeKey(m.grade).key === gradeKey && getMaterialChapter(m).id === id);
+      if (!target) throw new Error('Bab tujuan tidak ditemukan pada kelas yang dipilih.');
+      return { ...getMaterialChapter(target), gradeKey };
+    }
+
     function openManualMaterialModal(id) {
       const modal = document.getElementById('modal-manual-material');
       const titleEl = document.getElementById('modal-manual-title');
@@ -4018,7 +4081,8 @@
           titleEl.textContent = 'Edit Bahan Ajar';
           idInput.value = item.id;
           titleInput.value = item.title || '';
-          gradeInput.value = item.grade || 'Kelas 10';
+          gradeInput.value = normalizeGradeKey(item.grade).key === 'umum' ? 'Umum' : 'Kelas ' + normalizeGradeKey(item.grade).order;
+          populateManualChapterOptions(item.chapterOverride?.id);
           formatInput.value = item.format || 'HTML';
           topicInput.value = item.topic || '';
           subjectInput.value = item.subject || 'Kimia';
@@ -4034,6 +4098,7 @@
         idInput.value = '';
         titleInput.value = '';
         gradeInput.value = 'Kelas 10';
+        populateManualChapterOptions();
         formatInput.value = 'HTML';
         topicInput.value = '';
         subjectInput.value = 'Kimia';
@@ -4055,6 +4120,7 @@
       const id = document.getElementById('manual-item-id').value;
       const title = document.getElementById('manual-item-title').value.trim();
       const grade = document.getElementById('manual-item-grade').value;
+      const chapterOverride = selectedManualChapter(grade);
       const format = document.getElementById('manual-item-format').value;
       const topic = document.getElementById('manual-item-topic').value.trim();
       const subject = document.getElementById('manual-item-subject').value;
@@ -4067,16 +4133,21 @@
         // Edit existing
         const idx = allMaterials.findIndex(m => String(m.id) === String(id));
         if (idx !== -1) {
-          allMaterials[idx] = { ...allMaterials[idx], title, grade, format, topic, subject, url, description, thumbnail };
+          const fields = { title, grade, format, topic, subject, url, description, thumbnail, chapterOverride };
+          const overrides = readCatalogOverrides('chemportal_material_overrides');
+          overrides[String(id)] = fields;
+          try { localStorage.setItem('chemportal_material_overrides', JSON.stringify(overrides)); }
+          catch (_) { alert('Perubahan belum tersimpan. Penyimpanan browser tidak tersedia.'); return; }
+          allMaterials[idx] = normalizeMaterialCurriculum({ ...allMaterials[idx], ...fields });
         }
       } else {
         // Add new
         const newItem = {
           id: 'mat-' + Date.now(),
           title, grade, format, topic, subject, url, description,
-          thumbnail
+          thumbnail, chapterOverride
         };
-        allMaterials.unshift(newItem);
+        allMaterials.unshift(normalizeMaterialCurriculum(newItem));
       }
 
       localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials));
