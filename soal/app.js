@@ -7,12 +7,48 @@
  * =========================================================================
  */
 
+// Versioning & Cache Busting
+const APP_VERSION = "2.11";
+
 // Global State
 let currentPackage = null;
 let activeParallelTab = 'A'; // 'A' atau 'B'
 let savedQuestions = [];     // Koleksi soal yang ditandai / disimpan oleh guru
 let filterSavedOnly = false; // Filter tampilan: tampilkan hanya soal yang ditandai
 const LAST_GENERATED_DRAFT_KEY = "portalkimia_generator_last_draft_v1";
+const APP_VERSION_KEY = "portalkimia_generator_version";
+
+function handleAppVersionMigration() {
+  try {
+    const stored = localStorage.getItem(APP_VERSION_KEY);
+    const badge = document.getElementById("appVersionBadge");
+    if (badge) badge.textContent = "v" + APP_VERSION;
+    const footerBadge = document.getElementById("footerVersionBadge");
+    if (footerBadge) footerBadge.textContent = "v" + APP_VERSION;
+    console.info(`[PortalKimia Generator Soal] Aktif Versi v${APP_VERSION}`);
+    if (stored && stored !== APP_VERSION) {
+      console.info(`[PortalKimia] Deteksi pembaruan versi: ${stored} ➜ v${APP_VERSION}`);
+      localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
+      setTimeout(() => {
+        showVersionToast(`✨ Generator Soal berhasil diperbarui ke versi v${APP_VERSION}!`);
+      }, 1000);
+    } else if (!stored) {
+      localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
+    }
+  } catch (e) {
+    console.warn("Versi migration error:", e);
+  }
+}
+
+function showVersionToast(msg) {
+  try {
+    const toast = document.createElement("div");
+    toast.className = "fixed bottom-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 bg-zinc-900/95 border border-emerald-500/50 text-emerald-300 text-xs rounded-xl shadow-2xl backdrop-blur-md transition-all duration-300";
+    toast.innerHTML = `<span>${msg}</span><button onclick="this.parentElement.remove()" class="text-zinc-400 hover:text-white font-bold ml-2">✕</button>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 6000);
+  } catch (e) {}
+}
 
 // SYSTEM PROMPT DASAR DENGAN ATURAN ILMIAH DAN NOTASI KIMIA
 const BASE_CHEMISTRY_PROMPT = `
@@ -80,6 +116,9 @@ PEDOMAN UTAMA:
          M2: Method mark kedua / intermediate step
          A1: Accuracy mark (angka final + satuan benar)
          Additional Guidance: ALLOW..., IGNORE..., DO NOT ALLOW..., TE (Transferred Error / ECF).
+      * PENTING TERKAIT STRUKTUR JSON: Meskipun SELURUH isi konten naskah soal wajib 100% British English, NAMA KUNCI JSON HARUS TETAP MEMAKAI SKEMA BAKU:
+        "judul", "jenjang", "topik_utama", "daftar_soal", "nomor", "tipe_soal", "topik", "subtopik", "tingkat_kesulitan", "pertanyaan", "pilihan_jawaban", "kunci_jawaban", "pembahasan_langkah".
+        DILARANG KERAS mengganti nama kunci JSON menjadi bahasa Inggris (misalnya: JANGAN ganti "daftar_soal" jadi "questions", JANGAN ganti "pertanyaan" jadi "question_text" / "stem").
 
 7. FORMAT URAIAN TERSTRUKTUR & MODE TANPA STIMULUS:
    - Untuk soal Esai / Uraian Terstruktur:
@@ -113,6 +152,7 @@ const AI_USAGE_KEY = "portalkimia_ai_usage_v1";
 
 // INITIALIZATION BULLETPROOF
 function initializeAllComponents() {
+  try { handleAppVersionMigration(); } catch (e) { console.warn("handleAppVersionMigration error:", e); }
   try {
     if (typeof window !== "undefined" && window.lucide && typeof window.lucide.createIcons === "function") {
       window.lucide.createIcons();
@@ -1625,12 +1665,23 @@ function renderSvgIllustration(svgCode, caption) {
  * Menjamin objek paket soal selalu memiliki format valid dan daftar_soal berupa Array,
  * bahkan jika AI mengembalikan format alternatif (soal, questions, array polos, pilihan jawaban object, dsb.)
  */
+function isQuestionLike(item) {
+  if (!item || typeof item !== "object") return false;
+  if (item.pertanyaan || item.soal || item.question || item.question_text || item.stem || item.prompt || item.context || item.problem || item.teks) return true;
+  if (Array.isArray(item.subparts) || Array.isArray(item.sub_questions) || Array.isArray(item.parts) || Array.isArray(item.sub_soal) || Array.isArray(item.subSoal)) return true;
+  if (Array.isArray(item.pilihan_jawaban) || Array.isArray(item.options) || Array.isArray(item.choices) || Array.isArray(item.pilihan) || Array.isArray(item.opsi)) return true;
+  if ((item.nomor != null || item.number != null || item.question_number != null || item.no != null) && 
+      (item.kunci_jawaban || item.answer || item.mark_scheme || item.pembahasan || item.marks || item.total_marks || item.tipe_soal || item.type)) return true;
+  return false;
+}
+
 function normalizeAndValidateQuizPackage(rawInput, defaults = {}) {
   let pkg = rawInput;
 
   // 1. Ekstraksi dan parsing jika input masih berupa string mentah
   if (typeof pkg === "string") {
     let clean = pkg.trim();
+    clean = clean.replace(/<think(?:s[^>]*)?>[\s\S]*?<\/think>/gi, "").trim();
     if (clean.startsWith("```")) {
       clean = clean.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
     }
@@ -1655,18 +1706,38 @@ function normalizeAndValidateQuizPackage(rawInput, defaults = {}) {
     throw new Error("Respon AI kosong atau bukan objek valid.");
   }
 
-  // 2. Buka pembungkus bersarang jika ada (.data, .raw, .quiz, .paket, dsb.)
-  if (pkg.data && typeof pkg.data === "object" && !Array.isArray(pkg.daftar_soal)) {
-    pkg = pkg.data;
-  }
-  if (pkg.quiz && typeof pkg.quiz === "object" && !Array.isArray(pkg.daftar_soal)) {
-    pkg = pkg.quiz;
-  }
-  if (pkg.paket && typeof pkg.paket === "object" && !Array.isArray(pkg.daftar_soal)) {
-    pkg = pkg.paket;
+  // 2. Buka pembungkus bersarang (multi-level unwrapping)
+  const wrapperKeys = [
+    "data", "raw", "quiz", "paket", "paper", "exam_paper", "examination_paper", 
+    "exam", "examination", "assessment", "test", "quiz_package", "package", 
+    "result", "response", "content", "output", "payload"
+  ];
+  for (let depth = 0; depth < 8; depth++) {
+    if (!pkg || typeof pkg !== "object" || Array.isArray(pkg)) break;
+    if ((Array.isArray(pkg.daftar_soal) && pkg.daftar_soal.length > 0) ||
+        (Array.isArray(pkg.questions) && pkg.questions.length > 0) ||
+        (Array.isArray(pkg.soal) && pkg.soal.length > 0)) {
+      break;
+    }
+
+    const keys = Object.keys(pkg);
+    if (keys.length === 1 && pkg[keys[0]] && typeof pkg[keys[0]] === "object" && !Array.isArray(pkg[keys[0]])) {
+      pkg = pkg[keys[0]];
+      continue;
+    }
+
+    let unwrapped = false;
+    for (const k of wrapperKeys) {
+      if (pkg[k] && typeof pkg[k] === "object" && !Array.isArray(pkg[k])) {
+        pkg = pkg[k];
+        unwrapped = true;
+        break;
+      }
+    }
+    if (!unwrapped) break;
   }
 
-  // 3. Jika respon AI berupa Array langsung (daftar butir soal tanpa pembungkus paket)
+  // 3. Jika respon AI berupa Array langsung
   if (Array.isArray(pkg)) {
     pkg = {
       judul: defaults.topic ? `Asesmen Kimia - ${defaults.topic}` : "Naskah Soal Asesmen Kimia",
@@ -1677,33 +1748,80 @@ function normalizeAndValidateQuizPackage(rawInput, defaults = {}) {
     };
   }
 
-  // 4. Deteksi lokasi array butir soal (daftar_soal) dari berbagai variasi penamaan AI
+  // 4. Deteksi dan gabungkan struktur sections jika ada (misal Section A + Section B Pearson)
+  if (!Array.isArray(pkg.daftar_soal) || pkg.daftar_soal.length === 0) {
+    const sectionCandidateKeys = ["sections", "parts", "bagian", "paper_sections", "examination_sections"];
+    for (const sKey of sectionCandidateKeys) {
+      if (Array.isArray(pkg[sKey]) && pkg[sKey].length > 0) {
+        const flattened = [];
+        pkg[sKey].forEach(sec => {
+          if (sec && typeof sec === "object") {
+            const secQuestions = sec.questions || sec.soal || sec.daftar_soal || sec.items || sec.problems;
+            if (Array.isArray(secQuestions)) {
+              secQuestions.forEach(q => {
+                if (q && typeof q === "object") {
+                  if (sec.section_name || sec.title || sec.name) {
+                    q._section_origin = sec.section_name || sec.title || sec.name;
+                  }
+                  flattened.push(q);
+                }
+              });
+            }
+          }
+        });
+        if (flattened.length > 0) {
+          pkg.daftar_soal = flattened;
+          break;
+        }
+      }
+    }
+  }
+
+  // Deteksi kunci section terpisah (section_a, section_b, dll.)
+  if (!Array.isArray(pkg.daftar_soal) || pkg.daftar_soal.length === 0) {
+    const secSplitKeys = [
+      'section_a', 'section_b', 'section_c', 
+      'sectionA', 'sectionB', 'sectionC', 
+      'bagian_a', 'bagian_b', 'bagian_c',
+      'multiple_choice_section', 'structured_section'
+    ];
+    let collectedSec = [];
+    secSplitKeys.forEach(k => {
+      if (Array.isArray(pkg[k])) {
+        collectedSec.push(...pkg[k]);
+      } else if (pkg[k] && typeof pkg[k] === "object") {
+        const qList = pkg[k].questions || pkg[k].soal || pkg[k].daftar_soal || pkg[k].items;
+        if (Array.isArray(qList)) collectedSec.push(...qList);
+      }
+    });
+    if (collectedSec.length > 0) {
+      pkg.daftar_soal = collectedSec;
+    }
+  }
+
+  // 5. Deteksi array daftar_soal dari berbagai variasi penamaan AI
   if (!Array.isArray(pkg.daftar_soal)) {
-    if (Array.isArray(pkg.soal)) {
-      pkg.daftar_soal = pkg.soal;
-    } else if (Array.isArray(pkg.daftarSoal)) {
-      pkg.daftar_soal = pkg.daftarSoal;
-    } else if (Array.isArray(pkg.questions)) {
-      pkg.daftar_soal = pkg.questions;
-    } else if (Array.isArray(pkg.items)) {
-      pkg.daftar_soal = pkg.items;
-    } else if (Array.isArray(pkg.paket_soal)) {
-      pkg.daftar_soal = pkg.paket_soal;
-    } else if (Array.isArray(pkg.soal_list)) {
-      pkg.daftar_soal = pkg.soal_list;
-    } else if (Array.isArray(pkg.daftar_pertanyaan)) {
-      pkg.daftar_soal = pkg.daftar_pertanyaan;
-    } else {
-      // Cari properti apa saja yang berupa Array berisi objek soal
+    const candidateArrayKeys = [
+      "soal", "daftarSoal", "questions", "items", "paket_soal", 
+      "soal_list", "daftar_pertanyaan", "structured_questions", 
+      "mcq_questions", "exam_questions", "problems", "question_list", "questionList"
+    ];
+    for (const key of candidateArrayKeys) {
+      if (Array.isArray(pkg[key]) && pkg[key].length > 0) {
+        pkg.daftar_soal = pkg[key];
+        break;
+      }
+    }
+
+    if (!Array.isArray(pkg.daftar_soal)) {
       const candidateKey = Object.keys(pkg).find(k => 
         Array.isArray(pkg[k]) && 
         pkg[k].length > 0 && 
-        (pkg[k][0].pertanyaan || pkg[k][0].soal || pkg[k][0].question || pkg[k][0].pilihan_jawaban)
+        pkg[k].some(isQuestionLike)
       );
       if (candidateKey) {
         pkg.daftar_soal = pkg[candidateKey];
-      } else if (pkg.pertanyaan || pkg.soal || pkg.question) {
-        // AI hanya mengembalikan 1 butir soal tunggal sebagai objek langsung
+      } else if (isQuestionLike(pkg)) {
         pkg.daftar_soal = [ pkg ];
       } else {
         pkg.daftar_soal = [];
@@ -1711,18 +1829,20 @@ function normalizeAndValidateQuizPackage(rawInput, defaults = {}) {
     }
   }
 
-  // 5. Pastikan Paket B jika ada
+  // 6. Pastikan Paket B jika ada
   if (!Array.isArray(pkg.daftar_soal_paket_b)) {
     if (Array.isArray(pkg.paket_b)) {
       pkg.daftar_soal_paket_b = pkg.paket_b;
     } else if (Array.isArray(pkg.soal_paket_b)) {
       pkg.daftar_soal_paket_b = pkg.soal_paket_b;
+    } else if (Array.isArray(pkg.questions_set_b)) {
+      pkg.daftar_soal_paket_b = pkg.questions_set_b;
     } else {
       delete pkg.daftar_soal_paket_b;
     }
   }
 
-  // 6. Normalisasi setiap butir soal di daftar_soal
+  // 7. Normalisasi setiap butir soal di daftar_soal
   const normalizeList = (list) => {
     if (!Array.isArray(list)) return [];
     return list.map((soal, idx) => {
@@ -1730,84 +1850,118 @@ function normalizeAndValidateQuizPackage(rawInput, defaults = {}) {
         soal = { pertanyaan: String(soal) };
       }
 
-      soal.nomor = parseInt(soal.nomor, 10) || (idx + 1);
-      soal.tipe_soal = soal.tipe_soal || defaults.qType || "Pilihan Ganda";
-      soal.topik = soal.topik || defaults.topic || "Kimia";
-      soal.subtopik = soal.subtopik || defaults.subtopic || "Materi Esensial";
-      soal.tingkat_kesulitan = soal.tingkat_kesulitan || defaults.difficulty || "Sedang";
+      soal.nomor = parseInt(soal.nomor || soal.number || soal.question_number || soal.no, 10) || (idx + 1);
+      soal.tipe_soal = soal.tipe_soal || soal.type || soal.question_type || defaults.qType || "Pilihan Ganda";
+      soal.topik = soal.topik || soal.topic || defaults.topic || "Kimia";
+      soal.subtopik = soal.subtopik || soal.subtopic || defaults.subtopic || "Materi Esensial";
+      soal.tingkat_kesulitan = soal.tingkat_kesulitan || soal.difficulty || soal.demand || soal.level || defaults.difficulty || "Sedang";
 
-      // Pertanyaan
-      let rawPertanyaan = String(soal.pertanyaan || soal.soal || soal.question || soal.teks || "Pertanyaan belum ditentukan.").trim();
+      // 7a. Bangun teks pertanyaan lengkap (gabungkan context, stem, dan subparts jika terpisah)
+      let mainPrompt = "";
+      if (soal.context && soal.stem && soal.context !== soal.stem) {
+        mainPrompt = `${soal.context}\n\n${soal.stem}`;
+      } else {
+        mainPrompt = soal.pertanyaan || soal.question || soal.question_text || soal.stem || soal.prompt || soal.context || soal.soal || soal.teks || soal.problem || "";
+      }
+
+      // Deteksi jika ada array subparts / sub-pertanyaan terpisah
+      const rawSubparts = soal.subparts || soal.sub_questions || soal.parts || soal.sub_soal || soal.subSoal;
+      if (Array.isArray(rawSubparts) && rawSubparts.length > 0) {
+        const formattedSubs = rawSubparts.map((sub, sIdx) => {
+          if (typeof sub === "string") return sub.trim();
+          if (!sub || typeof sub !== "object") return "";
+          const label = sub.label || sub.sub_number || sub.part || sub.no || `(${String.fromCharCode(97 + sIdx)})`;
+          const qText = sub.question || sub.text || sub.teks || sub.pertanyaan || sub.prompt || "";
+          const marks = sub.marks || sub.mark || sub.skor || sub.points;
+          const marksStr = marks ? ` [${marks} ${Number(marks) === 1 ? 'mark' : 'marks'}]` : "";
+          return `${label} ${qText}${marksStr}`.trim();
+        }).filter(Boolean);
+
+        const subsCombined = formattedSubs.join("\n\n");
+        if (subsCombined && !mainPrompt.includes(formattedSubs[0])) {
+          mainPrompt = mainPrompt ? `${mainPrompt}\n\n${subsCombined}` : subsCombined;
+        }
+      }
+
+      // Tambahkan Total Marks jika ada
+      if (soal.total_marks || soal.total_mark) {
+        const tot = soal.total_marks || soal.total_mark;
+        const totTag = `[Total for Question ${soal.nomor} = ${tot} marks]`;
+        if (!mainPrompt.includes("Total for Question") && !mainPrompt.includes("Total:")) {
+          mainPrompt = `${mainPrompt}\n\n${totTag}`;
+        }
+      }
+
+      let rawPertanyaan = String(mainPrompt || "Pertanyaan belum ditentukan.").trim();
       rawPertanyaan = rawPertanyaan
         .replace(/(?:Answer|Jawaban)\s*:\s*[\._\s]{3,}/gi, "")
         .replace(/\[\s*(?:Answer|Jawaban)\s*:\s*[\._\s]{3,}\]/gi, "")
         .replace(/[\.]{5,}/g, "")
-        .replace(/[_\s]{6,}/g, " ")
+        .replace(/[\_\s]{6,}/g, " ")
         .trim();
       soal.pertanyaan = rawPertanyaan;
 
-      // Pilihan Jawaban (Menangani format Array maupun format Object { A: '...', B: '...' })
-      if (soal.pilihan_jawaban) {
-        if (Array.isArray(soal.pilihan_jawaban)) {
-          soal.pilihan_jawaban = soal.pilihan_jawaban.map((opt, i) => {
+      // 7b. Pilihan Jawaban (Menangani format Array maupun format Object)
+      const rawOptions = soal.pilihan_jawaban || soal.options || soal.choices || soal.pilihan || soal.opsi || soal.answers;
+      if (rawOptions) {
+        if (Array.isArray(rawOptions)) {
+          soal.pilihan_jawaban = rawOptions.map((opt, i) => {
             if (typeof opt === "string") {
-              const lbl = String.fromCharCode(65 + i);
-              return { label: lbl, teks: opt.replace(/^[A-E][.:\)]\s*/i, "").trim() };
+              const matchLetter = opt.match(/^([A-E])[.:\)]\s*(.*)$/i);
+              const lbl = matchLetter ? matchLetter[1].toUpperCase() : String.fromCharCode(65 + i);
+              const txt = matchLetter ? matchLetter[2] : opt;
+              return { label: lbl, teks: txt.trim() };
             }
             return {
-              label: String(opt.label || String.fromCharCode(65 + i)).trim().toUpperCase(),
-              teks: String(opt.teks || opt.text || opt.jawaban || "").trim()
+              label: String(opt.label || opt.letter || opt.key || String.fromCharCode(65 + i)).trim().toUpperCase(),
+              teks: String(opt.teks || opt.text || opt.jawaban || opt.option || opt.value || "").trim()
             };
           });
-        } else if (typeof soal.pilihan_jawaban === "object") {
-          soal.pilihan_jawaban = Object.keys(soal.pilihan_jawaban).map(k => ({
+        } else if (typeof rawOptions === "object") {
+          soal.pilihan_jawaban = Object.keys(rawOptions).map(k => ({
             label: k.trim().toUpperCase(),
-            teks: String(soal.pilihan_jawaban[k]).trim()
+            teks: String(rawOptions[k]).trim()
           }));
-        }
-      } else if (soal.options || soal.opsi || soal.pilihan) {
-        const rawOpts = soal.options || soal.opsi || soal.pilihan;
-        if (Array.isArray(rawOpts)) {
-          soal.pilihan_jawaban = rawOpts.map((opt, i) => ({
-            label: (typeof opt === "object" && opt.label) ? opt.label : String.fromCharCode(65 + i),
-            teks: typeof opt === "object" ? (opt.teks || opt.text || "") : String(opt)
-          }));
-        } else if (typeof rawOpts === "object") {
-          soal.pilihan_jawaban = Object.keys(rawOpts).map(k => ({
-            label: k.trim().toUpperCase(),
-            teks: String(rawOpts[k]).trim()
-          }));
+        } else {
+          soal.pilihan_jawaban = [];
         }
       } else {
         soal.pilihan_jawaban = [];
       }
 
-      // Kunci Jawaban
-      soal.kunci_jawaban = String(soal.kunci_jawaban || soal.kunci || soal.answer || "A").trim();
+      // 7c. Kunci Jawaban
+      soal.kunci_jawaban = String(
+        soal.kunci_jawaban || soal.kunci || soal.answer || soal.correct_answer || 
+        soal.key || soal.correctAnswer || (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0 ? "A" : "Terlampir")
+      ).trim();
 
-      // Pembahasan Langkah
-      if (!soal.pembahasan_langkah) {
-        if (soal.pembahasan) {
-          if (Array.isArray(soal.pembahasan)) {
-            soal.pembahasan_langkah = soal.pembahasan.map(String);
-          } else if (typeof soal.pembahasan === "string") {
-            soal.pembahasan_langkah = soal.pembahasan.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-          }
-        } else if (soal.explanation) {
-          soal.pembahasan_langkah = Array.isArray(soal.explanation) ? soal.explanation.map(String) : [String(soal.explanation)];
+      // 7d. Pembahasan Langkah / Mark Scheme
+      const rawSolutions = soal.pembahasan_langkah || soal.pembahasan || soal.explanation || 
+                           soal.mark_scheme || soal.marking_scheme || soal.worked_solution || 
+                           soal.solution || soal.solutions || soal.rubric;
+      if (rawSolutions) {
+        if (Array.isArray(rawSolutions)) {
+          soal.pembahasan_langkah = rawSolutions.map(s => {
+            if (typeof s === "object" && s !== null) {
+              return Object.entries(s).map(([k, v]) => `${k}: ${v}`).join(" | ");
+            }
+            return String(s).trim();
+          }).filter(Boolean);
+        } else if (typeof rawSolutions === "string") {
+          soal.pembahasan_langkah = rawSolutions.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+        } else if (typeof rawSolutions === "object") {
+          soal.pembahasan_langkah = Object.entries(rawSolutions).map(([k, v]) => `${k}: ${v}`);
         } else {
-          soal.pembahasan_langkah = defaults.includeSolutions === false
-            ? [] 
-            : ["Pembahasan dapat diselesaikan berdasarkan konsep stoikiometri dan hukum dasar kimia terkait."];
+          soal.pembahasan_langkah = [String(rawSolutions)];
         }
-      } else if (typeof soal.pembahasan_langkah === "string") {
-        soal.pembahasan_langkah = soal.pembahasan_langkah.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-      } else if (!Array.isArray(soal.pembahasan_langkah)) {
-        soal.pembahasan_langkah = [String(soal.pembahasan_langkah)];
+      } else {
+        soal.pembahasan_langkah = defaults.includeSolutions === false
+          ? []
+          : ["Pembahasan dapat diselesaikan berdasarkan konsep stoikiometri dan hukum dasar kimia terkait."];
       }
 
-      // Tips atau Jebakan
-      soal.tips_atau_jebakan = String(soal.tips_atau_jebakan || soal.tips || soal.miskonsepsi || "").trim();
+      // 7e. Tips atau Jebakan
+      soal.tips_atau_jebakan = String(soal.tips_atau_jebakan || soal.tips || soal.miskonsepsi || soal.common_mistakes || soal.guidance || "").trim();
 
       return soal;
     });
@@ -1818,14 +1972,17 @@ function normalizeAndValidateQuizPackage(rawInput, defaults = {}) {
     pkg.daftar_soal_paket_b = normalizeList(pkg.daftar_soal_paket_b);
   }
 
-  // 7. Metadata Paket
-  pkg.judul = String(pkg.judul || (defaults.topic ? `Asesmen Kimia - ${defaults.topic}` : "Naskah Soal Asesmen Kimia")).trim();
-  pkg.jenjang = String(pkg.jenjang || defaults.grade || "SMA Kelas 11 (Fase F)").trim();
-  pkg.topik_utama = String(pkg.topik_utama || defaults.topic || "Kimia Umum").trim();
-  pkg.stimulus_model = String(pkg.stimulus_model || defaults.stimulus || "Kontekstual").trim();
+  // 8. Metadata Paket (Dukung kunci bahasa Inggris: title, grade, topic, stimulus)
+  pkg.judul = String(pkg.judul || pkg.title || (defaults.topic ? `Asesmen Kimia - ${defaults.topic}` : "Naskah Soal Asesmen Kimia")).trim();
+  pkg.jenjang = String(pkg.jenjang || pkg.grade || defaults.grade || "SMA Kelas 11 (Fase F)").trim();
+  pkg.topik_utama = String(pkg.topik_utama || pkg.topic || defaults.topic || "Kimia Umum").trim();
+  pkg.stimulus_model = String(pkg.stimulus_model || pkg.stimulus || defaults.stimulus || "Kontekstual").trim();
 
-  // 8. Kisi-Kisi
-  if (pkg.kisi_kisi_asesmen && !Array.isArray(pkg.kisi_kisi_asesmen)) {
+  // 9. Kisi-Kisi
+  const rawKisi = pkg.kisi_kisi_asesmen || pkg.kisi_kisi || pkg.assessment_grid || pkg.specification_grid;
+  if (Array.isArray(rawKisi)) {
+    pkg.kisi_kisi_asesmen = rawKisi;
+  } else {
     delete pkg.kisi_kisi_asesmen;
   }
 
@@ -1910,7 +2067,7 @@ async function generateQuiz() {
   const stimulus = document.getElementById("stimulusSelect").value;
   const isPearson = grade.toLowerCase().includes("pearson") || grade.toLowerCase().includes("edexcel");
   const isNoStimulus = stimulus.toLowerCase().includes("tanpa stimulus");
-  const isStructured = qType.toLowerCase().includes("terstruktur") || qType.toLowerCase().includes("esai") || qType.toLowerCase().includes("uraian") || isPearson;
+  const isStructured = qType.toLowerCase().includes("terstruktur") || qType.toLowerCase().includes("esai") || qType.toLowerCase().includes("uraian");
   const topicSelect = document.getElementById("topicSelect");
   const topic = topicSelect.value === "CUSTOM" 
     ? (document.getElementById("customTopicInput").value.trim() || "Kimia Umum")
@@ -2234,7 +2391,7 @@ ${typeInstruction}
      : 'DINONAKTIFKAN (FOKUS 100% MAKSIMAL PADA KUALITAS NASKAH SOAL). Pengajar TIDAK MEMERLUKAN langkah pembahasan panjang. KERAHKAN 100% KUOTA TOKEN DAN KAPASITAS PENALARAN AI UNTUK MENYUSUN BUTIR SOAL KIMIA TERBAIK: susun narasi stimulus kontekstual yang mendalam, sajikan tabel data eksperimen empiris, angka stoikiometri yang presisi, dan opsi jawaban dengan distraktor (pengecoh) yang cerdas dan menantang nalar siswa. Cukup berikan huruf kunci_jawaban singkat (misal: "A") dan KOSONGKAN pembahasan_langkah agar kuota token tidak terbuang!'}
 
 9. BAHASA & KURIKULUM: ${isPearson 
-     ? 'WAJIB 100% BAHASA INGGRIS (British English). Gunakan istilah dan tata nama kurikulum Pearson Edexcel International GCSE / A-Level (ethanoic acid, propanoic acid, cm³, dm³, mol dm⁻³, limiting reagent, Brønsted-Lowry, Ka, Kw = 1.0 x 10^-14 mol² dm⁻⁶). Judul naskah soal WAJIB Bahasa Inggris (misal: "PEARSON EDEXCEL INTERNATIONAL A-LEVEL ASSESSMENT - ' + topic.toUpperCase() + '").' 
+     ? 'WAJIB 100% BAHASA INGGRIS (British English). Gunakan istilah dan tata nama kurikulum Pearson Edexcel International GCSE / A-Level (ethanoic acid, propanoic acid, cm³, dm³, mol dm⁻³, limiting reagent, Brønsted-Lowry, Ka, Kw = 1.0 x 10^-14 mol² dm⁻⁶). Judul naskah soal WAJIB Bahasa Inggris (misal: "PEARSON EDEXCEL INTERNATIONAL A-LEVEL ASSESSMENT - ' + topic.toUpperCase() + '"). PENTING: Nama kunci JSON WAJIB TETAP ("judul", "jenjang", "topik_utama", "daftar_soal", "nomor", "pertanyaan", "pilihan_jawaban", "kunci_jawaban", "pembahasan_langkah") dan DILARANG diubah ke bahasa Inggris!' 
      : 'Bahasa Indonesia standar Kurikulum Merdeka / asesmen nasional.'}
 `;
 
@@ -2423,6 +2580,16 @@ ${typeInstruction}
 
     // Pastikan parsedPkg.daftar_soal selalu Array
     parsedPkg.daftar_soal = Array.isArray(parsedPkg.daftar_soal) ? parsedPkg.daftar_soal : [];
+
+    // Validasi Keras: Cegah naskah kosong (0 butir soal)
+    if (!parsedPkg.daftar_soal || parsedPkg.daftar_soal.length === 0) {
+      console.error("[PortalKimia] Normalisasi tidak menemukan butir soal dalam respon AI:", parsedPkg);
+      throw new Error(
+        isPearson 
+          ? "AI tidak menghasilkan butir soal dalam format yang dikenali (0 soal). Silakan coba klik 'Buat Naskah Soal' lagi."
+          : "Format respon AI tidak memuat butir soal yang valid (0 soal). Silakan coba klik 'Buat Naskah Soal' kembali."
+      );
+    }
 
     // FITUR SIMPAN SOAL INKREMENTAL:
     // Jika ada soal yang ditandai sebelumnya, JANGAN HAPUS!
@@ -3517,6 +3684,8 @@ function initExportListeners() {
       if (!confirmClear) return;
 
       currentPackage = null;
+      savedQuestions = [];
+      filterSavedOnly = false;
       try {
         localStorage.removeItem(LAST_GENERATED_DRAFT_KEY);
       } catch (e) {}
@@ -3530,6 +3699,7 @@ function initExportListeners() {
       const autoBadge = document.getElementById("autoBackupBadge");
       if (autoBadge) autoBadge.className = "hidden";
 
+      updateSavedCountBadge();
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
