@@ -2216,10 +2216,18 @@
 
     function normalizeGradeKey(gradeStr) {
       const g = (gradeStr || '').toLowerCase();
-      if (g.includes('10')) return { key: 'kelas-10', name: 'Kelas 10 (Fase E)', badge: 'Fase E', icon: 'school', color: 'violet', order: 10 };
-      if (g.includes('11')) return { key: 'kelas-11', name: 'Kelas 11 (Fase F)', badge: 'Fase F', icon: 'science', color: 'sky', order: 11 };
-      if (g.includes('12')) return { key: 'kelas-12', name: 'Kelas 12 (Fase F)', badge: 'Fase F', icon: 'bolt', color: 'purple', order: 12 };
+      if (g.includes('10') || /\bkelas\s*x(?:\s|$|\()/i.test(g)) return { key: 'kelas-10', name: 'Kelas 10 (Fase E)', badge: 'Fase E', icon: 'school', color: 'violet', order: 10 };
+      if (g.includes('11') || /\bkelas\s*xi(?:\s|$|\()/i.test(g)) return { key: 'kelas-11', name: 'Kelas 11 (Fase F)', badge: 'Fase F', icon: 'science', color: 'sky', order: 11 };
+      if (g.includes('12') || /\bkelas\s*xii(?:\s|$|\()/i.test(g)) return { key: 'kelas-12', name: 'Kelas 12 (Fase F)', badge: 'Fase F', icon: 'bolt', color: 'purple', order: 12 };
       return { key: 'umum', name: 'Semua Kelas & Laboratorium Terbuka', badge: 'Umum', icon: 'biotech', color: 'emerald', order: 99 };
+    }
+
+    function matchesGradeFilter(itemGrade, selectedGrade) {
+      const selectedKey = normalizeGradeKey(selectedGrade).key;
+      const gradeNumbers = String(itemGrade || '').match(/\d+/g) || [];
+      return gradeNumbers.length
+        ? gradeNumbers.some(number => "kelas-" + number === selectedKey)
+        : normalizeGradeKey(itemGrade).key === selectedKey;
     }
 
     function normalizeMaterialCurriculum(item) {
@@ -2229,7 +2237,7 @@
       let grade = item.grade || '';
       const g = grade.toLowerCase();
 
-      if (!grade || grade === 'Umum' || (!g.includes('10') && !g.includes('11') && !g.includes('12'))) {
+      if (!grade || grade === 'Umum' || normalizeGradeKey(grade).key === 'umum') {
         if (lower.includes('laboratorium kimia virtual')) {
           grade = 'Semua Kelas (Umum)';
         } else if (lower.match(/volta|elektrolisis|faraday|redoks|korosi|benzena|alkana|alkena|alkuna|hidrokarbon|haloalkana|alkohol|eter|aldehida|keton|asam karboksilat|ester|polimer|karbohidrat|lipid|asam amino|protein|dna|rna|unsur transisi|periode ketiga|senyawa kompleks|radioaktivitas|reaksi inti|gravimetri|spektrofotometri/)) {
@@ -3074,7 +3082,7 @@
         }
         // Grade filter
         if (currentFilterGrade !== 'ALL') {
-          if ((item.grade || '') !== currentFilterGrade) return false;
+          if (!matchesGradeFilter(item.grade, currentFilterGrade)) return false;
         }
         // Search query
         if (currentSearchQuery) {
