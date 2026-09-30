@@ -521,6 +521,7 @@
               <option value="title_desc">Judul (Z-A)</option>
             </select>
 
+            <button id="btn-cloud-catalog" type="button" onclick="publishCatalogSettings()" class="hidden px-2.5 py-1.5 rounded-xl bg-violet-100 text-violet-800 border border-violet-300">Simpan susunan ke cloud</button>
             <!-- Reset Urutan Button -->
             <button 
               id="btn-reset-order"
@@ -2235,6 +2236,75 @@
         : normalizeGradeKey(itemGrade).key === selectedKey;
     }
 
+    let catalogSaveTimer = null, catalogSaving = false;
+    async function catalogTeacherRequest(action, body) {
+      const request = { action, ...(body || {}) };
+      if (window.google?.script?.run) return new Promise((resolve,reject) => google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).portalTeacherApi(request));
+      return (await fetch(GAS_API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, body:JSON.stringify({ ...request, action:'teacherApi', teacherAction:action }), signal:AbortSignal.timeout(25000) })).json();
+    }
+    function queueCatalogChange(key, value) {
+      const pending = readCatalogOverrides('chemportal_catalog_pending'); pending[key] = value;
+      localStorage.setItem('chemportal_catalog_pending', JSON.stringify(pending));
+      clearTimeout(catalogSaveTimer); catalogSaveTimer = setTimeout(() => publishCatalogSettings(false), 600);
+    }
+    async function publishCatalogSettings(includeLocal = true) {
+      if (!isTeacherMode || catalogSaving) return;
+      if (includeLocal) {
+        const pending = readCatalogOverrides('chemportal_catalog_pending');
+        Object.entries(readCatalogOverrides('chemportal_material_overrides')).forEach(([id,value]) => pending['material:'+id] = value);
+        Object.entries(readCatalogOverrides('chemportal_chapter_titles')).forEach(([id,value]) => pending['chapter:'+id] = value);
+        pending.learningOrder = getCustomLearningOrder(); pending.chapterOrder = getCustomChapterOrder();
+        localStorage.setItem('chemportal_catalog_pending', JSON.stringify(pending));
+      }
+      const changes = readCatalogOverrides('chemportal_catalog_pending'); if (!Object.keys(changes).length) return;
+      catalogSaving = true;
+      let cloudSaved = false;
+      try {
+        let token = sessionStorage.getItem('chemportal_catalog_token') || '';
+        if (!token) {
+          const password = prompt('Masukkan kata sandi backend Ruang Guru untuk menyimpan susunan media ke cloud:');
+          if (password === null) return;
+          const login = await catalogTeacherRequest('login', {password});
+          if (!login.success || !login.data?.token) throw Error(login.message || 'Masuk guru gagal.');
+          token = login.data.token; sessionStorage.setItem('chemportal_catalog_token', token);
+        }
+        const result = await catalogTeacherRequest('saveCatalogSettings', {token,changes});
+        if (!result.success || !result.data?.saved) {
+          if (/sesi|masuk|guru/i.test(result.message || '')) sessionStorage.removeItem('chemportal_catalog_token');
+          throw Error(result.message || 'Penyimpanan cloud belum terkonfirmasi. Perbarui deployment GAS.');
+        }
+        const remaining = readCatalogOverrides('chemportal_catalog_pending');
+        Object.keys(changes).forEach(key => {if (JSON.stringify(remaining[key]) === JSON.stringify(changes[key])) delete remaining[key];});
+        localStorage.setItem('chemportal_catalog_pending', JSON.stringify(remaining));
+        cloudSaved = true;
+        showToast('Susunan media tersimpan di cloud; perangkat lain dapat memuatnya.', 'cloud_done');
+      } catch (error) { alert('Belum tersimpan di cloud: ' + error.message + '\nPerubahan tetap ada di perangkat ini. Gunakan Simpan susunan ke cloud untuk mencoba lagi.'); }
+      finally {
+        catalogSaving = false;
+        if (cloudSaved && Object.keys(readCatalogOverrides('chemportal_catalog_pending')).length) {
+          clearTimeout(catalogSaveTimer); catalogSaveTimer = setTimeout(() => publishCatalogSettings(false), 600);
+        }
+      }
+    }
+    async function loadCloudCatalogSettings() {
+      try {
+        const result = window.google?.script?.run
+          ? await new Promise((resolve,reject) => google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).portalCatalogSettings())
+          : await (await fetch(GAS_API_URL + '?action=catalogSettings', {signal:AbortSignal.timeout(20000)})).json();
+        if (!result.success || !result.data || typeof result.data !== 'object') return;
+        const cloud = {...result.data, ...readCatalogOverrides('chemportal_catalog_pending')};
+        if (!Object.keys(cloud).length) return;
+        const materials = {}, chapters = {};
+        Object.entries(cloud).forEach(([key,value]) => { if (key.startsWith('material:')) materials[key.slice(9)] = value; if (key.startsWith('chapter:')) chapters[key.slice(8)] = value; });
+        localStorage.setItem('chemportal_material_overrides', JSON.stringify(materials));
+        localStorage.setItem('chemportal_chapter_titles', JSON.stringify(chapters));
+        if (Array.isArray(cloud.learningOrder)) localStorage.setItem('chemportal_learning_order', JSON.stringify(cloud.learningOrder));
+        if (Array.isArray(cloud.chapterOrder)) localStorage.setItem('chemportal_chapter_order', JSON.stringify(cloud.chapterOrder));
+        allMaterials = allMaterials.map(m => normalizeMaterialCurriculum(m)); window.allMaterials = allMaterials;
+        localStorage.setItem('chemportal_materials', JSON.stringify(allMaterials)); renderMaterials(); renderAdminMaterialsTable();
+      } catch (_) { /* Keep usable local settings if the server is offline or not yet upgraded. */ }
+    }
+
     function readCatalogOverrides(key) {
       try { const data = JSON.parse(localStorage.getItem(key) || '{}'); return data && typeof data === 'object' && !Array.isArray(data) ? data : {}; } catch (_) { return {}; }
     }
@@ -2254,7 +2324,8 @@
       try { localStorage.setItem('chemportal_chapter_titles', JSON.stringify(overrides)); }
       catch (_) { alert('Judul belum tersimpan. Penyimpanan browser penuh atau tidak tersedia.'); return; }
       renderMaterials();
-      showToast('Judul bab disimpan pada perangkat ini.', 'edit');
+      queueCatalogChange('chapter:' + chapterId, name);
+      showToast('Judul bab disimpan; menunggu penyimpanan cloud.', 'edit');
     }
     function normalizeMaterialCurriculum(item) {
       if (!item) return item;
@@ -2562,6 +2633,7 @@
     function saveCustomLearningOrder(orderArray) {
       try {
         localStorage.setItem('chemportal_learning_order', JSON.stringify(orderArray));
+        queueCatalogChange('learningOrder', orderArray);
       } catch(e) {}
     }
 
@@ -2614,6 +2686,7 @@
     function saveCustomChapterOrder(orderArray) {
       try {
         localStorage.setItem('chemportal_chapter_order', JSON.stringify(orderArray));
+        queueCatalogChange('chapterOrder', orderArray);
       } catch(e) {}
     }
 
@@ -2662,6 +2735,7 @@
       if (confirm('Kembalikan urutan langkah belajar dan urutan bab ke alur kurikulum standar?')) {
         localStorage.removeItem('chemportal_learning_order');
         localStorage.removeItem('chemportal_chapter_order');
+        queueCatalogChange('learningOrder', []); queueCatalogChange('chapterOrder', []);
         renderMaterials();
         showToast('Urutan bab dan materi dikembalikan ke alur standar.', 'restart_alt');
       }
@@ -3136,6 +3210,7 @@
 
       const btnReset = document.getElementById('btn-reset-order');
       if (btnReset) btnReset.classList.toggle('hidden', !isTeacherMode);
+      document.getElementById('btn-cloud-catalog')?.classList.toggle('hidden', !isTeacherMode);
 
       // Sorting
       const sortOrder = document.getElementById('sort-order')?.value || 'learning_flow';
@@ -4139,6 +4214,7 @@
           try { localStorage.setItem('chemportal_material_overrides', JSON.stringify(overrides)); }
           catch (_) { alert('Perubahan belum tersimpan. Penyimpanan browser tidak tersedia.'); return; }
           allMaterials[idx] = normalizeMaterialCurriculum({ ...allMaterials[idx], ...fields });
+          queueCatalogChange('material:' + id, fields);
         }
       } else {
         // Add new
@@ -4156,7 +4232,7 @@
       renderMaterials();
       updateDashboardStats();
       renderAdminMaterialsTable();
-      alert('Bahan ajar berhasil disimpan!');
+      alert('Perubahan tersimpan di perangkat. Penyimpanan cloud akan dikonfirmasi terpisah.');
     }
 
     function deleteMaterial(id) {
@@ -5063,6 +5139,8 @@ function copyGlossaryFormula(id) {
       updateViewModeButtons();
       renderLastVisitedBanner();
       loadMaterials();
+      loadCloudCatalogSettings();
+      window.addEventListener('focus', loadCloudCatalogSettings);
       initGlossary();
     }
 
