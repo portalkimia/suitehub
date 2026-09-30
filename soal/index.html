@@ -70,12 +70,12 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Custom Design System Stylesheet -->
-  <link rel="stylesheet" href="styles.css?v=2.11">
+  <link rel="stylesheet" href="styles.css?v=2.12">
 
   <!-- Konfigurasi Terpusat PortalKimia Suite -->
-  <script src="../config.js?v=2.11"></script>
+  <script src="../config.js?v=2.12"></script>
   <!-- Konfigurasi Lokal Cabang Soal (Multi-Device Ready) -->
-  <script src="config.js?v=2.11"></script>
+  <script src="config.js?v=2.12"></script>
 </head>
 
 <body class="min-h-screen antialiased flex flex-col bg-grid-pattern selection:bg-violet-500/30 selection:text-violet-200">
@@ -110,7 +110,7 @@
                   Generator Soal AI
                 </span>
                 <span id="appVersionBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-tight shadow-sm" title="Versi Rilis Terpasang (Terupdate Otomatis)">
-                  v2.11
+                  v2.12
                 </span>
               </div>
               <p class="text-[10px] text-zinc-400 font-medium hidden sm:block">Otomatisasi Asesmen &amp; Bank Soal Kimia</p>
@@ -408,10 +408,10 @@
           <!-- Export Buttons (Termasuk Excel Quizizz Opsi 5) -->
           <div class="flex flex-wrap items-center gap-2">
             <div id="autoBackupBadge" class="hidden"></div>
-            <button id="btnExportWord" type="button" title="Unduh File Microsoft Word (.docx)"
+            <button id="btnExportWord" type="button" title="Unduh Naskah Soal Format Microsoft Word (Standar Kertas A4 &amp; Font Times New Roman 12pt)"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-semibold transition-all">
               <i data-lucide="file-text" class="w-3.5 h-3.5 text-violet-400"></i>
-              <span>Word (.doc)</span>
+              <span>Word A4 (.doc)</span>
             </button>
             <button id="btnExportExcelQuizizz" type="button" title="Unduh File Excel Template Impor Quizizz / LMS (.xlsx)"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all shadow-sm">
@@ -861,7 +861,7 @@
         <span>Generator Soal AI — Tito Vanzal, S.Pd.</span>
       </div>
       <div class="flex items-center gap-3 text-zinc-400">
-        <span id="footerVersionBadge" class="font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">v2.11</span>
+        <span id="footerVersionBadge" class="font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">v2.12</span>
         <span>•</span>
         <a href="../" class="hover:text-violet-300 transition-colors">Kembali ke Suite Hub</a>
         <span>•</span>
@@ -871,6 +871,6 @@
   </footer>
 
   <!-- Application Logic -->
-  <script src="app.js?v=2.11"></script>
+  <script src="app.js?v=2.12"></script>
 </body>
 </html>

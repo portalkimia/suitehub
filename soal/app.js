@@ -8,7 +8,7 @@
  */
 
 // Versioning & Cache Busting
-const APP_VERSION = "2.11";
+const APP_VERSION = "2.12";
 
 // Global State
 let currentPackage = null;
@@ -1310,31 +1310,31 @@ function formatChemistryForWordHtml(text, inTable = false) {
   s = s.replace(/_\{([^{}]+)\}/g, "<sub>$1</sub>");
   s = s.replace(/_([0-9]+|[a-z]|\+|\-)/g, "<sub>$1</sub>");
 
-  // 5. Superscripts & Derajat Celsius
-  s = s.replace(/\^\\circ\s*(?:C)?/g, "&deg;C");
-  s = s.replace(/\\circ\s*(?:C)?/g, "&deg;C");
+  // 5. Superscripts & Derajat Celsius (Literal UTF-8 aman tanpa entitas XML)
+  s = s.replace(/\^\\circ\s*(?:C)?/g, "°C");
+  s = s.replace(/\\circ\s*(?:C)?/g, "°C");
   s = s.replace(/\^\{([^{}]+)\}/g, "<sup>$1</sup>");
   s = s.replace(/\^([0-9]+[\+\-]?|[\+\-]|[a-z])/g, "<sup>$1</sup>");
 
-  // 6. Panah dan Kesetimbangan Kimia
-  s = s.replace(/\\rightleftharpoons/g, "&#8652;"); // ⇌
-  s = s.replace(/\\longleftrightarrow/g, "&#8652;");
-  s = s.replace(/\\leftrightarrow/g, "&harr;");
-  s = s.replace(/\\rightarrow/g, "&rarr;"); // →
-  s = s.replace(/\\to\b/g, "&rarr;");
-  s = s.replace(/\\leftarrow/g, "&larr;");
-  s = s.replace(/<=>/g, "&#8652;");
-  s = s.replace(/->/g, "&rarr;");
+  // 6. Panah dan Kesetimbangan Kimia (Karakter UTF-8 Asli agar lolos parser Word/WPS)
+  s = s.replace(/\\rightleftharpoons/g, "⇌");
+  s = s.replace(/\\longleftrightarrow/g, "⇌");
+  s = s.replace(/\\leftrightarrow/g, "↔");
+  s = s.replace(/\\rightarrow/g, "→");
+  s = s.replace(/\\to\b/g, "→");
+  s = s.replace(/\\leftarrow/g, "←");
+  s = s.replace(/<=>/g, "⇌");
+  s = s.replace(/->/g, "→");
 
-  // 7. Simbol Termodinamika & Yunani
-  s = s.replace(/\\Delta\s*H/g, "&Delta;H");
-  s = s.replace(/\\Delta/g, "&Delta;"); // Δ
-  s = s.replace(/\\alpha/g, "&alpha;");
-  s = s.replace(/\\beta/g, "&beta;");
-  s = s.replace(/\\gamma/g, "&gamma;");
-  s = s.replace(/\\pm/g, "&plusmn;");
-  s = s.replace(/\\times/g, "&times;");
-  s = s.replace(/\\cdot/g, "&middot;");
+  // 7. Simbol Termodinamika & Yunani (Karakter UTF-8 Asli)
+  s = s.replace(/\\Delta\s*H/g, "ΔH");
+  s = s.replace(/\\Delta/g, "Δ");
+  s = s.replace(/\\alpha/g, "α");
+  s = s.replace(/\\beta/g, "β");
+  s = s.replace(/\\gamma/g, "γ");
+  s = s.replace(/\\pm/g, "±");
+  s = s.replace(/\\times/g, "×");
+  s = s.replace(/\\cdot/g, "·");
   s = s.replace(/\\dots/g, "...");
   s = s.replace(/\\ldots/g, "...");
 
@@ -1390,8 +1390,8 @@ function convertMarkdownTableToWordHtml(text) {
     };
 
     let headers = splitCells(headerRow);
-    let html = `<table border="1" cellpadding="0" cellspacing="0" class="chem-word-table" style="width: 100%; border-collapse: collapse; margin: 6pt 0; font-size: 9.5pt; font-family: 'Segoe UI', Calibri, Arial, sans-serif; border: 1px solid #cbd5e1;"><thead><tr style="background-color: #f1f5f9;">`;
-    headers.forEach(h => html += `<th style="border: 1px solid #cbd5e1; padding: 5pt 8pt; text-align: center; font-weight: bold; background-color: #f1f5f9; color: #1e293b;">${formatChemistryForWordHtml(h, true)}</th>`);
+    let html = `<table border="1" cellpadding="0" cellspacing="0" class="chem-word-table" style="width: 100%; border-collapse: collapse; margin: 6pt 0; font-size: 11pt; font-family: 'Times New Roman', Times, serif; border: 1px solid #000000;"><thead><tr style="background-color: #f1f5f9;">`;
+    headers.forEach(h => html += `<th style="border: 1px solid #000000; padding: 4pt 6pt; text-align: center; font-weight: bold; background-color: #f1f5f9; color: #000000; font-family: 'Times New Roman', Times, serif;">${formatChemistryForWordHtml(h, true)}</th>`);
     html += `</tr></thead><tbody>`;
 
     bodyRows.forEach(r => {
@@ -1400,7 +1400,7 @@ function convertMarkdownTableToWordHtml(text) {
         html += `<tr>`;
         cells.forEach(c => {
           const isShort = c.length <= 15 || /^[0-9\s°C,.\-+±%]+$/.test(c);
-          html += `<td style="border: 1px solid #cbd5e1; padding: 4pt 8pt; text-align: ${isShort ? 'center' : 'left'}; vertical-align: middle;">${formatChemistryForWordHtml(c, true)}</td>`;
+          html += `<td style="border: 1px solid #000000; padding: 4pt 6pt; text-align: ${isShort ? 'center' : 'left'}; vertical-align: middle; font-family: 'Times New Roman', Times, serif;">${formatChemistryForWordHtml(c, true)}</td>`;
         });
         html += `</tr>`;
       }
@@ -3880,28 +3880,28 @@ function formatPromptWithSubpartsAndDotsForWord(promptText, isStructuredOrEssay 
   let formatted = formatChemistryForWordHtml(promptText);
 
   if (!isStructuredOrEssay) {
-    return `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin: 6pt 0 6pt 0; font-size: 11pt; color: #0f172a;">${formatted}</div>`;
+    return `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.5; margin: 6pt 0 6pt 0; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000;">${formatted}</div>`;
   }
 
   const parsedSub = parseStructuredQuestionContent(promptText);
 
+  // Garis lembar jawab presisi berbasis tabel agar TIDAK memicu zoom out 14% di WPS/Word
   const makeDottedLines = (linesCount = 2) => {
-    const singleDotLine = "........................................................................................................................................";
-    let lines = [];
+    let rows = [];
     for (let i = 0; i < linesCount; i++) {
-      lines.push(singleDotLine);
+      rows.push(`<tr><td style="border: none; border-bottom: 1pt dotted #475569; height: 18pt; padding: 0; font-size: 1pt; mso-line-height-rule: exactly; line-height: 18pt;">&nbsp;</td></tr>`);
     }
     return `
-      <div style="font-family: 'Courier New', monospace; letter-spacing: 2px; color: #94a3b8; margin: 3pt 0 8pt 16pt; line-height: 1.8;">
-        ${lines.join("<br>\n")}
-      </div>
+      <table cellpadding="0" cellspacing="0" style="width: 100%; border: none; border-collapse: collapse; margin-top: 4pt; margin-bottom: 8pt; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+        ${rows.join("\n")}
+      </table>
     `;
   };
 
   if (parsedSub.hasSubparts && parsedSub.subparts.length > 0) {
     let out = [];
     if (parsedSub.stem) {
-      out.push(`<div style="margin-top: 4pt; margin-bottom: 4pt; font-size: 11pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;">${formatChemistryForWordHtml(parsedSub.stem)}</div>`);
+      out.push(`<div style="margin-top: 4pt; margin-bottom: 4pt; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000; text-align: justify; text-justify: inter-ideograph; line-height: 1.5;">${formatChemistryForWordHtml(parsedSub.stem)}</div>`);
     }
     parsedSub.subparts.forEach(sub => {
       let cleanText = sub.text;
@@ -3912,14 +3912,14 @@ function formatPromptWithSubpartsAndDotsForWord(promptText, isStructuredOrEssay 
       const markMatch = cleanText.match(/(?:\[|\()(\d+)\s*(?:marks?|mark|skor|poin)?(?:\bin total\b)?(?:\]|\))$/i);
       if (markMatch) {
         const markVal = parseInt(markMatch[1], 10);
-        markBadge = `<div style="text-align: right; font-weight: bold; font-size: 10pt; color: #1e293b; margin-top: 2pt;">(${markVal})</div>`;
+        markBadge = `<div style="text-align: right; font-weight: bold; font-size: 11pt; font-family: 'Times New Roman', Times, serif; color: #000000; margin-top: 2pt;">(${markVal})</div>`;
         cleanText = cleanText.substring(0, markMatch.index).trim();
         linesCount = markVal === 1 ? 2 : (markVal === 2 ? 4 : 6);
       }
 
       const romanParts = splitRomanSubparts(cleanText);
       if (romanParts.length > 1) {
-        out.push(`<div style="margin-top: 6pt; margin-bottom: 2pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;"><b>${sub.label}</b></div>`);
+        out.push(`<div style="margin-top: 6pt; margin-bottom: 2pt; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000; text-align: justify; text-justify: inter-ideograph; line-height: 1.5;"><b>${sub.label}</b></div>`);
         romanParts.forEach(rp => {
           if (rp.label) {
             let rText = rp.text;
@@ -3928,19 +3928,19 @@ function formatPromptWithSubpartsAndDotsForWord(promptText, isStructuredOrEssay 
             const rMatch = rText.match(/(?:\[|\()(\d+)\s*(?:marks?|mark|skor|poin)?(?:\bin total\b)?(?:\]|\))$/i);
             if (rMatch) {
               const rVal = parseInt(rMatch[1], 10);
-              rBadge = `<div style="text-align: right; font-weight: bold; font-size: 10pt; color: #1e293b; margin-top: 2pt;">(${rVal})</div>`;
+              rBadge = `<div style="text-align: right; font-weight: bold; font-size: 11pt; font-family: 'Times New Roman', Times, serif; color: #000000; margin-top: 2pt;">(${rVal})</div>`;
               rText = rText.substring(0, rMatch.index).trim();
               rLines = rVal === 1 ? 2 : (rVal === 2 ? 4 : 6);
             }
-            out.push(`<div style="margin-top: 3pt; margin-bottom: 2pt; margin-left: 14pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;"><b>${rp.label}</b> ${formatChemistryForWordHtml(rText)}</div>`);
+            out.push(`<div style="margin-top: 3pt; margin-bottom: 2pt; margin-left: 18pt; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000; text-align: justify; text-justify: inter-ideograph; line-height: 1.5;"><b>${rp.label}</b> ${formatChemistryForWordHtml(rText)}</div>`);
             if (rBadge) out.push(rBadge);
             out.push(makeDottedLines(rLines));
           } else {
-            out.push(`<div style="margin-top: 2pt; margin-bottom: 2pt; margin-left: 14pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;">${formatChemistryForWordHtml(rp.text)}</div>`);
+            out.push(`<div style="margin-top: 2pt; margin-bottom: 2pt; margin-left: 18pt; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000; text-align: justify; text-justify: inter-ideograph; line-height: 1.5;">${formatChemistryForWordHtml(rp.text)}</div>`);
           }
         });
       } else {
-        out.push(`<div style="margin-top: 6pt; margin-bottom: 2pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;"><b>${sub.label}</b> ${formatChemistryForWordHtml(cleanText)}</div>`);
+        out.push(`<div style="margin-top: 6pt; margin-bottom: 2pt; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000; text-align: justify; text-justify: inter-ideograph; line-height: 1.5;"><b>${sub.label}</b> ${formatChemistryForWordHtml(cleanText)}</div>`);
         if (markBadge) out.push(markBadge);
         out.push(makeDottedLines(linesCount));
       }
@@ -3949,18 +3949,18 @@ function formatPromptWithSubpartsAndDotsForWord(promptText, isStructuredOrEssay 
     const totMatch = promptText.match(/(?:\[|\()(?:Total for Question \d+ = (\d+) marks?|Total:\s*(\d+)\s*marks?)(?:\]|\))/i);
     if (totMatch) {
       const tot = totMatch[1] || totMatch[2];
-      out.push(`<div style="text-align: right; font-weight: bold; font-size: 10.5pt; color: #0f172a; margin-top: 6pt; margin-bottom: 12pt;">(Total for Question = ${tot} marks)</div>`);
+      out.push(`<div style="text-align: right; font-weight: bold; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000; margin-top: 6pt; margin-bottom: 12pt;">(Total for Question = ${tot} marks)</div>`);
     }
 
     return out.join("");
   } else {
     // Soal esai biasa tanpa subparts
     const bigDots = makeDottedLines(4);
-    return `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin: 6pt 0 6pt 0; font-size: 11pt; color: #0f172a;">${formatted}</div>` + bigDots;
+    return `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.5; margin: 6pt 0 6pt 0; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000;">${formatted}</div>` + bigDots;
   }
 }
 
-// WORD EXPORTER (.doc / .docx - STANDAR UKURAN KERTAS A4 & NOTASI KIMIA HTML)
+// WORD EXPORTER (.doc / .docx - STANDAR UKURAN KERTAS A4 & FONT TIMES NEW ROMAN 12PT)
 function exportToWordDocx(pkg) {
   if (!pkg) {
     alert("⚠️ Data paket soal belum tersedia. Silakan buat soal terlebih dahulu.");
@@ -3992,7 +3992,6 @@ function exportToWordDocx(pkg) {
       }
     }
 
-    // Jaminan perlindungan mutlak: listA tidak boleh kosong jika pkg memiliki soal
     if ((!listA || listA.length === 0) && pkg.daftar_soal && pkg.daftar_soal.length > 0) {
       listA = pkg.daftar_soal;
     }
@@ -4025,18 +4024,18 @@ function exportToWordDocx(pkg) {
                                     isPearson ||
                                     (!soal.pilihan_jawaban || soal.pilihan_jawaban.length === 0);
 
-        // 3. Pilihan Jawaban vs Dotted Lines
+        // 3. Pilihan Jawaban vs Dotted Lines (Font Times New Roman 12pt)
         let opts = "";
         let promptHtml = "";
         if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
-          promptHtml = `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin: 6pt 0 6pt 0; font-size: 11pt; color: #0f172a;">${formatChemistryForWordHtml(parsed.prompt)}</div>`;
+          promptHtml = `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.5; margin: 6pt 0 6pt 0; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000;">${formatChemistryForWordHtml(parsed.prompt)}</div>`;
           opts = soal.pilihan_jawaban.map(o => `
-            <div style="margin-left: 20pt; margin-top: 3pt; margin-bottom: 3pt; text-align: justify; text-justify: inter-ideograph; line-height: 1.45; font-size: 11pt;">
-              ${isPearson ? `<span style="font-family: Arial, sans-serif; border: 1px solid #000; padding: 1pt 5pt; margin-right: 6pt; font-size: 9.5pt;">&nbsp;&nbsp;</span>` : ''}<b>${o.label}.</b> ${formatChemistryForWordHtml(o.teks)}
+            <div style="margin-left: 20pt; margin-top: 3pt; margin-bottom: 3pt; text-align: justify; text-justify: inter-ideograph; line-height: 1.5; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000;">
+              ${isPearson ? `<span style="font-family: 'Times New Roman', Times, serif; border: 1px solid #000; padding: 1pt 5pt; margin-right: 6pt; font-size: 10pt;">&nbsp;&nbsp;</span>` : ''}<b>${o.label}.</b> ${formatChemistryForWordHtml(o.teks)}
             </div>
           `).join("");
           if (isPearson) {
-            opts += `<div style="text-align: right; font-weight: bold; font-size: 10pt; color: #1e293b; margin-top: 2pt;">(1)</div>`;
+            opts += `<div style="text-align: right; font-weight: bold; font-size: 11pt; color: #000000; font-family: 'Times New Roman', Times, serif; margin-top: 2pt;">(1)</div>`;
           }
         } else {
           // Uraian terstruktur atau essay dengan garis lembar jawab
@@ -4054,7 +4053,7 @@ function exportToWordDocx(pkg) {
           svgWord = `
             <div style="text-align: center; margin: 8pt auto;">
               ${cleanSvg}
-              ${soal.caption_ilustrasi ? `<p style="font-size: 9pt; font-style: italic; color: #64748b; margin-top: 3pt; text-align: center;">Diagram: ${formatChemistryForWordHtml(soal.caption_ilustrasi)}</p>` : ''}
+              ${soal.caption_ilustrasi ? `<p style="font-size: 10pt; font-style: italic; color: #475569; margin-top: 3pt; text-align: center; font-family: 'Times New Roman', Times, serif;">Diagram: ${formatChemistryForWordHtml(soal.caption_ilustrasi)}</p>` : ''}
             </div>
           `;
         }
@@ -4062,14 +4061,14 @@ function exportToWordDocx(pkg) {
         const hasStimulusBox = Boolean(!isNoStimulus && (parsed.stimulus || parsed.tableMarkdown));
 
         return `
-          <div style="margin-bottom: 16pt; page-break-inside: avoid;">
-            <div style="font-size: 9pt; color: #475569; margin-bottom: 4pt; line-height: 1.35; font-family: 'Segoe UI', Calibri, Arial, sans-serif;">
+          <div style="margin-bottom: 16pt; page-break-inside: avoid; font-family: 'Times New Roman', Times, serif;">
+            <div style="font-size: 10pt; color: #475569; margin-bottom: 4pt; line-height: 1.35; font-family: 'Times New Roman', Times, serif;">
               <b>${soal.nomor}.</b> ${metaText}
             </div>
 
             ${hasStimulusBox ? `
-              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6pt; padding: 10pt 12pt; margin: 4pt 0 8pt 0;">
-                ${parsed.stimulus ? `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin-bottom: ${parsed.tableMarkdown ? '6pt' : '0'}; color: #1e293b; font-size: 10.5pt;">${formatChemistryForWordHtml(parsed.stimulus)}</div>` : ''}
+              <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4pt; padding: 8pt 10pt; margin: 4pt 0 8pt 0; font-family: 'Times New Roman', Times, serif;">
+                ${parsed.stimulus ? `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.5; margin-bottom: ${parsed.tableMarkdown ? '6pt' : '0'}; color: #000000; font-size: 11.5pt; font-family: 'Times New Roman', Times, serif;">${formatChemistryForWordHtml(parsed.stimulus)}</div>` : ''}
                 ${parsed.tableMarkdown ? convertMarkdownTableToWordHtml(parsed.tableMarkdown) : ''}
               </div>
             ` : ''}
@@ -4101,7 +4100,7 @@ function exportToWordDocx(pkg) {
           }
         });
         renderedWordHtml += `
-          <div style="text-align: right; font-weight: bold; font-size: 11pt; margin-top: 18pt; padding-top: 6pt; border-top: 1.5pt solid #000000; font-family: Arial, sans-serif;">
+          <div style="text-align: right; font-weight: bold; font-size: 12pt; margin-top: 18pt; padding-top: 6pt; border-top: 1.5pt solid #000000; font-family: 'Times New Roman', Times, serif; color: #000000;">
             TOTAL FOR PAPER = ${totalMarks} MARKS
           </div>
         `;
@@ -4119,18 +4118,18 @@ function exportToWordDocx(pkg) {
         for (let i = 0; i < qList.length; i += chunkSize) {
           const chunk = qList.slice(i, i + chunkSize);
           const colWidth = (100 / Math.max(chunk.length, 1)).toFixed(1);
-          const headers = chunk.map(q => `<th style="padding: 5pt 2pt; text-align: center; border: 1px solid #cbd5e1; font-size: 9pt; background-color: #f1f5f9; color: #334155; width: ${colWidth}%;">No. ${q.nomor}</th>`).join("");
-          const cells = chunk.map(q => `<td style="padding: 6pt 2pt; text-align: center; border: 1px solid #cbd5e1; font-size: 11pt; color: #15803d; font-weight: bold; background-color: #ffffff;">${formatChemistryForWordHtml(q.kunci_jawaban || '-')}</td>`).join("");
+          const headers = chunk.map(q => `<th style="padding: 5pt 2pt; text-align: center; border: 1px solid #000000; font-size: 10pt; background-color: #f1f5f9; color: #000000; width: ${colWidth}%; font-family: 'Times New Roman', Times, serif;">No. ${q.nomor}</th>`).join("");
+          const cells = chunk.map(q => `<td style="padding: 6pt 2pt; text-align: center; border: 1px solid #000000; font-size: 11pt; color: #000000; font-weight: bold; background-color: #ffffff; font-family: 'Times New Roman', Times, serif;">${formatChemistryForWordHtml(q.kunci_jawaban || '-')}</td>`).join("");
           tablesHtml += `
-            <table cellpadding="0" cellspacing="0" style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 4pt; margin-bottom: 8pt; border: 1px solid #cbd5e1;">
+            <table cellpadding="0" cellspacing="0" style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 4pt; margin-bottom: 8pt; border: 1px solid #000000;">
               <tr>${headers}</tr>
               <tr>${cells}</tr>
             </table>
           `;
         }
         return `
-          <div style="margin: 12pt 0; page-break-inside: avoid;">
-            <p style="font-size: 10pt; color: #64748b; margin-bottom: 6pt; font-style: italic; text-align: justify; text-justify: inter-ideograph;">*${isPearson ? 'Mark Scheme Summary Matrix (Exam Mode)' : 'Matriks Kunci Jawaban Singkat (Mode Naskah Soal)'}:</p>
+          <div style="margin: 12pt 0; page-break-inside: avoid; font-family: 'Times New Roman', Times, serif;">
+            <p style="font-size: 10.5pt; color: #475569; margin-bottom: 6pt; font-style: italic; text-align: justify; text-justify: inter-ideograph; font-family: 'Times New Roman', Times, serif;">*${isPearson ? 'Mark Scheme Summary Matrix (Exam Mode)' : 'Matriks Kunci Jawaban Singkat (Mode Naskah Soal)'}:</p>
             ${tablesHtml}
           </div>
         `;
@@ -4144,17 +4143,17 @@ function exportToWordDocx(pkg) {
         const keyHtml = formatAnswerKeyForWordHtml(soal.kunci_jawaban);
 
         return `
-          <div style="margin-bottom: 12pt; page-break-inside: avoid;">
-            <div style="font-weight: bold; margin-bottom: 2pt; font-size: 11pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph;">
+          <div style="margin-bottom: 12pt; page-break-inside: avoid; font-family: 'Times New Roman', Times, serif;">
+            <div style="font-weight: bold; margin-bottom: 2pt; font-size: 12pt; color: #000000; text-align: justify; text-justify: inter-ideograph; font-family: 'Times New Roman', Times, serif;">
               ${soal.nomor}. ${isPearson ? 'Key / Answer' : 'Kunci'}: ${isMultiKey ? '' : keyHtml}
             </div>
-            ${isMultiKey ? `<div style="margin-left: 12pt; margin-top: 2pt; margin-bottom: 4pt;">${keyHtml}</div>` : ''}
-            <div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; font-size: 10.5pt; color: #1e293b; margin: 2pt 0 4pt 0;">
+            ${isMultiKey ? `<div style="margin-left: 12pt; margin-top: 2pt; margin-bottom: 4pt; font-family: 'Times New Roman', Times, serif; font-size: 11pt;">${keyHtml}</div>` : ''}
+            <div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.5; font-size: 11pt; color: #000000; margin: 2pt 0 4pt 0; font-family: 'Times New Roman', Times, serif;">
               <b>${isPearson ? 'Mark Scheme &amp; Worked Solutions:' : 'Pembahasan:'}</b>
-              <ul style="margin: 2pt 0 0 0; padding-left: 18pt;">${steps}</ul>
+              <ul style="margin: 2pt 0 0 0; padding-left: 18pt; font-family: 'Times New Roman', Times, serif;">${steps}</ul>
             </div>
             ${soal.tips_atau_jebakan ? `
-              <p style="font-size: 9.5pt; font-style: italic; color: #475569; margin: 2pt 0 0 18pt; text-align: justify; text-justify: inter-ideograph;">
+              <p style="font-size: 10.5pt; font-style: italic; color: #475569; margin: 2pt 0 0 18pt; text-align: justify; text-justify: inter-ideograph; font-family: 'Times New Roman', Times, serif;">
                 💡 <b>${isPearson ? 'Tip / Common Misconception' : 'Tips'}:</b> ${formatChemistryForWordHtml(soal.tips_atau_jebakan)}
               </p>
             ` : ''}
@@ -4168,41 +4167,41 @@ function exportToWordDocx(pkg) {
     const headSoal = isPearson ? 'EXAMINATION PAPER' : 'LEMBAR SOAL';
     const headSol = isPearson ? 'MARK SCHEME &amp; WORKED SOLUTIONS (For Teacher)' : 'KUNCI JAWABAN &amp; PEMBAHASAN (untuk guru)';
 
-    let questionsPart = `<h3 style="color: #1e3a8a; font-size: 13pt; font-weight: bold; margin-bottom: 12pt;">${headSoal}${labelA}</h3>` + formatWordQuestions(listA);
-    let solutionsPart = `<h3 style="color: #991b1b; font-size: 13pt; font-weight: bold; margin: 18pt 0 12pt 0; text-align: left; border-top: 1.5px solid #cbd5e1; padding-top: 12pt;">${headSol}${labelA}</h3>` + formatWordSolutions(listA);
+    let questionsPart = `<h3 style="color: #1e3a8a; font-size: 13pt; font-weight: bold; margin-bottom: 12pt; font-family: 'Times New Roman', Times, serif;">${headSoal}${labelA}</h3>` + formatWordQuestions(listA);
+    let solutionsPart = `<h3 style="color: #991b1b; font-size: 13pt; font-weight: bold; margin: 18pt 0 12pt 0; text-align: left; border-top: 1.5px solid #000000; padding-top: 12pt; font-family: 'Times New Roman', Times, serif;">${headSol}${labelA}</h3>` + formatWordSolutions(listA);
 
     if (listB.length > 0) {
-      questionsPart += `<div class="page-break"></div><h3 style="color: #1e3a8a; font-size: 13pt; font-weight: bold; margin-bottom: 12pt;">${headSoal}${labelB}</h3>` + formatWordQuestions(listB);
-      solutionsPart += `<div class="page-break"></div><h3 style="color: #991b1b; font-size: 13pt; font-weight: bold; margin: 18pt 0 12pt 0; text-align: left; border-top: 1.5px solid #cbd5e1; padding-top: 12pt;">${headSol}${labelB}</h3>` + formatWordSolutions(listB);
+      questionsPart += `<div class="page-break"></div><h3 style="color: #1e3a8a; font-size: 13pt; font-weight: bold; margin-bottom: 12pt; font-family: 'Times New Roman', Times, serif;">${headSoal}${labelB}</h3>` + formatWordQuestions(listB);
+      solutionsPart += `<div class="page-break"></div><h3 style="color: #991b1b; font-size: 13pt; font-weight: bold; margin: 18pt 0 12pt 0; text-align: left; border-top: 1.5px solid #000000; padding-top: 12pt; font-family: 'Times New Roman', Times, serif;">${headSol}${labelB}</h3>` + formatWordSolutions(listB);
     }
 
     let kisiPart = "";
     if (pkg.kisi_kisi_asesmen && pkg.kisi_kisi_asesmen.length > 0 && !exportSavedOnly) {
       let rows = pkg.kisi_kisi_asesmen.map(k => `
         <tr>
-          <td style="padding: 5pt; text-align: center; border: 1px solid #cbd5e1;">${k.nomor}</td>
-          <td style="padding: 5pt; border: 1px solid #cbd5e1; text-align: justify; text-justify: inter-ideograph;">${formatChemistryForWordHtml(k.cp_tp)}</td>
-          <td style="padding: 5pt; border: 1px solid #cbd5e1; text-align: justify; text-justify: inter-ideograph;">${formatChemistryForWordHtml(k.indikator_soal)}</td>
-          <td style="padding: 5pt; text-align: center; border: 1px solid #cbd5e1;">${k.level_kognitif}</td>
-          <td style="padding: 5pt; text-align: center; border: 1px solid #cbd5e1;">${k.bentuk_soal}</td>
-          <td style="padding: 5pt; text-align: center; font-weight: bold; border: 1px solid #cbd5e1;">${k.kunci_jawaban}</td>
-          <td style="padding: 5pt; text-align: center; border: 1px solid #cbd5e1;">${k.skor || 10}</td>
+          <td style="padding: 4pt 6pt; text-align: center; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif;">${k.nomor}</td>
+          <td style="padding: 4pt 6pt; border: 1px solid #000000; text-align: justify; text-justify: inter-ideograph; font-family: 'Times New Roman', Times, serif;">${formatChemistryForWordHtml(k.cp_tp)}</td>
+          <td style="padding: 4pt 6pt; border: 1px solid #000000; text-align: justify; text-justify: inter-ideograph; font-family: 'Times New Roman', Times, serif;">${formatChemistryForWordHtml(k.indikator_soal)}</td>
+          <td style="padding: 4pt 6pt; text-align: center; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif;">${k.level_kognitif}</td>
+          <td style="padding: 4pt 6pt; text-align: center; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif;">${k.bentuk_soal}</td>
+          <td style="padding: 4pt 6pt; text-align: center; font-weight: bold; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif;">${k.kunci_jawaban}</td>
+          <td style="padding: 4pt 6pt; text-align: center; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif;">${k.skor || 10}</td>
         </tr>
       `).join("");
 
       kisiPart = `
         <div class="page-break"></div>
-        <h3 style="color: #0f172a; text-align: center; font-size: 13pt; font-weight: bold; margin-bottom: 8pt;">LAMPIRAN: MATRIKS KISI-KISI ASESMEN</h3>
-        <table border="1" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 9pt; border: 1px solid #cbd5e1;">
+        <h3 style="color: #000000; text-align: center; font-size: 13pt; font-weight: bold; margin-bottom: 8pt; font-family: 'Times New Roman', Times, serif;">LAMPIRAN: MATRIKS KISI-KISI ASESMEN</h3>
+        <table border="1" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 10pt; border: 1px solid #000000; font-family: 'Times New Roman', Times, serif;">
           <thead>
             <tr style="background-color: #f1f5f9;">
-              <th style="border: 1px solid #cbd5e1; padding: 5pt; text-align: center; font-weight: bold;">No</th>
-              <th style="border: 1px solid #cbd5e1; padding: 5pt;">Capaian / Tujuan Pembelajaran</th>
-              <th style="border: 1px solid #cbd5e1; padding: 5pt;">Indikator Butir Soal</th>
-              <th style="border: 1px solid #cbd5e1; padding: 5pt; text-align: center;">Level</th>
-              <th style="border: 1px solid #cbd5e1; padding: 5pt; text-align: center;">Bentuk</th>
-              <th style="border: 1px solid #cbd5e1; padding: 5pt; text-align: center;">Kunci</th>
-              <th style="border: 1px solid #cbd5e1; padding: 5pt; text-align: center;">Skor</th>
+              <th style="border: 1px solid #000000; padding: 4pt 6pt; text-align: center; font-weight: bold; font-family: 'Times New Roman', Times, serif;">No</th>
+              <th style="border: 1px solid #000000; padding: 4pt 6pt; font-family: 'Times New Roman', Times, serif;">Capaian / Tujuan Pembelajaran</th>
+              <th style="border: 1px solid #000000; padding: 4pt 6pt; font-family: 'Times New Roman', Times, serif;">Indikator Butir Soal</th>
+              <th style="border: 1px solid #000000; padding: 4pt 6pt; text-align: center; font-family: 'Times New Roman', Times, serif;">Level</th>
+              <th style="border: 1px solid #000000; padding: 4pt 6pt; text-align: center; font-family: 'Times New Roman', Times, serif;">Bentuk</th>
+              <th style="border: 1px solid #000000; padding: 4pt 6pt; text-align: center; font-family: 'Times New Roman', Times, serif;">Kunci</th>
+              <th style="border: 1px solid #000000; padding: 4pt 6pt; text-align: center; font-family: 'Times New Roman', Times, serif;">Skor</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -4210,57 +4209,161 @@ function exportToWordDocx(pkg) {
       `;
     }
 
-    const docContent = `
-      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    const docContent = `<html xmlns:v="urn:schemas-microsoft-com:vml"
+      xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+      xmlns="http://www.w3.org/TR/REC-html40">
       <head>
-        <meta charset='utf-8'>
-        <title>${pkg.judul || 'Paket Ulangan Harian Kimia'}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="ProgId" content="Word.Document">
+        <meta name="Generator" content="Microsoft Word 15">
+        <meta name="Originator" content="Microsoft Word 15">
+        <title>${pkg.judul || 'Paket Asesmen Kimia'}</title>
+        <!--[if gte mso 9]>
+        <xml>
+          <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+            <w:ValidateAgainstSchemas/>
+            <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+            <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+            <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+            <w:Compatibility>
+              <w:BreakWrappedTables/>
+              <w:SnapToGridInCell/>
+              <w:WrapTextWithPunct/>
+              <w:UseAsianBreakRules/>
+              <w:DontGrowAutofit/>
+              <w:SplitPgBreakAndParaMark/>
+              <w:EnableOpenTypeFeatures/>
+            </w:Compatibility>
+            <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+          </w:WordDocument>
+        </xml>
+        <![endif]-->
         <style>
-          @page Section1 {
+          /* Pengaturan Halaman A4 & Margin Standar 1.91 cm */
+          @page {
             size: 595.3pt 841.9pt; /* A4: 210mm x 297mm */
-            margin: 54.0pt 54.0pt 54.0pt 54.0pt; /* 1.9cm Margins */
-            mso-header-margin: 35.4pt;
-            mso-footer-margin: 35.4pt;
+            margin: 54.0pt 54.0pt 54.0pt 54.0pt; /* 1.91 cm */
+            mso-page-orientation: portrait;
+            mso-header-margin: 36.0pt;
+            mso-footer-margin: 36.0pt;
             mso-paper-source: 0;
           }
-          div.Section1 { page: Section1; }
+          @page Section1 {
+            size: 595.3pt 841.9pt;
+            margin: 54.0pt 54.0pt 54.0pt 54.0pt;
+            mso-header-margin: 36.0pt;
+            mso-footer-margin: 36.0pt;
+            mso-paper-source: 0;
+          }
+          div.Section1 {
+            page: Section1;
+            width: 100%;
+            max-width: 100%;
+          }
+          /* Pengaturan Standar Tipografi: Times New Roman 12pt */
           body {
-            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-            font-size: 11pt;
-            line-height: 1.45;
-            color: #0f172a;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            color: #000000;
             text-align: justify;
             text-justify: inter-ideograph;
+            margin: 0;
+            padding: 0;
           }
-          p, div, li, td {
+          p, div, li, td, th {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
             text-align: justify;
             text-justify: inter-ideograph;
           }
           p.MsoNormal, li.MsoNormal, div.MsoNormal {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
             text-align: justify;
             text-justify: inter-ideograph;
+            line-height: 1.5;
+            margin-top: 0;
+            margin-bottom: 6pt;
           }
-          h2 { text-align: center; font-size: 15pt; font-weight: bold; margin-bottom: 4pt; color: #0f172a; }
-          .meta { text-align: center; font-size: 9.5pt; color: #64748b; margin-bottom: 15pt; border-bottom: 1.5px solid #cbd5e1; padding-bottom: 8pt; font-style: italic; }
-          .page-break { page-break-before: always; }
-          table { border-collapse: collapse; width: 100%; margin: 8pt 0; font-size: 9.5pt; }
-          th, td { border: 1px solid #cbd5e1; padding: 5pt 7pt; }
-          th { background-color: #f1f5f9; text-align: center; font-weight: bold; color: #1e293b; }
-          sub { vertical-align: sub; font-size: 8pt; line-height: 0; }
-          sup { vertical-align: super; font-size: 8pt; line-height: 0; }
-          hr { border: none; border-top: 1.5px solid #cbd5e1; margin: 16pt 0; }
+          h1, h2, h3, h4 {
+            font-family: 'Times New Roman', Times, serif;
+          }
+          h2 {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 4pt;
+            color: #000000;
+          }
+          h3 {
+            font-size: 13pt;
+            font-weight: bold;
+          }
+          .meta {
+            text-align: center;
+            font-size: 10pt;
+            color: #475569;
+            margin-bottom: 14pt;
+            border-bottom: 1.5px solid #000000;
+            padding-bottom: 8pt;
+            font-style: italic;
+            font-family: 'Times New Roman', Times, serif;
+          }
+          .page-break {
+            page-break-before: always;
+            mso-break-type: section-break;
+          }
+          table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 6pt 0;
+            font-size: 11pt;
+            font-family: 'Times New Roman', Times, serif;
+          }
+          th, td {
+            border: 1px solid #000000;
+            padding: 4pt 6pt;
+            font-family: 'Times New Roman', Times, serif;
+          }
+          th {
+            background-color: #f1f5f9;
+            text-align: center;
+            font-weight: bold;
+            color: #000000;
+          }
+          sub {
+            vertical-align: sub;
+            font-size: 9pt;
+            line-height: 0;
+          }
+          sup {
+            vertical-align: super;
+            font-size: 9pt;
+            line-height: 0;
+          }
+          hr {
+            border: none;
+            border-top: 1.5px solid #000000;
+            margin: 14pt 0;
+          }
         </style>
       </head>
       <body>
         <div class="Section1">
           ${isPearson ? `
-            <table style="width: 100%; border: 1.5pt solid #000000; border-collapse: collapse; margin-bottom: 14pt;">
+            <table style="width: 100%; border: 1.5pt solid #000000; border-collapse: collapse; margin-bottom: 14pt; font-family: 'Times New Roman', Times, serif;">
               <tr>
-                <td style="padding: 6pt 8pt; border: 1pt solid #000000; width: 45%; font-family: Arial, sans-serif; font-size: 9.5pt; vertical-align: top;">
-                  <b>Candidate surname:</b> ....................................................<br><br>
-                  <b>Other names:</b> ............................................................
+                <td style="padding: 6pt 8pt; border: 1pt solid #000000; width: 45%; font-family: 'Times New Roman', Times, serif; font-size: 11pt; vertical-align: top;">
+                  <b>Candidate surname:</b> <span style="display:inline-block; border-bottom: 1pt solid #000; width: 130pt;">&nbsp;</span><br><br>
+                  <b>Other names:</b> <span style="display:inline-block; border-bottom: 1pt solid #000; width: 155pt;">&nbsp;</span>
                 </td>
-                <td style="padding: 6pt 8pt; border: 1pt solid #000000; width: 25%; text-align: center; font-family: Arial, sans-serif; font-size: 9pt; vertical-align: top;">
+                <td style="padding: 6pt 8pt; border: 1pt solid #000000; width: 25%; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 10pt; vertical-align: top;">
                   <b>Centre Number</b><br>
                   <table align="center" style="margin: 4pt auto 0 auto; border-collapse: collapse;">
                     <tr>
@@ -4272,7 +4375,7 @@ function exportToWordDocx(pkg) {
                     </tr>
                   </table>
                 </td>
-                <td style="padding: 6pt 8pt; border: 1pt solid #000000; width: 30%; text-align: center; font-family: Arial, sans-serif; font-size: 9pt; vertical-align: top;">
+                <td style="padding: 6pt 8pt; border: 1pt solid #000000; width: 30%; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 10pt; vertical-align: top;">
                   <b>Candidate Number</b><br>
                   <table align="center" style="margin: 4pt auto 0 auto; border-collapse: collapse;">
                     <tr>
@@ -4285,30 +4388,30 @@ function exportToWordDocx(pkg) {
                 </td>
               </tr>
               <tr>
-                <td colspan="3" style="padding: 8pt 10pt; background-color: #f8fafc; border-top: 1.5pt solid #000000; font-family: Arial, sans-serif;">
-                  <div style="font-size: 13pt; font-weight: bold; color: #000000;">Pearson Edexcel International GCSE / Advanced Level</div>
-                  <div style="font-size: 10.5pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt;">Chemistry — ${(pkg.topik_utama || 'Examination Paper').toUpperCase()}</div>
-                  <div style="font-size: 8.5pt; color: #475569; margin-top: 4pt; line-height: 1.35;">
+                <td colspan="3" style="padding: 8pt 10pt; background-color: #f8fafc; border-top: 1.5pt solid #000000; font-family: 'Times New Roman', Times, serif;">
+                  <div style="font-size: 13pt; font-weight: bold; color: #000000; font-family: 'Times New Roman', Times, serif;">Pearson Edexcel International GCSE / Advanced Level</div>
+                  <div style="font-size: 11pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">Chemistry — ${(pkg.topik_utama || 'Examination Paper').toUpperCase()}</div>
+                  <div style="font-size: 9.5pt; color: #334155; margin-top: 4pt; line-height: 1.35; font-family: 'Times New Roman', Times, serif;">
                     <b>Instructions:</b> Answer ALL questions. • Use black ink or ball-point pen. • Show all stages in calculations with correct units. • Calculators may be used.
                   </div>
                 </td>
               </tr>
             </table>
           ` : `
-            <table style="width: 100%; border: none; border-bottom: 2px solid #0f172a; margin-bottom: 14pt; padding-bottom: 6pt;">
+            <table style="width: 100%; border: none; border-bottom: 2px solid #000000; margin-bottom: 14pt; padding-bottom: 6pt; font-family: 'Times New Roman', Times, serif;">
               <tr>
-                <td style="border: none; padding: 0; vertical-align: top; width: 56%;">
-                  <div style="font-size: 13pt; font-weight: bold; color: #0f172a; letter-spacing: 0.5px;">SMA PROGRESIF BUMI SHALAWAT</div>
-                  <div style="font-size: 10.5pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt;">${(pkg.judul || 'ASESMEN &amp; DRILLING SOAL KIMIA').toUpperCase()}</div>
-                  <div style="font-size: 9pt; color: #475569; margin-top: 2pt;">
+                <td style="border: none; padding: 0; vertical-align: top; width: 56%; font-family: 'Times New Roman', Times, serif;">
+                  <div style="font-size: 13pt; font-weight: bold; color: #000000; letter-spacing: 0.5px;">SMA PROGRESIF BUMI SHALAWAT</div>
+                  <div style="font-size: 11pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt;">${(pkg.judul || 'ASESMEN &amp; DRILLING SOAL KIMIA').toUpperCase()}</div>
+                  <div style="font-size: 10pt; color: #475569; margin-top: 2pt;">
                     Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang || 'SMA'} | Materi: ${pkg.topik_utama || 'Kimia'}${exportSavedOnly ? ' (Koleksi Pilihan Guru)' : ''}
                   </div>
                 </td>
-                <td style="border: none; padding: 0; vertical-align: top; width: 44%; text-align: right;">
-                  <div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9.5pt; line-height: 1.6; text-align: right; color: #1e293b;">
-                    <b>NAMA :</b> ....................................................<br>
-                    <b>KELAS:</b> ....................................................<br>
-                    <b>TANGGAL:</b> ....................................................
+                <td style="border: none; padding: 0; vertical-align: top; width: 44%; text-align: right; font-family: 'Times New Roman', Times, serif;">
+                  <div style="font-family: 'Times New Roman', Times, serif; font-size: 10.5pt; line-height: 1.6; text-align: right; color: #000000;">
+                    <b>NAMA :</b> <span style="display:inline-block; border-bottom: 1pt solid #000; width: 140pt;">&nbsp;</span><br>
+                    <b>KELAS:</b> <span style="display:inline-block; border-bottom: 1pt solid #000; width: 140pt;">&nbsp;</span><br>
+                    <b>TANGGAL:</b> <span style="display:inline-block; border-bottom: 1pt solid #000; width: 140pt;">&nbsp;</span>
                   </div>
                 </td>
               </tr>
@@ -4322,14 +4425,13 @@ function exportToWordDocx(pkg) {
           ${kisiPart}
         </div>
       </body>
-      </html>
-    `;
+      </html>`;
 
-    const blob = new Blob(['\ufeff', docContent], { type: 'application/msword' });
+    const blob = new Blob(['\ufeff', docContent], { type: 'application/msword;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${(pkg.judul || "Asesmen_Kimia").replace(/\s+/g, "_")}${exportSavedOnly ? '_Pilihan' : ''}.doc`;
+    a.download = `${(pkg.judul || "Asesmen_Kimia").replace(/\s+/g, "_")}${exportSavedOnly ? '_Pilihan' : ''}_A4_TNR.doc`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
