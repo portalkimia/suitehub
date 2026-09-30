@@ -12,6 +12,9 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="theme-color" content="#0b0f19">
   
+  <!-- PortalKimia Suite Central Config -->
+  <script src="../config.js"></script>
+  
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   
@@ -738,16 +741,17 @@
           <div class="col-md-6 mb-3">
             <label class="form-label" for="aiTopik">
               <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">science</span>
-              Topik / Materi
+              Topik / Materi (Semua Mata Pelajaran)
             </label>
-            <input type="text" id="aiTopik" class="form-control" placeholder="Contoh: Sifat Koligatif Larutan" oninput="sinkronTopikKeForm()">
+            <input type="text" id="aiTopik" class="form-control" placeholder="Ketik bebas: misal Kimia, Fisika, Biologi, Matematika, dll." oninput="sinkronTopikKeForm()">
+            <div class="form-text small text-info mt-1">💡 <b>Fleksibel Semua Mapel:</b> Ketik materi dan mapel secara manual untuk Kimia, Fisika, Biologi, Matematika, Bahasa, IPS, dll.</div>
           </div>
           <div class="col-md-3 mb-3">
             <label class="form-label" for="aiPertemuan">
               <span class="material-symbols-outlined text-emerald" style="font-size: 16px;">calendar_today</span>
               Jumlah Pertemuan
             </label>
-            <select id="aiPertemuan" class="form-select">
+            <select id="aiPertemuan" class="form-select" onchange="perbaruiLabelTombolKuotaModul()">
               <option value="1">1 Pertemuan</option>
               <option value="2">2 Pertemuan</option>
               <option value="3">3 Pertemuan</option>
@@ -766,9 +770,9 @@
               Model AI untuk Menyusun Modul
             </label>
             <select id="aiProvider" class="form-select border-violet" onchange="aturKeteranganAIProvider()">
+              <option value="deepseek" selected>DeepSeek V4.1 Flash langsung (Pilihan Utama - Cepat &amp; Cerdas)</option>
               <option value="auto">Otomatis: Gemini → DeepSeek V4.1 Flash (cadangan berbayar)</option>
               <option value="gemini">Gemini saja (rantai model Gemini)</option>
-              <option value="deepseek">DeepSeek V4.1 Flash langsung (berbayar)</option>
             </select>
             <div id="aiProviderNotice" class="small mt-2 text-warning" role="status"></div>
           </div>
@@ -818,7 +822,7 @@
         <!-- TOMBOL GENERATE UTAMA -->
         <button type="button" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" id="tombolAI" onclick="mintaBantuanAI()">
           <span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span>
-          <span>Generate Kerangka Otomatis</span>
+          <span id="tombolAIText">Generate Kerangka Otomatis [1 Kuota]</span>
         </button>
 
         <!-- FITUR 5: ANIMASI PROGRESS BERTAHAP -->
@@ -1174,18 +1178,24 @@
               </button>
             </div>
             <div class="small text-muted mb-2">Buat token akses dan pantau/atur sisa kesempatan generate rekan guru:</div>
-            <div class="row g-2 mb-3">
-              <div class="col-sm-6">
+            <div class="row g-2 mb-2">
+              <div class="col-sm-5">
                 <input type="text" id="adminInputNamaGuru" class="form-control form-control-sm" placeholder="Nama Guru (misal: Pak Budi)">
               </div>
-              <div class="col-sm-3">
-                <input type="number" id="adminInputSaldoAwal" class="form-control form-control-sm" value="5" min="1" max="999" placeholder="Saldo Kuota">
+              <div class="col-sm-4">
+                <input type="text" id="adminInputCustomToken" class="form-control form-control-sm font-monospace text-uppercase" placeholder="Custom Token (Opsional, misal: BUDI-KIMIA)">
               </div>
               <div class="col-sm-3">
-                <button type="button" class="btn btn-primary btn-sm w-100" onclick="adminTambahAkunGuru()">
-                  <span class="material-symbols-outlined align-middle" style="font-size:14px;">add</span> Buat
-                </button>
+                <div class="input-group input-group-sm">
+                  <input type="number" id="adminInputSaldoAwal" class="form-control" value="5" min="1" max="999" placeholder="Kuota" title="Saldo Kuota">
+                  <button type="button" class="btn btn-primary" onclick="adminTambahAkunGuru()" title="Buat Token">
+                    <span class="material-symbols-outlined align-middle" style="font-size:14px;">add</span> Buat
+                  </button>
+                </div>
               </div>
+            </div>
+            <div class="text-muted mb-3" style="font-size: 11px;">
+              💡 <em>Tips Master: Isi kolom <b>Custom Token</b> untuk token singkat yang mudah diingat (misal: <code>BUDI-KIMIA</code>). Jika dikosongkan, sistem membuat token otomatis yang pendek (misal: <code>TK-BUDI-123</code>).</em>
             </div>
             <div id="adminTableAkunGuruContainer" class="table-responsive small" style="max-height: 220px; overflow-y: auto;">
               <!-- Rendered via JS -->
@@ -1221,6 +1231,81 @@
               Simpan &amp; Hubungkan
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 4: KONFIRMASI PRA-GENERATE MODUL AJAR / LESSON PLAN
+       ========================================================================= -->
+  <div class="modal fade" id="modalConfirmGenerateModul" tabindex="-1" aria-labelledby="modalConfirmModulLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background-color: var(--obs-surface-mid); border: 1px solid var(--obs-violet); border-radius: 1rem;">
+        <div class="modal-header border-secondary border-opacity-25 pb-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-violet" style="font-size: 26px;">psychology_alt</span>
+            <div>
+              <h5 class="modal-title fs-6 fw-bold m-0 text-white" id="modalConfirmModulLabel">Konfirmasi Pembuatan Dokumen AI</h5>
+              <p class="text-muted m-0" style="font-size: 11px;">Tinjau parameter rancangan sebelum memotong kuota token</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-3 p-sm-4">
+          <!-- Parameter Box -->
+          <div class="p-3 rounded-3 mb-3" style="background-color: var(--obs-surface-low); border: 1px solid var(--obs-border);">
+            <div class="row g-2 text-xs" style="font-size: 12px;">
+              <div class="col-6">
+                <span class="text-muted d-block" style="font-size: 10px;">Jenis Dokumen:</span>
+                <strong id="confirmModulJenis" class="text-white">-</strong>
+              </div>
+              <div class="col-6">
+                <span class="text-muted d-block" style="font-size: 10px;">Jenjang / Kelas:</span>
+                <strong id="confirmModulKelas" class="text-white">-</strong>
+              </div>
+              <div class="col-12 border-top border-secondary border-opacity-10 pt-1.5">
+                <span class="text-muted d-block" style="font-size: 10px;">Topik / Materi:</span>
+                <strong id="confirmModulTopik" class="text-violet">-</strong>
+              </div>
+              <div class="col-6 border-top border-secondary border-opacity-10 pt-1.5">
+                <span class="text-muted d-block" style="font-size: 10px;">Jumlah Pertemuan:</span>
+                <strong id="confirmModulPertemuan" class="text-white">-</strong>
+              </div>
+              <div class="col-6 border-top border-secondary border-opacity-10 pt-1.5">
+                <span class="text-muted d-block" style="font-size: 10px;">Model Pembelajaran:</span>
+                <strong id="confirmModulModel" class="text-white">-</strong>
+              </div>
+              <div class="col-12 border-top border-secondary border-opacity-10 pt-1.5">
+                <span class="text-muted d-block" style="font-size: 10px;">Media / Bahan Rujukan:</span>
+                <span id="confirmModulMedia" class="text-zinc-200 fw-semibold">-</span>
+              </div>
+              <div class="col-12 border-top border-secondary border-opacity-10 pt-1.5">
+                <span class="text-muted d-block" style="font-size: 10px;">Model AI Aktif:</span>
+                <span id="confirmModulAIProvider" class="fw-bold text-info">DeepSeek V4.1 Flash</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Highlight Kuota & Saldo -->
+          <div class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background-color: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.35);">
+            <div>
+              <div class="fw-bold text-white" style="font-size: 12px;">Total Kuota yang Digunakan:</div>
+              <div class="text-muted" style="font-size: 11px;">Sisa Saldo: <span id="confirmModulSaldo" class="text-emerald fw-bold">...</span></div>
+            </div>
+            <div class="badge bg-warning text-dark fs-6 px-3 py-2 fw-bold" id="confirmModulKuotaBadge">
+              1 Kuota
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-secondary border-opacity-25 d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            Batal / Ubah Isian
+          </button>
+          <button type="button" id="btnEksekusiGenerateModul" class="btn btn-primary btn-sm d-flex align-items-center gap-1.5 px-3" style="background: linear-gradient(135deg, #7c3aed, #4f46e5); border: none;">
+            <span class="material-symbols-outlined" style="font-size: 16px;">auto_awesome</span>
+            <span id="btnEksekusiGenerateModulText">Lanjutkan Generate [1 Kuota]</span>
+          </button>
         </div>
       </div>
     </div>
@@ -1272,11 +1357,106 @@
 
     function getGasBackendUrl() {
       const stored = localStorage.getItem('gasWebAppUrl');
-      return (stored && stored.trim()) ? stored : DEFAULT_GAS_URL;
+      if (stored && stored.trim()) return stored.trim();
+      if (typeof window !== 'undefined' && window.PORTALKIMIA_CONFIG && window.PORTALKIMIA_CONFIG.GENERATOR_API) {
+        return window.PORTALKIMIA_CONFIG.GENERATOR_API;
+      }
+      return DEFAULT_GAS_URL;
     }
 
     function getGeneratorAccessToken() {
-      return (localStorage.getItem('generatorAccessToken') || '').trim();
+      return (
+        localStorage.getItem('generatorAccessToken') ||
+        localStorage.getItem('portalkimia_guru_token') ||
+        localStorage.getItem('portalkimia_soal_access_token') ||
+        ''
+      ).trim();
+    }
+
+    function setGeneratorAccessToken(token) {
+      if (token && token.trim()) {
+        const clean = token.trim();
+        localStorage.setItem('generatorAccessToken', clean);
+        localStorage.setItem('portalkimia_guru_token', clean);
+        localStorage.setItem('portalkimia_soal_access_token', clean);
+      } else {
+        localStorage.removeItem('generatorAccessToken');
+        localStorage.removeItem('portalkimia_guru_token');
+        localStorage.removeItem('portalkimia_soal_access_token');
+      }
+    }
+
+    function showModulToast(msg) {
+      try {
+        const toast = document.createElement("div");
+        toast.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(18,18,21,0.95);border:1px solid rgba(52,211,153,0.5);border-radius:12px;color:#34d399;font-size:13px;font-family:'Geist',sans-serif;box-shadow:0 10px 25px rgba(0,0,0,0.6);backdrop-filter:blur(8px);transition:all 0.3s ease;";
+        toast.innerHTML = `<span>${msg}</span><button type="button" style="background:none;border:none;color:#a1a1aa;cursor:pointer;font-weight:bold;margin-left:8px;" onclick="this.parentElement.remove()">✕</button>`;
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.remove(); }, 6500);
+      } catch (e) {}
+    }
+
+    function handleMagicLinkTokenModul() {
+      if (typeof window === "undefined" || !window.location) return;
+      let magicToken = null;
+      try {
+        if (typeof URLSearchParams !== "undefined") {
+          const params = new URLSearchParams(window.location.search || "");
+          magicToken = params.get("token") || params.get("kunci") || params.get("accessToken") || params.get("key");
+        } else if (window.location.search) {
+          const m = window.location.search.match(/[?&](token|kunci|accessToken|key)=([^&#]*)/i);
+          if (m && m[2]) magicToken = decodeURIComponent(m[2]);
+        }
+      } catch (e) {
+        console.warn("Error parsing URL search params:", e);
+      }
+
+      if (magicToken && magicToken.trim()) {
+        const cleanToken = magicToken.trim();
+        setGeneratorAccessToken(cleanToken);
+        const inputToken = document.getElementById('inputAccessToken');
+        if (inputToken) inputToken.value = cleanToken;
+
+        // Bersihkan URL tanpa reload agar rapi
+        try {
+          const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+          window.history.replaceState({ path: cleanUrl }, document.title, cleanUrl);
+        } catch (e) {}
+
+        ujiKoneksiBackendOtomatis().then(function(ok) {
+          const acc = window.currentUserAccount;
+          const nama = (acc && acc.nama) ? acc.nama : 'Rekan Guru';
+          const saldo = (acc && acc.saldo != null) ? acc.saldo : '';
+          showModulToast(`🎉 Selamat datang, ${nama}! Token Generator Modul Ajar aktif${saldo !== '' ? ' (' + saldo + 'x kuota)' : ''}.`);
+
+          // Set nama penyusun jika ada dan saat ini belum diisi secara manual
+          try {
+            const inputPenyusun = document.querySelector('input[name="nama"]');
+            if (inputPenyusun && (!inputPenyusun.value || inputPenyusun.value.trim() === 'Tito Vanzal, S.Pd.')) {
+              if (acc && acc.nama) inputPenyusun.value = acc.nama;
+            }
+          } catch (e) {}
+        }).catch(function() {
+          showModulToast(`✨ Token akses guru (${cleanToken}) berhasil dipasang.`);
+        });
+      } else {
+        const existingToken = getGeneratorAccessToken();
+        if (existingToken) {
+          const inputToken = document.getElementById('inputAccessToken');
+          if (inputToken && !inputToken.value) inputToken.value = existingToken;
+          ujiKoneksiBackendOtomatis().then(function() {
+            const acc = window.currentUserAccount;
+            if (acc && acc.nama) {
+              try {
+                const inputPenyusun = document.querySelector('input[name="nama"]');
+                if (inputPenyusun && (!inputPenyusun.value || inputPenyusun.value.trim() === 'Tito Vanzal, S.Pd.')) {
+                  inputPenyusun.value = acc.nama;
+                }
+              } catch (e) {}
+            }
+          });
+        }
+      }
     }
 
     function toggleAccessTokenVisibility() {
@@ -1361,7 +1541,7 @@
         return;
       }
       localStorage.setItem('gasWebAppUrl', url);
-      localStorage.setItem('generatorAccessToken', token);
+      setGeneratorAccessToken(token);
       backendSudahDiverifikasi = false;
       updateBackendStatusUI();
       const modalEl = document.getElementById('modalBackendConfig');
@@ -1406,7 +1586,7 @@
         if (data.error) throw new Error(data.error);
         backendSudahDiverifikasi = true;
         localStorage.setItem('gasWebAppUrl', url);
-        localStorage.setItem('generatorAccessToken', token);
+        setGeneratorAccessToken(token);
         
         window.currentUserAccount = {
           peran: data.peran || 'guru',
@@ -1415,6 +1595,10 @@
           terpakai: data.terpakai || 0
         };
         localStorage.setItem('generatorAccountInfo', JSON.stringify(window.currentUserAccount));
+        if (data.nama) {
+          localStorage.setItem('portalkimia_guru_nama', data.nama);
+          localStorage.setItem('portalkimia_nama_guru', data.nama);
+        }
         
         const adminPanel = document.getElementById('panelAdminTokenGuru');
         if (adminPanel) {
@@ -1465,6 +1649,10 @@
           terpakai: data.terpakai || 0
         };
         localStorage.setItem('generatorAccountInfo', JSON.stringify(window.currentUserAccount));
+        if (data.nama) {
+          localStorage.setItem('portalkimia_guru_nama', data.nama);
+          localStorage.setItem('portalkimia_nama_guru', data.nama);
+        }
         updateBackendStatusUI();
         return true;
       }).catch(function() {
@@ -1494,6 +1682,10 @@
             terpakai: data.terpakai || 0
           };
           localStorage.setItem('generatorAccountInfo', JSON.stringify(window.currentUserAccount));
+          if (data.nama) {
+            localStorage.setItem('portalkimia_guru_nama', data.nama);
+            localStorage.setItem('portalkimia_nama_guru', data.nama);
+          }
           updateBackendStatusUI();
         }
       }).catch(function() {});
@@ -1564,8 +1756,31 @@
               alert('Token disalin: ' + item.token);
             });
           };
+
+          const btnWa = document.createElement('button');
+          btnWa.type = 'button';
+          btnWa.className = 'btn btn-outline-success btn-sm py-0 px-1.5 ms-1 fw-bold';
+          btnWa.style.fontSize = '11px';
+          btnWa.title = 'Salin Tautan Akses WhatsApp untuk ' + item.nama;
+          btnWa.textContent = '🔗 Salin Link WA';
+          btnWa.onclick = function() {
+            adminSalinMagicLinkGuruModul(item.token, item.nama);
+          };
+
+          const btnEdit = document.createElement('button');
+          btnEdit.type = 'button';
+          btnEdit.className = 'btn btn-outline-primary btn-sm py-0 px-1 ms-1';
+          btnEdit.style.fontSize = '11px';
+          btnEdit.title = 'Ubah / Custom Token Guru Ini';
+          btnEdit.textContent = '✏️ Ubah';
+          btnEdit.onclick = function() {
+            adminGantiTokenGuru(item.token, item.nama);
+          };
+
           tdToken.appendChild(codeEl);
           tdToken.appendChild(btnCopy);
+          tdToken.appendChild(btnWa);
+          tdToken.appendChild(btnEdit);
 
           const tdSaldo = document.createElement('td');
           const badge = document.createElement('span');
@@ -1627,10 +1842,36 @@
       });
     }
 
+    function adminSalinMagicLinkGuruModul(token, nama) {
+      let base = "https://portalkimia.github.io/suitehub/generator/";
+      try {
+        if (typeof window !== "undefined" && window.location && window.location.origin) {
+          if (window.location.origin.includes("github.io")) {
+            base = window.location.origin + window.location.pathname;
+            base = base.replace(/\/index\.html$/i, "/");
+            if (!base.endsWith("/")) base += "/";
+          }
+        }
+      } catch (e) {}
+
+      const magicUrl = `${base}?token=${encodeURIComponent(token)}`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(magicUrl).then(function() {
+          alert(`✅ Tautan Akses WhatsApp untuk ${nama} berhasil disalin:\n\n${magicUrl}\n\nKirimkan tautan ini ke WhatsApp rekan guru. Rekan guru cukup mengklik tautan tersebut untuk langsung menggunakan Generator Modul Ajar tanpa perlu mengetik token!`);
+        }).catch(function() {
+          prompt("Salin tautan WhatsApp ini untuk rekan guru:", magicUrl);
+        });
+      } else {
+        prompt("Salin tautan WhatsApp ini untuk rekan guru:", magicUrl);
+      }
+    }
+
     function adminTambahAkunGuru() {
       const inputNama = document.getElementById('adminInputNamaGuru');
       const inputSaldo = document.getElementById('adminInputSaldoAwal');
+      const inputCustom = document.getElementById('adminInputCustomToken');
       const nama = (inputNama?.value || '').trim();
+      const customToken = (inputCustom?.value || '').trim();
       const saldo = parseInt(inputSaldo?.value || '5', 10);
       if (!nama) {
         alert('Masukkan nama guru terlebih dahulu.');
@@ -1645,7 +1886,8 @@
           action: 'adminTambahAkun',
           accessToken: token,
           nama: nama,
-          saldoAwal: isNaN(saldo) ? 5 : saldo
+          saldoAwal: isNaN(saldo) ? 5 : saldo,
+          customToken: customToken || undefined
         })
       })
       .then(function(r) { return r.json(); })
@@ -1654,9 +1896,41 @@
           alert('Gagal menambah akun: ' + data.error);
           return;
         }
-        alert('Akun berhasil dibuat!\n\nNama: ' + data.nama + '\nToken: ' + data.token + '\nSaldo: ' + data.saldo + 'x generate\n\nKirimkan token di atas kepada guru terkait.');
-        navigator.clipboard && navigator.clipboard.writeText(data.token).catch(function() {});
+        const magicLink = "https://portalkimia.github.io/suitehub/generator/?token=" + encodeURIComponent(data.token);
+        alert('Akun berhasil dibuat!\n\nNama: ' + data.nama + '\nToken: ' + data.token + '\nSaldo: ' + data.saldo + 'x generate\n\nTautan Akses WhatsApp:\n' + magicLink + '\n\n(Tautan WhatsApp telah disalin otomatis ke clipboard)');
+        navigator.clipboard && navigator.clipboard.writeText(magicLink).catch(function() {});
         if (inputNama) inputNama.value = '';
+        if (inputCustom) inputCustom.value = '';
+        muatDaftarTokenGuruAdmin();
+      })
+      .catch(function(err) { alert('Gagal menghubungi backend: ' + err.message); });
+    }
+
+    function adminGantiTokenGuru(tokenLama, namaGuru) {
+      const tokenBaru = prompt(`Ganti token untuk ${namaGuru || tokenLama}:\n\nKetik token baru yang singkat & mudah diingat (misal: BUDI-KIMIA atau BUDI2026):`, tokenLama);
+      if (!tokenBaru || !tokenBaru.trim() || tokenBaru.trim() === tokenLama) return;
+      const cleanBaru = tokenBaru.trim();
+      const url = getGasBackendUrl();
+      const token = getGeneratorAccessToken();
+      fetch(url, {
+        method: 'POST', redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'adminGantiToken',
+          accessToken: token,
+          identitas: tokenLama,
+          tokenBaru: cleanBaru
+        })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) {
+          alert('Gagal mengganti token: ' + data.error);
+          return;
+        }
+        const magicLink = "https://portalkimia.github.io/suitehub/generator/?token=" + encodeURIComponent(cleanBaru);
+        alert(`✅ Token untuk ${data.nama || namaGuru} berhasil diubah menjadi:\n${cleanBaru}\n\nTautan Akses WhatsApp Baru:\n${magicLink}\n\n(Tautan baru telah disalin otomatis ke clipboard)`);
+        navigator.clipboard && navigator.clipboard.writeText(magicLink).catch(function() {});
         muatDaftarTokenGuruAdmin();
       })
       .catch(function(err) { alert('Gagal menghubungi backend: ' + err.message); });
@@ -5888,9 +6162,17 @@
       const instruksi = document.getElementById('copilotInstruksi').value;
       const gasUrl = getGasBackendUrl();
 
+      const accInfo = getGeneratorAccountInfo();
+      if (accInfo && accInfo.peran !== 'master' && Number(accInfo.saldo || 0) < 1) {
+        alert("Token Penggunaan AI Berbayar Anda habis (0 kuota). Hubungi U Tito untuk penambahan kuota.");
+        const modal = document.getElementById('modalTokenAkses');
+        if (modal) modal.style.display = 'block';
+        return;
+      }
+
       feedback.style.display = 'block';
       feedback.className = 'small text-violet mt-2';
-      feedback.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5"></span> Co-Pilot sedang memoles bagian ini...';
+      feedback.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5"></span> Co-Pilot sedang memoles bagian ini [1 Kuota]...';
       btn.disabled = true;
 
       // Kumpulkan data bagian saat ini
@@ -6143,12 +6425,14 @@
     // =========================================================================
     // 8. AUTO-SAVE & DRAFT
     // =========================================================================
+    // 8. AUTO-SAVE & DRAFT
+    // =========================================================================
     function aturKeteranganAIProvider() {
-      const provider=document.getElementById('aiProvider')?.value||'auto';
+      const provider=document.getElementById('aiProvider')?.value||'deepseek';
       const note=document.getElementById('aiProviderNotice');
       if(!note)return;
-      if(provider==='deepseek') note.textContent='DeepSeek V4.1 Flash memakai API berbayar; biaya dihitung dari token. Pastikan saldo API tersedia. File PDF perlu Gemini; kutipan ayat/hadis yang tidak disertai sumber akan ditandai belum terverifikasi.';
-      else if(provider==='auto') note.textContent='Gemini dicoba lebih dahulu. Jika Gemini kehabisan kuota (429) atau layanan mengalami gangguan (5xx), sistem mencoba DeepSeek berbayar dan memakai saldo API DeepSeek. PDF perlu Gemini; kutipan ayat/hadis tanpa sumber akan ditandai belum terverifikasi.';
+      if(provider==='deepseek') note.textContent='DeepSeek V4.1 Flash memakai API berbayar; biaya dihitung dari token. Kecepatan tinggi, penalaran cerdas, dan hasil lengkap tanpa terputus.';
+      else if(provider==='auto') note.textContent='Gemini dicoba lebih dahulu. Jika Gemini kehabisan kuota (429) atau layanan mengalami gangguan (5xx), sistem mencoba DeepSeek berbayar dan memakai saldo API DeepSeek.';
       else note.textContent='Hanya model Gemini yang digunakan. Tidak ada fallback berbayar ke DeepSeek.';
     }
 
@@ -6165,7 +6449,7 @@
       draft.jenisDokumen = document.getElementById('jenisDokumen').value;
       draft.aiBahanAjar = document.getElementById('aiBahanAjar').value;
       draft.aiModelPembelajaran = document.getElementById('aiModelPembelajaran').value;
-      draft.aiProvider = document.getElementById('aiProvider')?.value || 'auto';
+      draft.aiProvider = document.getElementById('aiProvider')?.value || 'deepseek';
       
       const ceklisFields = ['keimanan', 'penalaran', 'kolaborasi', 'kesehatan', 'kewargaan', 'kreativitas', 'kemandirian', 'komunikasi'];
       ceklisFields.forEach(item => {
@@ -6223,7 +6507,7 @@
         document.getElementById('jenisDokumen').value = 'Modul Ajar';
         document.getElementById('aiBahanAjar').value = '';
         document.getElementById('aiModelPembelajaran').value = 'Otomatis';
-        document.getElementById('aiProvider').value = 'auto';
+        document.getElementById('aiProvider').value = 'deepseek';
         const areaHasil = document.getElementById('areaHasil');
         if (areaHasil) areaHasil.innerHTML = '';
         aturKeteranganAIProvider();
@@ -6259,13 +6543,14 @@
 
       initTheme();
       updateBackendStatusUI();
-      if (getGeneratorAccessToken()) ujiKoneksiBackendOtomatis();
+      handleMagicLinkTokenModul();
       muatKatalogMediaTersimpan();
       restorePortalMediaSelections();
       renderQuickTags();
       sinkronkanMediaPortalTerbaru(true);
       muatDraft();
       aturKeteranganAIProvider();
+      perbaruiLabelTombolKuotaModul();
 
       const areaBahanAjar = document.getElementById('aiBahanAjar');
       if (areaBahanAjar) {
@@ -6282,8 +6567,25 @@
     });
 
     // =========================================================================
-    // 9. LOGIKA SAKELAR DOKUMEN
+    // 9. LOGIKA SAKELAR DOKUMEN & BOBOT KUOTA
     // =========================================================================
+    function hitungBobotKuotaModulClient() {
+      const jenis = document.getElementById('jenisDokumen')?.value || 'Modul Ajar';
+      const p = parseInt(document.getElementById('aiPertemuan')?.value || '1', 10);
+      if (jenis === 'Lesson Plan') return 1;
+      if (p <= 2) return 1;
+      if (p <= 4) return 2;
+      return 3;
+    }
+
+    function perbaruiLabelTombolKuotaModul() {
+      const bobot = hitungBobotKuotaModulClient();
+      const txt = document.getElementById('tombolAIText');
+      if (txt) {
+        txt.textContent = `Generate Kerangka Otomatis [${bobot} Kuota]`;
+      }
+    }
+
     function aturTampilanDokumen() {
       const jenis = document.getElementById('jenisDokumen').value;
       const opsiPertemuan = document.getElementById('aiPertemuan');
@@ -6301,6 +6603,7 @@
           opsiPertemuan.options[i].disabled = false;
         }
       }
+      perbaruiLabelTombolKuotaModul();
     }
 
     // =========================================================================
@@ -6448,6 +6751,94 @@
         fileBerkas: window.currentUploadedFile
       };
 
+      const bobotDibutuhkan = hitungBobotKuotaModulClient();
+      const accInfo = getGeneratorAccountInfo();
+      if (accInfo && accInfo.peran !== 'master') {
+        const s = Number(accInfo.saldo || 0);
+        if (s <= 0) {
+          alert("Token Penggunaan AI Berbayar Anda habis. Hubungi U Tito untuk penambahan kuota.");
+          const modal = document.getElementById('modalTokenAkses');
+          if (modal) modal.style.display = 'block';
+          return;
+        }
+        if (s < bobotDibutuhkan) {
+          alert(`Sisa kuota Anda (${s} kuota) tidak mencukupi untuk membuat ${inputJenis} ${inputPertemuan} pertemuan (membutuhkan ${bobotDibutuhkan} kuota).\n\nSilakan kurangi jumlah pertemuan atau hubungi U Tito untuk penambahan kuota.`);
+          return;
+        }
+      }
+
+      // Tampilkan Konfirmasi Pra-Generate dengan Ringkasan Parameter dan Kuota
+      bukaModalKonfirmasiModul(dataInstruksi, inputModel, inputKelas, bobotDibutuhkan, accInfo);
+    }
+
+    function bukaModalKonfirmasiModul(dataInstruksi, inputModel, inputKelas, bobotDibutuhkan, accInfo) {
+      const elJenis = document.getElementById('confirmModulJenis');
+      if (elJenis) elJenis.textContent = dataInstruksi.jenisDokumen;
+      const elKelas = document.getElementById('confirmModulKelas');
+      if (elKelas) elKelas.textContent = 'Kelas ' + (dataInstruksi.kelas || '-');
+      const elTopik = document.getElementById('confirmModulTopik');
+      if (elTopik) elTopik.textContent = dataInstruksi.topik || '-';
+      const elPertemuan = document.getElementById('confirmModulPertemuan');
+      if (elPertemuan) elPertemuan.textContent = (dataInstruksi.pertemuan || '1') + ' Pertemuan';
+      const elModel = document.getElementById('confirmModulModel');
+      if (elModel) elModel.textContent = dataInstruksi.modelPembelajaran || '-';
+      
+      const elMedia = document.getElementById('confirmModulMedia');
+      if (elMedia) {
+        if (window.hasUploadedReference) {
+          elMedia.textContent = 'Berkas Rujukan Guru (' + (window.uploadedFileName || 'Eksternal') + ')';
+        } else if (window.selectedPortalMedia && window.selectedPortalMedia.length > 0) {
+          elMedia.textContent = 'Katalog Media PortalKimia (' + window.selectedPortalMedia.length + ' Media)';
+        } else {
+          elMedia.textContent = 'Standar Kurikulum Merdeka (Tanpa Rujukan Khusus)';
+        }
+      }
+
+      const elAI = document.getElementById('confirmModulAIProvider');
+      if (elAI) {
+        const prov = document.getElementById('aiProvider')?.value || 'auto';
+        elAI.textContent = prov === 'gemini' ? 'Google Gemini Pro' : 'DeepSeek V4.1 Flash (Utama)';
+      }
+
+      const elBadge = document.getElementById('confirmModulKuotaBadge');
+      if (elBadge) elBadge.textContent = bobotDibutuhkan + ' Kuota';
+
+      const elSaldo = document.getElementById('confirmModulSaldo');
+      if (elSaldo) {
+        elSaldo.textContent = accInfo 
+          ? (accInfo.peran === 'master' ? 'Master (Tanpa Batas)' : (accInfo.saldo ?? 0) + ' Kuota') 
+          : 'Belum Ditautkan';
+      }
+
+      const btnText = document.getElementById('btnEksekusiGenerateModulText');
+      if (btnText) btnText.textContent = 'Lanjutkan Generate [' + bobotDibutuhkan + ' Kuota]';
+
+      const modalEl = document.getElementById('modalConfirmGenerateModul');
+      if (modalEl) {
+        let modalInstance = null;
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        }
+        const btnEksekusi = document.getElementById('btnEksekusiGenerateModul');
+        if (btnEksekusi) {
+          btnEksekusi.onclick = function() {
+            if (modalInstance) modalInstance.hide();
+            eksekusiPanggilanAIMain(dataInstruksi, inputModel, inputKelas);
+          };
+        }
+        if (modalInstance) {
+          modalInstance.show();
+        } else {
+          modalEl.style.display = 'block';
+        }
+      } else {
+        // Fallback jika elemen modal tidak ditemukan
+        eksekusiPanggilanAIMain(dataInstruksi, inputModel, inputKelas);
+      }
+    }
+
+    function eksekusiPanggilanAIMain(dataInstruksi, inputModel, inputKelas) {
+      const tombolAI = document.getElementById('tombolAI');
       tombolAI.disabled = true;
       mulaiAnimasiProgress(inputModel);
 

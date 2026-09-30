@@ -187,6 +187,27 @@
           <span class="hidden md:inline">Kunci</span>
         </button>
 
+        <!-- Tombol Ganti Token Guru (Tampil saat Guru aktif) -->
+        <button id="ganti-token-btn" type="button" title="Ganti atau Perbarui Token Guru"
+                class="hidden items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/30 text-purple-300 text-xs font-medium transition-colors">
+          <span>🔑</span>
+          <span class="hidden md:inline">Ganti Token</span>
+        </button>
+
+        <!-- Tombol Info Kuota & Biaya AI (Tampil saat Guru aktif) -->
+        <button id="info-kuota-btn" type="button" title="Informasi Sistem Kuota & AI Berbayar"
+                class="hidden items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/30 text-purple-300 text-xs font-medium transition-colors">
+          <span>ℹ️</span>
+          <span class="hidden md:inline">Info Biaya &amp; Kuota</span>
+        </button>
+
+        <!-- Tombol Kelola Token Guru (Tampil saat Admin aktif) -->
+        <button id="admin-magic-link-btn" type="button" title="Kelola Token Guru, Buat Token Singkat & Salin Link WA"
+                class="hidden items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-violet-950/40 hover:bg-violet-900/50 border border-violet-500/30 text-violet-300 text-xs font-medium transition-colors">
+          <span>👥</span>
+          <span class="hidden md:inline">Kelola Token Guru</span>
+        </button>
+
         <!-- Server Status Indicator -->
         <button id="server-status-btn" title="Status Koneksi Google Apps Script (Klik untuk Hubungkan Ulang)" 
                 class="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-500/20 text-[11px] text-emerald-400 font-medium hover:bg-emerald-900/40 transition-colors">
@@ -442,14 +463,27 @@
         </button>
       </div>
 
-      <!-- Password Form -->
+      <!-- Password / Token Form -->
       <form id="auth-form" class="mt-4 space-y-3.5">
-        <p class="text-xs text-slate-300">
-          Silakan masukkan kata sandi pengajar untuk membuka <span id="auth-target-role-label" class="font-bold text-purple-300">Mode Guru</span>:
+        <p class="text-xs text-slate-300" id="auth-instruction-text">
+          Silakan masukkan <b class="text-purple-300">Token Akses Guru</b> atau kata sandi pengajar untuk membuka <span id="auth-target-role-label" class="font-bold text-purple-300">Mode Guru</span>:
         </p>
+
+        <!-- Kotak Token Tersimpan (1-Click Login jika sebelumnya sudah ada token di browser) -->
+        <div id="auth-saved-token-box" class="hidden p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 text-xs">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <span class="text-slate-400">Token tersimpan:</span><br>
+              <b id="auth-saved-token-name" class="text-purple-300 font-mono"></b>
+            </div>
+            <button type="button" id="btn-use-saved-token" class="shrink-0 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md shadow-purple-900/40 transition-all">
+              Masuk Cepat ➔
+            </button>
+          </div>
+        </div>
         
         <div id="auth-input-wrap" class="relative">
-          <input type="password" id="auth-password-input" autofocus placeholder="Ketik kata sandi..." 
+          <input type="password" id="auth-password-input" autofocus placeholder="Ketik token guru (TK-...) atau kata sandi..." 
                  class="w-full px-3.5 py-2.5 pr-10 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-100 text-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all">
           <button type="button" id="toggle-auth-password-btn" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors" title="Lihat / Sembunyikan Kata Sandi">
             <svg id="eye-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -458,10 +492,228 @@
         
         <p id="auth-error-msg" class="text-xs text-rose-400 font-medium hidden text-center"></p>
 
-        <button type="submit" id="submit-auth-btn" class="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-lg shadow-purple-900/50 transition-all">
-          Buka Akses
+        <button type="submit" id="submit-auth-btn" class="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-lg shadow-purple-900/50 transition-all flex items-center justify-center gap-2">
+          <span id="submit-auth-btn-text">Buka Akses</span>
+          <span id="submit-auth-spinner" class="hidden animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white"></span>
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: KELOLA TOKEN GURU & MAGIC LINK (ADMIN MODE) -->
+  <!-- ========================================================================= -->
+  <div id="modal-admin-token-mgr" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/85 backdrop-blur-md hidden">
+    <div class="relative w-full max-w-2xl rounded-2xl glass-card border border-purple-500/40 shadow-2xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg">
+            👥
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Manajemen Token Rekan Guru</h3>
+            <p class="text-xs text-slate-400">Atur kuota, buat token custom singkat (misal: <code class="text-purple-300">BUDI-KIMIA</code>), ubah token, dan salin link WhatsApp.</p>
+          </div>
+        </div>
+        <button type="button" id="close-token-mgr-btn" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Form Tambah / Custom Token -->
+      <form id="form-suite-add-token" class="mt-4 p-4 rounded-xl bg-purple-950/30 border border-purple-500/20 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-purple-300 uppercase tracking-wider">➕ Buat Token Baru</span>
+          <button type="button" id="btn-suite-refresh-tokens" class="text-[11px] text-slate-400 hover:text-white flex items-center gap-1 px-2.5 py-1 rounded-lg bg-obsidian-800 hover:bg-obsidian-750 border border-slate-700 transition-colors">
+            🔄 Segarkan
+          </button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+          <div class="sm:col-span-5">
+            <label class="block text-[11px] text-slate-400 mb-1">Nama Rekan Guru:</label>
+            <input type="text" id="suite-token-input-nama" placeholder="Pak Budi / Bu Siti" required
+                   class="w-full px-3 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500">
+          </div>
+          <div class="sm:col-span-4">
+            <label class="block text-[11px] text-slate-400 mb-1">Custom Token (Opsional):</label>
+            <input type="text" id="suite-token-input-custom" placeholder="BUDI-KIMIA"
+                   class="w-full px-3 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-xs font-mono uppercase text-purple-300 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500">
+          </div>
+          <div class="sm:col-span-3 flex flex-col justify-end">
+            <label class="block text-[11px] text-slate-400 mb-1">Kuota &amp; Aksi:</label>
+            <div class="flex gap-1.5">
+              <input type="number" id="suite-token-input-saldo" value="10" min="1" max="999" title="Saldo Kuota"
+                     class="w-14 px-2 py-2 rounded-xl bg-obsidian-800 border border-slate-700 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-purple-500">
+              <button type="submit" id="btn-submit-suite-token"
+                      class="flex-1 py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md shadow-purple-900/40 transition-all flex items-center justify-center gap-1">
+                <span>Buat</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400">
+          💡 <em>Tips Master: Ketik kata kunci pendek di kolom <b>Custom Token</b> agar rekan guru mudah mengingatnya (misal: <code>BUDI-KIMIA</code> atau <code>BUDI2026</code>). Jika dikosongkan, sistem membuat token singkat otomatis (misal: <code>TK-BUDI-123</code>).</em>
+        </p>
+      </form>
+
+      <!-- Tabel Daftar Akun Guru -->
+      <div class="mt-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-slate-300">Daftar Akun Guru Terdaftar</span>
+          <span id="suite-token-count-badge" class="text-[11px] text-purple-400 font-mono">0 akun</span>
+        </div>
+        <div id="suite-table-tokens-container" class="max-h-60 overflow-y-auto rounded-xl border border-slate-700/80 bg-obsidian-900/80 text-xs">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: SAMBUTAN & TRANSPARANSI KUOTA GURU (AI BERBAYAR MANDIRI) -->
+  <!-- ========================================================================= -->
+  <div id="modal-guru-welcome" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/85 backdrop-blur-md hidden">
+    <div class="relative w-full max-w-2xl rounded-2xl glass-card border border-purple-500/40 shadow-2xl p-6 sm:p-7 max-h-[92vh] overflow-y-auto">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg">
+            ✨
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Selamat Datang di PortalKimia Suite</h3>
+            <p class="text-xs text-slate-400">Ruang Kerja AI Terpadu Pendidik: Modul Ajar &amp; Bank Soal HOTS</p>
+          </div>
+        </div>
+        <button type="button" id="close-guru-welcome-btn" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="mt-4 space-y-4 text-xs text-slate-300 leading-relaxed">
+        <!-- Pengantar Singkat -->
+        <p>
+          Halo Bapak/Ibu Rekan Guru Hebat! Selamat datang di ekosistem perancangan perangkat ajar digital. Portal ini dirancang untuk mempermudah dan mempercepat penyusunan administrasi pembelajaran Anda: merancang <b>Modul Ajar Kurikulum Merdeka</b> (lengkap dengan skenario pembelajaran bertahap, format standar A4 Times New Roman 12 pt, Profil Pelajar Pancasila, dan rujukan media) serta <b>Paket Soal Ujian &amp; Kisi-Kisi HOTS</b> terstandar hanya dalam hitungan detik.
+        </p>
+
+        <!-- Kenapa Perlu Token & Membayar? -->
+        <div class="p-3.5 rounded-xl bg-purple-950/40 border border-purple-500/30 space-y-2">
+          <div class="flex items-center gap-2 text-purple-300 font-bold text-xs uppercase tracking-wide">
+            <span>💎 Mengapa Menggunakan Sistem Token / Kuota Berbayar?</span>
+          </div>
+          <p>
+            Generator di portal ini <b>TIDAK MENGGUNAKAN AI gratisan / publik</b>. AI gratisan memiliki kuota request yang sangat sempit (sering terkena batasan <i>Rate Limit 429</i>), antrean lambat saat jam sibuk sekolah, dan kerap memotong isi dokumen di tengah jalan (<i>truncated</i>), sehingga merusak struktur modul maupun instrumen soal.
+          </p>
+          <p>
+            Portal ini terhubung langsung ke <b>Dedicated Paid AI Server (DeepSeek V4.1 Flash &amp; Gemini Pro API Tier Berbayar Mandiri)</b>. Dengan API berbayar resmi:
+          </p>
+          <ul class="list-disc list-inside space-y-1 text-slate-300 pl-1">
+            <li><b>Kecepatan Tinggi:</b> Dokumen ratusan hingga ribuan kata selesai dirancang dalam hitungan detik.</li>
+            <li><b>Kualitas &amp; Penalaran Mendalam:</b> Bebas miskonsepsi, penalaran pedagogis ilmiah tajam, dan bebas terputus.</li>
+            <li><b>Iuran Biaya Operasional Komputasi Murni:</b> Kuota yang Bapak/Ibu miliki murni sebagai pengganti biaya sewa komputasi server API AI dan pemeliharaan sistem web agar siap digunakan kapan saja.</li>
+          </ul>
+        </div>
+
+        <!-- Tabel Ringkasan Skema Pengurangan Kuota -->
+        <div>
+          <div class="text-xs font-bold text-white mb-2 flex items-center gap-1.5">
+            <span>📊 Ringkasan Skema Konsumsi Kuota (Sangat Hemat &amp; Transparan):</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            <!-- Modul Ajar -->
+            <div class="p-3 rounded-xl bg-obsidian-900/90 border border-slate-700/80 space-y-1.5">
+              <div class="font-bold text-emerald-400 text-xs flex items-center gap-1">
+                <span>📘 Generator Modul Ajar</span>
+              </div>
+              <ul class="space-y-1 text-[11px] text-slate-300">
+                <li class="flex justify-between border-b border-slate-800 pb-1">
+                  <span>Lesson Plan (1–2 Pertemuan)</span>
+                  <span class="font-bold text-emerald-300">1 Kuota</span>
+                </li>
+                <li class="flex justify-between border-b border-slate-800 pb-1">
+                  <span>Modul Ajar (1–2 Pertemuan)</span>
+                  <span class="font-bold text-emerald-300">1 Kuota</span>
+                </li>
+                <li class="flex justify-between border-b border-slate-800 pb-1">
+                  <span>Modul Ajar (3–4 Pertemuan)</span>
+                  <span class="font-bold text-amber-300">2 Kuota</span>
+                </li>
+                <li class="flex justify-between border-b border-slate-800 pb-1">
+                  <span>Modul Ajar (5–9 Pertemuan)</span>
+                  <span class="font-bold text-amber-400">3 Kuota</span>
+                </li>
+                <li class="flex justify-between">
+                  <span>Micro Co-Pilot (Poles per 1 bagian)</span>
+                  <span class="font-bold text-purple-300">1 Kuota</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Soal Asesmen -->
+            <div class="p-3 rounded-xl bg-obsidian-900/90 border border-slate-700/80 space-y-1.5">
+              <div class="font-bold text-indigo-400 text-xs flex items-center gap-1">
+                <span>📝 Generator Soal Ujian &amp; Asesmen</span>
+              </div>
+              <ul class="space-y-1 text-[11px] text-slate-300">
+                <li class="flex justify-between border-b border-slate-800 pb-1">
+                  <span>5 – 10 Butir Soal</span>
+                  <span class="font-bold text-indigo-300">1 Kuota</span>
+                </li>
+                <li class="flex justify-between border-b border-slate-800 pb-1">
+                  <span>11 – 20 Butir Soal (Maksimal)</span>
+                  <span class="font-bold text-amber-300">2 Kuota</span>
+                </li>
+                <li class="flex justify-between">
+                  <span>Paket Paralel (Paket B Anti-Contek)</span>
+                  <span class="font-bold text-purple-300">+1 Kuota</span>
+                </li>
+                <li class="text-[10px] text-slate-400 italic pt-1">
+                  *Kisi-kisi, kunci jawaban, pembahasan, dan stimulus sudah gratis termasuk dalam paket.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tips Kualitas Terbaik: Generate Sedikit vs Banyak -->
+        <div class="p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/40 text-[11px] space-y-1.5 text-amber-200">
+          <div class="font-bold text-amber-300 flex items-center gap-1.5 text-xs">
+            <span>🎯 Tips Kualitas Maksimal: Generate Butir Sedikit vs Banyak</span>
+          </div>
+          <p>
+            Jika Bapak/Ibu menginginkan hasil soal dengan <b>kualitas penalaran HOTS yang mendalam, stimulus kontekstual yang kaya data/fenomena nyata, serta opsi distraktor yang tajam</b>, sangat disarankan untuk men-generate dalam <b>jumlah butir yang proporsional (misalnya 5–10 butir soal per generate)</b>.
+          </p>
+          <p>
+            Men-generate butir soal langsung dalam jumlah banyak (15–20 soal sekaligus) membagi kapasitas komputasi dan ruang konteks AI, sehingga kedalaman eksplorasi stimulus dan rincian pembahasan tiap butir soal cenderung berkurang. Lebih optimal generate per 5–10 butir berkualitas tinggi, lalu kumpulkan dalam Bank Soal.
+          </p>
+        </div>
+
+        <!-- Fleksibel Semua Mapel -->
+        <div class="p-3 rounded-xl bg-blue-950/30 border border-blue-500/30 text-[11px] space-y-1 text-blue-200">
+          <div class="font-bold text-blue-300 flex items-center gap-1.5 text-xs">
+            <span>💡 Fleksibel Digunakan untuk Seluruh Mata Pelajaran</span>
+          </div>
+          <p>
+            Meskipun portal ini awalnya dioptimalkan untuk Kimia, <b>kedua generator AI ini sangat fleksibel untuk digunakan oleh seluruh guru mata pelajaran</b> (Fisika, Biologi, Matematika, IPA/IPS, Bahasa Indonesia, Bahasa Inggris, dll.).
+          </p>
+          <p>
+            <b>Caranya:</b> Cukup ketikkan nama mata pelajaran dan materi secara manual pada kolom topik (bukan memilih dari daftar dropdown bawaan), AI akan langsung menyesuaikan kaidah keilmuan mapel Anda!
+          </p>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="mt-5 pt-3 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none">
+          <input type="checkbox" id="suite-chk-dismiss-welcome" class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 bg-obsidian-800 border-slate-700">
+          <span>Tutup untuk hari ini</span>
+        </label>
+        <button type="button" id="btn-suite-close-welcome" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-900/40 transition-colors">
+          Mengerti &amp; Mulai Berkarya ✨
+        </button>
+      </div>
     </div>
   </div>
 
@@ -662,11 +914,127 @@
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    async function verifyAuth(inputPassword, targetRole) {
-      const inputHash = await hashPassword(inputPassword);
-      if (inputHash === AUTH_HASH.admin) return true;
-      if (targetRole === 'guru' && inputHash === AUTH_HASH.guru) return true;
-      return false;
+    async function verifyTokenViaGas(token) {
+      if (!token || !token.trim()) return { success: false, message: "Token kosong." };
+      const cleanToken = token.trim();
+
+      const endpoints = [];
+      if (window.PORTALKIMIA_CONFIG) {
+        if (window.PORTALKIMIA_CONFIG.SOAL_API) endpoints.push(window.PORTALKIMIA_CONFIG.SOAL_API);
+        if (window.PORTALKIMIA_CONFIG.GENERATOR_API) endpoints.push(window.PORTALKIMIA_CONFIG.GENERATOR_API);
+      }
+      if (endpoints.length === 0) {
+        endpoints.push("https://script.google.com/macros/s/AKfycbx5znz66Ye57dVVgoqiD5_QUlhbr8ap7ve81iJqeFNjLaVVRaTwpUzDMipXfE5bQbSSMQ/exec");
+        endpoints.push("https://script.google.com/macros/s/AKfycbwB18ndUY8Dv4Iz1JMzM030T9AexXj-SY-O5KBMn5AwFfCv1HIj7Ic5BzbOvToEfCg/exec");
+      }
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'ping', accessToken: cleanToken })
+          });
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (data && !data.error) {
+            // Token valid! Sinkronkan ke seluruh kunci ekosistem PortalKimia Suite
+            localStorage.setItem('portalkimia_guru_token', cleanToken);
+            localStorage.setItem('portalkimia_soal_access_token', cleanToken);
+            localStorage.setItem('generatorAccessToken', cleanToken);
+            if (data.nama) {
+              localStorage.setItem('portalkimia_guru_nama', data.nama);
+              localStorage.setItem('portalkimia_nama_guru', data.nama);
+            }
+            localStorage.setItem('generatorAccountInfo', JSON.stringify({
+              peran: data.peran || 'guru',
+              nama: data.nama || 'Rekan Guru',
+              saldo: data.saldo !== undefined ? data.saldo : 'Unlimited',
+              terpakai: data.terpakai || 0
+            }));
+
+            return {
+              success: true,
+              role: data.peran === 'master' ? 'admin' : 'guru',
+              isToken: true,
+              account: data,
+              token: cleanToken
+            };
+          }
+        } catch (e) {
+          console.warn("Uji token ke endpoint gagal:", url, e);
+        }
+      }
+
+      return { success: false, message: "Token guru tidak valid atau kuota habis." };
+    }
+
+    async function verifyAuth(inputVal, targetRole) {
+      if (!inputVal) return { success: false, message: "Ketik kata sandi atau token." };
+      const trimmed = inputVal.trim();
+
+      // 1. Cek kata sandi statis admin
+      const inputHash = await hashPassword(trimmed);
+      if (inputHash === AUTH_HASH.admin) {
+        return { success: true, role: 'admin', isToken: false };
+      }
+
+      // 2. Cek kata sandi statis guru
+      if (targetRole === 'guru' && inputHash === AUTH_HASH.guru) {
+        return { success: true, role: 'guru', isToken: false };
+      }
+
+      // 3. Cek Token Akses Guru via GAS API (otomatis sinkron ke Soal & Generator)
+      const tokenResult = await verifyTokenViaGas(trimmed);
+      if (tokenResult.success) {
+        return tokenResult;
+      }
+
+      return {
+        success: false,
+        message: targetRole === 'admin'
+          ? "Kata sandi admin salah."
+          : "Token akses atau kata sandi guru tidak valid."
+      };
+    }
+
+    async function handleMagicLinkSuite() {
+      if (typeof window === "undefined" || !window.location) return;
+      let magicToken = null;
+      try {
+        if (typeof URLSearchParams !== "undefined") {
+          const params = new URLSearchParams(window.location.search || "");
+          magicToken = params.get("token") || params.get("kunci") || params.get("accessToken") || params.get("key");
+        } else if (window.location.search) {
+          const m = window.location.search.match(/[?&](token|kunci|accessToken|key)=([^&#]*)/i);
+          if (m && m[2]) magicToken = decodeURIComponent(m[2]);
+        }
+      } catch (e) {}
+
+      if (magicToken && magicToken.trim()) {
+        const cleanToken = magicToken.trim();
+        showToast("⏳ Memverifikasi token akses guru...", "warning");
+
+        // Bersihkan URL tanpa reload agar rapi
+        try {
+          const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+          window.history.replaceState({ path: cleanUrl }, document.title, cleanUrl);
+        } catch (e) {}
+
+        const authResult = await verifyTokenViaGas(cleanToken);
+        if (authResult.success) {
+          const unlockedRole = authResult.role || "guru";
+          sessionStorage.setItem("PORTALKIMIA_SESSION_ROLE", unlockedRole);
+          activeRole = unlockedRole;
+          updateRoleUI();
+          const nama = authResult.account?.nama || "Rekan Guru";
+          const saldo = authResult.account?.saldo != null ? ` (${authResult.account.saldo}x kuota)` : "";
+          showToast(`🎉 Selamat datang, ${nama}! Mode Guru aktif${saldo}. Modul terhubung.`, "success");
+        } else {
+          showToast(`⚠️ Token ${cleanToken} tidak valid atau kuota habis.`, "error");
+        }
+      }
     }
 
     /**
@@ -1014,6 +1382,49 @@
       const schedDrawer = document.getElementById("schedule-detail-drawer");
       const refreshBtn = document.getElementById("refresh-btn");
 
+      const gantiTokenBtn = document.getElementById("ganti-token-btn");
+      const infoKuotaBtn = document.getElementById("info-kuota-btn");
+      const adminMagicBtn = document.getElementById("admin-magic-link-btn");
+
+      if (gantiTokenBtn) {
+        if (activeRole === 'guru') {
+          gantiTokenBtn.classList.remove("hidden");
+          gantiTokenBtn.classList.add("flex");
+        } else {
+          gantiTokenBtn.classList.add("hidden");
+          gantiTokenBtn.classList.remove("flex");
+        }
+      }
+
+      if (infoKuotaBtn) {
+        if (activeRole === 'guru') {
+          infoKuotaBtn.classList.remove("hidden");
+          infoKuotaBtn.classList.add("flex");
+        } else {
+          infoKuotaBtn.classList.add("hidden");
+          infoKuotaBtn.classList.remove("flex");
+        }
+      }
+
+      if (adminMagicBtn) {
+        if (activeRole === 'admin') {
+          adminMagicBtn.classList.remove("hidden");
+          adminMagicBtn.classList.add("flex");
+        } else {
+          adminMagicBtn.classList.add("hidden");
+          adminMagicBtn.classList.remove("flex");
+        }
+      }
+
+      // Sinkronisasi link tombol aksi cepat dengan token guru aktif
+      const currentToken = localStorage.getItem("portalkimia_guru_token") || localStorage.getItem("generatorAccessToken");
+      if (guruModulBtn) {
+        guruModulBtn.href = currentToken ? `./generator/?token=${encodeURIComponent(currentToken)}` : `./generator/`;
+      }
+      if (guruSoalBtn) {
+        guruSoalBtn.href = currentToken ? `./soal/?token=${encodeURIComponent(currentToken)}` : `./soal/`;
+      }
+
       if (activeRole === "siswa") {
         if (profileInitial) profileInitial.innerText = "🎓";
         if (profileName) profileName.innerText = "Siswa & Tamu";
@@ -1034,15 +1445,31 @@
         if (schedDrawer) schedDrawer.classList.add("hidden");
 
       } else if (activeRole === "guru") {
+        const savedNama = localStorage.getItem("portalkimia_guru_nama") || localStorage.getItem("portalkimia_nama_guru");
+        const savedToken = localStorage.getItem("portalkimia_guru_token") || localStorage.getItem("generatorAccessToken");
+        let saldoTxt = "";
+        try {
+          const acc = JSON.parse(localStorage.getItem("generatorAccountInfo") || "null");
+          if (acc && acc.saldo != null) saldoTxt = ` (${acc.saldo}x kuota)`;
+        } catch (e) {}
+
         if (profileInitial) profileInitial.innerText = "⚗️";
-        if (profileName) profileName.innerText = "Rekan Guru Kimia";
-        if (profileSub) profileSub.innerText = "Komunitas MGMP Kimia SMA";
-        if (heroBadgeText) heroBadgeText.innerText = "RUANG KERJA MGMP KIMIA";
-        if (heroHeadline) heroHeadline.innerHTML = `Selamat datang, <span class="gradient-title">rekan MGMP Kimia</span>`;
-        if (heroSubtitle) heroSubtitle.innerText = "Akses terintegrasi media pembelajaran interaktif, laboratorium virtual, generator modul ajar AI Kurikulum Merdeka, generator soal AI, dan pembinaan olimpiade kimia.";
+        if (profileName) profileName.innerText = savedNama || "Rekan Guru";
+        if (profileSub) {
+          const subBase = savedToken ? `Token: ${savedToken}${saldoTxt}` : "Komunitas Pendidik";
+          profileSub.innerHTML = `${subBase} • <button type="button" onclick="openGuruWelcomeModal(true)" class="text-purple-300 hover:text-white underline cursor-pointer">ℹ️ Info Kuota &amp; Biaya AI</button>`;
+        }
+        if (heroBadgeText) heroBadgeText.innerText = "RUANG KERJA AI GURU";
+        if (heroHeadline) heroHeadline.innerHTML = `Selamat datang, <span class="gradient-title">${savedNama || "Rekan Guru"}</span>`;
+        if (heroSubtitle) heroSubtitle.innerText = "Akses terintegrasi media pembelajaran interaktif, laboratorium virtual, generator modul ajar AI Kurikulum Merdeka, generator soal AI, dan pembinaan olimpiade sains.";
         if (addBranchTopBtn) addBranchTopBtn.classList.add("hidden");
         if (resetDefaultBtn) { resetDefaultBtn.classList.add("hidden"); resetDefaultBtn.classList.remove("flex"); }
         if (refreshBtn) refreshBtn.title = "Segarkan Data Portal";
+
+        // Tampilkan modal sambutan & transparansi kuota untuk guru non-master
+        if (!isSuiteMasterAccount()) {
+          checkAndShowGuruWelcomeModal();
+        }
 
         // Mode Guru: HILANGKAN LMS & JADWAL PRIBADI LAMA (Bukan untuk rekan MGMP)
         // Tombol LMS disembunyikan total di mode guru
@@ -1104,6 +1531,9 @@
       const targetLabel = document.getElementById("auth-target-role-label");
       const passwordInput = document.getElementById("auth-password-input");
       const errMsg = document.getElementById("auth-error-msg");
+      const savedBox = document.getElementById("auth-saved-token-box");
+      const savedName = document.getElementById("auth-saved-token-name");
+      const instructionText = document.getElementById("auth-instruction-text");
 
       errMsg.classList.add("hidden");
       passwordInput.value = "";
@@ -1112,6 +1542,28 @@
       const roleName = targetRole === 'admin' ? 'Mode Admin' : 'Mode Guru';
       if (title) title.innerText = `Autentikasi ${roleName}`;
       if (targetLabel) targetLabel.innerText = roleName;
+
+      const storedToken = localStorage.getItem("portalkimia_guru_token") || localStorage.getItem("generatorAccessToken");
+      const storedNama = localStorage.getItem("portalkimia_guru_nama") || localStorage.getItem("portalkimia_nama_guru");
+
+      if (targetRole === 'guru') {
+        if (instructionText) {
+          instructionText.innerHTML = `Silakan masukkan <b class="text-purple-300">Token Akses Guru</b> atau kata sandi pengajar untuk membuka <span class="font-bold text-purple-300">Mode Guru</span>:`;
+        }
+        passwordInput.placeholder = "Ketik token guru (TK-...) atau sandi...";
+        if (storedToken && savedBox && savedName) {
+          savedName.innerText = storedNama ? `${storedNama} (${storedToken})` : storedToken;
+          savedBox.classList.remove("hidden");
+        } else if (savedBox) {
+          savedBox.classList.add("hidden");
+        }
+      } else {
+        if (instructionText) {
+          instructionText.innerHTML = `Silakan masukkan kata sandi administrator untuk membuka <span class="font-bold text-purple-300">Mode Admin</span>:`;
+        }
+        passwordInput.placeholder = "Ketik kata sandi administrator...";
+        if (savedBox) savedBox.classList.add("hidden");
+      }
 
       modal.classList.remove("hidden");
       setTimeout(() => passwordInput.focus(), 150);
@@ -1770,6 +2222,19 @@
           `;
         }
 
+        // Action Button URL (Otomatis sertakan token aktif jika pengguna dalam Mode Guru/Admin)
+        const token = localStorage.getItem("portalkimia_guru_token") || localStorage.getItem("generatorAccessToken");
+        let launchUrl = branch.url;
+        if (token && (activeRole === 'guru' || activeRole === 'admin')) {
+          const urlLower = (launchUrl || "").toLowerCase();
+          if (urlLower.includes("soal") || urlLower.includes("generator") || urlLower.includes("asesmen")) {
+            if (!launchUrl.includes("token=")) {
+              const sep = launchUrl.includes("?") ? "&" : "?";
+              launchUrl = `${launchUrl}${sep}token=${encodeURIComponent(token)}`;
+            }
+          }
+        }
+
         html += `
           <article class="group relative rounded-2xl glass-card ${theme.border} p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl ${theme.shadow}">
             <!-- Glow background -->
@@ -1805,7 +2270,7 @@
             </div>
 
             <!-- Action Button -->
-            <a href="${branch.url}" target="_blank" rel="noopener noreferrer" 
+            <a href="${launchUrl}" target="_blank" rel="noopener noreferrer" 
                class="w-full py-2.5 px-4 rounded-xl font-semibold text-xs tracking-wide flex items-center justify-center gap-2 shadow-lg transition-all duration-200 ${theme.btn}">
               <span>${branch.buttonText || "Buka Website"}</span>
               <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -2170,28 +2635,418 @@
         const inputVal = pwInput.value.trim();
         const errMsg = document.getElementById("auth-error-msg");
         const inputWrap = document.getElementById("auth-input-wrap");
+        const submitBtn = document.getElementById("submit-auth-btn");
+        const btnText = document.getElementById("submit-auth-btn-text");
+        const spinner = document.getElementById("submit-auth-spinner");
 
         if (!inputVal) {
-          errMsg.innerText = "Silakan ketik kata sandi.";
+          errMsg.innerText = "Silakan ketik token guru atau kata sandi.";
           errMsg.classList.remove("hidden");
           return;
         }
 
-        const isValid = await verifyAuth(inputVal, pendingRoleSwitch || "guru");
-        if (isValid) {
-          const unlockedRole = pendingRoleSwitch || "guru";
-          sessionStorage.setItem("PORTALKIMIA_SESSION_ROLE", unlockedRole);
-          activeRole = unlockedRole;
-          closeAuthModal();
-          updateRoleUI();
-          showToast(`Akses Mode ${unlockedRole === 'admin' ? 'Admin' : 'Guru'} Berhasil Dibuka!`, "success");
-        } else {
-          errMsg.innerText = "Kata sandi salah. Akses ditolak.";
-          errMsg.classList.remove("hidden");
-          inputWrap.classList.add("animate-shake");
-          setTimeout(() => inputWrap.classList.remove("animate-shake"), 500);
+        errMsg.classList.add("hidden");
+        if (btnText) btnText.innerText = "Memverifikasi...";
+        if (spinner) spinner.classList.remove("hidden");
+        if (submitBtn) submitBtn.disabled = true;
+
+        try {
+          const authResult = await verifyAuth(inputVal, pendingRoleSwitch || "guru");
+          if (authResult && authResult.success) {
+            const unlockedRole = authResult.role || pendingRoleSwitch || "guru";
+            sessionStorage.setItem("PORTALKIMIA_SESSION_ROLE", unlockedRole);
+            activeRole = unlockedRole;
+            closeAuthModal();
+            updateRoleUI();
+            if (authResult.isToken) {
+              const nama = authResult.account?.nama || "Rekan Guru";
+              const saldo = authResult.account?.saldo != null ? ` (${authResult.account.saldo}x kuota)` : "";
+              showToast(`🎉 Selamat datang, ${nama}! Mode Guru aktif${saldo}. Akses modul terhubung.`, "success");
+            } else {
+              showToast(`Akses Mode ${unlockedRole === 'admin' ? 'Admin' : 'Guru'} Berhasil Dibuka!`, "success");
+            }
+          } else {
+            errMsg.innerText = authResult?.message || "Token atau kata sandi tidak valid. Akses ditolak.";
+            errMsg.classList.remove("hidden");
+            inputWrap.classList.add("animate-shake");
+            setTimeout(() => inputWrap.classList.remove("animate-shake"), 500);
+          }
+        } finally {
+          if (btnText) btnText.innerText = "Buka Akses";
+          if (spinner) spinner.classList.add("hidden");
+          if (submitBtn) submitBtn.disabled = false;
         }
       });
+
+      // Quick Login dengan Token Tersimpan
+      const btnUseSaved = document.getElementById("btn-use-saved-token");
+      if (btnUseSaved) {
+        btnUseSaved.addEventListener("click", async () => {
+          const storedToken = localStorage.getItem("portalkimia_guru_token") || localStorage.getItem("generatorAccessToken");
+          if (!storedToken) return;
+          const errMsg = document.getElementById("auth-error-msg");
+          const btnText = document.getElementById("submit-auth-btn-text");
+          const spinner = document.getElementById("submit-auth-spinner");
+
+          errMsg.classList.add("hidden");
+          if (btnText) btnText.innerText = "Memverifikasi...";
+          if (spinner) spinner.classList.remove("hidden");
+
+          try {
+            const authResult = await verifyTokenViaGas(storedToken);
+            if (authResult && authResult.success) {
+              sessionStorage.setItem("PORTALKIMIA_SESSION_ROLE", "guru");
+              activeRole = "guru";
+              closeAuthModal();
+              updateRoleUI();
+              const nama = authResult.account?.nama || "Rekan Guru";
+              const saldo = authResult.account?.saldo != null ? ` (${authResult.account.saldo}x kuota)` : "";
+              showToast(`🎉 Selamat datang kembali, ${nama}! Mode Guru aktif${saldo}.`, "success");
+            } else {
+              errMsg.innerText = "Token tersimpan tidak valid atau kuota habis. Silakan ketik token baru.";
+              errMsg.classList.remove("hidden");
+            }
+          } finally {
+            if (btnText) btnText.innerText = "Buka Akses";
+            if (spinner) spinner.classList.add("hidden");
+          }
+        });
+      }
+
+      // Tombol Ganti Token Guru (Top Bar)
+      const gantiTokenBtn = document.getElementById("ganti-token-btn");
+      if (gantiTokenBtn) {
+        gantiTokenBtn.addEventListener("click", () => {
+          openAuthModal("guru");
+        });
+      }
+
+      // Tombol Info Kuota & Biaya AI (Top Bar)
+      const infoKuotaBtn = document.getElementById("info-kuota-btn");
+      if (infoKuotaBtn) {
+        infoKuotaBtn.addEventListener("click", () => {
+          openGuruWelcomeModal(true);
+        });
+      }
+
+      // Handler Modal Sambutan & Transparansi Kuota Guru
+      const closeGuruWelcomeBtn = document.getElementById("close-guru-welcome-btn");
+      if (closeGuruWelcomeBtn) closeGuruWelcomeBtn.addEventListener("click", closeGuruWelcomeModal);
+
+      const btnSuiteCloseWelcome = document.getElementById("btn-suite-close-welcome");
+      if (btnSuiteCloseWelcome) btnSuiteCloseWelcome.addEventListener("click", closeGuruWelcomeModal);
+
+      // Helper Sambutan & Cek Master
+      function isSuiteMasterAccount() {
+        const savedAuth = sessionStorage.getItem("PORTALKIMIA_SESSION_ROLE");
+        if (savedAuth === "admin") return true;
+        const token = (localStorage.getItem("portalkimia_guru_token") || localStorage.getItem("generatorAccessToken") || "").trim().toLowerCase();
+        if (token === "kimiasatuhati" || token.indexOf("master") >= 0) return true;
+        try {
+          const acc = JSON.parse(localStorage.getItem("generatorAccountInfo") || "null");
+          if (acc && acc.peran === "master") return true;
+        } catch (e) {}
+        return false;
+      }
+
+      function openGuruWelcomeModal(forced) {
+        const modal = document.getElementById("modal-guru-welcome");
+        if (!modal) return;
+        if (!forced) {
+          if (activeRole !== "guru" || isSuiteMasterAccount()) return;
+          const todayStr = new Date().toISOString().split("T")[0];
+          const dismissedDate = localStorage.getItem("portalkimia_dismiss_welcome_date");
+          if (dismissedDate === todayStr) return;
+        }
+        modal.classList.remove("hidden");
+      }
+
+      function closeGuruWelcomeModal() {
+        const modal = document.getElementById("modal-guru-welcome");
+        if (!modal) return;
+        const chk = document.getElementById("suite-chk-dismiss-welcome");
+        if (chk && chk.checked) {
+          const todayStr = new Date().toISOString().split("T")[0];
+          localStorage.setItem("portalkimia_dismiss_welcome_date", todayStr);
+        }
+        modal.classList.add("hidden");
+      }
+
+      function checkAndShowGuruWelcomeModal() {
+        setTimeout(() => {
+          openGuruWelcomeModal(false);
+        }, 600);
+      }
+
+      window.isSuiteMasterAccount = isSuiteMasterAccount;
+      window.openGuruWelcomeModal = openGuruWelcomeModal;
+      window.closeGuruWelcomeModal = closeGuruWelcomeModal;
+      window.checkAndShowGuruWelcomeModal = checkAndShowGuruWelcomeModal;
+
+      // Helper Backend GAS & Master Token untuk Suite
+      function getSuiteGasBackendUrl() {
+        if (window.PORTALKIMIA_CONFIG) {
+          if (window.PORTALKIMIA_CONFIG.SOAL_API) return window.PORTALKIMIA_CONFIG.SOAL_API;
+          if (window.PORTALKIMIA_CONFIG.GENERATOR_API) return window.PORTALKIMIA_CONFIG.GENERATOR_API;
+        }
+        return "https://script.google.com/macros/s/AKfycbx5znz66Ye57dVVgoqiD5_QUlhbr8ap7ve81iJqeFNjLaVVRaTwpUzDMipXfE5bQbSSMQ/exec";
+      }
+
+      function getSuiteMasterToken() {
+        return localStorage.getItem("portalkimia_guru_token") || localStorage.getItem("generatorAccessToken") || "kimiasatuhati";
+      }
+
+      function openTokenMgrModal() {
+        const modal = document.getElementById("modal-admin-token-mgr");
+        if (modal) {
+          modal.classList.remove("hidden");
+          muatDaftarTokenGuruSuite();
+        }
+      }
+
+      function closeTokenMgrModal() {
+        const modal = document.getElementById("modal-admin-token-mgr");
+        if (modal) modal.classList.add("hidden");
+      }
+
+      const closeTokenMgrBtn = document.getElementById("close-token-mgr-btn");
+      if (closeTokenMgrBtn) closeTokenMgrBtn.addEventListener("click", closeTokenMgrModal);
+
+      const btnSuiteRefresh = document.getElementById("btn-suite-refresh-tokens");
+      if (btnSuiteRefresh) btnSuiteRefresh.addEventListener("click", muatDaftarTokenGuruSuite);
+
+      // Tombol Kelola Token Guru (Top Bar - Mode Admin)
+      const adminMagicBtn = document.getElementById("admin-magic-link-btn");
+      if (adminMagicBtn) {
+        adminMagicBtn.addEventListener("click", openTokenMgrModal);
+      }
+
+      async function muatDaftarTokenGuruSuite() {
+        const container = document.getElementById("suite-table-tokens-container");
+        const badge = document.getElementById("suite-token-count-badge");
+        if (!container) return;
+        container.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs">Memuat daftar akun guru dari backend Google Apps Script...</div>';
+
+        const url = getSuiteGasBackendUrl();
+        const token = getSuiteMasterToken();
+
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "adminListAkun", accessToken: token })
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          const daftar = data.daftar || [];
+          if (badge) badge.textContent = `${daftar.length} akun`;
+
+          if (!daftar.length) {
+            container.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs">Belum ada akun guru. Buat akun pertama menggunakan formulir di atas.</div>';
+            return;
+          }
+
+          let html = '<table class="w-full text-left border-collapse">' +
+            '<thead><tr class="border-b border-slate-700/80 bg-obsidian-800/80 text-[10px] uppercase font-bold text-slate-400">' +
+            '<th class="p-2.5">Guru</th><th class="p-2.5">Token Akses</th><th class="p-2.5 text-center">Saldo</th><th class="p-2.5 text-center">Terpakai</th><th class="p-2.5 text-right">Aksi</th>' +
+            '</tr></thead><tbody class="divide-y divide-slate-800/60">';
+
+          daftar.forEach(item => {
+            const isHabis = Number(item.saldo || 0) <= 0;
+            html += '<tr class="hover:bg-purple-950/20 transition-colors">' +
+              '<td class="p-2.5 font-semibold text-slate-200">' + item.nama + '</td>' +
+              '<td class="p-2.5 font-mono text-[11px] text-purple-300"><span class="cursor-pointer hover:text-purple-200 select-all" title="Klik untuk salin" onclick="navigator.clipboard && navigator.clipboard.writeText(\'' + item.token + '\')">' + item.token + '</span></td>' +
+              '<td class="p-2.5 text-center font-bold font-mono ' + (isHabis ? 'text-rose-400' : 'text-emerald-400') + '">' + item.saldo + 'x</td>' +
+              '<td class="p-2.5 text-center font-mono text-slate-400">' + item.terpakai + 'x</td>' +
+              '<td class="p-2.5 text-right space-x-1 whitespace-nowrap">' +
+              '<button type="button" class="px-2 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/60 text-purple-300 font-bold text-[10px] transition-colors" title="Salin Link WhatsApp" onclick="window.suiteSalinMagicLink(\'' + item.token + '\', \'' + item.nama + '\')">🔗 Link WA</button>' +
+              '<button type="button" class="px-2 py-1 rounded-lg bg-sky-600/30 hover:bg-sky-600/60 text-sky-300 font-bold text-[10px] transition-colors" title="Ubah / Custom Token" onclick="window.suiteGantiTokenGuru(\'' + item.token + '\', \'' + item.nama + '\')">✏️ Ubah</button>' +
+              '<button type="button" class="px-1.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 font-bold text-[10px] transition-colors" title="Tambah 5 kuota" onclick="window.suiteUbahSaldoGuru(\'' + item.token + '\', 5, \'tambah\')">+5</button>' +
+              '<button type="button" class="px-1.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 font-bold text-[10px] transition-colors" title="Tambah 1 kuota" onclick="window.suiteUbahSaldoGuru(\'' + item.token + '\', 1, \'tambah\')">+1</button>' +
+              '<button type="button" class="px-1.5 py-1 rounded-lg bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 font-bold text-[10px] transition-colors" title="Kurangi 1 kuota" onclick="window.suiteUbahSaldoGuru(\'' + item.token + '\', 1, \'kurang\')">-1</button>' +
+              '<button type="button" class="px-1.5 py-1 rounded-lg bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 font-bold text-[10px] transition-colors" title="Hapus akun guru" onclick="window.suiteHapusAkunGuru(\'' + item.token + '\', \'' + item.nama + '\')">🗑️</button>' +
+              '</td></tr>';
+          });
+
+          html += '</tbody></table>';
+          container.innerHTML = html;
+        } catch (err) {
+          container.innerHTML = '<div class="p-4 text-center text-rose-400 text-xs">Gagal memuat akun: ' + err.message + '</div>';
+        }
+      }
+
+      window.suiteSalinMagicLink = function(token, nama) {
+        let base = "https://portalkimia.github.io/suitehub/";
+        try {
+          if (typeof window !== "undefined" && window.location && window.location.origin) {
+            if (window.location.origin.includes("github.io")) {
+              base = window.location.origin + window.location.pathname.replace(/\/index\.html$/i, "/");
+              if (!base.endsWith("/")) base += "/";
+            }
+          }
+        } catch (e) {}
+
+        const magicUrl = `${base}?token=${encodeURIComponent(token)}`;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(magicUrl).then(() => {
+            alert(`✅ Tautan Masuk Otomatis WhatsApp untuk ${nama} berhasil disalin:\n\n${magicUrl}\n\nKirimkan tautan ini ke WhatsApp rekan guru. Rekan guru cukup mengklik tautan tersebut untuk langsung masuk ke PortalKimia Suite dalam Mode Guru tanpa perlu memasukkan token lagi!`);
+          }).catch(() => {
+            prompt("Salin tautan WhatsApp ini untuk rekan guru:", magicUrl);
+          });
+        } else {
+          prompt("Salin tautan WhatsApp ini untuk rekan guru:", magicUrl);
+        }
+      };
+
+      window.suiteGantiTokenGuru = async function(tokenLama, namaGuru) {
+        const tokenBaru = prompt(`Ganti token untuk ${namaGuru || tokenLama}:\n\nKetik token baru yang singkat & mudah diingat (misal: BUDI-KIMIA atau BUDI2026):`, tokenLama);
+        if (!tokenBaru || !tokenBaru.trim() || tokenBaru.trim() === tokenLama) return;
+        const cleanBaru = tokenBaru.trim();
+        const url = getSuiteGasBackendUrl();
+        const token = getSuiteMasterToken();
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "adminGantiToken",
+              accessToken: token,
+              identitas: tokenLama,
+              tokenBaru: cleanBaru
+            })
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+
+          let base = "https://portalkimia.github.io/suitehub/";
+          try {
+            if (window.location && window.location.origin && window.location.origin.includes("github.io")) {
+              base = window.location.origin + window.location.pathname.replace(/\/index\.html$/i, "/");
+              if (!base.endsWith("/")) base += "/";
+            }
+          } catch (e) {}
+          const magicLink = `${base}?token=${encodeURIComponent(cleanBaru)}`;
+          alert(`✅ Token untuk ${data.nama || namaGuru} berhasil diubah menjadi:\n${cleanBaru}\n\nTautan Akses WhatsApp Baru:\n${magicLink}\n\n(Tautan baru telah disalin otomatis ke clipboard)`);
+          if (navigator.clipboard) navigator.clipboard.writeText(magicLink).catch(() => {});
+          muatDaftarTokenGuruSuite();
+        } catch (err) {
+          alert("Gagal mengganti token: " + err.message);
+        }
+      };
+
+      window.suiteUbahSaldoGuru = async function(identitas, nilai, mode) {
+        const url = getSuiteGasBackendUrl();
+        const token = getSuiteMasterToken();
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "adminUbahSaldo",
+              accessToken: token,
+              identitas: identitas,
+              nilai: nilai,
+              mode: mode
+            })
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          muatDaftarTokenGuruSuite();
+        } catch (err) {
+          alert("Gagal update kuota: " + err.message);
+        }
+      };
+
+      window.suiteHapusAkunGuru = async function(identitas, nama) {
+        if (!confirm(`Hapus akun rekan guru ${nama} (${identitas})?\nToken ini tidak akan dapat digunakan lagi.`)) return;
+        const url = getSuiteGasBackendUrl();
+        const token = getSuiteMasterToken();
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "adminHapusAkun",
+              accessToken: token,
+              identitas: identitas
+            })
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          showToast(`Akun ${nama} berhasil dihapus`, "success");
+          muatDaftarTokenGuruSuite();
+        } catch (err) {
+          alert("Gagal menghapus akun: " + err.message);
+        }
+      };
+
+      // Form Submit Buat Akun / Custom Token Baru di Suite
+      const formSuiteAddToken = document.getElementById("form-suite-add-token");
+      if (formSuiteAddToken) {
+        formSuiteAddToken.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const inputNama = document.getElementById("suite-token-input-nama");
+          const inputCustom = document.getElementById("suite-token-input-custom");
+          const inputSaldo = document.getElementById("suite-token-input-saldo");
+          const btnSubmit = document.getElementById("btn-submit-suite-token");
+
+          const nama = (inputNama?.value || "").trim();
+          const customToken = (inputCustom?.value || "").trim();
+          const saldo = parseInt(inputSaldo?.value || "10", 10);
+
+          if (!nama) {
+            alert("Masukkan nama rekan guru terlebih dahulu.");
+            return;
+          }
+
+          if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Membuat...";
+          }
+
+          const url = getSuiteGasBackendUrl();
+          const token = getSuiteMasterToken();
+
+          try {
+            const res = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body: JSON.stringify({
+                action: "adminTambahAkun",
+                accessToken: token,
+                nama: nama,
+                saldoAwal: isNaN(saldo) ? 10 : saldo,
+                customToken: customToken || undefined
+              })
+            });
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+
+            let base = "https://portalkimia.github.io/suitehub/";
+            try {
+              if (window.location && window.location.origin && window.location.origin.includes("github.io")) {
+                base = window.location.origin + window.location.pathname.replace(/\/index\.html$/i, "/");
+                if (!base.endsWith("/")) base += "/";
+              }
+            } catch (e) {}
+
+            const magicLink = `${base}?token=${encodeURIComponent(data.token)}`;
+            alert(`✅ Akun guru berhasil dibuat!\n\nNama: ${data.nama}\nToken: ${data.token}\nSaldo: ${data.saldo}x generate\n\nTautan Akses WhatsApp:\n${magicLink}\n\n(Tautan WhatsApp telah disalin otomatis ke clipboard)`);
+            if (navigator.clipboard) navigator.clipboard.writeText(magicLink).catch(() => {});
+
+            if (inputNama) inputNama.value = "";
+            if (inputCustom) inputCustom.value = "";
+            muatDaftarTokenGuruSuite();
+          } catch (err) {
+            alert("Gagal membuat akun: " + err.message);
+          } finally {
+            if (btnSubmit) {
+              btnSubmit.disabled = false;
+              btnSubmit.innerText = "Buat";
+            }
+          }
+        });
+      }
 
       // 9. Modal Tambah & Edit Cabang Events (Admin Mode)
       document.getElementById("close-modal-btn").addEventListener("click", closeAddModal);
@@ -2303,7 +3158,10 @@
         updateLiveClockAndDate();
       });
 
-      // 12. PWA Service Worker Registration (Super App Scope)
+      // 12. Auto-Detect Magic Link (?token=...)
+      handleMagicLinkSuite();
+
+      // 13. PWA Service Worker Registration (Super App Scope)
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./sw.js', { scope: './' })

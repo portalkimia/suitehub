@@ -70,12 +70,12 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Custom Design System Stylesheet -->
-  <link rel="stylesheet" href="styles.css?v=2.12">
+  <link rel="stylesheet" href="styles.css?v=2.13">
 
   <!-- Konfigurasi Terpusat PortalKimia Suite -->
-  <script src="../config.js?v=2.12"></script>
+  <script src="../config.js?v=2.13"></script>
   <!-- Konfigurasi Lokal Cabang Soal (Multi-Device Ready) -->
-  <script src="config.js?v=2.12"></script>
+  <script src="config.js?v=2.13"></script>
 </head>
 
 <body class="min-h-screen antialiased flex flex-col bg-grid-pattern selection:bg-violet-500/30 selection:text-violet-200">
@@ -109,9 +109,7 @@
                 <span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[10px] font-black tracking-wider uppercase">
                   Generator Soal AI
                 </span>
-                <span id="appVersionBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-tight shadow-sm" title="Versi Rilis Terpasang (Terupdate Otomatis)">
-                  v2.12
-                </span>
+                <span id="appVersionBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-tight shadow-sm" title="Versi Rilis Terpasang (Terupdate Otomatis)">v2.13</span>
               </div>
               <p class="text-[10px] text-zinc-400 font-medium hidden sm:block">Otomatisasi Asesmen &amp; Bank Soal Kimia</p>
             </div>
@@ -194,11 +192,11 @@
           <div>
             <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Model AI:</label>
             <select id="modelSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
-              <option value="gemini-3.7-flash" selected>Gemini 3.7 Flash (Flagship - Penalaran Tinggi)</option>
+              <option value="deepseek-flash" selected>DeepSeek V4.1 Flash (Pilihan Utama - Cepat &amp; Presisi)</option>
+              <option value="gemini-3.7-flash">Gemini 3.7 Flash (Flagship - Penalaran Tinggi)</option>
               <option value="gemini-3.6-flash">Gemini 3.6 Flash (Cepat &amp; Efisien)</option>
-              <option value="deepseek-flash">DeepSeek V4.1 Flash (API berbayar)</option>
             </select>
-            <p class="mt-1.5 text-[10px] leading-relaxed text-amber-300">DeepSeek menggunakan API berbayar. Kunci API harus disimpan pada Script Properties di backend GAS.</p>
+            <p class="mt-1.5 text-[10px] leading-relaxed text-amber-300">DeepSeek menggunakan API berbayar mandiri berkecepatan tinggi dengan batas token output luas.</p>
           </div>
 
           <!-- Jenjang Pendidikan -->
@@ -246,9 +244,9 @@
             </select>
           </div>
 
-          <!-- Materi Pokok Kimia -->
+          <!-- Materi Pokok Kimia / Mapel Lain -->
           <div>
-            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Materi Pokok Kimia:</label>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Materi Pokok / Mata Pelajaran:</label>
             <select id="topicSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
               <option value="Stoikiometri & Hukum Dasar Kimia" selected>Stoikiometri &amp; Hukum Dasar Kimia</option>
               <option value="Larutan Asam-Basa & Indikator pH">Larutan Asam-Basa &amp; Indikator pH</option>
@@ -268,14 +266,15 @@
               <option value="Kimia Koloid & Sifat Koloid">Kimia Koloid &amp; Sifat Koloid</option>
               <option value="Kimia Unsur & Sifat Periodik">Kimia Unsur &amp; Sifat Periodik</option>
               <option value="Kimia Lingkungan & Kimia Hijau">Kimia Lingkungan &amp; Kimia Hijau</option>
-              <option value="CUSTOM">[Topik Lain / Tulis Sendiri]</option>
+              <option value="CUSTOM">✨ [Tulis Bebas / Mapel Lain (Fisika, Biologi, Matematika, IPS, dll)]</option>
             </select>
+            <p class="text-[11px] text-amber-300/90 mt-1">💡 <b>Fleksibel untuk Semua Mapel:</b> Pilih <i>"[Tulis Bebas / Mapel Lain]"</i> untuk membuat soal Fisika, Biologi, Matematika, Bahasa, dll secara manual.</p>
           </div>
 
           <!-- Input Custom Topic jika dipilih -->
           <div class="hidden" id="customTopicContainer">
-            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Tuliskan Topik Kustom:</label>
-            <input type="text" id="customTopicInput" placeholder="Contoh: Titrasi Redoks Kompleksometri"
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Tuliskan Topik / Mapel Kustom:</label>
+            <input type="text" id="customTopicInput" placeholder="Contoh: Fisika (Hukum Newton) / Biologi (Sistem Sirkulasi) / Matematika (Trigonometri)"
                    class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
           </div>
 
@@ -303,12 +302,11 @@
           <div>
             <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Jumlah Butir Soal per Paket:</label>
             <select id="numQuestionsSelect" class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
-              <option value="3">3 Butir Soal</option>
-              <option value="5" selected>5 Butir Soal (Direkomendasikan)</option>
-              <option value="10">10 Butir Soal</option>
-              <option value="15">15 Butir Soal</option>
-              <option value="20">20 Butir Soal (Maksimal)</option>
-              <option value="25">25 Butir Soal (Bank Soal Besar)</option>
+              <option value="3">3 Butir Soal (1 Kuota)</option>
+              <option value="5" selected>5 Butir Soal (1 Kuota - Rekomendasi Cepat)</option>
+              <option value="10">10 Butir Soal (1 Kuota)</option>
+              <option value="15">15 Butir Soal (2 Kuota)</option>
+              <option value="20">20 Butir Soal (2 Kuota - Maksimal)</option>
             </select>
           </div>
 
@@ -319,6 +317,30 @@
                    class="w-full px-3 py-2 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
           </div>
 
+        </div>
+
+        <!-- Identitas Kop Naskah Soal (Kustomisasi Guru & Sekolah) -->
+        <div class="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-2.5 mt-4">
+          <div class="flex items-center justify-between">
+            <div class="text-xs font-bold text-violet-300 flex items-center gap-1.5">
+              <i data-lucide="building-2" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span>Identitas Kop Naskah Soal (Nama Guru &amp; Sekolah)</span>
+            </div>
+            <span class="text-[10px] text-emerald-400/90 font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Tersimpan Otomatis</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label for="inputCustomNamaGuru" class="block text-[11px] font-medium text-zinc-300 mb-1">Nama Guru Pengampu:</label>
+              <input type="text" id="inputCustomNamaGuru" placeholder="Contoh: Tito Vanzal, S.Pd. atau Nama Anda"
+                     class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+            </div>
+            <div>
+              <label for="inputCustomNamaSekolah" class="block text-[11px] font-medium text-zinc-300 mb-1">Nama Sekolah / Instansi:</label>
+              <input type="text" id="inputCustomNamaSekolah" placeholder="Contoh: SMA Progresif Bumi Shalawat atau Sekolah Anda"
+                     class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700/80 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none">
+            </div>
+          </div>
+          <p class="text-[10px] text-zinc-400 leading-tight">Nama dan sekolah ini otomatis tercetak pada kop lembar soal Word A4 dan dokumen Google Docs Anda.</p>
         </div>
 
         <!-- ====================================================================
@@ -345,7 +367,7 @@
             <label class="flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors border border-zinc-800 bg-zinc-900/40">
               <input type="checkbox" id="chkIncludeParallel" class="mt-0.5 w-4 h-4 rounded text-violet-600 focus:ring-violet-500 bg-zinc-800 border-zinc-700">
               <div>
-                <span class="text-xs font-bold text-zinc-200 block">🔀 Paket Paralel (A &amp; B)</span>
+                <span class="text-xs font-bold text-zinc-200 block">🔀 Paket Paralel (A &amp; B) <span class="text-[10px] text-amber-300 font-semibold">(+1 Kuota)</span></span>
                 <span class="text-[11px] text-zinc-400 block leading-tight">Buat 2 paket paralel setara anti-contek di kelas.</span>
               </div>
             </label>
@@ -378,7 +400,7 @@
           <button type="submit" id="btnGenerate"
                   class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-violet-900/40 transition-all cursor-pointer">
             <i data-lucide="sparkles" class="w-4 h-4"></i>
-            <span>Buat Soal dengan AI</span>
+            <span id="btnGenerateText">Buat Soal dengan AI [1 Kuota]</span>
           </button>
         </div>
       </form>
@@ -608,6 +630,87 @@
   </main>
 
   <!-- ========================================================================
+       MODAL: PILIHAN FORMAT UNDUH WORD A4 (VERSI SISWA VS GURU)
+       ======================================================================== -->
+  <div id="modalWordExport" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-zinc-950/85 backdrop-blur-md hidden no-print">
+    <div class="relative w-full max-w-lg rounded-2xl glass-card border border-zinc-700/80 shadow-2xl flex flex-col overflow-hidden my-auto p-5 space-y-4">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-violet-500/20 text-violet-400 flex items-center justify-center shrink-0">
+            <i data-lucide="file-text" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="text-base font-bold text-white leading-tight">Pilih Format Unduh Word A4</h4>
+            <p class="text-[11px] text-zinc-400">Standar Kertas A4 • Font Times New Roman 12pt</p>
+          </div>
+        </div>
+        <button type="button" class="text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer" onclick="closeWordExportModal()" title="Tutup">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Option Cards -->
+      <div class="space-y-2.5">
+        <!-- Opsi 1: Versi Siswa -->
+        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-zinc-700/80 bg-zinc-900/60 hover:bg-zinc-800/60 cursor-pointer transition-all has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-950/20">
+          <input type="radio" name="wordExportOption" value="siswa" class="mt-1 w-4 h-4 text-emerald-600 focus:ring-emerald-500 bg-zinc-800 border-zinc-700">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">🎓 Versi Siswa (Student Exam Paper)</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Siap Fotokopi</span>
+            </div>
+            <p class="text-[11px] text-zinc-400 leading-relaxed">
+              Memuat lembar soal lengkap, stimulus/tabel data, dan lembar jawab bertitik. <b>Tanpa kunci jawaban dan tanpa pembahasan</b> agar siap langsung dibagikan ke siswa di kelas.
+            </p>
+          </div>
+        </label>
+
+        <!-- Opsi 2: Versi Lengkap / Pegangan Guru (Default) -->
+        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-zinc-700/80 bg-zinc-900/60 hover:bg-zinc-800/60 cursor-pointer transition-all has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/30">
+          <input type="radio" name="wordExportOption" value="guru" checked class="mt-1 w-4 h-4 text-violet-600 focus:ring-violet-500 bg-zinc-800 border-zinc-700">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">👨‍🏫 Versi Lengkap Pegangan Guru (Master &amp; Guide)</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">Lengkap</span>
+            </div>
+            <p class="text-[11px] text-zinc-400 leading-relaxed">
+              Naskah soal lengkap disusul lembar kunci jawaban, pembahasan langkah demi langkah (*worked solutions*), dan matriks kisi-kisi asesmen di halaman terpisah.
+            </p>
+          </div>
+        </label>
+
+        <!-- Opsi 3: Kunci Jawaban & Pembahasan Saja -->
+        <label class="flex items-start gap-3 p-3.5 rounded-xl border border-zinc-700/80 bg-zinc-900/60 hover:bg-zinc-800/60 cursor-pointer transition-all has-[:checked]:border-amber-500 has-[:checked]:bg-amber-950/20">
+          <input type="radio" name="wordExportOption" value="kunci_saja" class="mt-1 w-4 h-4 text-amber-600 focus:ring-amber-500 bg-zinc-800 border-zinc-700">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">🔑 Hanya Kunci Jawaban &amp; Pembahasan</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Mark Scheme</span>
+            </div>
+            <p class="text-[11px] text-zinc-400 leading-relaxed">
+              Khusus matriks kunci jawaban, rubrik penskoran, dan langkah penyelesaian ilmiah untuk arsip atau pedoman penilaian guru.
+            </p>
+          </div>
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-zinc-800">
+        <button type="button" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition-colors cursor-pointer" onclick="closeWordExportModal()">
+          Batal
+        </button>
+        <button type="button" id="btnConfirmWordExport" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-lg shadow-violet-900/30 transition-all cursor-pointer">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Unduh File Word (.doc)</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================
        MODAL: DIAGNOSTIK & TES KONEKSI AI
        ======================================================================== -->
     <!-- ========================================================================
@@ -698,18 +801,22 @@
             </div>
             <div class="text-[11px] text-zinc-400">Buat token baru atau atur sisa kesempatan generate rekan guru:</div>
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
-              <div class="sm:col-span-6">
+              <div class="sm:col-span-5">
                 <input type="text" id="adminInputNamaGuruSoal" placeholder="Nama Guru (misal: Pak Budi)" class="w-full px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-700 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500">
               </div>
-              <div class="sm:col-span-3">
-                <input type="number" id="adminInputSaldoAwalSoal" value="5" min="1" max="999" placeholder="Kuota" class="w-full px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-700 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500">
+              <div class="sm:col-span-4">
+                <input type="text" id="adminInputCustomTokenSoal" placeholder="Custom Token (misal: BUDI-KIMIA)" class="w-full px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-700 text-xs text-white font-mono uppercase placeholder-zinc-500 focus:outline-none focus:border-violet-500">
               </div>
-              <div class="sm:col-span-3">
-                <button type="button" id="btnAdminTambahTokenSoal" class="w-full px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition-colors">
+              <div class="sm:col-span-3 flex gap-1">
+                <input type="number" id="adminInputSaldoAwalSoal" value="5" min="1" max="999" placeholder="Kuota" title="Saldo Kuota" class="w-16 px-2 py-1.5 rounded-lg bg-zinc-950 border border-zinc-700 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500">
+                <button type="button" id="btnAdminTambahTokenSoal" class="flex-1 px-2.5 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition-colors">
                   <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
                   <span>Buat</span>
                 </button>
               </div>
+            </div>
+            <div class="text-[10px] text-zinc-400">
+              💡 <em>Tips Master: Isi kolom <b>Custom Token</b> untuk token singkat yang mudah diingat (misal: <code>BUDI-KIMIA</code>). Jika kosong, sistem membuat token otomatis pendek (misal: <code>TK-BUDI-123</code>).</em>
             </div>
             <div id="adminTableAkunGuruContainerSoal" class="max-h-48 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-950/60 text-xs">
               <!-- Rendered via JS -->
@@ -783,6 +890,106 @@
   <!-- ========================================================================
        FOOTER (PortalKimia Suite Standard)
        ======================================================================== -->
+  <!-- ========================================================================
+       MODAL: KONFIRMASI PRA-GENERATE SOAL AI
+       ======================================================================== -->
+  <div id="modalConfirmGenerateSoal" class="fixed inset-0 z-50 hidden no-print overflow-y-auto p-4 bg-zinc-950/90 backdrop-blur-sm flex items-center justify-center">
+    <div class="max-w-lg w-full my-auto glass-card border border-violet-500/40 rounded-2xl p-5 sm:p-6 shadow-2xl relative">
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between gap-3 border-b border-zinc-800 pb-3.5">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-violet-600/20 text-violet-300 flex items-center justify-center">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Konfirmasi Pembuatan Soal AI</h3>
+            <p class="text-[11px] text-zinc-400">Tinjau parameter rancangan sebelum memotong kuota token.</p>
+          </div>
+        </div>
+        <button id="btnCancelConfirmSoalX" type="button" class="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="mt-4 space-y-3.5 text-xs text-zinc-300">
+        <!-- Rincian Pilihan Form -->
+        <div class="p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-2">
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div>
+              <span class="text-zinc-400 block text-[10px]">Topik / Materi:</span>
+              <strong id="confirmSoalTopik" class="text-violet-300 font-semibold block truncate">-</strong>
+            </div>
+            <div>
+              <span class="text-zinc-400 block text-[10px]">Subtopik:</span>
+              <strong id="confirmSoalSubtopik" class="text-zinc-200 font-semibold block truncate">-</strong>
+            </div>
+            <div>
+              <span class="text-zinc-400 block text-[10px]">Jenjang &amp; Kurikulum:</span>
+              <strong id="confirmSoalJenjang" class="text-zinc-200 font-semibold block truncate">-</strong>
+            </div>
+            <div>
+              <span class="text-zinc-400 block text-[10px]">Tipe Soal:</span>
+              <strong id="confirmSoalTipe" class="text-zinc-200 font-semibold block truncate">-</strong>
+            </div>
+            <div>
+              <span class="text-zinc-400 block text-[10px]">Model Stimulus:</span>
+              <strong id="confirmSoalStimulus" class="text-zinc-200 font-semibold block truncate">-</strong>
+            </div>
+            <div>
+              <span class="text-zinc-400 block text-[10px]">Tingkat Kesulitan:</span>
+              <strong id="confirmSoalKesulitan" class="text-zinc-200 font-semibold block truncate">-</strong>
+            </div>
+            <div>
+              <span class="text-zinc-400 block text-[10px]">Jumlah Butir Soal:</span>
+              <strong id="confirmSoalJumlah" class="text-emerald-400 font-bold block">-</strong>
+            </div>
+            <div>
+              <span class="text-zinc-400 block text-[10px]">Model AI:</span>
+              <strong id="confirmSoalModelAI" class="text-indigo-300 font-semibold block truncate">-</strong>
+            </div>
+          </div>
+
+          <!-- Fitur Tambahan Terpilih -->
+          <div class="pt-2 border-t border-zinc-800/80">
+            <span class="text-zinc-400 block text-[10px] mb-1">Fitur Tambahan Aktif:</span>
+            <div id="confirmSoalBadges" class="flex flex-wrap gap-1.5">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Peringatan Kisi-Kisi jika aktif -->
+        <div id="confirmKisiKisiWarning" class="hidden p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-200 text-[11px] leading-snug">
+          ⚠️ <b>Catatan Admin:</b> Pembuatan kisi-kisi dan kartu soal belum dikaji ulang kualitasnya secara mendalam oleh admin pengembang. Format dan ketepatan pemetaan mungkin bervariasi.
+        </div>
+
+        <!-- Box Kuota & Saldo -->
+        <div class="p-3 rounded-xl bg-violet-950/30 border border-violet-500/30 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] text-zinc-400 block">Kuota yang Digunakan:</span>
+            <span id="confirmSoalKuotaDipakai" class="text-sm font-extrabold text-amber-300">1 Kuota</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] text-zinc-400 block">Sisa Saldo Token:</span>
+            <span id="confirmSoalSaldoUser" class="text-xs font-bold text-emerald-400">...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="mt-5 pt-3 border-t border-zinc-800 flex items-center justify-between gap-2">
+        <button id="btnDismissConfirmSoal" type="button" class="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition-colors">
+          Batal / Ubah Pilihan
+        </button>
+        <button id="btnExecuteGenerateSoal" type="button" class="px-5 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-violet-900/40 transition-all flex items-center gap-1.5">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span id="btnExecuteGenerateSoalText">Lanjutkan Generate</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div id="questionEditorModal" class="fixed inset-0 z-50 hidden no-print overflow-y-auto p-4 bg-zinc-950/90 backdrop-blur-sm">
     <div class="max-w-3xl mx-auto my-8 glass-card border border-zinc-700 rounded-2xl p-4 sm:p-6">
       <div class="flex items-start justify-between gap-3 border-b border-zinc-800 pb-3">
@@ -861,7 +1068,7 @@
         <span>Generator Soal AI — Tito Vanzal, S.Pd.</span>
       </div>
       <div class="flex items-center gap-3 text-zinc-400">
-        <span id="footerVersionBadge" class="font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">v2.12</span>
+        <span id="footerVersionBadge" class="font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">v2.13</span>
         <span>•</span>
         <a href="../" class="hover:text-violet-300 transition-colors">Kembali ke Suite Hub</a>
         <span>•</span>
@@ -871,6 +1078,6 @@
   </footer>
 
   <!-- Application Logic -->
-  <script src="app.js?v=2.12"></script>
+  <script src="app.js?v=2.13"></script>
 </body>
 </html>

@@ -8,7 +8,119 @@
  */
 
 // Versioning & Cache Busting
-const APP_VERSION = "2.12";
+// Versioning & Cache Busting
+const APP_VERSION = "2.13";
+
+// Kustomisasi Identitas Guru & Sekolah
+const TEACHER_NAME_KEY = "portalkimia_nama_guru";
+const SCHOOL_NAME_KEY = "portalkimia_nama_sekolah";
+const DEFAULT_TEACHER_NAME = "Tito Vanzal, S.Pd.";
+const DEFAULT_SCHOOL_NAME = "SMA Progresif Bumi Shalawat";
+
+function getCustomTeacherName() {
+  try {
+    const val = localStorage.getItem(TEACHER_NAME_KEY);
+    return val && val.trim() ? val.trim() : DEFAULT_TEACHER_NAME;
+  } catch (e) {
+    return DEFAULT_TEACHER_NAME;
+  }
+}
+
+function setCustomTeacherName(name) {
+  try {
+    if (name && name.trim()) {
+      localStorage.setItem(TEACHER_NAME_KEY, name.trim());
+    } else {
+      localStorage.removeItem(TEACHER_NAME_KEY);
+    }
+    const input = document.getElementById("inputCustomNamaGuru");
+    if (input) input.value = getCustomTeacherName();
+  } catch (e) {}
+}
+
+function getCustomSchoolName() {
+  try {
+    const val = localStorage.getItem(SCHOOL_NAME_KEY);
+    return val && val.trim() ? val.trim() : DEFAULT_SCHOOL_NAME;
+  } catch (e) {
+    return DEFAULT_SCHOOL_NAME;
+  }
+}
+
+function setCustomSchoolName(school) {
+  try {
+    if (school && school.trim()) {
+      localStorage.setItem(SCHOOL_NAME_KEY, school.trim());
+    } else {
+      localStorage.removeItem(SCHOOL_NAME_KEY);
+    }
+    const input = document.getElementById("inputCustomNamaSekolah");
+    if (input) input.value = getCustomSchoolName();
+  } catch (e) {}
+}
+
+function initTeacherIdentityListeners() {
+  const inputGuru = document.getElementById("inputCustomNamaGuru");
+  const inputSekolah = document.getElementById("inputCustomNamaSekolah");
+  if (inputGuru) {
+    inputGuru.value = getCustomTeacherName();
+    inputGuru.addEventListener("input", (e) => {
+      setCustomTeacherName(e.target.value);
+    });
+  }
+  if (inputSekolah) {
+    inputSekolah.value = getCustomSchoolName();
+    inputSekolah.addEventListener("input", (e) => {
+      setCustomSchoolName(e.target.value);
+    });
+  }
+}
+
+// Handler Magic Link (?token=... atau ?kunci=...)
+function handleMagicLinkToken() {
+  if (typeof window === "undefined" || !window.location) return;
+  let magicToken = null;
+  try {
+    if (typeof URLSearchParams !== "undefined") {
+      const params = new URLSearchParams(window.location.search || "");
+      magicToken = params.get("token") || params.get("kunci") || params.get("accessToken") || params.get("key");
+    } else if (window.location.search) {
+      const m = window.location.search.match(/[?&](token|kunci|accessToken|key)=([^&#]*)/i);
+      if (m && m[2]) magicToken = decodeURIComponent(m[2]);
+    }
+  } catch (e) {
+    console.warn("Error parsing URL search params:", e);
+  }
+  if (magicToken && magicToken.trim()) {
+    const cleanToken = magicToken.trim();
+    setGeneratorAccessToken(cleanToken);
+    
+    const inputToken = document.getElementById("inputAccessTokenSoal");
+    if (inputToken) inputToken.value = cleanToken;
+
+    // Bersihkan URL tanpa reload agar rapi
+    try {
+      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+      window.history.replaceState({ path: cleanUrl }, document.title, cleanUrl);
+    } catch (e) {}
+
+    ujiKoneksiDanToken(cleanToken).then(acc => {
+      const nama = (acc && acc.nama) ? acc.nama : "Rekan Guru";
+      const saldo = (acc && acc.saldo != null) ? acc.saldo : "";
+      showVersionToast(`🎉 Selamat datang, ${nama}! Token Anda aktif${saldo ? ` (${saldo}x kuota)` : ''}.`);
+      
+      const storedTeacher = localStorage.getItem(TEACHER_NAME_KEY);
+      if (!storedTeacher && acc && acc.nama) {
+        setCustomTeacherName(acc.nama);
+      }
+    }).catch(() => {
+      showVersionToast(`✨ Token akses guru (${cleanToken}) berhasil dipasang.`);
+    });
+  } else {
+    const token = getGeneratorAccessToken();
+    if (token) ujiKoneksiDanToken(token);
+  }
+}
 
 // Global State
 let currentPackage = null;
@@ -50,24 +162,26 @@ function showVersionToast(msg) {
   } catch (e) {}
 }
 
-// SYSTEM PROMPT DASAR DENGAN ATURAN ILMIAH DAN NOTASI KIMIA
+// SYSTEM PROMPT DASAR DENGAN ATURAN ILMIAH DAN NOTASI KIMIA / SEMUA MAPEL
 const BASE_CHEMISTRY_PROMPT = `
-Anda adalah Pakar Guru Kimia Senior dan Penyusun Soal Standar Nasional (Kurikulum Merdeka, UTBK-SNBT, AKM, dan Olimpiade Kimia).
-Tugas Anda adalah menyusun instrumen asesmen kimia yang berstandar tinggi, valid secara ilmiah, kontekstual, dan bebas dari miskonsepsi.
+Anda adalah Pakar Pendidik Senior dan Penyusun Soal Standar Asesmen Nasional (Kurikulum Merdeka, UTBK-SNBT, AKM, Olimpiade Sains/Mapel, dan Asesmen Sekolah).
+Tugas Anda adalah menyusun instrumen asesmen pembelajaran berstandar tinggi, valid secara keilmuan sesuai mata pelajaran terkait, kontekstual, dan bebas dari miskonsepsi.
 
 PEDOMAN UTAMA:
-1. AKURASI ILMIAH & MATEMATIS:
-   - Persamaan reaksi kimia WAJIB setara (hukum kekekalan massa & muatan).
-   - Perhitungan stoikiometri, massa atom relatif (Ar), massa molekul (Mr), tetapan asam-basa (Ka/Kb), potensial sel (E°), dan tetapan lainnya harus akurat secara empiris.
+1. AKURASI ILMIAH & KEILMUAN (KIMIA, FISIKA, BIOLOGI, MATEMATIKA, MAUPUN MAPEL LAINNYA):
+   - Sesuaikan materi dengan kaidah keilmuan topik mata pelajaran yang diujikan secara komprehensif.
+   - Untuk Kimia: Persamaan reaksi kimia WAJIB setara (hukum kekekalan massa & muatan). Perhitungan stoikiometri, massa atom relatif (Ar), massa molekul (Mr), tetapan asam-basa (Ka/Kb), potensial sel (E°), dll harus akurat secara empiris.
+   - Untuk Fisika / Matematika: Rumus, variabel, hukum fisika, dan perhitungan matematis harus presisi.
+   - Untuk Biologi / IPA / IPS / Bahasa: Konsep biologi, anatomi, data sejarah, geografi, dan tata bahasa harus valid dan kontekstual.
 
 2. ATURAN PENULISAN ANGKA, PERSEN (%), DAN NOTASI LATEX (MUTLAK):
    - DILARANG menggunakan tanda dollar ($...$) untuk persentase (%), angka biasa, atau satuan umum.
    - Tuliskan persentase secara langsung dalam teks biasa: tulis '50,0%' atau '25%' (JANGAN menulis '$50{,}0\\%$' atau '$50{,}0\\%' atau '$50%$').
    - Tuliskan angka desimal dan satuan biasa: '0,5 mol', '100 mL', '25 °C', '1 atm', '5,4 gram'.
-   - Tanda dollar inline ($...$) WAJIB DIGUNAKAN untuk SEMUA rumus kimia, ion, dan reaksi:
+   - Tanda dollar inline ($...$) WAJIB DIGUNAKAN untuk SEMUA rumus kimia, ion, reaksi, atau persamaan matematika:
      a. Rumus kimia senyawa/ion: $\\text{H}_2\\text{SO}_4$, $\\text{Al}^{3+}$, $\\text{CH}_3\\text{COOH}$, $\\text{Ca(OH)}_2$, $\\text{KOH}$, $\\text{O}_2$, $\\text{C}_x\\text{H}_{2x+2}$, $\\text{C}_2\\text{H}_6$, $\\text{C}_y\\text{H}_{2y}$
      b. Persamaan reaksi kimia: $2\\text{H}_2 + \\text{O}_2 \\rightarrow 2\\text{H}_2\\text{O}$, $\\text{C}_x\\text{H}_{2x+2} + \\frac{3x+1}{2}\\text{O}_2 \\rightarrow x\\text{CO}_2 + (x+1)\\text{H}_2\\text{O}$
-     c. Besaran termokimia & kesetimbangan: $\\Delta H = -285{,}8\\text{ kJ/mol}$, $K_a = 10^{-5}$, $E^\\circ = +1{,}10\\text{ V}$, $\\text{pH} = 3 - \\log 2$
+     c. Besaran termokimia, fisika & kesetimbangan: $\\Delta H = -285{,}8\\text{ kJ/mol}$, $K_a = 10^{-5}$, $E^\\circ = +1{,}10\\text{ V}$, $\\text{pH} = 3 - \\log 2$, $F = m \\cdot a$
    - ATURAN KUNCI JAWABAN & PEMBAHASAN: Wajib juga menyertakan tanda dollar ($...$) pada rumus kimia, persamaan reaksi, dan variabel perhitungan.
    - PERINGATAN KERAS: JANGAN PERNAH menulis perintah LaTeX seperti \\text{...}, \\rightarrow, \\rightleftharpoons, atau \\frac{...}{...} tanpa diapit tanda dollar $! Penulisan bare LaTeX tanpa tanda dollar inline dilarang keras.
 
@@ -162,9 +276,11 @@ function initializeAllComponents() {
   try { initConnectionModal(); } catch (e) { console.error("initConnectionModal error:", e); }
   try { updateConnectionStatusUI(); } catch (e) { console.error("updateConnectionStatusUI error:", e); }
   try {
-    const token = getGeneratorAccessToken();
-    if (token) ujiKoneksiDanToken(token);
-  } catch (e) { console.error("ujiKoneksiDanToken error:", e); }
+    handleMagicLinkToken();
+  } catch (e) { console.error("handleMagicLinkToken error:", e); }
+  try {
+    initTeacherIdentityListeners();
+  } catch (e) { console.error("initTeacherIdentityListeners error:", e); }
 
   try { initFormListeners(); } catch (e) { console.error("initFormListeners error:", e); }
   try { initTabListeners(); } catch (e) { console.error("initTabListeners error:", e); }
@@ -239,12 +355,25 @@ function getGasUrl() {
 // =========================================================================
 
 function getGeneratorAccessToken() {
-  return (localStorage.getItem('generatorAccessToken') || '').trim();
+  return (
+    localStorage.getItem('generatorAccessToken') ||
+    localStorage.getItem('portalkimia_guru_token') ||
+    localStorage.getItem('portalkimia_soal_access_token') ||
+    ''
+  ).trim();
 }
 
 function setGeneratorAccessToken(token) {
-  if (token && token.trim()) localStorage.setItem('generatorAccessToken', token.trim());
-  else localStorage.removeItem('generatorAccessToken');
+  if (token && token.trim()) {
+    const clean = token.trim();
+    localStorage.setItem('generatorAccessToken', clean);
+    localStorage.setItem('portalkimia_guru_token', clean);
+    localStorage.setItem('portalkimia_soal_access_token', clean);
+  } else {
+    localStorage.removeItem('generatorAccessToken');
+    localStorage.removeItem('portalkimia_guru_token');
+    localStorage.removeItem('portalkimia_soal_access_token');
+  }
 }
 
 function getGeneratorAccountInfo() {
@@ -256,8 +385,17 @@ function getGeneratorAccountInfo() {
 }
 
 function setGeneratorAccountInfo(info) {
-  if (info) localStorage.setItem('generatorAccountInfo', JSON.stringify(info));
-  else localStorage.removeItem('generatorAccountInfo');
+  if (info) {
+    localStorage.setItem('generatorAccountInfo', JSON.stringify(info));
+    if (info.nama) {
+      localStorage.setItem('portalkimia_guru_nama', info.nama);
+      localStorage.setItem('portalkimia_nama_guru', info.nama);
+    }
+  } else {
+    localStorage.removeItem('generatorAccountInfo');
+    localStorage.removeItem('portalkimia_guru_nama');
+    localStorage.removeItem('portalkimia_nama_guru');
+  }
 }
 
 function updateConnectionStatusUI() {
@@ -441,6 +579,8 @@ async function muatDaftarTokenGuruAdminSoal() {
         '<td class="p-2 text-center font-bold font-mono ' + (isHabis ? 'text-rose-400' : 'text-emerald-400') + '">' + item.saldo + 'x</td>' +
         '<td class="p-2 text-center font-mono text-zinc-400">' + item.terpakai + 'x</td>' +
         '<td class="p-2 text-right space-x-1 whitespace-nowrap">' +
+        '<button type="button" class="px-2 py-0.5 rounded bg-violet-600/30 hover:bg-violet-600/60 text-violet-300 font-bold text-[10px]" title="Salin Tautan Akses Langsung WhatsApp untuk guru ini" onclick="window.adminSalinMagicLinkGuruSoal(\'' + item.token + '\', \'' + item.nama + '\')">🔗 Link WA</button>' +
+        '<button type="button" class="px-1.5 py-0.5 rounded bg-sky-600/30 hover:bg-sky-600/60 text-sky-300 font-bold text-[10px]" title="Ubah / Custom Token Guru" onclick="window.adminGantiTokenGuruSoal(\'' + item.token + '\', \'' + item.nama + '\')">✏️ Ubah</button>' +
         '<button type="button" class="px-1.5 py-0.5 rounded bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 font-bold text-[10px]" title="Tambah 5 kuota" onclick="window.adminUbahSaldoGuruSoal(\'' + item.token + '\', 5, \'tambah\')">+5</button>' +
         '<button type="button" class="px-1.5 py-0.5 rounded bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 font-bold text-[10px]" title="Tambah 1 kuota" onclick="window.adminUbahSaldoGuruSoal(\'' + item.token + '\', 1, \'tambah\')">+1</button>' +
         '<button type="button" class="px-1.5 py-0.5 rounded bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 font-bold text-[10px]" title="Kurangi 1 kuota" onclick="window.adminUbahSaldoGuruSoal(\'' + item.token + '\', 1, \'kurang\')">-1</button>' +
@@ -455,10 +595,36 @@ async function muatDaftarTokenGuruAdminSoal() {
   }
 }
 
+window.adminSalinMagicLinkGuruSoal = function(token, nama) {
+  let base = "https://portalkimia.github.io/suitehub/soal/";
+  try {
+    if (typeof window !== "undefined" && window.location && window.location.origin) {
+      if (window.location.origin.includes("github.io")) {
+        base = window.location.origin + window.location.pathname;
+        base = base.replace(/\/index\.html$/i, "/");
+        if (!base.endsWith("/")) base += "/";
+      }
+    }
+  } catch (e) {}
+
+  const magicUrl = `${base}?token=${encodeURIComponent(token)}`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(magicUrl).then(() => {
+      alert(`✅ Tautan Akses WhatsApp untuk ${nama} berhasil disalin:\n\n${magicUrl}\n\nKirimkan tautan ini ke WhatsApp rekan guru. Rekan guru cukup mengklik tautan tersebut untuk langsung menggunakan Generator Soal dengan token dan kuota aktif tanpa perlu mengetik apapun!`);
+    }).catch(() => {
+      prompt("Salin tautan WhatsApp ini untuk rekan guru:", magicUrl);
+    });
+  } else {
+    prompt("Salin tautan WhatsApp ini untuk rekan guru:", magicUrl);
+  }
+};
+
 async function adminTambahAkunGuruSoal() {
   const inputNama = document.getElementById("adminInputNamaGuruSoal");
   const inputSaldo = document.getElementById("adminInputSaldoAwalSoal");
+  const inputCustom = document.getElementById("adminInputCustomTokenSoal");
   const nama = (inputNama ? inputNama.value : '').trim();
+  const customToken = (inputCustom ? inputCustom.value : '').trim();
   const saldo = parseInt(inputSaldo ? inputSaldo.value : '5', 10);
   if (!nama) {
     alert("Masukkan nama rekan guru terlebih dahulu.");
@@ -470,18 +636,55 @@ async function adminTambahAkunGuruSoal() {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "adminTambahAkun", accessToken: token, nama: nama, saldoAwal: isNaN(saldo) ? 5 : saldo })
+      body: JSON.stringify({
+        action: "adminTambahAkun",
+        accessToken: token,
+        nama: nama,
+        saldoAwal: isNaN(saldo) ? 5 : saldo,
+        customToken: customToken || undefined
+      })
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    alert("Akun berhasil dibuat!\n\nNama: " + data.nama + "\nToken: " + data.token + "\nSaldo: " + data.saldo + "x generate\n\nKirimkan token di atas kepada guru terkait.");
-    if (navigator.clipboard) navigator.clipboard.writeText(data.token).catch(() => {});
+    const magicLink = "https://portalkimia.github.io/suitehub/soal/?token=" + encodeURIComponent(data.token);
+    alert("Akun berhasil dibuat!\n\nNama: " + data.nama + "\nToken: " + data.token + "\nSaldo: " + data.saldo + "x generate\n\nTautan Akses WhatsApp:\n" + magicLink + "\n\n(Tautan WhatsApp telah disalin otomatis ke clipboard)");
+    if (navigator.clipboard) navigator.clipboard.writeText(magicLink).catch(() => {});
     if (inputNama) inputNama.value = '';
+    if (inputCustom) inputCustom.value = '';
     muatDaftarTokenGuruAdminSoal();
   } catch (err) {
     alert("Gagal membuat akun: " + err.message);
   }
 }
+
+async function adminGantiTokenGuruSoal(tokenLama, namaGuru) {
+  const tokenBaru = prompt(`Ganti token untuk ${namaGuru || tokenLama}:\n\nKetik token baru yang singkat & mudah diingat (misal: BUDI-KIMIA atau BUDI2026):`, tokenLama);
+  if (!tokenBaru || !tokenBaru.trim() || tokenBaru.trim() === tokenLama) return;
+  const cleanBaru = tokenBaru.trim();
+  const url = getGasUrl();
+  const token = getGeneratorAccessToken();
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "adminGantiToken",
+        accessToken: token,
+        identitas: tokenLama,
+        tokenBaru: cleanBaru
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const magicLink = "https://portalkimia.github.io/suitehub/soal/?token=" + encodeURIComponent(cleanBaru);
+    alert(`✅ Token untuk ${data.nama || namaGuru} berhasil diubah menjadi:\n${cleanBaru}\n\nTautan Akses WhatsApp Baru:\n${magicLink}\n\n(Tautan baru telah disalin otomatis ke clipboard)`);
+    if (navigator.clipboard) navigator.clipboard.writeText(magicLink).catch(() => {});
+    muatDaftarTokenGuruAdminSoal();
+  } catch (err) {
+    alert("Gagal mengganti token: " + err.message);
+  }
+}
+window.adminGantiTokenGuruSoal = adminGantiTokenGuruSoal;
 
 async function adminUbahSaldoGuruSoal(identitas, nilai, mode) {
   const url = getGasUrl();
@@ -960,6 +1163,151 @@ function updateCurriculumFormUI() {
   }
 }
 
+function hitungBobotKuotaSoalClient(numQuestions, includeParallel) {
+  const n = parseInt(numQuestions || 5, 10);
+  let bobot = 1;
+  if (n <= 10) bobot = 1;
+  else bobot = 2; // n <= 20 (Maksimal 20 butir)
+
+  if (includeParallel) bobot += 1;
+  return bobot;
+}
+
+function updateGenerateButtonQuotaBadge() {
+  const numSelect = document.getElementById("numQuestionsSelect");
+  const chkParallel = document.getElementById("chkIncludeParallel");
+  const btnText = document.getElementById("btnGenerateText");
+  if (!btnText) return;
+
+  const n = numSelect ? parseInt(numSelect.value, 10) : 5;
+  const isParallel = chkParallel ? chkParallel.checked : false;
+  const bobot = hitungBobotKuotaSoalClient(n, isParallel);
+
+  btnText.textContent = `Buat Soal dengan AI [${bobot} Kuota]`;
+}
+
+// MODAL KONFIRMASI PRA-GENERATE SOAL AI
+function bukaModalKonfirmasiSoal() {
+  const gasUrl = getGasUrl();
+  const apiKey = localStorage.getItem("portal_gemini_api_key");
+  if (!gasUrl && !apiKey) {
+    alert("⚠️ Backend Google Apps Script belum terhubung di config.js!");
+    return;
+  }
+
+  const topicSelect = document.getElementById("topicSelect");
+  let topic = "";
+  if (topicSelect) {
+    topic = topicSelect.value === "CUSTOM" 
+      ? (document.getElementById("customTopicInput")?.value.trim() || "")
+      : (topicSelect.value || "");
+  }
+  if (!topic) {
+    alert("⚠️ Silakan pilih atau tuliskan Topik / Materi soal terlebih dahulu.");
+    return;
+  }
+
+  const grade = document.getElementById("gradeSelect")?.value || "-";
+  const qType = document.getElementById("questionTypeSelect")?.value || "-";
+  const stimulus = document.getElementById("stimulusSelect")?.value || "-";
+  const difficulty = document.getElementById("difficultySelect")?.value || "-";
+  const subtopic = document.getElementById("subtopicInput")?.value.trim() || "- (Umum)";
+  const numQuestions = parseInt(document.getElementById("numQuestionsSelect")?.value, 10) || 5;
+  const model = document.getElementById("modelSelect")?.value || "deepseek-flash";
+  const modelLabel = model === "deepseek-flash" ? "DeepSeek V4.1 Flash (Utama)" : (model === "gemini-3.7-flash" ? "Gemini 3.7 Flash" : "Gemini 3.6 Flash");
+
+  const includeKisiKisi = document.getElementById("chkIncludeKisiKisi")?.checked;
+  const includeParallel = document.getElementById("chkIncludeParallel")?.checked;
+  const includeVisuals = document.getElementById("chkIncludeVisuals")?.checked;
+  const includeSolutions = document.getElementById("chkIncludeSolutions")?.checked;
+
+  const bobot = hitungBobotKuotaSoalClient(numQuestions, includeParallel);
+  const accInfo = getGeneratorAccountInfo();
+
+  if (accInfo && accInfo.peran !== 'master') {
+    const s = Number(accInfo.saldo || 0);
+    if (s <= 0) {
+      alert("Token Penggunaan AI Berbayar Anda habis. Hubungi U Tito untuk penambahan kuota.");
+      openConnectionModal();
+      return;
+    }
+    if (s < bobot) {
+      alert(`Sisa kuota Anda (${s} kuota) tidak mencukupi untuk membuat ${numQuestions} butir soal (membutuhkan ${bobot} kuota).\n\nSilakan kurangi jumlah butir soal atau hubungi U Tito untuk penambahan kuota.`);
+      return;
+    }
+  }
+
+  // Populate Field Modal
+  const elTopik = document.getElementById("confirmSoalTopik");
+  if (elTopik) elTopik.textContent = topic;
+  const elSubtopik = document.getElementById("confirmSoalSubtopik");
+  if (elSubtopik) elSubtopik.textContent = subtopic;
+  const elJenjang = document.getElementById("confirmSoalJenjang");
+  if (elJenjang) elJenjang.textContent = grade;
+  const elTipe = document.getElementById("confirmSoalTipe");
+  if (elTipe) elTipe.textContent = qType;
+  const elStimulus = document.getElementById("confirmSoalStimulus");
+  if (elStimulus) elStimulus.textContent = stimulus;
+  const elKesulitan = document.getElementById("confirmSoalKesulitan");
+  if (elKesulitan) elKesulitan.textContent = difficulty;
+  const elJumlah = document.getElementById("confirmSoalJumlah");
+  if (elJumlah) elJumlah.textContent = `${numQuestions} Butir Soal`;
+  const elModel = document.getElementById("confirmSoalModelAI");
+  if (elModel) elModel.textContent = modelLabel;
+
+  // Render Badges Fitur Tambahan
+  const containerBadges = document.getElementById("confirmSoalBadges");
+  if (containerBadges) {
+    let badgesHtml = "";
+    if (includeParallel) {
+      badgesHtml += `<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold text-[10px] border border-amber-500/30">🔀 Paket Paralel A &amp; B (+1 Kuota)</span>`;
+    }
+    if (includeKisiKisi) {
+      badgesHtml += `<span class="px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 font-semibold text-[10px] border border-violet-500/30">📋 Kisi-Kisi Soal</span>`;
+    }
+    if (includeSolutions) {
+      badgesHtml += `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold text-[10px] border border-emerald-500/30">💡 Kunci &amp; Pembahasan</span>`;
+    }
+    if (includeVisuals) {
+      badgesHtml += `<span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-semibold text-[10px] border border-cyan-500/30">🧪 Diagram/Tabel SVG</span>`;
+    }
+    if (!badgesHtml) {
+      badgesHtml = `<span class="text-zinc-500 italic text-[10px]">Standar Butir Soal Ujian (Tanpa Fitur Tambahan)</span>`;
+    }
+    containerBadges.innerHTML = badgesHtml;
+  }
+
+  // Tampilkan peringatan admin jika fitur kisi-kisi dicentang
+  const warnKisiKisi = document.getElementById("confirmKisiKisiWarning");
+  if (warnKisiKisi) {
+    warnKisiKisi.classList.toggle("hidden", !includeKisiKisi);
+  }
+
+  // Tampilkan Total Kuota dan Saldo
+  const elKuota = document.getElementById("confirmSoalKuotaDipakai");
+  if (elKuota) elKuota.textContent = `${bobot} Kuota`;
+  const elSaldo = document.getElementById("confirmSoalSaldoUser");
+  if (elSaldo) {
+    elSaldo.textContent = accInfo 
+      ? (accInfo.peran === 'master' ? 'Master (Tanpa Batas)' : `${accInfo.saldo ?? 0} Kuota`) 
+      : 'Belum Terhubung';
+  }
+
+  const btnEksekusiText = document.getElementById("btnExecuteGenerateSoalText");
+  if (btnEksekusiText) {
+    btnEksekusiText.textContent = `Lanjutkan Generate [${bobot} Kuota]`;
+  }
+
+  const modal = document.getElementById("modalConfirmGenerateSoal");
+  if (modal) modal.classList.remove("hidden");
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function tutupModalKonfirmasiSoal() {
+  const modal = document.getElementById("modalConfirmGenerateSoal");
+  if (modal) modal.classList.add("hidden");
+}
+
 // FORM LISTENERS
 function initFormListeners() {
   const gradeSelect = document.getElementById("gradeSelect");
@@ -991,9 +1339,58 @@ function initFormListeners() {
     });
   }
 
-  document.getElementById("quizConfigForm").addEventListener("submit", async (e) => {
+  const numQuestionsSelect = document.getElementById("numQuestionsSelect");
+  if (numQuestionsSelect) {
+    numQuestionsSelect.addEventListener("change", updateGenerateButtonQuotaBadge);
+  }
+
+  const chkIncludeParallel = document.getElementById("chkIncludeParallel");
+  if (chkIncludeParallel) {
+    chkIncludeParallel.addEventListener("change", updateGenerateButtonQuotaBadge);
+  }
+
+  // Peringatan Admin saat Checkbox Kisi-Kisi dicentang
+  const chkIncludeKisiKisi = document.getElementById("chkIncludeKisiKisi");
+  if (chkIncludeKisiKisi) {
+    chkIncludeKisiKisi.addEventListener("change", (e) => {
+      if (e.target.checked) {
+        const setuju = confirm(
+          "⚠️ Peringatan Kualitas Kisi-Kisi:\n\n" +
+          "Fitur pembuatan kisi-kisi dan kartu soal saat ini belum dikaji ulang kualitasnya secara mendalam oleh admin pengembang.\n\n" +
+          "Apakah Anda yakin tetap ingin menggunakannya?"
+        );
+        if (!setuju) {
+          e.target.checked = false;
+        }
+      }
+    });
+  }
+
+  // Modal Konfirmasi Pra-Generate Button Listeners
+  const btnCancelConfirmSoalX = document.getElementById("btnCancelConfirmSoalX");
+  if (btnCancelConfirmSoalX) {
+    btnCancelConfirmSoalX.addEventListener("click", tutupModalKonfirmasiSoal);
+  }
+
+  const btnDismissConfirmSoal = document.getElementById("btnDismissConfirmSoal");
+  if (btnDismissConfirmSoal) {
+    btnDismissConfirmSoal.addEventListener("click", tutupModalKonfirmasiSoal);
+  }
+
+  const btnExecuteGenerateSoal = document.getElementById("btnExecuteGenerateSoal");
+  if (btnExecuteGenerateSoal) {
+    btnExecuteGenerateSoal.addEventListener("click", async () => {
+      tutupModalKonfirmasiSoal();
+      await generateQuiz();
+    });
+  }
+
+  updateGenerateButtonQuotaBadge();
+
+  // Tampilkan Konfirmasi sebelum Generate
+  document.getElementById("quizConfigForm").addEventListener("submit", (e) => {
     e.preventDefault();
-    await generateQuiz();
+    bukaModalKonfirmasiSoal();
   });
 }
 
@@ -2358,15 +2755,15 @@ Pada properti 'tipe_soal' tuliskan 'PG Kompleks (Asosiasi 1-2-3-4)'.`;
 
   // Buat User Prompt
   const userPrompt = `
-Susun naskah soal asesmen kimia berkualitas tinggi dengan spesifikasi berikut:
-- Topik Utama: ${topic}
+Susun naskah soal asesmen berkualitas tinggi untuk mata pelajaran / topik spesifik berikut:
+- Topik / Mata Pelajaran Utama: ${topic}
 - Subtopik: ${subtopic || 'Materi inti dan esensial dalam materi ini'}
 - Jenjang Pendidikan: ${grade}
 - Format Tipe Soal: ${qType}
 - Model Pendekatan Stimulus: ${stimulus}
 - Tingkat Kesulitan: ${difficulty}
 - Jumlah Butir Soal: ${numQuestions} butir soal
-- Catatan Tambahan Guru: ${extraNotes || (isPearson ? 'Follow Pearson Edexcel International A-Level specifications' : 'Sesuai standar asesmen kimia nasional')}
+- Catatan Tambahan Guru: ${extraNotes || (isPearson ? 'Follow Pearson Edexcel International A-Level specifications' : 'Sesuai standar asesmen nasional')}
 
 INSTRUKSI KHUSUS FITUR:
 1. PEDOMAN TINGKAT KESULITAN & LEVEL KOGNITIF:
@@ -2376,7 +2773,7 @@ ${difficultyInstruction}
 ${typeInstruction}
 
 3. STIMULUS SOAL: ${isNoStimulus 
-     ? 'MODE TANPA STIMULUS / DRILLING LANGSUNG (HEMAT KERTAS): DILARANG MEMBUAT PARAGRAF CERITA / STIMULUS PANJANG! Langsung susun pertanyaan to the point pada pokok reaksi kimia, data stoikiometri, atau formula perhitungan yang diuji agar lembar naskah sangat hemat ruang kertas saat dicetak.' 
+     ? 'MODE TANPA STIMULUS / DRILLING LANGSUNG (HEMAT KERTAS): DILARANG MEMBUAT PARAGRAF CERITA / STIMULUS PANJANG! Langsung susun pertanyaan to the point pada pokok reaksi kimia/konsep inti, data stoikiometri/rumus, atau formula perhitungan yang diuji agar lembar naskah sangat hemat ruang kertas saat dicetak.' 
      : 'Gunakan model pendekatan "' + stimulus + '". Awali pertanyaan dengan narasi kontekstual yang relevan dan menggugah nalar literasi sains.'}
 4. TABEL & ILUSTRASI KIMIA: ${includeVisuals 
      ? 'Sertakan tabel data eksperimen (dalam format Markdown table rapi) atau diagram vektor SVG (pada properti ilustrasi_svg) HANYA untuk butir soal yang secara alamiah membutuhkan pengamatan data empiris / sajian visual (seperti laju reaksi, sel volta, titrasi, termokimia). JANGAN memaksakan tabel atau diagram pada seluruh butir soal jika tidak relevan, KECUALI jika catatan instruksi khusus guru di bawah secara eksplisit meminta tabel/diagram di setiap soal.' 
@@ -2388,7 +2785,7 @@ ${typeInstruction}
 
 8. PEMBUATAN JAWABAN & PEMBAHASAN: ${includeSolutions 
      ? 'WAJIB susun kunci_jawaban yang presisi dan susun pembahasan_langkah secara terperinci tahap demi tahap (step-by-step), mencakup rumus kimia, substitusi angka stoikiometri, dan analisis ilmiahnya.' 
-     : 'DINONAKTIFKAN (FOKUS 100% MAKSIMAL PADA KUALITAS NASKAH SOAL). Pengajar TIDAK MEMERLUKAN langkah pembahasan panjang. KERAHKAN 100% KUOTA TOKEN DAN KAPASITAS PENALARAN AI UNTUK MENYUSUN BUTIR SOAL KIMIA TERBAIK: susun narasi stimulus kontekstual yang mendalam, sajikan tabel data eksperimen empiris, angka stoikiometri yang presisi, dan opsi jawaban dengan distraktor (pengecoh) yang cerdas dan menantang nalar siswa. Cukup berikan huruf kunci_jawaban singkat (misal: "A") dan KOSONGKAN pembahasan_langkah agar kuota token tidak terbuang!'}
+     : 'DINONAKTIFKAN (FOKUS 100% MAKSIMAL PADA KUALITAS NASKAH SOAL). Pengajar TIDAK MEMERLUKAN langkah pembahasan panjang. KERAHKAN 100% KUOTA TOKEN DAN KAPASITAS PENALARAN AI UNTUK MENYUSUN BUTIR SOAL TERBAIK: susun narasi stimulus kontekstual yang mendalam, sajikan tabel data eksperimen empiris, angka yang presisi, dan opsi jawaban dengan distraktor (pengecoh) yang cerdas dan menantang nalar siswa. Cukup berikan huruf kunci_jawaban singkat (misal: "A") dan KOSONGKAN pembahasan_langkah agar kuota token tidak terbuang!'}
 
 9. BAHASA & KURIKULUM: ${isPearson 
      ? 'WAJIB 100% BAHASA INGGRIS (British English). Gunakan istilah dan tata nama kurikulum Pearson Edexcel International GCSE / A-Level (ethanoic acid, propanoic acid, cm³, dm³, mol dm⁻³, limiting reagent, Brønsted-Lowry, Ka, Kw = 1.0 x 10^-14 mol² dm⁻⁶). Judul naskah soal WAJIB Bahasa Inggris (misal: "PEARSON EDEXCEL INTERNATIONAL A-LEVEL ASSESSMENT - ' + topic.toUpperCase() + '"). PENTING: Nama kunci JSON WAJIB TETAP ("judul", "jenjang", "topik_utama", "daftar_soal", "nomor", "pertanyaan", "pilihan_jawaban", "kunci_jawaban", "pembahasan_langkah") dan DILARANG diubah ke bahasa Inggris!' 
@@ -2409,11 +2806,19 @@ ${typeInstruction}
         return;
       }
       const accInfo = getGeneratorAccountInfo();
-      if (accInfo && accInfo.peran !== 'master' && Number(accInfo.saldo || 0) <= 0) {
-        alert("Token Penggunaan AI Berbayar anda habis, hubungi U Tito untuk penambahan kuota.");
-        const modal = document.getElementById("connectionModal");
-        if (modal) modal.classList.remove("hidden");
-        return;
+      const requiredQuota = hitungBobotKuotaSoalClient(numQuestions, includeParallel);
+      if (accInfo && accInfo.peran !== 'master') {
+        const s = Number(accInfo.saldo || 0);
+        if (s <= 0) {
+          alert("Token Penggunaan AI Berbayar Anda habis. Hubungi U Tito untuk penambahan kuota.");
+          const modal = document.getElementById("connectionModal");
+          if (modal) modal.classList.remove("hidden");
+          return;
+        }
+        if (s < requiredQuota) {
+          alert(`Sisa kuota Anda (${s} kuota) tidak mencukupi untuk membuat paket ini (membutuhkan ${requiredQuota} kuota: ${numQuestions} butir soal${includeParallel ? ' + Paket Paralel' : ''}).\n\nSilakan sesuaikan jumlah butir soal atau hubungi U Tito untuk penambahan kuota.`);
+          return;
+        }
       }
     }
 
@@ -2505,6 +2910,8 @@ ${typeInstruction}
         prompt: userPrompt,
         systemInstruction: BASE_CHEMISTRY_PROMPT,
         schema: quizJsonSchema,
+        numQuestions: numQuestions,
+        includeParallel: includeParallel,
         maxOutputTokens: model === "deepseek-flash" ? deepSeekOutputTokenBudget : 8192
       };
 
@@ -3205,6 +3612,8 @@ function renderPrintLayout(pkg) {
   try {
     const isPearson = (pkg.jenjang || "").toLowerCase().includes("pearson") || (pkg.jenjang || "").toLowerCase().includes("edexcel");
     const isNoStimulus = (pkg.stimulus_model || "").toLowerCase().includes("tanpa stimulus");
+    const customTeacher = getCustomTeacherName();
+    const customSchool = getCustomSchoolName();
 
     const headerTitleElem = document.getElementById("printHeaderTitle");
     if (headerTitleElem) {
@@ -3535,13 +3944,28 @@ function initExportListeners() {
     });
   }
 
-  document.getElementById("btnExportWord").addEventListener("click", () => {
-    if (!currentPackage) {
-      alert("⚠️ Data paket soal belum tersedia. Silakan buat soal terlebih dahulu.");
-      return;
-    }
-    exportToWordDocx(currentPackage);
-  });
+  // Modal Pilihan Ekspor Word A4 (Versi Siswa vs Versi Guru)
+  const btnExportWord = document.getElementById("btnExportWord");
+  if (btnExportWord) {
+    btnExportWord.addEventListener("click", () => {
+      if (!currentPackage) {
+        alert("⚠️ Data paket soal belum tersedia. Silakan buat soal terlebih dahulu.");
+        return;
+      }
+      openWordExportModal();
+    });
+  }
+
+  const btnConfirmWord = document.getElementById("btnConfirmWordExport");
+  if (btnConfirmWord) {
+    btnConfirmWord.addEventListener("click", () => {
+      if (!currentPackage) return;
+      const selected = document.querySelector('input[name="wordExportOption"]:checked');
+      const mode = selected ? selected.value : 'guru';
+      exportToWordDocx(currentPackage, mode);
+      closeWordExportModal();
+    });
+  }
 
   document.getElementById("btnExportExcelQuizizz").addEventListener("click", () => {
     if (!currentPackage) {
@@ -3960,8 +4384,23 @@ function formatPromptWithSubpartsAndDotsForWord(promptText, isStructuredOrEssay 
   }
 }
 
+function openWordExportModal() {
+  const modal = document.getElementById("modalWordExport");
+  if (modal) {
+    modal.classList.remove("hidden");
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+  }
+}
+
+function closeWordExportModal() {
+  const modal = document.getElementById("modalWordExport");
+  if (modal) modal.classList.add("hidden");
+}
+
 // WORD EXPORTER (.doc / .docx - STANDAR UKURAN KERTAS A4 & FONT TIMES NEW ROMAN 12PT)
-function exportToWordDocx(pkg) {
+function exportToWordDocx(pkg, exportMode = 'guru') {
   if (!pkg) {
     alert("⚠️ Data paket soal belum tersedia. Silakan buat soal terlebih dahulu.");
     return;
@@ -4003,6 +4442,8 @@ function exportToWordDocx(pkg) {
 
     const isPearson = (pkg.jenjang || "").toLowerCase().includes("pearson") || (pkg.jenjang || "").toLowerCase().includes("edexcel");
     const isNoStimulus = (pkg.stimulus_model || "").toLowerCase().includes("tanpa stimulus");
+    const customTeacher = getCustomTeacherName();
+    const customSchool = getCustomSchoolName();
 
     const formatWordQuestions = (questions) => {
       let renderedWordHtml = (questions || []).map((soal) => {
@@ -4392,6 +4833,7 @@ function exportToWordDocx(pkg) {
                   <div style="font-size: 13pt; font-weight: bold; color: #000000; font-family: 'Times New Roman', Times, serif;">Pearson Edexcel International GCSE / Advanced Level</div>
                   <div style="font-size: 11pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">Chemistry — ${(pkg.topik_utama || 'Examination Paper').toUpperCase()}</div>
                   <div style="font-size: 9.5pt; color: #334155; margin-top: 4pt; line-height: 1.35; font-family: 'Times New Roman', Times, serif;">
+                    <b>Centre / School:</b> ${customSchool} &bull; <b>Teacher:</b> ${customTeacher}<br>
                     <b>Instructions:</b> Answer ALL questions. • Use black ink or ball-point pen. • Show all stages in calculations with correct units. • Calculators may be used.
                   </div>
                 </td>
@@ -4401,10 +4843,10 @@ function exportToWordDocx(pkg) {
             <table style="width: 100%; border: none; border-bottom: 2px solid #000000; margin-bottom: 14pt; padding-bottom: 6pt; font-family: 'Times New Roman', Times, serif;">
               <tr>
                 <td style="border: none; padding: 0; vertical-align: top; width: 56%; font-family: 'Times New Roman', Times, serif;">
-                  <div style="font-size: 13pt; font-weight: bold; color: #000000; letter-spacing: 0.5px;">SMA PROGRESIF BUMI SHALAWAT</div>
+                  <div style="font-size: 13pt; font-weight: bold; color: #000000; letter-spacing: 0.5px;">${customSchool.toUpperCase()}</div>
                   <div style="font-size: 11pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt;">${(pkg.judul || 'ASESMEN &amp; DRILLING SOAL KIMIA').toUpperCase()}</div>
                   <div style="font-size: 10pt; color: #475569; margin-top: 2pt;">
-                    Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang || 'SMA'} | Materi: ${pkg.topik_utama || 'Kimia'}${exportSavedOnly ? ' (Koleksi Pilihan Guru)' : ''}
+                    Guru Pengampu: <b>${customTeacher}</b> | Mapel: Kimia | Jenjang: ${pkg.jenjang || 'SMA'} | Materi: ${pkg.topik_utama || 'Kimia'}${exportSavedOnly ? ' (Pilihan Guru)' : ''}
                   </div>
                 </td>
                 <td style="border: none; padding: 0; vertical-align: top; width: 44%; text-align: right; font-family: 'Times New Roman', Times, serif;">
@@ -4417,21 +4859,26 @@ function exportToWordDocx(pkg) {
               </tr>
             </table>
           `}
-          ${questionsPart}
-
-          <div class="page-break"></div>
-          ${solutionsPart}
-
-          ${kisiPart}
+          ${exportMode === 'siswa' 
+            ? questionsPart 
+            : (exportMode === 'kunci_saja' 
+                ? (solutionsPart + (kisiPart ? `<div class="page-break"></div>` + kisiPart : ''))
+                : (questionsPart + `<div class="page-break"></div>` + solutionsPart + (kisiPart ? `<div class="page-break"></div>` + kisiPart : ''))
+              )
+          }
         </div>
       </body>
       </html>`;
+
+    const modeSuffix = exportMode === 'siswa' 
+      ? '_Versi_Siswa_A4_TNR' 
+      : (exportMode === 'kunci_saja' ? '_Kunci_Pembahasan_A4_TNR' : '_Lengkap_Guru_A4_TNR');
 
     const blob = new Blob(['\ufeff', docContent], { type: 'application/msword;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${(pkg.judul || "Asesmen_Kimia").replace(/\s+/g, "_")}${exportSavedOnly ? '_Pilihan' : ''}_A4_TNR.doc`;
+    a.download = `${(pkg.judul || "Asesmen_Kimia").replace(/\s+/g, "_")}${exportSavedOnly ? '_Pilihan' : ''}${modeSuffix}.doc`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
