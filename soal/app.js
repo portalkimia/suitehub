@@ -55,13 +55,44 @@ PEDOMAN UTAMA:
    - Pastikan opsi jawaban pada Sebab-Akibat dan Asosiasi mengikuti standar baku nasional secara konsisten.
    - Jika tingkat kesulitan bertuliskan 'Campuran', distribusikan level kognitif secara bertingkat dan proporsional dari L1 (C1-C2 Pemahaman), L2 (C3 Aplikasi & Perhitungan), hingga L3 (C4-C5 Penalaran HOTS).
 
-6. KURIKULUM PEARSON EDEXCEL (100% BAHASA INGGRIS):
-   - Jika jenjang adalah Pearson Edexcel (Grade 10/11/12): SELURUH naskah soal (judul, pertanyaan, sub-soal, opsi, kunci, dan mark scheme) WAJIB 100% MENGGUNAKAN BAHASA INGGRIS (British English).
-   - Gunakan nomenklatur dan terminologi IUPAC resmi Edexcel: 'ethanoic acid' (BUKAN 'acetic acid'), 'propanoic acid', 'cm³', 'dm³', 'mol dm⁻³', 'limiting reagent', 'enthalpy change of neutralisation', 'Brønsted–Lowry', 'Kw = 1.0 x 10^-14 mol² dm⁻⁶', 'Ka'.
-   - Format butir soal mengikuti structured questions paper: pengantar kasus/reaksi diikuti sub-pertanyaan bertingkat a), b), c)... dengan poin nilai [1 mark], [2 marks], dll.
+6. STANDAR UJIAN RESMI PEARSON EDEXCEL (100% BRITISH ENGLISH):
+   - Jika jenjang adalah Pearson Edexcel (Grade 10 IGCSE, Grade 11 International AS, atau Grade 12 International A2):
+     * SELURUH naskah (judul, pengantar, pertanyaan, sub-soal, opsi, kunci, dan mark scheme) WAJIB 100% BAHASA INGGRIS BAKU (British English).
+     * Nomenklatur & Konvensi IUPAC resmi Edexcel: 'ethanoic acid' (BUKAN 'acetic acid'), 'propanoic acid', 'cm³', 'dm³', 'mol dm⁻³', 'g mol⁻¹', 'limiting reagent', 'enthalpy change of neutralisation', 'relative formula mass Mr', 'molar gas volume at r.t.p. = 24.0 dm³ mol⁻¹', 'Kw = 1.00 x 10^-14 mol² dm⁻⁶', 'Ka', 'R = 8.31 J mol⁻¹ K⁻¹'.
+     * Taksonomi Kata Perintah (Command Words) resmi Pearson Edexcel:
+       - 'State' / 'Name' / 'Give': 1 mark recall atau identifikasi singkat.
+       - 'Define': Definisi kimia presisi (misal: standard enthalpy of combustion, first electron affinity, buffer solution).
+       - 'Calculate': Perhitungan kuantitatif lengkap dengan rumus, substitusi angka, dan angka penting yang tepat (2 atau 3 s.f.).
+       - 'Describe': Menyebutkan observasi empiris laboratorium (effervescence / bubbling, precipitate color & solubility, temperature change).
+       - 'Explain': Menjelaskan konsep 'mengapa' menggunakan prinsip kimia, gaya antarmolekul, ikatan, atau orbital elektron.
+       - 'Write an ionic equation including state symbols': Persamaan ionik dengan simbol wujud (aq, s, l, g).
+       - 'Deduce' / 'Suggest': Penarikan kesimpulan logis dari data atau tabel tren periodik.
+     * Aturan Butir Soal Terstruktur (Section B Style):
+       - Diawali konteks ("This question is about...", "A student carried out an experiment to...").
+       - Sub-soal bertingkat: (a)(i), (a)(ii), (b)(i), (b)(ii), (c)... dengan alokasi mark di akhir setiap sub-soal: [1 mark], [2 marks], [3 marks].
+       - Di akhir butir soal WAJIB dicantumkan total mark: [Total for Question X = Y marks].
+     * Aturan Multiple Choice Questions (Section A Style):
+       - WAJIB TEPAT 4 OPSI: A, B, C, D (DILARANG KERAS 5 opsi!).
+       - Setiap butir MCQ bernilai tepat 1 mark.
+     * Standar Kunci & Worked Solutions (Official Pearson Mark Scheme):
+       - Format wajib menggunakan struktur Mark Scheme resmi Edexcel:
+         M1: Method mark pertama (misal: calculation of moles of acid)
+         M2: Method mark kedua / intermediate step
+         A1: Accuracy mark (angka final + satuan benar)
+         Additional Guidance: ALLOW..., IGNORE..., DO NOT ALLOW..., TE (Transferred Error / ECF).
 
 7. FORMAT URAIAN TERSTRUKTUR & MODE TANPA STIMULUS:
-   - Untuk soal Esai / Uraian Terstruktur: Susun butir soal dengan sub-pertanyaan bertingkat: a), b), c)... Kosongkan pilihan_jawaban (isi array kosong []).
+   - Untuk soal Esai / Uraian Terstruktur:
+     * Tuliskan stem / narasi pengantar soal terlebih dahulu (jika ada).
+     * Setiap sub-pertanyaan bertingkat WAJIB dipisahkan pada BARIS BARU tersendiri dengan diawali (a), (b), (c)... Contoh:
+       Pengantar reaksi atau kasus...
+       (a) Pertanyaan sub a... [1 mark]
+       (b) Pertanyaan sub b... [2 marks]
+       (c) Pertanyaan sub c... [3 marks]
+     * DILARANG KERAS menggabungkan sub-pertanyaan (a), (b), (c) dalam satu baris/paragraf bersambung.
+     * DILARANG menuliskan titik-titik manual seperti 'Answer: .............' atau 'Jawaban: .............' di dalam string pertanyaan karena sistem otomatis menambahkan lembar jawab bertitik-titik untuk siswa.
+     * Kosongkan pilihan_jawaban (isi array kosong []).
+     * Kunci jawaban dan pembahasan untuk uraian terstruktur wajib dirinci per sub-poin: (a) ..., (b) ..., (c) ...
    - Jika dipilih 'Tanpa Stimulus (Drilling Langsung)': DILARANG membuat cerita/narasi konteks panjang. Langsung ke pokok reaksi/perhitungan to the point demi efisiensi kertas saat dicetak.
 `;
 
@@ -719,8 +750,183 @@ function initConnectionModal() {
   }, 800);
 }
 
+// DATA KURIKULUM & TOPIK DINAMIS (PEARSON EDEXCEL VS NASIONAL)
+const PEARSON_CURRICULUM_DATA = {
+  grade10: [
+    { value: "Principles of Chemistry: States of Matter, Formulae & Calculations", label: "Principles: Formulae, Equations & Chemical Calculations" },
+    { value: "Atomic Structure, Periodic Table & Chemical Bonding", label: "Atomic Structure, Periodic Table & Chemical Bonding" },
+    { value: "Inorganic Chemistry: Reactivity Series, Extraction & Rusting", label: "Reactivity Series, Metal Extraction & Rusting" },
+    { value: "Acids, Alkalis, Titrations & Salt Preparation", label: "Acids, Alkalis, Titrations & Salt Preparation" },
+    { value: "Energetics, Rates of Reaction & Reversible Equilibria", label: "Energetics, Rates of Reaction & Reversible Equilibria" },
+    { value: "Organic Chemistry: Alkanes, Alkenes, Alcohols & Polymers", label: "Organic Chemistry: Alkanes, Alkenes, Alcohols & Polymers" },
+    { value: "Qualitative Analysis: Chemical Tests for Gases, Cations & Anions", label: "Qualitative Analysis: Tests for Gases, Cations & Anions" },
+    { value: "CUSTOM", label: "[Other Topic / Custom Specification]" }
+  ],
+  grade11: [
+    { value: "Unit 1: Formulae, Equations and Amount of Substance (Moles)", label: "Unit 1: Formulae, Equations and Amount of Substance" },
+    { value: "Unit 1: Energetics (Enthalpy Changes & Hess's Law Cycles)", label: "Unit 1: Energetics (Enthalpy Changes & Hess Cycles)" },
+    { value: "Unit 1: Atomic Structure, Ionisation Energies & Bonding", label: "Unit 1: Atomic Structure, Ionisation Energies & Bonding" },
+    { value: "Unit 1: Introductory Organic Chemistry, Alkanes & Alkenes", label: "Unit 1: Introductory Organic Chemistry, Alkanes & Alkenes" },
+    { value: "Unit 2: Intermolecular Forces & Halogenoalkanes", label: "Unit 2: Intermolecular Forces & Halogenoalkanes" },
+    { value: "Unit 2: Alcohols, Mass Spectrometry & Infrared (IR)", label: "Unit 2: Alcohols, Mass Spectrometry & Infrared (IR)" },
+    { value: "Unit 2: Kinetics I & Chemical Equilibria I (Dynamic Equilibrium)", label: "Unit 2: Kinetics I & Chemical Equilibria I" },
+    { value: "Unit 2: Group 2 Alkaline Earth Metals & Group 7 Halogens", label: "Unit 2: Group 2 Alkaline Earth Metals & Group 7 Halogens" },
+    { value: "Unit 3: Practical Skills in Chemistry I (Core Practicals & Titration)", label: "Unit 3: Practical Skills in Chemistry I (Core Practicals)" },
+    { value: "CUSTOM", label: "[Other Topic / Custom Specification]" }
+  ],
+  grade12: [
+    { value: "Unit 4: Kinetics II (Rate Equations, Orders, Arrhenius & Mechanisms)", label: "Unit 4: Kinetics II (Rate Equations, Orders & Arrhenius)" },
+    { value: "Unit 4: Entropy, Lattice Energy & Born-Haber Cycles", label: "Unit 4: Entropy, Lattice Energy & Born-Haber Cycles" },
+    { value: "Unit 4: Chemical Equilibria II (Kc, Kp & Temperature Effects)", label: "Unit 4: Chemical Equilibria II (Kc, Kp)" },
+    { value: "Unit 4: Acid-Base Equilibria (pH, Kw, Ka, Buffers & Titration Curves)", label: "Unit 4: Acid-Base Equilibria (pH, Kw, Ka, Buffers & Titrations)" },
+    { value: "Unit 4: Carbonyl Compounds, Carboxylic Acids & Acyl Chlorides", label: "Unit 4: Carbonyl Compounds, Carboxylic Acids & Derivatives" },
+    { value: "Unit 5: Redox Equilibria, Standard Electrode Potentials (E°) & Cells", label: "Unit 5: Redox Equilibria, Electrode Potentials (E°) & Cells" },
+    { value: "Unit 5: Transition Metals, Ligand Exchange & Complex Ions", label: "Unit 5: Transition Metals, Ligands & Complex Ions" },
+    { value: "Unit 5: Arenes & Benzene Chemistry (Electrophilic Substitution)", label: "Unit 5: Arenes & Benzene Chemistry" },
+    { value: "Unit 5: Organic Nitrogen Chemistry (Amines, Amides, Amino Acids & Polymers)", label: "Unit 5: Organic Nitrogen Chemistry (Amines, Amides & Amino Acids)" },
+    { value: "Unit 6: Practical Skills in Chemistry II (Organic Synthesis, TLC, 1H/13C-NMR)", label: "Unit 6: Practical Skills in Chemistry II (Synthesis & NMR)" },
+    { value: "CUSTOM", label: "[Other Topic / Custom Specification]" }
+  ]
+};
+
+const INDONESIA_TOPIC_LIST = [
+  { value: "Stoikiometri & Hukum Dasar Kimia", label: "Stoikiometri & Hukum Dasar Kimia" },
+  { value: "Larutan Asam-Basa & Indikator pH", label: "Larutan Asam-Basa & Indikator pH" },
+  { value: "Larutan Penyangga (Buffer)", label: "Larutan Penyangga (Buffer)" },
+  { value: "Hidrolisis Garam", label: "Hidrolisis Garam" },
+  { value: "Kelarutan dan Hasil Kali Kelarutan (Ksp)", label: "Kelarutan dan Hasil Kali Kelarutan (Ksp)" },
+  { value: "Termokimia & Entalpi Reaksi", label: "Termokimia & Entalpi Reaksi" },
+  { value: "Laju Reaksi & Teori Tumbukan", label: "Laju Reaksi & Teori Tumbukan" },
+  { value: "Kesetimbangan Kimia & Asas Le Chatelier", label: "Kesetimbangan Kimia & Asas Le Chatelier" },
+  { value: "Reaksi Redoks & Penyetaraan Reaksi", label: "Reaksi Redoks & Penyetaraan Reaksi" },
+  { value: "Elektrokimia (Sel Volta & Elektrolisis)", label: "Elektrokimia (Sel Volta & Elektrolisis)" },
+  { value: "Struktur Atom & Sistem Periodik Unsur", label: "Struktur Atom & Sistem Periodik Unsur" },
+  { value: "Ikatan Kimia & Geometri Molekul", label: "Ikatan Kimia & Geometri Molekul" },
+  { value: "Senyawa Hidrokarbon & Minyak Bumi", label: "Senyawa Hidrokarbon & Minyak Bumi" },
+  { value: "Gugus Fungsi Senyawa Karbon", label: "Gugus Fungsi Senyawa Karbon" },
+  { value: "Makromolekul & Polimer", label: "Makromolekul & Polimer" },
+  { value: "Kimia Koloid & Sifat Koloid", label: "Kimia Koloid & Sifat Koloid" },
+  { value: "Kimia Unsur & Sifat Periodik", label: "Kimia Unsur & Sifat Periodik" },
+  { value: "Kimia Lingkungan & Kimia Hijau", label: "Kimia Lingkungan & Kimia Hijau" },
+  { value: "CUSTOM", label: "[Topik Lain / Tulis Sendiri]" }
+];
+
+const PEARSON_TYPES_LIST = [
+  { value: "Section B: Structured Questions Paper (Exam Style with subparts & marks)", label: "📝 Section B: Structured Questions Paper (Subparts & Marks)" },
+  { value: "Section A: Multiple Choice Questions (4 Options: A to D)", label: "🔘 Section A: Multiple Choice Questions (4 Options: A to D)" },
+  { value: "Complete Examination Paper (Section A MCQs + Section B Structured)", label: "📋 Complete Exam Paper (Section A MCQs + Section B Structured)" },
+  { value: "Core Practical & Experimental Skills (Unit 3/6 Laboratory & Data Analysis)", label: "🧪 Core Practical & Experimental Analysis (Unit 3/6 Style)" }
+];
+
+const INDONESIA_TYPES_LIST = [
+  { value: "Pilihan Ganda Biasa (A-E)", label: "Pilihan Ganda Biasa (5 Opsi: A s.d. E)" },
+  { value: "TKA Model Standar (Campuran Tipe 1 PG, Tipe 2 Asosiasi 1-2-3-4, Tipe 3 Sebab-Akibat)", label: "🎯 TKA Standar (Campuran Tipe 1 PG, Tipe 2 Asosiasi, Tipe 3 Sebab-Akibat)" },
+  { value: "Campuran Semua Bentuk Soal (PG Biasa, PG Kompleks 1-2-3-4, Sebab-Akibat, Esai/Tabel)", label: "🎲 Campuran Multi-Bentuk (PG, Kompleks 1-2-3-4, Sebab-Akibat, Esai)" },
+  { value: "Esai / Uraian Terstruktur (Sub a, b, c & Garis Lembar Jawab)", label: "📝 Esai / Uraian Terstruktur (Sub-pertanyaan a, b, c & Garis Lembar Jawab)" },
+  { value: "Pilihan Ganda Kompleks (Kombinasi Pernyataan 1, 2, 3, 4)", label: "PG Kompleks (Kombinasi Pernyataan 1, 2, 3, 4 - Asosiasi)" },
+  { value: "Pilihan Ganda Kompleks Matriks / Tabel (Benar-Salah)", label: "PG Kompleks Tabel (Benar / Salah - AKM)" },
+  { value: "Sebab-Akibat / Asosiasi (UTBK)", label: "Sebab-Akibat / Hubungan Antar-Hal (Pernyataan - Alasan)" },
+  { value: "Esai / Uraian Perhitungan", label: "Esai / Uraian Perhitungan Bertingkat" }
+];
+
+const PEARSON_STIMULUS_LIST = [
+  { value: "Core Practical & Laboratory Investigation (Titration, Calorimetry, Rates, Synthesis)", label: "🧪 Core Practical & Laboratory Investigation" },
+  { value: "Industrial & Environmental Chemistry (Haber Process, Contact Process, Catalysis)", label: "🏭 Industrial & Environmental Chemistry" },
+  { value: "Analytical & Spectroscopic Data (Mass Spec, IR, NMR, Chromatography)", label: "📊 Analytical & Spectroscopic Data" },
+  { value: "Theoretical & Pure Conceptual Principles", label: "📚 Pure Conceptual & Reaction Mechanisms" },
+  { value: "Tanpa Stimulus (Drilling Soal Langsung & Hemat Kertas)", label: "⚡ Direct Questions (No Stimulus / Paper-Saving)" }
+];
+
+const INDONESIA_STIMULUS_LIST = [
+  { value: "Kimia Hijau & Isu Lingkungan", label: "🌿 Kimia Hijau & Isu Lingkungan (Baterai EV, Polusi, Efisiensi)" },
+  { value: "Kontekstual Kehidupan Sehari-hari", label: "🏠 Kontekstual Sehari-hari (Antasida, Korosi, Bahan Rumah Tangga)" },
+  { value: "Proses Industri Kimia", label: "🏭 Proses Industri Kimia (Amonia Haber-Bosch, Kontak Asam Sulfat)" },
+  { value: "Prosedur Laboratorium & Praktikum", label: "🧪 Laboratorium & Praktikum (Titrasi, Uji Nyala, Kalorimeter)" },
+  { value: "Konseptual & Teori Murni", label: "📚 Konseptual & Teori Murni (Prinsip Kimia Standar)" },
+  { value: "Tanpa Stimulus (Drilling Soal Langsung & Hemat Kertas)", label: "⚡ Tanpa Stimulus (Drilling Soal Langsung & Hemat Kertas)" }
+];
+
+function updateCurriculumFormUI() {
+  const gradeElem = document.getElementById("gradeSelect");
+  const typeElem = document.getElementById("questionTypeSelect");
+  const topicElem = document.getElementById("topicSelect");
+  const stimulusElem = document.getElementById("stimulusSelect");
+  if (!gradeElem || !typeElem || !topicElem || !stimulusElem) return;
+
+  const gradeVal = gradeElem.value || "";
+  const isPearson = gradeVal.toLowerCase().includes("pearson") || gradeVal.toLowerCase().includes("edexcel");
+
+  const prevType = typeElem.value;
+  const prevTopic = topicElem.value;
+  const prevStimulus = stimulusElem.value;
+
+  if (isPearson) {
+    // 1. Tipe Soal Resmi Pearson
+    typeElem.innerHTML = PEARSON_TYPES_LIST.map(item => 
+      `<option value="${item.value}" ${item.value === prevType ? "selected" : ""}>${item.label}</option>`
+    ).join("");
+    if (!PEARSON_TYPES_LIST.some(item => item.value === prevType)) {
+      typeElem.selectedIndex = 0;
+    }
+
+    // 2. Topik Materi Pokok Pearson
+    let topicList = PEARSON_CURRICULUM_DATA.grade11;
+    if (gradeVal.includes("Grade 10")) topicList = PEARSON_CURRICULUM_DATA.grade10;
+    else if (gradeVal.includes("Grade 12")) topicList = PEARSON_CURRICULUM_DATA.grade12;
+
+    topicElem.innerHTML = topicList.map(item =>
+      `<option value="${item.value}" ${item.value === prevTopic ? "selected" : ""}>${item.label}</option>`
+    ).join("");
+    if (!topicList.some(item => item.value === prevTopic)) {
+      topicElem.selectedIndex = 0;
+    }
+
+    // 3. Model Stimulus Pearson
+    stimulusElem.innerHTML = PEARSON_STIMULUS_LIST.map(item =>
+      `<option value="${item.value}" ${item.value === prevStimulus ? "selected" : ""}>${item.label}</option>`
+    ).join("");
+    if (!PEARSON_STIMULUS_LIST.some(item => item.value === prevStimulus)) {
+      stimulusElem.selectedIndex = 0;
+    }
+  } else {
+    // Kurikulum Nasional
+    typeElem.innerHTML = INDONESIA_TYPES_LIST.map(item =>
+      `<option value="${item.value}" ${item.value === prevType ? "selected" : ""}>${item.label}</option>`
+    ).join("");
+    if (!INDONESIA_TYPES_LIST.some(item => item.value === prevType)) {
+      typeElem.selectedIndex = 1; // Default TKA Standar
+    }
+
+    topicElem.innerHTML = INDONESIA_TOPIC_LIST.map(item =>
+      `<option value="${item.value}" ${item.value === prevTopic ? "selected" : ""}>${item.label}</option>`
+    ).join("");
+    if (!INDONESIA_TOPIC_LIST.some(item => item.value === prevTopic)) {
+      topicElem.selectedIndex = 0;
+    }
+
+    stimulusElem.innerHTML = INDONESIA_STIMULUS_LIST.map(item =>
+      `<option value="${item.value}" ${item.value === prevStimulus ? "selected" : ""}>${item.label}</option>`
+    ).join("");
+    if (!INDONESIA_STIMULUS_LIST.some(item => item.value === prevStimulus)) {
+      stimulusElem.selectedIndex = 0;
+    }
+  }
+
+  // Toggle custom topic container
+  const customContainer = document.getElementById("customTopicContainer");
+  if (customContainer) {
+    if (topicElem.value === "CUSTOM") customContainer.classList.remove("hidden");
+    else customContainer.classList.add("hidden");
+  }
+}
+
 // FORM LISTENERS
 function initFormListeners() {
+  const gradeSelect = document.getElementById("gradeSelect");
+  if (gradeSelect) {
+    gradeSelect.addEventListener("change", updateCurriculumFormUI);
+  }
+
   const topicSelect = document.getElementById("topicSelect");
   const customContainer = document.getElementById("customTopicContainer");
 
@@ -884,6 +1090,157 @@ function syncSavedQuestions() {
 }
 
 /**
+ * KONVERTER NOTASI KIMIA & FORMULA LATEX UNTUK TAMPILAN WEB (PREVIEW)
+ * Mengubah notasi kimia LaTeX menjadi HTML native (<sub>, <sup>, &rarr;, &#8652;, dll.)
+ * agar font konsisten, tidak miring (italic) matematika, spasi tetap utuh, dan bebas kode LaTeX mentah.
+ */
+function formatChemistryForWebHtml(text) {
+  if (!text) return "";
+  let s = String(text);
+
+  // 1. Bersihkan persentase LaTeX: $50{,}0\%$ -> 50,0%
+  s = s.replace(/\$\s*([0-9]+(?:\{,\}|,|\.)?[0-9]*)\s*(?:\\%|%)(?:\s*\$)?/g, (m, p1) => p1.replace(/\{,\}/g, ",") + "%");
+  s = s.replace(/([0-9]+)\{,\}([0-9]+)/g, "$1,$2");
+  s = s.replace(/\\%/g, "%");
+
+  // 2. Pecahan \frac{a}{b} -> (a)/b
+  s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "($1)/$2");
+
+  // 3. Bersihkan wrapper teks LaTeX berulang
+  let loop = 0;
+  while (/\\(?:text|mathrm|mathbf|ce|operatorname|textit|textbf|underline|mathit)\{([^{}]*)\}/.test(s) && loop++ < 10) {
+    s = s.replace(/\\(?:text|mathrm|mathbf|ce|operatorname|textit|textbf|underline|mathit)\{([^{}]*)\}/g, "$1");
+  }
+  s = s.replace(/\\(?:text|mathrm|mathbf|ce)\b/g, "");
+
+  // 4. Subscripts: _{...} atau _angka/huruf variabel tunggal
+  s = s.replace(/_\{([^{}]+)\}/g, "<sub>$1</sub>");
+  s = s.replace(/_([0-9]+|[a-z]|\+|\-)/g, "<sub>$1</sub>");
+
+  // 5. Superscripts & Derajat Celsius
+  s = s.replace(/\^\\circ\s*(?:C)?/g, "&deg;C");
+  s = s.replace(/\\circ\s*(?:C)?/g, "&deg;C");
+  s = s.replace(/\^\{([^{}]+)\}/g, "<sup>$1</sup>");
+  s = s.replace(/\^([0-9]+[\+\-]?|[\+\-]|[a-z])/g, "<sup>$1</sup>");
+
+  // 6. Panah dan Kesetimbangan Kimia
+  s = s.replace(/\\rightleftharpoons/g, "&#8652;");
+  s = s.replace(/\\longleftrightarrow/g, "&#8652;");
+  s = s.replace(/\\leftrightarrow/g, "&harr;");
+  s = s.replace(/\\longrightarrow/g, "&rarr;");
+  s = s.replace(/\\rightarrow/g, "&rarr;");
+  s = s.replace(/\\to\b/g, "&rarr;");
+  s = s.replace(/\\leftarrow/g, "&larr;");
+  s = s.replace(/<=>/g, "&#8652;");
+  s = s.replace(/->/g, "&rarr;");
+
+  // 7. Simbol Termodinamika & Yunani
+  s = s.replace(/\\Delta\s*H/g, "&Delta;H");
+  s = s.replace(/\\Delta/g, "&Delta;");
+  s = s.replace(/\\alpha/g, "&alpha;");
+  s = s.replace(/\\beta/g, "&beta;");
+  s = s.replace(/\\gamma/g, "&gamma;");
+  s = s.replace(/\\pm/g, "&plusmn;");
+  s = s.replace(/\\times/g, "&times;");
+  s = s.replace(/\\cdot/g, "&middot;");
+  s = s.replace(/\\dots/g, "...");
+  s = s.replace(/\\ldots/g, "...");
+
+  // 8. Hapus delimiter math $ dan $$
+  s = s.replace(/\$\$/g, "");
+  s = s.replace(/\$/g, "");
+
+  // 9. Bersihkan sisa backslash perintah LaTeX umum
+  s = s.replace(/\\[a-zA-Z]+/g, "");
+
+  // 10. Bersihkan kurung kurawal sisa LaTeX
+  s = s.replace(/[{}]/g, "");
+
+  return s;
+}
+
+/**
+ * PARSER SUB-PERTANYAAN URAIAN TERSTRUKTUR
+ * Memisahkan stem / pengantar soal dengan sub-soal bertingkat (a), (b), (c)...
+ * serta membuang sisa teks titik-titik (Answer: ......) buatan model AI.
+ */
+function parseStructuredQuestionContent(text) {
+  if (!text) return { hasSubparts: false, stem: "", subparts: [] };
+  let clean = String(text)
+    .replace(/(?:Answer|Jawaban)\s*:\s*[\._\s]{3,}/gi, "")
+    .replace(/\[\s*(?:Answer|Jawaban)\s*:\s*[\._\s]{3,}\]/gi, "")
+    .replace(/[\.]{5,}/g, "")
+    .replace(/[_\s]{6,}/g, " ")
+    .trim();
+
+  // Cari apakah ada sub-pertanyaan seperti (a), (b), (c) atau a), b), c) atau a., b., c.
+  const regex = /(?:^|\s+)((?:\([a-hA-H]\)|[a-hA-H][\)\.]|\([0-9]+\)|[0-9]+[\)\.]))\s+/g;
+  const matches = [];
+  let m;
+  while ((m = regex.exec(clean)) !== null) {
+    matches.push({ label: m[1], index: m.index + m[0].indexOf(m[1]), length: m[1].length });
+  }
+
+  if (!matches.length || (matches.length === 1 && matches[0].index > 80)) {
+    return { hasSubparts: false, stem: clean, subparts: [] };
+  }
+
+  const stem = clean.substring(0, matches[0].index).trim();
+  const subparts = [];
+  for (let i = 0; i < matches.length; i++) {
+    const cur = matches[i];
+    const nextStart = (i + 1 < matches.length) ? matches[i + 1].index : clean.length;
+    const content = clean.substring(cur.index + cur.length, nextStart).trim();
+    subparts.push({
+      label: cur.label,
+      text: content
+    });
+  }
+
+  return { hasSubparts: true, stem: stem, subparts: subparts };
+}
+
+function splitRomanSubparts(text) {
+  if (!text) return [];
+  const romanRegex = /(?:^|\s+)((?:\([ivx]+\)|[ivx]+[\)\.]))\s+/gi;
+  const matches = [];
+  let m;
+  while ((m = romanRegex.exec(text)) !== null) {
+    matches.push({ label: m[1], index: m.index + m[0].indexOf(m[1]), length: m[1].length });
+  }
+  if (!matches.length) return [{ label: "", text: text }];
+
+  const parts = [];
+  const intro = text.substring(0, matches[0].index).trim();
+  if (intro) parts.push({ label: "", text: intro });
+
+  for (let i = 0; i < matches.length; i++) {
+    const cur = matches[i];
+    const nextStart = (i + 1 < matches.length) ? matches[i + 1].index : text.length;
+    parts.push({
+      label: cur.label,
+      text: text.substring(cur.index + cur.length, nextStart).trim()
+    });
+  }
+  return parts;
+}
+
+function formatAnswerKeyForWeb(keyText) {
+  if (!keyText) return "-";
+  const formatted = formatChemistryForWebHtml(keyText);
+  const parsed = parseStructuredQuestionContent(formatted);
+  if (parsed.hasSubparts) {
+    return parsed.subparts.map(sub => `
+      <div class="flex items-start gap-1.5 my-1">
+        <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold font-mono text-[11px] shrink-0">${sub.label}</span>
+        <span class="text-emerald-300 font-mono text-xs leading-relaxed">${sub.text}</span>
+      </div>
+    `).join("");
+  }
+  return `<span class="text-emerald-400 font-mono text-xs sm:text-sm">${formatted}</span>`;
+}
+
+/**
  * KONVERTER NOTASI KIMIA & FORMULA LATEX MENJADI HTML NATIVE UNTUK WORD (.DOC)
  * Word tidak menjalankan JavaScript KaTeX, sehingga formula diubah menjadi
  * tag HTML native: <sub>, <sup>, &rarr;, &#8652;, &Delta;, dll.
@@ -953,6 +1310,22 @@ function formatChemistryForWordHtml(text, inTable = false) {
   s = s.replace(/\\[a-zA-Z]+/g, "");
 
   return s;
+}
+
+function formatAnswerKeyForWordHtml(keyText) {
+  if (!keyText) return "-";
+  const parsed = parseStructuredQuestionContent(keyText);
+  if (parsed.hasSubparts && parsed.subparts.length > 0) {
+    let out = [];
+    if (parsed.stem) {
+      out.push(`<div style="margin-bottom: 2pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph;">${formatChemistryForWordHtml(parsed.stem)}</div>`);
+    }
+    parsed.subparts.forEach(sub => {
+      out.push(`<div style="margin-left: 12pt; margin-top: 2pt; margin-bottom: 2pt; font-size: 10.5pt; line-height: 1.45; text-align: justify; text-justify: inter-ideograph;"><b style="color: #15803d;">${sub.label}</b> <span style="color: #0f172a;">${formatChemistryForWordHtml(sub.text)}</span></div>`);
+    });
+    return out.join("");
+  }
+  return `<span style="color: #15803d; font-weight: bold;">${formatChemistryForWordHtml(keyText)}</span>`;
 }
 
 function convertMarkdownTableToWordHtml(text) {
@@ -1079,8 +1452,8 @@ function repairAndNormalizeLatex(text) {
   s = s.replace(/\\\(([\s\S]*?)\\\)/g, (m, p1) => `$${p1}$`);
   s = s.replace(/\\\[([\s\S]*?)\\\]/g, (m, p1) => `$$${p1}$$`);
 
-  // 3. Formula dalam kurung tanpa tanda dollar: (\text{C}_x\text{H}_{2x+2}) -> ($\text{C}_x\text{H}_{2x+2}$)
-  s = s.replace(/\(([^()$\r\n]*?\\text\{[^()$\r\n]*?)\)/g, (m, p1) => `($${p1}$)`);
+  // 3. Formula dalam kurung tanpa tanda dollar (hanya jika murni formula kimia, bukan teks bahasa Inggris berkurung): (\text{C}_x\text{H}_{2x+2}) -> ($\text{C}_x\text{H}_{2x+2}$)
+  s = s.replace(/\((\s*\\text\{[^{}]+\}(?:_[0-9a-zA-Z\{\}\+\-]+|\^[0-9a-zA-Z\{\}\+\-]+)*\s*)\)/g, (m, p1) => `($${p1}$)`);
 
   // 4. Bungkus baris persamaan reaksi kimia utuh tanpa dollar (mengandung panah dan notasi kimia/fraksi)
   const lines = s.split(/\r?\n/);
@@ -1364,7 +1737,14 @@ function normalizeAndValidateQuizPackage(rawInput, defaults = {}) {
       soal.tingkat_kesulitan = soal.tingkat_kesulitan || defaults.difficulty || "Sedang";
 
       // Pertanyaan
-      soal.pertanyaan = String(soal.pertanyaan || soal.soal || soal.question || soal.teks || "Pertanyaan belum ditentukan.").trim();
+      let rawPertanyaan = String(soal.pertanyaan || soal.soal || soal.question || soal.teks || "Pertanyaan belum ditentukan.").trim();
+      rawPertanyaan = rawPertanyaan
+        .replace(/(?:Answer|Jawaban)\s*:\s*[\._\s]{3,}/gi, "")
+        .replace(/\[\s*(?:Answer|Jawaban)\s*:\s*[\._\s]{3,}\]/gi, "")
+        .replace(/[\.]{5,}/g, "")
+        .replace(/[_\s]{6,}/g, " ")
+        .trim();
+      soal.pertanyaan = rawPertanyaan;
 
       // Pilihan Jawaban (Menangani format Array maupun format Object { A: '...', B: '...' })
       if (soal.pilihan_jawaban) {
@@ -1671,13 +2051,22 @@ async function generateQuiz() {
       l2Count += (numQuestions - diffSum);
     }
 
-    difficultyInstruction = `DISTRIBUSI LEVEL KOGNITIF CAMPURAN (TOTAL ${numQuestions} BUTIR SOAL):
+    if (isPearson) {
+      difficultyInstruction = `DEMAND & ASSESSMENT OBJECTIVES (AO) DISTRIBUTION (PEARSON EDEXCEL SPECIFICATION):
+Dalam paket ${numQuestions} butir soal ini, distribusikan tingkat tuntutan kognitif sesuai standar baku Pearson Edexcel Chemistry:
+- Low Demand / AO1 (Knowledge & Understanding): Tepat ${l1Count} butir soal (menguji definisi presisi, penamaan IUPAC, recall tren periodik, identifikasi rumus kimia).
+- Standard Demand / AO2 (Application of Knowledge & Calculation): Tepat ${l2Count} butir soal (menguji stoikiometri bertingkat, hukum Hess, perhitungan pH/Ka, mekanisme reaksi standar).
+- High Demand / AO3 (Analysis, Evaluation & Unfamiliar Contexts): Tepat ${l3Count} butir soal (menguji evaluasi ketidakpastian eksperimen, analisis data spektroskopi IR/MS/NMR, kurva titrasi kompleks).
+Pada properti 'tingkat_kesulitan' di SETIAP butir soal, tuliskan: 'AO1 (Low Demand)', 'AO2 (Standard Demand)', atau 'AO3 (High Demand)'.`;
+    } else {
+      difficultyInstruction = `DISTRIBUSI LEVEL KOGNITIF CAMPURAN (TOTAL ${numQuestions} BUTIR SOAL):
 - Level 1 (Pengetahuan & Pemahaman - C1/C2): Tepat ${l1Count} butir soal (menguji konsep dasar, rumus, tata nama, struktur).
 - Level 2 (Aplikasi & Perhitungan - C3): Tepat ${l2Count} butir soal (menguji stoikiometri, reaksi kimia, substitusi rumus kuantitatif, pH, elektrokimia).
 - Level 3 (Penalaran & Logika Tinggi HOTS - C4/C5/C6): Tepat ${l3Count} butir soal (menguji analisis grafik/kurva, data eksperimen anomali, evaluasi kesetimbangan/mekanisme, kimia hijau).
 ATURAN WAJIB:
 1. Susunlah urutan butir soal secara berjenjang dari mudah (soal L1 di awal), kemudian terapan sedang (soal L2 di tengah), lalu penalaran analitis mendalam (soal L3 di nomor-nomor akhir).
 2. Pada properti 'tingkat_kesulitan' di SETIAP butir soal, WAJIB dituliskan level aslinya secara spesifik: 'L1 (C2 - Pemahaman)', 'L2 (C3 - Aplikasi)', atau 'L3 (C4/C5 - Penalaran HOTS)'.`;
+    }
   } else {
     difficultyInstruction = `Tingkat Kesulitan: ${difficulty}. Semua butir soal berbobot ${difficulty}. Pada properti 'tingkat_kesulitan' di setiap butir soal tuliskan '${difficulty}'.`;
   }
@@ -1685,16 +2074,70 @@ ATURAN WAJIB:
   // Distribusi Format Tipe Soal
   let typeInstruction = "";
   if (isPearson) {
-    typeInstruction = `FORMAT KHUSUS PEARSON EDEXCEL INTERNATIONAL A-LEVEL (STRUCTURED EXAM PAPER):
-- Seluruh teks WAJIB 100% BAHASA INGGRIS (British English).
-- Setiap butir soal nomor 1, 2, 3... diawali ringkasan kasus/persamaan reaksi/data stoikiometri, kemudian dipecah menjadi sub-pertanyaan bertingkat:
-  a) ... [1 mark]
-  b) ... [2 marks]
-  c) ... [3 marks]
-- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []) karena bertipe structured questions.
-- Pada properti 'tipe_soal', tuliskan 'Structured Question'.
-- Pada properti 'kunci_jawaban', tuliskan jawaban ringkas per sub-soal.
-- Pada properti 'pembahasan_langkah', susun Mark Scheme resmi terperinci per sub-soal a), b), c) dengan kriteria alokasi poin.`;
+    const isMcqOnly = qType.toLowerCase().includes("multiple choice") || qType.toLowerCase().includes("section a");
+    const isCompletePaper = qType.toLowerCase().includes("complete exam");
+    const isPractical = qType.toLowerCase().includes("practical") || qType.toLowerCase().includes("experimental");
+
+    if (isMcqOnly) {
+      typeInstruction = `AUTHENTIC PEARSON EDEXCEL SECTION A (MULTIPLE CHOICE QUESTIONS):
+- All questions MUST be 100% in British English.
+- EVERY question MUST have EXACTLY 4 OPTIONS: A, B, C, D (FORBIDDEN to generate 5 options!).
+- Each question is worth exactly 1 mark.
+- Rigorous question styles: stoichiometry with molar gas volume (24.0 dm³ mol⁻¹ at r.t.p.), skeletal isomers, electron configurations, ionisation energy successive jumps, atom economy & percentage yield, mass spectrometry fragment ions, reaction condition deductions.
+- Set property 'tipe_soal' to 'Multiple Choice (Section A)'.
+- Set property 'pilihan_jawaban' to an array of 4 items with 'label' ('A', 'B', 'C', 'D') and 'teks'.
+- In 'pembahasan_langkah', provide clear reasoning justifying why the key option is correct and explaining why key distractors are incorrect.`;
+    } else if (isCompletePaper) {
+      const mcqCount = Math.max(1, Math.floor(numQuestions * 0.4));
+      typeInstruction = `AUTHENTIC PEARSON EDEXCEL COMPLETE EXAMINATION PAPER:
+This paper consists of TWO sections:
+1. SECTION A (Questions 1 to ${mcqCount}): Multiple Choice Questions.
+   - EXACTLY 4 OPTIONS (A, B, C, D) per question. Worth 1 mark each.
+   - Set 'tipe_soal' to 'Multiple Choice (Section A)'.
+2. SECTION B (Questions ${mcqCount + 1} to ${numQuestions}): Structured Questions.
+   - Each question begins with a context ("This question is about...").
+   - Subparts: (a)(i), (a)(ii), (b)... with explicit mark allocations [1 mark], [2 marks], etc.
+   - At the end of each question: [Total for Question X = Y marks].
+   - Set 'tipe_soal' to 'Structured Question (Section B)'.
+   - Leave 'pilihan_jawaban' as empty array [].
+   - In 'pembahasan_langkah', use official Pearson Mark Scheme: M1, M2, A1, Additional Guidance: ALLOW..., IGNORE..., DO NOT ALLOW...`;
+    } else if (isPractical) {
+      typeInstruction = `AUTHENTIC PEARSON EDEXCEL CORE PRACTICAL & EXPERIMENTAL SKILLS (UNIT 3/6 STYLE):
+- All questions MUST be in British English, focusing on laboratory techniques and practical competencies:
+  * Volumetric titrations (burette readings, concordant titres within 0.20 cm³, indicator choices: phenolphthalein, methyl orange).
+  * Enthalpy changes in a coffee-cup calorimeter (temperature readings, cooling curve extrapolation, Q = mcΔT, percentage uncertainty = (uncertainty / reading) * 100).
+  * Rate of reaction experiments (gas collection with gas syringe, clock reactions, initial rates from tangents).
+  * Organic preparation & purification (reflux, distillation, drying with anhydrous MgSO4, boiling temperature determination).
+  * Qualitative inorganic tests (flame tests, precipitations with aqueous NaOH and NH3, halide tests with acidified AgNO3 and dilute/conc NH3).
+- Format: Multi-part structured questions with subparts (a), (b), (c) and allocated marks [1 mark], [2 marks].
+- At the end: [Total for Question X = Y marks].
+- Set 'tipe_soal' to 'Practical Skills & Data Analysis'.
+- In 'pembahasan_langkah', use official Pearson Mark Scheme with M1, M2, A1, and Additional Guidance.`;
+    } else {
+      // Default: Section B Structured Questions Paper
+      typeInstruction = `AUTHENTIC PEARSON EDEXCEL SECTION B (STRUCTURED QUESTIONS EXAM PAPER):
+- All questions MUST be 100% British English following official Pearson Edexcel IGCSE / International A-Level specifications.
+- Every question MUST begin with an authentic chemical or experimental context:
+  "This question is about..." or "A student investigated the reaction between..."
+- Break each question into structured subparts labeled (a)(i), (a)(ii), (b), (c)...
+- EVERY subpart MUST have an explicit mark allocation in square brackets at the end: [1 mark], [2 marks], [3 marks].
+- Strictly use official Pearson Command Words:
+  * 'State' / 'Name' / 'Give' [1 mark]
+  * 'Define' [1 or 2 marks]
+  * 'Calculate' [2 or 3 marks] - show formula, working, correct units and 2-3 significant figures.
+  * 'Describe' [1 or 2 marks] - observations, color changes, effervescence.
+  * 'Explain' [2 marks] - reason using chemical principles, bonding, or electron configurations.
+  * 'Write an ionic equation, including state symbols' [1 or 2 marks]
+  * 'Deduce' / 'Suggest' [1 or 2 marks]
+- At the end of each question, include the total mark: [Total for Question X = Y marks].
+- Set 'pilihan_jawaban' to empty array [].
+- Set 'tipe_soal' to 'Structured Question (Section B)'.
+- In 'pembahasan_langkah', structure solutions strictly as an Official Pearson Edexcel Mark Scheme:
+  M1: (Method mark 1, e.g. calculation of moles or first scientific point)
+  M2: (Method mark 2 / intermediate deduction)
+  A1: (Accuracy mark - final numerical answer with units or precise formula)
+  Additional Guidance: ALLOW..., IGNORE..., DO NOT ALLOW..., TE (Error Carried Forward).`;
+    }
   } else if (qType.includes("Terstruktur")) {
     typeInstruction = `FORMAT KHUSUS ESAI / URAIAN TERSTRUKTUR:
 - Setiap butir soal diawali pengantar reaksi/data kasus, lalu dipecah menjadi sub-pertanyaan bertingkat terstruktur:
@@ -2116,12 +2559,11 @@ function renderResults(pkg) {
   resultsSection.classList.remove("hidden");
   runStructuralQualityAudit();
 
-  // KaTeX rendering
+  // KaTeX rendering (gunakan hanya display math dan \(...\) agar teks kalimat bahasa Inggris tidak terformat miring tanpa spasi)
   if (window.renderMathInElement) {
     renderMathInElement(resultsSection, {
       delimiters: [
         { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false },
         { left: "\\(", right: "\\)", display: false },
         { left: "\\[", right: "\\]", display: true }
       ],
@@ -2151,7 +2593,6 @@ function renderActiveQuestionsList() {
     const mathOpts = {
       delimiters: [
         { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false },
         { left: "\\(", right: "\\)", display: false },
         { left: "\\[", right: "\\]", display: true }
       ],
@@ -2161,6 +2602,117 @@ function renderActiveQuestionsList() {
     const sElem = document.getElementById("studentQuestionsList");
     if (tElem) renderMathInElement(tElem, mathOpts);
     if (sElem) renderMathInElement(sElem, mathOpts);
+  }
+}
+
+// HELPER RENDER KONTEN PERTANYAAN WEB (TERMASUK PEMISAHAN SUBPARTS & FORMULA KIMIA)
+function renderQuestionContentForWeb(soal) {
+  if (!soal) return "";
+  const rawText = String(soal.pertanyaan || "").trim();
+
+  // 1. Ekstrak tabel markdown jika ada
+  const lines = rawText.split(/\r?\n/);
+  let beforeLines = [];
+  let tableLines = [];
+  let afterLines = [];
+  let inTable = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    const isTableLine = line.includes("|") && (line.split("|").length >= 3);
+    if (isTableLine) {
+      inTable = true;
+      tableLines.push(line);
+    } else {
+      if (inTable) afterLines.push(lines[i]);
+      else beforeLines.push(lines[i]);
+    }
+  }
+
+  const hasTable = tableLines.length >= 2;
+  const tableHtml = hasTable ? parseMarkdownTable(tableLines.join("\n")) : "";
+  const mainText = hasTable ? (beforeLines.join("\n") + "\n" + afterLines.join("\n")).trim() : rawText;
+
+  // 2. Parse sub-soal terstruktur (a), (b), (c)
+  const parsed = parseStructuredQuestionContent(mainText);
+
+  if (parsed.hasSubparts && (!soal.pilihan_jawaban || soal.pilihan_jawaban.length === 0)) {
+    let out = [];
+
+    if (parsed.stem) {
+      out.push(`<div class="text-sm leading-relaxed text-zinc-100 mb-3">${formatChemistryForWebHtml(parsed.stem)}</div>`);
+    }
+
+    if (tableHtml) {
+      out.push(`<div class="my-3 overflow-x-auto">${tableHtml}</div>`);
+    }
+
+    parsed.subparts.forEach(sub => {
+      let cleanText = sub.text;
+      let markBadge = "";
+      const markMatch = cleanText.match(/(?:\[|\()(\d+)\s*(?:marks?|mark|skor|poin)?(?:\bin total\b)?(?:\]|\))$/i);
+      if (markMatch) {
+        const markVal = parseInt(markMatch[1], 10);
+        markBadge = `<span class="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 font-mono text-xs font-bold shrink-0">(${markVal})</span>`;
+        cleanText = cleanText.substring(0, markMatch.index).trim();
+      }
+
+      const subPartsList = splitRomanSubparts(cleanText);
+      let subBodyHtml = "";
+
+      if (subPartsList.length > 1) {
+        subBodyHtml = subPartsList.map(p => {
+          if (!p.label) {
+            return `<div class="text-sm text-zinc-200 leading-relaxed mb-1.5">${formatChemistryForWebHtml(p.text)}</div>`;
+          }
+          let rText = p.text;
+          let rBadge = "";
+          const rMatch = rText.match(/(?:\[|\()(\d+)\s*(?:marks?|mark|skor|poin)?(?:\bin total\b)?(?:\]|\))$/i);
+          if (rMatch) {
+            const rVal = parseInt(rMatch[1], 10);
+            rBadge = `<span class="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 font-mono text-[11px] font-bold shrink-0">(${rVal})</span>`;
+            rText = rText.substring(0, rMatch.index).trim();
+          }
+          return `
+            <div class="flex items-start gap-2 my-1 pl-2">
+              <span class="px-1.5 py-0.5 rounded bg-zinc-800 text-violet-300 text-xs font-mono font-bold shrink-0">${p.label}</span>
+              <div class="text-sm text-zinc-200 leading-relaxed flex-grow">${formatChemistryForWebHtml(rText)}</div>
+              ${rBadge}
+            </div>
+          `;
+        }).join("");
+      } else {
+        subBodyHtml = `<div class="text-sm text-zinc-200 leading-relaxed">${formatChemistryForWebHtml(cleanText)}</div>`;
+      }
+
+      out.push(`
+        <div class="my-3 p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800/90 shadow-sm space-y-2">
+          <div class="flex items-start gap-2.5">
+            <span class="px-2.5 py-0.5 rounded-md bg-violet-600/30 border border-violet-500/30 text-violet-300 text-xs font-bold font-mono shrink-0">${sub.label}</span>
+            <div class="flex-grow space-y-1">${subBodyHtml}</div>
+            ${markBadge}
+          </div>
+          <div class="font-mono text-xs text-zinc-600 tracking-widest pl-8 select-none overflow-hidden whitespace-nowrap opacity-60">
+            ........................................................................................................................................<br>
+            ........................................................................................................................................
+          </div>
+        </div>
+      `);
+    });
+
+    const totMatch = rawText.match(/(?:\[|\()(?:Total for Question \d+ = (\d+) marks?|Total:\s*(\d+)\s*marks?)(?:\]|\))/i);
+    if (totMatch) {
+      const tot = totMatch[1] || totMatch[2];
+      out.push(`<div class="text-right text-xs font-bold text-zinc-400 mt-2 font-mono italic">(Total for Question ${soal.nomor} = ${tot} marks)</div>`);
+    }
+
+    return out.join("");
+  } else {
+    let html = `<div class="text-sm leading-relaxed text-zinc-100 mb-3">${formatChemistryForWebHtml(mainText)}</div>`;
+    if (tableHtml) {
+      html += `<div class="my-3 overflow-x-auto">${tableHtml}</div>`;
+    }
+    return html;
   }
 }
 
@@ -2192,26 +2744,34 @@ function renderTeacherQuestions(questions) {
 
     let optionsHtml = "";
     if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
+      const isPearsonCurriculum = (currentQuizData && currentQuizData.jenjang && ((currentQuizData.jenjang.toLowerCase().includes("pearson")) || (currentQuizData.jenjang.toLowerCase().includes("edexcel")))) || (document.getElementById("gradeSelect")?.value?.toLowerCase().includes("pearson")) || false;
       optionsHtml = soal.pilihan_jawaban.map((opt) => {
         const isCorrect = String(opt.label || "").toUpperCase() === String(soal.kunci_jawaban || "").toUpperCase();
         return `
           <div class="option-row ${isCorrect ? 'correct-answer' : ''}">
+            ${isPearsonCurriculum ? '<span class="inline-block w-4 h-4 border border-zinc-500 rounded-sm mr-1.5 shrink-0 text-center text-[10px] leading-4 text-zinc-400"></span>' : ''}
             <span class="option-label">${opt.label}</span>
-            <div class="flex-grow-1">${opt.teks} ${isCorrect ? '<b class="text-emerald-400 ms-2 font-mono">(Kunci Jawaban)</b>' : ''}</div>
+            <div class="flex-grow-1">${formatChemistryForWebHtml(opt.teks)} ${isCorrect ? '<b class="text-emerald-400 ms-2 font-mono">(Kunci Jawaban)</b>' : ''}</div>
           </div>
         `;
       }).join("");
+      if (isPearsonCurriculum) {
+        optionsHtml += `<div class="flex justify-end mt-1 text-xs font-mono font-bold text-sky-400">(1)</div>`;
+      }
     } else {
-      optionsHtml = `
-        <div class="p-2.5 rounded-lg bg-violet-950/20 border border-violet-500/20 text-xs text-violet-300 flex items-center gap-2 mb-2">
-          <i data-lucide="edit-3" class="w-3.5 h-3.5 text-violet-400 shrink-0"></i>
-          <span><b>Soal Uraian / Terstruktur:</b> Lembar jawab bertitik-titik disiapkan otomatis saat dicetak atau diekspor ke Word/Docs.</span>
-        </div>
-      `;
+      const hasSubparts = parseStructuredQuestionContent(soal.pertanyaan || "").hasSubparts;
+      if (!hasSubparts) {
+        optionsHtml = `
+          <div class="p-2.5 rounded-lg bg-violet-950/20 border border-violet-500/20 text-xs text-violet-300 flex items-center gap-2 mb-2">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5 text-violet-400 shrink-0"></i>
+            <span><b>Soal Uraian / Terstruktur:</b> Lembar jawab bertitik-titik disiapkan otomatis saat dicetak atau diekspor ke Word/Docs.</span>
+          </div>
+        `;
+      }
     }
 
-    // Render Tabel jika ada di pertanyaan
-    const formattedQuestion = parseMarkdownTable(soal.pertanyaan || "");
+    // Render Pertanyaan (Merapikan format kimia dan memisahkan sub-soal terstruktur)
+    const formattedQuestion = renderQuestionContentForWeb(soal);
 
     // Render SVG jika ada
     const svgHtml = soal.ilustrasi_svg ? renderSvgIllustration(soal.ilustrasi_svg, soal.caption_ilustrasi) : "";
@@ -2220,9 +2780,9 @@ function renderTeacherQuestions(questions) {
       ? soal.pembahasan_langkah.filter(s => s && !s.toLowerCase().includes("mode fokus"))
       : [];
     const hasDetailedSteps = stepsList.length > 0;
-    const stepsHtml = stepsList.map(st => `<li class="mb-1 text-zinc-200">${st}</li>`).join("");
+    const stepsHtml = stepsList.map(st => `<li class="mb-1 text-zinc-200">${formatChemistryForWebHtml(st)}</li>`).join("");
     const tipsHtml = soal.tips_atau_jebakan 
-      ? `<div class="mt-2.5 p-2.5 rounded-lg bg-amber-500/10 border-l-2 border-amber-500 text-amber-300 text-xs"><b>💡 Tips & Miskonsepsi Siswa:</b> ${soal.tips_atau_jebakan}</div>` 
+      ? `<div class="mt-2.5 p-2.5 rounded-lg bg-amber-500/10 border-l-2 border-amber-500 text-amber-300 text-xs"><b>💡 Tips & Miskonsepsi Siswa:</b> ${formatChemistryForWebHtml(soal.tips_atau_jebakan)}</div>` 
       : "";
 
     card.innerHTML = `
@@ -2244,8 +2804,8 @@ function renderTeacherQuestions(questions) {
         </div>
       </div>
 
-      <!-- Pertanyaan (Termasuk Tabel Markdown) -->
-      <div class="text-sm leading-relaxed text-zinc-100 mb-3">${formattedQuestion}</div>
+      <!-- Pertanyaan (Termasuk Tabel Markdown & Subparts) -->
+      <div class="mb-3">${formattedQuestion}</div>
 
       <!-- Ilustrasi SVG (Jika Ada) -->
       ${svgHtml}
@@ -2257,7 +2817,7 @@ function renderTeacherQuestions(questions) {
         <div class="flex items-center justify-between gap-2 mb-1.5 text-xs font-bold text-violet-300">
           <div class="flex items-center gap-2">
             <i data-lucide="key" class="w-4 h-4 text-emerald-400"></i>
-            <span>Kunci Jawaban: <b class="text-emerald-400 text-sm">${soal.kunci_jawaban || '-'}</b></span>
+            <span>Kunci Jawaban: <b class="text-emerald-400 text-sm">${formatAnswerKeyForWeb(soal.kunci_jawaban)}</b></span>
           </div>
           ${!hasDetailedSteps ? '<span class="text-[10px] text-zinc-400 italic bg-zinc-800/80 px-2 py-0.5 rounded border border-zinc-700/60">Mode Naskah Soal (Pembahasan dinonaktifkan)</span>' : ''}
         </div>
@@ -2288,14 +2848,31 @@ function renderStudentQuestions(questions) {
     card.className = "question-item";
     card.id = `student-card-${soal.nomor}`;
 
+    const parsedSub = parseStructuredQuestionContent(soal.pertanyaan || "");
+    const isStructured = parsedSub.hasSubparts && (!soal.pilihan_jawaban || soal.pilihan_jawaban.length === 0);
+
     let inputHtml = "";
     if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
+      const isPearsonCurriculum = (currentQuizData && currentQuizData.jenjang && ((currentQuizData.jenjang.toLowerCase().includes("pearson")) || (currentQuizData.jenjang.toLowerCase().includes("edexcel")))) || (document.getElementById("gradeSelect")?.value?.toLowerCase().includes("pearson")) || false;
       inputHtml = soal.pilihan_jawaban.map((opt) => `
         <label class="option-row" for="opt_${soal.nomor}_${opt.label}">
           <input type="radio" class="mr-2.5 text-violet-600 focus:ring-violet-500" name="q_${soal.nomor}" id="opt_${soal.nomor}_${opt.label}" value="${opt.label}">
           <span class="option-label">${opt.label}</span>
-          <span class="flex-grow-1">${opt.teks}</span>
+          <span class="flex-grow-1">${formatChemistryForWebHtml(opt.teks)}</span>
         </label>
+      `).join("");
+      if (isPearsonCurriculum) {
+        inputHtml += `<div class="flex justify-end mt-1 text-xs font-mono font-bold text-cyan-400">(1)</div>`;
+      }
+    } else if (isStructured) {
+      inputHtml = parsedSub.subparts.map(sub => `
+        <div class="my-2.5 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-1.5">
+          <div class="flex items-start gap-2">
+            <span class="px-2 py-0.5 rounded bg-cyan-600/30 text-cyan-300 text-xs font-bold font-mono shrink-0">${sub.label}</span>
+            <div class="text-xs text-zinc-300 flex-grow leading-relaxed">${formatChemistryForWebHtml(sub.text)}</div>
+          </div>
+          <textarea class="w-full mt-1.5 px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100 text-xs focus:ring-2 focus:ring-cyan-500 outline-none" rows="2" placeholder="Jawaban untuk sub-soal ${sub.label}..."></textarea>
+        </div>
       `).join("");
     } else {
       inputHtml = `
@@ -2303,7 +2880,10 @@ function renderStudentQuestions(questions) {
       `;
     }
 
-    const formattedQuestion = parseMarkdownTable(soal.pertanyaan || "");
+    const formattedQuestion = isStructured
+      ? (parsedSub.stem ? `<div class="text-sm text-zinc-100 mb-3">${formatChemistryForWebHtml(parsedSub.stem)}</div>` : "")
+      : renderQuestionContentForWeb(soal);
+
     const svgHtml = soal.ilustrasi_svg ? renderSvgIllustration(soal.ilustrasi_svg, soal.caption_ilustrasi) : "";
 
     card.innerHTML = `
@@ -2442,7 +3022,6 @@ function renderKisiKisiTab(kisiList) {
     const mathOpts = {
       delimiters: [
         { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false },
         { left: "\\(", right: "\\)", display: false },
         { left: "\\[", right: "\\]", display: true }
       ],
@@ -2479,6 +3058,63 @@ function renderPrintLayout(pkg) {
     if (lblNum) lblNum.textContent = isPearson ? "STUDENT ID" : "Nomor Absen";
     if (lblClass) lblClass.textContent = isPearson ? "CLASS" : "Kelas / Fase";
     if (lblDate) lblDate.textContent = isPearson ? "DATE" : "Hari / Tanggal";
+
+    const studentIdBox = document.getElementById("printStudentIdentityBox");
+    if (studentIdBox) {
+      if (isPearson) {
+        studentIdBox.innerHTML = `
+          <table style="width: 100%; border: 1.5pt solid #000; border-collapse: collapse; margin-top: 8pt; font-family: Arial, sans-serif;">
+            <tr>
+              <td style="padding: 6pt 8pt; border: 1pt solid #000; width: 45%; font-size: 9.5pt; vertical-align: top;">
+                <b>Candidate surname:</b> ....................................................<br><br>
+                <b>Other names:</b> ............................................................
+              </td>
+              <td style="padding: 6pt 8pt; border: 1pt solid #000; width: 25%; text-align: center; font-size: 9pt; vertical-align: top;">
+                <b>Centre Number</b><br>
+                <table align="center" style="margin: 4pt auto 0 auto; border-collapse: collapse;">
+                  <tr>
+                    <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                    <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                    <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                    <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                    <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                  </tr>
+                </table>
+              </td>
+              <td style="padding: 6pt 8pt; border: 1pt solid #000; width: 30%; text-align: center; font-size: 9pt; vertical-align: top;">
+                <b>Candidate Number</b><br>
+                <table align="center" style="margin: 4pt auto 0 auto; border-collapse: collapse;">
+                  <tr>
+                    <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                    <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                    <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                    <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3" style="padding: 6pt 8pt; background-color: #f8fafc; border-top: 1.5pt solid #000; font-size: 8.5pt; color: #334155; line-height: 1.35;">
+                <b>Instructions to Candidates:</b> Answer <b>ALL</b> questions. • Use black ink or ball-point pen. • Fill in the boxes at the top of this page with your name, centre number and candidate number. • Show all stages in calculations and state the correct units.
+              </td>
+            </tr>
+          </table>
+        `;
+      } else {
+        studentIdBox.innerHTML = `
+          <div style="display: flex; justify-content: space-between; width: 100%;">
+            <div>
+              <span id="printLblName">Nama Siswa</span> : .....................................................<br>
+              <span id="printLblNum">Nomor Absen</span>: .....................................................
+            </div>
+            <div>
+              <span id="printLblClass">Kelas / Fase</span>: .....................................................<br>
+              <span id="printLblDate">Hari / Tanggal</span>: .....................................................
+            </div>
+          </div>
+        `;
+      }
+    }
 
     const qContainer = document.getElementById("printQuestionsContent");
     const sContainer = document.getElementById("printSolutionsContent");
@@ -2567,6 +3203,31 @@ function renderPrintLayout(pkg) {
           </div>
         `;
       });
+
+      if (isPearson) {
+        let totalPaperMarks = 0;
+        questions.forEach(soal => {
+          if (!soal) return;
+          if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
+            totalPaperMarks += 1;
+          } else {
+            const parsedSub = parseStructuredQuestionContent(soal.pertanyaan || "");
+            if (parsedSub.hasSubparts && parsedSub.subparts.length > 0) {
+              parsedSub.subparts.forEach(sub => {
+                const markMatch = sub.text.match(/\s*(?:\[|\()(\d+)\s*(?:marks?|mark|m|poin|skor)?(?:\)|\/|\s*mark\]|\s*marks\])/i);
+                totalPaperMarks += markMatch ? parseInt(markMatch[1], 10) : 1;
+              });
+            } else {
+              totalPaperMarks += 1;
+            }
+          }
+        });
+        html += `
+          <div style="margin-top: 16pt; padding-top: 8pt; border-top: 1.5pt solid #0f172a; text-align: right; font-weight: bold; font-size: 11pt; color: #0f172a;">
+            TOTAL FOR PAPER = ${totalPaperMarks} MARKS
+          </div>
+        `;
+      }
       return html;
     };
 
@@ -2579,7 +3240,7 @@ function renderPrintLayout(pkg) {
       if (!hasDetailedSteps) {
         let cells = questions.map(q => `
           <td style="border: 1px solid #cbd5e1; padding: 4pt 8pt; text-align: center; font-size: 10pt; background: #fff;">
-            <b>No. ${q.nomor}</b><br><span style="font-weight: bold; font-size: 11pt; color: #15803d;">${q.kunci_jawaban || '-'}</span>
+            <b>No. ${q.nomor}</b><br><span style="font-weight: bold; font-size: 11pt; color: #15803d;">${formatChemistryForWordHtml(q.kunci_jawaban || '-')}</span>
           </td>
         `).join("");
         html += `
@@ -2596,15 +3257,19 @@ function renderPrintLayout(pkg) {
       questions.forEach((soal) => {
         if (!soal) return;
         const stepsList = Array.isArray(soal.pembahasan_langkah) ? soal.pembahasan_langkah : [];
-        const steps = stepsList.map(st => `<li>${st}</li>`).join("");
+        const steps = stepsList.map(st => `<li>${formatChemistryForWordHtml(st)}</li>`).join("");
+        const parsedKey = parseStructuredQuestionContent(soal.kunci_jawaban || "");
+        const isMultiKey = parsedKey.hasSubparts && parsedKey.subparts.length > 0;
+        const keyHtml = formatAnswerKeyForWordHtml(soal.kunci_jawaban);
         html += `
           <div style="margin-bottom: 10pt; page-break-inside: avoid;">
-            <div style="font-weight: bold; font-size: 10.5pt;">${soal.nomor}. ${isPearson ? 'Key / Answer' : 'Kunci'}: <u>${soal.kunci_jawaban || '-'}</u></div>
+            <div style="font-weight: bold; font-size: 10.5pt;">${soal.nomor}. ${isPearson ? 'Key / Answer' : 'Kunci'}: ${isMultiKey ? '' : keyHtml}</div>
+            ${isMultiKey ? `<div style="margin-left: 12pt; margin-top: 2pt; margin-bottom: 4pt;">${keyHtml}</div>` : ''}
             <div style="text-align: justify; line-height: 1.45; font-size: 10pt; margin: 2pt 0 4pt 0;">
               <b>${isPearson ? 'Mark Scheme &amp; Worked Solutions:' : 'Pembahasan:'}</b>
               <ul style="margin: 2pt 0 0 0; padding-left: 18pt;">${steps}</ul>
             </div>
-            ${soal.tips_atau_jebakan ? `<div style="font-size: 9.5pt; font-style: italic; color: #475569; margin: 2pt 0 0 18pt; text-align: justify;">💡 ${isPearson ? 'Tip / Common Misconception' : 'Tips'}: ${soal.tips_atau_jebakan}</div>` : ''}
+            ${soal.tips_atau_jebakan ? `<div style="font-size: 9.5pt; font-style: italic; color: #475569; margin: 2pt 0 0 18pt; text-align: justify;">💡 ${isPearson ? 'Tip / Common Misconception' : 'Tips'}: ${formatChemistryForWordHtml(soal.tips_atau_jebakan)}</div>` : ''}
           </div>
         `;
       });
@@ -2628,7 +3293,6 @@ function renderPrintLayout(pkg) {
       renderMathInElement(printSheet, {
         delimiters: [
           { left: "$$", right: "$$", display: true },
-          { left: "$", right: "$", display: false },
           { left: "\\(", right: "\\)", display: false },
           { left: "\\[", right: "\\]", display: true }
         ],
@@ -3049,41 +3713,79 @@ function formatPromptWithSubpartsAndDotsForWord(promptText, isStructuredOrEssay 
     return `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin: 6pt 0 6pt 0; font-size: 11pt; color: #0f172a;">${formatted}</div>`;
   }
 
-  // Cek apakah teks memuat sub-pertanyaan bertingkat a), b), c) atau a., b., c.
-  const lines = formatted.split(/<br\s*[\/]?>|\r?\n/);
-  const subpartRegex = /^\s*(?:<b>)?\s*([a-hA-H][\)\.])\s*(?:<\/b>)?\s*(.*)$/;
-  const hasSubparts = lines.some(l => subpartRegex.test(l.trim()));
+  const parsedSub = parseStructuredQuestionContent(promptText);
 
-  const dotLine = `
-    <div style="font-family: 'Courier New', monospace; letter-spacing: 2px; color: #94a3b8; margin: 3pt 0 8pt 16pt; line-height: 1.8;">
-      ........................................................................................................................................<br>
-      ........................................................................................................................................
-    </div>
-  `;
-
-  if (hasSubparts) {
-    let out = [];
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-      const match = line.match(subpartRegex);
-      if (match) {
-        out.push(`<div style="margin-top: 6pt; margin-bottom: 2pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;"><b>${match[1]}</b> ${match[2]}</div>`);
-        out.push(dotLine);
-      } else {
-        out.push(`<div style="margin-top: 3pt; margin-bottom: 3pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;">${line}</div>`);
-      }
+  const makeDottedLines = (linesCount = 2) => {
+    const singleDotLine = "........................................................................................................................................";
+    let lines = [];
+    for (let i = 0; i < linesCount; i++) {
+      lines.push(singleDotLine);
     }
-    return out.join("");
-  } else {
-    // Soal esai biasa tanpa subparts: berikan 3 baris titik-titik di bawahnya
-    const bigDots = `
-      <div style="font-family: 'Courier New', monospace; letter-spacing: 2px; color: #94a3b8; margin: 6pt 0 12pt 16pt; line-height: 1.8;">
-        ................................................................................................................................................................<br>
-        ................................................................................................................................................................<br>
-        ................................................................................................................................................................
+    return `
+      <div style="font-family: 'Courier New', monospace; letter-spacing: 2px; color: #94a3b8; margin: 3pt 0 8pt 16pt; line-height: 1.8;">
+        ${lines.join("<br>\n")}
       </div>
     `;
+  };
+
+  if (parsedSub.hasSubparts && parsedSub.subparts.length > 0) {
+    let out = [];
+    if (parsedSub.stem) {
+      out.push(`<div style="margin-top: 4pt; margin-bottom: 4pt; font-size: 11pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;">${formatChemistryForWordHtml(parsedSub.stem)}</div>`);
+    }
+    parsedSub.subparts.forEach(sub => {
+      let cleanText = sub.text;
+      let markBadge = "";
+      let linesCount = 2;
+
+      // Cek apakah ada mark: [1 mark], [2 marks], dll
+      const markMatch = cleanText.match(/(?:\[|\()(\d+)\s*(?:marks?|mark|skor|poin)?(?:\bin total\b)?(?:\]|\))$/i);
+      if (markMatch) {
+        const markVal = parseInt(markMatch[1], 10);
+        markBadge = `<div style="text-align: right; font-weight: bold; font-size: 10pt; color: #1e293b; margin-top: 2pt;">(${markVal})</div>`;
+        cleanText = cleanText.substring(0, markMatch.index).trim();
+        linesCount = markVal === 1 ? 2 : (markVal === 2 ? 4 : 6);
+      }
+
+      const romanParts = splitRomanSubparts(cleanText);
+      if (romanParts.length > 1) {
+        out.push(`<div style="margin-top: 6pt; margin-bottom: 2pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;"><b>${sub.label}</b></div>`);
+        romanParts.forEach(rp => {
+          if (rp.label) {
+            let rText = rp.text;
+            let rBadge = "";
+            let rLines = 2;
+            const rMatch = rText.match(/(?:\[|\()(\d+)\s*(?:marks?|mark|skor|poin)?(?:\bin total\b)?(?:\]|\))$/i);
+            if (rMatch) {
+              const rVal = parseInt(rMatch[1], 10);
+              rBadge = `<div style="text-align: right; font-weight: bold; font-size: 10pt; color: #1e293b; margin-top: 2pt;">(${rVal})</div>`;
+              rText = rText.substring(0, rMatch.index).trim();
+              rLines = rVal === 1 ? 2 : (rVal === 2 ? 4 : 6);
+            }
+            out.push(`<div style="margin-top: 3pt; margin-bottom: 2pt; margin-left: 14pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;"><b>${rp.label}</b> ${formatChemistryForWordHtml(rText)}</div>`);
+            if (rBadge) out.push(rBadge);
+            out.push(makeDottedLines(rLines));
+          } else {
+            out.push(`<div style="margin-top: 2pt; margin-bottom: 2pt; margin-left: 14pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;">${formatChemistryForWordHtml(rp.text)}</div>`);
+          }
+        });
+      } else {
+        out.push(`<div style="margin-top: 6pt; margin-bottom: 2pt; font-size: 10.5pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph; line-height: 1.45;"><b>${sub.label}</b> ${formatChemistryForWordHtml(cleanText)}</div>`);
+        if (markBadge) out.push(markBadge);
+        out.push(makeDottedLines(linesCount));
+      }
+    });
+
+    const totMatch = promptText.match(/(?:\[|\()(?:Total for Question \d+ = (\d+) marks?|Total:\s*(\d+)\s*marks?)(?:\]|\))/i);
+    if (totMatch) {
+      const tot = totMatch[1] || totMatch[2];
+      out.push(`<div style="text-align: right; font-weight: bold; font-size: 10.5pt; color: #0f172a; margin-top: 6pt; margin-bottom: 12pt;">(Total for Question = ${tot} marks)</div>`);
+    }
+
+    return out.join("");
+  } else {
+    // Soal esai biasa tanpa subparts
+    const bigDots = makeDottedLines(4);
     return `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin: 6pt 0 6pt 0; font-size: 11pt; color: #0f172a;">${formatted}</div>` + bigDots;
   }
 }
@@ -3134,7 +3836,7 @@ function exportToWordDocx(pkg) {
     const isNoStimulus = (pkg.stimulus_model || "").toLowerCase().includes("tanpa stimulus");
 
     const formatWordQuestions = (questions) => {
-      return (questions || []).map((soal) => {
+      let renderedWordHtml = (questions || []).map((soal) => {
         if (!soal) return "";
 
         // 1. Metadata Butir Soal (Elemen, Subtopik, Level)
@@ -3160,9 +3862,12 @@ function exportToWordDocx(pkg) {
           promptHtml = `<div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; margin: 6pt 0 6pt 0; font-size: 11pt; color: #0f172a;">${formatChemistryForWordHtml(parsed.prompt)}</div>`;
           opts = soal.pilihan_jawaban.map(o => `
             <div style="margin-left: 20pt; margin-top: 3pt; margin-bottom: 3pt; text-align: justify; text-justify: inter-ideograph; line-height: 1.45; font-size: 11pt;">
-              <b>${o.label}.</b> ${formatChemistryForWordHtml(o.teks)}
+              ${isPearson ? `<span style="font-family: Arial, sans-serif; border: 1px solid #000; padding: 1pt 5pt; margin-right: 6pt; font-size: 9.5pt;">&nbsp;&nbsp;</span>` : ''}<b>${o.label}.</b> ${formatChemistryForWordHtml(o.teks)}
             </div>
           `).join("");
+          if (isPearson) {
+            opts += `<div style="text-align: right; font-weight: bold; font-size: 10pt; color: #1e293b; margin-top: 2pt;">(1)</div>`;
+          }
         } else {
           // Uraian terstruktur atau essay dengan garis lembar jawab
           promptHtml = formatPromptWithSubpartsAndDotsForWord(parsed.prompt, isStructuredOrEssay);
@@ -3206,6 +3911,32 @@ function exportToWordDocx(pkg) {
           </div>
         `;
       }).join("");
+
+      if (isPearson) {
+        let totalMarks = 0;
+        (questions || []).forEach(soal => {
+          if (!soal) return;
+          if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
+            totalMarks += 1;
+          } else {
+            const parsedSub = parseStructuredQuestionContent(soal.pertanyaan || "");
+            if (parsedSub.hasSubparts && parsedSub.subparts.length > 0) {
+              parsedSub.subparts.forEach(sub => {
+                const markMatch = sub.text.match(/\s*(?:\[|\()(\d+)\s*(?:marks?|mark|m|poin|skor)?(?:\)|\/|\s*mark\]|\s*marks\])/i);
+                totalMarks += markMatch ? parseInt(markMatch[1], 10) : 1;
+              });
+            } else {
+              totalMarks += 1;
+            }
+          }
+        });
+        renderedWordHtml += `
+          <div style="text-align: right; font-weight: bold; font-size: 11pt; margin-top: 18pt; padding-top: 6pt; border-top: 1.5pt solid #000000; font-family: Arial, sans-serif;">
+            TOTAL FOR PAPER = ${totalMarks} MARKS
+          </div>
+        `;
+      }
+      return renderedWordHtml;
     };
 
     const formatWordSolutions = (questions) => {
@@ -3219,7 +3950,7 @@ function exportToWordDocx(pkg) {
           const chunk = qList.slice(i, i + chunkSize);
           const colWidth = (100 / Math.max(chunk.length, 1)).toFixed(1);
           const headers = chunk.map(q => `<th style="padding: 5pt 2pt; text-align: center; border: 1px solid #cbd5e1; font-size: 9pt; background-color: #f1f5f9; color: #334155; width: ${colWidth}%;">No. ${q.nomor}</th>`).join("");
-          const cells = chunk.map(q => `<td style="padding: 6pt 2pt; text-align: center; border: 1px solid #cbd5e1; font-size: 11pt; color: #15803d; font-weight: bold; background-color: #ffffff;">${q.kunci_jawaban || '-'}</td>`).join("");
+          const cells = chunk.map(q => `<td style="padding: 6pt 2pt; text-align: center; border: 1px solid #cbd5e1; font-size: 11pt; color: #15803d; font-weight: bold; background-color: #ffffff;">${formatChemistryForWordHtml(q.kunci_jawaban || '-')}</td>`).join("");
           tablesHtml += `
             <table cellpadding="0" cellspacing="0" style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 4pt; margin-bottom: 8pt; border: 1px solid #cbd5e1;">
               <tr>${headers}</tr>
@@ -3238,11 +3969,16 @@ function exportToWordDocx(pkg) {
       return qList.map((soal) => {
         if (!soal) return "";
         let steps = (Array.isArray(soal.pembahasan_langkah) ? soal.pembahasan_langkah : []).map(st => `<li>${formatChemistryForWordHtml(st)}</li>`).join("");
+        const parsedKey = parseStructuredQuestionContent(soal.kunci_jawaban || "");
+        const isMultiKey = parsedKey.hasSubparts && parsedKey.subparts.length > 0;
+        const keyHtml = formatAnswerKeyForWordHtml(soal.kunci_jawaban);
+
         return `
           <div style="margin-bottom: 12pt; page-break-inside: avoid;">
-            <p style="font-weight: bold; margin-bottom: 2pt; font-size: 11pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph;">
-              ${soal.nomor}. ${isPearson ? 'Key / Answer' : 'Kunci'}: <u>${soal.kunci_jawaban || '-'}</u>
-            </p>
+            <div style="font-weight: bold; margin-bottom: 2pt; font-size: 11pt; color: #0f172a; text-align: justify; text-justify: inter-ideograph;">
+              ${soal.nomor}. ${isPearson ? 'Key / Answer' : 'Kunci'}: ${isMultiKey ? '' : keyHtml}
+            </div>
+            ${isMultiKey ? `<div style="margin-left: 12pt; margin-top: 2pt; margin-bottom: 4pt;">${keyHtml}</div>` : ''}
             <div style="text-align: justify; text-justify: inter-ideograph; line-height: 1.45; font-size: 10.5pt; color: #1e293b; margin: 2pt 0 4pt 0;">
               <b>${isPearson ? 'Mark Scheme &amp; Worked Solutions:' : 'Pembahasan:'}</b>
               <ul style="margin: 2pt 0 0 0; padding-left: 18pt;">${steps}</ul>
@@ -3347,24 +4083,67 @@ function exportToWordDocx(pkg) {
       </head>
       <body>
         <div class="Section1">
-          <table style="width: 100%; border: none; border-bottom: 2px solid #0f172a; margin-bottom: 14pt; padding-bottom: 6pt;">
-            <tr>
-              <td style="border: none; padding: 0; vertical-align: top; width: 56%;">
-                <div style="font-size: 13pt; font-weight: bold; color: #0f172a; letter-spacing: 0.5px;">SMA PROGRESIF BUMI SHALAWAT</div>
-                <div style="font-size: 10.5pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt;">${(pkg.judul || (isPearson ? 'PEARSON EDEXCEL CHEMISTRY ASSESSMENT' : 'ASESMEN &amp; DRILLING SOAL KIMIA')).toUpperCase()}</div>
-                <div style="font-size: 9pt; color: #475569; margin-top: 2pt;">
-                  ${isPearson ? 'Subject: Chemistry' : 'Mata Pelajaran: Kimia'} | ${isPearson ? 'Level' : 'Jenjang'}: ${pkg.jenjang || 'SMA'} | ${isPearson ? 'Topic' : 'Materi'}: ${pkg.topik_utama || 'Kimia'}${exportSavedOnly ? (isPearson ? ' (Selected Set)' : ' (Koleksi Pilihan Guru)') : ''}
-                </div>
-              </td>
-              <td style="border: none; padding: 0; vertical-align: top; width: 44%; text-align: right;">
-                <div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9.5pt; line-height: 1.6; text-align: right; color: #1e293b;">
-                  <b>${isPearson ? 'NAME' : 'NAMA'} :</b> ....................................................<br>
-                  <b>${isPearson ? 'CLASS' : 'KELAS'}:</b> ....................................................<br>
-                  <b>${isPearson ? 'DATE' : 'TANGGAL'}:</b> ....................................................
-                </div>
-              </td>
-            </tr>
-          </table>
+          ${isPearson ? `
+            <table style="width: 100%; border: 1.5pt solid #000000; border-collapse: collapse; margin-bottom: 14pt;">
+              <tr>
+                <td style="padding: 6pt 8pt; border: 1pt solid #000000; width: 45%; font-family: Arial, sans-serif; font-size: 9.5pt; vertical-align: top;">
+                  <b>Candidate surname:</b> ....................................................<br><br>
+                  <b>Other names:</b> ............................................................
+                </td>
+                <td style="padding: 6pt 8pt; border: 1pt solid #000000; width: 25%; text-align: center; font-family: Arial, sans-serif; font-size: 9pt; vertical-align: top;">
+                  <b>Centre Number</b><br>
+                  <table align="center" style="margin: 4pt auto 0 auto; border-collapse: collapse;">
+                    <tr>
+                      <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                      <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                      <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                      <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                      <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                    </tr>
+                  </table>
+                </td>
+                <td style="padding: 6pt 8pt; border: 1pt solid #000000; width: 30%; text-align: center; font-family: Arial, sans-serif; font-size: 9pt; vertical-align: top;">
+                  <b>Candidate Number</b><br>
+                  <table align="center" style="margin: 4pt auto 0 auto; border-collapse: collapse;">
+                    <tr>
+                      <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                      <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                      <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                      <td style="border: 1pt solid #000; width: 14pt; height: 16pt;">&nbsp;</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" style="padding: 8pt 10pt; background-color: #f8fafc; border-top: 1.5pt solid #000000; font-family: Arial, sans-serif;">
+                  <div style="font-size: 13pt; font-weight: bold; color: #000000;">Pearson Edexcel International GCSE / Advanced Level</div>
+                  <div style="font-size: 10.5pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt;">Chemistry — ${(pkg.topik_utama || 'Examination Paper').toUpperCase()}</div>
+                  <div style="font-size: 8.5pt; color: #475569; margin-top: 4pt; line-height: 1.35;">
+                    <b>Instructions:</b> Answer ALL questions. • Use black ink or ball-point pen. • Show all stages in calculations with correct units. • Calculators may be used.
+                  </div>
+                </td>
+              </tr>
+            </table>
+          ` : `
+            <table style="width: 100%; border: none; border-bottom: 2px solid #0f172a; margin-bottom: 14pt; padding-bottom: 6pt;">
+              <tr>
+                <td style="border: none; padding: 0; vertical-align: top; width: 56%;">
+                  <div style="font-size: 13pt; font-weight: bold; color: #0f172a; letter-spacing: 0.5px;">SMA PROGRESIF BUMI SHALAWAT</div>
+                  <div style="font-size: 10.5pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt;">${(pkg.judul || 'ASESMEN &amp; DRILLING SOAL KIMIA').toUpperCase()}</div>
+                  <div style="font-size: 9pt; color: #475569; margin-top: 2pt;">
+                    Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang || 'SMA'} | Materi: ${pkg.topik_utama || 'Kimia'}${exportSavedOnly ? ' (Koleksi Pilihan Guru)' : ''}
+                  </div>
+                </td>
+                <td style="border: none; padding: 0; vertical-align: top; width: 44%; text-align: right;">
+                  <div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9.5pt; line-height: 1.6; text-align: right; color: #1e293b;">
+                    <b>NAMA :</b> ....................................................<br>
+                    <b>KELAS:</b> ....................................................<br>
+                    <b>TANGGAL:</b> ....................................................
+                  </div>
+                </td>
+              </tr>
+            </table>
+          `}
           ${questionsPart}
 
           <div class="page-break"></div>
