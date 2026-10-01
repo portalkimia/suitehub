@@ -1416,6 +1416,14 @@
       }
     }
 
+    function getGeneratorAccountInfo() {
+      try {
+        return window.currentUserAccount || JSON.parse(localStorage.getItem('generatorAccountInfo') || 'null');
+      } catch (e) {
+        return null;
+      }
+    }
+
     function showModulToast(msg) {
       try {
         const toast = document.createElement("div");
