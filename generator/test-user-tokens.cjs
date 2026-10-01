@@ -1,7 +1,7 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 
 const root = __dirname;
-const gasPath = path.join(root, 'Code.gs');
+const gasPath = fs.existsSync(path.join(root, 'Code.gs')) ? path.join(root, 'Code.gs') : path.join(root, '..', 'backup', 'generator', 'Code.gs');
 const gas = fs.readFileSync(gasPath, 'utf8').replace(/\r\n/g, '\n');
 
 function createHarness() {
@@ -244,6 +244,138 @@ test('doPost handles ping and admin actions with role enforcement', () => {
     }) }
   }).text);
   assert.equal(adminDeny.code, 'FORBIDDEN');
+});
+
+// TEST 6: ITP & Formatif Consolidation (TEPAT 2 BARIS FORMATIF: LKPD & KUIS)
+test('ITP & Asesmen Formatif collapses exactly into 2 rows, wipes itp3-14, and removes sub-formatif 1a/1b/2a/2b', () => {
+  const { context } = createHarness();
+  
+  // Simulasi output mentah AI yang memecah 5 baris formatif (seperti kasus user)
+  const fragmentedAI = {
+    topik: 'Korosi Logam dan Pencegahannya',
+    tujuan: 'Murid mampu menganalisis proses korosi...',
+    itp1: 'Menganalisis fenomena korosi pada paku besi dalam berbagai medium',
+    asesmen1: 'Formatif 1a (LKPD): Pengamatan dan pencatatan hasil simulasi',
+    aktivitas1: 'Pengamatan virtual dan pengisian tabel korosi (20 menit)',
+    itp2: 'Mengidentifikasi faktor-faktor yang mempercepat korosi',
+    asesmen2: 'Formatif 1b (LKPD): Analisis data hasil simulasi',
+    aktivitas2: 'Diskusi kelompok menganalisis data tabel (15 menit)',
+    itp3: 'Menjelaskan mekanisme reaksi redoks perkaratan besi',
+    asesmen3: 'Formatif 1c (LKPD): Penjelasan reaksi redoks',
+    aktivitas3: 'Diskusi reaksi redoks korosi (20 menit)',
+    itp4: 'Merumuskan cara pencegahan korosi',
+    asesmen4: 'Formatif 1d (LKPD): Solusi pencegahan',
+    aktivitas4: 'Penentuan metode pencegahan (15 menit)',
+    itp5: 'Menyelesaikan kuis evaluasi interaktif pada media PortalKimia',
+    asesmen5: 'Formatif 2a (Kuis): Skor kuis evaluasi interaktif media',
+    aktivitas5: 'Pengerjaan kuis interaktif mandiri pada media (20 menit)',
+    subTopik1: 'Korosi', ayat1: 'q55-9', zona1: 'Fun game', awal1: 'Murid bersiap',
+    memahami1: 'Murid memahami', mengaplikasi1: 'Murid mengaplikasi', merefleksi1: 'Murid merefleksi', penutup1: 'Simpulan',
+    listAsesmen: '1. Diagnostik awal\n2. Formatif 1 (LKPD)\n3. Lembar observasi sikap dan keaktifan\n4. Formatif 2 (Kuis)'
+  };
+
+  const rawJson = JSON.stringify(fragmentedAI);
+  const normalizedStr = context.harmonisasiOutputAI_(rawJson, 1);
+  const normalized = JSON.parse(normalizedStr);
+
+  // 1. Baris 1: Formatif 1 (LKPD) - Bersih dari embel-embel 1a
+  assert.ok(normalized.asesmen1.startsWith('Formatif 1 (LKPD):'));
+  assert.ok(!normalized.asesmen1.includes('Formatif 1a'));
+
+  // 2. Baris 2: Formatif 2 (Kuis) - Otomatis mengambil baris kuis (sebelumnya di baris 5) dan bersih dari 2a
+  assert.ok(normalized.asesmen2.startsWith('Formatif 2 (Kuis):'));
+  assert.ok(!normalized.asesmen2.includes('Formatif 2a'));
+  assert.ok(/kuis/i.test(normalized.itp2));
+  assert.ok(/kuis/i.test(normalized.aktivitas2));
+
+  // 3. Baris 3 s.d. 14: WAJIB KOSONG STRING ""
+  for (let r = 3; r <= 14; r++) {
+    assert.equal(normalized['itp' + r], '', 'itp' + r + ' harus kosong');
+    assert.equal(normalized['asesmen' + r], '', 'asesmen' + r + ' harus kosong');
+    assert.equal(normalized['aktivitas' + r], '', 'aktivitas' + r + ' harus kosong');
+  }
+
+  // 4. Observasi terhapus dari listAsesmen dan memuat Diagnostik Awal
+  assert.ok(!/observasi/i.test(normalized.listAsesmen));
+  assert.ok(/diagnostik/i.test(normalized.listAsesmen));
+  assert.ok(/diagnostik|prasyarat/i.test(normalized.awal1));
+
+  // KASUS 2: Media hanya memuat 1 tugas (misal hanya LKPD, tanpa kuis) -> TEPAT 1 FORMATIF
+  const singleTaskAI = {
+    topik: 'Larutan Elektrolit',
+    tujuan: 'Murid mampu menganalisis daya hantar...',
+    itp1: 'Menyelidiki daya hantar listrik larutan melalui simulator',
+    asesmen1: 'Formatif 1: Pengisian lembar kerja data uji daya hantar',
+    aktivitas1: 'Simulasi uji larutan dan pencatatan tabel data (30 menit)',
+    subTopik1: 'Elektrolit', ayat1: 'q55-9', zona1: 'Fun game', awal1: 'Murid bersiap',
+    memahami1: 'Murid memahami', mengaplikasi1: 'Murid mengaplikasi', merefleksi1: 'Murid merefleksi', penutup1: 'Simpulan',
+    listAsesmen: 'Formatif: Pengisian LKPD'
+  };
+
+  const normSingle = JSON.parse(context.harmonisasiOutputAI_(JSON.stringify(singleTaskAI), 1));
+  assert.ok(normSingle.asesmen1.startsWith('Formatif 1'));
+  // Baris 2 sampai 14 WAJIB kosong jika hanya 1 tugas
+  for (let r = 2; r <= 14; r++) {
+    assert.equal(normSingle['itp' + r], '', 'Baris ' + r + ' harus kosong pada 1 tugas');
+    assert.equal(normSingle['asesmen' + r], '', 'Asesmen ' + r + ' harus kosong pada 1 tugas');
+    assert.equal(normSingle['aktivitas' + r], '', 'Aktivitas ' + r + ' harus kosong pada 1 tugas');
+  }
+  assert.ok(/diagnostik/i.test(normSingle.listAsesmen));
+  assert.ok(/diagnostik|prasyarat/i.test(normSingle.awal1));
+});
+
+// TEST 7: Pemisahan Poin Langkah Pembelajaran (Tidak Bergabung dalam 1 Paragraf)
+test('Langkah pembelajaran (awal, memahami, mengaplikasi, merefleksi, penutup) terpisah per baris baru (\n)', () => {
+  const { context } = createHarness();
+  
+  // Simulasi output AI yang menyatukan poin dalam satu paragraf bertumpuk (kasus screenshot pengguna)
+  const mergedStepsAI = {
+    topik: 'Sifat Keperiodikan Unsur',
+    tujuan: 'Murid mampu menganalisis keteraturan sifat periodik unsur',
+    itp1: 'Menganalisis keteraturan jari-jari atom dan energi ionisasi melalui simulasi SPU',
+    asesmen1: 'Formatif 1 (LKPD): Pengisian tabel perbandingan sifat keperiodikan unsur',
+    aktivitas1: 'Eksplorasi simulator dan analisis tren SPU (30 menit)',
+    subTopik1: 'Tren Sifat Periodik',
+    ayat1: 'q55-9',
+    zona1: 'Ice breaking tebak unsur',
+    awal1: "1) Pendidik menginstruksikan murid untuk merapikan lingkungan kelas dan memakai atribut sekolah dengan benar. 2) Murid membuka sesi pembelajaran dengan berdoa. 3) Pendidik memeriksa presensi murid, lalu murid menyiapkan alat tulis, buku catatan, dan memastikan kesiapan perangkat digital kelompok. 4) Asesmen diagnostik awal: murid memperhatikan dan merespons pendidik terkait review materi sebelumnya. 5) Motivasi: pendidik menampilkan media. 6) Murid menyimak hikmah ayat. 7) Murid memperhatikan tujuan pembelajaran. 8) Pendidik menyampaikan pokok materi dengan peta konsep.",
+    memahami1: "a) Murid melakukan eksplorasi konsep esensial dan peta konsep pada menu materi Media Pembelajaran Interaktif PortalKimia dengan bimbingan pendidik. b) Murid mencermati narasi tren dalam satu golongan dan tren satu periode. c) Murid mengidentifikasi variabel penyelidikan yaitu nomor atom Z dan jari-jari atom.",
+    mengaplikasi1: "1. Murid menjalankan simulator uji larutan HCl 0.1 M dan buffer pH 7.4. 2. Murid mencatat data pengamatan ke dalam tabel digital.",
+    merefleksi1: "- Murid mengaitkan konsep SPU dengan aplikasi material di industri. - Murid menuliskan refleksi di lembar catatan.",
+    penutup1: "1) Murid bersama pendidik menyimpulkan pembelajaran. 2) Pendidik memberikan apresiasi. 3) Pendidik menyampaikan rencana pembelajaran berikutnya yaitu Ikatan Kimia. 4) Murid membaca hamdalah dan do'a kafaratul majlis untuk menutup kegiatan pembelajaran.",
+    listAsesmen: "1. Asesmen Diagnostik Awal 2. Formatif 1 (LKPD) 3. Formatif 2 (Kuis)"
+  };
+
+  const normalized = JSON.parse(context.harmonisasiOutputAI_(JSON.stringify(mergedStepsAI), 1));
+
+  // 1. Kegiatan Awal terpisah menjadi 8 baris terpisah
+  const linesAwal = normalized.awal1.split('\n').filter(Boolean);
+  assert.equal(linesAwal.length, 8, 'Awal1 harus terpisah menjadi 8 baris, bukan 1 paragraf');
+  assert.ok(linesAwal[0].startsWith('1)'));
+  assert.ok(linesAwal[1].startsWith('2)'));
+  assert.ok(linesAwal[7].startsWith('8)'));
+
+  // 2. Kegiatan Memahami terpisah menjadi 3 baris terpisah (a), b), c))
+  const linesMemahami = normalized.memahami1.split('\n').filter(Boolean);
+  assert.equal(linesMemahami.length, 3, 'Memahami1 harus terpisah menjadi 3 baris');
+  assert.ok(linesMemahami[0].startsWith('a)'));
+  assert.ok(linesMemahami[1].startsWith('b)'));
+  assert.ok(linesMemahami[2].startsWith('c)'));
+
+  // 3. Mengaplikasi: desimal kimia (0.1 M, pH 7.4) tidak boleh terbelah salah
+  const linesMengaplikasi = normalized.mengaplikasi1.split('\n').filter(Boolean);
+  assert.equal(linesMengaplikasi.length, 2, 'Mengaplikasi1 harus terpisah 2 poin angka');
+  assert.ok(linesMengaplikasi[0].includes('0.1 M'));
+  assert.ok(linesMengaplikasi[0].includes('pH 7.4'));
+
+  // 4. Penutup terpisah per nomor
+  const linesPenutup = normalized.penutup1.split('\n').filter(Boolean);
+  assert.ok(linesPenutup.length >= 4, 'Penutup harus terpisah minimal 4 baris');
+  assert.ok(linesPenutup[linesPenutup.length - 1].includes('kafaratul majlis'));
+
+  // 5. listAsesmen terpisah per baris
+  const linesAsesmen = normalized.listAsesmen.split('\n').filter(Boolean);
+  assert.equal(linesAsesmen.length, 3, 'listAsesmen harus terpisah menjadi 3 baris');
 });
 
 console.log('\nAll ' + passed + ' multi-user token ledger tests passed successfully!');
