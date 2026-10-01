@@ -49,42 +49,50 @@ const DEFAULT_SCHOOL_NAME = "SMA Progresif Bumi Shalawat";
 function getCustomTeacherName() {
   try {
     const val = localStorage.getItem(TEACHER_NAME_KEY);
-    return val && val.trim() ? val.trim() : DEFAULT_TEACHER_NAME;
+    return (val !== null && val !== undefined && val.trim()) ? val.trim() : DEFAULT_TEACHER_NAME;
   } catch (e) {
     return DEFAULT_TEACHER_NAME;
   }
 }
 
-function setCustomTeacherName(name) {
+function setCustomTeacherName(name, updateDom = true) {
   try {
-    if (name && name.trim()) {
-      localStorage.setItem(TEACHER_NAME_KEY, name.trim());
-    } else {
+    if (typeof name === "string" && name.trim()) {
+      localStorage.setItem(TEACHER_NAME_KEY, name);
+    } else if (typeof name === "string" && name.length === 0) {
       localStorage.removeItem(TEACHER_NAME_KEY);
     }
-    const input = document.getElementById("inputCustomNamaGuru");
-    if (input) input.value = getCustomTeacherName();
+    if (updateDom) {
+      const input = document.getElementById("inputCustomNamaGuru");
+      if (input && document.activeElement !== input) {
+        input.value = getCustomTeacherName();
+      }
+    }
   } catch (e) {}
 }
 
 function getCustomSchoolName() {
   try {
     const val = localStorage.getItem(SCHOOL_NAME_KEY);
-    return val && val.trim() ? val.trim() : DEFAULT_SCHOOL_NAME;
+    return (val !== null && val !== undefined && val.trim()) ? val.trim() : DEFAULT_SCHOOL_NAME;
   } catch (e) {
     return DEFAULT_SCHOOL_NAME;
   }
 }
 
-function setCustomSchoolName(school) {
+function setCustomSchoolName(school, updateDom = true) {
   try {
-    if (school && school.trim()) {
-      localStorage.setItem(SCHOOL_NAME_KEY, school.trim());
-    } else {
+    if (typeof school === "string" && school.trim()) {
+      localStorage.setItem(SCHOOL_NAME_KEY, school);
+    } else if (typeof school === "string" && school.length === 0) {
       localStorage.removeItem(SCHOOL_NAME_KEY);
     }
-    const input = document.getElementById("inputCustomNamaSekolah");
-    if (input) input.value = getCustomSchoolName();
+    if (updateDom) {
+      const input = document.getElementById("inputCustomNamaSekolah");
+      if (input && document.activeElement !== input) {
+        input.value = getCustomSchoolName();
+      }
+    }
   } catch (e) {}
 }
 
@@ -94,13 +102,39 @@ function initTeacherIdentityListeners() {
   if (inputGuru) {
     inputGuru.value = getCustomTeacherName();
     inputGuru.addEventListener("input", (e) => {
-      setCustomTeacherName(e.target.value);
+      // Simpan langsung nilai input ke localStorage tanpa mereset input.value saat mengetik (memperbolehkan spasi)
+      try {
+        localStorage.setItem(TEACHER_NAME_KEY, e.target.value);
+      } catch (err) {}
+    });
+    inputGuru.addEventListener("blur", (e) => {
+      const trimmed = e.target.value.trim();
+      if (!trimmed) {
+        localStorage.removeItem(TEACHER_NAME_KEY);
+        e.target.value = DEFAULT_TEACHER_NAME;
+      } else {
+        localStorage.setItem(TEACHER_NAME_KEY, trimmed);
+        e.target.value = trimmed;
+      }
     });
   }
   if (inputSekolah) {
     inputSekolah.value = getCustomSchoolName();
     inputSekolah.addEventListener("input", (e) => {
-      setCustomSchoolName(e.target.value);
+      // Simpan langsung nilai input ke localStorage tanpa mereset input.value saat mengetik (memperbolehkan spasi)
+      try {
+        localStorage.setItem(SCHOOL_NAME_KEY, e.target.value);
+      } catch (err) {}
+    });
+    inputSekolah.addEventListener("blur", (e) => {
+      const trimmed = e.target.value.trim();
+      if (!trimmed) {
+        localStorage.removeItem(SCHOOL_NAME_KEY);
+        e.target.value = DEFAULT_SCHOOL_NAME;
+      } else {
+        localStorage.setItem(SCHOOL_NAME_KEY, trimmed);
+        e.target.value = trimmed;
+      }
     });
   }
 }
