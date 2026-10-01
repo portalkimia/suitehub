@@ -5055,11 +5055,7 @@ function initExportListeners() {
   const btnConfirmWord = document.getElementById("btnConfirmWordExport");
   if (btnConfirmWord) {
     btnConfirmWord.addEventListener("click", () => {
-      if (!currentPackage) return;
-      const selected = document.querySelector('input[name="wordExportOption"]:checked');
-      const mode = selected ? selected.value : 'guru';
-      exportToWordDocx(currentPackage, mode);
-      closeWordExportModal();
+      confirmWordExport();
     });
   }
 
@@ -5162,6 +5158,54 @@ function initExportListeners() {
     const oldText = btnSaveDocs.textContent;
     btnSaveDocs.textContent = "Menyimpan ke Docs…";
     try {
+      // Siapkan data terformat khusus Google Docs (Unicode murni tanpa tag HTML)
+      const docsPackage = JSON.parse(JSON.stringify(currentPackage));
+      const cleanListDocs = (list) => {
+        if (!Array.isArray(list)) return;
+        list.forEach(q => {
+          if (!q) return;
+          const tSoal = (q.tipe_soal || "").toLowerCase();
+          const isTts = tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("crossword");
+          q.pertanyaan = formatChemistryForGoogleDocsText(isTts ? cleanTtsClue(q.pertanyaan) : q.pertanyaan);
+          if (Array.isArray(q.pilihan_jawaban)) {
+            q.pilihan_jawaban.forEach(opt => {
+              opt.teks = formatChemistryForGoogleDocsText(opt.teks);
+            });
+          }
+          if (q.kunci_jawaban) {
+            q.kunci_jawaban = isTts ? (q.kunci_jawaban || "").toUpperCase().replace(/[^A-Z]/g, "") : formatChemistryForGoogleDocsText(q.kunci_jawaban);
+          }
+          if (Array.isArray(q.pembahasan_langkah)) {
+            q.pembahasan_langkah = q.pembahasan_langkah.map(st => formatChemistryForGoogleDocsText(st));
+          }
+          if (q.tips_atau_jebakan) {
+            q.tips_atau_jebakan = formatChemistryForGoogleDocsText(q.tips_atau_jebakan);
+          }
+        });
+      };
+      cleanListDocs(docsPackage.daftar_soal);
+      cleanListDocs(docsPackage.daftar_soal_paket_b);
+
+      // Cek apakah ada soal TTS untuk di-render grid canvas PNG dan layout
+      const allQ = docsPackage.daftar_soal || [];
+      const ttsQ = allQ.filter(q => {
+        const t = (q.tipe_soal || "").toLowerCase();
+        return t.includes("tts") || t.includes("silang") || t.includes("crossword");
+      });
+
+      if (ttsQ.length > 0) {
+        const ttsItems = ttsQ.map(q => ({
+          word: (q.kunci_jawaban || "").toUpperCase().replace(/[^A-Z]/g, ""),
+          clue: cleanTtsClue(q.pertanyaan),
+          soal: q
+        }));
+        const layout = generateCrosswordLayout(ttsItems, 80);
+        if (layout) {
+          docsPackage.crosswordLayout = layout;
+          docsPackage.crosswordPngBase64 = renderCrosswordToPngBase64(layout);
+        }
+      }
+
       const response = await fetch(gasUrl, {
         method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
@@ -5169,7 +5213,7 @@ function initExportListeners() {
           teacherToken: teacherToken,
           accessToken: teacherToken,
           requestId: docsSaveRequestId,
-          dataSoal: currentPackage
+          dataSoal: docsPackage
         })
       });
       const result = await response.json();
@@ -5481,6 +5525,10 @@ function formatPromptWithSubpartsAndDotsForWord(promptText, isStructuredOrEssay 
 }
 
 function openWordExportModal() {
+  if (!currentPackage) {
+    alert("⚠️ Data paket soal belum tersedia. Silakan buat soal terlebih dahulu.");
+    return;
+  }
   const modal = document.getElementById("modalWordExport");
   if (modal) {
     modal.classList.remove("hidden");
@@ -5493,6 +5541,225 @@ function openWordExportModal() {
 function closeWordExportModal() {
   const modal = document.getElementById("modalWordExport");
   if (modal) modal.classList.add("hidden");
+}
+
+function confirmWordExport() {
+  if (!currentPackage) {
+    alert("⚠️ Data paket soal belum tersedia. Silakan buat soal terlebih dahulu.");
+    return;
+  }
+  const selected = document.querySelector('input[name="wordExportOption"]:checked');
+  const mode = selected ? selected.value : 'guru';
+  const btn = document.getElementById("btnConfirmWordExport");
+  const oldHtml = btn ? btn.innerHTML : "";
+  if (btn) {
+    btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-white"></i><span>Menyiapkan File Word...</span>`;
+    if (window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
+  }
+  setTimeout(() => {
+    try {
+      exportToWordDocx(currentPackage, mode);
+    } catch (err) {
+      alert("❌ Gagal mengunduh file Word: " + err.message);
+    } finally {
+      if (btn) btn.innerHTML = oldHtml;
+      if (window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
+      closeWordExportModal();
+    }
+  }, 100);
+}
+
+// Pasang ke window agar selalu dapat dipanggil langsung dari onclick
+window.openWordExportModal = openWordExportModal;
+window.closeWordExportModal = closeWordExportModal;
+window.confirmWordExport = confirmWordExport;
+
+// HELPER CANVAS: Render Grid TTS 2D ke format Gambar PNG Base64 untuk Google Docs
+function renderCrosswordToPngBase64(layout) {
+  if (!layout || !layout.grid || !layout.width || !layout.height) return null;
+  try {
+    const canvas = document.createElement("canvas");
+    const cellSize = 32;
+    const pad = 20;
+    canvas.width = layout.width * cellSize + pad * 2;
+    canvas.height = layout.height * cellSize + pad * 2;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    // Background putih bersih
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let r = 0; r < layout.height; r++) {
+      for (let c = 0; c < layout.width; c++) {
+        const cell = layout.grid[r][c];
+        if (cell) {
+          const x = pad + c * cellSize;
+          const y = pad + r * cellSize;
+
+          // Kotak putih
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(x, y, cellSize, cellSize);
+
+          // Garis border hitam tegas
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 1.6;
+          ctx.strokeRect(x, y, cellSize, cellSize);
+
+          // Nomor soal di pojok kiri atas
+          if (cell.number) {
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 9px Arial, sans-serif";
+            ctx.textAlign = "left";
+            ctx.textBaseline = "top";
+            ctx.fillText(String(cell.number), x + 3, y + 2.5);
+          }
+        }
+      }
+    }
+
+    return canvas.toDataURL("image/png");
+  } catch (err) {
+    console.warn("Gagal membuat canvas PNG crossword:", err);
+    return null;
+  }
+}
+
+// HELPER FORMAT KIMIA UNICODE MURNI UNTUK GOOGLE DOCS (TANPA TAG HTML, TANPA RAW LATEX)
+function formatChemistryForGoogleDocsText(text) {
+  if (!text) return "";
+  let s = String(text);
+
+  // Bersihkan persentase & koma desimal LaTeX
+  s = s.replace(/\$\s*([0-9]+(?:\{,\}|,|\.)?[0-9]*)\s*(?:\\%|%)(?:\s*\$)?/g, (m, p1) => p1.replace(/\{,\}/g, ",") + "%");
+  s = s.replace(/([0-9]+)\{,\}([0-9]+)/g, "$1,$2");
+  s = s.replace(/\{,\}/g, ",");
+  s = s.replace(/\\%/g, "%");
+
+  // Bersihkan wrapper teks LaTeX
+  let loop = 0;
+  while (/\\(?:text|mathrm|mathbf|ce|operatorname|textit|textbf|underline|mathit)\{([^{}]*)\}/.test(s) && loop++ < 10) {
+    s = s.replace(/\\(?:text|mathrm|mathbf|ce|operatorname|textit|textbf|underline|mathit)\{([^{}]*)\}/g, "$1");
+  }
+  s = s.replace(/\\(?:text|mathrm|mathbf|ce)\b/g, "");
+
+  // Pecahan \frac{num}{den}
+  let fIdx, fSafety = 0;
+  while ((fIdx = s.indexOf('\\frac')) !== -1 && fSafety++ < 20) {
+    let p = fIdx + 5;
+    while (p < s.length && (s[p] === ' ' || s[p] === '\t')) p++;
+    if (s[p] !== '{') { s = s.replace('\\frac', ''); break; }
+    let b1Start = p, depth = 1;
+    p++;
+    while (p < s.length && depth > 0) {
+      if (s[p] === '{') depth++;
+      else if (s[p] === '}') depth--;
+      p++;
+    }
+    if (depth !== 0) break;
+    let num = s.slice(b1Start + 1, p - 1);
+    while (p < s.length && (s[p] === ' ' || s[p] === '\t')) p++;
+    if (s[p] !== '{') break;
+    let b2Start = p;
+    depth = 1;
+    p++;
+    while (p < s.length && depth > 0) {
+      if (s[p] === '{') depth++;
+      else if (s[p] === '}') depth--;
+      p++;
+    }
+    if (depth !== 0) break;
+    let den = s.slice(b2Start + 1, p - 1);
+    s = s.slice(0, fIdx) + '(' + num + ' / ' + den + ')' + s.slice(p);
+  }
+
+  const subMap = {
+    '0':'₀', '1':'₁', '2':'₂', '3':'₃', '4':'₄', '5':'₅', '6':'₆', '7':'₇', '8':'₈', '9':'₉',
+    '+':'₊', '-':'₋', '=':'₌', '(':'₍', ')':'₎',
+    'a':'ₐ', 'e':'ₑ', 'h':'ₕ', 'i':'ᵢ', 'j':'ⱼ', 'k':'ₖ', 'l':'ₗ', 'm':'ₘ', 'n':'ₙ', 'o':'ₒ', 'p':'ₚ', 'r':'ᵣ', 's':'ₛ', 't':'ₜ', 'u':'ᵤ', 'v':'ᵥ', 'x':'ₓ'
+  };
+
+  const supMap = {
+    '0':'⁰', '1':'¹', '2':'²', '3':'³', '4':'⁴', '5':'⁵', '6':'⁶', '7':'⁷', '8':'⁸', '9':'⁹',
+    '+':'⁺', '-':'⁻', '=':'⁼', '(':'⁽', ')':'⁾',
+    'a':'ᵃ', 'b':'ᵇ', 'c':'ᶜ', 'd':'ᵈ', 'e':'ᵉ', 'f':'ᶠ', 'g':'ᵍ', 'h':'ʰ', 'i':'ⁱ', 'j':'ʲ',
+    'k':'ᵏ', 'l':'ˡ', 'm':'ᵐ', 'n':'ⁿ', 'o':'ᵒ', 'p':'ᵖ', 'r':'ʳ', 's':'ˢ', 't':'ᵗ', 'u':'ᵘ',
+    'v':'ᵛ', 'w':'ʷ', 'x':'ˣ', 'y':'ʸ', 'z':'ᶻ'
+  };
+
+  // Ubah HTML sub dan sup ke Unicode
+  s = s.replace(/<sub>(.*?)<\/sub>/gi, (_, p1) => p1.split('').map(ch => subMap[ch] || ch).join(''));
+  s = s.replace(/<sup>(.*?)<\/sup>/gi, (_, p1) => p1.split('').map(ch => supMap[ch] || ch).join(''));
+
+  // LaTeX subscripts & superscripts
+  s = s.replace(/_\{([^{}]+)\}/g, (_, p1) => p1.split('').map(ch => subMap[ch] || ch).join(''));
+  s = s.replace(/_([0-9a-z\+\-])/g, (_, p1) => subMap[p1] || p1);
+
+  s = s.replace(/\^\\circ\s*(?:C)?/g, "°C");
+  s = s.replace(/\\circ\s*(?:C)?/g, "°C");
+  s = s.replace(/\^\{([^{}]+)\}/g, (_, p1) => p1.split('').map(ch => supMap[ch] || ch).join(''));
+  s = s.replace(/\^([0-9a-z\+\-])/g, (_, p1) => supMap[p1] || p1);
+
+  // Panah & simbol
+  s = s.replace(/\\rightleftharpoons/g, "⇌");
+  s = s.replace(/\\longleftrightarrow/g, "⇌");
+  s = s.replace(/\\leftrightarrow/g, "↔");
+  s = s.replace(/\\longrightarrow/g, "→");
+  s = s.replace(/\\rightarrow/g, "→");
+  s = s.replace(/\\to\b/g, "→");
+  s = s.replace(/\\leftarrow/g, "←");
+  s = s.replace(/<=>/g, "⇌");
+  s = s.replace(/->/g, "→");
+
+  s = s.replace(/\\Delta\s*H/g, "ΔH");
+  s = s.replace(/\\Delta/g, "Δ");
+  s = s.replace(/\\alpha/g, "α");
+  s = s.replace(/\\beta/g, "β");
+  s = s.replace(/\\gamma/g, "γ");
+  s = s.replace(/\\pm/g, "±");
+  s = s.replace(/\\times/g, "×");
+  s = s.replace(/\\cdot/g, "·");
+  s = s.replace(/\\dots/g, "…");
+  s = s.replace(/\\ldots/g, "…");
+  s = s.replace(/\\approx/g, "≈");
+  s = s.replace(/\\neq/g, "≠");
+  s = s.replace(/\\leq?/g, "≤");
+  s = s.replace(/\\geq?/g, "≥");
+  s = s.replace(/\\infty/g, "∞");
+
+  s = s.replace(/\\left\s*[\(\[\{]/g, "(");
+  s = s.replace(/\\right\s*[\)\]\}]/g, ")");
+  s = s.replace(/\\left\./g, "");
+  s = s.replace(/\\right\./g, "");
+
+  s = s.replace(/\\log\b/g, "log");
+  s = s.replace(/\\ln\b/g, "ln");
+  s = s.replace(/\\sin\b/g, "sin");
+  s = s.replace(/\\cos\b/g, "cos");
+  s = s.replace(/\\tan\b/g, "tan");
+
+  s = s.replace(/\$\$/g, "");
+  s = s.replace(/\$/g, "");
+  s = s.replace(/\\([a-zA-Z]+)/g, "$1");
+  s = s.replace(/\\/g, "");
+  s = s.replace(/[{}]/g, "");
+
+  // Entitas HTML
+  s = s.replace(/&deg;C/gi, "°C");
+  s = s.replace(/&deg;/gi, "°");
+  s = s.replace(/&times;/gi, "×");
+  s = s.replace(/&plusmn;/gi, "±");
+  s = s.replace(/&harr;/gi, "↔");
+  s = s.replace(/&rarr;/gi, "→");
+  s = s.replace(/&amp;/gi, "&");
+  s = s.replace(/&lt;/gi, "<");
+  s = s.replace(/&gt;/gi, ">");
+  s = s.replace(/&nbsp;/gi, " ");
+
+  // Hapus semua sisa tag HTML
+  s = s.replace(/<[^>]+>/g, "");
+
+  return s.trim();
 }
 
 // HELPER FORMAT KHUSUS SOAL UNIK UNTUK WORD (MENJODOHKAN, SCRAMBLE, TTS)
@@ -6085,14 +6352,27 @@ function exportToWordDocx(pkg, exportMode = 'guru') {
       : (exportMode === 'kunci_saja' ? '_Kunci_Pembahasan_A4_TNR' : '_Lengkap_Guru_A4_TNR');
 
     const blob = new Blob(['\ufeff', docContent], { type: 'application/msword;charset=utf-8' });
+    const safeTitle = (pkg.judul || "Asesmen_Kimia")
+      .replace(/[/\\?%*:|"<>]/g, '-')
+      .replace(/\s+/g, '_')
+      .substring(0, 80);
+    const fileName = `${safeTitle}${exportSavedOnly ? '_Pilihan' : ''}${modeSuffix}.doc`;
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
+    a.style.display = "none";
     a.href = url;
-    a.download = `${(pkg.judul || "Asesmen_Kimia").replace(/\s+/g, "_")}${exportSavedOnly ? '_Pilihan' : ''}${modeSuffix}.doc`;
+    a.setAttribute("download", fileName);
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setTimeout(() => {
+      try {
+        if (a.parentNode) a.parentNode.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        console.warn("Cleanup blob URL error:", e);
+      }
+    }, 30000);
   } catch (err) {
     alert("❌ Gagal mengekspor dokumen Word: " + err.message);
   }
