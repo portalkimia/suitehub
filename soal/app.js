@@ -326,13 +326,14 @@ PEDOMAN UTAMA:
      * Kosongkan 'pilihan_jawaban' ([]).
      * Pada 'kunci_jawaban', tuliskan kata asli dalam huruf kapital, contoh: "ENDOTERM".
      * Pada 'tipe_soal', tuliskan 'Scramble (Kata Acak)'.
-   - FORMAT TEKA-TEKI SILANG (TTS KIMIA MENDATAR & MENURUN):
-     * Tentukan arah dan nomor petunjuk: "[➡️ MENDATAR] - Nomor X (Y Huruf)" atau "[⬇️ MENURUN] - Nomor X (Y Huruf)".
-     * Sajikan kalimat petunjuk/clue konsep kimia yang menarik dan edukatif.
-     * Tampilkan kotak huruf TTS: "KOTAK TTS: [   ] [   ]... (sejumlah Y kotak)".
+   - FORMAT TEKA-TEKI SILANG (TTS KIMIA 2D INTERLOCKING MENDATAR & MENURUN):
+     * Pilihlah istilah, nama senyawa, konsep, atau partikel kimia yang esensial dan bervariasi (panjang 3 hingga 10 huruf, SATU KATA tanpa spasi).
+     * Pastikan kata-kata yang dipilih memiliki huruf-huruf umum yang saling bersinggungan agar dapat berpotongan secara silang (interlocking 2D grid) mendatar dan menurun.
+     * Pada 'pertanyaan', tuliskan HANYA kalimat petunjuk (clue) konsep kimia yang mendalam, menarik, dan edukatif (JANGAN menuliskan kotak-kotak manual atau label arah, karena sistem otomatis menyusun kisi-kisi kotak 2D dan nomornya).
      * Kosongkan 'pilihan_jawaban' ([]).
-     * Pada 'kunci_jawaban', tuliskan kata jawaban TTS dalam huruf kapital, contoh: "ELEKTRON".
+     * Pada 'kunci_jawaban', tuliskan kata kunci TTS dalam SATU KATA huruf kapital murni (contoh: "ELEKTRON", "TITRASI", "INDIKATOR", "BUFFER", "LAKMUS", "HIDROLISIS").
      * Pada 'tipe_soal', tuliskan 'Teka-Teki Silang (TTS)'.
+     * Pada 'pembahasan_langkah', jelaskan materi konsep kimia terkait kata kunci tersebut.
    - FORMAT CAMPURAN SOAL UNIK:
      * Distribusikan paket butir soal secara proporsional ke dalam ketiga format di atas (Menjodohkan, Scramble, dan TTS).
      * Tuliskan format spesifik butir tersebut pada properti 'tipe_soal': 'Menjodohkan (Matching)', 'Scramble (Kata Acak)', atau 'Teka-Teki Silang (TTS)'.
@@ -2866,16 +2867,13 @@ Pada properti 'tipe_soal' tuliskan 'PG Kompleks (Asosiasi 1-2-3-4)'.`;
 - Pada 'pembahasan_langkah', uraikan penjelasan konsep ilmiah istilah tersebut.
 - Pada 'tipe_soal', tuliskan 'Scramble (Kata Acak)'.`;
   } else if (qType.includes("Teka-Teki Silang") || qType.includes("TTS")) {
-    typeInstruction = `FORMAT KHUSUS TEKA-TEKI SILANG (TTS KIMIA MENDATAR & MENURUN):
-- Susun butir-butir soal sebagai instrumen Teka-Teki Silang Kimia edukatif.
-- Variasikan nomor petunjuk antara MENDATAR (Across) dan MENURUN (Down).
-- Setiap butir soal WAJIB memuat:
-  1. Arah dan nomor petunjuk: "[➡️ MENDATAR] - Nomor X (Y Huruf)" atau "[⬇️ MENURUN] - Nomor X (Y Huruf)".
-  2. Kalimat petunjuk (clue) konsep kimia yang menantang dan mendidik.
-  3. Kotak huruf TTS: "KOTAK TTS: [   ] [   ]... (sejumlah Y kotak kosong)".
+    typeInstruction = `FORMAT KHUSUS TEKA-TEKI SILANG (TTS KIMIA 2D INTERLOCKING MENDATAR & MENURUN):
+- Susun paket ${numQuestions} butir soal ini sebagai instrumen Teka-Teki Silang Kimia 2 Dimensi (Crossword Puzzle).
+- Pilihlah istilah/kata kunci kimia esensial dengan panjang 3–10 huruf yang kaya huruf vokal/konsonan umum sehingga dapat saling berpotongan (interlocking) pada kisi-kisi 2D.
+- Pada properti 'pertanyaan', sajikan HANYA kalimat petunjuk/clue konsep kimia yang mendidik dan menantang (DILARANG menambahkan teks kotak manual atau [MENDATAR/MENURUN] di dalam pertanyaan karena tata letak dan penomoran 2D dibuat otomatis oleh sistem web).
 - WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []).
-- Pada 'kunci_jawaban', tuliskan kata kunci TTS dalam huruf kapital (misal: 'ELEKTRON').
-- Pada 'pembahasan_langkah', jelaskan materi konsep kimia terkait kata kunci tersebut.
+- Pada 'kunci_jawaban', tuliskan kata kunci TTS dalam SATU KATA huruf kapital murni (misal: 'INDIKATOR', 'TITRASI', 'ELEKTRON', 'BUFFER', 'LAKMUS').
+- Pada 'pembahasan_langkah', jelaskan materi konsep kimia terkait kata kunci tersebut secara lengkap.
 - Pada 'tipe_soal', tuliskan 'Teka-Teki Silang (TTS)'.`;
   } else if (qType.includes("Campuran Soal Unik")) {
     typeInstruction = `FORMAT CAMPURAN SOAL UNIK (MENJODOHKAN, SCRAMBLE, & TTS):
@@ -3315,6 +3313,587 @@ function renderActiveQuestionsList() {
   }
 }
 
+
+// =========================================================================
+// CROSSWORD (TEKA-TEKI SILANG 2D INTERLOCKING) ENGINE & GENERATOR
+// =========================================================================
+
+function cleanTtsClue(text) {
+  if (!text) return '';
+  let c = text.trim();
+  c = c.replace(/^\[[^\]]*(?:MENDATAR|MENURUN|ACROSS|DOWN)[^\]]*\]\s*/i, '');
+  c = c.replace(/^(?:[-–:]\s*)*(?:Nomor\s*\d+\s*)?(?:\(\d+\s*Huruf\)\s*)?(?:PETUNJUK\s*:\s*)?/i, '');
+  c = c.replace(/(?:KOTAK\s+TTS|KOTAK\s+JAWABAN)\s*:\s*\[[\s\S]*$/i, '');
+  c = c.replace(/\(\d+\s*kotak\s*kosong\)\s*$/i, '');
+  return c.trim();
+}
+
+function isValidPlacement(grid, word, row, col, direction, gridSize) {
+  const len = word.length;
+  if (direction === 'across') {
+    if (col < 1 || col + len >= gridSize - 1 || row < 1 || row >= gridSize - 1) return false;
+    if (grid[row][col - 1] !== null || grid[row][col + len] !== null) return false;
+
+    let hasIntersection = false;
+    for (let i = 0; i < len; i++) {
+      const curCell = grid[row][col + i];
+      if (curCell !== null) {
+        if (curCell !== word[i]) return false;
+        hasIntersection = true;
+      } else {
+        if (grid[row - 1][col + i] !== null || grid[row + 1][col + i] !== null) return false;
+      }
+    }
+    return hasIntersection;
+  } else {
+    if (row < 1 || row + len >= gridSize - 1 || col < 1 || col >= gridSize - 1) return false;
+    if (grid[row - 1][col] !== null || grid[row + len][col] !== null) return false;
+
+    let hasIntersection = false;
+    for (let i = 0; i < len; i++) {
+      const curCell = grid[row + i][col];
+      if (curCell !== null) {
+        if (curCell !== word[i]) return false;
+        hasIntersection = true;
+      } else {
+        if (grid[row + i][col - 1] !== null || grid[row + i][col + 1] !== null) return false;
+      }
+    }
+    return hasIntersection;
+  }
+}
+
+function countIntersections(grid, word, row, col, direction) {
+  let count = 0;
+  for (let i = 0; i < word.length; i++) {
+    const r = direction === 'down' ? row + i : row;
+    const c = direction === 'across' ? col + i : col;
+    if (grid[r][c] !== null) count++;
+  }
+  return count;
+}
+
+function computeBounds(words) {
+  let minRow = Infinity, maxRow = -Infinity, minCol = Infinity, maxCol = -Infinity;
+  for (const w of words) {
+    minRow = Math.min(minRow, w.row);
+    minCol = Math.min(minCol, w.col);
+    if (w.direction === 'across') {
+      maxRow = Math.max(maxRow, w.row);
+      maxCol = Math.max(maxCol, w.col + w.word.length - 1);
+    } else {
+      maxRow = Math.max(maxRow, w.row + w.word.length - 1);
+      maxCol = Math.max(maxCol, w.col);
+    }
+  }
+  return { minRow, maxRow, minCol, maxCol };
+}
+
+function computeArea(words) {
+  const b = computeBounds(words);
+  return (b.maxRow - b.minRow + 1) * (b.maxCol - b.minCol + 1);
+}
+
+function generateCrosswordLayout(wordList, maxAttempts = 80) {
+  const cleanList = wordList.map((item, idx) => ({
+    id: idx + 1,
+    word: (item.word || item.kunci_jawaban || '').toUpperCase().replace(/[^A-Z]/g, ''),
+    clue: cleanTtsClue(item.clue || item.pertanyaan || ''),
+    soal: item.soal || item
+  })).filter(item => item.word.length >= 2);
+
+  if (cleanList.length === 0) return null;
+
+  let bestResult = null;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const list = [...cleanList];
+    if (attempt > 0) {
+      list.sort(() => Math.random() - 0.5);
+    } else {
+      list.sort((a, b) => b.word.length - a.word.length);
+    }
+
+    const GRID_SIZE = 60;
+    const grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
+    const placedWords = [];
+
+    const first = list[0];
+    const startRow = Math.floor(GRID_SIZE / 2);
+    const startCol = Math.floor((GRID_SIZE - first.word.length) / 2);
+
+    for (let c = 0; c < first.word.length; c++) {
+      grid[startRow][startCol + c] = first.word[c];
+    }
+    placedWords.push({
+      ...first,
+      row: startRow,
+      col: startCol,
+      direction: 'across',
+      intersections: 0
+    });
+
+    for (let i = 1; i < list.length; i++) {
+      const candidate = list[i];
+      let bestPlacement = null;
+      let minScore = Infinity;
+
+      for (const placed of placedWords) {
+        const nextDir = placed.direction === 'across' ? 'down' : 'across';
+
+        for (let pIdx = 0; pIdx < placed.word.length; pIdx++) {
+          const letter = placed.word[pIdx];
+
+          for (let cIdx = 0; cIdx < candidate.word.length; cIdx++) {
+            if (candidate.word[cIdx] !== letter) continue;
+
+            let r, c;
+            if (nextDir === 'down') {
+              r = placed.row - cIdx;
+              c = placed.col + pIdx;
+            } else {
+              r = placed.row + pIdx;
+              c = placed.col - cIdx;
+            }
+
+            if (isValidPlacement(grid, candidate.word, r, c, nextDir, GRID_SIZE)) {
+              const intersections = countIntersections(grid, candidate.word, r, c, nextDir);
+              const bounds = computeBounds([...placedWords, { row: r, col: c, word: candidate.word, direction: nextDir }]);
+              const aspectPenalty = Math.abs((bounds.maxCol - bounds.minCol) - (bounds.maxRow - bounds.minRow)) * 2;
+              const area = (bounds.maxRow - bounds.minRow + 1) * (bounds.maxCol - bounds.minCol + 1);
+              const score = area - (intersections * 50) + aspectPenalty;
+
+              if (score < minScore) {
+                minScore = score;
+                bestPlacement = { row: r, col: c, direction: nextDir, intersections };
+              }
+            }
+          }
+        }
+      }
+
+      if (bestPlacement) {
+        for (let idx = 0; idx < candidate.word.length; idx++) {
+          const r = bestPlacement.direction === 'down' ? bestPlacement.row + idx : bestPlacement.row;
+          const c = bestPlacement.direction === 'across' ? bestPlacement.col + idx : bestPlacement.col;
+          grid[r][c] = candidate.word[idx];
+        }
+        placedWords.push({
+          ...candidate,
+          row: bestPlacement.row,
+          col: bestPlacement.col,
+          direction: bestPlacement.direction,
+          intersections: bestPlacement.intersections
+        });
+      }
+    }
+
+    if (!bestResult || placedWords.length > bestResult.placedWords.length || 
+        (placedWords.length === bestResult.placedWords.length && bestResult.area > computeArea(placedWords))) {
+      bestResult = {
+        grid,
+        placedWords,
+        area: computeArea(placedWords)
+      };
+      if (placedWords.length === cleanList.length) {
+        if (attempt >= 25) break;
+      }
+    }
+  }
+
+  if (!bestResult || bestResult.placedWords.length === 0) return null;
+
+  // Fallback placement for any unplaced words so 100% of words are in the crossword!
+  if (bestResult.placedWords.length < cleanList.length) {
+    const placedIds = new Set(bestResult.placedWords.map(w => w.id));
+    const unplaced = cleanList.filter(w => !placedIds.has(w.id));
+    for (const uw of unplaced) {
+      const bounds = computeBounds(bestResult.placedWords);
+      const newRow = bounds.maxRow + 2;
+      const newCol = bounds.minCol;
+      bestResult.placedWords.push({
+        ...uw,
+        row: newRow,
+        col: newCol,
+        direction: 'across',
+        intersections: 0
+      });
+    }
+  }
+
+  // Crop to bounding box
+  const bounds = computeBounds(bestResult.placedWords);
+  const width = bounds.maxCol - bounds.minCol + 1;
+  const height = bounds.maxRow - bounds.minRow + 1;
+
+  const croppedGrid = Array.from({ length: height }, () => Array(width).fill(null));
+  const finalWords = bestResult.placedWords.map(w => ({
+    ...w,
+    row: w.row - bounds.minRow,
+    col: w.col - bounds.minCol
+  }));
+
+  for (const w of finalWords) {
+    for (let i = 0; i < w.word.length; i++) {
+      const r = w.direction === 'down' ? w.row + i : w.row;
+      const c = w.direction === 'across' ? w.col + i : w.col;
+      if (!croppedGrid[r][c]) {
+        croppedGrid[r][c] = { letter: w.word[i], number: null, row: r, col: c };
+      }
+    }
+  }
+
+  // Crossword numbering in reading order (top-to-bottom, left-to-right)
+  let currentNum = 1;
+  const startCells = [];
+  for (let r = 0; r < height; r++) {
+    for (let c = 0; c < width; c++) {
+      const startsAcross = finalWords.find(w => w.direction === 'across' && w.row === r && w.col === c);
+      const startsDown = finalWords.find(w => w.direction === 'down' && w.row === r && w.col === c);
+      if (startsAcross || startsDown) {
+        startCells.push({ r, c, num: currentNum++ });
+      }
+    }
+  }
+
+  for (const sc of startCells) {
+    if (croppedGrid[sc.r][sc.c]) {
+      croppedGrid[sc.r][sc.c].number = sc.num;
+    }
+    const across = finalWords.find(w => w.direction === 'across' && w.row === sc.r && w.col === sc.c);
+    if (across) across.number = sc.num;
+    const down = finalWords.find(w => w.direction === 'down' && w.row === sc.r && w.col === sc.c);
+    if (down) down.number = sc.num;
+  }
+
+  const acrossClues = finalWords.filter(w => w.direction === 'across').sort((a, b) => a.number - b.number);
+  const downClues = finalWords.filter(w => w.direction === 'down').sort((a, b) => a.number - b.number);
+
+  return {
+    width,
+    height,
+    grid: croppedGrid,
+    words: finalWords,
+    acrossClues,
+    downClues
+  };
+}
+
+function getOrBuildCrosswordLayout(pkg, activeTab = 'A') {
+  if (!pkg) return null;
+  const cacheKey = activeTab === 'B' ? '_crosswordLayoutB' : '_crosswordLayoutA';
+  if (pkg[cacheKey]) return pkg[cacheKey];
+
+  const questions = (activeTab === 'B' && pkg.daftar_soal_paket_b) ? pkg.daftar_soal_paket_b : (pkg.daftar_soal || []);
+  const ttsQuestions = questions.filter(q => {
+    const t = (q.tipe_soal || '').toLowerCase();
+    return t.includes('tts') || t.includes('silang') || t.includes('crossword');
+  });
+
+  if (ttsQuestions.length === 0) return null;
+
+  const layout = generateCrosswordLayout(ttsQuestions, 80);
+  pkg[cacheKey] = layout;
+  return layout;
+}
+
+// RENDER CROSSWORD FOR WEB (TEACHER & STUDENT MODES)
+function renderCrosswordSectionForWeb(layout, isStudent = false) {
+  if (!layout || !layout.grid) return '';
+
+  let gridCellsHtml = '';
+  for (let r = 0; r < layout.height; r++) {
+    for (let c = 0; c < layout.width; c++) {
+      const cell = layout.grid[r][c];
+      if (!cell) {
+        gridCellsHtml += `<div class="w-8 h-8 sm:w-9 sm:h-9 bg-transparent pointer-events-none select-none"></div>`;
+      } else if (isStudent) {
+        gridCellsHtml += `
+          <div class="relative w-8 h-8 sm:w-9 sm:h-9 bg-zinc-900 border-2 border-zinc-600 rounded flex items-center justify-center focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-500/50 tts-cell-box" id="tts_box_${r}_${c}">
+            ${cell.number ? `<span class="absolute top-0.5 left-1 text-[8px] font-mono text-cyan-400 font-bold leading-none select-none">${cell.number}</span>` : ''}
+            <input type="text" maxlength="1" 
+                   id="tts_input_${r}_${c}" 
+                   data-row="${r}" data-col="${c}" 
+                   data-letter="${cell.letter}"
+                   class="w-full h-full bg-transparent text-center font-bold font-mono text-sm uppercase text-white focus:outline-none selection:bg-transparent" 
+                   autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+          </div>
+        `;
+      } else {
+        gridCellsHtml += `
+          <div class="relative w-8 h-8 sm:w-9 sm:h-9 bg-zinc-900 border-2 border-cyan-500/50 rounded flex items-center justify-center shadow-sm tts-cell-box" id="teacher_tts_${r}_${c}">
+            ${cell.number ? `<span class="absolute top-0.5 left-1 text-[8px] font-mono text-cyan-400 font-bold leading-none select-none">${cell.number}</span>` : ''}
+            <span class="font-bold font-mono text-sm text-cyan-200 tts-letter-preview">${cell.letter}</span>
+          </div>
+        `;
+      }
+    }
+  }
+
+  const acrossCluesHtml = layout.acrossClues.map(c => `
+    <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 hover:border-cyan-500/50 cursor-pointer transition-all tts-clue-item" 
+         data-direction="${c.direction}" data-row="${c.row}" data-col="${c.col}" data-word="${c.word}" 
+         onclick="highlightCrosswordWord(${c.row}, ${c.col}, '${c.direction}', ${c.word.length}, ${isStudent})">
+      <div class="text-xs text-zinc-300 leading-snug">
+        <b class="text-cyan-400 font-bold mr-1">${c.number}.</b> ${c.clue}
+        ${isStudent ? `<span class="text-zinc-500 font-mono text-[11px] ml-1">(${c.word.length} huruf)</span>` : `<span class="text-cyan-300 font-mono font-bold ml-1.5 bg-cyan-950/40 px-1.5 py-0.5 rounded border border-cyan-500/30">[${c.word}]</span>`}
+      </div>
+    </div>
+  `).join('');
+
+  const downCluesHtml = layout.downClues.map(c => `
+    <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 hover:border-violet-500/50 cursor-pointer transition-all tts-clue-item" 
+         data-direction="${c.direction}" data-row="${c.row}" data-col="${c.col}" data-word="${c.word}" 
+         onclick="highlightCrosswordWord(${c.row}, ${c.col}, '${c.direction}', ${c.word.length}, ${isStudent})">
+      <div class="text-xs text-zinc-300 leading-snug">
+        <b class="text-violet-400 font-bold mr-1">${c.number}.</b> ${c.clue}
+        ${isStudent ? `<span class="text-zinc-500 font-mono text-[11px] ml-1">(${c.word.length} huruf)</span>` : `<span class="text-violet-300 font-mono font-bold ml-1.5 bg-violet-950/40 px-1.5 py-0.5 rounded border border-violet-500/30">[${c.word}]</span>`}
+      </div>
+    </div>
+  `).join('');
+
+  // Detailed explanations for teacher mode
+  let explanationsHtml = '';
+  if (!isStudent) {
+    const allWords = [...layout.acrossClues, ...layout.downClues].sort((a, b) => a.number - b.number);
+    const stepsHtml = allWords.map(w => {
+      const steps = w.soal && Array.isArray(w.soal.pembahasan_langkah) ? w.soal.pembahasan_langkah.join(' ') : (w.clue || '');
+      return `
+        <div class="p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800 text-xs">
+          <div class="font-bold text-white mb-1 flex items-center justify-between">
+            <span><b>No. ${w.number} (${w.direction === 'across' ? 'Mendatar' : 'Menurun'})</b> — ${w.word}</span>
+            <span class="text-[10px] text-zinc-400 font-mono">${w.word.length} Huruf</span>
+          </div>
+          <div class="text-zinc-300 leading-relaxed">${formatChemistryForWebHtml(steps)}</div>
+        </div>
+      `;
+    }).join('');
+
+    explanationsHtml = `
+      <details class="group mt-4 pt-3 border-t border-zinc-800">
+        <summary class="flex items-center justify-between text-xs font-bold text-cyan-300 cursor-pointer list-none select-none py-1">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="key" class="w-4 h-4 text-emerald-400"></i>
+            <span>🔍 Pembahasan Konsep Ilmiah TTS Lengkap (${allWords.length} Istilah)</span>
+          </span>
+          <span class="group-open:rotate-180 transition-transform">▼</span>
+        </summary>
+        <div class="mt-3 space-y-2">
+          ${stepsHtml}
+        </div>
+      </details>
+    `;
+  }
+
+  return `
+    <div class="glass-card p-4 sm:p-6 mb-6 rounded-2xl border border-cyan-500/40 shadow-xl space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center font-bold text-lg">
+            📰
+          </div>
+          <div>
+            <h4 class="text-base font-bold text-white leading-tight">Lembar Teka-Teki Silang (TTS 2D Interlocking)</h4>
+            <p class="text-xs text-zinc-400">Kisi-kisi berpotongan mendatar &amp; menurun sesuai kaidah baku TTS.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          ${!isStudent ? `
+            <button type="button" id="btnToggleCrosswordLetters" onclick="toggleTeacherCrosswordLetters()" 
+                    class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-cyan-300 font-semibold text-xs border border-cyan-500/30 transition-colors">
+              👁️ Sembunyikan Kunci Huruf
+            </button>
+          ` : `
+            <span class="text-[11px] text-cyan-300 bg-cyan-950/40 px-2.5 py-1 rounded-full border border-cyan-500/30 font-medium">
+              💡 Ketik huruf di kotak atau klik petunjuk soal
+            </span>
+          `}
+        </div>
+      </div>
+
+      <!-- 2D Crossword Grid -->
+      <div class="overflow-x-auto py-2 flex justify-center">
+        <div class="inline-grid gap-1 bg-zinc-950/80 p-3 rounded-2xl border border-zinc-800 shadow-inner" 
+             style="grid-template-columns: repeat(${layout.width}, minmax(0, 1fr));">
+          ${gridCellsHtml}
+        </div>
+      </div>
+
+      <!-- Clues Section: 2 Columns -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+        <div class="p-4 rounded-xl bg-cyan-950/20 border border-cyan-500/30 space-y-2.5">
+          <h5 class="text-xs font-bold text-cyan-300 flex items-center gap-1.5 uppercase tracking-wider">
+            <span>➡️</span> MENDATAR (Across)
+          </h5>
+          <div class="space-y-2">
+            ${acrossCluesHtml}
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-violet-950/20 border border-violet-500/30 space-y-2.5">
+          <h5 class="text-xs font-bold text-violet-300 flex items-center gap-1.5 uppercase tracking-wider">
+            <span>⬇️</span> MENURUN (Down)
+          </h5>
+          <div class="space-y-2">
+            ${downCluesHtml}
+          </div>
+        </div>
+      </div>
+
+      ${explanationsHtml}
+    </div>
+  `;
+}
+
+// TOGGLE TEACHER LETTERS
+var teacherCrosswordLettersVisible = true;
+function toggleTeacherCrosswordLetters() {
+  teacherCrosswordLettersVisible = !teacherCrosswordLettersVisible;
+  const letters = document.querySelectorAll('.tts-letter-preview');
+  letters.forEach(el => {
+    el.style.visibility = teacherCrosswordLettersVisible ? 'visible' : 'hidden';
+  });
+  const btn = document.getElementById('btnToggleCrosswordLetters');
+  if (btn) {
+    btn.textContent = teacherCrosswordLettersVisible ? '👁️ Sembunyikan Kunci Huruf' : '👁️ Tampilkan Kunci Huruf';
+  }
+}
+
+// HIGHLIGHT ACTIVE WORD ON CROSSWORD GRID
+function highlightCrosswordWord(startRow, startCol, direction, length, isStudent = false) {
+  document.querySelectorAll('.tts-cell-box').forEach(b => b.classList.remove('tts-cell-highlight'));
+  document.querySelectorAll('.tts-clue-item').forEach(c => c.classList.remove('tts-clue-active'));
+
+  for (let i = 0; i < length; i++) {
+    const r = direction === 'down' ? startRow + i : startRow;
+    const c = direction === 'across' ? startCol + i : startCol;
+    const boxId = isStudent ? `tts_box_${r}_${c}` : `teacher_tts_${r}_${c}`;
+    const box = document.getElementById(boxId);
+    if (box) box.classList.add('tts-cell-highlight');
+  }
+
+  if (isStudent) {
+    const firstInput = document.getElementById(`tts_input_${startRow}_${startCol}`);
+    if (firstInput) {
+      firstInput.focus();
+      firstInput.select();
+    }
+  }
+}
+
+// STUDENT CROSSWORD NAVIGATION
+function initStudentCrosswordNavigation() {
+  const inputs = document.querySelectorAll('input[id^="tts_input_"]');
+  inputs.forEach(input => {
+    input.addEventListener('keydown', (e) => {
+      const r = parseInt(input.dataset.row, 10);
+      const c = parseInt(input.dataset.col, 10);
+
+      if (e.key === 'ArrowRight') {
+        const next = document.getElementById(`tts_input_${r}_${c + 1}`);
+        if (next) { next.focus(); next.select(); e.preventDefault(); }
+      } else if (e.key === 'ArrowLeft') {
+        const prev = document.getElementById(`tts_input_${r}_${c - 1}`);
+        if (prev) { prev.focus(); prev.select(); e.preventDefault(); }
+      } else if (e.key === 'ArrowDown') {
+        const down = document.getElementById(`tts_input_${r + 1}_${c}`);
+        if (down) { down.focus(); down.select(); e.preventDefault(); }
+      } else if (e.key === 'ArrowUp') {
+        const up = document.getElementById(`tts_input_${r - 1}_${c}`);
+        if (up) { up.focus(); up.select(); e.preventDefault(); }
+      } else if (e.key === 'Backspace' && !input.value) {
+        // Find previous across or down cell
+        const prevAcross = document.getElementById(`tts_input_${r}_${c - 1}`);
+        if (prevAcross) { prevAcross.focus(); prevAcross.select(); }
+      }
+    });
+
+    input.addEventListener('input', () => {
+      if (input.value && input.value.length === 1) {
+        input.value = input.value.toUpperCase();
+        const r = parseInt(input.dataset.row, 10);
+        const c = parseInt(input.dataset.col, 10);
+        // Advance to next across or down cell
+        const nextAcross = document.getElementById(`tts_input_${r}_${c + 1}`);
+        if (nextAcross) {
+          nextAcross.focus();
+          nextAcross.select();
+        } else {
+          const nextDown = document.getElementById(`tts_input_${r + 1}_${c}`);
+          if (nextDown) {
+            nextDown.focus();
+            nextDown.select();
+          }
+        }
+      }
+    });
+  });
+}
+
+// RENDER CROSSWORD FOR WORD EXPORT & PRINT
+function renderCrosswordTableForWord(layout, isStudent = false) {
+  if (!layout || !layout.grid) return '';
+
+  const cellPt = layout.width > 14 ? Math.max(16, Math.floor(400 / layout.width)) : 22;
+
+  let rowsHtml = '';
+  for (let r = 0; r < layout.height; r++) {
+    let cellsHtml = '';
+    for (let c = 0; c < layout.width; c++) {
+      const cell = layout.grid[r][c];
+      if (!cell) {
+        cellsHtml += `<td style="width: ${cellPt}pt; height: ${cellPt}pt; border: none; background-color: transparent; padding: 0;">&nbsp;</td>`;
+      } else {
+        const numText = cell.number ? `<span style="font-size: 7pt; font-family: 'Times New Roman', Times, serif; font-weight: bold; position: absolute; top: 1pt; left: 2pt; line-height: 1;">${cell.number}</span>` : '';
+        const letterText = isStudent ? '&nbsp;' : `<b style="font-size: 11pt; font-family: 'Times New Roman', Times, serif; font-weight: bold;">${cell.letter}</b>`;
+        cellsHtml += `
+          <td style="width: ${cellPt}pt; height: ${cellPt}pt; border: 1.5pt solid #000000; background-color: #ffffff; text-align: center; vertical-align: middle; position: relative; padding: 0; line-height: ${cellPt}pt;">
+            ${numText}
+            ${letterText}
+          </td>
+        `;
+      }
+    }
+    rowsHtml += `<tr>${cellsHtml}</tr>`;
+  }
+
+  const acrossHtml = layout.acrossClues.map(c => `
+    <div style="margin-bottom: 5pt; text-align: justify; line-height: 1.35; font-size: 10.5pt; font-family: 'Times New Roman', Times, serif;">
+      <b>${c.number}.</b> ${c.clue} ${isStudent ? `<i>(${c.word.length} huruf)</i>` : `<b style="color: #1e3a8a;">[${c.word}]</b>`}
+    </div>
+  `).join('');
+
+  const downHtml = layout.downClues.map(c => `
+    <div style="margin-bottom: 5pt; text-align: justify; line-height: 1.35; font-size: 10.5pt; font-family: 'Times New Roman', Times, serif;">
+      <b>${c.number}.</b> ${c.clue} ${isStudent ? `<i>(${c.word.length} huruf)</i>` : `<b style="color: #1e3a8a;">[${c.word}]</b>`}
+    </div>
+  `).join('');
+
+  return `
+    <div style="text-align: center; margin: 10pt 0 16pt 0;">
+      <table align="center" style="border-collapse: collapse; margin: 0 auto; border: none;">
+        ${rowsHtml}
+      </table>
+    </div>
+    <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 12pt; font-family: 'Times New Roman', Times, serif;">
+      <tr>
+        <td style="width: 50%; vertical-align: top; border: none; padding-right: 12pt;">
+          <div style="font-size: 11.5pt; font-weight: bold; border-bottom: 1.5pt solid #000000; padding-bottom: 2pt; margin-bottom: 6pt; text-transform: uppercase;">
+            MENDATAR
+          </div>
+          ${acrossHtml}
+        </td>
+        <td style="width: 50%; vertical-align: top; border: none; padding-left: 12pt;">
+          <div style="font-size: 11.5pt; font-weight: bold; border-bottom: 1.5pt solid #000000; padding-bottom: 2pt; margin-bottom: 6pt; text-transform: uppercase;">
+            MENURUN
+          </div>
+          ${downHtml}
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
 // HELPER RENDER VISUAL KHUSUS SOAL UNIK (SCRAMBLE, TTS, & MENJODOHKAN)
 function renderUniqueQuestionVisuals(text, soal) {
   if (!soal) return "";
@@ -3540,7 +4119,25 @@ function renderTeacherQuestions(questions) {
     return;
   }
 
-  displayedQuestions.forEach((soal) => {
+  // 1. Deteksi Teka-Teki Silang (TTS 2D)
+  const ttsQuestions = displayedQuestions.filter(q => {
+    const t = (q.tipe_soal || "").toLowerCase();
+    return t.includes("tts") || t.includes("silang") || t.includes("crossword");
+  });
+  const nonTtsQuestions = displayedQuestions.filter(q => !ttsQuestions.includes(q));
+
+  if (ttsQuestions.length > 0) {
+    const layout = getOrBuildCrosswordLayout(currentPackage, activeParallelTab);
+    if (layout) {
+      const crosswordHtml = renderCrosswordSectionForWeb(layout, false);
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = crosswordHtml;
+      container.appendChild(tempDiv.firstElementChild || tempDiv);
+    }
+  }
+
+  // 2. Render soal lainnya (Pilihan Ganda, Uraian, Menjodohkan, Scramble)
+  nonTtsQuestions.forEach((soal) => {
     if (!soal) return;
     const isPinned = soal.is_pinned === true;
     const card = document.createElement("div");
@@ -3579,13 +4176,6 @@ function renderTeacherQuestions(questions) {
             <div><b>Format Scramble:</b> Siswa menyusun huruf-huruf acak menjadi istilah kimia yang tepat berdasarkan petunjuk konsep.</div>
           </div>
         `;
-      } else if (tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("crossword")) {
-        optionsHtml = `
-          <div class="p-2.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 text-xs text-cyan-200 flex items-center gap-2 mb-2">
-            <span class="text-base">📰</span>
-            <div><b>Format Teka-Teki Silang (TTS):</b> Petunjuk mendatar/menurun edukatif untuk lembar TTS kimia interaktif.</div>
-          </div>
-        `;
       } else if (!hasSubparts) {
         optionsHtml = `
           <div class="p-2.5 rounded-lg bg-violet-950/20 border border-violet-500/20 text-xs text-violet-300 flex items-center gap-2 mb-2">
@@ -3596,10 +4186,7 @@ function renderTeacherQuestions(questions) {
       }
     }
 
-    // Render Pertanyaan (Merapikan format kimia dan memisahkan sub-soal terstruktur)
     const formattedQuestion = renderQuestionContentForWeb(soal);
-
-    // Render SVG jika ada
     const svgHtml = soal.ilustrasi_svg ? renderSvgIllustration(soal.ilustrasi_svg, soal.caption_ilustrasi) : "";
 
     const stepsList = Array.isArray(soal.pembahasan_langkah) 
@@ -3630,15 +4217,10 @@ function renderTeacherQuestions(questions) {
         </div>
       </div>
 
-      <!-- Pertanyaan (Termasuk Tabel Markdown & Subparts) -->
       <div class="mb-3">${formattedQuestion}</div>
-
-      <!-- Ilustrasi SVG (Jika Ada) -->
       ${svgHtml}
-
       <div class="space-y-1 mb-3">${optionsHtml}</div>
 
-      <!-- Pembahasan Box -->
       <div class="pembahasan-box">
         <div class="flex items-center justify-between gap-2 mb-1.5 text-xs font-bold text-violet-300">
           <div class="flex items-center gap-2">
@@ -3668,37 +4250,38 @@ function renderStudentQuestions(questions) {
 
   const displayedQuestions = filterSavedOnly ? questions.filter(q => q && q.is_pinned === true) : questions;
 
-  displayedQuestions.forEach((soal) => {
+  // 1. Deteksi Teka-Teki Silang (TTS 2D)
+  const ttsQuestions = displayedQuestions.filter(q => {
+    const t = (q.tipe_soal || "").toLowerCase();
+    return t.includes("tts") || t.includes("silang") || t.includes("crossword");
+  });
+  const nonTtsQuestions = displayedQuestions.filter(q => !ttsQuestions.includes(q));
+
+  if (ttsQuestions.length > 0) {
+    const layout = getOrBuildCrosswordLayout(currentPackage, activeParallelTab);
+    if (layout) {
+      const crosswordHtml = renderCrosswordSectionForWeb(layout, true);
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = crosswordHtml;
+      container.appendChild(tempDiv.firstElementChild || tempDiv);
+      setTimeout(initStudentCrosswordNavigation, 60);
+    }
+  }
+
+  // 2. Render soal lainnya
+  nonTtsQuestions.forEach((soal) => {
     if (!soal) return;
     const card = document.createElement("div");
     card.className = "question-item";
-    card.id = `student-card-${soal.nomor}`;
-
-    const parsedSub = parseStructuredQuestionContent(soal.pertanyaan || "");
-    const isStructured = parsedSub.hasSubparts && (!soal.pilihan_jawaban || soal.pilihan_jawaban.length === 0);
 
     let inputHtml = "";
     if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
-      const isPearsonCurriculum = (currentQuizData && currentQuizData.jenjang && ((currentQuizData.jenjang.toLowerCase().includes("pearson")) || (currentQuizData.jenjang.toLowerCase().includes("edexcel")))) || (document.getElementById("gradeSelect")?.value?.toLowerCase().includes("pearson")) || false;
       inputHtml = soal.pilihan_jawaban.map((opt) => `
-        <label class="option-row" for="opt_${soal.nomor}_${opt.label}">
-          <input type="radio" class="mr-2.5 text-violet-600 focus:ring-violet-500" name="q_${soal.nomor}" id="opt_${soal.nomor}_${opt.label}" value="${opt.label}">
-          <span class="option-label">${opt.label}</span>
-          <span class="flex-grow-1">${formatChemistryForWebHtml(opt.teks)}</span>
+        <label class="option-row cursor-pointer hover:bg-zinc-800/60 block rounded-xl p-3 border border-zinc-800 transition-colors">
+          <input type="radio" name="q_${soal.nomor}" value="${opt.label}" class="w-4 h-4 text-violet-600 focus:ring-violet-500 bg-zinc-950 border-zinc-700">
+          <span class="option-label ml-2 font-bold text-violet-300">${opt.label}.</span>
+          <span class="text-zinc-200 text-sm ml-1">${formatChemistryForWebHtml(opt.teks)}</span>
         </label>
-      `).join("");
-      if (isPearsonCurriculum) {
-        inputHtml += `<div class="flex justify-end mt-1 text-xs font-mono font-bold text-cyan-400">(1)</div>`;
-      }
-    } else if (isStructured) {
-      inputHtml = parsedSub.subparts.map(sub => `
-        <div class="my-2.5 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-1.5">
-          <div class="flex items-start gap-2">
-            <span class="px-2 py-0.5 rounded bg-cyan-600/30 text-cyan-300 text-xs font-bold font-mono shrink-0">${sub.label}</span>
-            <div class="text-xs text-zinc-300 flex-grow leading-relaxed">${formatChemistryForWebHtml(sub.text)}</div>
-          </div>
-          <textarea class="w-full mt-1.5 px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100 text-xs focus:ring-2 focus:ring-cyan-500 outline-none" rows="2" placeholder="Jawaban untuk sub-soal ${sub.label}..."></textarea>
-        </div>
       `).join("");
     } else {
       const tSoal = (soal.tipe_soal || "").toLowerCase();
@@ -3712,18 +4295,6 @@ function renderStudentQuestions(questions) {
             <input type="text" id="student_input_${soal.nomor}" 
                    class="w-full sm:w-80 px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-amber-500/50 text-white font-mono text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner" 
                    placeholder="Contoh: STOIKIOMETRI">
-          </div>
-        `;
-      } else if (tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("crossword")) {
-        inputHtml = `
-          <div class="my-2.5 p-3 rounded-xl bg-zinc-900/80 border border-cyan-500/30 space-y-2">
-            <label for="student_input_${soal.nomor}" class="block text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-              <span>📰</span>
-              <span>Ketik kata jawaban Teka-Teki Silang (TTS):</span>
-            </label>
-            <input type="text" id="student_input_${soal.nomor}" 
-                   class="w-full sm:w-80 px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-cyan-500/50 text-white font-mono text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-inner" 
-                   placeholder="Contoh: ELEKTRON">
           </div>
         `;
       } else if (tSoal.includes("jodoh") || tSoal.includes("matching")) {
@@ -3740,23 +4311,22 @@ function renderStudentQuestions(questions) {
         `;
       } else {
         inputHtml = `
-          <textarea class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none" rows="3" placeholder="Tuliskan langkah jawaban Anda di sini..."></textarea>
+          <textarea id="student_input_${soal.nomor}" rows="4" 
+                    class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs focus:outline-none focus:ring-2 focus:ring-violet-500 leading-relaxed" 
+                    placeholder="Tuliskan analisis dan langkah penyelesaian Anda di sini..."></textarea>
         `;
       }
     }
 
-    const formattedQuestion = isStructured
-      ? (parsedSub.stem ? `<div class="text-sm text-zinc-100 mb-3">${formatChemistryForWebHtml(parsedSub.stem)}</div>` : "")
-      : renderQuestionContentForWeb(soal);
-
+    const formattedQuestion = renderQuestionContentForWeb(soal);
     const svgHtml = soal.ilustrasi_svg ? renderSvgIllustration(soal.ilustrasi_svg, soal.caption_ilustrasi) : "";
 
     card.innerHTML = `
       <div class="flex justify-between items-center mb-2">
-        <h6 class="text-xs font-bold text-zinc-400">Nomor ${soal.nomor} (${soal.subtopik}) — Paket ${activeParallelTab}</h6>
-        <span class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[10px] font-bold">${soal.tingkat_kesulitan}</span>
+        <h5 class="font-bold text-white text-sm sm:text-base">Soal Nomor ${soal.nomor}</h5>
+        <span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[10px] font-bold">${soal.tingkat_kesulitan}</span>
       </div>
-      <div class="text-sm text-zinc-100 mb-3">${formattedQuestion}</div>
+      <div class="mb-3">${formattedQuestion}</div>
       ${svgHtml}
       <div class="space-y-1">${inputHtml}</div>
       <div id="feedback-${soal.nomor}" class="mt-2 text-xs hidden"></div>
@@ -3776,10 +4346,44 @@ function evaluateStudentQuiz(questions) {
   let correct = 0;
   let totalPG = 0;
 
+  // 1. Evaluasi Interaktif Teka-Teki Silang (TTS 2D)
+  const ttsInputs = document.querySelectorAll('input[id^="tts_input_"]');
+  if (ttsInputs.length > 0) {
+    let ttsCorrect = 0;
+    let ttsTotal = ttsInputs.length;
+    ttsInputs.forEach(inp => {
+      const userVal = (inp.value || "").trim().toUpperCase();
+      const expected = (inp.dataset.letter || "").trim().toUpperCase();
+      const parentBox = inp.closest('.tts-cell-box') || inp.parentElement;
+      if (userVal && userVal === expected) {
+        ttsCorrect++;
+        inp.classList.remove("text-rose-400", "text-white");
+        inp.classList.add("text-emerald-400");
+        if (parentBox) {
+          parentBox.classList.remove("border-zinc-600", "border-rose-500", "tts-cell-wrong");
+          parentBox.classList.add("border-emerald-500", "tts-cell-correct");
+        }
+      } else {
+        inp.classList.remove("text-emerald-400", "text-white");
+        inp.classList.add("text-rose-400");
+        if (parentBox) {
+          parentBox.classList.remove("border-zinc-600", "border-emerald-500", "tts-cell-correct");
+          parentBox.classList.add("border-rose-500", "tts-cell-wrong");
+        }
+      }
+    });
+    totalPG += ttsTotal;
+    correct += ttsCorrect;
+  }
+
+  // 2. Evaluasi Soal Non-TTS
   questions.forEach((soal) => {
     if (!soal) return;
     const tSoal = (soal.tipe_soal || "").toLowerCase();
-    const isUnique = tSoal.includes("scramble") || tSoal.includes("acak") || tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("jodoh") || tSoal.includes("matching");
+    if (tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("crossword")) {
+      return; // Sudah dievaluasi di atas via grid sel
+    }
+    const isUnique = tSoal.includes("scramble") || tSoal.includes("acak") || tSoal.includes("jodoh") || tSoal.includes("matching");
 
     if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
       totalPG++;
@@ -3799,7 +4403,7 @@ function evaluateStudentQuiz(questions) {
           }
         } else {
           feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs";
-          feedbackDiv.innerHTML = `⚠️ <b>Belum Dijawab.</b> Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
+          feedbackDiv.innerHTML = "⚠️ Anda belum menjawab soal ini.";
         }
       }
     } else if (isUnique) {
@@ -3808,23 +4412,22 @@ function evaluateStudentQuiz(questions) {
       const feedbackDiv = document.getElementById(`feedback-${soal.nomor}`);
       if (feedbackDiv) {
         feedbackDiv.classList.remove("hidden");
-        const userVal = studentInput ? studentInput.value.trim() : "";
-        if (userVal) {
-          const cleanUser = userVal.toUpperCase().replace(/[^A-Z0-9]/g, "");
-          const cleanKey = String(soal.kunci_jawaban || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-          const isCorrect = (cleanUser === cleanKey) || (cleanUser && cleanKey && (cleanUser.includes(cleanKey) || cleanKey.includes(cleanUser)));
+        if (studentInput && studentInput.value.trim()) {
+          const userVal = studentInput.value.trim().toUpperCase().replace(/\s+/g, " ");
+          const keyVal = (soal.kunci_jawaban || "").trim().toUpperCase().replace(/\s+/g, " ");
+          const isMatchClean = userVal.replace(/[^A-Za-z0-9]/g, "") === keyVal.replace(/[^A-Za-z0-9]/g, "");
 
-          if (isCorrect) {
+          if (isMatchClean) {
             correct++;
             feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs";
-            feedbackDiv.innerHTML = `✅ <b>Tepat Sekali!</b> Jawaban Anda: <b>${userVal.toUpperCase()}</b>`;
+            feedbackDiv.innerHTML = `✅ <b>Jawaban Tepat!</b> (${studentInput.value.trim()})`;
           } else {
             feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs";
-            feedbackDiv.innerHTML = `❌ <b>Kurang Tepat.</b> Jawaban Anda: ${userVal} | Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
+            feedbackDiv.innerHTML = `❌ <b>Kurang Tepat.</b> Jawaban Anda: ${studentInput.value.trim()} | Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
           }
         } else {
           feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs";
-          feedbackDiv.innerHTML = `⚠️ <b>Belum Dijawab.</b> Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
+          feedbackDiv.innerHTML = "⚠️ Anda belum menjawab soal ini.";
         }
       }
     }
@@ -4042,7 +4645,30 @@ function renderPrintLayout(pkg) {
     const renderPrintQuestions = (questions, labelPaket) => {
       const paperHead = isPearson ? 'EXAMINATION PAPER' : 'LEMBAR SOAL';
       let html = `<h4 style="margin: 14pt 0 8pt 0; text-decoration: underline; font-weight: bold; font-size: 11.5pt; color: #1e3a8a;">${paperHead} ${labelPaket ? '(' + labelPaket + ')' : ''}</h4>`;
-      questions.forEach((soal) => {
+
+      const ttsQuestions = (questions || []).filter(q => {
+        const t = (q.tipe_soal || "").toLowerCase();
+        return t.includes("tts") || t.includes("silang") || t.includes("crossword");
+      });
+      const nonTtsQuestions = (questions || []).filter(q => !ttsQuestions.includes(q));
+
+      if (ttsQuestions.length > 0) {
+        const ttsItems = ttsQuestions.map(q => ({
+          word: (q.kunci_jawaban || "").toUpperCase().replace(/[^A-Z]/g, ""),
+          clue: cleanTtsClue(q.pertanyaan),
+          soal: q
+        }));
+        const layout = generateCrosswordLayout(ttsItems, 80);
+        if (layout) {
+          html += renderCrosswordTableForWord(layout, true);
+        }
+      }
+
+      if (nonTtsQuestions.length > 0) {
+        if (ttsQuestions.length > 0) {
+          html += `<div style="page-break-before: always; margin-top: 14pt;"><hr style="border: none; border-top: 1.5px solid #000;"/></div>`;
+        }
+        nonTtsQuestions.forEach((soal) => {
         if (!soal) return;
 
         const metaParts = [];
@@ -4093,36 +4719,11 @@ function renderPrintLayout(pkg) {
             ` : ''}
 
             ${promptTextHtml}
-
             ${svgHtml}
             ${optText}
           </div>
         `;
       });
-
-      if (isPearson) {
-        let totalPaperMarks = 0;
-        questions.forEach(soal => {
-          if (!soal) return;
-          if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
-            totalPaperMarks += 1;
-          } else {
-            const parsedSub = parseStructuredQuestionContent(soal.pertanyaan || "");
-            if (parsedSub.hasSubparts && parsedSub.subparts.length > 0) {
-              parsedSub.subparts.forEach(sub => {
-                const markMatch = sub.text.match(/\s*(?:\[|\()(\d+)\s*(?:marks?|mark|m|poin|skor)?(?:\)|\/|\s*mark\]|\s*marks\])/i);
-                totalPaperMarks += markMatch ? parseInt(markMatch[1], 10) : 1;
-              });
-            } else {
-              totalPaperMarks += 1;
-            }
-          }
-        });
-        html += `
-          <div style="margin-top: 16pt; padding-top: 8pt; border-top: 1.5pt solid #0f172a; text-align: right; font-weight: bold; font-size: 11pt; color: #0f172a;">
-            TOTAL FOR PAPER = ${totalPaperMarks} MARKS
-          </div>
-        `;
       }
       return html;
     };
@@ -4847,7 +5448,33 @@ function exportToWordDocx(pkg, exportMode = 'guru') {
     const customSchool = getCustomSchoolName();
 
     const formatWordQuestions = (questions) => {
-      let renderedWordHtml = (questions || []).map((soal) => {
+      const ttsQuestions = (questions || []).filter(q => {
+        const t = (q.tipe_soal || "").toLowerCase();
+        return t.includes("tts") || t.includes("silang") || t.includes("crossword");
+      });
+      const nonTtsQuestions = (questions || []).filter(q => !ttsQuestions.includes(q));
+
+      let renderedWordHtml = "";
+
+      // 1. Render Lembar Teka-Teki Silang 2D (Foto 1)
+      if (ttsQuestions.length > 0) {
+        const ttsItems = ttsQuestions.map(q => ({
+          word: (q.kunci_jawaban || "").toUpperCase().replace(/[^A-Z]/g, ""),
+          clue: cleanTtsClue(q.pertanyaan),
+          soal: q
+        }));
+        const layout = generateCrosswordLayout(ttsItems, 80);
+        if (layout) {
+          renderedWordHtml += renderCrosswordTableForWord(layout, exportMode === 'siswa');
+        }
+      }
+
+      // 2. Render Soal Lainnya (Jika ada di Campuran)
+      if (nonTtsQuestions.length > 0) {
+        if (ttsQuestions.length > 0) {
+          renderedWordHtml += `<div style="page-break-before: always; margin-top: 20pt;"><hr style="border: none; border-top: 2px solid #000;"/></div>`;
+        }
+        renderedWordHtml += nonTtsQuestions.map((soal) => {
         if (!soal) return "";
 
         // 1. Metadata Butir Soal (Elemen, Subtopik, Level)
@@ -4869,8 +5496,7 @@ function exportToWordDocx(pkg, exportMode = 'guru') {
         const tSoal = (soal.tipe_soal || "").toLowerCase();
         const isMatching = tSoal.includes("jodoh") || tSoal.includes("matching");
         const isScramble = tSoal.includes("scramble") || tSoal.includes("acak");
-        const isTts = tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("crossword");
-        const isUniqueType = isMatching || isScramble || isTts;
+        const isUniqueType = isMatching || isScramble;
 
         // 3. Pilihan Jawaban vs Dotted Lines vs Format Soal Unik (Font Times New Roman 12pt)
         let opts = "";
@@ -4889,7 +5515,6 @@ function exportToWordDocx(pkg, exportMode = 'guru') {
           promptHtml = formatUniqueQuestionForWord(parsed.prompt, soal);
           opts = "";
         } else {
-          // Uraian terstruktur atau essay dengan garis lembar jawab
           promptHtml = formatPromptWithSubpartsAndDotsForWord(parsed.prompt, isStructuredOrEssay);
           opts = "";
         }
@@ -4925,12 +5550,12 @@ function exportToWordDocx(pkg, exportMode = 'guru') {
             ` : ''}
 
             ${promptHtml}
-
             ${svgWord}
             ${opts}
           </div>
         `;
       }).join("");
+      }
 
       if (isPearson) {
         let totalMarks = 0;
