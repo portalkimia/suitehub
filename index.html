@@ -473,8 +473,8 @@
         <div id="auth-saved-token-box" class="hidden p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 text-xs">
           <div class="flex items-center justify-between gap-2">
             <div>
-              <span class="text-slate-400">Token tersimpan:</span><br>
-              <b id="auth-saved-token-name" class="text-purple-300 font-mono"></b>
+              <span class="text-slate-400">Akun Guru Tersimpan:</span><br>
+              <b id="auth-saved-token-name" class="text-purple-300 font-semibold"></b>
             </div>
             <button type="button" id="btn-use-saved-token" class="shrink-0 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md shadow-purple-900/40 transition-all">
               Masuk Cepat ➔
@@ -933,6 +933,22 @@
       const hashBuffer = await crypto.subtle.digest("SHA-256", data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    /**
+     * FORMAT NAMA GURU:
+     * Menambahkan awalan "Guru " jika guru diinput dengan nama panggilan saja (misal: "Dhevira" -> "Guru Dhevira").
+     */
+    function formatNamaGuru(nama) {
+      if (!nama || !nama.trim()) return "Rekan Guru";
+      const trimmed = nama.trim();
+      if (/^(guru|pak|bu|ibu|bapak|ustadz|ustadzah|ust|ustz)\b/i.test(trimmed)) {
+        return trimmed;
+      }
+      if (/^(admin|master)\b/i.test(trimmed)) {
+        return trimmed;
+      }
+      return `Guru ${trimmed}`;
     }
 
     async function verifyTokenViaGas(token) {
@@ -1474,14 +1490,16 @@
           if (acc && acc.saldo != null) saldoTxt = ` (${acc.saldo}x kuota)`;
         } catch (e) {}
 
+        const namaTampil = formatNamaGuru(savedNama);
+
         if (profileInitial) profileInitial.innerText = "⚗️";
-        if (profileName) profileName.innerText = savedNama || "Rekan Guru";
+        if (profileName) profileName.innerText = namaTampil;
         if (profileSub) {
-          const subBase = savedToken ? `Token: ${savedToken}${saldoTxt}` : "Komunitas Pendidik";
+          const subBase = "Akses Mode Guru" + saldoTxt;
           profileSub.innerHTML = `${subBase} • <button type="button" onclick="openGuruWelcomeModal(true)" class="text-purple-300 hover:text-white underline cursor-pointer">ℹ️ Info Kuota &amp; Biaya AI</button>`;
         }
         if (heroBadgeText) heroBadgeText.innerText = "RUANG KERJA AI GURU";
-        if (heroHeadline) heroHeadline.innerHTML = `Selamat datang, <span class="gradient-title">${savedNama || "Rekan Guru"}</span>`;
+        if (heroHeadline) heroHeadline.innerHTML = `Selamat datang, <span class="gradient-title">${namaTampil}</span>`;
         if (heroSubtitle) heroSubtitle.innerText = "Akses terintegrasi media pembelajaran interaktif, laboratorium virtual, generator modul ajar AI Kurikulum Merdeka, generator soal AI, dan pembinaan olimpiade sains.";
         if (addBranchTopBtn) addBranchTopBtn.classList.add("hidden");
         if (resetDefaultBtn) { resetDefaultBtn.classList.add("hidden"); resetDefaultBtn.classList.remove("flex"); }
@@ -1573,7 +1591,16 @@
         }
         passwordInput.placeholder = "Ketik token guru (TK-...) atau sandi...";
         if (storedToken && savedBox && savedName) {
-          savedName.innerText = storedNama ? `${storedNama} (${storedToken})` : storedToken;
+          // Hanya tampilkan nama pemilik token, sembunyikan kode token demi keamanan & privasi
+          let namaPemilik = storedNama;
+          if (!namaPemilik) {
+            try {
+              const acc = JSON.parse(localStorage.getItem("generatorAccountInfo") || "null");
+              if (acc && acc.nama) namaPemilik = acc.nama;
+              else if (acc && acc.peran === "master") namaPemilik = "Admin Pengembang (Master)";
+            } catch (e) {}
+          }
+          savedName.innerText = formatNamaGuru(namaPemilik);
           savedBox.classList.remove("hidden");
         } else if (savedBox) {
           savedBox.classList.add("hidden");
@@ -2680,7 +2707,7 @@
             closeAuthModal();
             updateRoleUI();
             if (authResult.isToken) {
-              const nama = authResult.account?.nama || "Rekan Guru";
+              const nama = formatNamaGuru(authResult.account?.nama);
               const saldo = authResult.account?.saldo != null ? ` (${authResult.account.saldo}x kuota)` : "";
               showToast(`🎉 Selamat datang, ${nama}! Mode Guru aktif${saldo}. Akses modul terhubung.`, "success");
             } else {
@@ -2720,7 +2747,8 @@
               activeRole = "guru";
               closeAuthModal();
               updateRoleUI();
-              const nama = authResult.account?.nama || "Rekan Guru";
+              const storedNama = localStorage.getItem("portalkimia_guru_nama") || localStorage.getItem("portalkimia_nama_guru");
+              const nama = formatNamaGuru(authResult.account?.nama || storedNama);
               const saldo = authResult.account?.saldo != null ? ` (${authResult.account.saldo}x kuota)` : "";
               showToast(`🎉 Selamat datang kembali, ${nama}! Mode Guru aktif${saldo}.`, "success");
             } else {
@@ -2872,8 +2900,9 @@
 
           daftar.forEach(item => {
             const isHabis = Number(item.saldo || 0) <= 0;
+            const namaGuruTampil = formatNamaGuru(item.nama);
             html += '<tr class="hover:bg-purple-950/20 transition-colors">' +
-              '<td class="p-2.5 font-semibold text-slate-200">' + item.nama + '</td>' +
+              '<td class="p-2.5 font-semibold text-slate-200">' + namaGuruTampil + '</td>' +
               '<td class="p-2.5 font-mono text-[11px] text-purple-300"><span class="cursor-pointer hover:text-purple-200 select-all" title="Klik untuk salin" onclick="navigator.clipboard && navigator.clipboard.writeText(\'' + item.token + '\')">' + item.token + '</span></td>' +
               '<td class="p-2.5 text-center font-bold font-mono ' + (isHabis ? 'text-rose-400' : 'text-emerald-400') + '">' + item.saldo + 'x</td>' +
               '<td class="p-2.5 text-center font-mono text-slate-400">' + item.terpakai + 'x</td>' +

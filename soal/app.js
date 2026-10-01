@@ -27,6 +27,19 @@ const APP_VERSION = "2.14";
   } catch (e) {}
 })();
 
+// Helper Standarisasi Nama Guru
+function formatNamaGuru(nama) {
+  if (!nama || !nama.trim()) return "Rekan Guru";
+  const trimmed = nama.trim();
+  if (/^(guru|pak|bu|ibu|bapak|ustadz|ustadzah|ust|ustz)\b/i.test(trimmed)) {
+    return trimmed;
+  }
+  if (/^(admin|master)\b/i.test(trimmed)) {
+    return trimmed;
+  }
+  return `Guru ${trimmed}`;
+}
+
 // Kustomisasi Identitas Guru & Sekolah
 const TEACHER_NAME_KEY = "portalkimia_nama_guru";
 const SCHOOL_NAME_KEY = "portalkimia_nama_sekolah";
@@ -121,13 +134,13 @@ function handleMagicLinkToken() {
     } catch (e) {}
 
     ujiKoneksiDanToken(cleanToken).then(acc => {
-      const nama = (acc && acc.nama) ? acc.nama : "Rekan Guru";
+      const nama = (acc && acc.nama) ? formatNamaGuru(acc.nama) : "Rekan Guru";
       const saldo = (acc && acc.saldo != null) ? acc.saldo : "";
       showVersionToast(`🎉 Selamat datang, ${nama}! Token Anda aktif${saldo ? ` (${saldo}x kuota)` : ''}.`);
       
       const storedTeacher = localStorage.getItem(TEACHER_NAME_KEY);
       if (!storedTeacher && acc && acc.nama) {
-        setCustomTeacherName(acc.nama);
+        setCustomTeacherName(formatNamaGuru(acc.nama));
       }
     }).catch(() => {
       showVersionToast(`✨ Token akses guru (${cleanToken}) berhasil dipasang.`);
@@ -470,7 +483,7 @@ function updateConnectionStatusUI() {
     }
   } else if (acc && acc.peran === 'guru') {
     const saldo = typeof acc.saldo === 'number' ? acc.saldo : Number(acc.saldo || 0);
-    const nama = acc.nama || 'Guru';
+    const nama = formatNamaGuru(acc.nama);
     const isHabis = saldo <= 0;
 
     if (dot) dot.className = isHabis ? "w-2 h-2 rounded-full bg-rose-400 animate-pulse" : "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
@@ -589,8 +602,9 @@ async function muatDaftarTokenGuruAdminSoal() {
 
     daftar.forEach(item => {
       const isHabis = Number(item.saldo || 0) <= 0;
+      const namaGuruTampil = formatNamaGuru(item.nama);
       html += '<tr class="hover:bg-zinc-900/40 transition-colors">' +
-        '<td class="p-2 font-semibold text-zinc-200">' + item.nama + '</td>' +
+        '<td class="p-2 font-semibold text-zinc-200">' + namaGuruTampil + '</td>' +
         '<td class="p-2 font-mono text-[11px] text-zinc-400"><span class="cursor-pointer hover:text-emerald-300 select-all" title="Klik untuk salin" onclick="navigator.clipboard && navigator.clipboard.writeText(\'' + item.token + '\')">' + item.token + '</span></td>' +
         '<td class="p-2 text-center font-bold font-mono ' + (isHabis ? 'text-rose-400' : 'text-emerald-400') + '">' + item.saldo + 'x</td>' +
         '<td class="p-2 text-center font-mono text-zinc-400">' + item.terpakai + 'x</td>' +
@@ -626,7 +640,7 @@ window.adminSalinMagicLinkGuruSoal = function(token, nama) {
   const magicUrl = `${base}?token=${encodeURIComponent(token)}`;
   if (navigator.clipboard) {
     navigator.clipboard.writeText(magicUrl).then(() => {
-      alert(`✅ Tautan Akses WhatsApp untuk ${nama} berhasil disalin:\n\n${magicUrl}\n\nKirimkan tautan ini ke WhatsApp rekan guru. Rekan guru cukup mengklik tautan tersebut untuk langsung menggunakan Generator Soal dengan token dan kuota aktif tanpa perlu mengetik apapun!`);
+      alert(`✅ Tautan Akses WhatsApp untuk ${formatNamaGuru(nama)} berhasil disalin:\n\n${magicUrl}\n\nKirimkan tautan ini ke WhatsApp rekan guru. Rekan guru cukup mengklik tautan tersebut untuk langsung menggunakan Generator Soal dengan token dan kuota aktif tanpa perlu mengetik apapun!`);
     }).catch(() => {
       prompt("Salin tautan WhatsApp ini untuk rekan guru:", magicUrl);
     });
@@ -663,7 +677,7 @@ async function adminTambahAkunGuruSoal() {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     const magicLink = "https://portalkimia.github.io/suitehub/soal/?token=" + encodeURIComponent(data.token);
-    alert("Akun berhasil dibuat!\n\nNama: " + data.nama + "\nToken: " + data.token + "\nSaldo: " + data.saldo + "x generate\n\nTautan Akses WhatsApp:\n" + magicLink + "\n\n(Tautan WhatsApp telah disalin otomatis ke clipboard)");
+    alert("Akun berhasil dibuat!\n\nNama: " + formatNamaGuru(data.nama) + "\nToken: " + data.token + "\nSaldo: " + data.saldo + "x generate\n\nTautan Akses WhatsApp:\n" + magicLink + "\n\n(Tautan WhatsApp telah disalin otomatis ke clipboard)");
     if (navigator.clipboard) navigator.clipboard.writeText(magicLink).catch(() => {});
     if (inputNama) inputNama.value = '';
     if (inputCustom) inputCustom.value = '';
@@ -674,7 +688,7 @@ async function adminTambahAkunGuruSoal() {
 }
 
 async function adminGantiTokenGuruSoal(tokenLama, namaGuru) {
-  const tokenBaru = prompt(`Ganti token untuk ${namaGuru || tokenLama}:\n\nKetik token baru yang singkat & mudah diingat (misal: BUDI-KIMIA atau BUDI2026):`, tokenLama);
+  const tokenBaru = prompt(`Ganti token untuk ${formatNamaGuru(namaGuru) || tokenLama}:\n\nKetik token baru yang singkat & mudah diingat (misal: BUDI-KIMIA atau BUDI2026):`, tokenLama);
   if (!tokenBaru || !tokenBaru.trim() || tokenBaru.trim() === tokenLama) return;
   const cleanBaru = tokenBaru.trim();
   const url = getGasUrl();
@@ -693,7 +707,7 @@ async function adminGantiTokenGuruSoal(tokenLama, namaGuru) {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     const magicLink = "https://portalkimia.github.io/suitehub/soal/?token=" + encodeURIComponent(cleanBaru);
-    alert(`✅ Token untuk ${data.nama || namaGuru} berhasil diubah menjadi:\n${cleanBaru}\n\nTautan Akses WhatsApp Baru:\n${magicLink}\n\n(Tautan baru telah disalin otomatis ke clipboard)`);
+    alert(`✅ Token untuk ${formatNamaGuru(data.nama || namaGuru)} berhasil diubah menjadi:\n${cleanBaru}\n\nTautan Akses WhatsApp Baru:\n${magicLink}\n\n(Tautan baru telah disalin otomatis ke clipboard)`);
     if (navigator.clipboard) navigator.clipboard.writeText(magicLink).catch(() => {});
     muatDaftarTokenGuruAdminSoal();
   } catch (err) {
