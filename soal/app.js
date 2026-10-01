@@ -1633,17 +1633,50 @@ function formatChemistryForWebHtml(text) {
   // 1. Bersihkan persentase LaTeX: $50{,}0\%$ -> 50,0%
   s = s.replace(/\$\s*([0-9]+(?:\{,\}|,|\.)?[0-9]*)\s*(?:\\%|%)(?:\s*\$)?/g, (m, p1) => p1.replace(/\{,\}/g, ",") + "%");
   s = s.replace(/([0-9]+)\{,\}([0-9]+)/g, "$1,$2");
+  s = s.replace(/\{,\}/g, ",");
   s = s.replace(/\\%/g, "%");
 
-  // 2. Pecahan \frac{a}{b} -> (a)/b
-  s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "($1)/$2");
-
-  // 3. Bersihkan wrapper teks LaTeX berulang
+  // 2. Bersihkan wrapper teks LaTeX berulang terlebih dahulu agar isi \text{} tidak rusak
   let loop = 0;
   while (/\\(?:text|mathrm|mathbf|ce|operatorname|textit|textbf|underline|mathit)\{([^{}]*)\}/.test(s) && loop++ < 10) {
     s = s.replace(/\\(?:text|mathrm|mathbf|ce|operatorname|textit|textbf|underline|mathit)\{([^{}]*)\}/g, "$1");
   }
   s = s.replace(/\\(?:text|mathrm|mathbf|ce)\b/g, "");
+
+  // 3. Pecahan \frac{num}{den} dengan dukungan kurung bersarang (nested braces)
+  let fIdx;
+  let fSafety = 0;
+  while ((fIdx = s.indexOf('\\frac')) !== -1 && fSafety++ < 20) {
+    let p = fIdx + 5;
+    while (p < s.length && (s[p] === ' ' || s[p] === '\t')) p++;
+    if (s[p] !== '{') {
+      s = s.replace('\\frac', '');
+      break;
+    }
+    let b1Start = p;
+    let depth = 1;
+    p++;
+    while (p < s.length && depth > 0) {
+      if (s[p] === '{') depth++;
+      else if (s[p] === '}') depth--;
+      p++;
+    }
+    if (depth !== 0) break;
+    let num = s.slice(b1Start + 1, p - 1);
+    while (p < s.length && (s[p] === ' ' || s[p] === '\t')) p++;
+    if (s[p] !== '{') break;
+    let b2Start = p;
+    depth = 1;
+    p++;
+    while (p < s.length && depth > 0) {
+      if (s[p] === '{') depth++;
+      else if (s[p] === '}') depth--;
+      p++;
+    }
+    if (depth !== 0) break;
+    let den = s.slice(b2Start + 1, p - 1);
+    s = s.slice(0, fIdx) + '(' + num + ' / ' + den + ')' + s.slice(p);
+  }
 
   // 4. Subscripts: _{...} atau _angka/huruf variabel tunggal
   s = s.replace(/_\{([^{}]+)\}/g, "<sub>$1</sub>");
@@ -1666,7 +1699,7 @@ function formatChemistryForWebHtml(text) {
   s = s.replace(/<=>/g, "&#8652;");
   s = s.replace(/->/g, "&rarr;");
 
-  // 7. Simbol Termodinamika & Yunani
+  // 7. Simbol Matematika, Termodinamika & Yunani
   s = s.replace(/\\Delta\s*H/g, "&Delta;H");
   s = s.replace(/\\Delta/g, "&Delta;");
   s = s.replace(/\\alpha/g, "&alpha;");
@@ -1677,15 +1710,31 @@ function formatChemistryForWebHtml(text) {
   s = s.replace(/\\cdot/g, "&middot;");
   s = s.replace(/\\dots/g, "...");
   s = s.replace(/\\ldots/g, "...");
+  s = s.replace(/\\approx/g, "&asymp;");
+  s = s.replace(/\\neq/g, "&ne;");
+  s = s.replace(/\\leq?/g, "&le;");
+  s = s.replace(/\\geq?/g, "&ge;");
+  s = s.replace(/\\infty/g, "&infin;");
 
-  // 8. Hapus delimiter math $ dan $$
+  // 8. Fungsi Matematika Umum (Preservasi \log, \ln, \sin, dll.)
+  s = s.replace(/\\log\b/g, "log");
+  s = s.replace(/\\ln\b/g, "ln");
+  s = s.replace(/\\sin\b/g, "sin");
+  s = s.replace(/\\cos\b/g, "cos");
+  s = s.replace(/\\tan\b/g, "tan");
+  s = s.replace(/\\exp\b/g, "exp");
+  s = s.replace(/\\lim\b/g, "lim");
+  s = s.replace(/\\min\b/g, "min");
+  s = s.replace(/\\max\b/g, "max");
+
+  // 9. Hapus delimiter math $ dan $
   s = s.replace(/\$\$/g, "");
   s = s.replace(/\$/g, "");
 
-  // 9. Bersihkan sisa backslash perintah LaTeX umum
+  // 10. Bersihkan sisa backslash perintah LaTeX umum
   s = s.replace(/\\[a-zA-Z]+/g, "");
 
-  // 10. Bersihkan kurung kurawal sisa LaTeX
+  // 11. Bersihkan kurung kurawal sisa LaTeX
   s = s.replace(/[{}]/g, "");
 
   return s;
@@ -1780,45 +1829,83 @@ function formatAnswerKeyForWeb(keyText) {
 function formatChemistryForWordHtml(text, inTable = false) {
   if (!text) return "";
 
-  // Pastikan format LaTeX sudah dinormalisasi dan di-repair terlebih dahulu
-  let s = formatChemistryText(text);
+  let s = String(text);
 
   // 1. Konversi tabel Markdown menjadi tabel native HTML Word (hanya jika di luar tabel)
   if (!inTable && s.includes("|")) {
     s = convertMarkdownTableToWordHtml(s);
   }
 
-  // 2. Normalisasi pecahan \frac{a}{b} -> (a)/b untuk Word
-  s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "($1)/$2");
+  // 2. Bersihkan koma dan persen LaTeX: $50{,}0\%$ -> 50,0%
+  s = s.replace(/\$\s*([0-9]+(?:\{,\}|,|\.)?[0-9]*)\s*(?:\\%|%)(?:\s*\$)?/g, (m, p1) => p1.replace(/\{,\}/g, ",") + "%");
+  s = s.replace(/([0-9]+)\{,\}([0-9]+)/g, "$1,$2");
+  s = s.replace(/\{,\}/g, ",");
+  s = s.replace(/\\%/g, "%");
 
-  // 3. Hapus \text{...}, \mathrm{...}, \mathbf{...}, \ce{...} berulang
+  // 3. Bersihkan wrapper teks LaTeX berulang
   let textLoop = 0;
-  while (/\\(?:text|mathrm|mathbf|ce|operatorname)\{([^{}]*)\}/.test(s) && textLoop++ < 10) {
-    s = s.replace(/\\(?:text|mathrm|mathbf|ce|operatorname)\{([^{}]*)\}/g, "$1");
+  while (/\\(?:text|mathrm|mathbf|ce|operatorname|textit|textbf|underline|mathit)\{([^{}]*)\}/.test(s) && textLoop++ < 10) {
+    s = s.replace(/\\(?:text|mathrm|mathbf|ce|operatorname|textit|textbf|underline|mathit)\{([^{}]*)\}/g, "$1");
   }
   s = s.replace(/\\(?:text|mathrm|mathbf|ce)\b/g, "");
 
-  // 4. Subscripts: _{...} atau _angka/huruf variabel tunggal
+  // 4. Pecahan \frac{num}{den} dengan dukungan kurung bersarang (nested braces)
+  let fIdx;
+  let fSafety = 0;
+  while ((fIdx = s.indexOf('\\frac')) !== -1 && fSafety++ < 20) {
+    let p = fIdx + 5;
+    while (p < s.length && (s[p] === ' ' || s[p] === '\t')) p++;
+    if (s[p] !== '{') {
+      s = s.replace('\\frac', '');
+      break;
+    }
+    let b1Start = p;
+    let depth = 1;
+    p++;
+    while (p < s.length && depth > 0) {
+      if (s[p] === '{') depth++;
+      else if (s[p] === '}') depth--;
+      p++;
+    }
+    if (depth !== 0) break;
+    let num = s.slice(b1Start + 1, p - 1);
+    while (p < s.length && (s[p] === ' ' || s[p] === '\t')) p++;
+    if (s[p] !== '{') break;
+    let b2Start = p;
+    depth = 1;
+    p++;
+    while (p < s.length && depth > 0) {
+      if (s[p] === '{') depth++;
+      else if (s[p] === '}') depth--;
+      p++;
+    }
+    if (depth !== 0) break;
+    let den = s.slice(b2Start + 1, p - 1);
+    s = s.slice(0, fIdx) + '(' + num + ' / ' + den + ')' + s.slice(p);
+  }
+
+  // 5. Subscripts: _{...} atau _angka/huruf variabel tunggal
   s = s.replace(/_\{([^{}]+)\}/g, "<sub>$1</sub>");
   s = s.replace(/_([0-9]+|[a-z]|\+|\-)/g, "<sub>$1</sub>");
 
-  // 5. Superscripts & Derajat Celsius (Literal UTF-8 aman tanpa entitas XML)
+  // 6. Superscripts & Derajat Celsius (Literal UTF-8 aman tanpa entitas XML)
   s = s.replace(/\^\\circ\s*(?:C)?/g, "°C");
   s = s.replace(/\\circ\s*(?:C)?/g, "°C");
   s = s.replace(/\^\{([^{}]+)\}/g, "<sup>$1</sup>");
   s = s.replace(/\^([0-9]+[\+\-]?|[\+\-]|[a-z])/g, "<sup>$1</sup>");
 
-  // 6. Panah dan Kesetimbangan Kimia (Karakter UTF-8 Asli agar lolos parser Word/WPS)
+  // 7. Panah dan Kesetimbangan Kimia (Karakter UTF-8 Asli agar lolos parser Word/WPS)
   s = s.replace(/\\rightleftharpoons/g, "⇌");
   s = s.replace(/\\longleftrightarrow/g, "⇌");
   s = s.replace(/\\leftrightarrow/g, "↔");
+  s = s.replace(/\\longrightarrow/g, "→");
   s = s.replace(/\\rightarrow/g, "→");
   s = s.replace(/\\to\b/g, "→");
   s = s.replace(/\\leftarrow/g, "←");
   s = s.replace(/<=>/g, "⇌");
   s = s.replace(/->/g, "→");
 
-  // 7. Simbol Termodinamika & Yunani (Karakter UTF-8 Asli)
+  // 8. Simbol Termodinamika & Yunani (Karakter UTF-8 Asli)
   s = s.replace(/\\Delta\s*H/g, "ΔH");
   s = s.replace(/\\Delta/g, "Δ");
   s = s.replace(/\\alpha/g, "α");
@@ -1829,17 +1916,32 @@ function formatChemistryForWordHtml(text, inTable = false) {
   s = s.replace(/\\cdot/g, "·");
   s = s.replace(/\\dots/g, "...");
   s = s.replace(/\\ldots/g, "...");
+  s = s.replace(/\\approx/g, "≈");
+  s = s.replace(/\\neq/g, "≠");
+  s = s.replace(/\\leq?/g, "≤");
+  s = s.replace(/\\geq?/g, "≥");
+  s = s.replace(/\\infty/g, "∞");
 
-  // 8. Bersihkan koma dan persen LaTeX
-  s = s.replace(/\{,\}/g, ",");
-  s = s.replace(/\\%/g, "%");
+  // 9. Fungsi Matematika Umum (Preservasi \log, \ln, \sin, dll.)
+  s = s.replace(/\\log\b/g, "log");
+  s = s.replace(/\\ln\b/g, "ln");
+  s = s.replace(/\\sin\b/g, "sin");
+  s = s.replace(/\\cos\b/g, "cos");
+  s = s.replace(/\\tan\b/g, "tan");
+  s = s.replace(/\\exp\b/g, "exp");
+  s = s.replace(/\\lim\b/g, "lim");
+  s = s.replace(/\\min\b/g, "min");
+  s = s.replace(/\\max\b/g, "max");
 
-  // 9. Hapus delimiter math $
+  // 10. Hapus delimiter math $ dan $
   s = s.replace(/\$\$/g, "");
   s = s.replace(/\$/g, "");
 
-  // 10. Bersihkan sisa backslash perintah LaTeX umum
+  // 11. Bersihkan sisa backslash perintah LaTeX umum
   s = s.replace(/\\[a-zA-Z]+/g, "");
+
+  // 12. Bersihkan kurung kurawal sisa LaTeX
+  s = s.replace(/[{}]/g, "");
 
   return s;
 }
@@ -3635,7 +3737,7 @@ function renderCrosswordSectionForWeb(layout, isStudent = false) {
          data-direction="${c.direction}" data-row="${c.row}" data-col="${c.col}" data-word="${c.word}" 
          onclick="highlightCrosswordWord(${c.row}, ${c.col}, '${c.direction}', ${c.word.length}, ${isStudent})">
       <div class="text-xs text-zinc-300 leading-snug">
-        <b class="text-cyan-400 font-bold mr-1">${c.number}.</b> ${c.clue}
+        <b class="text-cyan-400 font-bold mr-1">${c.number}.</b> ${formatChemistryForWebHtml(c.clue)}
         ${isStudent ? `<span class="text-zinc-500 font-mono text-[11px] ml-1">(${c.word.length} huruf)</span>` : `<span class="text-cyan-300 font-mono font-bold ml-1.5 bg-cyan-950/40 px-1.5 py-0.5 rounded border border-cyan-500/30">[${c.word}]</span>`}
       </div>
     </div>
@@ -3646,7 +3748,7 @@ function renderCrosswordSectionForWeb(layout, isStudent = false) {
          data-direction="${c.direction}" data-row="${c.row}" data-col="${c.col}" data-word="${c.word}" 
          onclick="highlightCrosswordWord(${c.row}, ${c.col}, '${c.direction}', ${c.word.length}, ${isStudent})">
       <div class="text-xs text-zinc-300 leading-snug">
-        <b class="text-violet-400 font-bold mr-1">${c.number}.</b> ${c.clue}
+        <b class="text-violet-400 font-bold mr-1">${c.number}.</b> ${formatChemistryForWebHtml(c.clue)}
         ${isStudent ? `<span class="text-zinc-500 font-mono text-[11px] ml-1">(${c.word.length} huruf)</span>` : `<span class="text-violet-300 font-mono font-bold ml-1.5 bg-violet-950/40 px-1.5 py-0.5 rounded border border-violet-500/30">[${c.word}]</span>`}
       </div>
     </div>
@@ -3859,13 +3961,13 @@ function renderCrosswordTableForWord(layout, isStudent = false) {
 
   const acrossHtml = layout.acrossClues.map(c => `
     <div style="margin-bottom: 5pt; text-align: justify; line-height: 1.35; font-size: 10.5pt; font-family: 'Times New Roman', Times, serif;">
-      <b>${c.number}.</b> ${c.clue} ${isStudent ? `<i>(${c.word.length} huruf)</i>` : `<b style="color: #1e3a8a;">[${c.word}]</b>`}
+      <b>${c.number}.</b> ${formatChemistryForWordHtml(c.clue)} ${isStudent ? `<i>(${c.word.length} huruf)</i>` : `<b style="color: #1e3a8a;">[${c.word}]</b>`}
     </div>
   `).join('');
 
   const downHtml = layout.downClues.map(c => `
     <div style="margin-bottom: 5pt; text-align: justify; line-height: 1.35; font-size: 10.5pt; font-family: 'Times New Roman', Times, serif;">
-      <b>${c.number}.</b> ${c.clue} ${isStudent ? `<i>(${c.word.length} huruf)</i>` : `<b style="color: #1e3a8a;">[${c.word}]</b>`}
+      <b>${c.number}.</b> ${formatChemistryForWordHtml(c.clue)} ${isStudent ? `<i>(${c.word.length} huruf)</i>` : `<b style="color: #1e3a8a;">[${c.word}]</b>`}
     </div>
   `).join('');
 
@@ -4806,6 +4908,17 @@ function cleanLatex(text) {
   if (!text) return "";
   let s = formatChemistryText(text);
 
+  // Preservasi fungsi matematika
+  s = s.replace(/\\log\\b/g, "log")
+       .replace(/\\ln\\b/g, "ln")
+       .replace(/\\sin\\b/g, "sin")
+       .replace(/\\cos\\b/g, "cos")
+       .replace(/\\tan\\b/g, "tan")
+       .replace(/\\approx/g, "≈")
+       .replace(/\\neq/g, "≠")
+       .replace(/\\leq?/g, "≤")
+       .replace(/\\geq?/g, "≥");
+
   // Bersihkan pecahan: \frac{a}{b} -> (a)/b
   s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, "($1)/$2");
 
@@ -5328,7 +5441,7 @@ function formatUniqueQuestionForWord(promptText, soal) {
   const isScramble = tSoal.includes("scramble") || tSoal.includes("acak");
   const isTts = tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("crossword");
 
-  let cleanText = formatChemistryForWordHtml(promptText);
+  let cleanText = formatChemistryForWordHtml(isTts ? cleanTtsClue(promptText) : promptText);
 
   // Jika memuat tabel markdown, pisahkan dan render tabel Word
   const lines = promptText.split(/\r?\n/);
