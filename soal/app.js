@@ -8,7 +8,7 @@
  */
 
 // Versioning & Cache Busting
-const APP_VERSION = "2.14";
+const APP_VERSION = "2.15";
 
 // Migration Purge Token Lawas (Satu Kali Reset untuk Seluruh Klien)
 (function jalankanPembersihanTokenLama() {
@@ -204,6 +204,21 @@ function handleAppVersionMigration() {
     if (stored && stored !== APP_VERSION) {
       console.info(`[PortalKimia] Deteksi pembaruan versi: ${stored} ➜ v${APP_VERSION}`);
       localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
+      // Bersihkan layout TTS usang & sanitize draft tersimpan
+      try {
+        const raw = localStorage.getItem(LAST_GENERATED_DRAFT_KEY);
+        if (raw) {
+          const draft = JSON.parse(raw);
+          if (draft && draft.package) {
+            delete draft.package._crosswordLayoutA;
+            delete draft.package._crosswordLayoutB;
+            if (typeof sanitizeQuizPackage === "function") {
+              sanitizeQuizPackage(draft.package);
+            }
+            localStorage.setItem(LAST_GENERATED_DRAFT_KEY, JSON.stringify(draft));
+          }
+        }
+      } catch (e) {}
       setTimeout(() => {
         showVersionToast(`✨ Generator Soal berhasil diperbarui ke versi v${APP_VERSION}!`);
       }, 1000);
@@ -330,6 +345,7 @@ PEDOMAN UTAMA:
      * Pilihlah istilah, nama senyawa, konsep, atau partikel kimia yang esensial dan bervariasi (panjang 3 hingga 10 huruf, SATU KATA tanpa spasi).
      * Pastikan kata-kata yang dipilih memiliki huruf-huruf umum yang saling bersinggungan agar dapat berpotongan secara silang (interlocking 2D grid) mendatar dan menurun.
      * Pada 'pertanyaan', tuliskan HANYA kalimat petunjuk (clue) konsep kimia yang mendalam, menarik, dan edukatif (JANGAN menuliskan kotak-kotak manual atau label arah, karena sistem otomatis menyusun kisi-kisi kotak 2D dan nomornya).
+      * KHUSUS TEKA-TEKI SILANG (TTS): Pada kalimat petunjuk (clue), TULISKAN SEMUA RUMUS KIMIA & NOTASI DALAM TEKS BIASA / NATURAL (misal: HCl, CH3COOH, H2O, pH, Ka, 10^-2 M) TANPA simbol sintaks LaTeX $...$ atau \\text{} agar petunjuk langsung terbaca bersih dan rapi oleh siswa di lembar soal.
      * Kosongkan 'pilihan_jawaban' ([]).
      * Pada 'kunci_jawaban', tuliskan kata kunci TTS dalam SATU KATA huruf kapital murni (contoh: "ELEKTRON", "TITRASI", "INDIKATOR", "BUFFER", "LAKMUS", "HIDROLISIS").
      * Pada 'tipe_soal', tuliskan 'Teka-Teki Silang (TTS)'.
@@ -404,6 +420,7 @@ function restoreLastGeneratedDraft() {
     const draft = JSON.parse(raw);
     if (!draft || !draft.package || !Array.isArray(draft.package.daftar_soal) || !draft.package.daftar_soal.length) return;
     currentPackage = draft.package;
+    sanitizeQuizPackage(currentPackage);
     activeParallelTab = draft.activeParallelTab === "B" && Array.isArray(currentPackage.daftar_soal_paket_b) && currentPackage.daftar_soal_paket_b.length ? "B" : "A";
     filterSavedOnly = false;
     const btnA = document.getElementById("btnSwitchPaketA");
@@ -1630,13 +1647,13 @@ function formatChemistryForWebHtml(text) {
   if (!text) return "";
   let s = String(text);
 
-  // 1. Bersihkan persentase LaTeX: $50{,}0\%$ -> 50,0%
+  // 1. Bersihkan persentase LaTeX: $50{,}0%$ -> 50,0%
   s = s.replace(/\$\s*([0-9]+(?:\{,\}|,|\.)?[0-9]*)\s*(?:\\%|%)(?:\s*\$)?/g, (m, p1) => p1.replace(/\{,\}/g, ",") + "%");
   s = s.replace(/([0-9]+)\{,\}([0-9]+)/g, "$1,$2");
   s = s.replace(/\{,\}/g, ",");
   s = s.replace(/\\%/g, "%");
 
-  // 2. Bersihkan wrapper teks LaTeX berulang terlebih dahulu agar isi \text{} tidak rusak
+  // 2. Bersihkan wrapper teks LaTeX berulang
   let loop = 0;
   while (/\\(?:text|mathrm|mathbf|ce|operatorname|textit|textbf|underline|mathit)\{([^{}]*)\}/.test(s) && loop++ < 10) {
     s = s.replace(/\\(?:text|mathrm|mathbf|ce|operatorname|textit|textbf|underline|mathit)\{([^{}]*)\}/g, "$1");
@@ -1680,13 +1697,13 @@ function formatChemistryForWebHtml(text) {
 
   // 4. Subscripts: _{...} atau _angka/huruf variabel tunggal
   s = s.replace(/_\{([^{}]+)\}/g, "<sub>$1</sub>");
-  s = s.replace(/_([0-9]+|[a-z]|\+|\-)/g, "<sub>$1</sub>");
+  s = s.replace(/_([0-9]+|[a-zA-Z]|\+|\-)/g, "<sub>$1</sub>");
 
   // 5. Superscripts & Derajat Celsius
   s = s.replace(/\^\\circ\s*(?:C)?/g, "&deg;C");
   s = s.replace(/\\circ\s*(?:C)?/g, "&deg;C");
   s = s.replace(/\^\{([^{}]+)\}/g, "<sup>$1</sup>");
-  s = s.replace(/\^([0-9]+[\+\-]?|[\+\-]|[a-z])/g, "<sup>$1</sup>");
+  s = s.replace(/\^([0-9]+[\+\-]??|[\+\-]|[a-zA-Z])/g, "<sup>$1</sup>");
 
   // 6. Panah dan Kesetimbangan Kimia
   s = s.replace(/\\rightleftharpoons/g, "&#8652;");
@@ -1716,7 +1733,7 @@ function formatChemistryForWebHtml(text) {
   s = s.replace(/\\geq?/g, "&ge;");
   s = s.replace(/\\infty/g, "&infin;");
 
-  // 8. Fungsi Matematika Umum (Preservasi \log, \ln, \sin, dll.)
+  // 8. Fungsi Matematika Umum (Preservasi \log, \ln, dll.)
   s = s.replace(/\\log\b/g, "log");
   s = s.replace(/\\ln\b/g, "ln");
   s = s.replace(/\\sin\b/g, "sin");
@@ -1727,15 +1744,30 @@ function formatChemistryForWebHtml(text) {
   s = s.replace(/\\min\b/g, "min");
   s = s.replace(/\\max\b/g, "max");
 
-  // 9. Hapus delimiter math $ dan $
+  // 9. Bersihkan delimiter kurung LaTeX: \left[, \right], \left(, \right), \left., \right.
+  s = s.replace(/\\left\s*([\[\(\{])/g, "$1");
+  s = s.replace(/\\right\s*([\]\)\}])/g, "$1");
+  s = s.replace(/\\left\./g, "");
+  s = s.replace(/\\right\./g, "");
+
+  // 10. Bersihkan spasi khusus LaTeX: \,, \;, \:, \!, \ , \quad, \qquad
+  s = s.replace(/\\(?:quad|qquad)\b/g, " ");
+  s = s.replace(/\\([\,\;\:\!\s])/g, " ");
+  s = s.replace(/\\([\[\(\]\)])/g, "$1");
+  s = s.replace(/\\\\/g, " ");
+
+  // 11. Hapus delimiter math $ dan $
   s = s.replace(/\$\$/g, "");
   s = s.replace(/\$/g, "");
 
-  // 10. Bersihkan sisa backslash perintah LaTeX umum
+  // 12. Bersihkan sisa backslash perintah LaTeX umum
   s = s.replace(/\\[a-zA-Z]+/g, "");
 
-  // 11. Bersihkan kurung kurawal sisa LaTeX
+  // 13. Bersihkan kurung kurawal sisa LaTeX
   s = s.replace(/[{}]/g, "");
+
+  // 14. JAMINAN MUTLAK: Bersihkan semua sisa backslash liar tanpa merusak entitas HTML
+  s = s.replace(/\\/g, "");
 
   return s;
 }
@@ -1828,7 +1860,6 @@ function formatAnswerKeyForWeb(keyText) {
  */
 function formatChemistryForWordHtml(text, inTable = false) {
   if (!text) return "";
-
   let s = String(text);
 
   // 1. Konversi tabel Markdown menjadi tabel native HTML Word (hanya jika di luar tabel)
@@ -1836,7 +1867,7 @@ function formatChemistryForWordHtml(text, inTable = false) {
     s = convertMarkdownTableToWordHtml(s);
   }
 
-  // 2. Bersihkan koma dan persen LaTeX: $50{,}0\%$ -> 50,0%
+  // 2. Bersihkan koma dan persen LaTeX: $50{,}0%$ -> 50,0%
   s = s.replace(/\$\s*([0-9]+(?:\{,\}|,|\.)?[0-9]*)\s*(?:\\%|%)(?:\s*\$)?/g, (m, p1) => p1.replace(/\{,\}/g, ",") + "%");
   s = s.replace(/([0-9]+)\{,\}([0-9]+)/g, "$1,$2");
   s = s.replace(/\{,\}/g, ",");
@@ -1886,13 +1917,13 @@ function formatChemistryForWordHtml(text, inTable = false) {
 
   // 5. Subscripts: _{...} atau _angka/huruf variabel tunggal
   s = s.replace(/_\{([^{}]+)\}/g, "<sub>$1</sub>");
-  s = s.replace(/_([0-9]+|[a-z]|\+|\-)/g, "<sub>$1</sub>");
+  s = s.replace(/_([0-9]+|[a-zA-Z]|\+|\-)/g, "<sub>$1</sub>");
 
   // 6. Superscripts & Derajat Celsius (Literal UTF-8 aman tanpa entitas XML)
   s = s.replace(/\^\\circ\s*(?:C)?/g, "°C");
   s = s.replace(/\\circ\s*(?:C)?/g, "°C");
   s = s.replace(/\^\{([^{}]+)\}/g, "<sup>$1</sup>");
-  s = s.replace(/\^([0-9]+[\+\-]?|[\+\-]|[a-z])/g, "<sup>$1</sup>");
+  s = s.replace(/\^([0-9]+[\+\-]??|[\+\-]|[a-zA-Z])/g, "<sup>$1</sup>");
 
   // 7. Panah dan Kesetimbangan Kimia (Karakter UTF-8 Asli agar lolos parser Word/WPS)
   s = s.replace(/\\rightleftharpoons/g, "⇌");
@@ -1922,7 +1953,7 @@ function formatChemistryForWordHtml(text, inTable = false) {
   s = s.replace(/\\geq?/g, "≥");
   s = s.replace(/\\infty/g, "∞");
 
-  // 9. Fungsi Matematika Umum (Preservasi \log, \ln, \sin, dll.)
+  // 9. Fungsi Matematika Umum (Preservasi \log, \ln, dll.)
   s = s.replace(/\\log\b/g, "log");
   s = s.replace(/\\ln\b/g, "ln");
   s = s.replace(/\\sin\b/g, "sin");
@@ -1933,15 +1964,30 @@ function formatChemistryForWordHtml(text, inTable = false) {
   s = s.replace(/\\min\b/g, "min");
   s = s.replace(/\\max\b/g, "max");
 
-  // 10. Hapus delimiter math $ dan $
+  // 10. Bersihkan delimiter kurung LaTeX: \left[, \right], \left(, \right), \left., \right.
+  s = s.replace(/\\left\s*([\[\(\{])/g, "$1");
+  s = s.replace(/\\right\s*([\]\)\}])/g, "$1");
+  s = s.replace(/\\left\./g, "");
+  s = s.replace(/\\right\./g, "");
+
+  // 11. Bersihkan spasi khusus LaTeX: \,, \;, \:, \!, \ , \quad, \qquad
+  s = s.replace(/\\(?:quad|qquad)\b/g, " ");
+  s = s.replace(/\\([\,\;\:\!\s])/g, " ");
+  s = s.replace(/\\([\[\(\]\)])/g, "$1");
+  s = s.replace(/\\\\/g, " ");
+
+  // 12. Hapus delimiter math $ dan $
   s = s.replace(/\$\$/g, "");
   s = s.replace(/\$/g, "");
 
-  // 11. Bersihkan sisa backslash perintah LaTeX umum
+  // 13. Bersihkan sisa backslash perintah LaTeX umum
   s = s.replace(/\\[a-zA-Z]+/g, "");
 
-  // 12. Bersihkan kurung kurawal sisa LaTeX
+  // 14. Bersihkan kurung kurawal sisa LaTeX
   s = s.replace(/[{}]/g, "");
+
+  // 15. JAMINAN MUTLAK: Bersihkan semua sisa backslash liar
+  s = s.replace(/\\/g, "");
 
   return s;
 }
@@ -2587,21 +2633,33 @@ function normalizeAndValidateQuizPackage(rawInput, defaults = {}) {
 function sanitizeQuizPackage(pkg) {
   if (!pkg) return pkg;
 
+  // Invalidate any previously cached crossword layout to force re-render with clean clues
+  delete pkg._crosswordLayoutA;
+  delete pkg._crosswordLayoutB;
+
   const sanitizeQuestionList = (list) => {
     if (!Array.isArray(list)) return;
     list.forEach(soal => {
-      soal.pertanyaan = formatChemistryText(soal.pertanyaan);
+      const tSoal = (soal.tipe_soal || "").toLowerCase();
+      const isTts = tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("crossword");
+      if (isTts) {
+        soal.pertanyaan = formatChemistryForWebHtml(cleanTtsClue(soal.pertanyaan));
+      } else {
+        soal.pertanyaan = formatChemistryText(soal.pertanyaan);
+      }
       if (soal.pilihan_jawaban) {
         soal.pilihan_jawaban.forEach(opt => {
           opt.teks = formatChemistryText(opt.teks);
         });
       }
-      soal.kunci_jawaban = formatChemistryText(soal.kunci_jawaban);
+      soal.kunci_jawaban = isTts
+        ? (soal.kunci_jawaban || "").toUpperCase().replace(/[^A-Z]/g, "")
+        : formatChemistryText(soal.kunci_jawaban);
       if (soal.pembahasan_langkah) {
-        soal.pembahasan_langkah = soal.pembahasan_langkah.map(st => formatChemistryText(st));
+        soal.pembahasan_langkah = soal.pembahasan_langkah.map(st => isTts ? formatChemistryForWebHtml(st) : formatChemistryText(st));
       }
       if (soal.tips_atau_jebakan) {
-        soal.tips_atau_jebakan = formatChemistryText(soal.tips_atau_jebakan);
+        soal.tips_atau_jebakan = isTts ? formatChemistryForWebHtml(soal.tips_atau_jebakan) : formatChemistryText(soal.tips_atau_jebakan);
       }
     });
   };
@@ -3373,10 +3431,11 @@ function renderResults(pkg) {
   if (window.renderMathInElement) {
     renderMathInElement(resultsSection, {
       delimiters: [
-        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: true },
         { left: "\\(", right: "\\)", display: false },
         { left: "\\[", right: "\\]", display: true }
       ],
+      ignoredClasses: ["tts-clue-item", "tts-cell-box", "crossword-container"],
       throwOnError: false
     });
   }
@@ -3402,10 +3461,11 @@ function renderActiveQuestionsList() {
   if (window.renderMathInElement) {
     const mathOpts = {
       delimiters: [
-        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: true },
         { left: "\\(", right: "\\)", display: false },
         { left: "\\[", right: "\\]", display: true }
       ],
+      ignoredClasses: ["tts-clue-item", "tts-cell-box", "crossword-container"],
       throwOnError: false
     };
     const tElem = document.getElementById("teacherQuestionsList");
@@ -3500,7 +3560,9 @@ function generateCrosswordLayout(wordList, maxAttempts = 80) {
   const cleanList = wordList.map((item, idx) => ({
     id: idx + 1,
     word: (item.word || item.kunci_jawaban || '').toUpperCase().replace(/[^A-Z]/g, ''),
-    clue: cleanTtsClue(item.clue || item.pertanyaan || ''),
+    clue: formatChemistryForWebHtml(cleanTtsClue(item.clue || item.pertanyaan || '')),
+    clueWord: formatChemistryForWordHtml(cleanTtsClue(item.clue || item.pertanyaan || '')),
+    rawClue: cleanTtsClue(item.clue || item.pertanyaan || ''),
     soal: item.soal || item
   })).filter(item => item.word.length >= 2);
 
@@ -3737,7 +3799,7 @@ function renderCrosswordSectionForWeb(layout, isStudent = false) {
          data-direction="${c.direction}" data-row="${c.row}" data-col="${c.col}" data-word="${c.word}" 
          onclick="highlightCrosswordWord(${c.row}, ${c.col}, '${c.direction}', ${c.word.length}, ${isStudent})">
       <div class="text-xs text-zinc-300 leading-snug">
-        <b class="text-cyan-400 font-bold mr-1">${c.number}.</b> ${formatChemistryForWebHtml(c.clue)}
+        <b class="text-cyan-400 font-bold mr-1">${c.number}.</b> ${c.clue || formatChemistryForWebHtml(c.rawClue || '')}
         ${isStudent ? `<span class="text-zinc-500 font-mono text-[11px] ml-1">(${c.word.length} huruf)</span>` : `<span class="text-cyan-300 font-mono font-bold ml-1.5 bg-cyan-950/40 px-1.5 py-0.5 rounded border border-cyan-500/30">[${c.word}]</span>`}
       </div>
     </div>
@@ -3748,7 +3810,7 @@ function renderCrosswordSectionForWeb(layout, isStudent = false) {
          data-direction="${c.direction}" data-row="${c.row}" data-col="${c.col}" data-word="${c.word}" 
          onclick="highlightCrosswordWord(${c.row}, ${c.col}, '${c.direction}', ${c.word.length}, ${isStudent})">
       <div class="text-xs text-zinc-300 leading-snug">
-        <b class="text-violet-400 font-bold mr-1">${c.number}.</b> ${formatChemistryForWebHtml(c.clue)}
+        <b class="text-violet-400 font-bold mr-1">${c.number}.</b> ${c.clue || formatChemistryForWebHtml(c.rawClue || '')}
         ${isStudent ? `<span class="text-zinc-500 font-mono text-[11px] ml-1">(${c.word.length} huruf)</span>` : `<span class="text-violet-300 font-mono font-bold ml-1.5 bg-violet-950/40 px-1.5 py-0.5 rounded border border-violet-500/30">[${c.word}]</span>`}
       </div>
     </div>
@@ -3961,13 +4023,13 @@ function renderCrosswordTableForWord(layout, isStudent = false) {
 
   const acrossHtml = layout.acrossClues.map(c => `
     <div style="margin-bottom: 5pt; text-align: justify; line-height: 1.35; font-size: 10.5pt; font-family: 'Times New Roman', Times, serif;">
-      <b>${c.number}.</b> ${formatChemistryForWordHtml(c.clue)} ${isStudent ? `<i>(${c.word.length} huruf)</i>` : `<b style="color: #1e3a8a;">[${c.word}]</b>`}
+      <b>${c.number}.</b> ${c.clueWord || formatChemistryForWordHtml(c.clue || c.rawClue || '')} ${isStudent ? `<i>(${c.word.length} huruf)</i>` : `<b style="color: #1e3a8a;">[${c.word}]</b>`}
     </div>
   `).join('');
 
   const downHtml = layout.downClues.map(c => `
     <div style="margin-bottom: 5pt; text-align: justify; line-height: 1.35; font-size: 10.5pt; font-family: 'Times New Roman', Times, serif;">
-      <b>${c.number}.</b> ${formatChemistryForWordHtml(c.clue)} ${isStudent ? `<i>(${c.word.length} huruf)</i>` : `<b style="color: #1e3a8a;">[${c.word}]</b>`}
+      <b>${c.number}.</b> ${c.clueWord || formatChemistryForWordHtml(c.clue || c.rawClue || '')} ${isStudent ? `<i>(${c.word.length} huruf)</i>` : `<b style="color: #1e3a8a;">[${c.word}]</b>`}
     </div>
   `).join('');
 
