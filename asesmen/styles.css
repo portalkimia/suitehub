@@ -157,10 +157,18 @@ body {
   width: 42px;
   height: 42px;
   border-radius: 0.75rem;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.25rem;
   transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.type-icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 .assessment-card:hover .type-icon {
