@@ -9,3 +9,6 @@
 7. Jalankan `cekKonfigurasiKeamanan_()` bila ingin memeriksa konfigurasi tanpa menampilkan nilai rahasia.
 
 Endpoint sekarang menolak permintaan tanpa token dan membatasi maksimal 20 proses per menit. Teks prompt AI yang sudah ada dipertahankan.
+
+
+Jika fitur DeepSeek digunakan, tambahkan properti Script Properties bernama `DEEPSEEK_API_KEY`. Kunci tetap berada di backend GAS dan tidak disimpan di browser. Model `deepseek-flash` adalah DeepSeek V4.1 Flash dan penggunaan API berbayar sesuai token.

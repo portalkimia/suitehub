@@ -5,7 +5,7 @@
  * =========================================================================
  */
 
-const CACHE_NAME = 'portalkimia-suite-v1';
+const CACHE_NAME = 'portalkimia-suite-v2';
 const PRECACHE_ASSETS = [
   './',
   './index.html',

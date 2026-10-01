@@ -276,6 +276,32 @@ PEDOMAN UTAMA:
      * Kosongkan pilihan_jawaban (isi array kosong []).
      * Kunci jawaban dan pembahasan untuk uraian terstruktur wajib dirinci per sub-poin: (a) ..., (b) ..., (c) ...
    - Jika dipilih 'Tanpa Stimulus (Drilling Langsung)': DILARANG membuat cerita/narasi konteks panjang. Langsung ke pokok reaksi/perhitungan to the point demi efisiensi kertas saat dicetak.
+
+8. FORMAT SOAL UNIK & INTERAKTIF (MENJODOHKAN, SCRAMBLE, & TEKA-TEKI SILANG / TTS):
+   - FORMAT MENJODOHKAN (MATCHING KOLOM A & B):
+     * Sajikan instruksi: "Pasangkanlah konsep/senyawa/istilah pada Kolom A dengan karakteristik/reaksi/kegunaan yang tepat pada Kolom B!"
+     * Sajikan tabel Markdown 2 kolom: Kolom A (nomor 1, 2, 3, 4 berisi istilah/konsep) dan Kolom B (kode huruf A, B, C, D, E berisi deskripsi/karakteristik dengan opsi pengecoh).
+     * Cantumkan baris panduan: "Lembar Pasangan Jawaban: 1-[...], 2-[...], 3-[...], 4-[...]".
+     * Kosongkan properti 'pilihan_jawaban' ([]).
+     * Pada 'kunci_jawaban', tuliskan pasangan yang benar secara ringkas: "1 - B, 2 - D, 3 - A, 4 - C".
+     * Pada 'tipe_soal', tuliskan 'Menjodohkan (Matching)'.
+   - FORMAT KATA ACAK / SCRAMBLE (SUSUN HURUF ISTILAH KIMIA):
+     * Susun kata/istilah kimia esensial menjadi huruf acak yang dipisah tanda hubung: "KATA ACAK: E - N - D - O - T - E - R - M (8 Huruf)".
+     * Berikan petunjuk konsep kimia yang jelas: "PETUNJUK: Reaksi kimia yang menyerap kalor dari lingkungan ke sistem (ΔH > 0)...".
+     * Sertakan kotak huruf kosong: "KOTAK JAWABAN: [   ] [   ] [   ] [   ] [   ] [   ] [   ] [   ]".
+     * Kosongkan 'pilihan_jawaban' ([]).
+     * Pada 'kunci_jawaban', tuliskan kata asli dalam huruf kapital, contoh: "ENDOTERM".
+     * Pada 'tipe_soal', tuliskan 'Scramble (Kata Acak)'.
+   - FORMAT TEKA-TEKI SILANG (TTS KIMIA MENDATAR & MENURUN):
+     * Tentukan arah dan nomor petunjuk: "[➡️ MENDATAR] - Nomor X (Y Huruf)" atau "[⬇️ MENURUN] - Nomor X (Y Huruf)".
+     * Sajikan kalimat petunjuk/clue konsep kimia yang menarik dan edukatif.
+     * Tampilkan kotak huruf TTS: "KOTAK TTS: [   ] [   ]... (sejumlah Y kotak)".
+     * Kosongkan 'pilihan_jawaban' ([]).
+     * Pada 'kunci_jawaban', tuliskan kata jawaban TTS dalam huruf kapital, contoh: "ELEKTRON".
+     * Pada 'tipe_soal', tuliskan 'Teka-Teki Silang (TTS)'.
+   - FORMAT CAMPURAN SOAL UNIK:
+     * Distribusikan paket butir soal secara proporsional ke dalam ketiga format di atas (Menjodohkan, Scramble, dan TTS).
+     * Tuliskan format spesifik butir tersebut pada properti 'tipe_soal': 'Menjodohkan (Matching)', 'Scramble (Kata Acak)', atau 'Teka-Teki Silang (TTS)'.
 `;
 
 // INITIALIZATION
@@ -1099,7 +1125,11 @@ const INDONESIA_TYPES_LIST = [
   { value: "Pilihan Ganda Kompleks (Kombinasi Pernyataan 1, 2, 3, 4)", label: "PG Kompleks (Kombinasi Pernyataan 1, 2, 3, 4 - Asosiasi)" },
   { value: "Pilihan Ganda Kompleks Matriks / Tabel (Benar-Salah)", label: "PG Kompleks Tabel (Benar / Salah - AKM)" },
   { value: "Sebab-Akibat / Asosiasi (UTBK)", label: "Sebab-Akibat / Hubungan Antar-Hal (Pernyataan - Alasan)" },
-  { value: "Esai / Uraian Perhitungan", label: "Esai / Uraian Perhitungan Bertingkat" }
+  { value: "Esai / Uraian Perhitungan", label: "Esai / Uraian Perhitungan Bertingkat" },
+  { value: "Menjodohkan (Matching Kolom A & B)", label: "🧩 Menjodohkan (Matching Pasangan Konsep Kolom A & B)" },
+  { value: "Kata Acak / Scramble (Susun Huruf & Konsep)", label: "🔤 Scramble / Kata Acak (Susun Huruf & Konsep Kimia)" },
+  { value: "Teka-Teki Silang (TTS Kimia Mendatar & Menurun)", label: "📰 Teka-Teki Silang (TTS Kimia - Mendatar & Menurun)" },
+  { value: "Campuran Soal Unik (Menjodohkan, Scramble, & TTS)", label: "✨ Campuran Soal Unik (Menjodohkan, Scramble, & TTS)" }
 ];
 
 const PEARSON_STIMULUS_LIST = [
@@ -2779,6 +2809,48 @@ C. jika (2) dan (4) benar
 D. jika hanya (4) yang benar
 E. jika semua pernyataan benar
 Pada properti 'tipe_soal' tuliskan 'PG Kompleks (Asosiasi 1-2-3-4)'.`;
+  } else if (qType.includes("Menjodohkan")) {
+    typeInstruction = `FORMAT KHUSUS MENJODOHKAN (MATCHING KOLOM A & B):
+- Susun seluruh butir soal dalam format Menjodohkan Pasangan Konsep Kimia.
+- Setiap butir soal WAJIB memuat:
+  1. Instruksi penjodohan: "Pasangkanlah konsep/istilah pada Kolom A dengan karakteristik/definisi yang tepat pada Kolom B!"
+  2. Tabel Markdown 2 kolom: Kolom A (nomor 1, 2, 3, 4 berisi konsep) dan Kolom B (huruf A, B, C, D, E berisi deskripsi pasangan dengan 1 opsi pengecoh).
+  3. Baris panduan isian siswa: "Lembar Pasangan Jawaban: 1-[...], 2-[...], 3-[...], 4-[...]".
+- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []).
+- Pada 'kunci_jawaban', tuliskan pasangan yang benar (misal: '1 - B, 2 - D, 3 - A, 4 - C').
+- Pada 'pembahasan_langkah', jelaskan alasan ilmiah keterkaitan setiap pasangan.
+- Pada 'tipe_soal', tuliskan 'Menjodohkan (Matching)'.`;
+  } else if (qType.includes("Scramble") || qType.includes("Kata Acak")) {
+    typeInstruction = `FORMAT KHUSUS SCRAMBLE (SUSUN HURUF & KATA KIMIA):
+- Susun seluruh butir soal dalam format Kata Acak Kimia.
+- Setiap butir soal WAJIB memuat:
+  1. Huruf acak yang dipisah tanda hubung: "KATA ACAK: [HURUF-ACAK-KAPITAL] (X Huruf)".
+  2. Petunjuk konsep kimia yang komprehensif: "PETUNJUK: [Deskripsi konsep / reaksi / sifat zat]".
+  3. Kotak huruf isian siswa: "KOTAK JAWABAN: [   ] [   ]... (sejumlah X kotak kosong)".
+- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []).
+- Pada 'kunci_jawaban', tuliskan kata asli dalam huruf kapital (misal: 'STOIKIOMETRI').
+- Pada 'pembahasan_langkah', uraikan penjelasan konsep ilmiah istilah tersebut.
+- Pada 'tipe_soal', tuliskan 'Scramble (Kata Acak)'.`;
+  } else if (qType.includes("Teka-Teki Silang") || qType.includes("TTS")) {
+    typeInstruction = `FORMAT KHUSUS TEKA-TEKI SILANG (TTS KIMIA MENDATAR & MENURUN):
+- Susun butir-butir soal sebagai instrumen Teka-Teki Silang Kimia edukatif.
+- Variasikan nomor petunjuk antara MENDATAR (Across) dan MENURUN (Down).
+- Setiap butir soal WAJIB memuat:
+  1. Arah dan nomor petunjuk: "[➡️ MENDATAR] - Nomor X (Y Huruf)" atau "[⬇️ MENURUN] - Nomor X (Y Huruf)".
+  2. Kalimat petunjuk (clue) konsep kimia yang menantang dan mendidik.
+  3. Kotak huruf TTS: "KOTAK TTS: [   ] [   ]... (sejumlah Y kotak kosong)".
+- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []).
+- Pada 'kunci_jawaban', tuliskan kata kunci TTS dalam huruf kapital (misal: 'ELEKTRON').
+- Pada 'pembahasan_langkah', jelaskan materi konsep kimia terkait kata kunci tersebut.
+- Pada 'tipe_soal', tuliskan 'Teka-Teki Silang (TTS)'.`;
+  } else if (qType.includes("Campuran Soal Unik")) {
+    typeInstruction = `FORMAT CAMPURAN SOAL UNIK (MENJODOHKAN, SCRAMBLE, & TTS):
+- Distribusikan ${numQuestions} butir soal secara seimbang ke dalam 3 format unik:
+  1. Menjodohkan (Matching Kolom A & B dengan tabel Markdown)
+  2. Scramble (Kata Acak dengan petunjuk konsep dan kotak huruf)
+  3. Teka-Teki Silang (Petunjuk TTS Mendatar & Menurun dengan kotak TTS)
+- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []).
+- Pada properti 'tipe_soal' di SETIAP butir, tuliskan format spesifiknya: 'Menjodohkan (Matching)', 'Scramble (Kata Acak)', atau 'Teka-Teki Silang (TTS)'.`;
   } else {
     typeInstruction = `FORMAT SOAL: Susun seluruh butir soal dalam format '${qType}'. Pada properti 'tipe_soal' tuliskan '${qType}'.`;
   }
@@ -3209,6 +3281,96 @@ function renderActiveQuestionsList() {
   }
 }
 
+// HELPER RENDER VISUAL KHUSUS SOAL UNIK (SCRAMBLE, TTS, & MENJODOHKAN)
+function renderUniqueQuestionVisuals(text, soal) {
+  if (!soal) return "";
+  const tSoal = (soal.tipe_soal || "").toLowerCase();
+  const isScramble = tSoal.includes("scramble") || tSoal.includes("acak") || /KATA ACAK\s*:/i.test(text);
+  const isTts = tSoal.includes("tts") || tSoal.includes("silang") || /\[?(?:MENDATAR|MENURUN)\]?/i.test(text) || /KOTAK TTS/i.test(text);
+  const isMatching = tSoal.includes("jodoh") || tSoal.includes("matching") || /Lembar Pasangan/i.test(text);
+
+  let extraHtml = "";
+
+  if (isScramble) {
+    const matchScramble = text.match(/(?:KATA ACAK|SCRAMBLE)\s*:\s*([A-Za-z\s\-\,]+?)(?:\(|\n|$)/i);
+    let letters = [];
+    if (matchScramble) {
+      letters = matchScramble[1].split(/[\s\-\,]+/).filter(l => l.length === 1 && /[A-Za-z]/.test(l));
+    }
+    if (letters.length === 0 && soal.kunci_jawaban) {
+      letters = soal.kunci_jawaban.replace(/[^A-Za-z]/g, "").split("").sort(() => Math.random() - 0.5);
+    }
+
+    if (letters.length > 0) {
+      const chips = letters.map(l => 
+        `<span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-200 font-bold font-mono text-sm shadow-sm m-0.5">${l.toUpperCase()}</span>`
+      ).join("");
+
+      const count = letters.length;
+      const boxes = Array(count).fill(0).map(() => 
+        `<span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-zinc-950 border-2 border-dashed border-emerald-500/50 text-emerald-400 font-mono text-sm m-0.5 select-none">&nbsp;</span>`
+      ).join("");
+
+      extraHtml += `
+        <div class="my-3 p-3.5 rounded-xl bg-gradient-to-r from-amber-950/30 to-zinc-900/60 border border-amber-500/30 space-y-2.5">
+          <div class="flex items-center justify-between text-xs font-bold text-amber-300">
+            <span class="flex items-center gap-1.5">🔤 <b>Huruf-Huruf Acak:</b></span>
+            <span class="text-[11px] text-zinc-400 font-mono">(${letters.length} Huruf)</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1">${chips}</div>
+          <div class="pt-2 border-t border-zinc-800/80">
+            <div class="text-[11px] text-zinc-400 mb-1.5 font-medium">Kotak Isian Huruf Siswa:</div>
+            <div class="flex flex-wrap items-center gap-1">${boxes}</div>
+          </div>
+        </div>
+      `;
+    }
+  } else if (isTts) {
+    const isAcross = /MENDATAR|ACROSS/i.test(text);
+    const isDown = /MENURUN|DOWN/i.test(text);
+    const numLetterMatch = text.match(/\((\d+)\s*Huruf\)/i);
+    const letterCount = numLetterMatch ? parseInt(numLetterMatch[1], 10) : (soal.kunci_jawaban ? soal.kunci_jawaban.replace(/[^A-Za-z]/g, "").length : 0);
+
+    let directionBadge = "";
+    if (isAcross) {
+      directionBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold font-mono text-xs">➡️ MENDATAR (Across)</span>`;
+    } else if (isDown) {
+      directionBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-violet-500/20 border border-violet-500/40 text-violet-300 font-bold font-mono text-xs">⬇️ MENURUN (Down)</span>`;
+    }
+
+    let boxesHtml = "";
+    if (letterCount > 0 && letterCount <= 25) {
+      boxesHtml = Array(letterCount).fill(0).map((_, i) => 
+        `<span class="relative inline-flex items-center justify-center w-8 h-8 rounded bg-zinc-950 border-2 border-cyan-500/60 text-white font-mono text-xs font-bold m-0.5 select-none shadow-inner">${i === 0 ? `<span class="absolute top-0.5 left-1 text-[8px] text-cyan-400/80 font-mono">${soal.nomor}</span>` : ''}&nbsp;</span>`
+      ).join("");
+    }
+
+    extraHtml += `
+      <div class="my-3 p-3.5 rounded-xl bg-gradient-to-r from-cyan-950/30 to-zinc-900/60 border border-cyan-500/30 space-y-2.5">
+        <div class="flex items-center justify-between text-xs font-bold">
+          <div class="flex items-center gap-2">${directionBadge || '<span class="text-cyan-300">📰 Teka-Teki Silang</span>'}</div>
+          ${letterCount ? `<span class="text-[11px] text-zinc-400 font-mono">(${letterCount} Kotak Huruf)</span>` : ''}
+        </div>
+        ${boxesHtml ? `
+          <div class="pt-1">
+            <div class="text-[11px] text-zinc-400 mb-1.5 font-medium">Kotak TTS:</div>
+            <div class="flex flex-wrap items-center gap-1">${boxesHtml}</div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  } else if (isMatching) {
+    extraHtml += `
+      <div class="my-2.5 p-3 rounded-xl bg-violet-950/20 border border-violet-500/30 text-xs font-mono text-violet-200 flex items-center gap-2">
+        <span class="text-sm">🧩</span>
+        <span><b>Panduan Siswa:</b> Tuliskan pasangan jawaban pada lembar jawab (contoh format: <b>1-B, 2-D, 3-A, 4-C</b>).</span>
+      </div>
+    `;
+  }
+
+  return extraHtml;
+}
+
 // HELPER RENDER KONTEN PERTANYAAN WEB (TERMASUK PEMISAHAN SUBPARTS & FORMULA KIMIA)
 function renderQuestionContentForWeb(soal) {
   if (!soal) return "";
@@ -3316,6 +3478,10 @@ function renderQuestionContentForWeb(soal) {
     if (tableHtml) {
       html += `<div class="my-3 overflow-x-auto">${tableHtml}</div>`;
     }
+    const uniqueVisuals = renderUniqueQuestionVisuals(mainText, soal);
+    if (uniqueVisuals) {
+      html += uniqueVisuals;
+    }
     return html;
   }
 }
@@ -3364,7 +3530,29 @@ function renderTeacherQuestions(questions) {
       }
     } else {
       const hasSubparts = parseStructuredQuestionContent(soal.pertanyaan || "").hasSubparts;
-      if (!hasSubparts) {
+      const tSoal = (soal.tipe_soal || "").toLowerCase();
+      if (tSoal.includes("jodoh") || tSoal.includes("matching")) {
+        optionsHtml = `
+          <div class="p-2.5 rounded-xl bg-violet-950/30 border border-violet-500/30 text-xs text-violet-200 flex items-center gap-2 mb-2">
+            <span class="text-base">🧩</span>
+            <div><b>Format Menjodohkan:</b> Siswa menghubungkan konsep di Kolom A dengan pasangan yang tepat di Kolom B. Kunci jawaban dan lembar pasangan tersedia di bawah.</div>
+          </div>
+        `;
+      } else if (tSoal.includes("scramble") || tSoal.includes("acak")) {
+        optionsHtml = `
+          <div class="p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/30 text-xs text-amber-200 flex items-center gap-2 mb-2">
+            <span class="text-base">🔤</span>
+            <div><b>Format Scramble:</b> Siswa menyusun huruf-huruf acak menjadi istilah kimia yang tepat berdasarkan petunjuk konsep.</div>
+          </div>
+        `;
+      } else if (tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("crossword")) {
+        optionsHtml = `
+          <div class="p-2.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 text-xs text-cyan-200 flex items-center gap-2 mb-2">
+            <span class="text-base">📰</span>
+            <div><b>Format Teka-Teki Silang (TTS):</b> Petunjuk mendatar/menurun edukatif untuk lembar TTS kimia interaktif.</div>
+          </div>
+        `;
+      } else if (!hasSubparts) {
         optionsHtml = `
           <div class="p-2.5 rounded-lg bg-violet-950/20 border border-violet-500/20 text-xs text-violet-300 flex items-center gap-2 mb-2">
             <i data-lucide="edit-3" class="w-3.5 h-3.5 text-violet-400 shrink-0"></i>
@@ -3479,9 +3667,48 @@ function renderStudentQuestions(questions) {
         </div>
       `).join("");
     } else {
-      inputHtml = `
-        <textarea class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none" rows="3" placeholder="Tuliskan langkah jawaban Anda di sini..."></textarea>
-      `;
+      const tSoal = (soal.tipe_soal || "").toLowerCase();
+      if (tSoal.includes("scramble") || tSoal.includes("acak")) {
+        inputHtml = `
+          <div class="my-2.5 p-3 rounded-xl bg-zinc-900/80 border border-amber-500/30 space-y-2">
+            <label for="student_input_${soal.nomor}" class="block text-xs font-bold text-amber-300 flex items-center gap-1.5">
+              <span>🔤</span>
+              <span>Ketik kata hasil susunan huruf di sini:</span>
+            </label>
+            <input type="text" id="student_input_${soal.nomor}" 
+                   class="w-full sm:w-80 px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-amber-500/50 text-white font-mono text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner" 
+                   placeholder="Contoh: STOIKIOMETRI">
+          </div>
+        `;
+      } else if (tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("crossword")) {
+        inputHtml = `
+          <div class="my-2.5 p-3 rounded-xl bg-zinc-900/80 border border-cyan-500/30 space-y-2">
+            <label for="student_input_${soal.nomor}" class="block text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+              <span>📰</span>
+              <span>Ketik kata jawaban Teka-Teki Silang (TTS):</span>
+            </label>
+            <input type="text" id="student_input_${soal.nomor}" 
+                   class="w-full sm:w-80 px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-cyan-500/50 text-white font-mono text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-cyan-500 shadow-inner" 
+                   placeholder="Contoh: ELEKTRON">
+          </div>
+        `;
+      } else if (tSoal.includes("jodoh") || tSoal.includes("matching")) {
+        inputHtml = `
+          <div class="my-2.5 p-3 rounded-xl bg-zinc-900/80 border border-violet-500/30 space-y-2">
+            <label for="student_input_${soal.nomor}" class="block text-xs font-bold text-violet-300 flex items-center gap-1.5">
+              <span>🧩</span>
+              <span>Tuliskan pasangan jawaban (misal: 1-B, 2-D, 3-A, 4-C):</span>
+            </label>
+            <input type="text" id="student_input_${soal.nomor}" 
+                   class="w-full sm:w-80 px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-violet-500/50 text-white font-mono text-sm uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-violet-500 shadow-inner" 
+                   placeholder="1-B, 2-D, 3-A, 4-C">
+          </div>
+        `;
+      } else {
+        inputHtml = `
+          <textarea class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs focus:ring-2 focus:ring-violet-500 outline-none" rows="3" placeholder="Tuliskan langkah jawaban Anda di sini..."></textarea>
+        `;
+      }
     }
 
     const formattedQuestion = isStructured
@@ -3517,25 +3744,54 @@ function evaluateStudentQuiz(questions) {
 
   questions.forEach((soal) => {
     if (!soal) return;
+    const tSoal = (soal.tipe_soal || "").toLowerCase();
+    const isUnique = tSoal.includes("scramble") || tSoal.includes("acak") || tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("jodoh") || tSoal.includes("matching");
+
     if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
       totalPG++;
       const checkedRadio = document.querySelector(`input[name="q_${soal.nomor}"]:checked`);
       const feedbackDiv = document.getElementById(`feedback-${soal.nomor}`);
-      feedbackDiv.classList.remove("hidden");
-
-      if (checkedRadio) {
-        const userChoice = checkedRadio.value;
-        if (userChoice.toUpperCase() === soal.kunci_jawaban.toUpperCase()) {
-          correct++;
-          feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs";
-          feedbackDiv.innerHTML = `✅ <b>Tepat Sekali!</b> Jawaban Anda: ${userChoice}`;
+      if (feedbackDiv) {
+        feedbackDiv.classList.remove("hidden");
+        if (checkedRadio) {
+          const userChoice = checkedRadio.value;
+          if (userChoice.toUpperCase() === soal.kunci_jawaban.toUpperCase()) {
+            correct++;
+            feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs";
+            feedbackDiv.innerHTML = `✅ <b>Tepat Sekali!</b> Jawaban Anda: ${userChoice}`;
+          } else {
+            feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs";
+            feedbackDiv.innerHTML = `❌ <b>Kurang Tepat.</b> Jawaban Anda: ${userChoice} | Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
+          }
         } else {
-          feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs";
-          feedbackDiv.innerHTML = `❌ <b>Kurang Tepat.</b> Jawaban Anda: ${userChoice} | Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
+          feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs";
+          feedbackDiv.innerHTML = `⚠️ <b>Belum Dijawab.</b> Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
         }
-      } else {
-        feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs";
-        feedbackDiv.innerHTML = `⚠️ <b>Belum Dijawab.</b> Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
+      }
+    } else if (isUnique) {
+      totalPG++;
+      const studentInput = document.getElementById(`student_input_${soal.nomor}`);
+      const feedbackDiv = document.getElementById(`feedback-${soal.nomor}`);
+      if (feedbackDiv) {
+        feedbackDiv.classList.remove("hidden");
+        const userVal = studentInput ? studentInput.value.trim() : "";
+        if (userVal) {
+          const cleanUser = userVal.toUpperCase().replace(/[^A-Z0-9]/g, "");
+          const cleanKey = String(soal.kunci_jawaban || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+          const isCorrect = (cleanUser === cleanKey) || (cleanUser && cleanKey && (cleanUser.includes(cleanKey) || cleanKey.includes(cleanUser)));
+
+          if (isCorrect) {
+            correct++;
+            feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs";
+            feedbackDiv.innerHTML = `✅ <b>Tepat Sekali!</b> Jawaban Anda: <b>${userVal.toUpperCase()}</b>`;
+          } else {
+            feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs";
+            feedbackDiv.innerHTML = `❌ <b>Kurang Tepat.</b> Jawaban Anda: ${userVal} | Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
+          }
+        } else {
+          feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs";
+          feedbackDiv.innerHTML = `⚠️ <b>Belum Dijawab.</b> Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
+        }
       }
     }
   });
@@ -4429,6 +4685,87 @@ function closeWordExportModal() {
   if (modal) modal.classList.add("hidden");
 }
 
+// HELPER FORMAT KHUSUS SOAL UNIK UNTUK WORD (MENJODOHKAN, SCRAMBLE, TTS)
+function formatUniqueQuestionForWord(promptText, soal) {
+  if (!promptText) return "";
+  const tSoal = (soal.tipe_soal || "").toLowerCase();
+  const isMatching = tSoal.includes("jodoh") || tSoal.includes("matching");
+  const isScramble = tSoal.includes("scramble") || tSoal.includes("acak");
+  const isTts = tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("crossword");
+
+  let cleanText = formatChemistryForWordHtml(promptText);
+
+  // Jika memuat tabel markdown, pisahkan dan render tabel Word
+  const lines = promptText.split(/\r?\n/);
+  let tableLines = [];
+  let otherLines = [];
+  let inTable = false;
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim();
+    if (l.includes("|") && l.split("|").length >= 3) {
+      inTable = true;
+      tableLines.push(l);
+    } else {
+      otherLines.push(lines[i]);
+    }
+  }
+
+  let tableWordHtml = "";
+  if (tableLines.length >= 2) {
+    tableWordHtml = convertMarkdownTableToWordHtml(tableLines.join("\n"));
+    cleanText = formatChemistryForWordHtml(otherLines.join("\n").trim());
+  }
+
+  if (isMatching) {
+    return `
+      <div style="text-align: justify; line-height: 1.5; margin: 6pt 0; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000;">
+        ${cleanText}
+      </div>
+      ${tableWordHtml}
+      <div style="margin-top: 8pt; margin-bottom: 8pt; padding: 6pt 10pt; background-color: #f8fafc; border: 1pt solid #cbd5e1; font-family: 'Times New Roman', Times, serif; font-size: 11pt;">
+        <b>Lembar Pasangan Jawaban Siswa:</b><br/>
+        <div style="font-size: 12pt; letter-spacing: 2pt; margin-top: 4pt;">1 - ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) &nbsp;&nbsp;&nbsp;&nbsp; 2 - ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) &nbsp;&nbsp;&nbsp;&nbsp; 3 - ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) &nbsp;&nbsp;&nbsp;&nbsp; 4 - ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
+      </div>
+    `;
+  }
+
+  if (isScramble) {
+    const letterCount = (soal.kunci_jawaban || "").replace(/[^A-Za-z]/g, "").length || 8;
+    const boxes = Array(letterCount).fill(0).map(() => 
+      `<span style="display: inline-block; width: 22pt; height: 22pt; border: 1.5pt solid #000000; text-align: center; line-height: 22pt; margin: 2pt; font-size: 12pt; font-family: 'Times New Roman', Times, serif;">&nbsp;</span>`
+    ).join("");
+
+    return `
+      <div style="text-align: justify; line-height: 1.5; margin: 6pt 0; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000;">
+        ${cleanText}
+      </div>
+      <div style="margin-top: 8pt; margin-bottom: 8pt; font-family: 'Times New Roman', Times, serif;">
+        <div style="font-size: 10.5pt; color: #475569; margin-bottom: 3pt;">Kotak Isian Huruf Siswa:</div>
+        <div style="line-height: 26pt;">${boxes}</div>
+      </div>
+    `;
+  }
+
+  if (isTts) {
+    const letterCount = (soal.kunci_jawaban || "").replace(/[^A-Za-z]/g, "").length || 6;
+    const boxes = Array(letterCount).fill(0).map((_, i) => 
+      `<span style="display: inline-block; width: 22pt; height: 22pt; border: 1.5pt solid #000000; text-align: center; line-height: 22pt; margin: 2pt; font-size: 12pt; font-family: 'Times New Roman', Times, serif; position: relative;">${i === 0 ? `<sup style="font-size: 8pt;">${soal.nomor}</sup>` : '&nbsp;'}</span>`
+    ).join("");
+
+    return `
+      <div style="text-align: justify; line-height: 1.5; margin: 6pt 0; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000;">
+        ${cleanText}
+      </div>
+      <div style="margin-top: 8pt; margin-bottom: 8pt; font-family: 'Times New Roman', Times, serif;">
+        <div style="font-size: 10.5pt; color: #475569; margin-bottom: 3pt;">Kotak Jawaban TTS:</div>
+        <div style="line-height: 26pt;">${boxes}</div>
+      </div>
+    `;
+  }
+
+  return `<div style="text-align: justify; line-height: 1.5; margin: 6pt 0; font-size: 12pt; font-family: 'Times New Roman', Times, serif; color: #000000;">${cleanText}</div>`;
+}
+
 // WORD EXPORTER (.doc / .docx - STANDAR UKURAN KERTAS A4 & FONT TIMES NEW ROMAN 12PT)
 function exportToWordDocx(pkg, exportMode = 'guru') {
   if (!pkg) {
@@ -4495,7 +4832,13 @@ function exportToWordDocx(pkg, exportMode = 'guru') {
                                     isPearson ||
                                     (!soal.pilihan_jawaban || soal.pilihan_jawaban.length === 0);
 
-        // 3. Pilihan Jawaban vs Dotted Lines (Font Times New Roman 12pt)
+        const tSoal = (soal.tipe_soal || "").toLowerCase();
+        const isMatching = tSoal.includes("jodoh") || tSoal.includes("matching");
+        const isScramble = tSoal.includes("scramble") || tSoal.includes("acak");
+        const isTts = tSoal.includes("tts") || tSoal.includes("silang") || tSoal.includes("crossword");
+        const isUniqueType = isMatching || isScramble || isTts;
+
+        // 3. Pilihan Jawaban vs Dotted Lines vs Format Soal Unik (Font Times New Roman 12pt)
         let opts = "";
         let promptHtml = "";
         if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
@@ -4508,6 +4851,9 @@ function exportToWordDocx(pkg, exportMode = 'guru') {
           if (isPearson) {
             opts += `<div style="text-align: right; font-weight: bold; font-size: 11pt; color: #000000; font-family: 'Times New Roman', Times, serif; margin-top: 2pt;">(1)</div>`;
           }
+        } else if (isUniqueType) {
+          promptHtml = formatUniqueQuestionForWord(parsed.prompt, soal);
+          opts = "";
         } else {
           // Uraian terstruktur atau essay dengan garis lembar jawab
           promptHtml = formatPromptWithSubpartsAndDotsForWord(parsed.prompt, isStructuredOrEssay);

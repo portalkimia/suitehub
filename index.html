@@ -786,6 +786,40 @@
           </div>
         </div>
 
+        <!-- Status Kesiapan & Pemeliharaan (Kunci Akses untuk Uji Coba Admin) -->
+        <div class="p-3.5 rounded-xl bg-obsidian-850/90 border border-slate-800 space-y-2">
+          <label class="block text-xs font-semibold text-slate-200 flex items-center justify-between">
+            <span>Status Kesiapan / Pemeliharaan:</span>
+            <span class="text-[11px] text-amber-400 font-normal">Proteksi akses non-admin</span>
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-obsidian-800 border border-slate-700 cursor-pointer hover:border-emerald-500 transition-colors">
+              <input type="radio" name="branch-status-dev" value="normal" checked class="text-emerald-500 focus:ring-0">
+              <div>
+                <span class="font-bold text-emerald-400 block text-[11px]">✅ Normal</span>
+                <span class="text-[10px] text-slate-400 leading-tight block">Dapat dibuka publik</span>
+              </div>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-obsidian-800 border border-slate-700 cursor-pointer hover:border-amber-500 transition-colors">
+              <input type="radio" name="branch-status-dev" value="development" class="text-amber-500 focus:ring-0">
+              <div>
+                <span class="font-bold text-amber-300 block text-[11px]">🚧 Pengembangan</span>
+                <span class="text-[10px] text-slate-400 leading-tight block">Uji coba (Admin only)</span>
+              </div>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-obsidian-800 border border-slate-700 cursor-pointer hover:border-rose-500 transition-colors">
+              <input type="radio" name="branch-status-dev" value="maintenance" class="text-rose-500 focus:ring-0">
+              <div>
+                <span class="font-bold text-rose-400 block text-[11px]">🔧 Perbaikan</span>
+                <span class="text-[10px] text-slate-400 leading-tight block">Terkunci sementara</span>
+              </div>
+            </label>
+          </div>
+          <p class="text-[10px] text-slate-400 leading-relaxed pt-0.5">
+            💡 <em>Jika memilih <b>Pengembangan</b> atau <b>Perbaikan</b>, kartu tetap ditampilkan bagi rekan guru/siswa agar mereka mengetahui adanya modul baru, namun tombol aksesnya <b>dikunci</b>. Hanya Admin yang dapat membukanya untuk uji coba langsung.</em>
+          </p>
+        </div>
+
         <!-- URL / Path Link (BISA RELATIVE PATH ./folder/ ATAU FULL URL) -->
         <div>
           <label class="block text-xs font-semibold text-slate-200 mb-1">
@@ -1112,6 +1146,13 @@
         chips = [];
       }
 
+      const rawStatusDev = b.statusPengembangan !== undefined ? b.statusPengembangan : b.status_pengembangan;
+      const hasExplicitStatusDev = (rawStatusDev !== undefined && rawStatusDev !== null && String(rawStatusDev).trim() !== "");
+      let statusDev = (rawStatusDev || "normal").toString().trim().toLowerCase();
+      if (!["normal", "development", "maintenance"].includes(statusDev)) {
+        statusDev = "normal";
+      }
+
       return {
         id: b.id || "branch_" + Date.now(),
         title: b.title || "Modul Belajar",
@@ -1122,7 +1163,9 @@
         buttonText: b.buttonText || "Buka Website",
         theme: b.theme || "purple",
         icon: b.icon || "globe",
-        roles: roles
+        roles: roles,
+        statusPengembangan: statusDev,
+        _hasExplicitStatusDev: hasExplicitStatusDev
       };
     }
 
@@ -1140,7 +1183,8 @@
         buttonText: "Buka LMS Kelas",
         theme: "emerald",
         icon: "academic-cap",
-        roles: ["admin"]
+        roles: ["admin"],
+        statusPengembangan: "normal"
       },
       {
         id: "branch_media",
@@ -1152,7 +1196,8 @@
         buttonText: "Buka Portal Media",
         theme: "purple",
         icon: "flask",
-        roles: ["siswa", "guru", "admin"]
+        roles: ["siswa", "guru", "admin"],
+        statusPengembangan: "normal"
       },
       {
         id: "branch_virtual_lab",
@@ -1164,7 +1209,8 @@
         buttonText: "Masuk Lab Virtual",
         theme: "emerald",
         icon: "flask",
-        roles: ["siswa", "guru", "admin"]
+        roles: ["siswa", "guru", "admin"],
+        statusPengembangan: "normal"
       },
       {
         id: "branch_generator",
@@ -1176,7 +1222,8 @@
         buttonText: "Buka Generator",
         theme: "cyan",
         icon: "sparkles",
-        roles: ["guru", "admin"]
+        roles: ["guru", "admin"],
+        statusPengembangan: "normal"
       },
       {
         id: "branch_olimpiade",
@@ -1188,7 +1235,8 @@
         buttonText: "Buka Olimpiade",
         theme: "amber",
         icon: "trophy",
-        roles: ["siswa", "guru", "admin"]
+        roles: ["siswa", "guru", "admin"],
+        statusPengembangan: "normal"
       },
       {
         id: "branch_soal",
@@ -1200,7 +1248,21 @@
         buttonText: "Buka Generator Soal",
         theme: "indigo",
         icon: "sparkles",
-        roles: ["guru", "admin"]
+        roles: ["guru", "admin"],
+        statusPengembangan: "normal"
+      },
+      {
+        id: "branch_asesmen",
+        title: "Generator Asesmen AI",
+        category: "Otomatisasi AI",
+        description: "Rancang instrumen asesmen diagnostik, formatif, dan sumatif Kurikulum Merdeka berbasis bukti belajar autentik, rubrik terstandar, dan integrasi Modul Ajar.",
+        chips: ["Diagnostik & Formatif", "Rubrik KKTP", "Ekspor Word/Docs"],
+        url: "./asesmen/",
+        buttonText: "Buka Generator Asesmen",
+        theme: "purple",
+        icon: "sparkles",
+        roles: ["guru", "admin"],
+        statusPengembangan: "normal"
       }
     ];
 
@@ -2239,6 +2301,57 @@
           `<span class="text-[11px] px-2 py-0.5 rounded-md bg-obsidian-850 text-slate-300 border border-slate-700/60 font-medium">${chip}</span>`
         ).join("");
 
+        const statusDev = (branch.statusPengembangan || "normal").toLowerCase();
+        const isUnderDev = statusDev === "development";
+        const isMaintenance = statusDev === "maintenance";
+        const isSpecialStatus = isUnderDev || isMaintenance;
+
+        // Status Badge (di samping Category / Tag)
+        let statusBadge = "";
+        if (isUnderDev) {
+          statusBadge = `
+            <span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-sm">
+              <span>🚧</span>
+              <span>Pengembangan</span>
+            </span>
+          `;
+        } else if (isMaintenance) {
+          statusBadge = `
+            <span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1 shadow-sm">
+              <span>🔧</span>
+              <span>Perbaikan</span>
+            </span>
+          `;
+        }
+
+        // Callout Banner jika sedang dalam status pengembangan atau perbaikan
+        let devNoticeBox = "";
+        if (isUnderDev) {
+          devNoticeBox = `
+            <div class="mb-3.5 p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-200/90 text-[11px] flex items-start gap-2 shadow-inner">
+              <span class="text-base leading-none select-none">🚧</span>
+              <div class="space-y-0.5">
+                <span class="font-bold text-amber-300 block">Website Sedang Dikembangkan</span>
+                <p class="text-[10px] text-amber-200/80 leading-relaxed">
+                  Modul ini sedang dalam tahap pengerjaan &amp; uji coba internal. Belum dapat diakses publik.
+                </p>
+              </div>
+            </div>
+          `;
+        } else if (isMaintenance) {
+          devNoticeBox = `
+            <div class="mb-3.5 p-2.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-200/90 text-[11px] flex items-start gap-2 shadow-inner">
+              <span class="text-base leading-none select-none">🔧</span>
+              <div class="space-y-0.5">
+                <span class="font-bold text-rose-300 block">Website Sedang Diperbaiki</span>
+                <p class="text-[10px] text-rose-200/80 leading-relaxed">
+                  Modul ini sedang mengalami pemeliharaan teknis &amp; perbaikan sistem. Akses ditutup sementara.
+                </p>
+              </div>
+            </div>
+          `;
+        }
+
         // Di Mode Admin, tampilkan tombol Edit (✏️) pada SEMUA cabang, dan Delete (🗑️) pada cabang kustom
         let adminControls = "";
         let roleBadgeInfo = "";
@@ -2283,8 +2396,64 @@
           }
         }
 
+        // Action Button logic:
+        // Jika sedang 'development' atau 'maintenance':
+        // - Admin (activeRole === 'admin') BISA membuka untuk uji coba langsung!
+        // - Non-admin (Siswa/Guru) TIDAK BISA membuka (tombol terkunci dengan penjelasan)
+        let actionButtonHtml = "";
+
+        if (isSpecialStatus && activeRole !== "admin") {
+          // Terkunci untuk non-admin
+          const lockBtnText = isMaintenance ? "Terkunci (Sedang Diperbaiki)" : "Terkunci (Sedang Dikembangkan)";
+          const lockStyle = isMaintenance 
+            ? "bg-rose-950/40 hover:bg-rose-900/50 text-rose-300/90 border-rose-800/60" 
+            : "bg-amber-950/40 hover:bg-amber-900/50 text-amber-300/90 border-amber-800/60";
+
+          actionButtonHtml = `
+            <button type="button" 
+                    data-locked-type="${statusDev}" 
+                    data-branch-title="${branch.title}"
+                    class="locked-branch-btn w-full py-2.5 px-4 rounded-xl font-semibold text-xs tracking-wide flex items-center justify-center gap-2 border shadow-md transition-all duration-200 cursor-pointer ${lockStyle}">
+              <svg class="w-3.5 h-3.5 ${isMaintenance ? 'text-rose-400' : 'text-amber-400'}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+              <span>${lockBtnText}</span>
+            </button>
+          `;
+        } else if (isSpecialStatus && activeRole === "admin") {
+          // Khusus Admin: Tombol aktif dengan penanda "Uji Coba Admin"
+          actionButtonHtml = `
+            <div class="space-y-1.5 w-full">
+              <div class="flex items-center justify-between text-[10px] text-amber-300 font-semibold px-1">
+                <span>👑 Akses Uji Coba Admin</span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">Khusus Anda</span>
+              </div>
+              <a href="${launchUrl}" target="_blank" rel="noopener noreferrer" 
+                 class="w-full py-2.5 px-4 rounded-xl font-bold text-xs tracking-wide flex items-center justify-center gap-2 shadow-lg transition-all duration-200 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-400 text-white border border-amber-400/40 hover:shadow-amber-500/20">
+                <span>Buka Website [Uji Coba Admin]</span>
+                <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </a>
+            </div>
+          `;
+        } else {
+          // Status Normal
+          actionButtonHtml = `
+            <a href="${launchUrl}" target="_blank" rel="noopener noreferrer" 
+               class="w-full py-2.5 px-4 rounded-xl font-semibold text-xs tracking-wide flex items-center justify-center gap-2 shadow-lg transition-all duration-200 ${theme.btn}">
+              <span>${branch.buttonText || "Buka Website"}</span>
+              <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </a>
+          `;
+        }
+
+        const cardBorder = isUnderDev ? "border-amber-500/40 hover:border-amber-400/70" : (isMaintenance ? "border-rose-500/40 hover:border-rose-400/70" : theme.border);
+
         html += `
-          <article class="group relative rounded-2xl glass-card ${theme.border} p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl ${theme.shadow}">
+          <article class="group relative rounded-2xl glass-card ${cardBorder} p-5 sm:p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl ${theme.shadow}">
             <!-- Glow background -->
             <div class="absolute inset-0 rounded-2xl bg-gradient-to-b ${theme.glow} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             
@@ -2294,7 +2463,8 @@
                 <div class="w-11 h-11 rounded-xl border flex items-center justify-center transition-colors duration-300 ${theme.iconBox}">
                   ${iconSvg}
                 </div>
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                  ${statusBadge}
                   <span class="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md border ${theme.tag}">
                     ${branch.category || "UMUM"}
                   </span>
@@ -2307,6 +2477,7 @@
                 ${branch.title}
               </h2>
               ${roleBadgeInfo}
+              ${devNoticeBox}
               <p class="text-xs text-slate-300 leading-relaxed mb-4 line-clamp-3">
                 ${branch.description || "Akses modul dan layanan pembelajaran digital terintegrasi."}
               </p>
@@ -2318,13 +2489,7 @@
             </div>
 
             <!-- Action Button -->
-            <a href="${launchUrl}" target="_blank" rel="noopener noreferrer" 
-               class="w-full py-2.5 px-4 rounded-xl font-semibold text-xs tracking-wide flex items-center justify-center gap-2 shadow-lg transition-all duration-200 ${theme.btn}">
-              <span>${branch.buttonText || "Buka Website"}</span>
-              <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke-linecap="round" stroke-linejoin="round"></path>
-              </svg>
-            </a>
+            ${actionButtonHtml}
           </article>
         `;
       });
@@ -2373,6 +2538,17 @@
       if (triggerBtn) {
         triggerBtn.addEventListener("click", openAddBranchModal);
       }
+
+      // Event listener tombol modul terkunci (Sedang Dikembangkan / Diperbaiki)
+      container.querySelectorAll(".locked-branch-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const lockType = btn.getAttribute("data-locked-type");
+          const branchTitle = btn.getAttribute("data-branch-title") || "Website ini";
+          const statusText = lockType === "maintenance" ? "perbaikan / pemeliharaan" : "tahap pengembangan baru";
+          showToast(`🔒 "${branchTitle}" sedang dalam ${statusText} dan saat ini hanya dapat diuji coba oleh Admin.`, "warning");
+        });
+      });
 
       // Event listener Edit Cabang
       container.querySelectorAll(".edit-branch-btn").forEach(btn => {
@@ -2425,7 +2601,8 @@
     /**
      * Ambil Data Cabang dari Google Apps Script API
      */
-    async function fetchBranches() {
+    async function fetchBranches(options = {}) {
+      const isSilent = options.silent === true;
       const refreshIcon = document.getElementById("refresh-icon");
       if (refreshIcon) refreshIcon.classList.add("animate-spin");
 
@@ -2457,12 +2634,12 @@
             }
           });
 
-          // Prioritaskan roles resmi dari Google Apps Script / Spreadsheet
+          // Prioritaskan roles & status pengembangan resmi dari Google Apps Script / Spreadsheet
           currentBranches = normalized.map(nb => {
+            const localMatch = currentBranches.find(cb => cb.id === nb.id);
             let effectiveRoles = nb.roles;
             // Jika branch dari server belum punya roles, gunakan roles dari memory lokal
             if (!Array.isArray(effectiveRoles) || effectiveRoles.length === 0) {
-              const localMatch = currentBranches.find(cb => cb.id === nb.id);
               if (localMatch && Array.isArray(localMatch.roles) && localMatch.roles.length > 0) {
                 effectiveRoles = localMatch.roles;
               }
@@ -2472,14 +2649,23 @@
               effectiveRoles = (effectiveRoles || []).filter(r => r !== "guru");
               if (!effectiveRoles.includes("admin")) effectiveRoles.push("admin");
             }
-            return { ...nb, roles: effectiveRoles };
+
+            let effectiveStatusDev = nb.statusPengembangan || "normal";
+            // Jika server belum mengirimkan status pengembangan (GAS versi lama), pertahankan status lokal jika ada
+            if (!nb._hasExplicitStatusDev && localMatch && localMatch.statusPengembangan) {
+              effectiveStatusDev = localMatch.statusPengembangan;
+            }
+
+            return { ...nb, roles: effectiveRoles, statusPengembangan: effectiveStatusDev };
           });
 
           saveBranchesToLocalStorage();
           renderCategoryPills();
           renderGrid();
           updateServerStatus("online", "Terkoneksi");
-          showToast("Data cabang disinkronkan dari Google Sheets!", "success");
+          if (!isSilent) {
+            showToast("Data cabang disinkronkan dari Google Sheets!", "success");
+          }
         } else {
           throw new Error(result.message || "Format data tidak sesuai.");
         }
@@ -2552,6 +2738,10 @@
       document.getElementById("branch-role-guru").checked = true;
       document.getElementById("branch-role-admin").checked = true;
 
+      // Default status pengembangan: Normal
+      const normalDevRadio = document.querySelector('input[name="branch-status-dev"][value="normal"]');
+      if (normalDevRadio) normalDevRadio.checked = true;
+
       document.getElementById("modal-add-branch").classList.remove("hidden");
     }
 
@@ -2562,7 +2752,7 @@
 
       document.getElementById("branch-edit-id").value = branch.id;
       document.getElementById("modal-branch-title").innerText = "✏️ Edit Pengaturan Modul";
-      document.getElementById("modal-branch-sub").innerText = "Ubah judul, link, kategori, atau hak akses peran untuk modul ini.";
+      document.getElementById("modal-branch-sub").innerText = "Ubah judul, link, kategori, hak akses peran, atau status kesiapan modul ini.";
       document.getElementById("btn-submit-text").innerText = "Simpan Perubahan";
 
       // Pre-fill fields
@@ -2586,6 +2776,11 @@
       document.getElementById("branch-role-siswa").checked = roles.includes("siswa");
       document.getElementById("branch-role-guru").checked = roles.includes("guru");
       document.getElementById("branch-role-admin").checked = roles.includes("admin");
+
+      // Pre-fill status kesiapan / pengembangan radio
+      const statusDev = (branch.statusPengembangan || "normal").toLowerCase();
+      const statusRadio = document.querySelector(`input[name="branch-status-dev"][value="${statusDev}"]`) || document.querySelector('input[name="branch-status-dev"][value="normal"]');
+      if (statusRadio) statusRadio.checked = true;
 
       document.getElementById("modal-add-branch").classList.remove("hidden");
     }
@@ -3107,6 +3302,7 @@
         e.preventDefault();
         const editId = document.getElementById("branch-edit-id").value;
         const selectedTheme = document.querySelector('input[name="branch-theme"]:checked')?.value || "purple";
+        const selectedStatusDev = document.querySelector('input[name="branch-status-dev"]:checked')?.value || "normal";
         
         // Roles yang dicentang
         const roles = [];
@@ -3130,7 +3326,8 @@
           chips: document.getElementById("branch-chips").value.split(",").map(c => c.trim()).filter(Boolean),
           theme: selectedTheme,
           icon: document.getElementById("branch-icon").value || "globe",
-          roles: roles
+          roles: roles,
+          statusPengembangan: selectedStatusDev
         };
 
         if (editId) {
@@ -3209,11 +3406,30 @@
       // 12. Auto-Detect Magic Link (?token=...)
       handleMagicLinkSuite();
 
-      // 13. PWA Service Worker Registration (Super App Scope)
+      // 13. Sinkronisasi Lintas Perangkat Real-Time (Auto-Sync saat tab aktif kembali)
+      let lastMultiDeviceSync = Date.now();
+      window.addEventListener("focus", () => {
+        if (Date.now() - lastMultiDeviceSync > 15000) {
+          lastMultiDeviceSync = Date.now();
+          fetchBranches({ silent: true });
+        }
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && Date.now() - lastMultiDeviceSync > 15000) {
+          lastMultiDeviceSync = Date.now();
+          fetchBranches({ silent: true });
+        }
+      });
+
+      // 14. PWA Service Worker Registration (Super App Scope)
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./sw.js', { scope: './' })
-            .then(reg => console.log('PWA ServiceWorker Aktif:', reg.scope))
+            .then(reg => {
+              console.log('PWA ServiceWorker Aktif:', reg.scope);
+              // Periksa pembaruan ServiceWorker secara proaktif
+              if (reg && reg.update) reg.update();
+            })
             .catch(err => console.log('PWA ServiceWorker error:', err));
         });
       }

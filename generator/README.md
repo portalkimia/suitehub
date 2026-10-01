@@ -35,7 +35,7 @@ Aplikasi **Generator Administrasi Kimia AI** dirancang khusus untuk guru Kimia S
   - Berkas interaktif `.html` (diekstraksi teks dan konten pembelajarannya secara otomatis di browser).
   - Berkas teks/LKM `.txt` / `.md`.
   - Dokumen `.pdf` dan foto diagram `.png/.jpg/.webp` (dikirim sebagai Base64 ke Gemini Multimodal API).
-- **Rantai Model Cerdas**: Berkas dianalisis menggunakan `gemini-3.7-flash` atau `gemini-3.6-flash`. Jika server Google mengalami lonjakan trafik (*high demand*), sistem secara otomatis beralih ke model alternatif cadangan tanpa menghentikan proses guru.
+- **Rantai Model Cerdas**: Berkas dianalisis dengan `gemini-3.8-flash` sebagai model utama, lalu otomatis mencoba model cadangan jika kuota atau layanan model utama tidak tersedia.
 
 ### 5. ⏳ Animasi Progress Bertahap
 - Animasi status dinamis dengan bilah progres berkilau (*shimmering progress bar*) yang memberikan umpan balik pedagogis secara *real-time*:
@@ -53,17 +53,16 @@ Aplikasi **Generator Administrasi Kimia AI** dirancang khusus untuk guru Kimia S
 
 ## 🛡️ Rantai Model AI (Multi-Model Fallback Chain)
 
-Backend `Code.gs` telah dikonfigurasi dengan urutan prioritas otomatis:
+Backend `Code.gs` mencoba model berikut secara berurutan. Model dengan kuota tersedia diprioritaskan sebagai fallback sebelum model yang pada gambar kuotanya sudah penuh:
 
-1. **Prioritas 1 (Model Utama): `gemini-3.7-flash`**
-   - Menggunakan generasi model Gemini 3.7 Flash mutakhir untuk penalaran pedagogis paling komprehensif.
-2. **Prioritas 2 (Cadangan 1): `gemini-3.6-flash`**
-   - Digunakan otomatis jika model 3.7 sedang mengalami lonjakan beban (*high demand*).
-3. **Prioritas 3 (Cadangan 2): `gemini-flash-lite-latest`**
-   - Model generasi Flash-Lite terbaru dengan kecepatan inferensi luar biasa (~1 detik) dan bebas antre.
-4. **Prioritas 4 (Cadangan 3): `gemini-3.1-flash-lite`**
-   - Jaring pengaman terakhir dengan kestabilan tinggi.
+1. **Utama: `gemini-3.8-flash`**
+2. **Cadangan 1: `gemini-3.5-flash`**
+3. **Cadangan 2: `gemini-3.1-flash-lite`**
+4. **Cadangan 3: `gemini-3.5-flash-lite`**
+5. **Cadangan 4: `gemini-3.6-flash`**
+6. **Cadangan 5: `gemini-3.7-flash`**
 
+Jika satu model gagal atau kuotanya habis, sistem mencoba model berikutnya secara otomatis.
 ---
 
 ## 🚀 Cara Menerapkan ke Google Apps Script
