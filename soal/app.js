@@ -8,8 +8,24 @@
  */
 
 // Versioning & Cache Busting
-// Versioning & Cache Busting
-const APP_VERSION = "2.13";
+const APP_VERSION = "2.14";
+
+// Migration Purge Token Lawas (Satu Kali Reset untuk Seluruh Klien)
+(function jalankanPembersihanTokenLama() {
+  const PURGE_KEY = "portalkimia_token_reset_v20261001";
+  try {
+    if (!localStorage.getItem(PURGE_KEY)) {
+      localStorage.removeItem("portalkimia_guru_token");
+      localStorage.removeItem("generatorAccessToken");
+      localStorage.removeItem("portalkimia_soal_access_token");
+      localStorage.removeItem("generatorAccountInfo");
+      localStorage.removeItem("portalkimia_guru_nama");
+      localStorage.removeItem("portalkimia_nama_guru");
+      try { sessionStorage.removeItem("PORTALKIMIA_SESSION_ROLE"); } catch (e) {}
+      localStorage.setItem(PURGE_KEY, "done");
+    }
+  } catch (e) {}
+})();
 
 // Kustomisasi Identitas Guru & Sekolah
 const TEACHER_NAME_KEY = "portalkimia_nama_guru";
