@@ -247,10 +247,10 @@ test('doPost handles ping and admin actions with role enforcement', () => {
 });
 
 // TEST 6: ITP & Formatif Consolidation (TEPAT 2 BARIS FORMATIF: LKPD & KUIS)
-test('ITP & Asesmen Formatif collapses exactly into 2 rows, wipes itp3-14, and removes sub-formatif 1a/1b/2a/2b', () => {
+test('ITP & Asesmen: Baris 1 memuat Diagnostik Awal, Baris 2 dst memuat Formatif seluruh media tanpa memotong baris kosong', () => {
   const { context } = createHarness();
   
-  // Simulasi output mentah AI yang memecah 5 baris formatif (seperti kasus user)
+  // Kasus 1: Output mentah AI yang memecah 5 baris formatif (1a s.d. 1d LKPD, 2a Kuis)
   const fragmentedAI = {
     topik: 'Korosi Logam dan Pencegahannya',
     tujuan: 'Murid mampu menganalisis proses korosi...',
@@ -278,24 +278,29 @@ test('ITP & Asesmen Formatif collapses exactly into 2 rows, wipes itp3-14, and r
   const normalizedStr = context.harmonisasiOutputAI_(rawJson, 1);
   const normalized = JSON.parse(normalizedStr);
 
-  // 1. Baris 1: Formatif 1 (LKPD) - Bersih dari embel-embel 1a
-  assert.ok(normalized.asesmen1.startsWith('Formatif 1 (LKPD):'));
-  assert.ok(!normalized.asesmen1.includes('Formatif 1a'));
+  // 1. Baris 1: WAJIB Asesmen Diagnostik Awal
+  assert.ok(/diagnostik/i.test(normalized.asesmen1), 'asesmen1 harus berupa Asesmen Diagnostik Awal');
+  assert.ok(/prasyarat|diagnostik|kesiapan/i.test(normalized.itp1), 'itp1 harus memuat indikator prasyarat');
+  assert.ok(/prasyarat|diagnostik/i.test(normalized.aktivitas1), 'aktivitas1 harus memuat aktivitas diagnostik awal');
 
-  // 2. Baris 2: Formatif 2 (Kuis) - Otomatis mengambil baris kuis (sebelumnya di baris 5) dan bersih dari 2a
-  assert.ok(normalized.asesmen2.startsWith('Formatif 2 (Kuis):'));
-  assert.ok(!normalized.asesmen2.includes('Formatif 2a'));
-  assert.ok(/kuis/i.test(normalized.itp2));
-  assert.ok(/kuis/i.test(normalized.aktivitas2));
+  // 2. Baris 2: Formatif 1 (LKPD) - Bersih dari embel-embel 1a
+  assert.ok(normalized.asesmen2.startsWith('Formatif 1'), 'asesmen2 harus Formatif 1');
+  assert.ok(!normalized.asesmen2.includes('Formatif 1a'), 'asesmen2 bersih dari 1a');
 
-  // 3. Baris 3 s.d. 14: WAJIB KOSONG STRING ""
-  for (let r = 3; r <= 14; r++) {
+  // 3. Baris 3: Formatif 2 (Kuis) - Otomatis mengambil baris kuis dan bersih dari 2a
+  assert.ok(normalized.asesmen3.startsWith('Formatif 2'), 'asesmen3 harus Formatif 2');
+  assert.ok(!normalized.asesmen3.includes('Formatif 2a'), 'asesmen3 bersih dari 2a');
+  assert.ok(/kuis/i.test(normalized.itp3), 'itp3 memuat indikator kuis');
+  assert.ok(/kuis/i.test(normalized.aktivitas3), 'aktivitas3 memuat aktivitas kuis');
+
+  // 4. Baris 4 s.d. 14: WAJIB KOSONG STRING "" (tanpa menghapus baris tabel di Google Docs)
+  for (let r = 4; r <= 14; r++) {
     assert.equal(normalized['itp' + r], '', 'itp' + r + ' harus kosong');
     assert.equal(normalized['asesmen' + r], '', 'asesmen' + r + ' harus kosong');
     assert.equal(normalized['aktivitas' + r], '', 'aktivitas' + r + ' harus kosong');
   }
 
-  // 4. Observasi terhapus dari listAsesmen dan memuat Diagnostik Awal
+  // 5. Observasi terhapus dari listAsesmen dan memuat Diagnostik Awal
   assert.ok(!/observasi/i.test(normalized.listAsesmen));
   assert.ok(/diagnostik/i.test(normalized.listAsesmen));
   assert.ok(/diagnostik|prasyarat/i.test(normalized.awal1));
@@ -313,15 +318,57 @@ test('ITP & Asesmen Formatif collapses exactly into 2 rows, wipes itp3-14, and r
   };
 
   const normSingle = JSON.parse(context.harmonisasiOutputAI_(JSON.stringify(singleTaskAI), 1));
-  assert.ok(normSingle.asesmen1.startsWith('Formatif 1'));
-  // Baris 2 sampai 14 WAJIB kosong jika hanya 1 tugas
-  for (let r = 2; r <= 14; r++) {
+  // Baris 1: Diagnostik Awal
+  assert.ok(/diagnostik/i.test(normSingle.asesmen1));
+  // Baris 2: Formatif 1
+  assert.ok(normSingle.asesmen2.startsWith('Formatif 1'));
+  // Baris 3 sampai 14 WAJIB kosong jika hanya 1 tugas
+  for (let r = 3; r <= 14; r++) {
     assert.equal(normSingle['itp' + r], '', 'Baris ' + r + ' harus kosong pada 1 tugas');
     assert.equal(normSingle['asesmen' + r], '', 'Asesmen ' + r + ' harus kosong pada 1 tugas');
     assert.equal(normSingle['aktivitas' + r], '', 'Aktivitas ' + r + ' harus kosong pada 1 tugas');
   }
   assert.ok(/diagnostik/i.test(normSingle.listAsesmen));
   assert.ok(/diagnostik|prasyarat/i.test(normSingle.awal1));
+
+  // KASUS 3: Guru menampilkan 2 Media (Media 1 & Media 2 masing-masing memuat tugas LKPD & Kuis) -> 4 FORMATIF MUNCUL
+  const multiMediaAI = {
+    topik: 'Reaksi Redoks dan Elektrokimia',
+    tujuan: 'Murid mampu menganalisis reaksi redoks dan sel elektrokimia...',
+    itp1: 'Mengidentifikasi konsep prasyarat bilangan oksidasi',
+    asesmen1: 'Diagnostik Awal: Tanya-jawab terstruktur materi prasyarat',
+    aktivitas1: 'Review materi prasyarat (10 menit)',
+    itp2: 'Menganalisis reaksi redoks spontan pada simulasi Media 1',
+    asesmen2: 'Formatif 1 (LKPD): Pengisian tabel pengamatan reaksi redoks Media 1',
+    aktivitas2: 'Eksplorasi simulator Media 1 (30 menit)',
+    itp3: 'Mengevaluasi pemahaman konsep redoks Media 1',
+    asesmen3: 'Formatif 2 (Kuis): Skor kuis interaktif Media 1',
+    aktivitas3: 'Pengerjaan kuis Media 1 (15 menit)',
+    itp4: 'Menyelidiki potensial sel Volta pada simulasi Media 2',
+    asesmen4: 'Formatif 3 (LKPD): Pengisian tabel data potensial sel Media 2',
+    aktivitas4: 'Eksplorasi simulator Media 2 (30 menit)',
+    itp5: 'Mengevaluasi aplikasi sel Volta Media 2',
+    asesmen5: 'Formatif 4 (Kuis): Skor kuis evaluasi interaktif Media 2',
+    aktivitas5: 'Pengerjaan kuis Media 2 (15 menit)',
+    subTopik1: 'Redoks', subTopik2: 'Sel Volta',
+    ayat1: 'q55-9', ayat2: 'q55-9', zona1: 'Game', zona2: 'Game',
+    awal1: 'Murid bersiap', awal2: 'Murid bersiap',
+    memahami1: 'Murid memahami', memahami2: 'Murid memahami',
+    mengaplikasi1: 'Murid mengaplikasi', mengaplikasi2: 'Murid mengaplikasi',
+    merefleksi1: 'Murid merefleksi', merefleksi2: 'Murid merefleksi',
+    penutup1: 'Simpulan', penutup2: 'Simpulan',
+    listAsesmen: '1. Diagnostik Awal\n2. Formatif 1\n3. Formatif 2\n4. Formatif 3\n5. Formatif 4'
+  };
+
+  const normMulti = JSON.parse(context.harmonisasiOutputAI_(JSON.stringify(multiMediaAI), 2));
+  assert.ok(/diagnostik/i.test(normMulti.asesmen1), 'Baris 1 harus Diagnostik Awal');
+  assert.ok(normMulti.asesmen2.startsWith('Formatif 1'), 'Baris 2 harus Formatif 1 Media 1');
+  assert.ok(normMulti.asesmen3.startsWith('Formatif 2'), 'Baris 3 harus Formatif 2 Media 1');
+  assert.ok(normMulti.asesmen4.startsWith('Formatif 3'), 'Baris 4 harus Formatif 3 Media 2');
+  assert.ok(normMulti.asesmen5.startsWith('Formatif 4'), 'Baris 5 harus Formatif 4 Media 2');
+  for (let r = 6; r <= 14; r++) {
+    assert.equal(normMulti['itp' + r], '', 'Baris ' + r + ' harus kosong pada 2 media');
+  }
 });
 
 // TEST 7: Pemisahan Poin Langkah Pembelajaran (Tidak Bergabung dalam 1 Paragraf)
@@ -409,5 +456,106 @@ test('Gaya bahasa pedagogis (Anti-Duplikasi TQA) terdefinisi dan disuntikkan ke 
   assert.ok(safetyDefault.includes('GAYA OTOMATIS BERAGAM'), 'instructionSafety_ default harus menyertakan gaya otomatis');
 });
 
+// TEST 9: Deteksi Token Master vs Token Guru & File Unggahan (Sanitasi Branding PortalKimia)
+test('Deteksi Token: Master mempertahankan PortalKimia, Token Guru & File Eksternal diubah jadi Media HTML Interaktif', () => {
+  const { context } = createHarness();
+  const accGuru = context.tambahAkunGuru('Pak Joko', 5);
+  const teacherToken = accGuru.token;
+  const masterToken = 'master-tito-secret';
+
+  const rawWithPortal = JSON.stringify({
+    topik: 'Termokimia',
+    digital: 'Modul Interaktif: Media Pembelajaran Interaktif PortalKimia berbasis web',
+    itp1: 'Mengidentifikasi reaksi eksoterm dan endoterm pada media PortalKimia',
+    asesmen1: 'Formatif 1 (LKPD): Pengamatan kalorimeter pada fitur PortalKimia',
+    aktivitas1: 'Eksplorasi simulasi interaktif pada aplikasi PortalKimia (20 menit)',
+    memahami1: 'Murid menyimak materi pada katalog internal PortalKimia',
+    listAsesmen: 'Formatif: Kuis interaktif PortalKimia',
+    lampiran: 'Lembar aktivitas peserta didik'
+  });
+
+  // 1. Master Token tanpa unggahan eksternal -> PortalKimia DIPERTAHANKAN
+  const resMaster = JSON.parse(context.harmonisasiOutputAI_(rawWithPortal, 1, masterToken));
+  assert.ok(resMaster.digital.includes('PortalKimia'), 'Master token harus mempertahankan PortalKimia');
+  assert.ok(resMaster.itp2.includes('PortalKimia'), 'itp2 pada master token harus mempertahankan PortalKimia');
+  assert.ok(resMaster.memahami1.includes('PortalKimia'), 'memahami1 pada master token harus mempertahankan PortalKimia');
+
+  // 2. Token Guru (Rekan Guru) -> PortalKimia WAJIB DIUBAH menjadi Media HTML Interaktif
+  const resGuru = JSON.parse(context.harmonisasiOutputAI_(rawWithPortal, 1, teacherToken));
+  assert.ok(!resGuru.digital.includes('PortalKimia'), 'Token guru TIDAK BOLEH mengandung kata PortalKimia');
+  assert.ok(resGuru.digital.includes('Media Pembelajaran HTML Interaktif'), 'Digital harus diubah jadi Media Pembelajaran HTML Interaktif');
+  assert.ok(!resGuru.itp2.includes('PortalKimia'), 'itp2 guru bebas PortalKimia');
+  assert.ok(resGuru.itp2.includes('HTML Interaktif'), 'itp2 guru memuat HTML Interaktif');
+  assert.ok(!resGuru.asesmen2.includes('PortalKimia'), 'asesmen2 guru bebas PortalKimia');
+  assert.ok(!resGuru.aktivitas2.includes('PortalKimia'), 'aktivitas2 guru bebas PortalKimia');
+  assert.ok(!resGuru.memahami1.includes('PortalKimia'), 'memahami1 guru bebas PortalKimia');
+  assert.ok(resGuru.memahami1.includes('katalog media HTML interaktif'), 'katalog diubah jadi katalog media HTML interaktif');
+  assert.ok(!resGuru.listAsesmen.includes('PortalKimia'), 'listAsesmen guru bebas PortalKimia');
+
+  // 3. Master Token TETAPI ada BERKAS RUJUKAN EKSTERNAL (Upload HTML Sendiri) -> WAJIB DIUBAH jadi Media HTML Interaktif
+  const rawWithUpload = JSON.stringify({
+    topik: 'Termokimia',
+    digital: 'Modul Interaktif: Media Pembelajaran Interaktif PortalKimia berbasis web',
+    itp1: 'Mengidentifikasi reaksi eksoterm pada media PortalKimia',
+    lampiran: '[BERKAS RUJUKAN EKSTERNAL GURU: termokimia-mandiri.html]'
+  });
+  const resUploadMaster = JSON.parse(context.harmonisasiOutputAI_(rawWithUpload, 1, masterToken));
+  assert.ok(!resUploadMaster.digital.includes('PortalKimia'), 'File upload eksternal TIDAK BOLEH mengandung kata PortalKimia bahkan untuk master');
+  assert.ok(resUploadMaster.digital.includes('Media Pembelajaran HTML Interaktif'), 'File upload diubah jadi Media Pembelajaran HTML Interaktif');
+});
+
+// TEST 10: Format Teks: Pembersihan Bold/Asterisks & Pencegahan Pemotongan Notasi Kimia (2, 8, 1)
+test('Format Teks: Poin langkah pembelajaran bebas dari asterisks markdown bold dan notasi kimia (2, 8, 1) tidak terpotong', () => {
+  const { context } = createHarness();
+
+  // 1. Notasi kimia seperti konfigurasi elektron (2, 8, 1) tidak boleh terpotong salah
+  const rawWithChemical = "4) Setiap murid mengerjakan kuis interaktif formatif pada media/Liveworksheets yang memuat soal tren sifat dan soal HOTS, misalnya memprediksi jenis ikatan antara unsur X (2, 8, 1) dengan unsur Y (2, 8, 7). 5) Murid menyusun tabel perbandingan empat sifat keperiodikan untuk Na, Mg, Cl, dan Ar pada buku tulis/LKPD digital sebagai bentuk sintesis pemahaman.";
+  const separated = context.pisahkanPoinBarisBaru_(rawWithChemical);
+  const lines = separated.split('\n');
+  assert.equal(lines.length, 2, 'Harus terpisah menjadi tepat 2 baris (poin 4 dan poin 5)');
+  assert.ok(lines[0].includes('(2, 8, 1) dengan unsur Y (2, 8, 7)'), 'Notasi kimia (2, 8, 1) harus utuh di baris poin 4');
+  assert.ok(lines[1].startsWith('5) Murid'), 'Poin 5 harus dimulai dengan 5) Murid');
+
+  // 2. Pembersihan markdown asterisks bold (**teks**) di harmonisasiOutputAI_
+  const rawAsterisks = JSON.stringify({
+    topik: '**Ikatan Kimia**',
+    memahami1: '**1)** Murid mengamati **animasi transfer elektron**.',
+    mengaplikasi1: '2) Murid **menggambarkan struktur Lewis** ionik.',
+    tujuan: 'Murid mampu memahami **ikatan ion dan kovalen**.'
+  });
+  const resClean = JSON.parse(context.harmonisasiOutputAI_(rawAsterisks, 1));
+  assert.equal(resClean.topik, 'Ikatan Kimia');
+  assert.equal(resClean.memahami1, '1) Murid mengamati animasi transfer elektron.');
+  assert.equal(resClean.mengaplikasi1, '2) Murid menggambarkan struktur Lewis ionik.');
+  assert.ok(!resClean.tujuan.includes('**'));
+
+  // 3. Verifikasi fungsi normalisasiFormatTeksDokumen_
+  let boldResetCount = 0;
+  const mockTableDoc = {
+    getBody: () => ({
+      getTables: () => [{
+        getNumRows: () => 2,
+        getRow: (r) => ({
+          getNumCells: () => 1,
+          getCell: (c) => ({
+            getNumChildren: () => 3,
+            getChild: (ch) => ({
+              getType: () => 'PARAGRAPH',
+              getText: () => ch === 0 ? 'Fase 2: Mengaplikasi' : (ch === 1 ? '1) Murid melakukan pengamatan' : '2) Murid menyusun laporan'),
+              editAsText: () => ({
+                setBold: (b) => { if (b === false) boldResetCount++; }
+              })
+            })
+          })
+        })
+      }]
+    })
+  };
+  context.DocumentApp = { ElementType: { PARAGRAPH: 'PARAGRAPH' } };
+  context.normalisasiFormatTeksDokumen_(mockTableDoc);
+  assert.equal(boldResetCount, 2, 'Kedua poin narasi langkah pembelajaran harus direset setBold(false), sedangkan judul fase dipertahankan');
+});
+
 console.log('\nAll ' + passed + ' multi-user token ledger tests passed successfully!');
+
 
