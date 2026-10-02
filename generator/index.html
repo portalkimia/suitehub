@@ -5459,8 +5459,8 @@
 
         let res = `[BERKAS RUJUKAN EKSTERNAL GURU: ${fileName}]\n` +
           `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n` +
-          `- Berkas ini diunggah langsung oleh guru sebagai media rujukan mandiri (BUKAN media katalog internal PortalKimia).\n` +
-          `- Pemanfaatan Digital (digital): Deskripsikan media pembelajaran digital ini berdasarkan berkas "${fileName}" (Fleksibel memanfaatkan Canva, Liveworksheets, atau platform digital lain, dan JANGAN menggunakan nama berkas atau deskripsi katalog PortalKimia lain meskipun materinya mirip).\n` +
+          `- Berkas ini diunggah langsung oleh guru sebagai Media Pembelajaran HTML Interaktif mandiri.\n` +
+          `- Pemanfaatan Digital (digital): Deskripsikan media pembelajaran digital ini sebagai "Media Pembelajaran HTML Interaktif: ${fileName}" (Fleksibel memanfaatkan Canva, Liveworksheets, atau platform digital lain sesuai kebutuhan guru).\n` +
           `- Keselarasan Kegiatan & Fleksibel Digital: Rancang kegiatan pembelajaran (awal, memahami, mengaplikasi, merefleksi, penutup) agar SESUAI PERSIS dengan materi, fenomena, simulasi internal, pengisian LKPD, dan kuis yang ada pada berkas ini. Pemanfaatan alat digital fleksibel (guru bebas menentukan penggunaan Canva, Liveworksheets, dll), dan DILARANG mengarang alat/bahan praktikum lab riil berbahaya di luar berkas ini!\n\n`;
 
         if (fenomena) {
@@ -6078,9 +6078,9 @@
           } else {
             const prefix = `[BERKAS RUJUKAN EKSTERNAL GURU: ${fileName}]\n` +
               `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n` +
-              `- Berkas ini diunggah langsung oleh guru sebagai media/materi pembelajaran mandiri (BUKAN media katalog internal PortalKimia).\n` +
+              `- Berkas ini diunggah langsung oleh guru sebagai Media Pembelajaran HTML Interaktif mandiri.\n` +
               `- Rancang tujuan pembelajaran, pemanfaatan digital (digital), ITP, dan aktivitas murid secara spesifik dan akurat berdasarkan isi materi berkas "${fileName}" ini.\n` +
-              `- Pada field pemanfaatan digital, deskripsikan media dari berkas ini; JANGAN menggunakan nama berkas atau deskripsi media katalog PortalKimia lain meskipun topiknya mirip.\n\n` +
+              `- Pada field pemanfaatan digital, deskripsikan media dari berkas ini secara kontekstual sebagai Media Pembelajaran HTML Interaktif.\n\n` +
               `--- ISI MATERI BERKAS UNGGAHAN ---\n`;
             areaBahan.value = prefix + (isiTeks.length > 50000 ? isiTeks.substring(0, 50000) + "... [ekstraksi dipotong]" : isiTeks);
           }
@@ -6105,7 +6105,7 @@
           const areaBahan = document.getElementById('aiBahanAjar');
           areaBahan.value = `[BERKAS RUJUKAN EKSTERNAL GURU (LAMPIRAN): ${fileName}]\n` +
             `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n` +
-            `- Berkas lampiran ini diunggah langsung oleh guru (BUKAN media katalog internal PortalKimia).\n` +
+            `- Berkas lampiran ini diunggah langsung oleh guru sebagai bahan rujukan mandiri.\n` +
             `- Analisis berkas lampiran "${fileName}" ini untuk merancang tujuan pembelajaran, pemanfaatan digital, ITP, dan aktivitas murid secara spesifik.`;
           simpanDraft();
         };
@@ -6406,15 +6406,27 @@
         let badgeColor = '#a78bfa';
         let badgeText = `ITP ${i}`;
         if (i === 1) {
-          labelJudul = `Formatif 1 (Tugas / LKPD Media Pembelajaran)`;
+          labelJudul = `Asesmen Diagnostik Awal (Kesiapan Belajar & Materi Prasyarat)`;
+          badgeColor = '#fbbf24';
+          badgeText = `Diagnostik`;
+        } else if (i === 2) {
+          labelJudul = `Formatif 1 (Tugas / Simulasi / LKPD Media 1)`;
           badgeColor = '#34d399';
           badgeText = `Formatif 1`;
-        } else if (i === 2) {
-          labelJudul = `Formatif 2 (Kuis / Tugas 2 Media &ndash; Opsional jika media memuat 2 tugas)`;
+        } else if (i === 3) {
+          labelJudul = `Formatif 2 (Kuis Interaktif Media 1 / Tugas Media 1)`;
           badgeColor = '#60a5fa';
           badgeText = `Formatif 2`;
+        } else if (i === 4) {
+          labelJudul = `Formatif 3 (Tugas / Simulasi / LKPD Media 2)`;
+          badgeColor = '#a78bfa';
+          badgeText = `Formatif 3`;
+        } else if (i === 5) {
+          labelJudul = `Formatif 4 (Kuis Interaktif Media 2 / Tugas Media 2)`;
+          badgeColor = '#f472b6';
+          badgeText = `Formatif 4`;
         } else {
-          labelJudul = `ITP ${i} (Cadangan &ndash; Dikosongkan jika media hanya 1 atau 2 tugas)`;
+          labelJudul = `ITP ${i} (Cadangan &ndash; Dikosongkan jika media/tugas sudah selesai)`;
           badgeColor = '#71717a';
           badgeText = `ITP ${i}`;
         }
@@ -7248,14 +7260,14 @@ if(typeof module!=='undefined') module.exports=GeneratorCore;
       if(mime==='text/html'){
         area.value=ekstrakKontenPedagogisHTML(content,file.name);
       }else {
-        var instruksi='[BERKAS RUJUKAN EKSTERNAL GURU: '+file.name+']\nINSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n- Berkas ini diunggah langsung oleh guru sebagai media rujukan mandiri (BUKAN media katalog internal PortalKimia).\n- Rancang tujuan pembelajaran, pemanfaatan digital (digital), ITP, dan aktivitas murid secara spesifik dan akurat berdasarkan isi materi berkas "'+file.name+'" ini.\n- Pada field pemanfaatan digital, deskripsikan media dari berkas ini; JANGAN menggunakan nama berkas atau deskripsi media katalog PortalKimia lain meskipun topiknya mirip.\n\n--- ISI MATERI BERKAS UNGGAHAN ---\n';
+        var instruksi='[BERKAS RUJUKAN EKSTERNAL GURU: '+file.name+']\nINSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n- Berkas ini diunggah langsung oleh guru sebagai media rujukan mandiri.\n- Rancang tujuan pembelajaran, pemanfaatan digital (digital), ITP, dan aktivitas murid secara spesifik dan akurat berdasarkan isi materi berkas "'+file.name+'" ini.\n- Pada field pemanfaatan digital, deskripsikan media dari berkas ini secara kontekstual.\n\n--- ISI MATERI BERKAS UNGGAHAN ---\n';
         area.value=instruksi+content.slice(0,48000);
       }
       window.currentUploadedFile=null;
     }else {
       var binary='';for(var i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));
       window.currentUploadedFile={name:file.name,mimeType:mime,base64:btoa(binary)};
-      area.value='[BERKAS RUJUKAN EKSTERNAL GURU (LAMPIRAN): '+file.name+']\nINSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n- Berkas lampiran ini diunggah langsung oleh guru (BUKAN media katalog internal PortalKimia).\n- Analisis berkas lampiran "'+file.name+'" ini untuk merancang tujuan pembelajaran, pemanfaatan digital, ITP, dan aktivitas murid secara spesifik.';
+      area.value='[BERKAS RUJUKAN EKSTERNAL GURU (LAMPIRAN): '+file.name+']\nINSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n- Berkas lampiran ini diunggah langsung oleh guru sebagai bahan rujukan mandiri.\n- Analisis berkas lampiran "'+file.name+'" ini untuk merancang tujuan pembelajaran, pemanfaatan digital, ITP, dan aktivitas murid secara spesifik.';
     }
     document.getElementById('filePreviewContainer').style.display='flex';document.getElementById('filePreviewName').textContent=file.name;document.getElementById('filePreviewSize').textContent=(file.size/1024).toFixed(1)+' KB • periksa privasi sebelum mengirim';
     window.hasUploadedReference=true;window.uploadedFileName=file.name;document.getElementById('privacyUploadNotice').style.display='block';document.getElementById('privacyConsent').checked=false;simpanDraft();

@@ -2,11 +2,11 @@
   {
     "start": "  var pedomanModelPembelajaran =",
     "end": "  var partsArray =",
-    "sha256": "2abec05a4284f10446dcc768ae4b0f9367df25e51e5d15d4902ec3175a212f40"
+    "sha256": "a69311fc16e455df708ffd8c196bc758b86fe72a3046e36abc36f79298a455d9"
   },
   {
     "start": "  var systemInstructionPoles =",
     "end": "  var payloadPoles =",
-    "sha256": "75cd966188c39005a14b898c2cf9a0ac326dc82b48811fcfa23c875b4987672a"
+    "sha256": "12f8cf7f2d2346298b665e51a1808b763cf47b3a0bf5ba772440439abf7051e8"
   }
 ]
