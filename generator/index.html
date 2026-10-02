@@ -5321,7 +5321,7 @@
         } else {
           out += `  - Media ini adalah modul Praktikum Virtual (Lab Interaktif) mandiri. Rancang kegiatan penyelidikan virtual berbasis kontrol instrumen, sensor, dan data eksperimen sesuai fitur lab ini.\n`;
         }
-        out += `  - HAPUS dan DILARANG menggunakan Canva Class. Gunakan LKPD dan evaluasi interaktif bawaan media ini.\n\n`;
+        out += `  - Pemanfaatan teknologi/media digital fleksibel (guru bebas memanfaatkan Canva, Liveworksheets, LKPD digital, dll sesuai kebutuhan).\n\n`;
       }
 
       if (lkpdText) {
@@ -5365,7 +5365,7 @@
       out += `   - Praktik Pedagogis: Inkuiri Terbimbing / Problem-Based Learning / Discovery Learning dengan simulasi interaktif digital berpusat pada murid (Student-Centered).\n`;
       out += `   - Lingkungan Belajar: Laboratorium Kimia Virtual & Ruang Kelas Kolaboratif Digital.\n`;
       out += `   - Kemitraan: Kolaborasi antarmurid (peer learning) dalam kelompok penyelidikan dan fasilitasi terarah oleh pendidik.\n`;
-      out += `   - Pemanfaatan Digital: ${media.digital} (Dilarang menggunakan Canva Class; gunakan ekosistem Media Interaktif & LKPD digital PortalKimia).\n`;
+      out += `   - Pemanfaatan Digital: ${media.digital} (Fleksibel memanfaatkan platform digital seperti Canva, Liveworksheets, LKPD digital, maupun Media Interaktif PortalKimia).\n`;
       out += `3. PEMBELAJARAN MENDALAM (DEEP LEARNING):\n`;
       out += `   - Pembelajaran Berkesadaran (Mindful): Mengamati fenomena kimia mikroskopis dan makroskopis dengan penuh kesadaran dan ketelitian.\n`;
       out += `   - Pembelajaran Bermakna (Meaningful): Menghubungkan konsep sains dengan teknologi aplikatif serta tadabbur kebesaran ciptaan Ilahi.\n`;
@@ -5378,8 +5378,8 @@
       out += `     2. Formatif 2 (Kuis Interaktif): Penilaian skor kuis evaluasi formatif mandiri yang langsung menampilkan skor pada media.\n`;
       out += `   - INSTRUKSI MUTLAK ASESMEN: DILARANG membuat asesmen observasi (observasi sikap, observasi keaktifan kelompok, lembar pengamatan, dsb.) atau rubrik tambahan yang merepotkan guru. Field 'asesmen1'..'asesmen14' dan 'listAsesmen' WAJIB hanya memuat 2 asesmen formatif media ini (LKPD & Skor Kuis) serta diagnostik awal.\n\n`;
 
-      out += `--- 8. INSTRUKSI MUTLAK KESELARASAN AI (ANTI-MENGARANG, BEBAS CANVA & TANPA OBSERVASI) ---\n`;
-      out += `- DILARANG KERAS menyebut atau menggunakan Canva Class / LKM Canva Class dalam bentuk apa pun. Gunakan fitur LKPD digital interaktif dan evaluasi mandiri bawaan media PortalKimia.\n`;
+      out += `--- 8. INSTRUKSI MUTLAK KESELARASAN AI (ANTI-MENGARANG, FLEKSIBEL DIGITAL & TANPA OBSERVASI) ---\n`;
+      out += `- FLEKSIBILITAS PEMANFAATAN DIGITAL: Guru bebas dan fleksibel menentukan platform atau media digital yang digunakan (diperbolehkan menggunakan Canva, Liveworksheets, Google Classroom, atau LKPD interaktif bawaan media).\n`;
       out += `- PRIORITAS SIMULASI INTERNAL: Jika media rujukan pertemuan adalah Media Pembelajaran yang memuat simulasi interaktif di dalamnya, murid WAJIB menjalankan simulasi yang ada di dalam berkas HTML media tersebut. JANGAN mengambil fitur dari modul Lab Interaktif / Praktikum Virtual terpisah, KECUALI jika media yang dipilih guru memang berkategori Praktikum Virtual (Lab Interaktif).\n`;
       out += `- ASESMEN FORMATIF PRAKTIS TANPA OBSERVASI: Asesmen formatif HANYA 2 kegiatan sesuai media (pengisian tabel data & analisis LKPD, serta skor kuis evaluasi interaktif media). DILARANG MENAMBAH asesmen observasi (observasi sikap, keaktifan, dsb.) yang merepotkan guru membuat rubrik.\n`;
       out += `- KEGIATAN AWAL SISTEMATIS: Poin pertama HANYA merapikan kelas dan memakai atribut sekolah, lalu berdoa. Persiapan alat tulis dan perangkat digital kelompok dilakukan SETELAH berdoa. Setelah tujuan pembelajaran dijelaskan, pendidik WAJIB menyampaikan pokok materi berupa peta konsep.\n`;
@@ -5424,8 +5424,8 @@
         let res = `[BERKAS RUJUKAN EKSTERNAL GURU: ${fileName}]\n` +
           `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n` +
           `- Berkas ini diunggah langsung oleh guru sebagai media rujukan mandiri (BUKAN media katalog internal PortalKimia).\n` +
-          `- Pemanfaatan Digital (digital): Deskripsikan media pembelajaran digital ini berdasarkan berkas "${fileName}" (DILARANG menggunakan Canva Class, dan JANGAN menggunakan nama berkas atau deskripsi katalog PortalKimia lain meskipun materinya mirip).\n` +
-          `- Keselarasan Kegiatan & Bebas Canva: Rancang kegiatan pembelajaran (awal, memahami, mengaplikasi, merefleksi, penutup) agar SESUAI PERSIS dengan materi, fenomena, simulasi internal, pengisian LKPD, dan kuis yang ada pada berkas ini. DILARANG KERAS menggunakan Canva Class dan DILARANG mengarang alat/bahan praktikum lab riil berbahaya di luar berkas ini!\n\n`;
+          `- Pemanfaatan Digital (digital): Deskripsikan media pembelajaran digital ini berdasarkan berkas "${fileName}" (Fleksibel memanfaatkan Canva, Liveworksheets, atau platform digital lain, dan JANGAN menggunakan nama berkas atau deskripsi katalog PortalKimia lain meskipun materinya mirip).\n` +
+          `- Keselarasan Kegiatan & Fleksibel Digital: Rancang kegiatan pembelajaran (awal, memahami, mengaplikasi, merefleksi, penutup) agar SESUAI PERSIS dengan materi, fenomena, simulasi internal, pengisian LKPD, dan kuis yang ada pada berkas ini. Pemanfaatan alat digital fleksibel (guru bebas menentukan penggunaan Canva, Liveworksheets, dll), dan DILARANG mengarang alat/bahan praktikum lab riil berbahaya di luar berkas ini!\n\n`;
 
         if (fenomena) {
           res += `--- 1. STIMULUS FENOMENA NYATA (APERSEPSI) ---\n${fenomena.slice(0, 3000)}\n\n`;
