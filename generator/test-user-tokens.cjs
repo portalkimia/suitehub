@@ -378,4 +378,36 @@ test('Langkah pembelajaran (awal, memahami, mengaplikasi, merefleksi, penutup) t
   assert.equal(linesAsesmen.length, 3, 'listAsesmen harus terpisah menjadi 3 baris');
 });
 
+test('Gaya bahasa pedagogis (Anti-Duplikasi TQA) terdefinisi dan disuntikkan ke instruksi AI', () => {
+  const { context } = createHarness();
+
+  // 1. Verifikasi kelima gaya bahasa mengembalikan pedoman yang sesuai
+  const gayaSaintifik = context.pedomanGayaTeks_('saintifik');
+  assert.ok(gayaSaintifik.includes('GAYA SAINTIFIK-EKSPLANATIF'), 'Gaya saintifik harus memuat pedoman riset & presisi');
+
+  const gayaReflektif = context.pedomanGayaTeks_('reflektif');
+  assert.ok(gayaReflektif.includes('GAYA REFLEKTIF-KONSEPTUAL'), 'Gaya reflektif harus memuat pedoman meaningful learning');
+
+  const gayaPraktis = context.pedomanGayaTeks_('praktis');
+  assert.ok(gayaPraktis.includes('GAYA PRAKTIS-KOLABORATIF'), 'Gaya praktis harus memuat pedoman aksi dan tim');
+
+  const gayaDiferensiasi = context.pedomanGayaTeks_('diferensiasi');
+  assert.ok(gayaDiferensiasi.includes('GAYA DIFERENSIASI-EKSPLORATIF'), 'Gaya diferensiasi harus memuat pedoman scaffolding');
+
+  const gayaOtomatis = context.pedomanGayaTeks_('otomatis');
+  assert.ok(gayaOtomatis.includes('GAYA OTOMATIS BERAGAM'), 'Gaya otomatis harus memuat variasi leksikal tinggi');
+
+  // Default fallback ketika parameter kosong/null
+  const gayaDefault = context.pedomanGayaTeks_(null);
+  assert.ok(gayaDefault.includes('GAYA OTOMATIS BERAGAM'), 'Gaya default harus otomatis beragam');
+
+  // 2. Verifikasi instructionSafety_ menyertakan pedoman gaya narasi
+  const safetyReflektif = context.instructionSafety_({ gayaTeks: 'reflektif' });
+  assert.ok(safetyReflektif.includes('GAYA REFLEKTIF-KONSEPTUAL'), 'instructionSafety_ harus menyertakan pedoman reflektif');
+
+  const safetyDefault = context.instructionSafety_({});
+  assert.ok(safetyDefault.includes('GAYA OTOMATIS BERAGAM'), 'instructionSafety_ default harus menyertakan gaya otomatis');
+});
+
 console.log('\nAll ' + passed + ' multi-user token ledger tests passed successfully!');
+

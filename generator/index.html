@@ -699,7 +699,7 @@
         </div>
         
         <div class="row">
-          <div class="col-md-6 mb-3">
+          <div class="col-md-4 mb-3">
             <label class="form-label" for="jenisDokumen">
               <span class="material-symbols-outlined text-violet" style="font-size: 16px;">description</span>
               Jenis Dokumen Administrasi
@@ -711,7 +711,7 @@
           </div>
 
           <!-- FITUR 2: PILIHAN CEPAT MODEL PEMBELAJARAN -->
-          <div class="col-md-6 mb-3">
+          <div class="col-md-4 mb-3">
             <label class="form-label" for="aiModelPembelajaran">
               <span class="material-symbols-outlined text-violet" style="font-size: 16px;">model_training</span>
               Pilihan Cepat Model Pembelajaran
@@ -728,6 +728,21 @@
               <option value="Cooperative Learning - Think-Pair-Share (TPS)">Cooperative Learning - Think-Pair-Share</option>
               <option value="Cooperative Learning - Numbered Heads Together (NHT)">Cooperative Learning - NHT</option>
               <option value="STEM (Science, Technology, Engineering, & Mathematics)">STEM (Science, Tech, Engineering, Math)</option>
+            </select>
+          </div>
+
+          <!-- FITUR GAYA TEKS & PEDAGOGIS (ANTI-DUPLIKASI TQA) -->
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="aiGayaTeks">
+              <span class="material-symbols-outlined text-amber" style="font-size: 16px;">stylus_note</span>
+              Gaya Bahasa & Pedagogis
+            </label>
+            <select id="aiGayaTeks" class="form-select border-amber" onchange="simpanPreferensiGayaTeks()">
+              <option value="otomatis">🎲 Otomatis Beragam (Dynamic TQA-Safe)</option>
+              <option value="reflektif">🌿 Reflektif-Konseptual (Humanis & Bermakna)</option>
+              <option value="saintifik">🏛️ Saintifik-Eksplanatif (Formal-Riset)</option>
+              <option value="praktis">⚡ Praktis-Kolaboratif (Aplikatif & Dinamis)</option>
+              <option value="diferensiasi">🎯 Diferensiasi-Eksploratif (Adaptif & Scaffolded)</option>
             </select>
           </div>
 
@@ -1277,6 +1292,10 @@
                 <strong id="confirmModulModel" class="text-white">-</strong>
               </div>
               <div class="col-12 border-top border-secondary border-opacity-10 pt-1.5">
+                <span class="text-muted d-block" style="font-size: 10px;">Gaya Bahasa (Anti-Duplikasi TQA):</span>
+                <span id="confirmModulGayaTeks" class="text-warning fw-semibold">🎲 Otomatis Beragam (Dynamic TQA-Safe)</span>
+              </div>
+              <div class="col-12 border-top border-secondary border-opacity-10 pt-1.5">
                 <span class="text-muted d-block" style="font-size: 10px;">Media / Bahan Rujukan:</span>
                 <span id="confirmModulMedia" class="text-zinc-200 fw-semibold">-</span>
               </div>
@@ -1422,6 +1441,23 @@
       } catch (e) {
         return null;
       }
+    }
+
+    function simpanPreferensiGayaTeks() {
+      try {
+        const el = document.getElementById('aiGayaTeks');
+        if (el) localStorage.setItem('generatorGayaTeks', el.value);
+      } catch (e) {}
+    }
+
+    function muatPreferensiGayaTeks() {
+      try {
+        const saved = localStorage.getItem('generatorGayaTeks');
+        const el = document.getElementById('aiGayaTeks');
+        if (saved && el) {
+          el.value = saved;
+        }
+      } catch (e) {}
     }
 
     function showModulToast(msg) {
@@ -6604,6 +6640,7 @@
       renderQuickTags();
       sinkronkanMediaPortalTerbaru(true);
       muatDraft();
+      muatPreferensiGayaTeks();
       aturKeteranganAIProvider();
       perbaruiLabelTombolKuotaModul();
 
@@ -6800,6 +6837,8 @@
         return;
       }
 
+      const inputGayaTeks = document.getElementById('aiGayaTeks')?.value || 'otomatis';
+
       const dataInstruksi = {
         ...generatorContext(),
         jenisDokumen: inputJenis,
@@ -6808,6 +6847,7 @@
         pertemuan: inputPertemuan,
         bahanAjar: inputBahanAjar,
         modelPembelajaran: inputModel,
+        gayaTeks: inputGayaTeks,
         fileBerkas: window.currentUploadedFile
       };
 
@@ -6842,6 +6882,18 @@
       if (elPertemuan) elPertemuan.textContent = (dataInstruksi.pertemuan || '1') + ' Pertemuan';
       const elModel = document.getElementById('confirmModulModel');
       if (elModel) elModel.textContent = dataInstruksi.modelPembelajaran || '-';
+
+      const elGaya = document.getElementById('confirmModulGayaTeks');
+      if (elGaya) {
+        const gayaMap = {
+          'otomatis': '🎲 Otomatis Beragam (Dynamic TQA-Safe)',
+          'reflektif': '🌿 Reflektif-Konseptual (Humanis & Bermakna)',
+          'saintifik': '🏛️ Saintifik-Eksplanatif (Formal-Riset)',
+          'praktis': '⚡ Praktis-Kolaboratif (Aplikatif & Dinamis)',
+          'diferensiasi': '🎯 Diferensiasi-Eksploratif (Adaptif & Scaffolded)'
+        };
+        elGaya.textContent = gayaMap[dataInstruksi.gayaTeks] || '🎲 Otomatis Beragam (Dynamic TQA-Safe)';
+      }
       
       const elMedia = document.getElementById('confirmModulMedia');
       if (elMedia) {
