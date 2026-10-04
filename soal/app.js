@@ -187,6 +187,8 @@ function handleMagicLinkToken() {
 
 // Global State
 let currentPackage = null;
+let currentQuizData = null; // Alias kompatibilitas
+window.currentQuizData = null;
 let activeParallelTab = 'A'; // 'A' atau 'B'
 let savedQuestions = [];     // Koleksi soal yang ditandai / disimpan oleh guru
 let filterSavedOnly = false; // Filter tampilan: tampilkan hanya soal yang ditandai
@@ -2703,8 +2705,31 @@ function notifyFallbackTo36() {
   }
 }
 
+
+// -------------------------------------------------------------
+// TAB SAFETY GUARD & ANTI-HANGUS KUOTA
+// -------------------------------------------------------------
+window.isAIGeneratingActive = false;
+
+window.addEventListener("beforeunload", function (e) {
+  if (window.isAIGeneratingActive) {
+    e.preventDefault();
+    e.returnValue = "Proses generate AI sedang berjalan di server! Meninggalkan atau me-refresh halaman sekarang dapat menyebabkan kuota Anda terpotong namun naskah gagal diterima.";
+    return e.returnValue;
+  }
+});
+
+document.addEventListener("visibilitychange", function () {
+  if (window.isAIGeneratingActive && !document.hidden) {
+    if (typeof showVersionToast === "function") {
+      showVersionToast("⚠️ Perhatian: Anda sempat berpindah tab saat generate. Harap tetap di halaman ini agar hasil naskah soal tidak gagal mendarat!");
+    }
+  }
+});
+
 // GENERATE QUIZ DENGAN FITUR DINAMIS
 async function generateQuiz() {
+  window.isAIGeneratingActive = true;
   const gasUrl = getGasUrl();
   const apiKey = localStorage.getItem("portal_gemini_api_key");
   if (!gasUrl && !apiKey) {
@@ -4309,7 +4334,7 @@ function renderTeacherQuestions(questions) {
 
     let optionsHtml = "";
     if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
-      const isPearsonCurriculum = (currentQuizData && currentQuizData.jenjang && ((currentQuizData.jenjang.toLowerCase().includes("pearson")) || (currentQuizData.jenjang.toLowerCase().includes("edexcel")))) || (document.getElementById("gradeSelect")?.value?.toLowerCase().includes("pearson")) || false;
+      const isPearsonCurriculum = (typeof currentPackage !== "undefined" && currentPackage && currentPackage.jenjang && ((currentPackage.jenjang.toLowerCase().includes("pearson")) || (currentPackage.jenjang.toLowerCase().includes("edexcel")))) || (document.getElementById("gradeSelect")?.value?.toLowerCase().includes("pearson")) || false;
       optionsHtml = soal.pilihan_jawaban.map((opt) => {
         const isCorrect = String(opt.label || "").toUpperCase() === String(soal.kunci_jawaban || "").toUpperCase();
         return `
