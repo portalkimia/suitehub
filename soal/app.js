@@ -1172,14 +1172,20 @@ const PEARSON_TYPES_LIST = [
 ];
 
 const INDONESIA_TYPES_LIST = [
-  { value: "Pilihan Ganda Biasa (A-E)", label: "Pilihan Ganda Biasa (5 Opsi: A s.d. E)" },
-  { value: "TKA Model Standar (Campuran Tipe 1 PG, Tipe 2 Asosiasi 1-2-3-4, Tipe 3 Sebab-Akibat)", label: "🎯 TKA Standar (Campuran Tipe 1 PG, Tipe 2 Asosiasi, Tipe 3 Sebab-Akibat)" },
-  { value: "Campuran Semua Bentuk Soal (PG Biasa, PG Kompleks 1-2-3-4, Sebab-Akibat, Esai/Tabel)", label: "🎲 Campuran Multi-Bentuk (PG, Kompleks 1-2-3-4, Sebab-Akibat, Esai)" },
+  { value: "Pilihan Ganda Biasa (A-E)", label: "🔘 Pilihan Ganda Biasa (5 Opsi: A s.d. E)" },
+  { value: "PG Multi-Jawaban (Centang Opsi Benar - AKM)", label: "☑️ PG Multi-Jawaban (Centang Semua Pilihan Benar - AKM)" },
+  { value: "TKA Model Standar (Campuran Tipe 1 PG, Tipe 2 Asosiasi 1-2-3-4, Tipe 3 Sebab-Akibat)", label: "🎯 TKA Standar (Campuran PG, Asosiasi 1-2-3-4, & Sebab-Akibat)" },
+  { value: "Campuran Semua Bentuk Soal (PG Biasa, PG Kompleks 1-2-3-4, Sebab-Akibat, Esai/Tabel)", label: "🎲 Campuran Multi-Bentuk (PG, Kompleks, Sebab-Akibat, & Esai)" },
+  { value: "Uraian Biasa (Jawaban Tertulis Non-Bertingkat)", label: "✍️ Uraian Biasa (Pertanyaan Tunggal & Jawaban Tertulis Non-Bertingkat)" },
   { value: "Esai / Uraian Terstruktur (Sub a, b, c & Garis Lembar Jawab)", label: "📝 Esai / Uraian Terstruktur (Sub-pertanyaan a, b, c & Garis Lembar Jawab)" },
-  { value: "Pilihan Ganda Kompleks (Kombinasi Pernyataan 1, 2, 3, 4)", label: "PG Kompleks (Kombinasi Pernyataan 1, 2, 3, 4 - Asosiasi)" },
-  { value: "Pilihan Ganda Kompleks Matriks / Tabel (Benar-Salah)", label: "PG Kompleks Tabel (Benar / Salah - AKM)" },
-  { value: "Sebab-Akibat / Asosiasi (UTBK)", label: "Sebab-Akibat / Hubungan Antar-Hal (Pernyataan - Alasan)" },
-  { value: "Esai / Uraian Perhitungan", label: "Esai / Uraian Perhitungan Bertingkat" },
+  { value: "Studi Kasus (Analisis Konseptual Berbasis Sumber Kredibel)", label: "🔬 Studi Kasus (Analisis Konseptual Berbasis Sumber Kredibel: Jurnal & Buku)" },
+  { value: "Argumen Ilmiah CER (Claim, Evidence, Reasoning)", label: "💡 Argumen Ilmiah CER (Claim, Evidence, Reasoning - Literasi Sains)" },
+  { value: "Analisis Kesalahan & Koreksi (Spot the Error)", label: "🔍 Analisis Kesalahan & Koreksi (Spot the Error / Miskonsepsi)" },
+  { value: "Teks Rumpang (Cloze Test - Isian Kata/Rumus Kunci)", label: "📄 Teks Rumpang (Cloze Test - Isian Kata / Rumus Kunci)" },
+  { value: "Pilihan Ganda Kompleks (Kombinasi Pernyataan 1, 2, 3, 4)", label: "🔢 PG Kompleks (Kombinasi Pernyataan 1, 2, 3, 4 - Asosiasi)" },
+  { value: "Pilihan Ganda Kompleks Matriks / Tabel (Benar-Salah)", label: "📊 PG Kompleks Tabel (Matriks Benar / Salah - AKM)" },
+  { value: "Sebab-Akibat (Pernyataan - Alasan / UTBK)", label: "⚖️ Sebab-Akibat / Hubungan Antar-Hal (Pernyataan - Alasan)" },
+  { value: "Diagnostik Dua Tingkat (Two-Tier Multiple Choice)", label: "🩺 Diagnostik Dua Tingkat (Two-Tier: Konten & Alasan Ilmiah)" },
   { value: "Menjodohkan (Matching Kolom A & B)", label: "🧩 Menjodohkan (Matching Pasangan Konsep Kolom A & B)" },
   { value: "Kata Acak / Scramble (Susun Huruf & Konsep)", label: "🔤 Scramble / Kata Acak (Susun Huruf & Konsep Kimia)" },
   { value: "Teka-Teki Silang (TTS Kimia Mendatar & Menurun)", label: "📰 Teka-Teki Silang (TTS Kimia - Mendatar & Menurun)" },
@@ -2744,7 +2750,7 @@ async function generateQuiz() {
   const stimulus = document.getElementById("stimulusSelect").value;
   const isPearson = grade.toLowerCase().includes("pearson") || grade.toLowerCase().includes("edexcel");
   const isNoStimulus = stimulus.toLowerCase().includes("tanpa stimulus");
-  const isStructured = qType.toLowerCase().includes("terstruktur") || qType.toLowerCase().includes("esai") || qType.toLowerCase().includes("uraian");
+  const isStructured = qType.toLowerCase().includes("terstruktur") || qType.toLowerCase().includes("esai") || qType.toLowerCase().includes("uraian") || qType.toLowerCase().includes("kasus") || qType.toLowerCase().includes("cer") || qType.toLowerCase().includes("kesalahan") || qType.toLowerCase().includes("rumpang");
   const topicSelect = document.getElementById("topicSelect");
   const topic = topicSelect.value === "CUSTOM" 
     ? (document.getElementById("customTopicInput").value.trim() || "Kimia Umum")
@@ -2972,6 +2978,69 @@ This paper consists of TWO sections:
   A1: (Accuracy mark - final numerical answer with units or precise formula)
   Additional Guidance: ALLOW..., IGNORE..., DO NOT ALLOW..., TE (Error Carried Forward).`;
     }
+  } else if (qType.includes("Multi-Jawaban") || qType.includes("Centang")) {
+    typeInstruction = `FORMAT KHUSUS PILIHAN GANDA MULTI-JAWABAN (MODEL KOTAK CENTANG / MULTIPLE SELECT AKM):
+- Susun butir soal model Asesmen Kompetensi Minimum (AKM) di mana siswa dapat memilih LEBIH DARI SATU jawaban yang benar dari 5 pilihan opsi (A, B, C, D, E).
+- Pada narasi stimulus / pertanyaan, WAJIB cantumkan instruksi tegas: "Pilihlah semua pernyataan yang benar dengan memberi tanda centang (✓) pada kotak yang tersedia!" (biasanya 2 atau 3 opsi benar).
+- Properti 'pilihan_jawaban': Berikan tepat 5 pilihan objek { label: 'A', teks: '...' } s.d. 'E'.
+- Pada 'tipe_soal', tuliskan 'PG Multi-Jawaban (Centang)'.
+- Pada 'kunci_jawaban', tuliskan seluruh huruf opsi yang benar dipisahkan koma (contoh: 'A, C, D' atau 'B, E').
+- Pada 'pembahasan_langkah', jelaskan secara ilmiah mengapa setiap opsi yang benar bernilai benar, dan di mana letak kekeliruan opsi distraktor lainnya.`;
+  } else if (qType.includes("CER") || qType.includes("Argumen Ilmiah")) {
+    typeInstruction = `FORMAT KHUSUS ARGUMEN ILMIAH CER (CLAIM, EVIDENCE, REASONING - LITERASI SAINS PISA):
+- Setiap butir soal menyajikan fenomena anomali data eksperimen atau isu kimia kontekstual.
+- Pertanyaan WAJIB dipecah menjadi 3 pilar argumentasi ilmiah terstruktur:
+  a) Klaim (Claim): Rumuskan kesimpulan langsung / klaim jawaban atas fenomena tersebut! [Skor: 1]
+  b) Bukti (Evidence): Kutip data eksperimen / grafik / angka kuantitatif spesifik dari stimulus yang mendukung klaim Anda! [Skor: 2]
+  c) Penalaran (Reasoning): Jelaskan hukum dasar / teori kimia ilmiah fundamental yang menghubungkan bukti tersebut dengan klaim Anda! [Skor: 2]
+- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []).
+- Pada 'tipe_soal', tuliskan 'Argumen Ilmiah CER'.
+- Pada 'kunci_jawaban', tuliskan intisari Claim, Evidence, dan Reasoning yang diharapkan.
+- Pada 'pembahasan_langkah', sajikan rubrik penskoran dan contoh uraian ilmiah ideal untuk pilar a (Claim), b (Evidence), dan c (Reasoning).`;
+  } else if (qType.includes("Kesalahan") || qType.includes("Spot the Error")) {
+    typeInstruction = `FORMAT KHUSUS ANALISIS KESALAHAN & KOREKSI (SPOT THE ERROR / MISKONSEPSI):
+- Setiap butir soal menyajikan narasi eksperimen laboratorium, tahapan penyetaraan reaksi redoks, atau perhitungan stoikiometri siswa yang memuat kesalahan konsep (disajikan terinci dalam Langkah 1, Langkah 2, Langkah 3, Langkah 4).
+- Pertanyaan terstruktur:
+  a) Identifikasi Langkah: Tentukan pada langkah nomor berapakah terjadi kesalahan konsep ilmiah! [Skor: 1]
+  b) Analisis Miskonsepsi: Jelaskan mengapa langkah tersebut keliru menurut prinsip kimia yang benar! [Skor: 2]
+  c) Rekonstruksi & Koreksi: Tuliskan langkah perbaikan dan perhitungan yang benar hingga tuntas! [Skor: 2]
+- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []).
+- Pada 'tipe_soal', tuliskan 'Analisis Kesalahan (Spot the Error)'.
+- Pada 'kunci_jawaban', tuliskan nomor langkah yang salah dan ringkasan koreksinya.
+- Pada 'pembahasan_langkah', jelaskan miskonsepsi umum yang mendasarinya dan langkah perbaikan tahap demi tahap.`;
+  } else if (qType.includes("Teks Rumpang") || qType.includes("Cloze")) {
+    typeInstruction = `FORMAT KHUSUS TEKS RUMPANG (CLOZE TEST - ISIAN KATA & RUMUS KUNCI):
+- Susun butir soal berupa paragraf pemaparan konsep atau mekanisme reaksi kimia yang di dalamnya memuat 3-5 bagian rumpang bernomor: (1) [ ... ], (2) [ ... ], (3) [ ... ], (4) [ ... ].
+- Bagian rumpang wajib berupa istilah ilmiah penting, rumus senyawa, spesi ion, atau angka stoikiometri esensial.
+- Di akhir teks, sertakan baris panduan isian: "Lembar Isian Jawaban: (1) ..., (2) ..., (3) ..., (4) ...".
+- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []).
+- Pada 'tipe_soal', tuliskan 'Teks Rumpang (Cloze Test)'.
+- Pada 'kunci_jawaban', tuliskan seluruh isian kata kunci secara berurutan: '(1) ..., (2) ..., (3) ..., (4) ...'.
+- Pada 'pembahasan_langkah', sajikan teks lengkap tanpa rumpang dan penjelasan materi untuk tiap kata kunci.`;
+  } else if (qType.includes("Diagnostik") || qType.includes("Two-Tier")) {
+    typeInstruction = `FORMAT KHUSUS DIAGNOSTIK DUA TINGKAT (TWO-TIER MULTIPLE CHOICE):
+- Setiap butir soal menguji konsep kimia dengan memisahkan instrumen menjadi 2 tingkatan:
+  * TINGKAT 1 (Pertanyaan Konten): Pertanyaan fenomena ilmiah dengan pilihan konten (A, B, C).
+  * TINGKAT 2 (Alasan Ilmiah): 4 pilihan alasan pendukung (1, 2, 3, 4) yang memuat 1 alasan valid dan 3 miskonsepsi umum siswa.
+- Pilihan jawaban utama (A s.d. E) merangkum kombinasi Konten dan Alasan secara baku:
+  A. Konten (A) dengan Alasan (1)
+  B. Konten (A) dengan Alasan (2)
+  C. Konten (B) dengan Alasan (3)
+  D. Konten (B) dengan Alasan (4)
+  E. Konten (C) dengan Alasan (1)
+- Properti 'pilihan_jawaban': Berikan 5 opsi kombinasi (A s.d. E).
+- Pada 'tipe_soal', tuliskan 'Diagnostik Dua Tingkat (Two-Tier)'.
+- Pada 'kunci_jawaban', tuliskan huruf opsi kombinasi yang tepat.
+- Pada 'pembahasan_langkah', bedah secara tuntas analisis kebenaran Tingkat 1 dan Tingkat 2, serta jelaskan miskonsepsi di balik opsi distraktor lainnya.`;
+  } else if (qType.includes("Uraian Biasa") || qType.includes("Non-Bertingkat") || qType.includes("Jawaban Tertulis")) {
+    typeInstruction = `FORMAT KHUSUS URAIAN BIASA (PERTANYAAN TUNGGAL NON-BERTINGKAT & JAWABAN TERTULIS):
+- Susun butir soal persis seperti gaya soal Pilihan Ganda (ada stimulus fenomena/konteks kimia singkat dan terarah, diikuti 1 kalimat pertanyaan inti yang lugas), TETAPI DILARANG memberikan opsi pilihan jawaban A, B, C, D, E.
+- DILARANG KERAS memecah pertanyaan menjadi sub-pertanyaan bertingkat (JANGAN membuat sub-soal a, b, c). Setiap nomor soal HANYA berisi SATU PERTANYAAN TUNGGAL yang langsung membutuhkan jawaban tertulis.
+- Model Pertanyaan: Menuntut siswa menuliskan jawaban ilmiah secara langsung dengan kalimat/penjelasan sendiri (contoh: menjelaskan alasan/prinsip ilmiah fenomena tersebut, menuliskan persamaan reaksi kimia berimbang, menentukan rumus senyawa/ion, menghitung besaran stoikiometri/entalpi, atau merumuskan kesimpulan konsep kimia).
+- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []).
+- Pada properti 'tipe_soal', tuliskan 'Uraian Biasa (Jawaban Tertulis)'.
+- Pada properti 'kunci_jawaban', tuliskan jawaban tertulis definitif yang diharapkan (kalimat penjelasan konsep yang padat, persamaan reaksi lengkap, atau nilai hasil perhitungan beserta satuannya).
+- Pada properti 'pembahasan_langkah', jelaskan secara terperinci konsep ilmiah dan tahapan penalaran/perhitungan untuk memperoleh jawaban tersebut, serta kriteria kata kunci penting untuk penilaian guru.`;
   } else if (qType.includes("Terstruktur")) {
     typeInstruction = `FORMAT KHUSUS ESAI / URAIAN TERSTRUKTUR:
 - Setiap butir soal diawali pengantar reaksi/data kasus, lalu dipecah menjadi sub-pertanyaan bertingkat terstruktur:
@@ -2982,6 +3051,24 @@ This paper consists of TWO sections:
 - Pada properti 'tipe_soal', tuliskan 'Uraian Terstruktur'.
 - Pada properti 'kunci_jawaban', tuliskan ringkasan jawaban per sub-pertanyaan.
 - Pada properti 'pembahasan_langkah', sajikan rubrik penskoran dan tahapan pengerjaan per sub-soal.`;
+  } else if (qType.includes("Studi Kasus")) {
+    typeInstruction = `FORMAT KHUSUS STUDI KASUS (ANALISIS KONSEPTUAL BERBASIS SUMBER KREDIBEL):
+- Setiap butir soal WAJIB menyajikan narasi studi kasus autentik yang mendalam terkait topik '${topic}' (misal: fenomena anomali alam, isu kimia lingkungan/kimia hijau, proses katalisis/industri kimia, kimia material/energi, atau dinamika biokimia/farmasi kontekstual).
+- Narasi kasus WAJIB dilengkapi data pendukung berupa tabel observasi/eksperimen (format tabel Markdown), data analitis kuantitatif/kualitatif, atau persamaan reaksi kimia berimbang.
+- Struktur Pertanyaan WAJIB berbentuk ANALISIS KONSEPTUAL BERTINGKAT (sub-pertanyaan a, b, c):
+  a) Identifikasi & Analisis Prinsip Konsep: Menganalisis konsep/hukum dasar kimia fundamental yang mendasari fenomena kasus tersebut. [Skor: ...]
+  b) Argumentasi Ilmiah & Evaluasi Konseptual: Menganalisis mekanisme reaksi, pergeseran kesetimbangan/termodinamika/kinetika/stoikiometri, atau evaluasi hipotesis dengan penalaran ilmiah kritis dan mendalam. [Skor: ...]
+  c) Sintesis Solusi & Korelasi Literatur: Menghubungkan konsep temuan dengan implikasi riil dan prinsip ilmiah yang telah teruji. [Skor: ...]
+- WAJIB KOSONGKAN properti 'pilihan_jawaban' (berikan array kosong []).
+- Pada properti 'tipe_soal', tuliskan 'Studi Kasus (Analisis Konseptual)'.
+- Pada properti 'kunci_jawaban', tuliskan ringkasan intisari jawaban pemahaman konseptual per sub-pertanyaan yang diharapkan dari siswa.
+- Pada properti 'pembahasan_langkah', WAJIB menyajikan 4 komponen komprehensif:
+  1. Langkah Analisis Konsep Kasus: Pembedahan prinsip dasar kimia per sub-soal secara mendalam dan terstruktur.
+  2. Model Jawaban & Argumentasi Siswa: Contoh uraian jawaban ideal berbasis konsep materi kimia.
+  3. DUKUNGAN SUMBER KREDIBEL (LITERATUR ILMIAH & BUKU TEKS STANDAR):
+     Wajib mencantumkan rujukan literatur ilmiah otoritatif dan kredibel yang menjadi dasar konsep materi kasus tersebut, minimal 1 buku teks standar kimia bereputasi (contoh: Raymond Chang 'Chemistry'; Petrucci 'General Chemistry'; Atkins 'Physical Chemistry'; McMurry 'Organic Chemistry'; Brown, LeMay, Bursten 'Chemistry: The Central Science'; Zumdahl 'Chemical Principles') ATAU jurnal ilmiah bereputasi (contoh: Journal of Chemical Education ACS, RSC Advances, Indonesian Journal of Chemistry, Education in Chemistry, dsb.).
+     Format penulisan rujukan: [Nama Penulis / Judul Buku atau Jurnal, Edisi/Tahun, serta Konsep Ilmiah Spesifik yang Menjadi Landasan Teori].
+  4. Rubrik Penilaian Konseptual: Pedoman kriteria ketuntasan pemahaman dan distribusi skor per sub-soal.`;
   } else if (qType.includes("TKA") || qType.includes("Campuran")) {
     typeInstruction = `DISTRIBUSI FORMAT TIPE SOAL (STANDAR TKA & CAMPURAN MULTI-BENTUK):
 Dalam paket ${numQuestions} butir soal ini, variasikan bentuk soal mengikuti standar baku Tes Kemampuan Akademik (TKA) Saintek Kimia:
@@ -4336,7 +4423,8 @@ function renderTeacherQuestions(questions) {
     if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
       const isPearsonCurriculum = (typeof currentPackage !== "undefined" && currentPackage && currentPackage.jenjang && ((currentPackage.jenjang.toLowerCase().includes("pearson")) || (currentPackage.jenjang.toLowerCase().includes("edexcel")))) || (document.getElementById("gradeSelect")?.value?.toLowerCase().includes("pearson")) || false;
       optionsHtml = soal.pilihan_jawaban.map((opt) => {
-        const isCorrect = String(opt.label || "").toUpperCase() === String(soal.kunci_jawaban || "").toUpperCase();
+        const isMulti = (soal.tipe_soal || "").toLowerCase().includes("multi") || (soal.tipe_soal || "").toLowerCase().includes("centang");
+          const isCorrect = isMulti ? String(soal.kunci_jawaban || "").toUpperCase().includes(String(opt.label || "").toUpperCase()) : (String(opt.label || "").toUpperCase() === String(soal.kunci_jawaban || "").toUpperCase());
         return `
           <div class="option-row ${isCorrect ? 'correct-answer' : ''}">
             ${isPearsonCurriculum ? '<span class="inline-block w-4 h-4 border border-zinc-500 rounded-sm mr-1.5 shrink-0 text-center text-[10px] leading-4 text-zinc-400"></span>' : ''}
@@ -4363,6 +4451,91 @@ function renderTeacherQuestions(questions) {
           <div class="p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/30 text-xs text-amber-200 flex items-center gap-2 mb-2">
             <span class="text-base">🔤</span>
             <div><b>Format Scramble:</b> Siswa menyusun huruf-huruf acak menjadi istilah kimia yang tepat berdasarkan petunjuk konsep.</div>
+          </div>
+        `;
+      } else if (tSoal.includes("multi") || tSoal.includes("centang")) {
+        optionsHtml = `
+          <div class="p-2.5 rounded-xl bg-blue-950/30 border border-blue-500/30 text-xs text-blue-200 flex items-center gap-2 mb-2">
+            <span class="text-base">☑️</span>
+            <div><b>PG Multi-Jawaban (Kotak Centang AKM):</b> Siswa memilih lebih dari satu jawaban yang benar (centang checkbox). Opsi kunci jawaban ditandai hijau di atas.</div>
+          </div>
+        `;
+      } else if (tSoal.includes("cer") || tSoal.includes("claim")) {
+        optionsHtml = `
+          <div class="p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/30 text-xs text-amber-200 flex items-center gap-2 mb-2">
+            <span class="text-base">💡</span>
+            <div><b>Argumen Ilmiah CER:</b> Siswa menyusun tiga pilar literasi sains: a) Claim (Klaim), b) Evidence (Bukti Data), dan c) Reasoning (Penalaran Ilmiah).</div>
+          </div>
+        `;
+      } else if (tSoal.includes("kesalahan") || tSoal.includes("error")) {
+        optionsHtml = `
+          <div class="p-2.5 rounded-xl bg-rose-950/30 border border-rose-500/30 text-xs text-rose-200 flex items-center gap-2 mb-2">
+            <span class="text-base">🔍</span>
+            <div><b>Analisis Kesalahan (Spot the Error):</b> Siswa mengidentifikasi letak kesalahan konsep ilmiah pada langkah prosedur/perhitungan dan memberikan koreksi valid.</div>
+          </div>
+        `;
+      } else if (tSoal.includes("rumpang") || tSoal.includes("cloze")) {
+        optionsHtml = `
+          <div class="p-2.5 rounded-xl bg-purple-950/30 border border-purple-500/30 text-xs text-purple-200 flex items-center gap-2 mb-2">
+            <span class="text-base">📄</span>
+            <div><b>Teks Rumpang (Cloze Test):</b> Siswa melengkapi kata/rumus kimia kunci pada bagian bertanda (1) [ ... ], (2) [ ... ] dst.</div>
+          </div>
+        `;
+      } else if (tSoal.includes("diagnostik") || tSoal.includes("two-tier")) {
+        optionsHtml = `
+          <div class="p-2.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 text-xs text-cyan-200 flex items-center gap-2 mb-2">
+            <span class="text-base">🩺</span>
+            <div><b>Diagnostik Dua Tingkat (Two-Tier):</b> Menguji pemahaman konten pada Tingkat 1 dan alasan ilmiah/miskonsepsi pada Tingkat 2.</div>
+          </div>
+        `;
+      } else if (tSoal.includes("cer") || tSoal.includes("claim")) {
+        inputHtml = `
+          <div class="my-2.5 p-3 rounded-xl bg-zinc-900/80 border border-amber-500/30 space-y-2">
+            <label for="student_input_${soal.nomor}" class="block text-xs font-bold text-amber-300 flex items-center gap-1.5">
+              <span>💡</span>
+              <span>Lembar Argumen Ilmiah CER (Claim, Evidence, Reasoning):</span>
+            </label>
+            <textarea id="student_input_${soal.nomor}" rows="5" 
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-amber-500/40 text-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed font-mono" 
+                      placeholder="a) Claim: ...&#10;b) Evidence: ...&#10;c) Reasoning: ..."></textarea>
+          </div>
+        `;
+      } else if (tSoal.includes("kesalahan") || tSoal.includes("error")) {
+        inputHtml = `
+          <div class="my-2.5 p-3 rounded-xl bg-zinc-900/80 border border-rose-500/30 space-y-2">
+            <label for="student_input_${soal.nomor}" class="block text-xs font-bold text-rose-300 flex items-center gap-1.5">
+              <span>🔍</span>
+              <span>Lembar Analisis Kesalahan & Perbaikan Ilmiah:</span>
+            </label>
+            <textarea id="student_input_${soal.nomor}" rows="5" 
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-rose-500/40 text-white text-xs focus:outline-none focus:ring-2 focus:ring-rose-500 leading-relaxed font-mono" 
+                      placeholder="a) Langkah yang salah: ...&#10;b) Miskonsepsi: ...&#10;c) Perbaikan yang benar: ..."></textarea>
+          </div>
+        `;
+      } else if (tSoal.includes("rumpang") || tSoal.includes("cloze")) {
+        inputHtml = `
+          <div class="my-2.5 p-3 rounded-xl bg-zinc-900/80 border border-purple-500/30 space-y-2">
+            <label for="student_input_${soal.nomor}" class="block text-xs font-bold text-purple-300 flex items-center gap-1.5">
+              <span>📄</span>
+              <span>Isikan kata/rumus kimia kunci yang tepat pada bagian rumpang:</span>
+            </label>
+            <input type="text" id="student_input_${soal.nomor}" 
+                   class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-purple-500/40 text-white text-xs focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                   placeholder="(1) ..., (2) ..., (3) ...">
+          </div>
+        `;
+      } else if (tSoal.includes("kasus") || tSoal.includes("case")) {
+        optionsHtml = `
+          <div class="p-2.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 text-xs text-cyan-200 flex items-center gap-2 mb-2">
+            <span class="text-base">🔬</span>
+            <div><b>Studi Kasus (Analisis Konseptual Berbasis Literatur Kredibel):</b> Siswa menganalisis fenomena autentik berdasarkan pemahaman konsep kimia mendalam yang divalidasi oleh rujukan jurnal ilmiah atau buku teks standar bereputasi.</div>
+          </div>
+        `;
+      } else if (tSoal.includes("biasa") || tSoal.includes("tertulis") || (!hasSubparts && (tSoal.includes("uraian") || tSoal.includes("esai")))) {
+        optionsHtml = `
+          <div class="p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-xs text-emerald-200 flex items-center gap-2 mb-2">
+            <span class="text-base">✍️</span>
+            <div><b>Uraian Biasa (Jawaban Tertulis Langsung):</b> Siswa menjawab langsung dengan uraian tertulis tanpa opsi PG. Garis lembar jawab bertitik-titik disiapkan otomatis saat dicetak / diekspor ke Word & Docs.</div>
           </div>
         `;
       } else if (!hasSubparts) {
@@ -4498,6 +4671,30 @@ function renderStudentQuestions(questions) {
                    placeholder="1-B, 2-D, 3-A, 4-C">
           </div>
         `;
+      } else if (tSoal.includes("kasus") || tSoal.includes("case")) {
+        inputHtml = `
+          <div class="my-2.5 p-3 rounded-xl bg-zinc-900/80 border border-cyan-500/30 space-y-2">
+            <label for="student_input_${soal.nomor}" class="block text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+              <span>🔬</span>
+              <span>Lembar Analisis Studi Kasus & Rujukan Konseptual:</span>
+            </label>
+            <textarea id="student_input_${soal.nomor}" rows="6" 
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-cyan-500/40 text-white text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 leading-relaxed font-mono" 
+                      placeholder="Tuliskan analisis konseptual per sub-soal (a, b, c), argumentasi ilmiah, serta prinsip/hukum kimia dari buku teks atau literatur ilmiah yang mendasari analisis Anda..."></textarea>
+          </div>
+        `;
+      } else if (tSoal.includes("biasa") || tSoal.includes("tertulis")) {
+        inputHtml = `
+          <div class="my-2.5 p-3 rounded-xl bg-zinc-900/80 border border-emerald-500/30 space-y-2">
+            <label for="student_input_${soal.nomor}" class="block text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+              <span>✍️</span>
+              <span>Tuliskan Jawaban Anda Secara Langsung:</span>
+            </label>
+            <textarea id="student_input_${soal.nomor}" rows="3" 
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-emerald-500/40 text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 leading-relaxed font-sans" 
+                      placeholder="Tuliskan jawaban penjelasan konsep, persamaan reaksi kimia, atau penyelesaian Anda di sini..."></textarea>
+          </div>
+        `;
       } else {
         inputHtml = `
           <textarea id="student_input_${soal.nomor}" rows="4" 
@@ -4576,23 +4773,44 @@ function evaluateStudentQuiz(questions) {
 
     if (soal.pilihan_jawaban && soal.pilihan_jawaban.length > 0) {
       totalPG++;
-      const checkedRadio = document.querySelector(`input[name="q_${soal.nomor}"]:checked`);
+      const isMulti = (soal.tipe_soal || "").toLowerCase().includes("multi") || (soal.tipe_soal || "").toLowerCase().includes("centang");
       const feedbackDiv = document.getElementById(`feedback-${soal.nomor}`);
       if (feedbackDiv) {
         feedbackDiv.classList.remove("hidden");
-        if (checkedRadio) {
-          const userChoice = checkedRadio.value;
-          if (userChoice.toUpperCase() === soal.kunci_jawaban.toUpperCase()) {
-            correct++;
-            feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs";
-            feedbackDiv.innerHTML = `✅ <b>Tepat Sekali!</b> Jawaban Anda: ${userChoice}`;
+        if (isMulti) {
+          const checkedBoxes = Array.from(document.querySelectorAll(`input[name="q_${soal.nomor}"]:checked`));
+          const userChoices = checkedBoxes.map(cb => cb.value.toUpperCase()).sort();
+          const keyChoices = (soal.kunci_jawaban || "").toUpperCase().replace(/[^A-E]/g, "").split("").sort();
+          if (userChoices.length > 0) {
+            const isMatch = userChoices.join("") === keyChoices.join("");
+            if (isMatch) {
+              correct++;
+              feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs";
+              feedbackDiv.innerHTML = `✅ <b>Semua Pilihan Tepat!</b> Pilihan Anda: [${userChoices.join(", ")}]`;
+            } else {
+              feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs";
+              feedbackDiv.innerHTML = `❌ <b>Kurang Tepat.</b> Pilihan Anda: [${userChoices.join(", ")}] | Kunci Seharusnya: <b>[${keyChoices.join(", ")}]</b>`;
+            }
           } else {
-            feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs";
-            feedbackDiv.innerHTML = `❌ <b>Kurang Tepat.</b> Jawaban Anda: ${userChoice} | Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
+            feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs";
+            feedbackDiv.innerHTML = "⚠️ Anda belum memilih opsi centang pada soal ini.";
           }
         } else {
-          feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs";
-          feedbackDiv.innerHTML = "⚠️ Anda belum menjawab soal ini.";
+          const checkedRadio = document.querySelector(`input[name="q_${soal.nomor}"]:checked`);
+          if (checkedRadio) {
+            const userChoice = checkedRadio.value;
+            if (userChoice.toUpperCase() === soal.kunci_jawaban.toUpperCase()) {
+              correct++;
+              feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs";
+              feedbackDiv.innerHTML = `✅ <b>Tepat Sekali!</b> Jawaban Anda: ${userChoice}`;
+            } else {
+              feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs";
+              feedbackDiv.innerHTML = `❌ <b>Kurang Tepat.</b> Jawaban Anda: ${userChoice} | Kunci Jawaban: <b>${soal.kunci_jawaban}</b>`;
+            }
+          } else {
+            feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs";
+            feedbackDiv.innerHTML = "⚠️ Anda belum menjawab soal ini.";
+          }
         }
       }
     } else if (isUnique) {
@@ -4617,6 +4835,19 @@ function evaluateStudentQuiz(questions) {
         } else {
           feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs";
           feedbackDiv.innerHTML = "⚠️ Anda belum menjawab soal ini.";
+        }
+      }
+    } else {
+      const studentInput = document.getElementById(`student_input_${soal.nomor}`);
+      const feedbackDiv = document.getElementById(`feedback-${soal.nomor}`);
+      if (feedbackDiv) {
+        feedbackDiv.classList.remove("hidden");
+        if (studentInput && studentInput.value.trim()) {
+          feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-200 text-xs";
+          feedbackDiv.innerHTML = `📝 <b>Jawaban Uraian Tersimpan:</b> "${studentInput.value.trim()}"<br/><span class="text-zinc-400 mt-1 inline-block">Kunci / Intisari Jawaban: <b class="text-emerald-400">${soal.kunci_jawaban || 'Terlampir pada lembar pembahasan'}</b></span>`;
+        } else {
+          feedbackDiv.className = "mt-2 p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs";
+          feedbackDiv.innerHTML = "⚠️ Anda belum menuliskan jawaban uraian untuk soal ini.";
         }
       }
     }
@@ -4871,6 +5102,15 @@ function renderPrintLayout(pkg) {
         const isStructuredOrEssay = (soal.tipe_soal || "").toLowerCase().includes("uraian") ||
                                     (soal.tipe_soal || "").toLowerCase().includes("esai") ||
                                     (soal.tipe_soal || "").toLowerCase().includes("structured") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("kasus") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("case") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("biasa") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("tertulis") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("cer") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("kesalahan") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("error") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("rumpang") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("cloze") ||
                                     isPearson ||
                                     (!soal.pilihan_jawaban || soal.pilihan_jawaban.length === 0);
 
@@ -5957,6 +6197,15 @@ function exportToWordDocx(pkg, exportMode = 'guru') {
         const isStructuredOrEssay = (soal.tipe_soal || "").toLowerCase().includes("uraian") ||
                                     (soal.tipe_soal || "").toLowerCase().includes("esai") ||
                                     (soal.tipe_soal || "").toLowerCase().includes("structured") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("kasus") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("case") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("biasa") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("tertulis") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("cer") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("kesalahan") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("error") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("rumpang") ||
+                                    (soal.tipe_soal || "").toLowerCase().includes("cloze") ||
                                     isPearson ||
                                     (!soal.pilihan_jawaban || soal.pilihan_jawaban.length === 0);
 
