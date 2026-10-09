@@ -646,6 +646,9 @@
         <a id="pdf-btn-drive" href="#" target="_blank" rel="noopener noreferrer" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 transition-colors" title="Buka di Google Drive">
           <span class="material-symbols-outlined text-[18px]">cloud_sync</span>
         </a>
+        <button onclick="shareCurrentMaterialLink()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer" title="Bagikan Tautan Materi Ini (Siswa / TQA)">
+          <span class="material-symbols-outlined text-[18px]">share</span>
+        </button>
         <button onclick="printPdfDocument()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors" title="Cetak LKPD">
           <span class="material-symbols-outlined text-[18px]">print</span>
         </button>
@@ -824,6 +827,11 @@
         <button onclick="openCurrentHtmlDirectTab()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 font-semibold rounded-lg bg-primary text-on-primary hover:bg-primary-fixed-dim transition-all shadow-sm cursor-pointer" title="Buka Simulasi di Tab Baru Layar Penuh">
           <span class="material-symbols-outlined text-[16px]">open_in_new</span>
           <span>Buka Tab Penuh</span>
+        </button>
+
+        <button onclick="shareCurrentMaterialLink()" class="inline-flex items-center gap-1.5 px-3 py-1.5 font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer" title="Salin Tautan Materi Langsung (Siswa / Administrasi TQA)">
+          <span class="material-symbols-outlined text-[16px]">share</span>
+          <span class="hidden sm:inline">Bagikan</span>
         </button>
 
         <button onclick="toggleFullscreenViewer('modal-viewer-html')" class="inline-flex items-center justify-center p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer" title="Mode Layar Penuh">
@@ -1885,6 +1893,7 @@
       renderMaterials();
       updateDashboardStats();
       renderAdminMaterialsTable();
+      handleDirectMediaDeepLink();
     }
 
     async function fetchMaterialsFromGoogleSheets() {
@@ -2068,6 +2077,9 @@
       window.allMaterials = allMaterials;
       updateCounters();
       renderMaterials();
+      if (hasLocal) {
+        handleDirectMediaDeepLink();
+      }
 
       // 2. Sinkronisasi data bahan ajar: coba Apps Script jika di environment Apps Script,
       // atau langsung ambil dari database Google Sheets (GViz) yang cepat, stabil, dan bebas 404
@@ -3126,6 +3138,15 @@
               <span class="material-symbols-outlined text-[15px]">open_in_new</span>
             </button>
 
+            <!-- Bagikan / Salin Tautan Langsung -->
+            <button 
+              type="button" 
+              onclick="copyMaterialShareLink('${item.id}', event)" 
+              class="w-7 h-7 rounded-lg border border-slate-200 dark:border-outline-variant bg-slate-50 dark:bg-surface-container hover:bg-slate-100 dark:hover:bg-surface-bright text-slate-600 dark:text-on-surface hover:text-violet-600 dark:hover:text-primary flex items-center justify-center transition-colors cursor-pointer" 
+              title="Bagikan Materi Langsung (Siswa / Administrasi TQA)">
+              <span class="material-symbols-outlined text-[15px]">share</span>
+            </button>
+
             <!-- Bintang Favorit -->
             <button 
               type="button"
@@ -3409,6 +3430,14 @@
                   class="p-2.5 rounded-xl border border-slate-200 dark:border-outline-variant bg-slate-50 dark:bg-surface-container-high hover:bg-slate-100 dark:hover:bg-surface-bright text-slate-700 dark:text-on-surface transition-colors cursor-pointer" 
                   title="Buka Langsung di Tab Baru">
                   <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                </button>
+
+                <!-- Bagikan / Salin Tautan Langsung (Siswa / TQA) -->
+                <button 
+                  onclick="copyMaterialShareLink('${item.id}', event)" 
+                  class="p-2.5 rounded-xl border border-slate-200 dark:border-outline-variant bg-slate-50 dark:bg-surface-container-high hover:bg-slate-100 dark:hover:bg-surface-bright text-slate-700 dark:text-on-surface hover:text-violet-600 dark:hover:text-primary transition-colors cursor-pointer" 
+                  title="Bagikan Materi Langsung (Siswa / Administrasi TQA)">
+                  <span class="material-symbols-outlined text-[18px]">share</span>
                 </button>
 
                 <!-- Admin Action Buttons (Visible when teacher mode is on) -->
@@ -3728,17 +3757,135 @@
       toggleFullscreenViewer('modal-viewer-ppt');
     }
 
+    // Smart Sharing & Deep Linking Suite (Siswa & Administrasi TQA)
+    const PORTAL_VIRTUAL_LABS = [
+      { id: "lab-titrasi-01", title: "Virtual Lab Titrasi Asam-Basa Presisi Tinggi & Kurva pH", file: "Lab_Titrasi_Asam_Basa_DeepDive.html", grade: "Kelas 11 (Fase F)", topic: "Larutan Asam Basa" },
+      { id: "lab-buffer-02", title: "Virtual Lab Larutan Penyangga (Buffer)", file: "Lab_Larutan_Penyangga_DeepDive.html", grade: "Kelas 11 (Fase F)", topic: "Larutan Penyangga" },
+      { id: "lab-hidrolisis-03", title: "Virtual Lab Hidrolisis Garam", file: "Lab_Hidrolisis_Garam_DeepDive.html", grade: "Kelas 11 (Fase F)", topic: "Hidrolisis Garam" },
+      { id: "lab-ksp-04", title: "Virtual Lab Kelarutan & Hasil Kali Kelarutan (Ksp)", file: "Lab_Ksp_Kelarutan_DeepDive.html", grade: "Kelas 11 (Fase F)", topic: "Kelarutan & Ksp" },
+      { id: "lab-kalorimeter-05", title: "Virtual Lab Termokimia & Kalorimeter", file: "Lab_Kalorimeter_Termokimia_DeepDive.html", grade: "Kelas 11 (Fase F)", topic: "Termokimia" },
+      { id: "lab-laju-06", title: "Virtual Lab Kinetika Kimia & Laju Reaksi", file: "Lab_Laju_Reaksi_DeepDive.html", grade: "Kelas 11 (Fase F)", topic: "Laju Reaksi" },
+      { id: "lab-kesetimbangan-07", title: "Virtual Lab Kesetimbangan Kimia & Le Chatelier", file: "Lab_Kesetimbangan_Kimia_DeepDive.html", grade: "Kelas 11 (Fase F)", topic: "Kesetimbangan Kimia" },
+      { id: "lab-volta-08", title: "Virtual Lab Sel Volta & Deret Elektrokimia", file: "Lab_Sel_Volta_DeepDive.html", grade: "Kelas 12 (Fase F)", topic: "Elektrokimia" },
+      { id: "lab-elektrolisis-09", title: "Virtual Lab Sel Elektrolisis & Hukum Faraday", file: "Lab_Elektrolisis_Faraday_DeepDive.html", grade: "Kelas 12 (Fase F)", topic: "Elektrokimia & Hukum Faraday" },
+      { id: "lab-koligatif-10", title: "Virtual Lab Sifat Koligatif Larutan", file: "Lab_Sifat_Koligatif_DeepDive.html", grade: "Kelas 12 (Fase F)", topic: "Sifat Koligatif" },
+      { id: "lab-redoks-11", title: "Virtual Lab Penyetaraan Reaksi Redoks", file: "Lab_Reaksi_Redoks_DeepDive.html", grade: "Kelas 12 (Fase F)", topic: "Redoks" },
+      { id: "lab-koloid-12", title: "Virtual Lab Sistem Koloid", file: "Lab_Sistem_Koloid_DeepDive.html", grade: "Kelas 11 (Fase F)", topic: "Koloid" },
+      { id: "lab-radioaktif-13", title: "Virtual Lab Radioaktivitas & Waktu Paruh", file: "Lab_Radioaktivitas_Peluruhan_DeepDive.html", grade: "Kelas 12 (Fase F)", topic: "Kimia Unsur & Inti" },
+      { id: "lab-organik-14", title: "Virtual Lab Identifikasi Gugus Fungsi Organik", file: "Lab_Gugus_Fungsi_Organik_DeepDive.html", grade: "Kelas 12 (Fase F)", topic: "Kimia Karbon Organik" },
+      { id: "lab-spektro-15", title: "Virtual Lab Spektrofotometri UV-Vis & Beer-Lambert", file: "Lab_Spektrofotometri_BeerLambert_DeepDive.html", grade: "Kelas 12 (Fase F)", topic: "Analisis Kimia" },
+      { id: "lab-vsepr-16", title: "Virtual Lab Geometri Molekul 3D & Teori VSEPR", file: "Lab_Geometri_Molekul_VSEPR_DeepDive.html", grade: "Kelas 10 (Fase E)", topic: "Ikatan Kimia & VSEPR" },
+      { id: "lab-elektrolit-17", title: "Virtual Lab Daya Hantar Listrik Larutan Elektrolit", file: "Lab_Larutan_Elektrolit_DayaHantar_DeepDive.html", grade: "Kelas 10 (Fase E)", topic: "Larutan Elektrolit" },
+      { id: "lab-ujinyala-18", title: "Virtual Lab Uji Nyala Logam Alkali & Spektrum Emisi", file: "Lab_Uji_Nyala_Struktur_Atom_DeepDive.html", grade: "Kelas 10 (Fase E)", topic: "Struktur Atom" }
+    ];
+
     function sharePptLink() {
-      const item = allMaterials.find(m => String(m.id) === String(activeViewingMaterialId));
-      const res = resolveMaterialViewUrls(item);
-      const shareUrl = res.directTabUrl || item?.url || window.location.href;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(shareUrl).then(() => {
-          showToast('Tautan bahan ajar disalin ke papan klip!', 'link');
+      shareCurrentMaterialLink();
+    }
+
+    function shareCurrentMaterialLink() {
+      if (!activeViewingMaterialId) return;
+      copyMaterialShareLink(activeViewingMaterialId);
+    }
+
+    function copyMaterialShareLink(materialId, event) {
+      if (event) event.stopPropagation();
+      let title = 'Bahan Ajar Kimia';
+      const item = allMaterials.find(m => String(m.id) === String(materialId));
+      if (item) {
+        title = item.title;
+      } else {
+        const vlab = PORTAL_VIRTUAL_LABS.find(l => String(l.id) === String(materialId));
+        if (vlab) title = vlab.title;
+      }
+
+      const cleanUrl = window.location.origin + window.location.pathname + '?id=' + encodeURIComponent(materialId);
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cleanUrl).then(() => {
+          showToast(`Tautan materi "${title}" disalin! Siap dibagikan ke siswa & TQA.`, 'share');
+        }).catch(() => {
+          prompt('Salin tautan materi:', cleanUrl);
         });
       } else {
-        prompt('Salin tautan bahan ajar:', shareUrl);
+        prompt('Salin tautan materi:', cleanUrl);
       }
+    }
+
+    let hasHandledDeepLink = false;
+    function handleDirectMediaDeepLink() {
+      if (hasHandledDeepLink) return;
+      const params = new URLSearchParams(window.location.search);
+      const query = (params.get('id') || params.get('materi') || params.get('media') || params.get('lab') || params.get('q') || '').trim();
+      const hash = (window.location.hash || '').replace('#', '').trim();
+      const targetQuery = (query || hash).toLowerCase();
+
+      if (!targetQuery) return;
+
+      // 1. Coba cocokkan di allMaterials
+      if (Array.isArray(allMaterials) && allMaterials.length > 0) {
+        const matched = allMaterials.find(m => 
+          String(m.id || '').toLowerCase() === targetQuery ||
+          (m.url && m.url.toLowerCase().includes(targetQuery)) ||
+          (m.title && m.title.toLowerCase().includes(targetQuery)) ||
+          (m.topic && m.topic.toLowerCase().includes(targetQuery)) ||
+          (m.description && m.description.toLowerCase().includes(targetQuery))
+        );
+
+        if (matched) {
+          hasHandledDeepLink = true;
+          setTimeout(() => {
+            const fmt = (matched.format || 'HTML').toUpperCase();
+            if (fmt === 'PDF') openPdfViewer(matched.id);
+            else if (fmt === 'PPT') openPptViewer(matched.id);
+            else openHtmlViewer(matched.id);
+            showToast(`Membuka materi khusus: ${matched.title}`, 'science');
+          }, 350);
+          return;
+        }
+      }
+
+      // 2. Coba cocokkan di PORTAL_VIRTUAL_LABS
+      const vlab = PORTAL_VIRTUAL_LABS.find(l => 
+        l.id.toLowerCase() === targetQuery ||
+        (l.file && l.file.toLowerCase().includes(targetQuery)) ||
+        (l.title && l.title.toLowerCase().includes(targetQuery)) ||
+        (l.topic && l.topic.toLowerCase().includes(targetQuery))
+      );
+
+      if (vlab) {
+        hasHandledDeepLink = true;
+        setTimeout(() => {
+          openVirtualLabInHtmlViewer(vlab);
+          showToast(`Membuka Virtual Lab: ${vlab.title}`, 'biotech');
+        }, 350);
+        return;
+      }
+    }
+
+    function openVirtualLabInHtmlViewer(lab) {
+      activeViewingMaterialId = lab.id;
+      document.getElementById('html-header-grade').textContent = lab.grade || 'Kelas 12 (Fase F)';
+      document.getElementById('html-header-topic').textContent = lab.topic || 'Laboratorium Virtual';
+      document.getElementById('html-header-title').textContent = lab.title;
+
+      const spinner = document.getElementById('html-spinner');
+      const iframe = document.getElementById('html-iframe');
+      if (spinner) spinner.style.display = 'flex';
+
+      const badgeText = document.getElementById('html-source-badge-text');
+      const toggleBtn = document.getElementById('html-btn-toggle-source');
+      const driveBtn = document.getElementById('html-btn-drive-source');
+
+      if (toggleBtn) toggleBtn.classList.add('hidden');
+      if (driveBtn) driveBtn.classList.add('hidden');
+      if (badgeText) badgeText.textContent = 'Laboratorium Interaktif';
+
+      iframe.src = lab.file;
+      iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
+
+      document.getElementById('modal-viewer-html')?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
     }
 
     function openHtmlViewer(materialId) {
@@ -5142,6 +5289,7 @@ function copyGlossaryFormula(id) {
       loadCloudCatalogSettings();
       window.addEventListener('focus', loadCloudCatalogSettings);
       initGlossary();
+      handleDirectMediaDeepLink();
     }
 
     if (document.readyState === 'loading') {

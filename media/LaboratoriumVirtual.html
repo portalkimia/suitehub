@@ -499,10 +499,14 @@
 
       <!-- Modal Footer -->
       <div class="p-4 border-t border-slate-200 dark:border-outline-variant/60 flex items-center justify-between gap-3 bg-slate-50 dark:bg-surface-container-high">
-        <button onclick="closeLabGuideModal()" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-outline-variant text-slate-600 dark:text-slate-300 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-surface-bright">
+        <button onclick="closeLabGuideModal()" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-outline-variant text-slate-600 dark:text-slate-300 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-surface-bright cursor-pointer">
           Tutup
         </button>
         <div class="flex items-center gap-2">
+          <button id="modal-share-btn" type="button" onclick="copyCurrentModalLabShareLink(event)" class="px-3.5 py-2 rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer" title="Salin tautan praktikum untuk siswa & TQA">
+            <span class="material-symbols-outlined text-[15px]">share</span>
+            <span>Salin Tautan</span>
+          </button>
           <a id="modal-open-newtab-btn" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-surface-container text-slate-800 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-surface-bright text-xs font-semibold flex items-center gap-1.5 transition-all">
             <span>Tab Baru</span>
             <span class="material-symbols-outlined text-[15px]">open_in_new</span>
@@ -1147,6 +1151,14 @@
             </button>
 
             <div class="flex items-center gap-1.5">
+              <button 
+                type="button" 
+                onclick="copyLabShareLink('${lab.id}', event)" 
+                class="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-surface-bright transition-all cursor-pointer" 
+                title="Bagikan Tautan Praktikum Ini (Siswa / TQA)">
+                <span class="material-symbols-outlined text-[16px]">share</span>
+              </button>
+
               <a 
                 href="${resolveLabUrl(lab.file)}" 
                 target="_blank" 
@@ -1400,10 +1412,79 @@
       setCategoryFilter('ALL');
     }
 
-    // Guide Modal
+    // Guide Modal & Direct Sharing
+    let currentActiveLabId = null;
+
+    function copyLabShareLink(labId, event) {
+      if (event) event.stopPropagation();
+      const lab = VIRTUAL_LABS.find(l => l.id === labId);
+      if (!lab) return;
+
+      const cleanUrl = window.location.origin + window.location.pathname + '?lab=' + encodeURIComponent(lab.id);
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cleanUrl).then(() => {
+          showToast(`Tautan ${lab.title} disalin! Siap dibagikan ke siswa & TQA.`, 'share');
+        }).catch(() => {
+          prompt('Salin tautan praktikum:', cleanUrl);
+        });
+      } else {
+        prompt('Salin tautan praktikum:', cleanUrl);
+      }
+    }
+
+    function copyCurrentModalLabShareLink(event) {
+      if (currentActiveLabId) {
+        copyLabShareLink(currentActiveLabId, event);
+      }
+    }
+
+    function handleLabDeepLink() {
+      const params = new URLSearchParams(window.location.search);
+      const query = (params.get('lab') || params.get('materi') || params.get('id') || params.get('q') || '').toLowerCase().trim();
+      
+      if (!query) {
+        const hash = (window.location.hash || '').replace('#', '').toLowerCase().trim();
+        if (hash) {
+          matchAndOpenLab(hash, params);
+        }
+        return;
+      }
+      matchAndOpenLab(query, params);
+    }
+
+    function matchAndOpenLab(query, params) {
+      const lab = VIRTUAL_LABS.find(l => 
+        l.id.toLowerCase() === query ||
+        (l.file && l.file.toLowerCase().includes(query)) ||
+        (l.title && l.title.toLowerCase().includes(query)) ||
+        (l.searchTerms && l.searchTerms.toLowerCase().includes(query))
+      );
+
+      if (!lab) return;
+
+      if (lab.grade.includes('10')) accordionStates['10'] = true;
+      if (lab.grade.includes('11')) accordionStates['11'] = true;
+      if (lab.grade.includes('12')) accordionStates['12'] = true;
+      renderVirtualLabs();
+
+      const isDirectLaunch = params && (params.get('direct') === '1' || params.get('launch') === '1' || params.get('auto') === '1');
+      if (isDirectLaunch) {
+        recordLastVisitedLab(lab.id);
+        window.location.href = resolveLabUrl(lab.file);
+      } else {
+        setTimeout(() => {
+          openLabGuideModal(lab.id);
+          showToast(`Membuka praktikum: ${lab.title}`, 'science');
+        }, 300);
+      }
+    }
+
     function openLabGuideModal(labId) {
       const lab = VIRTUAL_LABS.find(l => l.id === labId);
       if (!lab) return;
+
+      currentActiveLabId = labId;
 
       const modal = document.getElementById('modal-lab-guide');
       const title = document.getElementById('modal-title');
@@ -1537,6 +1618,7 @@
       updateFavoriteCountUI();
       renderLastVisitedLabBanner();
       renderVirtualLabs();
+      handleLabDeepLink();
 
       // Keyboard Esc to close modals
       document.addEventListener('keydown', (e) => {
@@ -1676,10 +1758,13 @@ window.PortalSubmission = (() => {
       let pending = Object.keys(localStorage).filter(k => k.startsWith(PREFIX)).map(read).find(p => p?.context === key);
       const quiz = Array.isArray(questions) ? questions : questionsNow;
       const submittedAnswers = Array.isArray(answers) && answers.length === quiz.length ? answers : quizState;
-      if (!pending && quiz.length && (submittedAnswers.length !== quiz.length || submittedAnswers.some(x => x === null || x === undefined || x === ''))) {
-        throw new Error('Jawab seluruh soal evaluasi sebelum mengirim.');
-      }
-      if (!pending && !window.confirm('Kirim jawaban FINAL?\n\nPastikan seluruh LKS, esai, dan evaluasi sudah lengkap. Setelah OK, jawaban dikunci. Draf di browser akan dihapus hanya setelah server memastikan jawaban tersimpan. Perubahan berikutnya memerlukan izin guru.')) return;
+      const unanswered = !pending && quiz.length
+        ? quiz.reduce((count, _, i) => count + (submittedAnswers[i] === null || submittedAnswers[i] === undefined || submittedAnswers[i] === '' ? 1 : 0), 0)
+        : 0;
+      const confirmation = unanswered
+        ? 'PERINGATAN: ' + unanswered + ' soal evaluasi belum dijawab.\n\nApakah Anda yakin ingin tetap mengumpulkan jawaban final? Setelah OK, jawaban dikunci. Draf di browser akan dihapus hanya setelah server memastikan jawaban tersimpan. Perubahan berikutnya memerlukan izin guru.'
+        : 'Kirim jawaban FINAL?\n\nPastikan seluruh LKS, esai, dan evaluasi sudah lengkap. Setelah OK, jawaban dikunci. Draf di browser akan dihapus hanya setelah server memastikan jawaban tersimpan. Perubahan berikutnya memerlukan izin guru.';
+      if (!pending && !window.confirm(confirmation)) return;
       let payload = pending?.payload;
       if (!payload) {
         const content = collect(config, submittedAnswers, quiz);

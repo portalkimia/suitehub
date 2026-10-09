@@ -2084,10 +2084,13 @@ window.PortalSubmission = (() => {
       let pending = Object.keys(localStorage).filter(k => k.startsWith(PREFIX)).map(read).find(p => p?.context === key);
       const quiz = Array.isArray(questions) ? questions : questionsNow;
       const submittedAnswers = Array.isArray(answers) && answers.length === quiz.length ? answers : quizState;
-      if (!pending && quiz.length && (submittedAnswers.length !== quiz.length || submittedAnswers.some(x => x === null || x === undefined || x === ''))) {
-        throw new Error('Jawab seluruh soal evaluasi sebelum mengirim.');
-      }
-      if (!pending && !window.confirm('Kirim jawaban FINAL?\n\nPastikan seluruh LKS, esai, dan evaluasi sudah lengkap. Setelah OK, jawaban dikunci. Draf di browser akan dihapus hanya setelah server memastikan jawaban tersimpan. Perubahan berikutnya memerlukan izin guru.')) return;
+      const unanswered = !pending && quiz.length
+        ? quiz.reduce((count, _, i) => count + (submittedAnswers[i] === null || submittedAnswers[i] === undefined || submittedAnswers[i] === '' ? 1 : 0), 0)
+        : 0;
+      const confirmation = unanswered
+        ? 'PERINGATAN: ' + unanswered + ' soal evaluasi belum dijawab.\n\nApakah Anda yakin ingin tetap mengumpulkan jawaban final? Setelah OK, jawaban dikunci. Draf di browser akan dihapus hanya setelah server memastikan jawaban tersimpan. Perubahan berikutnya memerlukan izin guru.'
+        : 'Kirim jawaban FINAL?\n\nPastikan seluruh LKS, esai, dan evaluasi sudah lengkap. Setelah OK, jawaban dikunci. Draf di browser akan dihapus hanya setelah server memastikan jawaban tersimpan. Perubahan berikutnya memerlukan izin guru.';
+      if (!pending && !window.confirm(confirmation)) return;
       let payload = pending?.payload;
       if (!payload) {
         const content = collect(config, submittedAnswers, quiz);
