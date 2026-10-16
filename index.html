@@ -60,6 +60,22 @@
     }
   </script>
 
+  <!-- Direct Deep-Link Forwarder untuk Siswa & Administrasi TQA -->
+  <script>
+    (function() {
+      try {
+        if (typeof window !== "undefined" && window.location && window.location.search) {
+          var p = new URLSearchParams(window.location.search);
+          if (p.has("lab")) {
+            window.location.replace("./media/LaboratoriumVirtual.html" + window.location.search);
+          } else if (p.has("materi") || p.has("id") || p.has("media")) {
+            window.location.replace("./media/index.html" + window.location.search);
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <!-- Custom Stylesheet -->
   <style data-purpose="custom-layout">
     /* Subtle Background Grid & Ambient Glow */
@@ -1109,6 +1125,57 @@
     }
 
     /**
+     * =========================================================================
+     * HELPER STATUS PENGEMBANGAN & NORMALISASI URL / CABANG
+     * =========================================================================
+     */
+    function canonicalStatusDev(val) {
+      if (!val) return "normal";
+      const s = String(val).toLowerCase().trim();
+      if (s === "development" || s === "pengembangan" || s === "dev" || s.includes("kembang")) {
+        return "development";
+      }
+      if (s === "maintenance" || s === "perbaikan" || s === "repair" || s.includes("baik") || s.includes("pelihara")) {
+        return "maintenance";
+      }
+      return "normal";
+    }
+
+    function normalizeUrlPath(u) {
+      if (!u) return "";
+      return String(u).replace(/^\.\//, "").replace(/\/+$/, "").toLowerCase().trim();
+    }
+
+    function isSameUrl(urlA, urlB) {
+      if (!urlA || !urlB) return false;
+      const a = normalizeUrlPath(urlA);
+      const b = normalizeUrlPath(urlB);
+      if (a === b) return true;
+      if (a.endsWith(".html") || b.endsWith(".html")) {
+        return a === b;
+      }
+      return a === b;
+    }
+
+    function isSameBranch(a, b) {
+      if (!a || !b) return false;
+      if (a.id && b.id && String(a.id).trim().toLowerCase() === String(b.id).trim().toLowerCase()) {
+        return true;
+      }
+      const urlA = normalizeUrlPath(a.url);
+      const urlB = normalizeUrlPath(b.url);
+      if (urlA && urlB && urlA === urlB) {
+        return true;
+      }
+      const titleA = (a.title || "").toLowerCase().trim();
+      const titleB = (b.title || "").toLowerCase().trim();
+      if (titleA && titleB && titleA === titleB) {
+        return true;
+      }
+      return false;
+    }
+
+    /**
      * NORMALISASI DATA CABANG AGAR ROLES & STRUKTUR SELALU VALID
      */
     function normalizeBranch(b) {
@@ -1148,10 +1215,7 @@
 
       const rawStatusDev = b.statusPengembangan !== undefined ? b.statusPengembangan : b.status_pengembangan;
       const hasExplicitStatusDev = (rawStatusDev !== undefined && rawStatusDev !== null && String(rawStatusDev).trim() !== "");
-      let statusDev = (rawStatusDev || "normal").toString().trim().toLowerCase();
-      if (!["normal", "development", "maintenance"].includes(statusDev)) {
-        statusDev = "normal";
-      }
+      const statusDev = canonicalStatusDev(rawStatusDev);
 
       return {
         id: b.id || "branch_" + Date.now(),
@@ -1203,7 +1267,7 @@
         id: "branch_virtual_lab",
         title: "Laboratorium Virtual Terpadu",
         category: "Praktikum Digital",
-        description: "Katalog khusus 18 laboratorium virtual kimia SMA berstandar PhET & Labster: Titrasi, Sel Volta, Kalorimeter, VSEPR 3D, Spektrofotometri, dan Peluruhan.",
+        description: "Katalog khusus 26 laboratorium virtual kimia SMA berstandar PhET & Labster: Titrasi, Sel Volta, Kalorimeter, VSEPR 3D, Spektrofotometri, dan Peluruhan.",
         chips: ["18 Lab Virtual", "PhET Standard", "Offline Ready"],
         url: "./media/LaboratoriumVirtual.html",
         buttonText: "Masuk Lab Virtual",
@@ -1273,16 +1337,30 @@
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Pastikan seluruh branch default resmi selalu hadir
-            DEFAULT_BRANCHES.forEach(def => {
-              if (!parsed.some(p => p.id === def.id)) {
-                parsed.push(def);
+            // Deduplikasi data tersimpan berdasarkan ID / URL / Judul
+            const uniqueParsed = [];
+            parsed.forEach(p => {
+              const exists = uniqueParsed.find(u => isSameBranch(u, p));
+              if (!exists) {
+                uniqueParsed.push(p);
+              } else {
+                if (p.statusPengembangan && canonicalStatusDev(p.statusPengembangan) !== "normal") {
+                  exists.statusPengembangan = p.statusPengembangan;
+                }
               }
             });
+
+            // Pastikan seluruh branch default resmi selalu hadir tanpa duplikasi
+            DEFAULT_BRANCHES.forEach(def => {
+              if (!uniqueParsed.some(p => isSameBranch(p, def))) {
+                uniqueParsed.push(def);
+              }
+            });
+
             // Bersihkan LMS agar tidak pernah membawa peran 'guru' dari cache lama
-            return parsed.map(b => {
+            return uniqueParsed.map(b => {
               const norm = normalizeBranch(b);
-              if (norm.id === "branch_lms") {
+              if (norm.id === "branch_lms" || (norm.url && norm.url.toLowerCase().includes("lms"))) {
                 norm.roles = (norm.roles || []).filter(r => r !== "guru");
                 if (norm.roles.length === 0) norm.roles = ["admin"];
               }
@@ -1704,6 +1782,7 @@
       }
 
       evaluateCurrentKbmStatus(now);
+      updateKbmHeaderQuickButtons();
     }
 
     function getLmsStorageData() {
@@ -2172,6 +2251,65 @@
 
     /**
      * =========================================================================
+     * PENGAMANAN TOMBOL AKSI CEPAT HEADER (KBM WIDGET)
+     * Memastikan modul yang berstatus 'development' atau 'maintenance'
+     * tidak dapat diakses dari tombol header oleh siswa atau rekan guru.
+     * =========================================================================
+     */
+    function updateKbmHeaderQuickButtons() {
+      const guruModulBtn = document.getElementById("kbm-guru-modul-btn");
+      const guruSoalBtn = document.getElementById("kbm-guru-soal-btn");
+      const studentExploreBtn = document.getElementById("kbm-student-explore-btn");
+      const lmsBtn = document.getElementById("kbm-quick-lms-btn");
+
+      const targets = [
+        { btn: guruModulBtn, url: "./generator/", title: "Generator Modul Ajar AI" },
+        { btn: guruSoalBtn, url: "./soal/", title: "Generator Soal Kimia AI" },
+        { btn: studentExploreBtn, url: "./media/", title: "PortalKimia Interaktif" },
+        { btn: lmsBtn, url: "./lms/", title: "LMS & Kelas Mandiri" }
+      ];
+
+      targets.forEach(item => {
+        if (!item.btn) return;
+
+        // Cari cabang yang sesuai berdasarkan URL
+        const branch = currentBranches.find(b => isSameUrl(b.url, item.url));
+        const statusDev = branch ? canonicalStatusDev(branch.statusPengembangan) : "normal";
+        const isSpecialStatus = statusDev === "development" || statusDev === "maintenance";
+        const branchTitle = branch ? branch.title : item.title;
+
+        // Reset click handler
+        item.btn.onclick = null;
+
+        if (isSpecialStatus) {
+          if (activeRole !== "admin") {
+            // TERKUNCI UNTUK NON-ADMIN (Siswa / Guru)
+            const statusLabel = statusDev === "maintenance" ? "Perbaikan" : "Pengembangan";
+            item.btn.title = `🔒 Modul "${branchTitle}" sedang dalam tahap ${statusLabel.toLowerCase()} (Akses Terkunci).`;
+            item.btn.classList.add("cursor-not-allowed", "opacity-85");
+
+            item.btn.onclick = (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const reasonText = statusDev === "maintenance" 
+                ? "perbaikan teknis / pemeliharaan" 
+                : "tahap pengembangan fitur baru";
+              showToast(`🔒 "${branchTitle}" sedang dalam ${reasonText} dan saat ini hanya dapat diuji coba oleh Admin.`, "warning");
+            };
+          } else {
+            // KHUSUS ADMIN: Akses uji coba dibuka
+            item.btn.classList.remove("cursor-not-allowed", "opacity-85");
+            item.btn.title = `👑 Akses Uji Coba Admin: Buka ${branchTitle}`;
+          }
+        } else {
+          // Status Normal
+          item.btn.classList.remove("cursor-not-allowed", "opacity-85");
+        }
+      });
+    }
+
+    /**
+     * =========================================================================
      * PENCARIAN CEPAT & FILTER KATEGORI
      * =========================================================================
      */
@@ -2301,7 +2439,7 @@
           `<span class="text-[11px] px-2 py-0.5 rounded-md bg-obsidian-850 text-slate-300 border border-slate-700/60 font-medium">${chip}</span>`
         ).join("");
 
-        const statusDev = (branch.statusPengembangan || "normal").toLowerCase();
+        const statusDev = canonicalStatusDev(branch.statusPengembangan);
         const isUnderDev = statusDev === "development";
         const isMaintenance = statusDev === "maintenance";
         const isSpecialStatus = isUnderDev || isMaintenance;
@@ -2543,7 +2681,7 @@
       container.querySelectorAll(".locked-branch-btn").forEach(btn => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
-          const lockType = btn.getAttribute("data-locked-type");
+          const lockType = canonicalStatusDev(btn.getAttribute("data-locked-type"));
           const branchTitle = btn.getAttribute("data-branch-title") || "Website ini";
           const statusText = lockType === "maintenance" ? "perbaikan / pemeliharaan" : "tahap pengembangan baru";
           showToast(`🔒 "${branchTitle}" sedang dalam ${statusText} dan saat ini hanya dapat diuji coba oleh Admin.`, "warning");
@@ -2574,6 +2712,9 @@
           }
         });
       });
+
+      // Sinkronkan status tombol aksi cepat header KBM dengan status cabang terbaru
+      updateKbmHeaderQuickButtons();
     }
 
     /**
@@ -2627,16 +2768,16 @@
           const rawFetched = result.data.length > 0 ? result.data : DEFAULT_BRANCHES;
           const normalized = rawFetched.map(normalizeBranch);
 
-          // Pastikan seluruh modul default penting (seperti lab virtual) selalu ada
+          // Pastikan seluruh modul default penting (seperti lab virtual & asesmen) selalu ada
           DEFAULT_BRANCHES.forEach(def => {
-            if (!normalized.some(nb => nb.id === def.id || (nb.url && def.url && nb.url.toLowerCase() === def.url.toLowerCase()))) {
+            if (!normalized.some(nb => isSameBranch(nb, def))) {
               normalized.push(def);
             }
           });
 
           // Prioritaskan roles & status pengembangan resmi dari Google Apps Script / Spreadsheet
           currentBranches = normalized.map(nb => {
-            const localMatch = currentBranches.find(cb => cb.id === nb.id);
+            const localMatch = currentBranches.find(cb => isSameBranch(cb, nb));
             let effectiveRoles = nb.roles;
             // Jika branch dari server belum punya roles, gunakan roles dari memory lokal
             if (!Array.isArray(effectiveRoles) || effectiveRoles.length === 0) {
@@ -2650,10 +2791,10 @@
               if (!effectiveRoles.includes("admin")) effectiveRoles.push("admin");
             }
 
-            let effectiveStatusDev = nb.statusPengembangan || "normal";
+            let effectiveStatusDev = canonicalStatusDev(nb.statusPengembangan);
             // Jika server belum mengirimkan status pengembangan (GAS versi lama), pertahankan status lokal jika ada
             if (!nb._hasExplicitStatusDev && localMatch && localMatch.statusPengembangan) {
-              effectiveStatusDev = localMatch.statusPengembangan;
+              effectiveStatusDev = canonicalStatusDev(localMatch.statusPengembangan);
             }
 
             return { ...nb, roles: effectiveRoles, statusPengembangan: effectiveStatusDev };
@@ -2662,6 +2803,7 @@
           saveBranchesToLocalStorage();
           renderCategoryPills();
           renderGrid();
+          updateKbmHeaderQuickButtons();
           updateServerStatus("online", "Terkoneksi");
           if (!isSilent) {
             showToast("Data cabang disinkronkan dari Google Sheets!", "success");
@@ -2674,6 +2816,7 @@
         updateServerStatus("offline", "Server Tak Terjangkau");
         renderCategoryPills();
         renderGrid();
+        updateKbmHeaderQuickButtons();
       } finally {
         if (refreshIcon) refreshIcon.classList.remove("animate-spin");
       }
@@ -2689,7 +2832,7 @@
       if (btnSpinner) btnSpinner.classList.remove("hidden");
 
       try {
-        await fetch(CONFIG.GAS_API_URL, {
+        const response = await fetch(CONFIG.GAS_API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
@@ -2697,6 +2840,24 @@
             ...payload
           })
         });
+
+        if (response.ok) {
+          try {
+            const resJson = await response.json();
+            if (resJson.status === "error") {
+              console.warn("GAS Server error response:", resJson.message);
+              showToast("⚠️ Server: " + (resJson.message || "Gagal sinkron"), "warning");
+            } else {
+              console.log("GAS Server success response:", resJson);
+              // Segarkan data dari server di latar belakang agar ID & status selalu sinkron
+              setTimeout(() => {
+                fetchBranches({ silent: true });
+              }, 1200);
+            }
+          } catch (jsonErr) {
+            console.log("GAS response ok (non-JSON):", jsonErr);
+          }
+        }
       } catch (err) {
         console.warn("Sinkronisasi GAS di latar belakang gagal:", err);
       } finally {
@@ -2778,7 +2939,7 @@
       document.getElementById("branch-role-admin").checked = roles.includes("admin");
 
       // Pre-fill status kesiapan / pengembangan radio
-      const statusDev = (branch.statusPengembangan || "normal").toLowerCase();
+      const statusDev = canonicalStatusDev(branch.statusPengembangan);
       const statusRadio = document.querySelector(`input[name="branch-status-dev"][value="${statusDev}"]`) || document.querySelector('input[name="branch-status-dev"][value="normal"]');
       if (statusRadio) statusRadio.checked = true;
 
@@ -3302,7 +3463,7 @@
         e.preventDefault();
         const editId = document.getElementById("branch-edit-id").value;
         const selectedTheme = document.querySelector('input[name="branch-theme"]:checked')?.value || "purple";
-        const selectedStatusDev = document.querySelector('input[name="branch-status-dev"]:checked')?.value || "normal";
+        const selectedStatusDev = canonicalStatusDev(document.querySelector('input[name="branch-status-dev"]:checked')?.value || "normal");
         
         // Roles yang dicentang
         const roles = [];
@@ -3420,6 +3581,13 @@
           fetchBranches({ silent: true });
         }
       });
+
+      // Polling background setiap 30 detik untuk sinkronisasi otomatis antar-perangkat
+      setInterval(() => {
+        if (document.visibilityState === "visible") {
+          fetchBranches({ silent: true });
+        }
+      }, 30000);
 
       // 14. PWA Service Worker Registration (Super App Scope)
       if ('serviceWorker' in navigator) {

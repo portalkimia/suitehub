@@ -4044,7 +4044,10 @@
       const driveId = extractGoogleDriveFileId(rawUrl);
       const isDrive = !!driveId;
       const localFallback = findLocalFallbackFile(item.title, rawUrl, item.id);
-      const isLocalHost = !window.location.hostname.includes('googleusercontent.com') && !window.location.hostname.includes('script.google.com');
+      const isLocalHost = window.location.protocol === 'file:' || 
+                          window.location.hostname === 'localhost' || 
+                          window.location.hostname === '127.0.0.1' || 
+                          window.location.hostname === '';
 
       let embedUrl = rawUrl;
       let directTabUrl = rawUrl;
@@ -4353,8 +4356,8 @@
         return;
       }
 
-      // 3. Jika mengarah ke file lokal yang valid di LOCAL_MEDIA_MAP, buka langsung
-      if (mappedLocalFile) {
+      // 3. Jika mengarah ke file lokal yang valid di LOCAL_MEDIA_MAP, buka langsung HANYA jika offline / local
+      if (mappedLocalFile && isLocalHost) {
         hasHandledDeepLink = true;
         setTimeout(() => {
           openVirtualLabInHtmlViewer({
@@ -4422,7 +4425,7 @@
         driveBtn.classList.add('hidden');
       }
 
-      if (res.localFallback && res.isDrive && toggleBtn) {
+      if (res.localFallback && res.isDrive && toggleBtn && isLocalHost) {
         toggleBtn.classList.remove('hidden');
         if (res.embedUrl === res.localFallback) {
           activeHtmlViewerSource = 'local';

@@ -561,6 +561,7 @@
 (function(){
   var inDriveSubdir = window.location.pathname.indexOf('/Media_Pembelajaran_Kimia_Drive/') !== -1;
   var isGas = window.location.hostname.indexOf('script.google.com') !== -1 || window.location.href.indexOf('/exec') !== -1;
+  var isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '';
   var links = document.querySelectorAll('#pk-related-modules-bar .pk-relmod-link');
   for (var i = 0; i < links.length; i++) {
     var mf = links[i].getAttribute('data-pk-modfile');
@@ -568,10 +569,16 @@
     if (isGas) {
       var base = window.location.href.split('?')[0];
       links[i].href = base + '?page=' + encodeURIComponent(mf.replace(/\.html$/i, ''));
-    } else if (inDriveSubdir) {
-      links[i].href = mf;
+    } else if (isLocal) {
+      if (inDriveSubdir) {
+        links[i].href = mf;
+      } else {
+        links[i].href = 'Media_Pembelajaran_Kimia_Drive/' + mf;
+      }
     } else {
-      links[i].href = 'Media_Pembelajaran_Kimia_Drive/' + mf;
+      // Di GitHub Pages / hosting online: arahkan ke index.html?materi= agar ditarik langsung dari Google Drive
+      var baseStem = mf.replace(/\.html$/i, '');
+      links[i].href = 'index.html?materi=' + encodeURIComponent(baseStem);
     }
   }
   var hubLink = document.getElementById('pk-back-hub-link');

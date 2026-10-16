@@ -2129,15 +2129,21 @@
     }
 
     function resolveModuleUrl(moduleFilename) {
-      if (window.location.hostname.includes('script.google.com') || window.location.href.includes('/exec')) {
-        const baseName = moduleFilename.replace(/\.html$/i, '');
+      const baseName = moduleFilename.replace(/\.html$/i, '');
+      const isGas = window.location.hostname.includes('script.google.com') || window.location.href.includes('/exec');
+      if (isGas) {
         const currentBase = window.location.href.split('?')[0];
         return `${currentBase}?page=${encodeURIComponent(baseName)}`;
       }
-      if (window.location.pathname.includes('/Media_Pembelajaran_Kimia_Drive/')) {
-        return moduleFilename;
+      const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '';
+      if (isLocal) {
+        if (window.location.pathname.includes('/Media_Pembelajaran_Kimia_Drive/')) {
+          return moduleFilename;
+        }
+        return 'Media_Pembelajaran_Kimia_Drive/' + moduleFilename;
       }
-      return 'Media_Pembelajaran_Kimia_Drive/' + moduleFilename;
+      // Di GitHub Pages / online server: buka via index.html agar dimuat langsung dari Google Drive (Cloud Web App)
+      return 'index.html?materi=' + encodeURIComponent(baseName);
     }
 
     // Filter Handlers
