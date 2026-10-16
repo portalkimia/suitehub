@@ -30,7 +30,7 @@ function replaceFunction(s, name, replacement) {
 }
 for (const dir of ['', 'Media_Pembelajaran_Kimia_Drive', 'Media_Pembelajaran_Kimia_Drive/Paket_Media_Baru', 'File Spark']) {
   if (!fs.existsSync(path.join(root, dir))) continue;
-  for (const file of fs.readdirSync(path.join(root, dir)).filter(f => /\.html$/i.test(f) && !['index.html','Guru.html'].includes(f))) {
+  for (const file of fs.readdirSync(path.join(root, dir)).filter(f => /\.html$/i.test(f) && !['index.html','Guru.html','LaboratoriumVirtual.html','Laboratorium_Kimia_Virtual_Umum.html'].includes(f) && !/^Lab_/i.test(f))) {
     const full = path.join(root, dir, file);
     let s = fs.readFileSync(full, 'utf8');
     if(s.includes('name="pk-native-media"') || /Hukum_Faraday/.test(file)) {
@@ -117,7 +117,7 @@ for (const dir of ['', 'Media_Pembelajaran_Kimia_Drive', 'Media_Pembelajaran_Kim
 const activeMedia = [];
 for (const [dir, prefix] of [['Media_Pembelajaran_Kimia_Drive', ''], ['.', 'Praktikum Virtual · ']]) {
   if (!fs.existsSync(path.join(root, dir))) continue;
-  for (const file of fs.readdirSync(path.join(root, dir)).filter(f => f.endsWith('.html') && (dir === 'Media_Pembelajaran_Kimia_Drive' || f.startsWith('Lab_')))) {
+  for (const file of fs.readdirSync(path.join(root, dir)).filter(f => f.endsWith('.html') && (dir === 'Media_Pembelajaran_Kimia_Drive' && !/^Lab_|^Laboratorium/i.test(f)))) {
     const html = fs.readFileSync(path.join(root, dir, file), 'utf8');
     const match = html.match(/PortalSubmission\.install\(\s*(\{[^\n]+?\})\s*,/);
     if (!match) continue;

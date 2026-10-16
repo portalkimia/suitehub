@@ -3534,7 +3534,473 @@
     let activeHtmlViewerSource = 'cloud'; // 'cloud' | 'local'
 
     // Pemetaan modul kimia ke berkas lokal (Semua materi diarahkan langsung via Google Drive & Cloud Web App)
-    const LOCAL_MEDIA_MAP = {};
+    const LOCAL_MEDIA_MAP = {
+      "aldehida_keton_dan_identifikasi_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Aldehida_Keton_dan_Identifikasi_12_Fase_F.html",
+      "aldehida_keton_dan_identifikasi_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Aldehida_Keton_dan_Identifikasi_12_Fase_F.html",
+      "aldehida keton dan identifikasi": "Media_Pembelajaran_Kimia_Drive/Aldehida_Keton_dan_Identifikasi_12_Fase_F.html",
+      "aldehida-keton-identifikasi-12": "Media_Pembelajaran_Kimia_Drive/Aldehida_Keton_dan_Identifikasi_12_Fase_F.html",
+      "aldehida, keton, dan uji identifikasi kimia (tollens & fehling)": "Media_Pembelajaran_Kimia_Drive/Aldehida_Keton_dan_Identifikasi_12_Fase_F.html",
+      "alkohol_eter_dan_oksidasi_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Alkohol_Eter_dan_Oksidasi_12_Fase_F.html",
+      "alkohol_eter_dan_oksidasi_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Alkohol_Eter_dan_Oksidasi_12_Fase_F.html",
+      "alkohol eter dan oksidasi": "Media_Pembelajaran_Kimia_Drive/Alkohol_Eter_dan_Oksidasi_12_Fase_F.html",
+      "alkohol-eter-oksidasi-12": "Media_Pembelajaran_Kimia_Drive/Alkohol_Eter_dan_Oksidasi_12_Fase_F.html",
+      "alkohol, eter, reaksi oksidasi bertingkat, dan uji identifikasi kimia": "Media_Pembelajaran_Kimia_Drive/Alkohol_Eter_dan_Oksidasi_12_Fase_F.html",
+      "asam_amino_dan_protein_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Asam_Amino_dan_Protein_12_Fase_F.html",
+      "asam_amino_dan_protein_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Asam_Amino_dan_Protein_12_Fase_F.html",
+      "asam amino dan protein": "Media_Pembelajaran_Kimia_Drive/Asam_Amino_dan_Protein_12_Fase_F.html",
+      "asam-amino-protein-12": "Media_Pembelajaran_Kimia_Drive/Asam_Amino_dan_Protein_12_Fase_F.html",
+      "asam amino dan protein: struktur zwitter-ion, titik isoelektrik, ikatan peptida, 4 tingkatan struktur protein, denaturasi, dan uji biokimia protein": "Media_Pembelajaran_Kimia_Drive/Asam_Amino_dan_Protein_12_Fase_F.html",
+      "asam_karboksilat_ester_dan_hidrolisis_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Asam_Karboksilat_Ester_dan_Hidrolisis_12_Fase_F.html",
+      "asam_karboksilat_ester_dan_hidrolisis_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Asam_Karboksilat_Ester_dan_Hidrolisis_12_Fase_F.html",
+      "asam karboksilat ester dan hidrolisis": "Media_Pembelajaran_Kimia_Drive/Asam_Karboksilat_Ester_dan_Hidrolisis_12_Fase_F.html",
+      "asam-karboksilat-ester-hidrolisis-12": "Media_Pembelajaran_Kimia_Drive/Asam_Karboksilat_Ester_dan_Hidrolisis_12_Fase_F.html",
+      "asam karboksilat (asam alkanoat), ester (alkil alkanoat), dan reaksi hidrolisis / saponifikasi": "Media_Pembelajaran_Kimia_Drive/Asam_Karboksilat_Ester_dan_Hidrolisis_12_Fase_F.html",
+      "asas_le_chatelier_suhu_dan_tekanan_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Asas_Le_Chatelier_Suhu_dan_Tekanan_11_Fase_F.html",
+      "asas_le_chatelier_suhu_dan_tekanan_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Asas_Le_Chatelier_Suhu_dan_Tekanan_11_Fase_F.html",
+      "asas le chatelier suhu dan tekanan": "Media_Pembelajaran_Kimia_Drive/Asas_Le_Chatelier_Suhu_dan_Tekanan_11_Fase_F.html",
+      "asas-le-chatelier-suhu-tekanan-11": "Media_Pembelajaran_Kimia_Drive/Asas_Le_Chatelier_Suhu_dan_Tekanan_11_Fase_F.html",
+      "asas le chatelier: pengaruh konsentrasi, suhu, tekanan, dan volume": "Media_Pembelajaran_Kimia_Drive/Asas_Le_Chatelier_Suhu_dan_Tekanan_11_Fase_F.html",
+      "asas le chatelier": "Media_Pembelajaran_Kimia_Drive/Asas_Le_Chatelier_Suhu_dan_Tekanan_11_Fase_F.html",
+      "bahan_bakar_oktan_dan_emisi_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Bahan_Bakar_Oktan_dan_Emisi_12_Fase_F.html",
+      "bahan_bakar_oktan_dan_emisi_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Bahan_Bakar_Oktan_dan_Emisi_12_Fase_F.html",
+      "bahan bakar oktan dan emisi": "Media_Pembelajaran_Kimia_Drive/Bahan_Bakar_Oktan_dan_Emisi_12_Fase_F.html",
+      "bahan-bakar-oktan-emisi-12": "Media_Pembelajaran_Kimia_Drive/Bahan_Bakar_Oktan_dan_Emisi_12_Fase_F.html",
+      "bahan bakar, bilangan oktan, fenomena knocking mesin, zat aditif ramah lingkungan, dan emisi gas buang kendaraan bermotor": "Media_Pembelajaran_Kimia_Drive/Bahan_Bakar_Oktan_dan_Emisi_12_Fase_F.html",
+      "bentuk_molekul_dan_vsepr_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Bentuk_Molekul_dan_VSEPR_11_Fase_F.html",
+      "bentuk_molekul_dan_vsepr_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Bentuk_Molekul_dan_VSEPR_11_Fase_F.html",
+      "bentuk molekul dan vsepr": "Media_Pembelajaran_Kimia_Drive/Bentuk_Molekul_dan_VSEPR_11_Fase_F.html",
+      "bentuk-molekul-vsepr-11": "Media_Pembelajaran_Kimia_Drive/Bentuk_Molekul_dan_VSEPR_11_Fase_F.html",
+      "bentuk geometri molekul & teori domain elektron (vsepr)": "Media_Pembelajaran_Kimia_Drive/Bentuk_Molekul_dan_VSEPR_11_Fase_F.html",
+      "benzena_dan_turunannya_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Benzena_dan_Turunannya_12_Fase_F.html",
+      "benzena_dan_turunannya_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Benzena_dan_Turunannya_12_Fase_F.html",
+      "benzena dan turunannya": "Media_Pembelajaran_Kimia_Drive/Benzena_dan_Turunannya_12_Fase_F.html",
+      "benzena-dan-turunannya-12": "Media_Pembelajaran_Kimia_Drive/Benzena_dan_Turunannya_12_Fase_F.html",
+      "benzena dan turunannya: struktur kekulé, resonansi aromatisitas, tata nama monosubstitusi/disubstitusi (o, m, p), dan substitusi elektrofilik aromatik": "Media_Pembelajaran_Kimia_Drive/Benzena_dan_Turunannya_12_Fase_F.html",
+      "bilangan_kuantum_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Bilangan_Kuantum_10_Fase_E.html",
+      "bilangan_kuantum_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Bilangan_Kuantum_10_Fase_E.html",
+      "bilangan kuantum": "Media_Pembelajaran_Kimia_Drive/Bilangan_Kuantum_10_Fase_E.html",
+      "bilangan-kuantum": "Media_Pembelajaran_Kimia_Drive/Bilangan_Kuantum_10_Fase_E.html",
+      "dna_rna_dan_asam_nukleat_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/DNA_RNA_dan_Asam_Nukleat_12_Fase_F.html",
+      "dna_rna_dan_asam_nukleat_12_fase_f": "Media_Pembelajaran_Kimia_Drive/DNA_RNA_dan_Asam_Nukleat_12_Fase_F.html",
+      "dna rna dan asam nukleat": "Media_Pembelajaran_Kimia_Drive/DNA_RNA_dan_Asam_Nukleat_12_Fase_F.html",
+      "dna-rna-asam-nukleat-12": "Media_Pembelajaran_Kimia_Drive/DNA_RNA_dan_Asam_Nukleat_12_Fase_F.html",
+      "asam nukleat: struktur nukleotida, basa purin-pirimidin, heliks ganda dna watson-crick, pasangan basa komplementer, dna vs rna, dan transkripsi genetik": "Media_Pembelajaran_Kimia_Drive/DNA_RNA_dan_Asam_Nukleat_12_Fase_F.html",
+      "asam nukleat": "Media_Pembelajaran_Kimia_Drive/DNA_RNA_dan_Asam_Nukleat_12_Fase_F.html",
+      "energi_alternatif_bahan_alam_dan_nanoteknologi_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Energi_Alternatif_Bahan_Alam_dan_Nanoteknologi_10_Fase_E.html",
+      "energi_alternatif_bahan_alam_dan_nanoteknologi_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Energi_Alternatif_Bahan_Alam_dan_Nanoteknologi_10_Fase_E.html",
+      "energi alternatif bahan alam dan nanoteknologi": "Media_Pembelajaran_Kimia_Drive/Energi_Alternatif_Bahan_Alam_dan_Nanoteknologi_10_Fase_E.html",
+      "energi-alternatif-nanoteknologi-10": "Media_Pembelajaran_Kimia_Drive/Energi_Alternatif_Bahan_Alam_dan_Nanoteknologi_10_Fase_E.html",
+      "energi terbarukan bahan alam & pengantar nanoteknologi": "Media_Pembelajaran_Kimia_Drive/Energi_Alternatif_Bahan_Alam_dan_Nanoteknologi_10_Fase_E.html",
+      "enzim_dan_kinetika_sederhana_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Enzim_dan_Kinetika_Sederhana_12_Fase_F.html",
+      "enzim_dan_kinetika_sederhana_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Enzim_dan_Kinetika_Sederhana_12_Fase_F.html",
+      "enzim dan kinetika sederhana": "Media_Pembelajaran_Kimia_Drive/Enzim_dan_Kinetika_Sederhana_12_Fase_F.html",
+      "enzim-kinetika-sederhana-12": "Media_Pembelajaran_Kimia_Drive/Enzim_dan_Kinetika_Sederhana_12_Fase_F.html",
+      "biokatalisator enzim: mekanisme sisi aktif (induced fit), energi aktivasi, kinetika michaelis-menten (vmax & km), faktor suhu/ph, dan inhibitor enzimatik": "Media_Pembelajaran_Kimia_Drive/Enzim_dan_Kinetika_Sederhana_12_Fase_F.html",
+      "biokatalisator enzim": "Media_Pembelajaran_Kimia_Drive/Enzim_dan_Kinetika_Sederhana_12_Fase_F.html",
+      "faktor_laju_reaksi_dan_arrhenius_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Faktor_Laju_Reaksi_dan_Arrhenius_11_Fase_F.html",
+      "faktor_laju_reaksi_dan_arrhenius_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Faktor_Laju_Reaksi_dan_Arrhenius_11_Fase_F.html",
+      "faktor laju reaksi dan arrhenius": "Media_Pembelajaran_Kimia_Drive/Faktor_Laju_Reaksi_dan_Arrhenius_11_Fase_F.html",
+      "faktor-laju-reaksi-11": "Media_Pembelajaran_Kimia_Drive/Faktor_Laju_Reaksi_dan_Arrhenius_11_Fase_F.html",
+      "faktor-faktor laju reaksi dan teori tumbukan arrhenius": "Media_Pembelajaran_Kimia_Drive/Faktor_Laju_Reaksi_dan_Arrhenius_11_Fase_F.html",
+      "gaya_antarmolekul_dan_sifat_zat_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Gaya_Antarmolekul_dan_Sifat_Zat_11_Fase_F.html",
+      "gaya_antarmolekul_dan_sifat_zat_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Gaya_Antarmolekul_dan_Sifat_Zat_11_Fase_F.html",
+      "gaya antarmolekul dan sifat zat": "Media_Pembelajaran_Kimia_Drive/Gaya_Antarmolekul_dan_Sifat_Zat_11_Fase_F.html",
+      "gaya-antarmolekul-sifat-11": "Media_Pembelajaran_Kimia_Drive/Gaya_Antarmolekul_dan_Sifat_Zat_11_Fase_F.html",
+      "gaya antarmolekul, ikatan hidrogen, & sifat fisis zat": "Media_Pembelajaran_Kimia_Drive/Gaya_Antarmolekul_dan_Sifat_Zat_11_Fase_F.html",
+      "gravimetri_dan_penentuan_klorida_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Gravimetri_dan_Penentuan_Klorida_12_Fase_F.html",
+      "gravimetri_dan_penentuan_klorida_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Gravimetri_dan_Penentuan_Klorida_12_Fase_F.html",
+      "gravimetri dan penentuan klorida": "Media_Pembelajaran_Kimia_Drive/Gravimetri_dan_Penentuan_Klorida_12_Fase_F.html",
+      "gravimetri-penentuan-klorida-12": "Media_Pembelajaran_Kimia_Drive/Gravimetri_dan_Penentuan_Klorida_12_Fase_F.html",
+      "analisis gravimetri: metode pengendapan kuantitatif, pembentukan endapan agcl, pencucian, pemijaran, dan penentuan kadar klorida": "Media_Pembelajaran_Kimia_Drive/Gravimetri_dan_Penentuan_Klorida_12_Fase_F.html",
+      "analisis gravimetri": "Media_Pembelajaran_Kimia_Drive/Gravimetri_dan_Penentuan_Klorida_12_Fase_F.html",
+      "gugus_fungsi_dan_tata_nama_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Gugus_Fungsi_dan_Tata_Nama_12_Fase_F.html",
+      "gugus_fungsi_dan_tata_nama_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Gugus_Fungsi_dan_Tata_Nama_12_Fase_F.html",
+      "gugus fungsi dan tata nama": "Media_Pembelajaran_Kimia_Drive/Gugus_Fungsi_dan_Tata_Nama_12_Fase_F.html",
+      "gugus-fungsi-tata-nama-12": "Media_Pembelajaran_Kimia_Drive/Gugus_Fungsi_dan_Tata_Nama_12_Fase_F.html",
+      "gugus fungsi senyawa karbon, homolog, dan tata nama iupac & trivial": "Media_Pembelajaran_Kimia_Drive/Gugus_Fungsi_dan_Tata_Nama_12_Fase_F.html",
+      "hakikat_kimia_dan_metode_ilmiah_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Hakikat_Kimia_dan_Metode_Ilmiah_10_Fase_E.html",
+      "hakikat_kimia_dan_metode_ilmiah_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Hakikat_Kimia_dan_Metode_Ilmiah_10_Fase_E.html",
+      "hakikat kimia dan metode ilmiah": "Media_Pembelajaran_Kimia_Drive/Hakikat_Kimia_dan_Metode_Ilmiah_10_Fase_E.html",
+      "hakikat-kimia-metode-ilmiah-10": "Media_Pembelajaran_Kimia_Drive/Hakikat_Kimia_dan_Metode_Ilmiah_10_Fase_E.html",
+      "hakikat ilmu kimia & metode ilmiah 10 fase e": "Media_Pembelajaran_Kimia_Drive/Hakikat_Kimia_dan_Metode_Ilmiah_10_Fase_E.html",
+      "haloalkana_substitusi_dan_eliminasi_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Haloalkana_Substitusi_dan_Eliminasi_12_Fase_F.html",
+      "haloalkana_substitusi_dan_eliminasi_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Haloalkana_Substitusi_dan_Eliminasi_12_Fase_F.html",
+      "haloalkana substitusi dan eliminasi": "Media_Pembelajaran_Kimia_Drive/Haloalkana_Substitusi_dan_Eliminasi_12_Fase_F.html",
+      "haloalkana-substitusi-eliminasi-12": "Media_Pembelajaran_Kimia_Drive/Haloalkana_Substitusi_dan_Eliminasi_12_Fase_F.html",
+      "haloalkana (alkil halida): tata nama, sifat, reaksi substitusi nukleofilik (sn1/sn2), dan eliminasi (e1/e2)": "Media_Pembelajaran_Kimia_Drive/Haloalkana_Substitusi_dan_Eliminasi_12_Fase_F.html",
+      "haloalkana (alkil halida)": "Media_Pembelajaran_Kimia_Drive/Haloalkana_Substitusi_dan_Eliminasi_12_Fase_F.html",
+      "hibridisasi_orbital_sigma_dan_pi_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Hibridisasi_Orbital_Sigma_dan_Pi_11_Fase_F.html",
+      "hibridisasi_orbital_sigma_dan_pi_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Hibridisasi_Orbital_Sigma_dan_Pi_11_Fase_F.html",
+      "hibridisasi orbital sigma dan pi": "Media_Pembelajaran_Kimia_Drive/Hibridisasi_Orbital_Sigma_dan_Pi_11_Fase_F.html",
+      "hibridisasi-orbital-sigma-pi-11": "Media_Pembelajaran_Kimia_Drive/Hibridisasi_Orbital_Sigma_dan_Pi_11_Fase_F.html",
+      "teori hibridisasi orbital, ikatan sigma (σ), & ikatan pi (π)": "Media_Pembelajaran_Kimia_Drive/Hibridisasi_Orbital_Sigma_dan_Pi_11_Fase_F.html",
+      "hidrokarbon_alkana_alkena_alkuna_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Hidrokarbon_Alkana_Alkena_Alkuna_12_Fase_F.html",
+      "hidrokarbon_alkana_alkena_alkuna_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Hidrokarbon_Alkana_Alkena_Alkuna_12_Fase_F.html",
+      "hidrokarbon alkana alkena alkuna": "Media_Pembelajaran_Kimia_Drive/Hidrokarbon_Alkana_Alkena_Alkuna_12_Fase_F.html",
+      "hidrokarbon": "Media_Pembelajaran_Kimia_Drive/Hidrokarbon_Alkana_Alkena_Alkuna_12_Fase_F.html",
+      "senyawa hidrokarbon": "Media_Pembelajaran_Kimia_Drive/Hidrokarbon_Alkana_Alkena_Alkuna_12_Fase_F.html",
+      "hidrolisis_garam_dan_ph_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Hidrolisis_Garam_dan_pH_11_Fase_F.html",
+      "hidrolisis_garam_dan_ph_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Hidrolisis_Garam_dan_pH_11_Fase_F.html",
+      "hidrolisis garam dan ph": "Media_Pembelajaran_Kimia_Drive/Hidrolisis_Garam_dan_pH_11_Fase_F.html",
+      "hidrolisis-garam-ph-11": "Media_Pembelajaran_Kimia_Drive/Hidrolisis_Garam_dan_pH_11_Fase_F.html",
+      "hidrolisis garam, jenis-jenis garam, dan perhitungan ph": "Media_Pembelajaran_Kimia_Drive/Hidrolisis_Garam_dan_pH_11_Fase_F.html",
+      "hukum_faraday_dan_perhitungan_elektrolisis_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Hukum_Faraday_dan_Perhitungan_Elektrolisis_12_Fase_F.html",
+      "hukum_faraday_dan_perhitungan_elektrolisis_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Hukum_Faraday_dan_Perhitungan_Elektrolisis_12_Fase_F.html",
+      "hukum faraday dan perhitungan elektrolisis": "Media_Pembelajaran_Kimia_Drive/Hukum_Faraday_dan_Perhitungan_Elektrolisis_12_Fase_F.html",
+      "hukum-faraday-elektrolisis-12": "Media_Pembelajaran_Kimia_Drive/Hukum_Faraday_dan_Perhitungan_Elektrolisis_12_Fase_F.html",
+      "hukum faraday i & ii: stoikiometri sel elektrolisis, muatan listrik, massa ekuivalen, penyaduran logam (elektroplating), dan pemurnian logam": "Media_Pembelajaran_Kimia_Drive/Hukum_Faraday_dan_Perhitungan_Elektrolisis_12_Fase_F.html",
+      "hukum faraday i & ii": "Media_Pembelajaran_Kimia_Drive/Hukum_Faraday_dan_Perhitungan_Elektrolisis_12_Fase_F.html",
+      "hukum_hess_dan_energi_ikatan_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Hukum_Hess_dan_Energi_Ikatan_11_Fase_F.html",
+      "hukum_hess_dan_energi_ikatan_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Hukum_Hess_dan_Energi_Ikatan_11_Fase_F.html",
+      "hukum hess dan energi ikatan": "Media_Pembelajaran_Kimia_Drive/Hukum_Hess_dan_Energi_Ikatan_11_Fase_F.html",
+      "hukum-hess-energi-ikatan-11": "Media_Pembelajaran_Kimia_Drive/Hukum_Hess_dan_Energi_Ikatan_11_Fase_F.html",
+      "hukum hess, diagram tingkat energi, dan energi ikatan rata-rata": "Media_Pembelajaran_Kimia_Drive/Hukum_Hess_dan_Energi_Ikatan_11_Fase_F.html",
+      "hukum_hukum_dasar_kimia_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Hukum_Hukum_Dasar_Kimia_10_Fase_E.html",
+      "hukum_hukum_dasar_kimia_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Hukum_Hukum_Dasar_Kimia_10_Fase_E.html",
+      "hukum hukum dasar kimia": "Media_Pembelajaran_Kimia_Drive/Hukum_Hukum_Dasar_Kimia_10_Fase_E.html",
+      "hukum-dasar-kimia-10": "Media_Pembelajaran_Kimia_Drive/Hukum_Hukum_Dasar_Kimia_10_Fase_E.html",
+      "hukum-hukum dasar kimia & perhitungan stoikiometri awal": "Media_Pembelajaran_Kimia_Drive/Hukum_Hukum_Dasar_Kimia_10_Fase_E.html",
+      "hukum_laju_orde_dan_waktu_paruh_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Hukum_Laju_Orde_dan_Waktu_Paruh_11_Fase_F.html",
+      "hukum_laju_orde_dan_waktu_paruh_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Hukum_Laju_Orde_dan_Waktu_Paruh_11_Fase_F.html",
+      "hukum laju orde dan waktu paruh": "Media_Pembelajaran_Kimia_Drive/Hukum_Laju_Orde_dan_Waktu_Paruh_11_Fase_F.html",
+      "hukum-laju-orde-waktu-paruh-11": "Media_Pembelajaran_Kimia_Drive/Hukum_Laju_Orde_dan_Waktu_Paruh_11_Fase_F.html",
+      "hukum laju reaksi, orde reaksi, dan waktu paruh (t₁/₂)": "Media_Pembelajaran_Kimia_Drive/Hukum_Laju_Orde_dan_Waktu_Paruh_11_Fase_F.html",
+      "ikatan_ion_kovalen_dan_logam_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Ikatan_Ion_Kovalen_dan_Logam_11_Fase_F.html",
+      "ikatan_ion_kovalen_dan_logam_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Ikatan_Ion_Kovalen_dan_Logam_11_Fase_F.html",
+      "ikatan ion kovalen dan logam": "Media_Pembelajaran_Kimia_Drive/Ikatan_Ion_Kovalen_dan_Logam_11_Fase_F.html",
+      "ikatan-ion-kovalen-logam-11": "Media_Pembelajaran_Kimia_Drive/Ikatan_Ion_Kovalen_dan_Logam_11_Fase_F.html",
+      "ikatan ion, ikatan kovalen, & ikatan logam": "Media_Pembelajaran_Kimia_Drive/Ikatan_Ion_Kovalen_dan_Logam_11_Fase_F.html",
+      "isomer_struktur_dan_geometri_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Isomer_Struktur_dan_Geometri_12_Fase_F.html",
+      "isomer_struktur_dan_geometri_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Isomer_Struktur_dan_Geometri_12_Fase_F.html",
+      "isomer struktur dan geometri": "Media_Pembelajaran_Kimia_Drive/Isomer_Struktur_dan_Geometri_12_Fase_F.html",
+      "isomer-struktur-geometri-12": "Media_Pembelajaran_Kimia_Drive/Isomer_Struktur_dan_Geometri_12_Fase_F.html",
+      "keisomeran senyawa karbon: isomer struktur (rangka, posisi, gugus fungsi) dan isomer ruang (geometri cis-trans & optis kiralitas)": "Media_Pembelajaran_Kimia_Drive/Isomer_Struktur_dan_Geometri_12_Fase_F.html",
+      "keisomeran senyawa karbon": "Media_Pembelajaran_Kimia_Drive/Isomer_Struktur_dan_Geometri_12_Fase_F.html",
+      "karbohidrat_dan_uji_identifikasi_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Karbohidrat_dan_Uji_Identifikasi_12_Fase_F.html",
+      "karbohidrat_dan_uji_identifikasi_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Karbohidrat_dan_Uji_Identifikasi_12_Fase_F.html",
+      "karbohidrat dan uji identifikasi": "Media_Pembelajaran_Kimia_Drive/Karbohidrat_dan_Uji_Identifikasi_12_Fase_F.html",
+      "karbohidrat-uji-identifikasi-12": "Media_Pembelajaran_Kimia_Drive/Karbohidrat_dan_Uji_Identifikasi_12_Fase_F.html",
+      "makromolekul karbohidrat: penggolongan monosakarida, disakarida, polisakarida, struktur siklik haworth, dan uji identifikasi biokimia": "Media_Pembelajaran_Kimia_Drive/Karbohidrat_dan_Uji_Identifikasi_12_Fase_F.html",
+      "makromolekul karbohidrat": "Media_Pembelajaran_Kimia_Drive/Karbohidrat_dan_Uji_Identifikasi_12_Fase_F.html",
+      "kelarutan_dan_hasil_kali_kelarutan_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Kelarutan_dan_Hasil_Kali_Kelarutan_11_Fase_F.html",
+      "kelarutan_dan_hasil_kali_kelarutan_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Kelarutan_dan_Hasil_Kali_Kelarutan_11_Fase_F.html",
+      "kelarutan dan hasil kali kelarutan": "Media_Pembelajaran_Kimia_Drive/Kelarutan_dan_Hasil_Kali_Kelarutan_11_Fase_F.html",
+      "kelarutan-ksp-11": "Media_Pembelajaran_Kimia_Drive/Kelarutan_dan_Hasil_Kali_Kelarutan_11_Fase_F.html",
+      "kelarutan (s) dan tetapan hasil kali kelarutan (ksp)": "Media_Pembelajaran_Kimia_Drive/Kelarutan_dan_Hasil_Kali_Kelarutan_11_Fase_F.html",
+      "keselamatan_dan_alat_laboratorium_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Keselamatan_dan_Alat_Laboratorium_10_Fase_E.html",
+      "keselamatan_dan_alat_laboratorium_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Keselamatan_dan_Alat_Laboratorium_10_Fase_E.html",
+      "keselamatan dan alat laboratorium": "Media_Pembelajaran_Kimia_Drive/Keselamatan_dan_Alat_Laboratorium_10_Fase_E.html",
+      "keselamatan-alat-lab-10": "Media_Pembelajaran_Kimia_Drive/Keselamatan_dan_Alat_Laboratorium_10_Fase_E.html",
+      "keselamatan kerja di laboratorium & pengenalan alat kimia": "Media_Pembelajaran_Kimia_Drive/Keselamatan_dan_Alat_Laboratorium_10_Fase_E.html",
+      "kesetimbangan_dinamis_kc_dan_qc_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Kesetimbangan_Dinamis_Kc_dan_Qc_11_Fase_F.html",
+      "kesetimbangan_dinamis_kc_dan_qc_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Kesetimbangan_Dinamis_Kc_dan_Qc_11_Fase_F.html",
+      "kesetimbangan dinamis kc dan qc": "Media_Pembelajaran_Kimia_Drive/Kesetimbangan_Dinamis_Kc_dan_Qc_11_Fase_F.html",
+      "kesetimbangan-dinamis-kc-qc-11": "Media_Pembelajaran_Kimia_Drive/Kesetimbangan_Dinamis_Kc_dan_Qc_11_Fase_F.html",
+      "kesetimbangan kimia dinamis, tetapan kesetimbangan (kc & kp), dan kuosien reaksi (qc)": "Media_Pembelajaran_Kimia_Drive/Kesetimbangan_Dinamis_Kc_dan_Qc_11_Fase_F.html",
+      "kesetimbangan_kimia_dinamis_dan_asas_le_chatelier_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Kesetimbangan_Kimia_Dinamis_dan_Asas_Le_Chatelier_11_Fase_F.html",
+      "kesetimbangan_kimia_dinamis_dan_asas_le_chatelier_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Kesetimbangan_Kimia_Dinamis_dan_Asas_Le_Chatelier_11_Fase_F.html",
+      "kesetimbangan kimia dinamis dan asas le chatelier": "Media_Pembelajaran_Kimia_Drive/Kesetimbangan_Kimia_Dinamis_dan_Asas_Le_Chatelier_11_Fase_F.html",
+      "kesetimbangan-le-chatelier-11": "Media_Pembelajaran_Kimia_Drive/Kesetimbangan_Kimia_Dinamis_dan_Asas_Le_Chatelier_11_Fase_F.html",
+      "kesetimbangan kimia dinamis & asas le chatelier 11 fase f": "Media_Pembelajaran_Kimia_Drive/Kesetimbangan_Kimia_Dinamis_dan_Asas_Le_Chatelier_11_Fase_F.html",
+      "kimia_hijau_dan_keberlanjutan_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Kimia_Hijau_dan_Keberlanjutan_10_Fase_E.html",
+      "kimia_hijau_dan_keberlanjutan_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Kimia_Hijau_dan_Keberlanjutan_10_Fase_E.html",
+      "kimia hijau dan keberlanjutan": "Media_Pembelajaran_Kimia_Drive/Kimia_Hijau_dan_Keberlanjutan_10_Fase_E.html",
+      "kimia-hijau-keberlanjutan-10": "Media_Pembelajaran_Kimia_Drive/Kimia_Hijau_dan_Keberlanjutan_10_Fase_E.html",
+      "prinsip kimia hijau (green chemistry) & pembangunan berkelanjutan": "Media_Pembelajaran_Kimia_Drive/Kimia_Hijau_dan_Keberlanjutan_10_Fase_E.html",
+      "kimia_unsur_golongan_utama_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Kimia_Unsur_Golongan_Utama_12_Fase_F.html",
+      "kimia_unsur_golongan_utama_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Kimia_Unsur_Golongan_Utama_12_Fase_F.html",
+      "kimia unsur golongan utama": "Media_Pembelajaran_Kimia_Drive/Kimia_Unsur_Golongan_Utama_12_Fase_F.html",
+      "kimia-unsur-golongan-utama-12": "Media_Pembelajaran_Kimia_Drive/Kimia_Unsur_Golongan_Utama_12_Fase_F.html",
+      "kimia unsur golongan utama: logam alkali (ia), alkali tanah (iia), halogen (viia), gas mulia (viiia), uji nyala, dan reaksi pendesakan halogen": "Media_Pembelajaran_Kimia_Drive/Kimia_Unsur_Golongan_Utama_12_Fase_F.html",
+      "konfigurasi_elektron_mekanika_kuantum_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Konfigurasi_Elektron_Mekanika_Kuantum_10_Fase_E.html",
+      "konfigurasi_elektron_mekanika_kuantum_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Konfigurasi_Elektron_Mekanika_Kuantum_10_Fase_E.html",
+      "konfigurasi elektron mekanika kuantum": "Media_Pembelajaran_Kimia_Drive/Konfigurasi_Elektron_Mekanika_Kuantum_10_Fase_E.html",
+      "konfigurasi-kuantum": "Media_Pembelajaran_Kimia_Drive/Konfigurasi_Elektron_Mekanika_Kuantum_10_Fase_E.html",
+      "konfigurasi_elektron_model_bohr_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Konfigurasi_Elektron_Model_Bohr_10_Fase_E.html",
+      "konfigurasi_elektron_model_bohr_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Konfigurasi_Elektron_Model_Bohr_10_Fase_E.html",
+      "konfigurasi elektron model bohr": "Media_Pembelajaran_Kimia_Drive/Konfigurasi_Elektron_Model_Bohr_10_Fase_E.html",
+      "konfigurasi-bohr": "Media_Pembelajaran_Kimia_Drive/Konfigurasi_Elektron_Model_Bohr_10_Fase_E.html",
+      "konsentrasi_dan_pembuatan_larutan_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Konsentrasi_dan_Pembuatan_Larutan_11_Fase_F.html",
+      "konsentrasi_dan_pembuatan_larutan_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Konsentrasi_dan_Pembuatan_Larutan_11_Fase_F.html",
+      "konsentrasi dan pembuatan larutan": "Media_Pembelajaran_Kimia_Drive/Konsentrasi_dan_Pembuatan_Larutan_11_Fase_F.html",
+      "konsentrasi-pembuatan-larutan-11": "Media_Pembelajaran_Kimia_Drive/Konsentrasi_dan_Pembuatan_Larutan_11_Fase_F.html",
+      "konsentrasi larutan, pengenceran, dan teknik pembuatan larutan standar": "Media_Pembelajaran_Kimia_Drive/Konsentrasi_dan_Pembuatan_Larutan_11_Fase_F.html",
+      "konsep_mol_dan_stoikiometri_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Konsep_Mol_dan_Stoikiometri_10_Fase_E.html",
+      "konsep_mol_dan_stoikiometri_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Konsep_Mol_dan_Stoikiometri_10_Fase_E.html",
+      "konsep mol dan stoikiometri": "Media_Pembelajaran_Kimia_Drive/Konsep_Mol_dan_Stoikiometri_10_Fase_E.html",
+      "konsep-mol-stoikiometri-10": "Media_Pembelajaran_Kimia_Drive/Konsep_Mol_dan_Stoikiometri_10_Fase_E.html",
+      "konsep mol, massa molar, & jembatan perhitungan stoikiometri": "Media_Pembelajaran_Kimia_Drive/Konsep_Mol_dan_Stoikiometri_10_Fase_E.html",
+      "konsep_redoks_dan_aturan_biloks_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Konsep_Redoks_dan_Aturan_Biloks_12_Fase_F.html",
+      "konsep_redoks_dan_aturan_biloks_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Konsep_Redoks_dan_Aturan_Biloks_12_Fase_F.html",
+      "konsep redoks dan aturan biloks": "Media_Pembelajaran_Kimia_Drive/Konsep_Redoks_dan_Aturan_Biloks_12_Fase_F.html",
+      "konsep-redoks": "Media_Pembelajaran_Kimia_Drive/Konsep_Redoks_dan_Aturan_Biloks_12_Fase_F.html",
+      "konsep redoks dan bilangan oksidasi": "Media_Pembelajaran_Kimia_Drive/Konsep_Redoks_dan_Aturan_Biloks_12_Fase_F.html",
+      "korosi_logam_dan_pencegahannya_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Korosi_Logam_dan_Pencegahannya_12_Fase_F.html",
+      "korosi_logam_dan_pencegahannya_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Korosi_Logam_dan_Pencegahannya_12_Fase_F.html",
+      "korosi logam dan pencegahannya": "Media_Pembelajaran_Kimia_Drive/Korosi_Logam_dan_Pencegahannya_12_Fase_F.html",
+      "korosi": "Media_Pembelajaran_Kimia_Drive/Korosi_Logam_dan_Pencegahannya_12_Fase_F.html",
+      "korosi logam": "Media_Pembelajaran_Kimia_Drive/Korosi_Logam_dan_Pencegahannya_12_Fase_F.html",
+      "kurva_kalibrasi_dan_spektrofotometri_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Kurva_Kalibrasi_dan_Spektrofotometri_12_Fase_F.html",
+      "kurva_kalibrasi_dan_spektrofotometri_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Kurva_Kalibrasi_dan_Spektrofotometri_12_Fase_F.html",
+      "kurva kalibrasi dan spektrofotometri": "Media_Pembelajaran_Kimia_Drive/Kurva_Kalibrasi_dan_Spektrofotometri_12_Fase_F.html",
+      "kurva-kalibrasi-spektrofotometri-12": "Media_Pembelajaran_Kimia_Drive/Kurva_Kalibrasi_dan_Spektrofotometri_12_Fase_F.html",
+      "spektrofotometri uv-vis dan kurva kalibrasi: hukum lambert-beer (a = ε": "Media_Pembelajaran_Kimia_Drive/Kurva_Kalibrasi_dan_Spektrofotometri_12_Fase_F.html",
+      "spektrofotometri uv-vis dan kurva kalibrasi": "Media_Pembelajaran_Kimia_Drive/Kurva_Kalibrasi_dan_Spektrofotometri_12_Fase_F.html",
+      "laboratorium_kimia_virtual_umum.html": "Media_Pembelajaran_Kimia_Drive/Laboratorium_Kimia_Virtual_Umum.html",
+      "laboratorium_kimia_virtual_umum": "Media_Pembelajaran_Kimia_Drive/Laboratorium_Kimia_Virtual_Umum.html",
+      "laboratorium kimia virtual": "Media_Pembelajaran_Kimia_Drive/Laboratorium_Kimia_Virtual_Umum.html",
+      "larutan_elektrolit_dan_nonelektrolit_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Larutan_Elektrolit_dan_Nonelektrolit_11_Fase_F.html",
+      "larutan_elektrolit_dan_nonelektrolit_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Larutan_Elektrolit_dan_Nonelektrolit_11_Fase_F.html",
+      "larutan elektrolit dan nonelektrolit": "Media_Pembelajaran_Kimia_Drive/Larutan_Elektrolit_dan_Nonelektrolit_11_Fase_F.html",
+      "larutan-elektrolit-nonelektrolit-11": "Media_Pembelajaran_Kimia_Drive/Larutan_Elektrolit_dan_Nonelektrolit_11_Fase_F.html",
+      "larutan elektrolit, nonelektrolit, dan derajat disosiasi (α)": "Media_Pembelajaran_Kimia_Drive/Larutan_Elektrolit_dan_Nonelektrolit_11_Fase_F.html",
+      "larutan_penyangga_dan_kapasitasnya_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Larutan_Penyangga_dan_Kapasitasnya_11_Fase_F.html",
+      "larutan_penyangga_dan_kapasitasnya_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Larutan_Penyangga_dan_Kapasitasnya_11_Fase_F.html",
+      "larutan penyangga dan kapasitasnya": "Media_Pembelajaran_Kimia_Drive/Larutan_Penyangga_dan_Kapasitasnya_11_Fase_F.html",
+      "larutan-penyangga-kapasitas-11": "Media_Pembelajaran_Kimia_Drive/Larutan_Penyangga_dan_Kapasitasnya_11_Fase_F.html",
+      "larutan penyangga (buffer), kapasitas buffer, dan peran fisiologis": "Media_Pembelajaran_Kimia_Drive/Larutan_Penyangga_dan_Kapasitasnya_11_Fase_F.html",
+      "lipid_lemak_dan_sabun_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Lipid_Lemak_dan_Sabun_12_Fase_F.html",
+      "lipid_lemak_dan_sabun_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Lipid_Lemak_dan_Sabun_12_Fase_F.html",
+      "lipid lemak dan sabun": "Media_Pembelajaran_Kimia_Drive/Lipid_Lemak_dan_Sabun_12_Fase_F.html",
+      "lipid-lemak-sabun-12": "Media_Pembelajaran_Kimia_Drive/Lipid_Lemak_dan_Sabun_12_Fase_F.html",
+      "biokimia lipid: klasifikasi trigliserida, asam lemak jenuh vs tak jenuh (omega-3/6/9), bilangan iodin, fosfolipid membran, dan saponifikasi sabun": "Media_Pembelajaran_Kimia_Drive/Lipid_Lemak_dan_Sabun_12_Fase_F.html",
+      "biokimia lipid": "Media_Pembelajaran_Kimia_Drive/Lipid_Lemak_dan_Sabun_12_Fase_F.html",
+      "materi_sifat_dan_perubahannya_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Materi_Sifat_dan_Perubahannya_10_Fase_E.html",
+      "materi_sifat_dan_perubahannya_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Materi_Sifat_dan_Perubahannya_10_Fase_E.html",
+      "materi sifat dan perubahannya": "Media_Pembelajaran_Kimia_Drive/Materi_Sifat_dan_Perubahannya_10_Fase_E.html",
+      "materi-sifat-perubahan-10": "Media_Pembelajaran_Kimia_Drive/Materi_Sifat_dan_Perubahannya_10_Fase_E.html",
+      "klasifikasi materi, sifat, & pemisahan campuran": "Media_Pembelajaran_Kimia_Drive/Materi_Sifat_dan_Perubahannya_10_Fase_E.html",
+      "minyak_bumi_dan_distilasi_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Minyak_Bumi_dan_Distilasi_12_Fase_F.html",
+      "minyak_bumi_dan_distilasi_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Minyak_Bumi_dan_Distilasi_12_Fase_F.html",
+      "minyak bumi dan distilasi": "Media_Pembelajaran_Kimia_Drive/Minyak_Bumi_dan_Distilasi_12_Fase_F.html",
+      "minyak-bumi-distilasi-12": "Media_Pembelajaran_Kimia_Drive/Minyak_Bumi_dan_Distilasi_12_Fase_F.html",
+      "minyak bumi, gas alam, dan distilasi bertingkat (fraksionasi): proses pembentukan, fraksi hidrokarbon, titik didih, dan industri petrokimia": "Media_Pembelajaran_Kimia_Drive/Minyak_Bumi_dan_Distilasi_12_Fase_F.html",
+      "minyak bumi, gas alam, dan distilasi bertingkat (fraksionasi)": "Media_Pembelajaran_Kimia_Drive/Minyak_Bumi_dan_Distilasi_12_Fase_F.html",
+      "partikel_atom_isotop_isobar_isoton_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Partikel_Atom_Isotop_Isobar_Isoton_10_Fase_E.html",
+      "partikel_atom_isotop_isobar_isoton_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Partikel_Atom_Isotop_Isobar_Isoton_10_Fase_E.html",
+      "partikel atom isotop isobar isoton": "Media_Pembelajaran_Kimia_Drive/Partikel_Atom_Isotop_Isobar_Isoton_10_Fase_E.html",
+      "partikel-atom-isotop-10": "Media_Pembelajaran_Kimia_Drive/Partikel_Atom_Isotop_Isobar_Isoton_10_Fase_E.html",
+      "partikel penyusun atom, notasi unsur, isotop, isobar, & isoton": "Media_Pembelajaran_Kimia_Drive/Partikel_Atom_Isotop_Isobar_Isoton_10_Fase_E.html",
+      "pencemaran_lingkungan_dan_pengolahan_limbah_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Pencemaran_Lingkungan_dan_Pengolahan_Limbah_10_Fase_E.html",
+      "pencemaran_lingkungan_dan_pengolahan_limbah_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Pencemaran_Lingkungan_dan_Pengolahan_Limbah_10_Fase_E.html",
+      "pencemaran lingkungan dan pengolahan limbah": "Media_Pembelajaran_Kimia_Drive/Pencemaran_Lingkungan_dan_Pengolahan_Limbah_10_Fase_E.html",
+      "pencemaran-pengolahan-limbah-10": "Media_Pembelajaran_Kimia_Drive/Pencemaran_Lingkungan_dan_Pengolahan_Limbah_10_Fase_E.html",
+      "kimia lingkungan, polusi air-udara, & pengolahan limbah": "Media_Pembelajaran_Kimia_Drive/Pencemaran_Lingkungan_dan_Pengolahan_Limbah_10_Fase_E.html",
+      "pengendapan_selektif_dan_ion_senama_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Pengendapan_Selektif_dan_Ion_Senama_11_Fase_F.html",
+      "pengendapan_selektif_dan_ion_senama_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Pengendapan_Selektif_dan_Ion_Senama_11_Fase_F.html",
+      "pengendapan selektif dan ion senama": "Media_Pembelajaran_Kimia_Drive/Pengendapan_Selektif_dan_Ion_Senama_11_Fase_F.html",
+      "pengendapan-selektif-ion-senama-11": "Media_Pembelajaran_Kimia_Drive/Pengendapan_Selektif_dan_Ion_Senama_11_Fase_F.html",
+      "pengaruh ion senama, kuosien kelarutan (qsp), dan pemisahan pengendapan selektif": "Media_Pembelajaran_Kimia_Drive/Pengendapan_Selektif_dan_Ion_Senama_11_Fase_F.html",
+      "penyetaraan_reaksi_redoks_metode_biloks_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Penyetaraan_Reaksi_Redoks_Metode_Biloks_12_Fase_F.html",
+      "penyetaraan_reaksi_redoks_metode_biloks_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Penyetaraan_Reaksi_Redoks_Metode_Biloks_12_Fase_F.html",
+      "penyetaraan reaksi redoks metode biloks": "Media_Pembelajaran_Kimia_Drive/Penyetaraan_Reaksi_Redoks_Metode_Biloks_12_Fase_F.html",
+      "redoks-biloks": "Media_Pembelajaran_Kimia_Drive/Penyetaraan_Reaksi_Redoks_Metode_Biloks_12_Fase_F.html",
+      "penyetaraan redoks metode biloks": "Media_Pembelajaran_Kimia_Drive/Penyetaraan_Reaksi_Redoks_Metode_Biloks_12_Fase_F.html",
+      "penyetaraan_reaksi_redoks_metode_setengah_reaksi_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Penyetaraan_Reaksi_Redoks_Metode_Setengah_Reaksi_12_Fase_F.html",
+      "penyetaraan_reaksi_redoks_metode_setengah_reaksi_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Penyetaraan_Reaksi_Redoks_Metode_Setengah_Reaksi_12_Fase_F.html",
+      "penyetaraan reaksi redoks metode setengah reaksi": "Media_Pembelajaran_Kimia_Drive/Penyetaraan_Reaksi_Redoks_Metode_Setengah_Reaksi_12_Fase_F.html",
+      "redoks-setengah-reaksi": "Media_Pembelajaran_Kimia_Drive/Penyetaraan_Reaksi_Redoks_Metode_Setengah_Reaksi_12_Fase_F.html",
+      "penyetaraan redoks metode setengah reaksi": "Media_Pembelajaran_Kimia_Drive/Penyetaraan_Reaksi_Redoks_Metode_Setengah_Reaksi_12_Fase_F.html",
+      "pereaksi_pembatas_persen_hasil_dan_kadar_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Pereaksi_Pembatas_Persen_Hasil_dan_Kadar_10_Fase_E.html",
+      "pereaksi_pembatas_persen_hasil_dan_kadar_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Pereaksi_Pembatas_Persen_Hasil_dan_Kadar_10_Fase_E.html",
+      "pereaksi pembatas persen hasil dan kadar": "Media_Pembelajaran_Kimia_Drive/Pereaksi_Pembatas_Persen_Hasil_dan_Kadar_10_Fase_E.html",
+      "pereaksi-pembatas-kadar-10": "Media_Pembelajaran_Kimia_Drive/Pereaksi_Pembatas_Persen_Hasil_dan_Kadar_10_Fase_E.html",
+      "pereaksi pembatas, persen hasil reaksi, & kadar kemurnian": "Media_Pembelajaran_Kimia_Drive/Pereaksi_Pembatas_Persen_Hasil_dan_Kadar_10_Fase_E.html",
+      "periode_dan_golongan_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Periode_dan_Golongan_10_Fase_E.html",
+      "periode_dan_golongan_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Periode_dan_Golongan_10_Fase_E.html",
+      "periode dan golongan": "Media_Pembelajaran_Kimia_Drive/Periode_dan_Golongan_10_Fase_E.html",
+      "periode-golongan": "Media_Pembelajaran_Kimia_Drive/Periode_dan_Golongan_10_Fase_E.html",
+      "persamaan_dan_penyetaraan_reaksi_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Persamaan_dan_Penyetaraan_Reaksi_10_Fase_E.html",
+      "persamaan_dan_penyetaraan_reaksi_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Persamaan_dan_Penyetaraan_Reaksi_10_Fase_E.html",
+      "persamaan dan penyetaraan reaksi": "Media_Pembelajaran_Kimia_Drive/Persamaan_dan_Penyetaraan_Reaksi_10_Fase_E.html",
+      "persamaan-penyetaraan-reaksi-10": "Media_Pembelajaran_Kimia_Drive/Persamaan_dan_Penyetaraan_Reaksi_10_Fase_E.html",
+      "persamaan reaksi kimia & metode penyetaraan koefisien": "Media_Pembelajaran_Kimia_Drive/Persamaan_dan_Penyetaraan_Reaksi_10_Fase_E.html",
+      "polaritas_ikatan_dan_molekul_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Polaritas_Ikatan_dan_Molekul_11_Fase_F.html",
+      "polaritas_ikatan_dan_molekul_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Polaritas_Ikatan_dan_Molekul_11_Fase_F.html",
+      "polaritas ikatan dan molekul": "Media_Pembelajaran_Kimia_Drive/Polaritas_Ikatan_dan_Molekul_11_Fase_F.html",
+      "polaritas-ikatan-molekul-11": "Media_Pembelajaran_Kimia_Drive/Polaritas_Ikatan_dan_Molekul_11_Fase_F.html",
+      "polaritas ikatan dan kepolaran molekul": "Media_Pembelajaran_Kimia_Drive/Polaritas_Ikatan_dan_Molekul_11_Fase_F.html",
+      "polimer_dan_material_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Polimer_dan_Material_12_Fase_F.html",
+      "polimer_dan_material_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Polimer_dan_Material_12_Fase_F.html",
+      "polimer dan material": "Media_Pembelajaran_Kimia_Drive/Polimer_dan_Material_12_Fase_F.html",
+      "polimer-material-12": "Media_Pembelajaran_Kimia_Drive/Polimer_dan_Material_12_Fase_F.html",
+      "polimer sintetis dan alami: polimerisasi adisi & kondensasi, termoplastik vs termoset, elastomer karet vulkanisasi, dan daur ulang plastik": "Media_Pembelajaran_Kimia_Drive/Polimer_dan_Material_12_Fase_F.html",
+      "polimer sintetis dan alami": "Media_Pembelajaran_Kimia_Drive/Polimer_dan_Material_12_Fase_F.html",
+      "radioaktivitas_dan_waktu_paruh_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Radioaktivitas_dan_Waktu_Paruh_12_Fase_F.html",
+      "radioaktivitas_dan_waktu_paruh_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Radioaktivitas_dan_Waktu_Paruh_12_Fase_F.html",
+      "radioaktivitas dan waktu paruh": "Media_Pembelajaran_Kimia_Drive/Radioaktivitas_dan_Waktu_Paruh_12_Fase_F.html",
+      "radioaktivitas-waktu-paruh-12": "Media_Pembelajaran_Kimia_Drive/Radioaktivitas_dan_Waktu_Paruh_12_Fase_F.html",
+      "radioaktivitas dan waktu paruh: kestabilan inti (n/z), sinar alfa, beta, gamma, kinetika peluruhan orde 1, dan radioperunut medis": "Media_Pembelajaran_Kimia_Drive/Radioaktivitas_dan_Waktu_Paruh_12_Fase_F.html",
+      "reaksi_inti_fisi_dan_fusi_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Reaksi_Inti_Fisi_dan_Fusi_12_Fase_F.html",
+      "reaksi_inti_fisi_dan_fusi_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Reaksi_Inti_Fisi_dan_Fusi_12_Fase_F.html",
+      "reaksi inti fisi dan fusi": "Media_Pembelajaran_Kimia_Drive/Reaksi_Inti_Fisi_dan_Fusi_12_Fase_F.html",
+      "reaksi-inti-fisi-fusi-12": "Media_Pembelajaran_Kimia_Drive/Reaksi_Inti_Fisi_dan_Fusi_12_Fase_F.html",
+      "reaksi inti fisi dan fusi: defek massa, energi ikat inti (e = δm": "Media_Pembelajaran_Kimia_Drive/Reaksi_Inti_Fisi_dan_Fusi_12_Fase_F.html",
+      "reaksi_organik_dan_esterifikasi_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Reaksi_Organik_dan_Esterifikasi_12_Fase_F.html",
+      "reaksi_organik_dan_esterifikasi_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Reaksi_Organik_dan_Esterifikasi_12_Fase_F.html",
+      "reaksi organik dan esterifikasi": "Media_Pembelajaran_Kimia_Drive/Reaksi_Organik_dan_Esterifikasi_12_Fase_F.html",
+      "reaksi-organik-esterifikasi-12": "Media_Pembelajaran_Kimia_Drive/Reaksi_Organik_dan_Esterifikasi_12_Fase_F.html",
+      "reaksi-reaksi senyawa karbon: substitusi, adisi (aturan markovnikov), eliminasi (aturan zaitsev), redoks, dan polimerisasi": "Media_Pembelajaran_Kimia_Drive/Reaksi_Organik_dan_Esterifikasi_12_Fase_F.html",
+      "reaksi-reaksi senyawa karbon": "Media_Pembelajaran_Kimia_Drive/Reaksi_Organik_dan_Esterifikasi_12_Fase_F.html",
+      "sejarah_perkembangan_spu_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Sejarah_Perkembangan_SPU_10_Fase_E.html",
+      "sejarah_perkembangan_spu_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Sejarah_Perkembangan_SPU_10_Fase_E.html",
+      "sejarah perkembangan spu": "Media_Pembelajaran_Kimia_Drive/Sejarah_Perkembangan_SPU_10_Fase_E.html",
+      "sejarah-spu": "Media_Pembelajaran_Kimia_Drive/Sejarah_Perkembangan_SPU_10_Fase_E.html",
+      "sel_elektrolisis_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Sel_Elektrolisis_12_Fase_F.html",
+      "sel_elektrolisis_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Sel_Elektrolisis_12_Fase_F.html",
+      "sel elektrolisis": "Media_Pembelajaran_Kimia_Drive/Sel_Elektrolisis_12_Fase_F.html",
+      "sel-elektrolisis": "Media_Pembelajaran_Kimia_Drive/Sel_Elektrolisis_12_Fase_F.html",
+      "sel_volta_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Sel_Volta_12_Fase_F.html",
+      "sel_volta_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Sel_Volta_12_Fase_F.html",
+      "sel volta": "Media_Pembelajaran_Kimia_Drive/Sel_Volta_12_Fase_F.html",
+      "sel-volta": "Media_Pembelajaran_Kimia_Drive/Sel_Volta_12_Fase_F.html",
+      "senyawa_kompleks_dan_koordinasi_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Senyawa_Kompleks_dan_Koordinasi_12_Fase_F.html",
+      "senyawa_kompleks_dan_koordinasi_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Senyawa_Kompleks_dan_Koordinasi_12_Fase_F.html",
+      "senyawa kompleks dan koordinasi": "Media_Pembelajaran_Kimia_Drive/Senyawa_Kompleks_dan_Koordinasi_12_Fase_F.html",
+      "senyawa-kompleks-koordinasi-12": "Media_Pembelajaran_Kimia_Drive/Senyawa_Kompleks_dan_Koordinasi_12_Fase_F.html",
+      "kimia koordinasi dan senyawa kompleks: asam-basa lewis, ligan, bilangan koordinasi, teori medan kristal (cft), dan tata nama iupac": "Media_Pembelajaran_Kimia_Drive/Senyawa_Kompleks_dan_Koordinasi_12_Fase_F.html",
+      "kimia koordinasi dan senyawa kompleks": "Media_Pembelajaran_Kimia_Drive/Senyawa_Kompleks_dan_Koordinasi_12_Fase_F.html",
+      "sifat_keperiodikan_unsur_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Sifat_Keperiodikan_Unsur_10_Fase_E.html",
+      "sifat_keperiodikan_unsur_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Sifat_Keperiodikan_Unsur_10_Fase_E.html",
+      "sifat keperiodikan unsur": "Media_Pembelajaran_Kimia_Drive/Sifat_Keperiodikan_Unsur_10_Fase_E.html",
+      "sifat-keperiodikan": "Media_Pembelajaran_Kimia_Drive/Sifat_Keperiodikan_Unsur_10_Fase_E.html",
+      "sifat_koligatif_larutan_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_11_Fase_F.html",
+      "sifat_koligatif_larutan_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_11_Fase_F.html",
+      "sifat koligatif larutan": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_11_Fase_F.html",
+      "sifat-koligatif-larutan-11": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_11_Fase_F.html",
+      "sifat koligatif larutan: penurunan tekanan uap, kenaikan titik didih, penurunan titik beku, dan tekanan osmotik": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_11_Fase_F.html",
+      "sistem_koloid_dan_penerapannya_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Sistem_Koloid_dan_Penerapannya_11_Fase_F.html",
+      "sistem_koloid_dan_penerapannya_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Sistem_Koloid_dan_Penerapannya_11_Fase_F.html",
+      "sistem koloid dan penerapannya": "Media_Pembelajaran_Kimia_Drive/Sistem_Koloid_dan_Penerapannya_11_Fase_F.html",
+      "sistem-koloid-penerapannya-11": "Media_Pembelajaran_Kimia_Drive/Sistem_Koloid_dan_Penerapannya_11_Fase_F.html",
+      "sistem koloid, sifat-sifat koloid, dan penerapannya dalam kehidupan sehari-hari": "Media_Pembelajaran_Kimia_Drive/Sistem_Koloid_dan_Penerapannya_11_Fase_F.html",
+      "struktur_lewis_dan_aturan_oktet_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Struktur_Lewis_dan_Aturan_Oktet_11_Fase_F.html",
+      "struktur_lewis_dan_aturan_oktet_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Struktur_Lewis_dan_Aturan_Oktet_11_Fase_F.html",
+      "struktur lewis dan aturan oktet": "Media_Pembelajaran_Kimia_Drive/Struktur_Lewis_dan_Aturan_Oktet_11_Fase_F.html",
+      "struktur-lewis-oktet-11": "Media_Pembelajaran_Kimia_Drive/Struktur_Lewis_dan_Aturan_Oktet_11_Fase_F.html",
+      "struktur lewis, aturan oktet, dan pengecualian oktet": "Media_Pembelajaran_Kimia_Drive/Struktur_Lewis_dan_Aturan_Oktet_11_Fase_F.html",
+      "tata_nama_dan_rumus_kimia_10_fase_e.html": "Media_Pembelajaran_Kimia_Drive/Tata_Nama_dan_Rumus_Kimia_10_Fase_E.html",
+      "tata_nama_dan_rumus_kimia_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Tata_Nama_dan_Rumus_Kimia_10_Fase_E.html",
+      "tata nama dan rumus kimia": "Media_Pembelajaran_Kimia_Drive/Tata_Nama_dan_Rumus_Kimia_10_Fase_E.html",
+      "tata-nama-rumus-kimia-10": "Media_Pembelajaran_Kimia_Drive/Tata_Nama_dan_Rumus_Kimia_10_Fase_E.html",
+      "tata nama senyawa anorganik & perumusan rumus kimia": "Media_Pembelajaran_Kimia_Drive/Tata_Nama_dan_Rumus_Kimia_10_Fase_E.html",
+      "teori_asam_basa_dan_ph_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Teori_Asam_Basa_dan_pH_11_Fase_F.html",
+      "teori_asam_basa_dan_ph_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Teori_Asam_Basa_dan_pH_11_Fase_F.html",
+      "teori asam basa dan ph": "Media_Pembelajaran_Kimia_Drive/Teori_Asam_Basa_dan_pH_11_Fase_F.html",
+      "teori-asam-basa-ph-11": "Media_Pembelajaran_Kimia_Drive/Teori_Asam_Basa_dan_pH_11_Fase_F.html",
+      "teori asam-basa (arrhenius, brønsted-lowry, lewis) dan perhitungan ph larutan": "Media_Pembelajaran_Kimia_Drive/Teori_Asam_Basa_dan_pH_11_Fase_F.html",
+      "termokimia_dan_kalorimetri_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Termokimia_dan_Kalorimetri_11_Fase_F.html",
+      "termokimia_dan_kalorimetri_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Termokimia_dan_Kalorimetri_11_Fase_F.html",
+      "termokimia dan kalorimetri": "Media_Pembelajaran_Kimia_Drive/Termokimia_dan_Kalorimetri_11_Fase_F.html",
+      "termokimia-kalorimetri-11": "Media_Pembelajaran_Kimia_Drive/Termokimia_dan_Kalorimetri_11_Fase_F.html",
+      "termokimia, reaksi eksoterm-endoterm, & kalorimetri": "Media_Pembelajaran_Kimia_Drive/Termokimia_dan_Kalorimetri_11_Fase_F.html",
+      "titrasi_asam_basa_dan_indikator_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Titrasi_Asam_Basa_dan_Indikator_11_Fase_F.html",
+      "titrasi_asam_basa_dan_indikator_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Titrasi_Asam_Basa_dan_Indikator_11_Fase_F.html",
+      "titrasi asam basa dan indikator": "Media_Pembelajaran_Kimia_Drive/Titrasi_Asam_Basa_dan_Indikator_11_Fase_F.html",
+      "titrasi-asam-basa-indikator-11": "Media_Pembelajaran_Kimia_Drive/Titrasi_Asam_Basa_dan_Indikator_11_Fase_F.html",
+      "titrasi asam-basa, kurva titrasi, dan pemilihan indikator": "Media_Pembelajaran_Kimia_Drive/Titrasi_Asam_Basa_dan_Indikator_11_Fase_F.html",
+      "titrasi_redoks_dan_kadar_besi_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Titrasi_Redoks_dan_Kadar_Besi_12_Fase_F.html",
+      "titrasi_redoks_dan_kadar_besi_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Titrasi_Redoks_dan_Kadar_Besi_12_Fase_F.html",
+      "titrasi redoks dan kadar besi": "Media_Pembelajaran_Kimia_Drive/Titrasi_Redoks_dan_Kadar_Besi_12_Fase_F.html",
+      "titrasi-redoks-kadar-besi-12": "Media_Pembelajaran_Kimia_Drive/Titrasi_Redoks_dan_Kadar_Besi_12_Fase_F.html",
+      "titrasi redoks: permanganometri (kmno4), penentuan kadar besi (fe2+) sampel, autoindikator titik akhir, dan stoikiometri transfer elektron": "Media_Pembelajaran_Kimia_Drive/Titrasi_Redoks_dan_Kadar_Besi_12_Fase_F.html",
+      "titrasi redoks": "Media_Pembelajaran_Kimia_Drive/Titrasi_Redoks_dan_Kadar_Besi_12_Fase_F.html",
+      "unsur_periode_ketiga_dan_oksidanya_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Unsur_Periode_Ketiga_dan_Oksidanya_12_Fase_F.html",
+      "unsur_periode_ketiga_dan_oksidanya_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Unsur_Periode_Ketiga_dan_Oksidanya_12_Fase_F.html",
+      "unsur periode ketiga dan oksidanya": "Media_Pembelajaran_Kimia_Drive/Unsur_Periode_Ketiga_dan_Oksidanya_12_Fase_F.html",
+      "unsur-periode-ketiga-oksidanya-12": "Media_Pembelajaran_Kimia_Drive/Unsur_Periode_Ketiga_dan_Oksidanya_12_Fase_F.html",
+      "unsur-unsur periode ketiga: keteraturan sifat fisik & kimia (na ke ar), metaloid silikon, dan perubahan sifat asam-basa hidroksida & oksida": "Media_Pembelajaran_Kimia_Drive/Unsur_Periode_Ketiga_dan_Oksidanya_12_Fase_F.html",
+      "unsur-unsur periode ketiga": "Media_Pembelajaran_Kimia_Drive/Unsur_Periode_Ketiga_dan_Oksidanya_12_Fase_F.html",
+      "unsur_transisi_konfigurasi_dan_sifat_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Unsur_Transisi_Konfigurasi_dan_Sifat_12_Fase_F.html",
+      "unsur_transisi_konfigurasi_dan_sifat_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Unsur_Transisi_Konfigurasi_dan_Sifat_12_Fase_F.html",
+      "unsur transisi konfigurasi dan sifat": "Media_Pembelajaran_Kimia_Drive/Unsur_Transisi_Konfigurasi_dan_Sifat_12_Fase_F.html",
+      "unsur-transisi-konfigurasi-sifat-12": "Media_Pembelajaran_Kimia_Drive/Unsur_Transisi_Konfigurasi_dan_Sifat_12_Fase_F.html",
+      "kimia logam transisi periode keempat (sc hingga zn): konfigurasi elektron 3d, tingkat oksidasi bervariasi, sifat magnetik, dan keanekaragaman warna senyawa": "Media_Pembelajaran_Kimia_Drive/Unsur_Transisi_Konfigurasi_dan_Sifat_12_Fase_F.html",
+      "kimia logam transisi periode keempat (sc hingga zn)": "Media_Pembelajaran_Kimia_Drive/Unsur_Transisi_Konfigurasi_dan_Sifat_12_Fase_F.html",
+      "lab_biomolekul_uji_makanan_deepdive.html": "Lab_Biomolekul_Uji_Makanan_DeepDive.html",
+      "lab_biomolekul_uji_makanan_deepdive": "Lab_Biomolekul_Uji_Makanan_DeepDive.html",
+      "lab-biomolekul-uji-makanan-deepdive": "Lab_Biomolekul_Uji_Makanan_DeepDive.html",
+      "lab_elektrolisis_faraday_deepdive.html": "Lab_Elektrolisis_Faraday_DeepDive.html",
+      "lab_elektrolisis_faraday_deepdive": "Lab_Elektrolisis_Faraday_DeepDive.html",
+      "lab-elektrolisis-faraday-deepdive": "Lab_Elektrolisis_Faraday_DeepDive.html",
+      "lab_geometri_molekul_vsepr_deepdive.html": "Lab_Geometri_Molekul_VSEPR_DeepDive.html",
+      "lab_geometri_molekul_vsepr_deepdive": "Lab_Geometri_Molekul_VSEPR_DeepDive.html",
+      "lab-geometri-molekul-vsepr-deepdive": "Lab_Geometri_Molekul_VSEPR_DeepDive.html",
+      "lab_gravimetri_analisis_kuantitatif_deepdive.html": "Lab_Gravimetri_Analisis_Kuantitatif_DeepDive.html",
+      "lab_gravimetri_analisis_kuantitatif_deepdive": "Lab_Gravimetri_Analisis_Kuantitatif_DeepDive.html",
+      "lab-gravimetri-analisis-kuantitatif-deepdive": "Lab_Gravimetri_Analisis_Kuantitatif_DeepDive.html",
+      "lab_gugus_fungsi_organik_deepdive.html": "Lab_Gugus_Fungsi_Organik_DeepDive.html",
+      "lab_gugus_fungsi_organik_deepdive": "Lab_Gugus_Fungsi_Organik_DeepDive.html",
+      "lab-gugus-fungsi-organik-deepdive": "Lab_Gugus_Fungsi_Organik_DeepDive.html",
+      "lab_hidrolisis_garam_deepdive.html": "Lab_Hidrolisis_Garam_DeepDive.html",
+      "lab_hidrolisis_garam_deepdive": "Lab_Hidrolisis_Garam_DeepDive.html",
+      "lab-hidrolisis-garam-deepdive": "Lab_Hidrolisis_Garam_DeepDive.html",
+      "lab_kalorimeter_termokimia_deepdive.html": "Lab_Kalorimeter_Termokimia_DeepDive.html",
+      "lab_kalorimeter_termokimia_deepdive": "Lab_Kalorimeter_Termokimia_DeepDive.html",
+      "lab-kalorimeter-termokimia-deepdive": "Lab_Kalorimeter_Termokimia_DeepDive.html",
+      "lab_keselamatan_pengukuran_lab_deepdive.html": "Lab_Keselamatan_Pengukuran_Lab_DeepDive.html",
+      "lab_keselamatan_pengukuran_lab_deepdive": "Lab_Keselamatan_Pengukuran_Lab_DeepDive.html",
+      "lab-keselamatan-pengukuran-lab-deepdive": "Lab_Keselamatan_Pengukuran_Lab_DeepDive.html",
+      "lab_kesetimbangan_kimia_deepdive.html": "Lab_Kesetimbangan_Kimia_DeepDive.html",
+      "lab_kesetimbangan_kimia_deepdive": "Lab_Kesetimbangan_Kimia_DeepDive.html",
+      "lab-kesetimbangan-kimia-deepdive": "Lab_Kesetimbangan_Kimia_DeepDive.html",
+      "lab_kimia_unsur_halogen_deepdive.html": "Lab_Kimia_Unsur_Halogen_DeepDive.html",
+      "lab_kimia_unsur_halogen_deepdive": "Lab_Kimia_Unsur_Halogen_DeepDive.html",
+      "lab-kimia-unsur-halogen-deepdive": "Lab_Kimia_Unsur_Halogen_DeepDive.html",
+      "lab_ksp_kelarutan_deepdive.html": "Lab_Ksp_Kelarutan_DeepDive.html",
+      "lab_ksp_kelarutan_deepdive": "Lab_Ksp_Kelarutan_DeepDive.html",
+      "lab-ksp-kelarutan-deepdive": "Lab_Ksp_Kelarutan_DeepDive.html",
+      "lab_kualitas_air_kimia_lingkungan_deepdive.html": "Lab_Kualitas_Air_Kimia_Lingkungan_DeepDive.html",
+      "lab_kualitas_air_kimia_lingkungan_deepdive": "Lab_Kualitas_Air_Kimia_Lingkungan_DeepDive.html",
+      "lab-kualitas-air-kimia-lingkungan-deepdive": "Lab_Kualitas_Air_Kimia_Lingkungan_DeepDive.html",
+      "lab_laju_reaksi_deepdive.html": "Lab_Laju_Reaksi_DeepDive.html",
+      "lab_laju_reaksi_deepdive": "Lab_Laju_Reaksi_DeepDive.html",
+      "lab-laju-reaksi-deepdive": "Lab_Laju_Reaksi_DeepDive.html",
+      "lab_larutan_elektrolit_dayahantar_deepdive.html": "Lab_Larutan_Elektrolit_DayaHantar_DeepDive.html",
+      "lab_larutan_elektrolit_dayahantar_deepdive": "Lab_Larutan_Elektrolit_DayaHantar_DeepDive.html",
+      "lab-larutan-elektrolit-dayahantar-deepdive": "Lab_Larutan_Elektrolit_DayaHantar_DeepDive.html",
+      "lab_larutan_penyangga_buffer_deepdive.html": "Lab_Larutan_Penyangga_Buffer_DeepDive.html",
+      "lab_larutan_penyangga_buffer_deepdive": "Lab_Larutan_Penyangga_Buffer_DeepDive.html",
+      "lab-larutan-penyangga-buffer-deepdive": "Lab_Larutan_Penyangga_Buffer_DeepDive.html",
+      "lab_larutan_penyangga_deepdive.html": "Lab_Larutan_Penyangga_DeepDive.html",
+      "lab_larutan_penyangga_deepdive": "Lab_Larutan_Penyangga_DeepDive.html",
+      "lab-larutan-penyangga-deepdive": "Lab_Larutan_Penyangga_DeepDive.html",
+      "lab_pembuatan_pengenceran_larutan_deepdive.html": "Lab_Pembuatan_Pengenceran_Larutan_DeepDive.html",
+      "lab_pembuatan_pengenceran_larutan_deepdive": "Lab_Pembuatan_Pengenceran_Larutan_DeepDive.html",
+      "lab-pembuatan-pengenceran-larutan-deepdive": "Lab_Pembuatan_Pengenceran_Larutan_DeepDive.html",
+      "lab_pemisahan_campuran_kromatografi_deepdive.html": "Lab_Pemisahan_Campuran_Kromatografi_DeepDive.html",
+      "lab_pemisahan_campuran_kromatografi_deepdive": "Lab_Pemisahan_Campuran_Kromatografi_DeepDive.html",
+      "lab-pemisahan-campuran-kromatografi-deepdive": "Lab_Pemisahan_Campuran_Kromatografi_DeepDive.html",
+      "lab_radioaktivitas_peluruhan_deepdive.html": "Lab_Radioaktivitas_Peluruhan_DeepDive.html",
+      "lab_radioaktivitas_peluruhan_deepdive": "Lab_Radioaktivitas_Peluruhan_DeepDive.html",
+      "lab-radioaktivitas-peluruhan-deepdive": "Lab_Radioaktivitas_Peluruhan_DeepDive.html",
+      "lab_reaksi_redoks_deepdive.html": "Lab_Reaksi_Redoks_DeepDive.html",
+      "lab_reaksi_redoks_deepdive": "Lab_Reaksi_Redoks_DeepDive.html",
+      "lab-reaksi-redoks-deepdive": "Lab_Reaksi_Redoks_DeepDive.html",
+      "lab_sel_volta_deepdive.html": "Lab_Sel_Volta_DeepDive.html",
+      "lab_sel_volta_deepdive": "Lab_Sel_Volta_DeepDive.html",
+      "lab-sel-volta-deepdive": "Lab_Sel_Volta_DeepDive.html",
+      "lab_sifat_koligatif_deepdive.html": "Lab_Sifat_Koligatif_DeepDive.html",
+      "lab_sifat_koligatif_deepdive": "Lab_Sifat_Koligatif_DeepDive.html",
+      "lab-sifat-koligatif-deepdive": "Lab_Sifat_Koligatif_DeepDive.html",
+      "lab_sistem_koloid_deepdive.html": "Lab_Sistem_Koloid_DeepDive.html",
+      "lab_sistem_koloid_deepdive": "Lab_Sistem_Koloid_DeepDive.html",
+      "lab-sistem-koloid-deepdive": "Lab_Sistem_Koloid_DeepDive.html",
+      "lab_spektrofotometri_beerlambert_deepdive.html": "Lab_Spektrofotometri_BeerLambert_DeepDive.html",
+      "lab_spektrofotometri_beerlambert_deepdive": "Lab_Spektrofotometri_BeerLambert_DeepDive.html",
+      "lab-spektrofotometri-beerlambert-deepdive": "Lab_Spektrofotometri_BeerLambert_DeepDive.html",
+      "lab_stoikiometri_pereaksi_pembatas_deepdive.html": "Lab_Stoikiometri_Pereaksi_Pembatas_DeepDive.html",
+      "lab_stoikiometri_pereaksi_pembatas_deepdive": "Lab_Stoikiometri_Pereaksi_Pembatas_DeepDive.html",
+      "lab-stoikiometri-pereaksi-pembatas-deepdive": "Lab_Stoikiometri_Pereaksi_Pembatas_DeepDive.html",
+      "lab_titrasi_asam_basa_deepdive.html": "Lab_Titrasi_Asam_Basa_DeepDive.html",
+      "lab_titrasi_asam_basa_deepdive": "Lab_Titrasi_Asam_Basa_DeepDive.html",
+      "lab-titrasi-asam-basa-deepdive": "Lab_Titrasi_Asam_Basa_DeepDive.html",
+      "lab_uji_nyala_struktur_atom_deepdive.html": "Lab_Uji_Nyala_Struktur_Atom_DeepDive.html",
+      "lab_uji_nyala_struktur_atom_deepdive": "Lab_Uji_Nyala_Struktur_Atom_DeepDive.html",
+      "lab-uji-nyala-struktur-atom-deepdive": "Lab_Uji_Nyala_Struktur_Atom_DeepDive.html",
+      "laboratoriumvirtual.html": "LaboratoriumVirtual.html",
+      "laboratoriumvirtual": "LaboratoriumVirtual.html"
+};
 
     function extractGoogleDriveFileId(url) {
       if (!url) return null;
@@ -3550,11 +4016,21 @@
       return null;
     }
 
-    function findLocalFallbackFile(title, url) {
-      const lowerTitle = (title || '').toLowerCase();
-      const lowerUrl = (url || '').toLowerCase();
+                function findLocalFallbackFile(title, url, id) {
+      const lowerId = String(id || '').trim().toLowerCase();
+      const lowerTitle = String(title || '').trim().toLowerCase();
+      const lowerUrl = String(url || '').trim().toLowerCase();
+      if (lowerId && LOCAL_MEDIA_MAP[lowerId]) return LOCAL_MEDIA_MAP[lowerId];
+      if (lowerTitle && LOCAL_MEDIA_MAP[lowerTitle]) return LOCAL_MEDIA_MAP[lowerTitle];
+      if (lowerUrl && LOCAL_MEDIA_MAP[lowerUrl]) return LOCAL_MEDIA_MAP[lowerUrl];
+      const normTitle = lowerTitle.replace(/[^a-z0-9]+/g, ' ').trim();
       for (const key in LOCAL_MEDIA_MAP) {
-        if (lowerTitle.includes(key) || lowerUrl.includes(key)) {
+        if (lowerId && key === lowerId) return LOCAL_MEDIA_MAP[key];
+        if ((lowerTitle && lowerTitle.includes(key)) || (lowerUrl && lowerUrl.includes(key))) {
+          return LOCAL_MEDIA_MAP[key];
+        }
+        const normKey = key.replace(/[^a-z0-9]+/g, ' ').trim();
+        if (normKey.length > 5 && normTitle.includes(normKey)) {
           return LOCAL_MEDIA_MAP[key];
         }
       }
@@ -3567,8 +4043,8 @@
       const rawUrl = (item.url || item.embedUrl || '').trim();
       const driveId = extractGoogleDriveFileId(rawUrl);
       const isDrive = !!driveId;
-      const localFallback = findLocalFallbackFile(item.title, rawUrl);
-      const isLocalHost = (window.location.protocol === 'file:');
+      const localFallback = findLocalFallbackFile(item.title, rawUrl, item.id);
+      const isLocalHost = !window.location.hostname.includes('googleusercontent.com') && !window.location.hostname.includes('script.google.com');
 
       let embedUrl = rawUrl;
       let directTabUrl = rawUrl;
@@ -3776,7 +4252,15 @@
       { id: "lab-spektro-15", title: "Virtual Lab Spektrofotometri UV-Vis & Beer-Lambert", file: "Lab_Spektrofotometri_BeerLambert_DeepDive.html", grade: "Kelas 12 (Fase F)", topic: "Analisis Kimia" },
       { id: "lab-vsepr-16", title: "Virtual Lab Geometri Molekul 3D & Teori VSEPR", file: "Lab_Geometri_Molekul_VSEPR_DeepDive.html", grade: "Kelas 10 (Fase E)", topic: "Ikatan Kimia & VSEPR" },
       { id: "lab-elektrolit-17", title: "Virtual Lab Daya Hantar Listrik Larutan Elektrolit", file: "Lab_Larutan_Elektrolit_DayaHantar_DeepDive.html", grade: "Kelas 10 (Fase E)", topic: "Larutan Elektrolit" },
-      { id: "lab-ujinyala-18", title: "Virtual Lab Uji Nyala Logam Alkali & Spektrum Emisi", file: "Lab_Uji_Nyala_Struktur_Atom_DeepDive.html", grade: "Kelas 10 (Fase E)", topic: "Struktur Atom" }
+      { id: "lab-ujinyala-18", title: "Virtual Lab Uji Nyala Logam Alkali & Spektrum Emisi", file: "Lab_Uji_Nyala_Struktur_Atom_DeepDive.html", grade: "Kelas 10 (Fase E)", topic: "Struktur Atom" },
+      { id: "lab-stoikiometri-19", title: "Virtual Lab Stoikiometri, Hukum Dasar & Pereaksi Pembatas", file: "Lab_Stoikiometri_Pereaksi_Pembatas_DeepDive.html", grade: "Kelas 10 (Fase E)", topic: "Stoikiometri & Hukum Dasar" },
+      { id: "lab-lingkungan-26", title: "Virtual Lab Analisis Kualitas Air, Kesadahan EDTA & Kimia Hijau", file: "Lab_Kualitas_Air_Kimia_Lingkungan_DeepDive.html", grade: "Kelas 10 (Fase E)", topic: "Kimia Hijau & Lingkungan" },
+      { id: "lab-unsur-25", title: "Virtual Lab Kimia Unsur: Pendesakan Halogen, Oksida Periode 3 & Ion Kompleks", file: "Lab_Kimia_Unsur_Halogen_DeepDive.html", grade: "Kelas 12 (Fase F)", topic: "Kimia Unsur & Senyawa Kompleks" },
+      { id: "lab-biomolekul-24", title: "Virtual Lab Uji Biomolekul: Karbohidrat, Protein, Lipid & Kinetika Enzim", file: "Lab_Biomolekul_Uji_Makanan_DeepDive.html", grade: "Kelas 12 (Fase F)", topic: "Makromolekul & Biomolekul" },
+      { id: "lab-gravimetri-23", title: "Virtual Lab Analisis Gravimetri & Penentuan Kadar Klorida/Sulfat", file: "Lab_Gravimetri_Analisis_Kuantitatif_DeepDive.html", grade: "Kelas 12 (Fase F)", topic: "Kimia Analisis Gravimetri" },
+      { id: "lab-larutan-22", title: "Virtual Lab Pembuatan Larutan Standar & Pengenceran Presisi", file: "Lab_Pembuatan_Pengenceran_Larutan_DeepDive.html", grade: "Kelas 11 (Fase F)", topic: "Konsentrasi & Pembuatan Larutan" },
+      { id: "lab-pemisahan-21", title: "Virtual Lab Pemisahan Campuran: Filtrasi, Distilasi Fraksionasi & Kromatografi", file: "Lab_Pemisahan_Campuran_Kromatografi_DeepDive.html", grade: "Kelas 10 (Fase E)", topic: "Pemisahan Campuran, Kromatografi & Distilasi" },
+      { id: "lab-keselamatan-20", title: "Virtual Lab Keselamatan Kerja (K3), Alat Lab & Akurasi Pengukuran", file: "Lab_Keselamatan_Pengukuran_Lab_DeepDive.html", grade: "Kelas 10 (Fase E)", topic: "Hakikat Kimia & Keselamatan Lab" }
     ];
 
     function sharePptLink() {
@@ -3813,7 +4297,7 @@
     }
 
     let hasHandledDeepLink = false;
-    function handleDirectMediaDeepLink() {
+                function handleDirectMediaDeepLink() {
       if (hasHandledDeepLink) return;
       const params = new URLSearchParams(window.location.search);
       const query = (params.get('id') || params.get('materi') || params.get('media') || params.get('lab') || params.get('q') || '').trim();
@@ -3821,16 +4305,19 @@
       const targetQuery = (query || hash).toLowerCase();
 
       if (!targetQuery) return;
+      const mappedLocalFile = findLocalFallbackFile(targetQuery, targetQuery, targetQuery);
 
       // 1. Coba cocokkan di allMaterials
       if (Array.isArray(allMaterials) && allMaterials.length > 0) {
-        const matched = allMaterials.find(m => 
-          String(m.id || '').toLowerCase() === targetQuery ||
-          (m.url && m.url.toLowerCase().includes(targetQuery)) ||
-          (m.title && m.title.toLowerCase().includes(targetQuery)) ||
-          (m.topic && m.topic.toLowerCase().includes(targetQuery)) ||
-          (m.description && m.description.toLowerCase().includes(targetQuery))
-        );
+        const matched = allMaterials.find(m => {
+          const mFallback = findLocalFallbackFile(m.title, m.url, m.id);
+          return String(m.id || '').toLowerCase() === targetQuery ||
+            (mappedLocalFile && mFallback === mappedLocalFile) ||
+            (m.url && m.url.toLowerCase().includes(targetQuery)) ||
+            (m.title && m.title.toLowerCase().includes(targetQuery)) ||
+            (m.topic && m.topic.toLowerCase().includes(targetQuery)) ||
+            (m.description && m.description.toLowerCase().includes(targetQuery));
+        });
 
         if (matched) {
           hasHandledDeepLink = true;
@@ -3846,12 +4333,16 @@
       }
 
       // 2. Coba cocokkan di PORTAL_VIRTUAL_LABS
-      const vlab = PORTAL_VIRTUAL_LABS.find(l => 
-        l.id.toLowerCase() === targetQuery ||
-        (l.file && l.file.toLowerCase().includes(targetQuery)) ||
-        (l.title && l.title.toLowerCase().includes(targetQuery)) ||
-        (l.topic && l.topic.toLowerCase().includes(targetQuery))
-      );
+      const normTarget = targetQuery.replace(/\.html$/i, '').replace(/[^a-z0-9]+/g, '-');
+      const vlab = PORTAL_VIRTUAL_LABS.find(l => {
+        const normFile = (l.file || '').toLowerCase().replace(/\.html$/i, '').replace(/[^a-z0-9]+/g, '-');
+        return l.id.toLowerCase() === targetQuery ||
+          normFile === normTarget ||
+          (mappedLocalFile && l.file && l.file.toLowerCase() === mappedLocalFile.toLowerCase()) ||
+          (l.file && l.file.toLowerCase().includes(targetQuery)) ||
+          (l.title && l.title.toLowerCase().includes(targetQuery)) ||
+          (l.topic && l.topic.toLowerCase().includes(targetQuery));
+      });
 
       if (vlab) {
         hasHandledDeepLink = true;
@@ -3860,6 +4351,20 @@
           showToast(`Membuka Virtual Lab: ${vlab.title}`, 'biotech');
         }, 350);
         return;
+      }
+
+      // 3. Jika mengarah ke file lokal yang valid di LOCAL_MEDIA_MAP, buka langsung
+      if (mappedLocalFile) {
+        hasHandledDeepLink = true;
+        setTimeout(() => {
+          openVirtualLabInHtmlViewer({
+            id: targetQuery,
+            title: query || hash,
+            file: mappedLocalFile,
+            grade: 'Kurikulum Merdeka',
+            topic: 'Modul Interaktif'
+          });
+        }, 350);
       }
     }
 

@@ -18,7 +18,7 @@ window.PortalSubmission = (() => {
     return Array.from(crypto.getRandomValues(new Uint8Array(24)), x => x.toString(16).padStart(2, '0')).join('');
   }
   function collect(config, answers, questions) {
-    const siswa = { nama: value('student-name'), kelas: value('student-class'), nis: value('student-nis'), tanggal: value('student-date') };
+    const siswa = { nama: value('student-name') || value('pk-student-name') || (active && active.name) || '', kelas: value('student-class') || (active && active.className) || value('pk-class-code') || '', nis: value('student-nis') || value('student-no') || (active && active.nis) || '', tanggal: value('student-date') };
     if (!siswa.nama || !siswa.kelas) throw new Error('Isi nama dan kelas sebelum mengirim.');
     const jawaban = { kuis: [], esai: {}, lks: {}, refleksi: {}, isianLain: {} };
     let correct = 0;
@@ -32,7 +32,7 @@ window.PortalSubmission = (() => {
     });
     // Canonical IDs collapse synchronized mobile/desktop copies without losing blank/zero values.
     document.querySelectorAll('input[id], textarea[id], select[id]').forEach(el => {
-      if (/^(password|file|hidden|button|submit|reset)$/i.test(el.type || '') || /^(student-(name|class|nis|date)$|pk-)/.test(el.id)) return;
+      if (/^(password|file|hidden|button|submit|reset)$/i.test(el.type || '') || /^(student-(name|class|nis|no|date)$|pk-)/.test(el.id)) return;
       const id = el.id.replace(/^mob-/, '');
       const v = /^(checkbox|radio)$/.test(el.type) ? (el.checked ? el.value : '') : el.value;
       const group = /essay|esai/i.test(id) ? jawaban.esai : /^(obs-|lks-|lkpd-)/.test(id) ? jawaban.lks : /reflec|refleksi|^ref-/.test(id) ? jawaban.refleksi : jawaban.isianLain;
@@ -113,7 +113,7 @@ window.PortalSubmission = (() => {
   }
   async function submit(config, answers, questions) {
     if (busy || finalized) return;
-    const btn = document.querySelector('[onclick*="submitToTeacherDatabase"], [onclick*="syncToPortalDatabase"]');
+    const btn = document.querySelector('[onclick*="submitToTeacherDatabase"], [onclick*="syncToPortalDatabase"], [onclick*="syncSubmissionCloud"]');
     busy = true;
     if (btn) btn.disabled = true;
     try {
@@ -193,7 +193,7 @@ window.PortalSubmission = (() => {
     finalized = true;
     Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).forEach(k=>{const p=read(k)?.payload;if(p?.mediaId===config.id&&p.assignmentId===payload.assignmentId&&Number(p.assignmentRevision)===Number(payload.assignmentRevision))localStorage.removeItem(k);});
     clearDrafts(config); freeze(true);
-    document.querySelectorAll('[onclick*="submitToTeacherDatabase"],[onclick*="syncToPortalDatabase"]').forEach(b=>{b.disabled=true;b.textContent='Jawaban sudah final';});
+    document.querySelectorAll('[onclick*="submitToTeacherDatabase"], [onclick*="syncToPortalDatabase"], [onclick*="syncSubmissionCloud"]').forEach(b=>{b.disabled=true;b.textContent='Jawaban sudah final';});
     notice('Tersimpan dan dikunci (1 siswa hanya 1 pengumpulan per media). Draf pada perangkat telah dihapus.\nBukti pengumpulan: '+(receipt.canonicalSubmissionId || receipt.submissionId));
   }
   async function checkAccess(config) {
@@ -230,7 +230,7 @@ window.PortalSubmission = (() => {
         return;
       }
       if(!response.open || (response.due && Date.now()>new Date(response.due).getTime()&&!response.allowLate)){active=null;freeze(true);throw Error('Pengumpulan ditutup atau tenggat telah berakhir. Hubungi guru.');}
-      for(const [id,v] of [['student-name',response.name],['student-class',response.className],['student-nis',response.nis]]){const e=document.getElementById(id);if(e)e.value=v;}
+      for(const [id,v] of [['student-name',response.name],['student-class',response.className],['student-nis',response.nis],['student-no',response.nis]]){const e=document.getElementById(id);if(e)e.value=v;}if(typeof updateStudentSummary==='function'){try{updateStudentSummary();}catch(_){}}
       const saved=read('pk_quiz_'+contextKey());
       const hasSavedQuiz=Array.isArray(saved)&&saved.length===questionsNow.length;
       quizState=hasSavedQuiz?saved:questionsNow.map(()=>null);
@@ -238,7 +238,7 @@ window.PortalSubmission = (() => {
       if(hasSavedQuiz)adapters?.setAnswers(quizState.slice());
       const pending=Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).map(read).find(p=>p?.context===contextKey());
       freeze(!!pending);
-      document.querySelectorAll('[onclick*="submitToTeacherDatabase"],[onclick*="syncToPortalDatabase"]').forEach(b=>{b.disabled=false;b.textContent=pending?'Coba kirim ulang jawaban final':'Kirim jawaban final';});
+      document.querySelectorAll('[onclick*="submitToTeacherDatabase"], [onclick*="syncToPortalDatabase"], [onclick*="syncSubmissionCloud"]').forEach(b=>{b.disabled=false;b.textContent=pending?'Coba kirim ulang jawaban final':'Kirim jawaban final';});
       notice('BERHASIL — Kode kelas dan nama terverifikasi.\n'+response.title+' · '+response.name+' ('+response.className+')\n'+(pending?'Jawaban final menunggu konfirmasi server. Tekan tombol kirim ulang untuk mencoba kembali.':'Anda dapat mulai mengerjakan. Pengumpulan dibatasi 1 kali per media.'),checkButton,'success');
       renderEvaluation();
     } catch(e){notice('GAGAL — '+(e.message || 'Kode kelas dan nama belum berhasil diperiksa. Jawaban belum dihapus.'),checkButton,'error');}finally{busy=false;if(checkButton){checkButton.disabled=false;checkButton.textContent='Periksa Tugas';checkButton.removeAttribute('aria-busy');}}
@@ -267,9 +267,9 @@ window.PortalSubmission = (() => {
     window.addEventListener('online', () => retryPending(config));
     // Explicit retry on a subsequent visit; no automatic transmission of merely saved drafts.
     const init = () => {
-      const accessBox=document.createElement('section');accessBox.setAttribute('data-pk-access','');accessBox.style.cssText='position:relative;z-index:60;isolation:isolate;padding:18px 20px;margin:20px 0;border:2px solid #0f766e;border-radius:14px;background:#effcf8;color:#123d36;font-family:sans-serif';
-      accessBox.innerHTML='<h2 style="font-weight:bold;margin:0 0 6px 0;font-size:16px">Tugas dari Guru</h2><p style="margin:0 0 12px 0;font-size:12px;color:#164e63">Masukkan <strong>Kode Kelas</strong> dari guru dan <strong>Nama Lengkap Siswa</strong>. Pengumpulan jawaban final hanya satu kali per materi.</p><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><label style="font-size:12px;font-weight:600">Kode Kelas <input id="pk-class-code" autocomplete="off" placeholder="Contoh: KIM-XII1-8F2A" style="padding:8px 10px;border:1px solid #94a3b8;color:#123d36;background:white;border-radius:8px;font-family:monospace;text-transform:uppercase"></label><label style="font-size:12px;font-weight:600">Nama Lengkap <input id="pk-student-name" autocomplete="off" placeholder="Nama sesuai daftar kelas" style="padding:8px 10px;border:1px solid #94a3b8;color:#123d36;background:white;border-radius:8px;min-width:200px"></label><button id="pk-check" type="button" style="padding:9px 16px;background:#0f766e;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Periksa Tugas</button></div>';
-      document.body.prepend(accessBox);document.getElementById('pk-check').addEventListener('click',()=>checkAccess(config));
+      const accessBox=document.createElement('section');accessBox.setAttribute('data-pk-access','');accessBox.style.cssText='position:relative;z-index:30;isolation:isolate;width:calc(100% - 2rem);max-width:78rem;box-sizing:border-box;padding:16px 20px;margin:16px auto 8px auto;border:1px solid rgba(20,184,166,0.45);border-radius:16px;background:linear-gradient(135deg,#f0fdfa 0%,#ecfeff 100%);color:#123d36;font-family:inherit;box-shadow:0 4px 20px -2px rgba(15,118,110,0.1)';
+      accessBox.innerHTML='<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px"><div><h2 style="font-weight:bold;margin:0 0 4px 0;font-size:15px;color:#0f766e">Tugas dari Guru</h2><p style="margin:0;font-size:12px;color:#164e63">Masukkan <strong>Kode Kelas</strong> dari guru dan <strong>Nama Lengkap Siswa</strong>. Pengumpulan jawaban final hanya satu kali per materi.</p></div><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><label style="font-size:12px;font-weight:600;color:#123d36">Kode Kelas <input id="pk-class-code" autocomplete="off" placeholder="Contoh: KIM-XII1-8F2A" style="padding:8px 10px;margin-left:4px;border:1px solid #94a3b8;color:#123d36;background:white;border-radius:8px;font-family:monospace;text-transform:uppercase"></label><label style="font-size:12px;font-weight:600;color:#123d36">Nama Lengkap <input id="pk-student-name" autocomplete="off" placeholder="Nama sesuai daftar kelas" style="padding:8px 10px;margin-left:4px;border:1px solid #94a3b8;color:#123d36;background:white;border-radius:8px;min-width:200px"></label><button id="pk-check" type="button" style="padding:9px 16px;background:#0f766e;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer">Periksa Tugas</button></div></div>';
+      const hdr=document.querySelector&&document.querySelector('body > header, body > nav');if(hdr&&hdr.after)hdr.after(accessBox);else if(document.body.prepend)document.body.prepend(accessBox);else document.body.appendChild(accessBox);document.getElementById('pk-check').addEventListener('click',()=>checkAccess(config));
       // Retain the local final marker across reloads; checking a new task/revision unlocks it.
       const last=localStorage.getItem('pk_context_'+config.id);
       if(last&&read('pk_final_'+last)){finalized=true;clearDrafts(config);freeze(true);notice('Pengumpulan terakhir Anda sudah final. Hubungi guru jika memerlukan izin revisi.');}

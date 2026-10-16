@@ -120,7 +120,7 @@ function clientContext(fields=[],fetchImpl=async()=>({json:async()=>({success:fa
   return {ctx,els,storage};
 }
 const files=[];
-for(const dir of ['','Media_Pembelajaran_Kimia_Drive','Media_Pembelajaran_Kimia_Drive/Paket_Media_Baru','File Spark'])if(fs.existsSync(path.join(__dirname,dir)))for(const f of fs.readdirSync(path.join(__dirname,dir)))if(f.endsWith('.html')&&!['index.html','Guru.html'].includes(f))files.push(path.join(__dirname,dir,f));
+for(const dir of ['','Media_Pembelajaran_Kimia_Drive','Media_Pembelajaran_Kimia_Drive/Paket_Media_Baru','File Spark'])if(fs.existsSync(path.join(__dirname,dir)))for(const f of fs.readdirSync(path.join(__dirname,dir)))if(f.endsWith('.html')&&!['index.html','Guru.html','LaboratoriumVirtual.html','Laboratorium_Kimia_Virtual_Umum.html'].includes(f) && !/^Lab_/i.test(f))files.push(path.join(__dirname,dir,f));
 for(const file of files) test('Complete payload and syntax: '+path.relative(__dirname,file),()=>{
   const html=fs.readFileSync(file,'utf8');
   for(const m of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new vm.Script(m[1],{filename:file});

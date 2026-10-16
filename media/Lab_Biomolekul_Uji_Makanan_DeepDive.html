@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Lab Uji Biomolekul: Karbohidrat, Protein, Lipid & Kinetika Enzim — PortalKimia DeepDive</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    body { font-family: 'Inter', sans-serif; background: #090d16; color: #f1f5f9; margin: 0; overflow-x: hidden; }
+    .font-headline { font-family: 'Space Grotesk', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+    @media (min-width: 1024px) {
+      .lab-workbench { height: calc(100vh - 64px); overflow: hidden; }
+      .panel-scroll { height: 100%; overflow-y: auto; }
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#090d16] text-slate-100">
+
+  <!-- TOP HEADER -->
+  <header class="h-16 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 lg:px-6 flex items-center justify-between sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <a href="LaboratoriumVirtual.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all">
+        <span class="material-symbols-outlined text-[16px] text-emerald-400">arrow_back</span>
+        <span>Katalog Lab Virtual</span>
+      </a>
+      <div class="h-5 w-[1px] bg-slate-800 hidden sm:block"></div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Kelas XII • Fase F</span>
+          <h1 class="font-headline font-bold text-sm sm:text-base text-white truncate">Virtual Lab Uji Biomolekul: Karbohidrat, Protein, Lipid & Kinetika Enzim</h1>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="resetExperiment()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 flex items-center gap-1.5 cursor-pointer">
+        <span class="material-symbols-outlined text-[15px] text-amber-400">restart_alt</span>
+        <span class="hidden sm:inline">Reset</span>
+      </button>
+      <button onclick="exportLabCSV()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 cursor-pointer">
+        <span class="material-symbols-outlined text-[15px]">download</span>
+        <span class="hidden sm:inline">Ekspor CSV</span>
+      </button>
+    </div>
+  </header>
+<!-- PK-RELATED-MODULES-BAR-START -->
+<div id="pk-related-modules-bar" style="background:linear-gradient(90deg,rgba(6,78,59,0.55),rgba(15,23,42,0.92));border-bottom:1px solid rgba(16,185,129,0.28);padding:8px 16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;z-index:45;position:relative;">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
+    <span style="font-size:11px;font-weight:800;color:#34d399;text-transform:uppercase;letter-spacing:0.05em;margin-right:4px;">🔗 Modul Materi Terkait:</span>
+    <a href="Media_Pembelajaran_Kimia_Drive/Asam_Amino_dan_Protein_12_Fase_F.html" data-pk-modfile="Asam_Amino_dan_Protein_12_Fase_F.html" class="pk-relmod-link" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6ee7b7;font-size:11px;font-weight:700;text-decoration:none;transition:all 0.2s;">📖 Asam Amino dan Protein: Struktur Zwitter-ion, Titik Isoelektrik, Ikatan Peptida, 4 Tingkatan Struktur Protein, Denaturasi, dan Uji Biokimia Protein <span style="opacity:0.75;font-weight:500;">(Kelas 12)</span></a><a href="Media_Pembelajaran_Kimia_Drive/DNA_RNA_dan_Asam_Nukleat_12_Fase_F.html" data-pk-modfile="DNA_RNA_dan_Asam_Nukleat_12_Fase_F.html" class="pk-relmod-link" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6ee7b7;font-size:11px;font-weight:700;text-decoration:none;transition:all 0.2s;">📖 Asam Nukleat: Struktur Nukleotida, Basa Purin-Pirimidin, Heliks Ganda DNA Watson-Crick, Pasangan Basa Komplementer, DNA vs RNA, dan Transkripsi Genetik <span style="opacity:0.75;font-weight:500;">(Kelas 12)</span></a><a href="Media_Pembelajaran_Kimia_Drive/Enzim_dan_Kinetika_Sederhana_12_Fase_F.html" data-pk-modfile="Enzim_dan_Kinetika_Sederhana_12_Fase_F.html" class="pk-relmod-link" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6ee7b7;font-size:11px;font-weight:700;text-decoration:none;transition:all 0.2s;">📖 Biokatalisator Enzim: Mekanisme Sisi Aktif (Induced Fit), Energi Aktivasi, Kinetika Michaelis-Menten (Vmax & Km), Faktor Suhu/pH, dan Inhibitor Enzimatik <span style="opacity:0.75;font-weight:500;">(Kelas 12)</span></a><a href="Media_Pembelajaran_Kimia_Drive/Karbohidrat_dan_Uji_Identifikasi_12_Fase_F.html" data-pk-modfile="Karbohidrat_dan_Uji_Identifikasi_12_Fase_F.html" class="pk-relmod-link" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6ee7b7;font-size:11px;font-weight:700;text-decoration:none;transition:all 0.2s;">📖 Makromolekul Karbohidrat: Penggolongan Monosakarida, Disakarida, Polisakarida, Struktur Siklik Haworth, dan Uji Identifikasi Biokimia <span style="opacity:0.75;font-weight:500;">(Kelas 12)</span></a><a href="Media_Pembelajaran_Kimia_Drive/Lipid_Lemak_dan_Sabun_12_Fase_F.html" data-pk-modfile="Lipid_Lemak_dan_Sabun_12_Fase_F.html" class="pk-relmod-link" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6ee7b7;font-size:11px;font-weight:700;text-decoration:none;transition:all 0.2s;">📖 Biokimia Lipid: Klasifikasi Trigliserida, Asam Lemak Jenuh vs Tak Jenuh (Omega-3/6/9), Bilangan Iodin, Fosfolipid Membran, dan Saponifikasi Sabun <span style="opacity:0.75;font-weight:500;">(Kelas 12)</span></a><a href="Media_Pembelajaran_Kimia_Drive/Polimer_dan_Material_12_Fase_F.html" data-pk-modfile="Polimer_dan_Material_12_Fase_F.html" class="pk-relmod-link" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6ee7b7;font-size:11px;font-weight:700;text-decoration:none;transition:all 0.2s;">📖 Polimer Sintetis dan Alami: Polimerisasi Adisi & Kondensasi, Termoplastik vs Termoset, Elastomer Karet Vulkanisasi, dan Daur Ulang Plastik <span style="opacity:0.75;font-weight:500;">(Kelas 12)</span></a>
+  </div>
+  <a href="LaboratoriumVirtual.html" id="pk-back-hub-link" style="font-size:11px;font-weight:700;color:#cbd5e1;text-decoration:none;padding:4px 10px;border-radius:8px;border:1px solid rgba(148,163,184,0.3);background:rgba(30,41,59,0.7);">← Semua 26 Lab Virtual</a>
+</div>
+<script>
+(function(){
+  var inDriveSubdir = window.location.pathname.indexOf('/Media_Pembelajaran_Kimia_Drive/') !== -1;
+  var isGas = window.location.hostname.indexOf('script.google.com') !== -1 || window.location.href.indexOf('/exec') !== -1;
+  var links = document.querySelectorAll('#pk-related-modules-bar .pk-relmod-link');
+  for (var i = 0; i < links.length; i++) {
+    var mf = links[i].getAttribute('data-pk-modfile');
+    if (!mf) continue;
+    if (isGas) {
+      var base = window.location.href.split('?')[0];
+      links[i].href = base + '?page=' + encodeURIComponent(mf.replace(/\.html$/i, ''));
+    } else if (inDriveSubdir) {
+      links[i].href = mf;
+    } else {
+      links[i].href = 'Media_Pembelajaran_Kimia_Drive/' + mf;
+    }
+  }
+  var hubLink = document.getElementById('pk-back-hub-link');
+  if (hubLink && isGas) {
+    hubLink.href = window.location.href.split('?')[0] + '?page=LaboratoriumVirtual';
+  }
+})();
+</script>
+<!-- PK-RELATED-MODULES-BAR-END -->
+
+
+  <!-- 3-PANEL WORKBENCH -->
+  <main class="lab-workbench grid grid-cols-1 lg:grid-cols-12 flex-1">
+
+    <!-- PANEL KIRI: KONTROL EKSPERIMEN -->
+    <aside class="lg:col-span-3 panel-scroll border-b lg:border-b-0 lg:border-r border-slate-800 bg-slate-900/60 p-4 space-y-4">
+      <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3">
+        <div class="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider font-mono">
+          <span class="material-symbols-outlined text-[18px]">tune</span>
+          <span>1. Pilih Mode Eksperimen</span>
+        </div>
+        <select id="presetSelect" onchange="changePreset()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-emerald-500">
+        </select>
+        <div id="formulaBox" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 font-mono text-[11px] text-emerald-300 text-center"></div>
+        <p id="presetDesc" class="text-[11px] text-slate-400 leading-relaxed"></p>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3.5">
+        <div class="flex items-center gap-2 text-sky-400 text-xs font-bold uppercase tracking-wider font-mono">
+          <span class="material-symbols-outlined text-[18px]">sliders</span>
+          <span>2. Variabel &amp; Kondisi Uji</span>
+        </div>
+
+        <div>
+          <label id="selectOptLabel" class="block text-[11px] font-semibold text-slate-300 mb-1.5"></label>
+          <select id="subOptionSelect" onchange="updateLab()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500"></select>
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span id="param1Label" class="text-slate-300 font-medium"></span>
+            <span id="param1Val" class="font-mono font-bold text-emerald-400"></span>
+          </div>
+          <input type="range" id="param1Slider" oninput="updateLab()" class="w-full accent-emerald-500 cursor-pointer">
+        </div>
+
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span id="param2Label" class="text-slate-300 font-medium"></span>
+            <span id="param2Val" class="font-mono font-bold text-amber-400"></span>
+          </div>
+          <input type="range" id="param2Slider" oninput="updateLab()" class="w-full accent-amber-500 cursor-pointer">
+        </div>
+
+        <button onclick="recordObservation()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-[16px]">add_chart</span>
+          <span>Catat Data Pengamatan</span>
+        </button>
+      </div>
+
+      <!-- Riwayat Log Pengamatan -->
+      <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider font-mono text-violet-400">Log Data Eksperimen</span>
+          <span id="logCountBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-violet-500/20 text-violet-300">0 Data</span>
+        </div>
+        <div class="max-h-44 overflow-y-auto border border-slate-800 rounded-xl">
+          <table class="w-full text-left text-[10px] font-mono">
+            <thead class="bg-slate-900 text-slate-400 sticky top-0">
+              <tr>
+                <th class="p-1.5">#</th>
+                <th class="p-1.5">Kondisi</th>
+                <th class="p-1.5 text-right">Hasil Utama</th>
+              </tr>
+            </thead>
+            <tbody id="logTableBody" class="divide-y divide-slate-800/70">
+              <tr><td colspan="3" class="p-3 text-center text-slate-500">Klik "Catat Data Pengamatan"</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PANEL TENGAH: VISUALISASI CANVAS 60 FPS & INSTRUMEN -->
+    <section class="lg:col-span-5 panel-scroll border-b lg:border-b-0 lg:border-r border-slate-800 bg-[#0b101b] p-4 flex flex-col justify-between space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900/90 border border-slate-800 rounded-2xl px-4 py-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs font-bold text-slate-200" id="stageStatusTitle">Instrumen Siap</span>
+        </div>
+        <span id="statusBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">AKTIF</span>
+      </div>
+
+      <div class="relative rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden shadow-inner flex-1 min-h-[280px] flex flex-col">
+        <canvas id="simCanvas" width="560" height="300" class="w-full h-full object-contain flex-1"></canvas>
+        <div class="bg-slate-900/90 border-t border-slate-800 px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+          <span id="visualCaption" class="text-slate-300 font-medium"></span>
+          <span class="font-mono text-emerald-400" id="visualSubMetric"></span>
+        </div>
+      </div>
+
+      <!-- Kartu Pembacaan Sensor Digital -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+          <div class="text-[10px] font-mono uppercase text-slate-400" id="m1Title">Parameter 1</div>
+          <div id="m1Val" class="text-sm font-mono font-bold text-emerald-400 mt-0.5">-</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+          <div class="text-[10px] font-mono uppercase text-slate-400" id="m2Title">Parameter 2</div>
+          <div id="m2Val" class="text-sm font-mono font-bold text-sky-400 mt-0.5">-</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+          <div class="text-[10px] font-mono uppercase text-slate-400" id="m3Title">Parameter 3</div>
+          <div id="m3Val" class="text-sm font-mono font-bold text-amber-400 mt-0.5">-</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+          <div class="text-[10px] font-mono uppercase text-slate-400" id="m4Title">Status Analisis</div>
+          <div id="m4Val" class="text-xs font-mono font-bold text-violet-300 mt-0.5">-</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL KANAN: ANALISIS KUANTITATIF & INTERPRETASI ILMIAH -->
+    <aside class="lg:col-span-4 panel-scroll bg-slate-900/60 p-4 space-y-4">
+      <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider font-mono">
+            <span class="material-symbols-outlined text-[18px]">analytics</span>
+            <span>Rincian Perhitungan &amp; Pengamatan</span>
+          </div>
+          <span class="text-[10px] font-mono text-slate-400">Real-Time</span>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="w-full text-xs font-mono border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-slate-300 border-b border-slate-800">
+                <th class="p-2.5 text-left">Besaran / Indikator</th>
+                <th class="p-2.5 text-right">Nilai Terukur</th>
+              </tr>
+            </thead>
+            <tbody id="detailTableBody" class="divide-y divide-slate-800/70"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-2.5">
+        <div class="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider font-mono">
+          <span class="material-symbols-outlined text-[18px]">lightbulb</span>
+          <span>Interpretasi Konsep &amp; Mekanisme</span>
+        </div>
+        <div id="scientificExplanation" class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-200 leading-relaxed space-y-1.5"></div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-2.5">
+        <div class="flex items-center gap-2 text-violet-400 text-xs font-bold uppercase tracking-wider font-mono">
+          <span class="material-symbols-outlined text-[18px]">fact_check</span>
+          <span>Panduan Pengambilan Data LKPD</span>
+        </div>
+        <ol class="text-xs text-slate-300 space-y-1.5 list-decimal pl-4 leading-relaxed">
+          <li>Pilih mode percobaan pada panel kiri dan amati rumus prinsip kerjanya.</li>
+          <li>Variasikan satu variabel bebas pada slider sambil menjaga variabel kontrol tetap.</li>
+          <li>Klik <strong>Catat Data Pengamatan</strong> minimal pada 3 kondisi berbeda untuk membandingkan pola data di tabel LKPD modul.</li>
+        </ol>
+      </div>
+    </aside>
+
+  </main>
+
+  <script>
+    const PRESETS = [{"key":"uji_makanan","name":"1. Uji Kualitatif Karbohidrat, Protein & Lipid (Benedict, Iodin, Biuret)","formula":"Gula Pereduksi + Cu²⁺ (Biru) —(Δ)→ Cu₂O↓ (Merah Bata) | Amilum + I₂ → Biru Tua | Peptida + Biuret → Ungu","desc":"Uji berbagai sampel biomolekul dengan reagen Benedict (wajib dipanaskan), larutan Iodin/Lugol, dan reagen Biuret.","param1Label":"Suhu Penangas Air / Waterbath (°C)","param1Min":25,"param1Max":95,"param1Step":5,"param1Def":85,"param1Unit":"°C","param2Label":"Waktu Inkubasi / Pemanasan (menit)","param2Min":1,"param2Max":10,"param2Step":1,"param2Def":5,"param2Unit":"mnt","selectLabel":"Kombinasi Sampel Biomolekul & Reagen Uji","selectOpts":[["glukosa_benedict","Glukosa (Monosakarida) + Reagen Benedict → Endapan Merah Bata Cu₂O"],["sukrosa_benedict","Sukrosa (Non-Pereduksi Murni) + Reagen Benedict → Tetap Biru (Negatif)"],["pati_iodin","Amilum / Pati + Larutan Iodin (Lugol) → Kompleks Biru Kehitaman"],["albumin_biuret","Albumin Putih Telur (Protein) + Reagen Biuret (Cu²⁺/OH⁻) → Ungu Violet"],["minyak_saponifikasi","Trigliserida Minyak + NaOH Pekat Panas → Sabun (RCOONa) + Gliserol"]],"calcType":"biomolekul_uji"},{"key":"enzim","name":"2. Kinetika Enzim Michaelis-Menten & Inhibisi Kompetitif","formula":"v = (V_max · [S]) / (K_m,app + [S])   dengan   K_m,app = K_m · (1 + [I]/K_i)","desc":"Analisis pengaruh konsentrasi substrat [S] dan keberadaan inhibitor kompetitif terhadap laju awal reaksi enzimatik (v).","param1Label":"Konsentrasi Substrat [S] (mM)","param1Min":0.5,"param1Max":20,"param1Step":0.5,"param1Def":4,"param1Unit":"mM","param2Label":"Konsentrasi Inhibitor Kompetitif [I] (mM)","param2Min":0,"param2Max":6,"param2Step":0.5,"param2Def":0,"param2Unit":"mM","selectLabel":"Kondisi pH & Suhu Inkubasi Enzim","selectOpts":[["optimum","Kondisi Optimum (Suhu 37°C, pH 7,0 → Vmax = 60 μmol/mnt, Km = 2,0 mM)"],["suboptimal","Suhu Berlebih 65°C (Denaturasi Parsial Struktur Tersier Protein Enzim)"]],"calcType":"enzim"}];
+    let currentPresetIdx = 0;
+    let logs = [];
+    let particles = [];
+    let animTick = 0;
+    let lastResult = null;
+
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < 36; i++) {
+        particles.push({
+          x: 150 + Math.random() * 260,
+          y: 90 + Math.random() * 160,
+          vx: (Math.random() - 0.5) * 1.6,
+          vy: (Math.random() - 0.5) * 1.6,
+          r: 4 + Math.random() * 3,
+          kind: i % 2
+        });
+      }
+    }
+
+    function computeExperiment(preset, p1, p2, opt) {
+      const t = preset.calcType;
+      let rows = [];
+      let m1 = ['-', '-'], m2 = ['-', '-'], m3 = ['-', '-'], m4 = ['Status', 'Valid'];
+      let explanation = '';
+      let liquidColor = '#38bdf8';
+      let precipColor = null;
+      let topLayerColor = null;
+
+      if (t === 'meniskus') {
+        const scale = Number(opt);
+        const raw = p1 + p2;
+        const readVal = Math.round(raw / scale) * scale;
+        const u = scale / 2;
+        const err = readVal - p1;
+        rows = [
+          ['Volume Cairan Sebenarnya', p1.toFixed(2) + ' mL'],
+          ['Bias Sudut Pandang (Paralaks)', (p2 >= 0 ? '+' : '') + p2.toFixed(2) + ' mL'],
+          ['Volume Terbaca oleh Pengamat', readVal.toFixed(2) + ' ± ' + u.toFixed(2) + ' mL'],
+          ['Galat Sistematis Pembacaan', (err >= 0 ? '+' : '') + err.toFixed(2) + ' mL']
+        ];
+        m1 = ['V Terbaca', readVal.toFixed(2) + ' mL'];
+        m2 = ['Ketidakpastian', '±' + u.toFixed(2) + ' mL'];
+        m3 = ['Galat Paralaks', (err >= 0 ? '+' : '') + err.toFixed(2) + ' mL'];
+        m4 = ['Posisi Mata', Math.abs(p2) < 0.05 ? 'Sejajar (Tepat)' : 'Bias Paralaks'];
+        explanation = Math.abs(p2) < 0.05
+          ? 'Mata sejajar dengan bagian dasar lengkungan meniskus cekung sehingga bebas bias paralaks. Ketidakpastian pengukuran murni ditentukan oleh ½ skala terkecil alat (±' + u.toFixed(2) + ' mL).'
+          : 'Posisi mata tidak sejajar dengan dasar meniskus menimbulkan kesalahan sistematis (paralaks) sebesar ' + err.toFixed(2) + ' mL yang tidak hilang meskipun menggunakan alat berskala rapat.';
+        liquidColor = '#38bdf8';
+      } else if (t === 'neraca') {
+        const isTare = opt === 'tare_on';
+        const displayed = isTare ? p1 : (p1 + p2);
+        const bias = displayed - p1;
+        rows = [
+          ['Massa Zat Padat Sebenarnya', p1.toFixed(4) + ' g'],
+          ['Massa Kaca Arloji (Wadah)', p2.toFixed(4) + ' g'],
+          ['Pembacaan Layar Neraca Digital', displayed.toFixed(4) + ' g'],
+          ['Kesalahan Massa Terbaca', (bias >= 0 ? '+' : '') + bias.toFixed(4) + ' g']
+        ];
+        m1 = ['Layar Neraca', displayed.toFixed(4) + ' g'];
+        m2 = ['Massa Murni', p1.toFixed(4) + ' g'];
+        m3 = ['Massa Wadah', p2.toFixed(4) + ' g'];
+        m4 = ['Mode Tare', isTare ? 'Aktif (Akurat)' : 'Lupa Tare!'];
+        explanation = isTare
+          ? 'Tombol Tare berhasil menolkan massa kaca arloji (' + p2.toFixed(2) + ' g), sehingga angka pada layar neraca langsung menunjukkan massa bersih zat kimia (' + p1.toFixed(4) + ' g).'
+          : 'PERINGATAN: Menimbang tanpa menekan Tare setelah meletakkan kaca arloji menyebabkan massa wadah ikut terhitung sebagai massa reaktan (+' + p2.toFixed(2) + ' g).';
+        liquidColor = '#34d399';
+      } else if (t === 'k3') {
+        const qHeat = p1 * 1.45;
+        const dT = qHeat / ((p1 + p2) * 0.00418) * 0.08;
+        const tFinal = 25 + dT;
+        const statusText = opt === 'safe' ? 'Prosedur Aman & Sesuai K3' : (opt === 'unsafe_order' ? 'BAHAYA PERCIKAN ASAM!' : 'APD TIDAK LENGKAP!');
+        rows = [
+          ['Volume H₂SO₄ Pekat (98%)', p1 + ' mL'],
+          ['Volume Air Akuades', p2 + ' mL'],
+          ['Kenaikan Suhu Pengenceran (ΔT)', '+' + dT.toFixed(1) + ' °C (T_akhir ≈ ' + tFinal.toFixed(1) + ' °C)'],
+          ['Evaluasi Keselamatan K3', statusText]
+        ];
+        m1 = ['Suhu Akhir', tFinal.toFixed(1) + ' °C'];
+        m2 = ['ΔT Eksoterm', '+' + dT.toFixed(1) + ' °C'];
+        m3 = ['Rasio Air:Asam', (p2 / p1).toFixed(1) + ' : 1'];
+        m4 = ['Status K3', opt === 'safe' ? 'AMAN' : 'BAHAYA'];
+        explanation = opt === 'safe'
+          ? 'Menuangkan asam sulfat pekat secara perlahan melalui dinding gelas ke dalam air yang volumenya lebih besar memungkinkan kalor hidrasi diserap oleh kapasitas kalor air secara aman.'
+          : 'Jangan pernah menuangkan air ke dalam asam pekat! Kalor hidrasi yang sangat eksotermis mendidihkan tetesan air seketika dan memercikkan asam korosif.';
+        liquidColor = opt === 'safe' ? '#34d399' : '#f43f5e';
+      } else if (t === 'kromatografi') {
+        const valid = opt !== 'submerged';
+        const rf1 = opt === 'eluen1' ? 0.35 : 0.58;
+        const rf2 = opt === 'eluen1' ? 0.75 : 0.82;
+        const d1 = valid ? (rf1 * p1) : 0;
+        const d2 = valid ? (rf2 * p1) : 0;
+        rows = [
+          ['Jarak Tempuh Eluen (d_eluen)', p1.toFixed(2) + ' cm'],
+          ['Jarak Bercak Pigmen A (d_A)', valid ? d1.toFixed(2) + ' cm (Rf = ' + rf1.toFixed(2) + ')' : 'Larut ke Sumur Eluen!'],
+          ['Jarak Bercak Pigmen B (d_B)', valid ? d2.toFixed(2) + ' cm (Rf = ' + rf2.toFixed(2) + ')' : 'Larut ke Sumur Eluen!'],
+          ['Selisih Pemisahan (Δd)', valid ? (d2 - d1).toFixed(2) + ' cm' : 'Gagal']
+        ];
+        m1 = ['Rf Pigmen A', valid ? rf1.toFixed(2) : 'GAGAL'];
+        m2 = ['Rf Pigmen B', valid ? rf2.toFixed(2) : 'GAGAL'];
+        m3 = ['Front Eluen', p1.toFixed(1) + ' cm'];
+        m4 = ['Validitas', valid ? 'Sah' : 'Garis Terendam'];
+        explanation = valid
+          ? 'Komponen yang lebih mudah larut dalam fase gerak (eluen) dan kurang terikat pada fase diam (selulosa kertas) bermigrasi lebih tinggi sehingga memiliki nilai Rf lebih besar.'
+          : 'GALAT: Garis awal penotolan sampel berada di bawah permukaan pelarut sehingga analit larut langsung ke dasar bejana dan elusi tidak valid.';
+        liquidColor = '#a78bfa';
+      } else if (t === 'distilasi') {
+        const isOil = opt === 'minyak_bumi';
+        const tb1 = isOil ? 125 : 78.4;
+        const tb2 = isOil ? 280 : 100.0;
+        const name1 = isOil ? 'Fraksi Bensin (Oktana)' : 'Etanol';
+        const name2 = isOil ? 'Fraksi Solar (Diesel)' : 'Air (H₂O)';
+        const vap1 = p1 >= tb1 && p2 < tb1;
+        const vap2 = p1 >= tb2 && p2 < tb2;
+        let distilat = 'Belum Ada Distilat (Suhu Kurang)';
+        if (vap1 && !vap2) distilat = name1 + ' Terkumpul Dominan (Terpisah Baik)';
+        else if (vap1 && vap2) distilat = 'Campuran ' + name1 + ' + ' + name2 + ' (Suhu Terlalu Tinggi!)';
+        rows = [
+          ['Titik Didih Komponen 1 (' + name1 + ')', tb1 + ' °C'],
+          ['Titik Didih Komponen 2 (' + name2 + ')', tb2 + ' °C'],
+          ['Suhu Pemanas vs Kondensor', p1 + ' °C vs ' + p2 + ' °C'],
+          ['Hasil Penampungan Distilat', distilat]
+        ];
+        m1 = ['Suhu Labu', p1 + ' °C'];
+        m2 = ['Td ' + (isOil ? 'Bensin' : 'Etanol'), tb1 + ' °C'];
+        m3 = ['Td ' + (isOil ? 'Solar' : 'Air'), tb2 + ' °C'];
+        m4 = ['Kemurnian', (vap1 && !vap2) ? 'Fraksi Murni' : (vap1 && vap2 ? 'Tercampur' : 'Belum Menguap')];
+        explanation = (vap1 && !vap2)
+          ? 'Suhu pemanas (' + p1 + ' °C) berada di antara titik didih kedua komponen (' + tb1 + '–' + tb2 + ' °C), sehingga ' + name1 + ' menguap dan mengembun sebagai distilat kaya komponen 1.'
+          : 'Atur suhu pemanas di atas ' + tb1 + ' °C namun di bawah ' + tb2 + ' °C agar hanya komponen bertitik didih lebih rendah yang terdistilasi.';
+        liquidColor = isOil ? '#f59e0b' : '#38bdf8';
+      } else if (t === 'filtrasi') {
+        const recovered = opt === 'filtrasi_kristal' ? (p1 * p2 / 100) : 0;
+        rows = [
+          ['Massa Garam Awal dalam Campuran', p1.toFixed(2) + ' g'],
+          ['Residu Tertahan di Kertas Saring', 'Pasir Silika (Tak Larut Air)'],
+          ['Massa Kristal Garam Terkumpul', recovered.toFixed(2) + ' g'],
+          ['Persen Pemulihan (% Recovery)', (opt === 'filtrasi_kristal' ? p2 : 0) + ' %']
+        ];
+        m1 = ['Garam Awal', p1.toFixed(2) + ' g'];
+        m2 = ['Kristal Hasil', recovered.toFixed(2) + ' g'];
+        m3 = ['% Recovery', (opt === 'filtrasi_kristal' ? p2 : 0) + ' %'];
+        m4 = ['Tahap Akhir', opt === 'filtrasi_kristal' ? 'Kristalisasi' : 'Masih Larut'];
+        explanation = opt === 'filtrasi_kristal'
+          ? 'Pasir tertahan sebagai residu pada kertas saring, sedangkan NaCl terlarut melewati saringan sebagai filtrat dan diperoleh kembali melalui penguapan pelarut (kristalisasi).'
+          : 'Garam dapur (NaCl) larut sempurna menjadi ion Na⁺ dan Cl⁻ yang lolos menembus pori kertas saring; tanpa tahap evaporasi/kristalisasi, padatan garam belum dapat dipisahkan dari air.';
+        precipColor = '#e2e8f0';
+      } else if (t === 'padatan') {
+        const map = {
+          NaCl_250: { name: 'NaCl', mr: 58.5, v: 250, col: '#38bdf8' },
+          CuSO4_250: { name: 'CuSO₄·5H₂O', mr: 249.5, v: 250, col: '#0284c7' },
+          KMnO4_100: { name: 'KMnO₄', mr: 158.0, v: 100, col: '#9333ea' }
+        }[opt];
+        const mol = p1 * (map.v / 1000);
+        const mass = mol * map.mr;
+        const vActual = map.v + p2;
+        const mActual = mol / (vActual / 1000);
+        const errPct = ((mActual - p1) / p1) * 100;
+        rows = [
+          ['Zat Terlarut & Labu Ukur', map.name + ' (Mr = ' + map.mr + ') • ' + map.v + ' mL'],
+          ['Mol Zat Terlarut (n = M × V)', mol.toFixed(4) + ' mol'],
+          ['Massa Padatan Ditimbang (m = n × Mr)', mass.toFixed(4) + ' g'],
+          ['Volume Akhir Aktual & Molaritas Aktual', vActual + ' mL → ' + mActual.toFixed(4) + ' M (Galat ' + (errPct >= 0 ? '+' : '') + errPct.toFixed(2) + '%)']
+        ];
+        m1 = ['Massa Timbang', mass.toFixed(3) + ' g'];
+        m2 = ['Mol Zat (n)', mol.toFixed(4) + ' mol'];
+        m3 = ['M Aktual', mActual.toFixed(4) + ' M'];
+        m4 = ['Meniskus', p2 === 0 ? 'Tepat Tanda' : (p2 > 0 ? 'Lewat Tanda' : 'Kurang Air')];
+        explanation = 'Untuk membuat ' + map.v + ' mL larutan ' + map.name + ' ' + p1.toFixed(2) + ' M, timbang ' + mass.toFixed(3) + ' g zat, larutkan di gelas kimia, bilas masuk ke labu ukur ' + map.v + ' mL, lalu himpitkan dasar meniskus tepat pada garis kalibrasi leher labu.';
+        liquidColor = map.col;
+      } else if (t === 'pengenceran') {
+        const v2 = Number(opt);
+        const v1 = (p2 * v2) / p1;
+        const vAir = Math.max(0, v2 - v1);
+        rows = [
+          ['Konsentrasi Stok (M₁) & Target (M₂)', p1.toFixed(2) + ' M → ' + p2.toFixed(2) + ' M'],
+          ['Volume Labu Ukur Akhir (V₂)', v2 + ' mL'],
+          ['Volume Larutan Stok Dipipet (V₁)', v1.toFixed(2) + ' mL'],
+          ['Penambahan Akuades hingga Tanda Batas', '± ' + vAir.toFixed(2) + ' mL (Total ' + v2 + ' mL)']
+        ];
+        m1 = ['V₁ Dipipet', v1.toFixed(2) + ' mL'];
+        m2 = ['V₂ Akhir', v2 + ' mL'];
+        m3 = ['Faktor Encer', (p1 / p2).toFixed(1) + '×'];
+        m4 = ['Status', v1 <= v2 ? 'Valid' : 'M₂ > M₁!'];
+        explanation = 'Berdasarkan kekekalan mol zat terlarut saat pengenceran (n₁ = n₂ ⇔ M₁·V₁ = M₂·V₂), pipet ' + v1.toFixed(2) + ' mL larutan induk ' + p1.toFixed(2) + ' M ke dalam labu ukur ' + v2 + ' mL, lalu tambahkan akuades sampai volume total tepat ' + v2 + ' mL.';
+        liquidColor = '#0ea5e9';
+      } else if (t === 'gravimetri_cl' || t === 'gravimetri_so4') {
+        const isCl = t === 'gravimetri_cl';
+        const truePct = 24.0;
+        const analyteMassIdeal = p1 * (truePct / 100);
+        const factor = isCl ? (35.45 / 143.32) : (96.06 / 233.39);
+        const precipIdeal = analyteMassIdeal / factor;
+        const extra = opt === 'wet_003' ? 0.03 : (opt === 'wet_006' ? 0.06 : (opt === 'impure' ? 0.04 : 0));
+        const precipWeighed = precipIdeal * (p2 / 100) + extra;
+        const calcAnalyte = precipWeighed * factor;
+        const calcPct = (calcAnalyte / p1) * 100;
+        rows = [
+          ['Faktor Gravimetri ' + (isCl ? 'Cl / AgCl' : 'SO₄ / BaSO₄'), factor.toFixed(4)],
+          ['Massa Endapan ' + (isCl ? 'AgCl' : 'BaSO₄') + ' Ideal', precipIdeal.toFixed(4) + ' g'],
+          ['Massa Endapan Ditimbang Aktual', precipWeighed.toFixed(4) + ' g'],
+          ['Kadar ' + (isCl ? 'Klorida (Cl⁻)' : 'Sulfat (SO₄²⁻)') + ' Terhitung', calcPct.toFixed(2) + ' % (Acuan: 24,00%)']
+        ];
+        m1 = ['Faktor (f)', factor.toFixed(4)];
+        m2 = ['m Endapan', precipWeighed.toFixed(4) + ' g'];
+        m3 = ['m Analit', calcAnalyte.toFixed(4) + ' g'];
+        m4 = ['% Kadar', calcPct.toFixed(2) + ' %'];
+        explanation = 'Massa analit dihitung dengan mengalikan massa endapan murni terhadap faktor gravimetri (f = ' + factor.toFixed(4) + '). Sisa air akibat pengeringan yang belum konstan memberi bias positif, sedangkan kelarutan endapan memberi bias negatif.';
+        liquidColor = '#cbd5e1';
+        precipColor = '#f8fafc';
+      } else if (t === 'biomolekul_uji') {
+        const map = {
+          glukosa_benedict: { res: p1 >= 70 ? 'POSITIF: Endapan Merah Bata (Cu₂O↓)' : 'Belum Bereaksi (Suhu < 70°C, Butuh Pemanasan!)', col: p1 >= 70 ? '#ea580c' : '#0284c7', prec: p1 >= 70 ? '#b91c1c' : null },
+          sukrosa_benedict: { res: 'NEGATIF: Larutan Tetap Biru (Sukrosa Tidak Memiliki Gugus Hemiasetal Bebas)', col: '#0284c7', prec: null },
+          pati_iodin: { res: p1 <= 55 ? 'POSITIF: Kompleks Biru Tua Kehitaman (Amilosa-Iodin)' : 'Warna Memudar (Heliks Amilosa Terurai pada Suhu Tinggi)', col: p1 <= 55 ? '#1e1b4b' : '#ca8a04', prec: null },
+          albumin_biuret: { res: 'POSITIF: Kompleks Koordinasi Cu²⁺-Peptida Berwarna Ungu Violet', col: '#9333ea', prec: null },
+          minyak_saponifikasi: { res: p1 >= 70 ? 'Saponifikasi Berhasil: Terbentuk Sabun Natrium Karboksilat + Gliserol' : 'Reaksi Lambat (Hidrolisis Basa Butuh Pemanasan)', col: '#facc15', prec: null }
+        }[opt];
+        rows = [
+          ['Kondisi Inkubasi / Waterbath', p1 + ' °C selama ' + p2 + ' menit'],
+          ['Hasil Pengamatan Visual', map.res],
+          ['Gugus / Ikatan Spesifik Terdeteksi', opt.includes('benedict') ? 'Aldehida / Alfa-Hidroksi Keton Bebas' : (opt === 'pati_iodin' ? 'Polisakarida Heliks Alfa-1,4-Glikosidik' : (opt === 'albumin_biuret' ? 'Ikatan Peptida (−CO−NH−) ≥ 2' : 'Ikatan Ester Trigliserida'))]
+        ];
+        m1 = ['Suhu Uji', p1 + ' °C'];
+        m2 = ['Waktu Uji', p2 + ' mnt'];
+        m3 = ['Reagen', opt.split('_')[1].toUpperCase()];
+        m4 = ['Hasil Uji', map.res.startsWith('POSITIF') || map.res.startsWith('Saponifikasi') ? 'POSITIF (+)' : 'NEGATIF (−)'];
+        explanation = map.res + '. Perhatikan bahwa uji Benedict wajib dipanaskan di penangas air (≥70°C) agar reduksi Cu²⁺ menjadi endapan merah bata Cu₂O berlangsung.';
+        liquidColor = map.col;
+        precipColor = map.prec;
+      } else if (t === 'enzim') {
+        const vmax = opt === 'optimum' ? 60 : 24;
+        const km = 2.0;
+        const ki = 1.0;
+        const kmApp = km * (1 + p2 / ki);
+        const v = (vmax * p1) / (kmApp + p1);
+        rows = [
+          ['V_max Sistem Enzim', vmax.toFixed(1) + ' μmol/menit'],
+          ['K_m Tampak (K_m,app)', kmApp.toFixed(2) + ' mM (K_m Murni = 2,00 mM)'],
+          ['Laju Awal Reaksi Enzimatik (v)', v.toFixed(2) + ' μmol/menit'],
+          ['Persentase Kejenuhan Enzim (v / V_max)', ((v / vmax) * 100).toFixed(1) + ' %']
+        ];
+        m1 = ['Laju Awal (v)', v.toFixed(2) + ' μM/m'];
+        m2 = ['Km Tampak', kmApp.toFixed(2) + ' mM'];
+        m3 = ['Vmax', vmax.toFixed(1) + ' μM/m'];
+        m4 = ['Inhibisi', p2 > 0 ? 'Kompetitif' : 'Tanpa Inhibitor'];
+        explanation = 'Inhibitor kompetitif bersaing dengan substrat pada sisi aktif enzim sehingga meningkatkan nilai Km tampak menjadi ' + kmApp.toFixed(2) + ' mM tanpa mengubah Vmax (dapat diatasi dengan meningkatkan konsentrasi substrat [S]).';
+        liquidColor = '#10b981';
+      } else if (t === 'halogen') {
+        const map = {
+          cl2_br: { rx: 'Cl₂(aq) + 2Br⁻(aq) → 2Cl⁻(aq) + Br₂(l)', spont: 'YA (E° Cl₂ > E° Br₂)', orgCol: '#ea580c', orgName: 'Jingga-Cokelat (Br₂ dalam CCl₄)' },
+          cl2_i: { rx: 'Cl₂(aq) + 2I⁻(aq) → 2Cl⁻(aq) + I₂(l)', spont: 'YA (E° Cl₂ > E° I₂)', orgCol: '#9333ea', orgName: 'Ungu Violet (I₂ dalam CCl₄)' },
+          br2_i: { rx: 'Br₂(aq) + 2I⁻(aq) → 2Br⁻(aq) + I₂(l)', spont: 'YA (E° Br₂ > E° I₂)', orgCol: '#9333ea', orgName: 'Ungu Violet (I₂ dalam CCl₄)' },
+          i2_br: { rx: 'I₂(aq) + Br⁻(aq) → Tidak Bereaksi', spont: 'TIDAK (I₂ Oksidator Terlemah)', orgCol: '#a855f7', orgName: 'Tetap I₂ Awal (Tanpa Pendesakan)' }
+        }[opt];
+        rows = [
+          ['Persamaan Reaksi Redoks', map.rx],
+          ['Kespontanan Pendesakan', map.spont],
+          ['Warna Fase Organik Nonpolar (CCl₄)', map.orgName]
+        ];
+        m1 = ['Spontanitas', map.spont.split(' ')[0]];
+        m2 = ['Fase CCl₄', map.orgName.split(' ')[0]];
+        m3 = ['Urutan E°', 'Cl₂ > Br₂ > I₂'];
+        m4 = ['Reaksi', map.spont.startsWith('YA') ? 'Terjadi' : 'Tidak'];
+        explanation = 'Daya pengoksidasi halogen menurun dari atas ke bawah golongan VIIA (F₂ > Cl₂ > Br₂ > I₂), sehingga halogen di bagian atas mampu mendesak ion halida di bawahnya dari larutannya.';
+        liquidColor = map.orgCol;
+        topLayerColor = '#bae6fd';
+      } else if (t === 'periode3') {
+        const map = {
+          na2o_air: { rx: 'Na₂O(s) + H₂O(l) → 2NaOH(aq)', sifat: 'Oksida Basa Kuat (Ikatan Ionik)', ph: '13,2', col: '#2563eb' },
+          al2o3_asam: { rx: 'Al₂O₃(s) + 6HCl(aq) → 2AlCl₃(aq) + 3H₂O(l)', sifat: 'Oksida Amfoter (Bereaksi sebagai Basa)', ph: '2,1', col: '#38bdf8' },
+          al2o3_basa: { rx: 'Al₂O₃(s) + 2NaOH(aq) + 3H₂O(l) → 2Na[Al(OH)₄](aq)', sifat: 'Oksida Amfoter (Bereaksi sebagai Asam)', ph: '12,8', col: '#6366f1' },
+          so3_air: { rx: 'SO₃(g) + H₂O(l) → H₂SO₄(aq)', sifat: 'Oksida Asam Kuat (Ikatan Kovalen)', ph: '1,0', col: '#f43f5e' }
+        }[opt];
+        rows = [
+          ['Persamaan Reaksi Kimia', map.rx],
+          ['Karakteristik Oksida Periode 3', map.sifat],
+          ['Derajat Keasaman (pH Larutan)', map.ph]
+        ];
+        m1 = ['pH Larutan', map.ph];
+        m2 = ['Sifat Oksida', map.sifat.split(' ')[1]];
+        m3 = ['Jumlah Zat', p1 + ' mmol'];
+        m4 = ['Kelarutan', 'Larut Bereaksi'];
+        explanation = 'Dari kiri ke kanan periode ketiga (Na ke Cl), sifat oksida berubah secara periodik dari Basa Kuat (Na₂O, MgO) → Amfoter (Al₂O₃) → Asam (SiO₂, P₄O₁₀, SO₃, Cl₂O₇) seiring pergeseran ikatan ionik ke kovalen.';
+        liquidColor = map.col;
+      } else if (t === 'kompleks') {
+        const map = {
+          cu_nh3: { ion: '[Cu(NH₃)₄(H₂O)₂]²⁺', biloks: '+2 (d⁹)', spin: 'n = 1 → μ = 1,73 BM (Paramagnetik)', col: '#1d4ed8', abs: (0.45 * p1 * p2).toFixed(2) },
+          fe_cn6: { ion: '[Fe(CN)₆]⁴⁻', biloks: '+2 (d⁶ Low-Spin)', spin: 'n = 0 → μ = 0,00 BM (Diamagnetik)', col: '#eab308', abs: (0.28 * p1 * p2).toFixed(2) },
+          fe_h2o6: { ion: '[Fe(H₂O)₆]³⁺', biloks: '+3 (d⁵ High-Spin)', spin: 'n = 5 → μ = 5,92 BM (Paramagnetik Kuat)', col: '#d97706', abs: (0.32 * p1 * p2).toFixed(2) }
+        }[opt];
+        rows = [
+          ['Formula Ion Kompleks & Biloks Pusat', map.ion + ' • Biloks = ' + map.biloks],
+          ['Konfigurasi Subkulit d & Sifat Magnetik', map.spin],
+          ['Absorbansi Spektrum d-d Terukur', map.abs + ' A']
+        ];
+        m1 = ['Biloks Pusat', map.biloks.split(' ')[0]];
+        m2 = ['Momen Magnet', map.spin.split('→')[1].trim().split(' ')[2] + ' BM'];
+        m3 = ['Absorbansi', map.abs + ' A'];
+        m4 = ['Geometri', 'Oktahedral (BK 6)'];
+        explanation = 'Ligan medan kuat seperti CN⁻ menimbulkan pembelahan orbital d (Δo) yang besar sehingga elektron berpasangan (low-spin), sedangkan ligan medan lemah seperti H₂O menghasilkan konfigurasi high-spin.';
+        liquidColor = map.col;
+      } else if (t === 'edta') {
+        const molEdta = (p2 / 1000) * 0.010;
+        const mgCaCO3 = molEdta * 100.09 * 1000;
+        const ppm = mgCaCO3 / (p1 / 1000);
+        const kategori = ppm < 60 ? 'Air Lunak (Soft Water)' : (ppm <= 120 ? 'Sadah Sedang' : (ppm <= 180 ? 'Air Sadah (Hard)' : 'Sangat Sadah'));
+        rows = [
+          ['Mol EDTA Bereaksi (1:1 dengan Ca²⁺/Mg²⁺)', (molEdta * 1000).toFixed(3) + ' mmol'],
+          ['Massa Setara CaCO₃ dalam Sampel', mgCaCO3.toFixed(2) + ' mg'],
+          ['Kadar Kesadahan Total (mg/L CaCO₃)', ppm.toFixed(1) + ' mg/L (ppm)'],
+          ['Klasifikasi Mutu Kesadahan Air', kategori]
+        ];
+        m1 = ['Kesadahan', ppm.toFixed(1) + ' ppm'];
+        m2 = ['Mol Ca²⁺/Mg²⁺', (molEdta * 1000).toFixed(2) + ' mmol'];
+        m3 = ['V EDTA', p2.toFixed(1) + ' mL'];
+        m4 = ['Mutu Air', kategori.split(' ')[1] || kategori];
+        explanation = 'Pada pH 10, EDTA membentuk kompleks kelat stabil 1:1 dengan ion Ca²⁺ dan Mg²⁺ ([Ca-EDTA]²⁻). Titik akhir titrasi ditandai perubahan warna indikator EBT dari merah anggur menjadi biru murni.';
+        liquidColor = '#2563eb';
+      } else if (t === 'koagulasi') {
+        const initNtu = opt === 'keruh_sedang' ? 80 : 180;
+        const optDose = opt === 'keruh_sedang' ? 35 : 65;
+        const eff = Math.max(0.05, 1 - Math.exp(-p1 / 22) * (p2 / 60));
+        const finalNtu = Math.max(1.5, initNtu * (1 - Math.min(0.97, (p1 / optDose) * 0.75 * (p2 / 40))));
+        rows = [
+          ['Kekeruhan Awal Air Limbah', initNtu + ' NTU'],
+          ['Dosis Tawas Al₂(SO₄)₃ & Waktu Endap', p1 + ' mg/L selama ' + p2 + ' menit'],
+          ['Kekeruhan Akhir Setelah Flokulasi', finalNtu.toFixed(1) + ' NTU'],
+          ['Efisiensi Penjernihan Koloid', (((initNtu - finalNtu) / initNtu) * 100).toFixed(1) + ' %']
+        ];
+        m1 = ['NTU Awal', initNtu + ' NTU'];
+        m2 = ['NTU Akhir', finalNtu.toFixed(1) + ' NTU'];
+        m3 = ['Reduksi Keruh', (((initNtu - finalNtu) / initNtu) * 100).toFixed(1) + '%'];
+        m4 = ['Mutu Fisik', finalNtu <= 25 ? 'Jernih (Memenuhi)' : 'Masih Keruh'];
+        explanation = 'Ion Al³⁺ dari koagulan tawas menetralkan muatan permukaan partikel koloid lumpur dan membentuk flok hidroksida Al(OH)₃ yang mengikat pengotor tersuspensi hingga mengendap.';
+        liquidColor = finalNtu <= 25 ? '#38bdf8' : '#a16207';
+        precipColor = p1 > 0 ? '#78350f' : null;
+      } else {
+        const atomEcon = opt === 'rute_hijau' ? 100.0 : 42.5;
+        const actualMass = p1 * (p2 / 100);
+        const wasteMass = opt === 'rute_hijau' ? (p1 - actualMass) : (p1 * (100 / atomEcon - 1) + (p1 - actualMass));
+        const eFactor = wasteMass / Math.max(1, actualMass);
+        rows = [
+          ['Persentase Ekonomi Atom Teoretis', atomEcon.toFixed(1) + ' %'],
+          ['Massa Produk Bersih Dihasilkan', actualMass.toFixed(2) + ' kg'],
+          ['Massa Total Limbah Samping', wasteMass.toFixed(2) + ' kg'],
+          ['Faktor Lingkungan (E-Factor = kg Limbah / kg Produk)', eFactor.toFixed(2)]
+        ];
+        m1 = ['Ekonomi Atom', atomEcon.toFixed(1) + '%'];
+        m2 = ['Produk Bersih', actualMass.toFixed(1) + ' kg'];
+        m3 = ['Limbah Samping', wasteMass.toFixed(1) + ' kg'];
+        m4 = ['E-Factor', eFactor.toFixed(2)];
+        explanation = 'Prinsip Kimia Hijau ke-2 (Ekonomi Atom) menekankan perancangan reaksi agar seluruh atom reaktan masuk ke dalam produk akhir yang diinginkan, meminimalkan E-Factor (rasio limbah terhadap produk).';
+        liquidColor = '#10b981';
+      }
+
+      return { rows, m1, m2, m3, m4, explanation, liquidColor, precipColor, topLayerColor };
+    }
+
+    function updateLab() {
+      const preset = PRESETS[currentPresetIdx];
+      const p1 = Number(document.getElementById('param1Slider').value);
+      const p2 = Number(document.getElementById('param2Slider').value);
+      const opt = document.getElementById('subOptionSelect').value;
+
+      document.getElementById('param1Val').textContent = p1 + ' ' + preset.param1Unit;
+      document.getElementById('param2Val').textContent = p2 + ' ' + preset.param2Unit;
+
+      const res = computeExperiment(preset, p1, p2, opt);
+      lastResult = { presetName: preset.name, p1, p2, opt, res };
+
+      document.getElementById('m1Title').textContent = res.m1[0];
+      document.getElementById('m1Val').textContent = res.m1[1];
+      document.getElementById('m2Title').textContent = res.m2[0];
+      document.getElementById('m2Val').textContent = res.m2[1];
+      document.getElementById('m3Title').textContent = res.m3[0];
+      document.getElementById('m3Val').textContent = res.m3[1];
+      document.getElementById('m4Title').textContent = res.m4[0];
+      document.getElementById('m4Val').textContent = res.m4[1];
+
+      document.getElementById('visualCaption').textContent = preset.name;
+      document.getElementById('visualSubMetric').textContent = res.m1[0] + ': ' + res.m1[1] + ' | ' + res.m2[0] + ': ' + res.m2[1];
+
+      document.getElementById('detailTableBody').innerHTML = res.rows.map(([k, v]) => `
+        <tr>
+          <td class="p-2.5 text-slate-300">${k}</td>
+          <td class="p-2.5 text-right font-bold text-emerald-400">${v}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('scientificExplanation').innerHTML = '<p>' + res.explanation + '</p>';
+    }
+
+    function changePreset() {
+      currentPresetIdx = Number(document.getElementById('presetSelect').value);
+      const p = PRESETS[currentPresetIdx];
+      document.getElementById('formulaBox').textContent = p.formula;
+      document.getElementById('presetDesc').textContent = p.desc;
+      document.getElementById('selectOptLabel').textContent = p.selectLabel;
+
+      const subSel = document.getElementById('subOptionSelect');
+      subSel.innerHTML = p.selectOpts.map(([val, text]) => `<option value="${val}">${text}</option>`).join('');
+
+      const s1 = document.getElementById('param1Slider');
+      s1.min = p.param1Min; s1.max = p.param1Max; s1.step = p.param1Step; s1.value = p.param1Def;
+      document.getElementById('param1Label').textContent = p.param1Label;
+
+      const s2 = document.getElementById('param2Slider');
+      s2.min = p.param2Min; s2.max = p.param2Max; s2.step = p.param2Step; s2.value = p.param2Def;
+      document.getElementById('param2Label').textContent = p.param2Label;
+
+      updateLab();
+    }
+
+    function recordObservation() {
+      if (!lastResult) return;
+      logs.push({
+        no: logs.length + 1,
+        mode: lastResult.presetName,
+        cond: lastResult.p1 + ' / ' + lastResult.p2,
+        main: lastResult.res.m1[1] + ' (' + lastResult.res.m4[1] + ')'
+      });
+      document.getElementById('logCountBadge').textContent = logs.length + ' Data';
+      document.getElementById('logTableBody').innerHTML = logs.map(l => `
+        <tr>
+          <td class="p-1.5 text-slate-400">${l.no}</td>
+          <td class="p-1.5 text-slate-200">${l.cond}</td>
+          <td class="p-1.5 text-right text-emerald-400 font-bold">${l.main}</td>
+        </tr>
+      `).join('');
+    }
+
+    function resetExperiment() {
+      logs = [];
+      document.getElementById('logCountBadge').textContent = '0 Data';
+      document.getElementById('logTableBody').innerHTML = '<tr><td colspan="3" class="p-3 text-center text-slate-500">Klik "Catat Data Pengamatan"</td></tr>';
+      changePreset();
+    }
+
+    function exportLabCSV() {
+      const rows = [['No', 'Mode Eksperimen', 'Kondisi Variabel', 'Hasil Pengamatan']];
+      logs.forEach(l => rows.push([l.no, l.mode, l.cond, l.main]));
+      const csv = rows.map(r => r.map(x => '"' + String(x).replace(/"/g, '""') + '"').join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Lab_Biomolekul_Uji_Makanan_DeepDive_Data.csv';
+      a.click();
+    }
+
+    function drawCanvas() {
+      const canvas = document.getElementById('simCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      animTick++;
+
+      // Lab bench background
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(40, 260, W - 80, 12);
+
+      const res = lastResult ? lastResult.res : { liquidColor: '#38bdf8', m1: ['', ''], m2: ['', ''] };
+
+      // Draw central vessel / apparatus
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(145, 55, 270, 200, [0, 0, 18, 18]);
+      ctx.stroke();
+
+      // Liquid fill
+      ctx.fillStyle = res.liquidColor || '#38bdf8';
+      ctx.globalAlpha = 0.42;
+      ctx.fillRect(148, 110, 264, 142);
+      ctx.globalAlpha = 1.0;
+
+      if (res.topLayerColor) {
+        ctx.fillStyle = res.topLayerColor;
+        ctx.globalAlpha = 0.38;
+        ctx.fillRect(148, 82, 264, 30);
+        ctx.globalAlpha = 1.0;
+      }
+
+      if (res.precipColor) {
+        ctx.fillStyle = res.precipColor;
+        ctx.beginPath();
+        ctx.roundRect(152, 232, 256, 20, 8);
+        ctx.fill();
+      }
+
+      // Graduation marks
+      ctx.strokeStyle = 'rgba(226,232,240,0.45)';
+      ctx.lineWidth = 1;
+      for (let y = 80; y <= 230; y += 25) {
+        ctx.beginPath();
+        ctx.moveTo(395, y);
+        ctx.lineTo(412, y);
+        ctx.stroke();
+      }
+
+      // Animated particles inside vessel
+      for (const pt of particles) {
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        if (pt.x < 160 || pt.x > 400) pt.vx *= -1;
+        if (pt.y < 118 || pt.y > 240) pt.vy *= -1;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+        ctx.fillStyle = pt.kind === 0 ? '#34d399' : '#fbbf24';
+        ctx.fill();
+      }
+
+      // Live readout overlay on canvas
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 12px "JetBrains Mono", monospace';
+      ctx.fillText((res.m1[0] || '') + ': ' + (res.m1[1] || ''), 155, 42);
+
+      requestAnimationFrame(drawCanvas);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const sel = document.getElementById('presetSelect');
+      sel.innerHTML = PRESETS.map((p, idx) => `<option value="${idx}">${p.name}</option>`).join('');
+      initParticles();
+      changePreset();
+      requestAnimationFrame(drawCanvas);
+    });
+  </script>
+</body>
+</html>

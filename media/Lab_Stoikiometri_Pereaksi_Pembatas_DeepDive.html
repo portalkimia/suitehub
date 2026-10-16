@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Lab: Stoikiometri, Hukum Dasar & Pereaksi Pembatas • PortalKimia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-space: #090d16;
+      --bg-bench: #131926;
+      --bg-panel: rgba(19, 25, 38, 0.94);
+      --bg-glass: rgba(28, 36, 54, 0.75);
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-bright: rgba(16, 185, 129, 0.45);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --primary-glow: rgba(16, 185, 129, 0.35);
+      --accent-cyan: #38bdf8;
+      --accent-amber: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      --lcd-bg: #03140f;
+      --lcd-text: #10f2a7;
+      --shadow-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.6);
+      --font-ui: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header.lab-header {
+      background: rgba(15, 20, 31, 0.96);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-back-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-back-hub, .btn-back-portal {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+      height: 32px;
+    }
+
+    .btn-back-hub {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .btn-back-hub:hover {
+      background: rgba(16, 185, 129, 0.3);
+      color: #fff;
+    }
+
+    .btn-back-portal {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+    .btn-back-portal:hover {
+      background: rgba(99, 102, 241, 0.3);
+      color: #fff;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #10b981, #0284c7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 18px var(--primary-glow);
+      font-size: 20px;
+    }
+
+    .brand-title h1 {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brand-title h1 span.badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--border-bright);
+      color: #6ee7b7;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-header {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      padding: 8px 13px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .btn-header.primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      color: #fff;
+    }
+
+    main.lab-workbench {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 350px 1fr 380px;
+      gap: 16px;
+      padding: 16px 20px;
+      max-width: 1740px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .panel-header {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-header h2 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-body {
+      padding: 15px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .control-group {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    select.lab-select {
+      width: 100%;
+      background: #090d16;
+      color: #f8fafc;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      padding: 9px 11px;
+      border-radius: 9px;
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .slider-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .slider-val {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.12);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent-emerald);
+      cursor: pointer;
+    }
+
+    .unit-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: #090d16;
+      padding: 4px;
+      border-radius: 9px;
+      border: 1px solid var(--border-glass);
+    }
+
+    .unit-btn {
+      padding: 6px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .unit-btn.active {
+      background: rgba(16, 185, 129, 0.25);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.45);
+    }
+
+    .btn-action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-lab {
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border-glass);
+      background: rgba(255, 255, 255, 0.06);
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-lab:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .btn-lab.run {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+    }
+    .btn-lab.log {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border: none;
+      color: #fff;
+    }
+
+    /* Center Panel */
+    .equation-banner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(14, 165, 233, 0.1));
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 12px;
+      padding: 12px 16px;
+      text-align: center;
+    }
+    .equation-text {
+      font-family: var(--font-mono);
+      font-size: 17px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: 0.5px;
+    }
+    .equation-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      background: #050911;
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      overflow: hidden;
+      height: 270px;
+    }
+
+    canvas#reactorCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .reactor-overlay-badges {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .r-badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
+    }
+    .r-badge.limiting {
+      border-color: rgba(244, 63, 94, 0.5);
+      color: #fda4af;
+      background: rgba(136, 19, 55, 0.65);
+    }
+    .r-badge.lavoisier {
+      border-color: rgba(16, 185, 129, 0.5);
+      color: #6ee7b7;
+      background: rgba(6, 78, 59, 0.65);
+    }
+
+    /* MRS Table */
+    .mrs-box {
+      background: #0b101b;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .mrs-title {
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border-glass);
+      font-size: 11px;
+      font-weight: 700;
+      color: #38bdf8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    table.mrs-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    table.mrs-table th, table.mrs-table td {
+      padding: 8px 10px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    table.mrs-table th {
+      background: rgba(15, 23, 42, 0.9);
+      color: #cbd5e1;
+      font-weight: 700;
+    }
+    table.mrs-table td.row-lbl {
+      text-align: left;
+      font-weight: 700;
+      color: #94a3b8;
+      width: 110px;
+    }
+    .mrs-m { color: #38bdf8; }
+    .mrs-r { color: #f59e0b; }
+    .mrs-s { color: #10b981; font-weight: 700; }
+
+    /* Right Panel LCD */
+    .lcd-meter-box {
+      background: #020907;
+      border: 2px solid #064e3b;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.95);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .lcd-top-bar {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(16, 242, 167, 0.7);
+    }
+    .lcd-digits-large {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--lcd-text);
+      text-shadow: 0 0 12px rgba(16, 242, 167, 0.6);
+    }
+    .lcd-sub-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(16, 242, 167, 0.15);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .calc-card {
+      background: #0d131f;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    .calc-row span.val {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+    }
+    table.data-table th {
+      background: #111723;
+      padding: 6px 8px;
+      text-align: left;
+      color: #94a3b8;
+      position: sticky;
+      top: 0;
+    }
+    table.data-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 15, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-card {
+      background: #131926;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      max-width: 680px;
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--accent-emerald);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 200;
+      transition: transform 0.3s ease;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 1150px) {
+      main.lab-workbench {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="lab-header">
+    <div class="brand-section">
+      <div class="nav-back-group">
+        <a href="LaboratoriumVirtual.html" class="btn-back-hub" onclick="handlePortalBack(event, 'LaboratoriumVirtual.html')">
+          ← Katalog Lab
+        </a>
+        <a href="index.html" class="btn-back-portal" onclick="handlePortalBack(event, 'index.html')">
+          🏠 Portal Media
+        </a>
+      </div>
+      <div class="brand-logo">⚖️</div>
+      <div class="brand-title">
+        <h1>
+          Virtual Lab: Stoikiometri, Hukum Dasar &amp; Pereaksi Pembatas
+          <span class="badge">Standar PhET / Labster</span>
+        </h1>
+        <p>Simulasi Tabel MRS (Mula-mula, Reaksi, Sisa), Hukum Kekekalan Massa Lavoisier, Jembatan Mol &amp; Persen Hasil</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-header" onclick="openModal('guideModal')">📘 Panduan &amp; Rumus</button>
+      <button class="btn-header" onclick="exportCSV()">📥 Ekspor CSV</button>
+      <button class="btn-header primary" onclick="openModal('quizModal')">🎯 Uji Pemahaman (4 Soal)</button>
+    </div>
+  </header>
+<!-- PK-RELATED-MODULES-BAR-START -->
+<div id="pk-related-modules-bar" style="background:linear-gradient(90deg,rgba(6,78,59,0.55),rgba(15,23,42,0.92));border-bottom:1px solid rgba(16,185,129,0.28);padding:8px 16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;z-index:45;position:relative;">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
+    <span style="font-size:11px;font-weight:800;color:#34d399;text-transform:uppercase;letter-spacing:0.05em;margin-right:4px;">🔗 Modul Materi Terkait:</span>
+    <a href="Media_Pembelajaran_Kimia_Drive/Hukum_Hukum_Dasar_Kimia_10_Fase_E.html" data-pk-modfile="Hukum_Hukum_Dasar_Kimia_10_Fase_E.html" class="pk-relmod-link" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6ee7b7;font-size:11px;font-weight:700;text-decoration:none;transition:all 0.2s;">📖 Hukum-Hukum Dasar Kimia & Perhitungan Stoikiometri Awal <span style="opacity:0.75;font-weight:500;">(Kelas 10)</span></a><a href="Media_Pembelajaran_Kimia_Drive/Konsep_Mol_dan_Stoikiometri_10_Fase_E.html" data-pk-modfile="Konsep_Mol_dan_Stoikiometri_10_Fase_E.html" class="pk-relmod-link" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6ee7b7;font-size:11px;font-weight:700;text-decoration:none;transition:all 0.2s;">📖 Konsep Mol, Massa Molar, & Jembatan Perhitungan Stoikiometri <span style="opacity:0.75;font-weight:500;">(Kelas 10)</span></a><a href="Media_Pembelajaran_Kimia_Drive/Pereaksi_Pembatas_Persen_Hasil_dan_Kadar_10_Fase_E.html" data-pk-modfile="Pereaksi_Pembatas_Persen_Hasil_dan_Kadar_10_Fase_E.html" class="pk-relmod-link" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6ee7b7;font-size:11px;font-weight:700;text-decoration:none;transition:all 0.2s;">📖 Pereaksi Pembatas, Persen Hasil Reaksi, & Kadar Kemurnian <span style="opacity:0.75;font-weight:500;">(Kelas 10)</span></a><a href="Media_Pembelajaran_Kimia_Drive/Persamaan_dan_Penyetaraan_Reaksi_10_Fase_E.html" data-pk-modfile="Persamaan_dan_Penyetaraan_Reaksi_10_Fase_E.html" class="pk-relmod-link" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.35);color:#6ee7b7;font-size:11px;font-weight:700;text-decoration:none;transition:all 0.2s;">📖 Persamaan Reaksi Kimia & Metode Penyetaraan Koefisien <span style="opacity:0.75;font-weight:500;">(Kelas 10)</span></a>
+  </div>
+  <a href="LaboratoriumVirtual.html" id="pk-back-hub-link" style="font-size:11px;font-weight:700;color:#cbd5e1;text-decoration:none;padding:4px 10px;border-radius:8px;border:1px solid rgba(148,163,184,0.3);background:rgba(30,41,59,0.7);">← Semua 26 Lab Virtual</a>
+</div>
+<script>
+(function(){
+  var inDriveSubdir = window.location.pathname.indexOf('/Media_Pembelajaran_Kimia_Drive/') !== -1;
+  var isGas = window.location.hostname.indexOf('script.google.com') !== -1 || window.location.href.indexOf('/exec') !== -1;
+  var links = document.querySelectorAll('#pk-related-modules-bar .pk-relmod-link');
+  for (var i = 0; i < links.length; i++) {
+    var mf = links[i].getAttribute('data-pk-modfile');
+    if (!mf) continue;
+    if (isGas) {
+      var base = window.location.href.split('?')[0];
+      links[i].href = base + '?page=' + encodeURIComponent(mf.replace(/\.html$/i, ''));
+    } else if (inDriveSubdir) {
+      links[i].href = mf;
+    } else {
+      links[i].href = 'Media_Pembelajaran_Kimia_Drive/' + mf;
+    }
+  }
+  var hubLink = document.getElementById('pk-back-hub-link');
+  if (hubLink && isGas) {
+    hubLink.href = window.location.href.split('?')[0] + '?page=LaboratoriumVirtual';
+  }
+})();
+</script>
+<!-- PK-RELATED-MODULES-BAR-END -->
+
+
+  <main class="lab-workbench">
+    <!-- LEFT PANEL: CONTROLS -->
+    <section class="glass-panel">
+      <div class="panel-header">
+        <h2>⚙️ Parameter Reaktor Stoikiometri</h2>
+      </div>
+      <div class="panel-body">
+        <div class="control-group">
+          <div class="control-label">
+            <span>1. Pilih Sistem Reaksi Kimia</span>
+          </div>
+          <select id="reactionSelect" class="lab-select" onchange="onReactionChange()">
+            <option value="haber">Sintesis Amonia: N₂(g) + 3H₂(g) → 2NH₃(g)</option>
+            <option value="water">Sintesis Air (Lavoisier): 2H₂(g) + O₂(g) → 2H₂O(l)</option>
+            <option value="methane">Pembakaran Metana: CH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(g)</option>
+            <option value="pbi2">Presipitasi Emas Hujan: Pb(NO₃)₂(aq) + 2KI(aq) → PbI₂(s) + 2KNO₃(aq)</option>
+            <option value="mghcl">Reaksi Logam-Asam: Mg(s) + 2HCl(aq) → MgCl₂(aq) + H₂(g)</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span>2. Mode Satuan Input Umpan</span>
+          </div>
+          <div class="unit-toggle">
+            <button id="btnUnitMol" class="unit-btn active" onclick="setInputUnit('mol')">Input dalam Mol (n)</button>
+            <button id="btnUnitGram" class="unit-btn" onclick="setInputUnit('gram')">Input dalam Massa (g)</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="slider-head">
+            <span id="labelReactantA">Reaktan A (N₂)</span>
+            <span class="slider-val" id="valReactantA">2.00 mol (56.03 g)</span>
+          </div>
+          <input type="range" id="sliderA" min="0.2" max="6.0" step="0.1" value="2.0" oninput="updateStoichiometry()">
+          <div style="font-size:11px; color:#94a3b8; display:flex; justify-content:space-between;">
+            <span id="mrLabelA">Mr N₂ = 28.014 g/mol</span>
+            <span id="coeffLabelA">Koefisien = 1</span>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="slider-head">
+            <span id="labelReactantB">Reaktan B (H₂)</span>
+            <span class="slider-val" id="valReactantB">4.50 mol (9.07 g)</span>
+          </div>
+          <input type="range" id="sliderB" min="0.2" max="9.0" step="0.1" value="4.5" oninput="updateStoichiometry()">
+          <div style="font-size:11px; color:#94a3b8; display:flex; justify-content:space-between;">
+            <span id="mrLabelB">Mr H₂ = 2.016 g/mol</span>
+            <span id="coeffLabelB">Koefisien = 3</span>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="slider-head">
+            <span>Efisiensi / Persen Hasil Aktual (%)</span>
+            <span class="slider-val" id="valYield">90%</span>
+          </div>
+          <input type="range" id="sliderYield" min="50" max="100" step="1" value="90" oninput="updateStoichiometry()">
+          <div style="font-size:11px; color:#94a3b8;">
+            Mensimulasikan kondisi laboratorium nyata (% Hasil = Aktual / Teoretis × 100%)
+          </div>
+        </div>
+
+        <div class="btn-action-row">
+          <button class="btn-lab run" onclick="triggerReactionAnimation()">⚡ Jalankan Reaksi</button>
+          <button class="btn-lab log" onclick="logObservation()">📝 Catat ke Tabel</button>
+        </div>
+
+        <button class="btn-lab" onclick="setStoichiometricRatio()">🎯 Atur Tepat Stoikiometris (Tanpa Sisa)</button>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: REACTOR CANVAS & MRS TABLE -->
+    <section class="glass-panel">
+      <div class="panel-header">
+        <h2>🔬 Chamber Reaktor Molekuler &amp; Analisis Tabel MRS</h2>
+        <span id="reactionPhaseBadge" style="font-size:11px; color:#34d399; font-weight:700;">Status: Siap Bereaksi</span>
+      </div>
+      <div class="panel-body">
+        <div class="equation-banner">
+          <div class="equation-text" id="equationDisplay">1 N₂(g) + 3 H₂(g) → 2 NH₃(g)</div>
+          <div class="equation-sub" id="equationSub">Perbandingan Koefisien Mol = 1 : 3 : 2</div>
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="reactorCanvas" width="760" height="270"></canvas>
+          <div class="reactor-overlay-badges">
+            <div class="r-badge limiting" id="badgeLimiting">Pereaksi Pembatas: H₂ (Habis Bereaksi)</div>
+            <div class="r-badge lavoisier" id="badgeLavoisier">Hukum Lavoisier: ∑m Awal (65.10 g) = ∑m Akhir (65.10 g)</div>
+          </div>
+        </div>
+
+        <div class="mrs-box">
+          <div class="mrs-title">
+            <span>📊 TABEL MRS (MULA-MULA • REAKSI • SISA) DALAM MOL &amp; GRAM</span>
+            <span id="excessBadge" style="color:#fcd34d;">Pereaksi Berlebih: N₂</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="mrs-table">
+              <thead>
+                <tr id="mrsHeaderRow">
+                  <th>Tahap</th>
+                  <th>1 N₂</th>
+                  <th>3 H₂</th>
+                  <th>→ 2 NH₃</th>
+                  <th>Ket.</th>
+                </tr>
+              </thead>
+              <tbody id="mrsBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: DIGITAL METERS & DATA LOG -->
+    <section class="glass-panel">
+      <div class="panel-header">
+        <h2>📟 Instrumen Analitik &amp; Log Data</h2>
+      </div>
+      <div class="panel-body">
+        <div class="lcd-meter-box">
+          <div class="lcd-top-bar">
+            <span>MASSA PRODUK UTAMA (TEORETIS)</span>
+            <span id="lcdProductSymbol">NH₃</span>
+          </div>
+          <div class="lcd-digits-large" id="lcdTheoreticalMass">51.09 g</div>
+          <div class="lcd-sub-grid">
+            <div>Mol Produk: <strong id="lcdTheoreticalMol" style="color:#fff;">3.00 mol</strong></div>
+            <div>Vol STP (Gas): <strong id="lcdVolumeStp" style="color:#38bdf8;">67.20 L</strong></div>
+            <div>Hasil Aktual: <strong id="lcdActualMass" style="color:#fcd34d;">45.98 g</strong></div>
+            <div>% Yield: <strong id="lcdYieldPct" style="color:#34d399;">90.0%</strong></div>
+          </div>
+        </div>
+
+        <div class="calc-card">
+          <div style="font-weight:700; color:#38bdf8; margin-bottom:2px;">PENENTUAN PEREAKSI PEMBATAS (n / koefisien):</div>
+          <div class="calc-row">
+            <span id="quotientLabelA">Hasil Bagi N₂ (nA / kA):</span>
+            <span class="val" id="quotientValA">2.00 / 1 = 2.000</span>
+          </div>
+          <div class="calc-row">
+            <span id="quotientLabelB">Hasil Bagi H₂ (nB / kB):</span>
+            <span class="val" id="quotientValB">4.50 / 3 = 1.500 (Terkecil)</span>
+          </div>
+          <div class="calc-row">
+            <span>Massa Sisa Pereaksi Berlebih:</span>
+            <span class="val" id="excessMassVal" style="color:#fcd34d;">14.01 g N₂</span>
+          </div>
+          <div class="calc-row">
+            <span>Total Massa Akhir Sistem:</span>
+            <span class="val" id="totalFinalMassVal" style="color:#34d399;">65.10 g (Kekal)</span>
+          </div>
+        </div>
+
+        <div class="control-group" style="padding:10px;">
+          <div class="control-label">
+            <span>📈 Grafik Komposisi Mol Sebelum vs Sesudah</span>
+          </div>
+          <canvas id="barChartCanvas" width="330" height="125" style="width:100%; height:125px; background:#050911; border-radius:8px;"></canvas>
+        </div>
+
+        <div class="control-group" style="flex:1; min-height:130px; overflow:hidden;">
+          <div class="control-label">
+            <span>📋 Tabel Pengamatan Praktikum</span>
+            <button onclick="clearLogs()" style="background:none; border:none; color:#f43f5e; font-size:10px; font-weight:700; cursor:pointer;">Hapus</button>
+          </div>
+          <div style="overflow-y:auto; max-height:140px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Reaksi</th>
+                  <th>n(A)</th>
+                  <th>n(B)</th>
+                  <th>Pembatas</th>
+                  <th>Produk (g)</th>
+                </tr>
+              </thead>
+              <tbody id="logTableBody">
+                <tr><td colspan="6" style="text-align:center; color:#64748b;">Klik "Catat ke Tabel" untuk merekam data</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- GUIDE MODAL -->
+  <div class="modal-backdrop" id="guideModal">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+        <h3 style="font-size:16px; font-weight:800; color:#34d399;">📘 Panduan Praktikum Stoikiometri &amp; Pereaksi Pembatas</h3>
+        <button class="btn-header" onclick="closeModal('guideModal')">✕ Tutup</button>
+      </div>
+      <div style="font-size:13px; line-height:1.65; color:#cbd5e1; display:flex; flex-direction:column; gap:10px;">
+        <p><strong>1. Hukum Kekekalan Massa (Lavoisier):</strong> Dalam sistem tertutup, massa total zat sebelum reaksi sama dengan massa total zat sesudah reaksi (massa produk + massa pereaksi sisa).</p>
+        <p><strong>2. Jembatan Mol:</strong> Gunakan hubungan <code>n = massa / Mr = V_STP / 22.4 = Jumlah Partikel / 6.022×10²³</code> untuk mengubah besaran fisik ke satuan mol.</p>
+        <p><strong>3. Menentukan Pereaksi Pembatas:</strong> Bagi jumlah mol mula-mula masing-masing reaktan dengan koefisien reaksinya (<code>n / koefisien</code>). Reaktan dengan <strong>hasil bagi terkecil</strong> adalah <strong>Pereaksi Pembatas</strong> (habis bereaksi).</p>
+        <p><strong>4. Persen Hasil (% Yield):</strong> <code>% Hasil = (Massa Aktual / Massa Teoretis) × 100%</code>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ MODAL -->
+  <div class="modal-backdrop" id="quizModal">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+        <h3 style="font-size:16px; font-weight:800; color:#38bdf8;">🎯 Kuis Evaluasi Stoikiometri &amp; Pereaksi Pembatas</h3>
+        <button class="btn-header" onclick="closeModal('quizModal')">✕ Tutup</button>
+      </div>
+      <div id="quizContainer" style="display:flex; flex-direction:column; gap:14px; font-size:13px;"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastMsg">Data berhasil dicatat!</div>
+
+  <script>
+    const REACTIONS = {
+      haber: {
+        name: "N₂ + 3H₂ → 2NH₃",
+        eqText: "1 N₂(g) + 3 H₂(g) → 2 NH₃(g)",
+        reactants: [
+          { symbol: "N₂", coeff: 1, mr: 28.014, color: "#38bdf8" },
+          { symbol: "H₂", coeff: 3, mr: 2.016, color: "#f8fafc" }
+        ],
+        products: [
+          { symbol: "NH₃", coeff: 2, mr: 17.031, isGas: true, color: "#10b981" }
+        ]
+      },
+      water: {
+        name: "2H₂ + O₂ → 2H₂O",
+        eqText: "2 H₂(g) + 1 O₂(g) → 2 H₂O(l)",
+        reactants: [
+          { symbol: "H₂", coeff: 2, mr: 2.016, color: "#f8fafc" },
+          { symbol: "O₂", coeff: 1, mr: 31.998, color: "#f43f5e" }
+        ],
+        products: [
+          { symbol: "H₂O", coeff: 2, mr: 18.015, isGas: false, color: "#38bdf8" }
+        ]
+      },
+      methane: {
+        name: "CH₄ + 2O₂ → CO₂ + 2H₂O",
+        eqText: "1 CH₄(g) + 2 O₂(g) → 1 CO₂(g) + 2 H₂O(g)",
+        reactants: [
+          { symbol: "CH₄", coeff: 1, mr: 16.043, color: "#a855f7" },
+          { symbol: "O₂", coeff: 2, mr: 31.998, color: "#f43f5e" }
+        ],
+        products: [
+          { symbol: "CO₂", coeff: 1, mr: 44.01, isGas: true, color: "#10b981" },
+          { symbol: "H₂O", coeff: 2, mr: 18.015, isGas: true, color: "#38bdf8" }
+        ]
+      },
+      pbi2: {
+        name: "Pb(NO₃)₂ + 2KI → PbI₂ + 2KNO₃",
+        eqText: "1 Pb(NO₃)₂(aq) + 2 KI(aq) → 1 PbI₂(s)↓ + 2 KNO₃(aq)",
+        reactants: [
+          { symbol: "Pb(NO₃)₂", coeff: 1, mr: 331.21, color: "#94a3b8" },
+          { symbol: "KI", coeff: 2, mr: 166.00, color: "#38bdf8" }
+        ],
+        products: [
+          { symbol: "PbI₂(s)", coeff: 1, mr: 461.01, isGas: false, color: "#facc15" },
+          { symbol: "KNO₃", coeff: 2, mr: 101.10, isGas: false, color: "#6ee7b7" }
+        ]
+      },
+      mghcl: {
+        name: "Mg + 2HCl → MgCl₂ + H₂",
+        eqText: "1 Mg(s) + 2 HCl(aq) → 1 MgCl₂(aq) + 1 H₂(g)↑",
+        reactants: [
+          { symbol: "Mg", coeff: 1, mr: 24.305, color: "#cbd5e1" },
+          { symbol: "HCl", coeff: 2, mr: 36.461, color: "#f59e0b" }
+        ],
+        products: [
+          { symbol: "MgCl₂", coeff: 1, mr: 95.211, isGas: false, color: "#10b981" },
+          { symbol: "H₂", coeff: 1, mr: 2.016, isGas: true, color: "#38bdf8" }
+        ]
+      }
+    };
+
+    let currentKey = 'haber';
+    let inputUnit = 'mol';
+    let logs = [];
+    let particles = [];
+    let isReactedView = true;
+    let lastCalc = null;
+
+    function handlePortalBack(e, target) {
+      if (window.history.length > 1 && document.referrer) {
+        e.preventDefault();
+        window.history.back();
+      }
+    }
+
+    function setInputUnit(unit) {
+      inputUnit = unit;
+      document.getElementById('btnUnitMol').classList.toggle('active', unit === 'mol');
+      document.getElementById('btnUnitGram').classList.toggle('active', unit === 'gram');
+      updateStoichiometry();
+    }
+
+    function onReactionChange() {
+      currentKey = document.getElementById('reactionSelect').value;
+      updateStoichiometry();
+      spawnParticles();
+    }
+
+    function setStoichiometricRatio() {
+      const rxn = REACTIONS[currentKey];
+      const baseExtent = 1.5;
+      document.getElementById('sliderA').value = (baseExtent * rxn.reactants[0].coeff).toFixed(1);
+      document.getElementById('sliderB').value = (baseExtent * rxn.reactants[1].coeff).toFixed(1);
+      updateStoichiometry();
+      showToast("Rasio reaktan diatur tepat stoikiometris (kedua reaktan habis bereaksi)!");
+    }
+
+    function updateStoichiometry() {
+      const rxn = REACTIONS[currentKey];
+      const rA = rxn.reactants[0];
+      const rB = rxn.reactants[1];
+      const pMain = rxn.products[0];
+
+      const rawA = parseFloat(document.getElementById('sliderA').value);
+      const rawB = parseFloat(document.getElementById('sliderB').value);
+      const yieldPct = parseFloat(document.getElementById('sliderYield').value);
+
+      // Slider always represents moles internally for smooth UX, or shows mass-first
+      const nA = rawA;
+      const nB = rawB;
+      const mA = nA * rA.mr;
+      const mB = nB * rB.mr;
+
+      document.getElementById('labelReactantA').textContent = `Reaktan A (${rA.symbol})`;
+      document.getElementById('labelReactantB').textContent = `Reaktan B (${rB.symbol})`;
+      document.getElementById('valReactantA').textContent = inputUnit === 'mol'
+        ? `${nA.toFixed(2)} mol (${mA.toFixed(2)} g)`
+        : `${mA.toFixed(2)} g (${nA.toFixed(2)} mol)`;
+      document.getElementById('valReactantB').textContent = inputUnit === 'mol'
+        ? `${nB.toFixed(2)} mol (${mB.toFixed(2)} g)`
+        : `${mB.toFixed(2)} g (${nB.toFixed(2)} mol)`;
+      document.getElementById('valYield').textContent = `${yieldPct}%`;
+
+      document.getElementById('mrLabelA').textContent = `Mr ${rA.symbol} = ${rA.mr} g/mol`;
+      document.getElementById('coeffLabelA').textContent = `Koefisien = ${rA.coeff}`;
+      document.getElementById('mrLabelB').textContent = `Mr ${rB.symbol} = ${rB.mr} g/mol`;
+      document.getElementById('coeffLabelB').textContent = `Koefisien = ${rB.coeff}`;
+
+      document.getElementById('equationDisplay').textContent = rxn.eqText;
+      const coeffStr = [...rxn.reactants.map(r => r.coeff), ...rxn.products.map(p => p.coeff)].join(' : ');
+      document.getElementById('equationSub').textContent = `Perbandingan Koefisien Mol = ${coeffStr}`;
+
+      const qA = nA / rA.coeff;
+      const qB = nB / rB.coeff;
+      const xi = Math.min(qA, qB);
+      const isEquiv = Math.abs(qA - qB) < 1e-5;
+      const limiting = isEquiv ? 'Keduanya Tepat Habis' : (qA < qB ? rA.symbol : rB.symbol);
+      const excess = isEquiv ? 'Tidak Ada (Stoikiometris)' : (qA < qB ? rB.symbol : rA.symbol);
+
+      const reactA = xi * rA.coeff;
+      const reactB = xi * rB.coeff;
+      const remA = Math.max(0, nA - reactA);
+      const remB = Math.max(0, nB - reactB);
+
+      const prodMols = rxn.products.map(p => xi * p.coeff);
+      const prodMasses = rxn.products.map((p, i) => prodMols[i] * p.mr);
+
+      const totalMassInitial = mA + mB;
+      const totalMassFinal = remA * rA.mr + remB * rB.mr + prodMasses.reduce((a, b) => a + b, 0);
+
+      document.getElementById('badgeLimiting').textContent = `Pereaksi Pembatas: ${limiting}`;
+      document.getElementById('excessBadge').textContent = `Pereaksi Berlebih: ${excess}`;
+      document.getElementById('badgeLavoisier').textContent = `Hukum Lavoisier: ∑m Awal (${totalMassInitial.toFixed(2)} g) = ∑m Akhir (${totalMassFinal.toFixed(2)} g)`;
+
+      // Render MRS Table
+      const headerCols = [
+        `<th>Tahap</th>`,
+        `<th>${rA.coeff} ${rA.symbol}</th>`,
+        `<th>${rB.coeff} ${rB.symbol}</th>`,
+        ...rxn.products.map((p, idx) => `<th>${idx === 0 ? '→ ' : '+ '}${p.coeff} ${p.symbol}</th>`)
+      ].join('');
+      document.getElementById('mrsHeaderRow').innerHTML = headerCols;
+
+      const mrsBody = document.getElementById('mrsBody');
+      mrsBody.innerHTML = `
+        <tr class="mrs-m">
+          <td class="row-lbl">Mula-mula (M)</td>
+          <td>${nA.toFixed(2)} mol<br><small style="color:#64748b">${mA.toFixed(2)} g</small></td>
+          <td>${nB.toFixed(2)} mol<br><small style="color:#64748b">${mB.toFixed(2)} g</small></td>
+          ${rxn.products.map(() => `<td>0.00 mol<br><small style="color:#64748b">0.00 g</small></td>`).join('')}
+        </tr>
+        <tr class="mrs-r">
+          <td class="row-lbl">Reaksi (R)</td>
+          <td>−${reactA.toFixed(2)} mol<br><small style="color:#64748b">−${(reactA * rA.mr).toFixed(2)} g</small></td>
+          <td>−${reactB.toFixed(2)} mol<br><small style="color:#64748b">−${(reactB * rB.mr).toFixed(2)} g</small></td>
+          ${rxn.products.map((p, i) => `<td>+${prodMols[i].toFixed(2)} mol<br><small style="color:#64748b">+${prodMasses[i].toFixed(2)} g</small></td>`).join('')}
+        </tr>
+        <tr class="mrs-s">
+          <td class="row-lbl">Sisa / Akhir (S)</td>
+          <td>${remA.toFixed(2)} mol<br><small style="color:#94a3b8">${(remA * rA.mr).toFixed(2)} g</small></td>
+          <td>${remB.toFixed(2)} mol<br><small style="color:#94a3b8">${(remB * rB.mr).toFixed(2)} g</small></td>
+          ${rxn.products.map((p, i) => `<td>${prodMols[i].toFixed(2)} mol<br><small style="color:#94a3b8">${prodMasses[i].toFixed(2)} g</small></td>`).join('')}
+        </tr>
+      `;
+
+      // Right Panel LCD
+      const mainMol = prodMols[0];
+      const mainMass = prodMasses[0];
+      const actualMass = mainMass * (yieldPct / 100);
+      const volStp = pMain.isGas ? mainMol * 22.4 : 0;
+
+      document.getElementById('lcdProductSymbol').textContent = pMain.symbol;
+      document.getElementById('lcdTheoreticalMass').textContent = `${mainMass.toFixed(2)} g`;
+      document.getElementById('lcdTheoreticalMol').textContent = `${mainMol.toFixed(2)} mol`;
+      document.getElementById('lcdVolumeStp').textContent = pMain.isGas ? `${volStp.toFixed(2)} L` : `Fase Padat/Cair`;
+      document.getElementById('lcdActualMass').textContent = `${actualMass.toFixed(2)} g`;
+      document.getElementById('lcdYieldPct').textContent = `${yieldPct.toFixed(1)}%`;
+
+      document.getElementById('quotientLabelA').textContent = `Hasil Bagi ${rA.symbol} (n / ${rA.coeff}):`;
+      document.getElementById('quotientValA').textContent = `${nA.toFixed(2)} / ${rA.coeff} = ${qA.toFixed(3)}${qA <= qB ? ' ★' : ''}`;
+      document.getElementById('quotientLabelB').textContent = `Hasil Bagi ${rB.symbol} (n / ${rB.coeff}):`;
+      document.getElementById('quotientValB').textContent = `${nB.toFixed(2)} / ${rB.coeff} = ${qB.toFixed(3)}${qB <= qA ? ' ★' : ''}`;
+
+      const excessMass = remA > 0.001 ? `${(remA * rA.mr).toFixed(2)} g ${rA.symbol}` : (remB > 0.001 ? `${(remB * rB.mr).toFixed(2)} g ${rB.symbol}` : '0.00 g (Habis)');
+      document.getElementById('excessMassVal').textContent = excessMass;
+      document.getElementById('totalFinalMassVal').textContent = `${totalMassFinal.toFixed(2)} g (Kekal)`;
+
+      lastCalc = {
+        rxnName: rxn.name,
+        nA, nB,
+        limiting,
+        mainSymbol: pMain.symbol,
+        mainMass,
+        actualMass,
+        remA, remB,
+        prodMols
+      };
+
+      drawBarChart(rxn, nA, nB, remA, remB, prodMols);
+      spawnParticles();
+    }
+
+    function drawBarChart(rxn, nA, nB, remA, remB, prodMols) {
+      const cvs = document.getElementById('barChartCanvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      const items = [
+        { label: `${rxn.reactants[0].symbol} Awal`, val: nA, color: '#38bdf8' },
+        { label: `${rxn.reactants[1].symbol} Awal`, val: nB, color: '#818cf8' },
+        { label: `${rxn.reactants[0].symbol} Sisa`, val: remA, color: '#f59e0b' },
+        { label: `${rxn.reactants[1].symbol} Sisa`, val: remB, color: '#fbbf24' },
+        { label: `${rxn.products[0].symbol}`, val: prodMols[0], color: '#10b981' }
+      ];
+
+      const maxVal = Math.max(6, ...items.map(i => i.val));
+      const barW = 38;
+      const gap = 22;
+      const startX = 24;
+      const baseY = 98;
+      const maxH = 72;
+
+      items.forEach((it, idx) => {
+        const x = startX + idx * (barW + gap);
+        const h = (it.val / maxVal) * maxH;
+        ctx.fillStyle = it.color;
+        ctx.fillRect(x, baseY - h, barW, h);
+
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 10px "Fira Code", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(it.val.toFixed(1), x + barW / 2, baseY - h - 5);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '9px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(it.label, x + barW / 2, baseY + 14);
+      });
+    }
+
+    function spawnParticles() {
+      if (!lastCalc) return;
+      const rxn = REACTIONS[currentKey];
+      particles = [];
+      const addGroup = (count, symbol, color) => {
+        const num = Math.max(1, Math.min(18, Math.round(count * 3)));
+        if (count < 0.05) return;
+        for (let i = 0; i < num; i++) {
+          particles.push({
+            x: 40 + Math.random() * 680,
+            y: 45 + Math.random() * 190,
+            vx: (Math.random() - 0.5) * 1.8,
+            vy: (Math.random() - 0.5) * 1.8,
+            symbol,
+            color,
+            r: 13
+          });
+        }
+      };
+
+      if (isReactedView) {
+        addGroup(lastCalc.remA, rxn.reactants[0].symbol + ' (Sisa)', '#f59e0b');
+        addGroup(lastCalc.remB, rxn.reactants[1].symbol + ' (Sisa)', '#fb923c');
+        rxn.products.forEach((p, idx) => {
+          addGroup(lastCalc.prodMols[idx], p.symbol, p.color);
+        });
+      } else {
+        addGroup(lastCalc.nA, rxn.reactants[0].symbol, rxn.reactants[0].color);
+        addGroup(lastCalc.nB, rxn.reactants[1].symbol, rxn.reactants[1].color);
+      }
+    }
+
+    function triggerReactionAnimation() {
+      isReactedView = false;
+      document.getElementById('reactionPhaseBadge').textContent = 'Status: Mencampur Reaktan...';
+      spawnParticles();
+      setTimeout(() => {
+        isReactedView = true;
+        document.getElementById('reactionPhaseBadge').textContent = 'Status: Reaksi Selesai (Kesetimbangan Stoikiometris)';
+        spawnParticles();
+        showToast('Reaksi selesai! Amati molekul produk dan sisa pereaksi berlebih.');
+      }, 900);
+    }
+
+    function animateCanvas() {
+      const cvs = document.getElementById('reactorCanvas');
+      if (cvs) {
+        const ctx = cvs.getContext('2d');
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+        // Grid lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+        for (let x = 0; x < cvs.width; x += 40) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cvs.height); ctx.stroke();
+        }
+        for (let y = 0; y < cvs.height; y += 40) {
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cvs.width, y); ctx.stroke();
+        }
+
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 25 || p.x > cvs.width - 25) p.vx *= -1;
+          if (p.y < 40 || p.y > cvs.height - 25) p.vy *= -1;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+          ctx.stroke();
+
+          ctx.fillStyle = '#090d16';
+          ctx.font = 'bold 9px "Plus Jakarta Sans", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(p.symbol.replace(' (Sisa)', ''), p.x, p.y);
+        });
+      }
+      requestAnimationFrame(animateCanvas);
+    }
+
+    function logObservation() {
+      if (!lastCalc) return;
+      logs.push({
+        idx: logs.length + 1,
+        rxn: lastCalc.rxnName,
+        nA: lastCalc.nA.toFixed(2),
+        nB: lastCalc.nB.toFixed(2),
+        limiting: lastCalc.limiting,
+        mass: `${lastCalc.mainMass.toFixed(2)} g ${lastCalc.mainSymbol}`
+      });
+      renderLogs();
+      showToast('Data pengamatan berhasil ditambahkan ke tabel!');
+    }
+
+    function renderLogs() {
+      const tbody = document.getElementById('logTableBody');
+      if (logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#64748b;">Klik "Catat ke Tabel" untuk merekam data</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = logs.map(l => `
+        <tr>
+          <td>${l.idx}</td>
+          <td>${l.rxn}</td>
+          <td>${l.nA}</td>
+          <td>${l.nB}</td>
+          <td style="color:#fda4af; font-weight:700;">${l.limiting}</td>
+          <td style="color:#34d399; font-weight:700;">${l.mass}</td>
+        </tr>
+      `).join('');
+    }
+
+    function clearLogs() {
+      logs = [];
+      renderLogs();
+    }
+
+    function exportCSV() {
+      if (logs.length === 0) {
+        showToast('Catat minimal 1 data ke tabel sebelum mengekspor CSV!');
+        return;
+      }
+      const header = 'No,Reaksi,Mol Reaktan A,Mol Reaktan B,Pereaksi Pembatas,Massa Produk Teoretis\n';
+      const rows = logs.map(l => `${l.idx},"${l.rxn}",${l.nA},${l.nB},"${l.limiting}","${l.mass}"`).join('\n');
+      const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Data_Praktikum_Stoikiometri_Pereaksi_Pembatas.csv';
+      a.click();
+    }
+
+    const QUIZ_DATA = [
+      {
+        q: "1. Pada reaksi N₂(g) + 3H₂(g) → 2NH₃(g), jika direaksikan 2 mol N₂ dan 3 mol H₂, manakah yang menjadi pereaksi pembatas?",
+        opts: ["N₂ (karena koefisiennya lebih kecil)", "H₂ (karena 3/3 = 1 lebih kecil dari 2/1 = 2)", "NH₃ (karena merupakan produk)", "Kedua reaktan habis bersamaan"],
+        ans: 1,
+        exp: "Bagi mol mula-mula dengan koefisien: N₂ = 2/1 = 2; H₂ = 3/3 = 1. Karena 1 < 2, maka H₂ adalah pereaksi pembatas."
+      },
+      {
+        q: "2. Dari soal nomor 1 (2 mol N₂ + 3 mol H₂), berapa mol gas NH₃ yang terbentuk secara teoretis?",
+        opts: ["1.0 mol NH₃", "2.0 mol NH₃", "3.0 mol NH₃", "4.0 mol NH₃"],
+        ans: 1,
+        exp: "Gunakan pereaksi pembatas H₂ (3 mol): mol NH₃ = (koef NH₃ / koef H₂) × 3 mol = (2/3) × 3 = 2.0 mol."
+      },
+      {
+        q: "3. Menurut Hukum Kekekalan Massa (Lavoisier), jika 4 g H₂ bereaksi dengan 32 g O₂ membentuk uap air dalam wadah tertutup, maka massa uap air yang terbentuk adalah...",
+        opts: ["18 gram", "32 gram", "36 gram", "64 gram"],
+        ans: 2,
+        exp: "4 g H₂ (2 mol) tepat bereaksi habis dengan 32 g O₂ (1 mol) menghasilkan 4 g + 32 g = 36 g H₂O."
+      },
+      {
+        q: "4. Jika perhitungan stoikiometri menghasilkan massa teoretis endapan PbI₂ sebesar 50 gram, namun hasil penimbangan di laboratorium adalah 42,5 gram, berapakah persen hasilnya (% yield)?",
+        opts: ["75%", "80%", "85%", "92.5%"],
+        ans: 2,
+        exp: "% Hasil = (42,5 g / 50 g) × 100% = 85%."
+      }
+    ];
+
+    function renderQuiz() {
+      const container = document.getElementById('quizContainer');
+      container.innerHTML = QUIZ_DATA.map((item, idx) => `
+        <div style="background:#0b101b; border:1px solid rgba(255,255,255,0.08); padding:12px; border-radius:10px;">
+          <div style="font-weight:700; margin-bottom:8px; color:#f1f5f9;">${item.q}</div>
+          <div style="display:grid; gap:6px;">
+            ${item.opts.map((opt, oIdx) => `
+              <button onclick="checkQuizAnswer(${idx}, ${oIdx})" id="qbtn-${idx}-${oIdx}" style="text-align:left; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.03); color:#cbd5e1; cursor:pointer; font-size:12px;">
+                ${String.fromCharCode(65 + oIdx)}. ${opt}
+              </button>
+            `).join('')}
+          </div>
+          <div id="qexp-${idx}" style="display:none; margin-top:8px; font-size:11.5px; padding:8px; border-radius:6px; background:rgba(16,185,129,0.12); color:#6ee7b7;"></div>
+        </div>
+      `).join('');
+    }
+
+    function checkQuizAnswer(qIdx, oIdx) {
+      const item = QUIZ_DATA[qIdx];
+      const expEl = document.getElementById(`qexp-${qIdx}`);
+      expEl.style.display = 'block';
+      if (oIdx === item.ans) {
+        expEl.style.background = 'rgba(16,185,129,0.15)';
+        expEl.style.color = '#6ee7b7';
+        expEl.textContent = '✅ Benar! ' + item.exp;
+      } else {
+        expEl.style.background = 'rgba(244,63,94,0.15)';
+        expEl.style.color = '#fda4af';
+        expEl.textContent = '❌ Kurang tepat. ' + item.exp;
+      }
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastMsg');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateStoichiometry();
+      renderQuiz();
+      animateCanvas();
+    });
+  </script>
+</body>
+</html>
