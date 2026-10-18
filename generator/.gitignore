@@ -1,0 +1,11 @@
+﻿# Operating System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Backup folders & Google Apps Script backend files (Jangan upload ke GitHub)
+backup/
+*.gs
+Code.gs

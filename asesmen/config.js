@@ -12,7 +12,7 @@
 window.ASSESSMENT_CONFIG = {
   // 1. URL Web App Google Apps Script khusus Generator Asesmen
   // Jika deploy tersendiri, isi URL Web App GAS Anda di sini:
-  GAS_API_URL: "",
+  GAS_API_URL: "https://script.google.com/macros/s/AKfycbxN12ywB4FWD1qDKpudxPaDBra7f_vJ-uPBCMvdZRS2-9y4qsHc6kWt4CwcOziHFJmN/exec",
 
   // 2. Mode Penyimpanan
   STORAGE_MODE: "local-and-cloud",

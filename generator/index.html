@@ -840,12 +840,18 @@
           <span id="tombolAIText">Generate Kerangka Otomatis [1 Kuota]</span>
         </button>
 
+        <!-- TIPS KUOTA AMAN -->
+        <div class="mt-2 p-2 rounded-3 border border-warning-subtle bg-warning bg-opacity-10 text-warning-emphasis d-flex align-items-start gap-2" style="font-size: 0.75rem; line-height: 1.4;">
+          <span class="material-symbols-outlined text-warning" style="font-size: 16px; margin-top: 1px;">info</span>
+          <span><strong>Tips Kuota Aman:</strong> Harap tetap berada di tab ini selama 20–45 detik hingga modul ajar muncul. Jangan berpindah tab atau mengunci layar HP/tablet agar kuota tidak terbuang sia-sia.</span>
+        </div>
+
         <!-- FITUR 5: ANIMASI PROGRESS BERTAHAP -->
         <div id="containerProgressAI" class="stepped-progress-container">
           <div class="stepped-bar-bg">
             <div id="steppedBarFill" class="stepped-bar-fill"></div>
           </div>
-          <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center justify-content-between mb-2">
             <div class="d-flex align-items-center gap-2">
               <span class="spinner-border spinner-border-sm text-violet" style="width: 14px; height: 14px;"></span>
               <span id="labelStepProgress" class="small fw-semibold text-light" style="font-size: 0.82rem;">
@@ -855,6 +861,18 @@
             <span id="persenStepProgress" class="badge rounded-pill" style="background: rgba(167, 139, 250, 0.25); color: var(--obs-primary); font-family: monospace; font-size: 0.75rem;">
               20%
             </span>
+          </div>
+
+          <!-- KOTAK PERINGATAN TAB KHUSUS MODUL AJAR -->
+          <div class="p-2.5 rounded-3 border border-warning bg-dark bg-opacity-75 text-start shadow-sm mt-2">
+            <div class="d-flex align-items-center gap-2 text-warning fw-bold small mb-1">
+              <span class="material-symbols-outlined text-warning" style="font-size: 18px;">warning</span>
+              <span>PERINGATAN PENTING: JANGAN BERPINDAH TAB ATAU MINIMIZE!</span>
+            </div>
+            <p class="mb-0 text-light opacity-90" style="font-size: 0.73rem; line-height: 1.45;">
+              Mohon <strong>tetap di halaman ini</strong> hingga seluruh kerangka modul selesai dirancang (20–45 detik). 
+              Membuka tab lain atau mengunci layar HP/tablet dapat memutus koneksi peramban, menyebabkan modul gagal diterima, padahal kuota Anda di server tetap terpotong.
+            </p>
           </div>
         </div>
 
@@ -6961,7 +6979,28 @@
       }
     }
 
+    
+    // -------------------------------------------------------------
+    // TAB SAFETY GUARD & ANTI-HANGUS KUOTA MODUL AJAR
+    // -------------------------------------------------------------
+    window.isAIGeneratingModul = false;
+
+    window.addEventListener("beforeunload", function (e) {
+      if (window.isAIGeneratingModul) {
+        e.preventDefault();
+        e.returnValue = "Proses perancangan modul ajar sedang berlangsung di server! Meninggalkan atau me-refresh halaman sekarang dapat menyebabkan kuota Anda terpotong namun modul gagal diterima.";
+        return e.returnValue;
+      }
+    });
+
+    document.addEventListener("visibilitychange", function () {
+      if (window.isAIGeneratingModul && !document.hidden) {
+        alert("⚠️ Perhatian: Anda sempat berpindah tab saat AI sedang merancang modul ajar. Harap tetap di halaman ini agar modul tidak gagal diterima dan kuota tidak terbuang sia-sia!");
+      }
+    });
+
     function eksekusiPanggilanAIMain(dataInstruksi, inputModel, inputKelas) {
+      window.isAIGeneratingModul = true;
       const tombolAI = document.getElementById('tombolAI');
       tombolAI.disabled = true;
       mulaiAnimasiProgress(inputModel);
@@ -6971,6 +7010,7 @@
         google.script.run
           .withSuccessHandler(function(hasilJSON) {
             tombolAI.disabled = false;
+            window.isAIGeneratingModul = false;
             selesaiAnimasiProgress(true, "Kerangka berhasil dirancang!");
             try {
               const data = typeof hasilJSON === 'string' ? JSON.parse(hasilJSON) : hasilJSON;
@@ -7012,20 +7052,57 @@
           return;
         }
 
-        fetch(gasUrl, {
-          method: 'POST',
-          redirect: 'follow',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'panggilGemini',
-            accessToken: getGeneratorAccessToken(),
-            dataInstruksi: dataInstruksi
-          })
-        })
-        .then(response => {
-          if (!response.ok) throw new Error("Status HTTP " + response.status);
-          return response.json();
-        })
+        // Eksekusi Panggilan AI dengan Sistem Antrean Cerdas (Smart Queue)
+        (async function eksekusiDenganAntrean() {
+          const maxQueueAttempts = 5;
+          let queueAttempts = 0;
+          let data = null;
+
+          while (queueAttempts < maxQueueAttempts) {
+            queueAttempts++;
+            try {
+              const response = await fetch(gasUrl, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                  action: 'panggilGemini',
+                  accessToken: getGeneratorAccessToken(),
+                  dataInstruksi: dataInstruksi
+                })
+              });
+              if (!response.ok) throw new Error("Status HTTP " + response.status);
+              data = await response.json();
+            } catch (err) {
+              if (queueAttempts >= maxQueueAttempts) throw err;
+              await new Promise(r => setTimeout(r, 4000));
+              continue;
+            }
+
+            const isServerBusy = data && data.error && typeof data.error === 'string' && (
+              data.error.toLowerCase().includes("memproses permintaan lain") ||
+              data.error.toLowerCase().includes("antrean kuota") ||
+              data.error.toLowerCase().includes("server sibuk")
+            );
+
+            if (isServerBusy) {
+              if (queueAttempts >= maxQueueAttempts) break;
+              const waitSec = 4 + queueAttempts * 2;
+              const labelStep = document.getElementById('labelStepProgress');
+              for (let s = waitSec; s > 0; s--) {
+                if (labelStep) {
+                  labelStep.innerHTML = `<span class="text-warning fw-bold">⏳ Server sibuk melayani rekan guru lain.</span> Anda di antrean prioritas (${queueAttempts}/${maxQueueAttempts}). Mencoba lagi dalam ${s} detik...`;
+                }
+                await new Promise(r => setTimeout(r, 1000));
+              }
+              if (labelStep) labelStep.textContent = "Menghubungkan kembali giliran Anda ke server...";
+              continue;
+            }
+
+            break;
+          }
+          return data;
+        })()
         .then(data => {
           tombolAI.disabled = false;
           const partial = (data && data.partialData) || data;
@@ -7035,6 +7112,7 @@
             }
           }
           if (data && data.error) {
+            window.isAIGeneratingModul = false;
             selesaiAnimasiProgress(false, "Respon Error dari Server");
             if (data.error.indexOf("Token Penggunaan AI Berbayat") >= 0 || data.error.indexOf("Token Penggunaan AI Berbayar") >= 0) {
               alert(data.error);
@@ -7051,6 +7129,7 @@
         })
         .catch(err => {
           tombolAI.disabled = false;
+          window.isAIGeneratingModul = false;
           selesaiAnimasiProgress(false, "Gagal terhubung");
           alert("Gagal menghubungi Backend Google Apps Script:\n" + err.message + "\n\nPastikan Deployment GAS diatur ke 'Who has access: Anyone'.");
         });

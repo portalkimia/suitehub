@@ -21,7 +21,7 @@ echo       - Backup LMS dan Backend GAS berhasil diamankan!
 
 echo.
 echo [3/4] Menyinkronkan Portal-Bahan-Ajar-Kimia (Media)...
-robocopy "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia" "C:\Users\Tito\Desktop\PortalKimia-Suite\media" /E /XD "Stitch" "scratch" ".system_generated" /XF "*.gs" >nul
+robocopy "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia" "C:\Users\Tito\Desktop\PortalKimia-Suite\media" /E /PURGE /XD "Stitch" "scratch" ".system_generated" "backup_locked_14" /XF "*.gs" >nul
 copy /Y "C:\Users\Tito\Desktop\PortalKimia-Suite\media\Guru.html" "C:\Users\Tito\Desktop\PortalKimia-Suite\media\guru.html" >nul
 if not exist "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite" mkdir "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite" >nul
 if exist "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Code.gs" (

@@ -27,6 +27,9 @@ window.PORTALKIMIA_CONFIG = {
 
   // 6. URL Web App Backend PortalKimia Soal 
   // Masukkan URL Google Apps Script Soal Anda di sini:
-  SOAL_API: "https://script.google.com/macros/s/AKfycbx5znz66Ye57dVVgoqiD5_QUlhbr8ap7ve81iJqeFNjLaVVRaTwpUzDMipXfE5bQbSSMQ/exec"
+  SOAL_API: "https://script.google.com/macros/s/AKfycbx5znz66Ye57dVVgoqiD5_QUlhbr8ap7ve81iJqeFNjLaVVRaTwpUzDMipXfE5bQbSSMQ/exec",
+
+  // 7. URL Web App Backend PortalKimia Generator Asesmen AI
+  ASESMEN_API: "https://script.google.com/macros/s/AKfycbxN12ywB4FWD1qDKpudxPaDBra7f_vJ-uPBCMvdZRS2-9y4qsHc6kWt4CwcOziHFJmN/exec"
 
 };

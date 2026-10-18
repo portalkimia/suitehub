@@ -1,0 +1,28 @@
+# Operating System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+*.swp
+*~
+
+# Temporary test runners & chrome profile
+chrome_temp/
+test_results*.html
+*.log
+
+# Editor & Workspace configs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Local caches & scratch directories
+scratch/
+.system_generated/
+
+# Backup folders & Google Apps Script backend files
+backup/
+*.gs
+Code.gs
