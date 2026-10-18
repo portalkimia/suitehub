@@ -373,7 +373,117 @@ var editingQuestionRef = null;
 const AI_USAGE_KEY = "portalkimia_ai_usage_v1";
 
 // INITIALIZATION BULLETPROOF
+
+// =========================================================================
+// THEME MANAGEMENT (LIGHT / DARK MODE)
+// =========================================================================
+const THEME_STORAGE_KEY = "portalkimia_theme";
+
+function getCurrentTheme() {
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved === "light" || saved === "dark") return saved;
+  } catch (e) {}
+  if (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) {
+    return "light";
+  }
+  return "dark";
+}
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  const isLight = theme === "light";
+  
+  if (isLight) {
+    root.classList.remove("dark");
+    root.classList.add("light");
+    root.setAttribute("data-theme", "light");
+    root.style.colorScheme = "light";
+  } else {
+    root.classList.remove("light");
+    root.classList.add("dark");
+    root.setAttribute("data-theme", "dark");
+    root.style.colorScheme = "dark";
+  }
+
+  // Update theme toggle icons and button titles
+  const sunIcon = document.getElementById("themeIconSun");
+  const moonIcon = document.getElementById("themeIconMoon");
+  const toggleBtn = document.getElementById("btnToggleTheme");
+
+  if (sunIcon && moonIcon) {
+    if (isLight) {
+      sunIcon.classList.remove("hidden");
+      moonIcon.classList.add("hidden");
+    } else {
+      sunIcon.classList.add("hidden");
+      moonIcon.classList.remove("hidden");
+    }
+  }
+
+  if (toggleBtn) {
+    toggleBtn.setAttribute("title", isLight ? "Ganti ke Mode Gelap (Dark Mode)" : "Ganti ke Mode Terang (Light Mode)");
+    toggleBtn.setAttribute("aria-label", isLight ? "Mode Gelap" : "Mode Terang");
+  }
+
+  // Re-render lucide icons if available
+  if (typeof window !== "undefined" && window.lucide && typeof window.lucide.createIcons === "function") {
+    try { window.lucide.createIcons(); } catch (e) {}
+  }
+}
+
+function toggleThemeMode() {
+  const current = document.documentElement.classList.contains("light") ? "light" : "dark";
+  const newTheme = current === "light" ? "dark" : "light";
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+  } catch (e) {
+    console.warn("Gagal menyimpan preferensi tema:", e);
+  }
+  applyTheme(newTheme);
+}
+
+function initThemeMode() {
+  const theme = getCurrentTheme();
+  applyTheme(theme);
+
+  // Setup button listener if button exists and not yet bound
+  const toggleBtn = document.getElementById("btnToggleTheme");
+  if (toggleBtn && !toggleBtn._themeBound) {
+    toggleBtn._themeBound = true;
+    toggleBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      toggleThemeMode();
+    });
+  }
+
+  // Listen to OS theme changes if user hasn't explicitly set a preference
+  if (typeof window !== "undefined" && window.matchMedia) {
+    try {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
+      if (mediaQuery && typeof mediaQuery.addEventListener === "function") {
+        mediaQuery.addEventListener("change", function(e) {
+          try {
+            const hasExplicit = localStorage.getItem(THEME_STORAGE_KEY);
+            if (!hasExplicit) {
+              applyTheme(e.matches ? "light" : "dark");
+            }
+          } catch (err) {}
+        });
+      }
+    } catch (e) {}
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.toggleThemeMode = toggleThemeMode;
+  window.applyTheme = applyTheme;
+  window.getCurrentTheme = getCurrentTheme;
+  window.initThemeMode = initThemeMode;
+}
+
 function initializeAllComponents() {
+  try { initThemeMode(); } catch (e) { console.error("initThemeMode error:", e); }
   try { handleAppVersionMigration(); } catch (e) { console.warn("handleAppVersionMigration error:", e); }
   try {
     if (typeof window !== "undefined" && window.lucide && typeof window.lucide.createIcons === "function") {

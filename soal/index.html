@@ -7,6 +7,21 @@
 
   <!-- PWA & Mobile Meta Tags -->
   <meta name="theme-color" content="#09090b">
+  <!-- Script Deteksi Tema Awal (Anti-FOUC) -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('portalkimia_theme');
+        if (saved === 'light' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        } else {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -118,8 +133,13 @@
 
         <!-- Right: Actions & API Key & Profile -->
         <div class="flex items-center gap-2 sm:gap-3">
-          
-          </span>
+          <!-- Tombol Pengalih Mode Terang / Gelap (Theme Toggle) -->
+          <button id="btnToggleTheme" type="button"
+                  class="flex items-center justify-center p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 hover:text-white transition-all shadow-sm focus:outline-none shrink-0"
+                  title="Ganti Mode Tampilan (Terang / Gelap)" onclick="toggleThemeMode()">
+            <i data-lucide="sun" id="themeIconSun" class="w-4 h-4 text-amber-400 hidden"></i>
+            <i data-lucide="moon" id="themeIconMoon" class="w-4 h-4 text-violet-300"></i>
+          </button>
 
           <button id="btnShowAIUsage" type="button" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 text-[11px] font-semibold" title="Lihat ringkasan pemakaian AI" onclick="openAIUsageModal()"><i data-lucide="chart-no-axes-column-increasing" class="w-3.5 h-3.5"></i><span>Pemakaian AI</span></button>
 

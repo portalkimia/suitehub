@@ -491,3 +491,339 @@ body {
   background-color: rgba(244, 63, 94, 0.25) !important;
   color: #fb7185 !important;
 }
+
+
+/* ==========================================================================
+   PORTALKIMIA SUITE — MODE TERANG (LIGHT MODE)
+   Design System: Clean Ivory Slate (#f8fafc) & Pure Card White (#ffffff)
+   Primary: Indigo-Violet (#7c3aed / #8b5cf6) | Text: Deep Slate (#0f172a)
+   ========================================================================== */
+
+html:not(.dark),
+html.light {
+  --bg-color: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-high: #f1f5f9;
+  --surface-highest: #e2e8f0;
+  --surface-input: #ffffff;
+  --outline: #cbd5e1;
+  --outline-light: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+}
+
+html:not(.dark) body,
+html.light body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Light Mode Grid & Ambient Glows */
+html:not(.dark) .bg-grid-pattern,
+html.light .bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px) !important;
+}
+
+html:not(.dark) .glow-radial-violet,
+html.light .glow-radial-violet {
+  background: radial-gradient(circle 600px at 50% 10%, rgba(139, 92, 246, 0.07), transparent 70%) !important;
+}
+
+html:not(.dark) .glow-radial-emerald,
+html.light .glow-radial-emerald {
+  background: radial-gradient(circle 450px at 10% 80%, rgba(16, 185, 129, 0.04), transparent 70%) !important;
+}
+
+/* Light Header Navigation Bar */
+html:not(.dark) .glass-header,
+html.light .glass-header {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Light Glass Cards */
+html:not(.dark) .glass-card,
+html.light .glass-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 4px 10px -3px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Light Typography & Contrast */
+html:not(.dark) h1, html:not(.dark) h2, html:not(.dark) h3, html:not(.dark) h4,
+html.light h1, html.light h2, html.light h3, html.light h4 {
+  color: #0f172a !important;
+}
+
+html:not(.dark) .text-white,
+html.light .text-white {
+  color: #0f172a !important;
+}
+
+html:not(.dark) .text-zinc-100, html:not(.dark) .text-zinc-200,
+html.light .text-zinc-100, html.light .text-zinc-200 {
+  color: #1e293b !important;
+}
+
+html:not(.dark) .text-zinc-300,
+html.light .text-zinc-300 {
+  color: #334155 !important;
+}
+
+html:not(.dark) .text-zinc-400,
+html.light .text-zinc-400 {
+  color: #64748b !important;
+}
+
+html:not(.dark) .text-zinc-500,
+html.light .text-zinc-500 {
+  color: #94a3b8 !important;
+}
+
+/* Light Backgrounds */
+html:not(.dark) .bg-zinc-950,
+html.light .bg-zinc-950 {
+  background-color: #ffffff !important;
+}
+
+html:not(.dark) .bg-zinc-900,
+html:not(.dark) .bg-zinc-900\/90,
+html:not(.dark) .bg-zinc-900\/80,
+html:not(.dark) .bg-zinc-900\/60,
+html:not(.dark) .bg-zinc-900\/40,
+html.light .bg-zinc-900,
+html.light .bg-zinc-900\/90,
+html.light .bg-zinc-900\/80,
+html.light .bg-zinc-900\/60,
+html.light .bg-zinc-900\/40 {
+  background-color: #f8fafc !important;
+}
+
+html:not(.dark) .bg-zinc-800,
+html:not(.dark) .bg-zinc-800\/50,
+html:not(.dark) .bg-zinc-800\/60,
+html.light .bg-zinc-800,
+html.light .bg-zinc-800\/50,
+html.light .bg-zinc-800\/60 {
+  background-color: #f1f5f9 !important;
+}
+
+/* Light Borders */
+html:not(.dark) .border-zinc-800,
+html:not(.dark) .border-zinc-700,
+html:not(.dark) .border-zinc-700\/80,
+html.light .border-zinc-800,
+html.light .border-zinc-700,
+html.light .border-zinc-700\/80 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Form Inputs, Selects & Textareas */
+html:not(.dark) input[type="text"],
+html:not(.dark) input[type="password"],
+html:not(.dark) input[type="number"],
+html:not(.dark) select,
+html:not(.dark) textarea,
+html.light input[type="text"],
+html.light input[type="password"],
+html.light input[type="number"],
+html.light select,
+html.light textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder,
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+html:not(.dark) input:focus,
+html:not(.dark) select:focus,
+html:not(.dark) textarea:focus,
+html.light input:focus,
+html.light select:focus,
+html.light textarea:focus {
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.18) !important;
+  background-color: #ffffff !important;
+}
+
+html:not(.dark) select option,
+html.light select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Question Items */
+html:not(.dark) .question-item,
+html.light .question-item {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+html:not(.dark) .question-item:hover,
+html.light .question-item:hover {
+  border-color: #a78bfa !important;
+  box-shadow: 0 4px 14px -2px rgba(139, 92, 246, 0.1) !important;
+}
+
+html:not(.dark) .question-item.pinned-active,
+html.light .question-item.pinned-active {
+  background: #faf5ff !important;
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 16px -2px rgba(139, 92, 246, 0.22) !important;
+}
+
+/* Pin Question Button */
+html:not(.dark) .btn-pin-question:not(.is-pinned),
+html.light .btn-pin-question:not(.is-pinned) {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+html:not(.dark) .btn-pin-question:not(.is-pinned):hover,
+html.light .btn-pin-question:not(.is-pinned):hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Option Rows */
+html:not(.dark) .option-row,
+html.light .option-row {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+html:not(.dark) .option-row:hover,
+html.light .option-row:hover {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) .option-row.correct-answer,
+html.light .option-row.correct-answer {
+  background: #ecfdf5 !important;
+  border-color: #34d399 !important;
+}
+
+html:not(.dark) .option-label,
+html.light .option-label {
+  background: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+html:not(.dark) .option-row.correct-answer .option-label,
+html.light .option-row.correct-answer .option-label {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+
+/* Pembahasan Box */
+html:not(.dark) .pembahasan-box,
+html.light .pembahasan-box {
+  background: #f5f3ff !important;
+  border: 1px solid #ddd6fe !important;
+  color: #1e293b !important;
+}
+
+/* Tabel Data Kimia */
+html:not(.dark) .chem-table-container,
+html.light .chem-table-container {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+
+html:not(.dark) .chem-table th,
+html.light .chem-table th {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+}
+
+html:not(.dark) .chem-table td,
+html.light .chem-table td {
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+html:not(.dark) .chem-table tr:nth-child(even),
+html.light .chem-table tr:nth-child(even) {
+  background: #f8fafc !important;
+}
+
+html:not(.dark) .chem-table tr:hover td,
+html.light .chem-table tr:hover td {
+  background: #f5f3ff !important;
+}
+
+/* SVG Container */
+html:not(.dark) .chem-svg-wrapper,
+html.light .chem-svg-wrapper {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+html:not(.dark) .chem-svg-caption,
+html.light .chem-svg-caption {
+  color: #64748b !important;
+}
+
+/* Kisi-kisi Card */
+html:not(.dark) .kisi-kisi-card,
+html.light .kisi-kisi-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+/* Modals Overlay & Body in Light Mode */
+html:not(.dark) [id$="Modal"],
+html:not(.dark) [id^="modal"],
+html.light [id$="Modal"],
+html.light [id^="modal"] {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Custom Scrollbar in Light Mode */
+html:not(.dark)::-webkit-scrollbar-track,
+html.light::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html:not(.dark)::-webkit-scrollbar-thumb,
+html.light::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+html:not(.dark)::-webkit-scrollbar-thumb:hover,
+html.light::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* TTS Grid in Light Mode */
+html:not(.dark) .tts-cell-box,
+html.light .tts-cell-box {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #475569 !important;
+}
+
+html:not(.dark) .tts-cell-box.bg-zinc-950,
+html.light .tts-cell-box.bg-zinc-950 {
+  background-color: #0f172a !important;
+}
