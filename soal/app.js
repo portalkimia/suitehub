@@ -3457,6 +3457,10 @@ async function autoBackupToCloudAndDocs(pkg) {
 
   try {
     const autoRequestId = "auto-doc-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+    const backupPkg = JSON.parse(JSON.stringify(pkg));
+    backupPkg.nama_guru = getCustomTeacherName();
+    backupPkg.nama_sekolah = getCustomSchoolName();
+
     const [resBank, resDocs] = await Promise.allSettled([
       fetch(gasUrl, {
         method: "POST",
@@ -3465,7 +3469,7 @@ async function autoBackupToCloudAndDocs(pkg) {
           action: "simpanBankSoal",
           teacherToken: token,
           accessToken: token,
-          dataSoal: pkg
+          dataSoal: backupPkg
         })
       }).then(r => r.json()),
       fetch(gasUrl, {
@@ -3476,7 +3480,7 @@ async function autoBackupToCloudAndDocs(pkg) {
           teacherToken: token,
           accessToken: token,
           requestId: autoRequestId,
-          dataSoal: pkg
+          dataSoal: backupPkg
         })
       }).then(r => r.json())
     ]);
@@ -4960,13 +4964,13 @@ function renderPrintLayout(pkg) {
 
     const headerTitleElem = document.getElementById("printHeaderTitle");
     if (headerTitleElem) {
-      headerTitleElem.textContent = isPearson ? "PEARSON EDEXCEL INTERNATIONAL A-LEVEL ASSESSMENT" : "PENILAIAN HARIAN / ASESMEN SUMATIF KIMIA";
+      headerTitleElem.textContent = isPearson ? "PEARSON EDEXCEL INTERNATIONAL A-LEVEL ASSESSMENT" : (customSchool ? customSchool.toUpperCase() : "PENILAIAN HARIAN / ASESMEN SUMATIF KIMIA");
     }
     const metaElem = document.getElementById("printMetaText");
     if (metaElem) {
       metaElem.textContent = isPearson 
-        ? `Subject: Chemistry | Level: ${pkg.jenjang || 'Pearson Edexcel A-Level'} | Topic: ${pkg.topik_utama || 'Chemistry'}`
-        : `Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang || 'SMA'} | Topik: ${pkg.topik_utama || 'Kimia'}`;
+        ? `Subject: Chemistry | Level: ${pkg.jenjang || 'Pearson Edexcel A-Level'} | Topic: ${pkg.topik_utama || 'Chemistry'} | Centre: ${customSchool}`
+        : `Mata Pelajaran: Kimia | Jenjang: ${pkg.jenjang || 'SMA'} | Topik: ${pkg.topik_utama || 'Kimia'} | Guru: ${customTeacher}`;
     }
 
     const lblName = document.getElementById("printLblName");
@@ -5425,6 +5429,8 @@ function initExportListeners() {
     try {
       // Siapkan data terformat khusus Google Docs (Unicode murni tanpa tag HTML)
       const docsPackage = JSON.parse(JSON.stringify(currentPackage));
+      docsPackage.nama_guru = getCustomTeacherName();
+      docsPackage.nama_sekolah = getCustomSchoolName();
       const cleanListDocs = (list) => {
         if (!Array.isArray(list)) return;
         list.forEach(q => {
@@ -6591,20 +6597,22 @@ function exportToWordDocx(pkg, exportMode = 'guru') {
               </tr>
             </table>
           ` : `
-            <table style="width: 100%; border: none; border-bottom: 2px solid #000000; margin-bottom: 14pt; padding-bottom: 6pt; font-family: 'Times New Roman', Times, serif;">
+            <table style="width: 100%; border: none; border-bottom: 3px double #000000; margin-bottom: 14pt; padding-bottom: 8pt; font-family: 'Times New Roman', Times, serif;">
               <tr>
-                <td style="border: none; padding: 0; vertical-align: top; width: 56%; font-family: 'Times New Roman', Times, serif;">
-                  <div style="font-size: 13pt; font-weight: bold; color: #000000; letter-spacing: 0.5px;">${customSchool.toUpperCase()}</div>
-                  <div style="font-size: 11pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt;">${(pkg.judul || 'ASESMEN &amp; DRILLING SOAL KIMIA').toUpperCase()}</div>
-                  <div style="font-size: 10pt; color: #475569; margin-top: 2pt;">
-                    Guru Pengampu: <b>${customTeacher}</b> | Mapel: Kimia | Jenjang: ${pkg.jenjang || 'SMA'} | Materi: ${pkg.topik_utama || 'Kimia'}${exportSavedOnly ? ' (Pilihan Guru)' : ''}
+                <td style="border: none; padding: 0; vertical-align: top; width: 58%; font-family: 'Times New Roman', Times, serif;">
+                  <div style="font-size: 13.5pt; font-weight: bold; color: #000000; letter-spacing: 0.5px; text-transform: uppercase;">${customSchool}</div>
+                  <div style="font-size: 11pt; font-weight: bold; color: #1e3a8a; margin-top: 2pt; text-transform: uppercase;">${(pkg.judul || 'ASESMEN &amp; DRILLING SOAL KIMIA').toUpperCase()}</div>
+                  <div style="font-size: 9.5pt; color: #334155; margin-top: 3pt; line-height: 1.35;">
+                    <b>Mata Pelajaran:</b> Kimia &bull; <b>Jenjang/Fase:</b> ${pkg.jenjang || 'SMA'}<br>
+                    <b>Topik/Materi:</b> ${pkg.topik_utama || 'Kimia'}${exportSavedOnly ? ' (Pilihan Guru)' : ''}<br>
+                    <b>Guru Pengampu:</b> ${customTeacher}
                   </div>
                 </td>
-                <td style="border: none; padding: 0; vertical-align: top; width: 44%; text-align: right; font-family: 'Times New Roman', Times, serif;">
-                  <div style="font-family: 'Times New Roman', Times, serif; font-size: 10.5pt; line-height: 1.6; text-align: right; color: #000000;">
-                    <b>NAMA :</b> <span style="display:inline-block; border-bottom: 1pt solid #000; width: 140pt;">&nbsp;</span><br>
-                    <b>KELAS:</b> <span style="display:inline-block; border-bottom: 1pt solid #000; width: 140pt;">&nbsp;</span><br>
-                    <b>TANGGAL:</b> <span style="display:inline-block; border-bottom: 1pt solid #000; width: 140pt;">&nbsp;</span>
+                <td style="border: none; padding: 0; vertical-align: top; width: 42%; text-align: right; font-family: 'Times New Roman', Times, serif;">
+                  <div style="font-family: 'Times New Roman', Times, serif; font-size: 10pt; line-height: 1.6; text-align: right; color: #000000;">
+                    <b>NAMA :</b> <span style="display:inline-block; border-bottom: 1pt solid #000; width: 135pt;">&nbsp;</span><br>
+                    <b>KELAS / NO :</b> <span style="display:inline-block; border-bottom: 1pt solid #000; width: 135pt;">&nbsp;</span><br>
+                    <b>HARI / TGL :</b> <span style="display:inline-block; border-bottom: 1pt solid #000; width: 135pt;">&nbsp;</span>
                   </div>
                 </td>
               </tr>
@@ -6687,9 +6695,13 @@ function exportToMarkdownFile(pkg) {
     questionsA = pkg.daftar_soal;
   }
 
+  const customTeacher = getCustomTeacherName();
+  const customSchool = getCustomSchoolName();
+
   let lines = [
-    `# ${pkg.judul || 'Asesmen Kimia'}${exportSavedOnly ? ' (Soal Pilihan Guru)' : ''}`,
-    `**Jenjang:** ${pkg.jenjang} | **Topik Pokok:** ${pkg.topik_utama} | **Model:** ${pkg.stimulus_model || 'Kontekstual'}\n`,
+    `# ${customSchool.toUpperCase()}`,
+    `## ${pkg.judul || 'Asesmen Kimia'}${exportSavedOnly ? ' (Soal Pilihan Guru)' : ''}`,
+    `**Guru Pengampu:** ${customTeacher} | **Mata Pelajaran:** Kimia | **Jenjang:** ${pkg.jenjang} | **Topik Pokok:** ${pkg.topik_utama}\n`,
     `---\n`,
     `## 📝 Lembar Soal (Paket A)\n`
   ];
