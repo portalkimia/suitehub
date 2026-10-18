@@ -378,8 +378,12 @@ const AI_USAGE_KEY = "portalkimia_ai_usage_v1";
 // THEME MANAGEMENT (LIGHT / DARK MODE)
 // =========================================================================
 const THEME_STORAGE_KEY = "portalkimia_theme";
+var _lastThemeToggleTimestamp = 0;
 
 function getCurrentTheme() {
+  if (typeof window !== "undefined" && typeof window.getCurrentTheme === "function" && window.getCurrentTheme !== getCurrentTheme) {
+    return window.getCurrentTheme();
+  }
   try {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
     if (saved === "light" || saved === "dark") return saved;
@@ -391,9 +395,12 @@ function getCurrentTheme() {
 }
 
 function applyTheme(theme) {
+  if (typeof window !== "undefined" && typeof window.applyTheme === "function" && window.applyTheme !== applyTheme) {
+    return window.applyTheme(theme);
+  }
   const root = document.documentElement;
-  const isLight = theme === "light";
-  
+  const isLight = (theme === "light");
+
   if (isLight) {
     root.classList.remove("dark");
     root.classList.add("light");
@@ -406,7 +413,6 @@ function applyTheme(theme) {
     root.style.colorScheme = "dark";
   }
 
-  // Update theme toggle icons and button titles
   const sunIcon = document.getElementById("themeIconSun");
   const moonIcon = document.getElementById("themeIconMoon");
   const toggleBtn = document.getElementById("btnToggleTheme");
@@ -425,14 +431,13 @@ function applyTheme(theme) {
     toggleBtn.setAttribute("title", isLight ? "Ganti ke Mode Gelap (Dark Mode)" : "Ganti ke Mode Terang (Light Mode)");
     toggleBtn.setAttribute("aria-label", isLight ? "Mode Gelap" : "Mode Terang");
   }
-
-  // Re-render lucide icons if available
-  if (typeof window !== "undefined" && window.lucide && typeof window.lucide.createIcons === "function") {
-    try { window.lucide.createIcons(); } catch (e) {}
-  }
 }
 
 function toggleThemeMode() {
+  const now = Date.now();
+  if (now - _lastThemeToggleTimestamp < 250) return;
+  _lastThemeToggleTimestamp = now;
+
   const current = document.documentElement.classList.contains("light") ? "light" : "dark";
   const newTheme = current === "light" ? "dark" : "light";
   try {
@@ -447,17 +452,9 @@ function initThemeMode() {
   const theme = getCurrentTheme();
   applyTheme(theme);
 
-  // Setup button listener if button exists and not yet bound
-  const toggleBtn = document.getElementById("btnToggleTheme");
-  if (toggleBtn && !toggleBtn._themeBound) {
-    toggleBtn._themeBound = true;
-    toggleBtn.addEventListener("click", function(e) {
-      e.preventDefault();
-      toggleThemeMode();
-    });
-  }
+  // Note: Tombol #btnToggleTheme sudah memiliki handler inline onclick="toggleThemeMode()"
+  // Jangan menambahkan addEventListener lagi agar tidak terjadi double-toggle/flipping seketika!
 
-  // Listen to OS theme changes if user hasn't explicitly set a preference
   if (typeof window !== "undefined" && window.matchMedia) {
     try {
       const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");

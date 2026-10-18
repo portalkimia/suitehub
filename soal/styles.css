@@ -827,3 +827,67 @@ html:not(.dark) .tts-cell-box.bg-zinc-950,
 html.light .tts-cell-box.bg-zinc-950 {
   background-color: #0f172a !important;
 }
+
+
+/* Theme Toggle Button & Header Actions in Light Mode */
+html:not(.dark) #btnToggleTheme,
+html.light #btnToggleTheme {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08) !important;
+  cursor: pointer !important;
+}
+
+html:not(.dark) #btnToggleTheme:hover,
+html.light #btnToggleTheme:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+html:not(.dark) #themeIconSun,
+html.light #themeIconSun {
+  color: #d97706 !important;
+}
+
+html:not(.dark) #btnShowAIUsage,
+html:not(.dark) #btnOpenConnectionModal,
+html.light #btnShowAIUsage,
+html.light #btnOpenConnectionModal {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+html:not(.dark) #btnShowAIUsage:hover,
+html:not(.dark) #btnOpenConnectionModal:hover,
+html.light #btnShowAIUsage:hover,
+html.light #btnOpenConnectionModal:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+
+html:not(.dark) .text-violet-300,
+html.light .text-violet-300 {
+  color: #7c3aed !important;
+}
+
+html:not(.dark) .text-violet-400,
+html.light .text-violet-400 {
+  color: #6d28d9 !important;
+}
+
+html:not(.dark) .border-violet-500\/30,
+html.light .border-violet-500\/30 {
+  border-color: rgba(124, 58, 237, 0.25) !important;
+}
+
+html:not(.dark) .bg-violet-600\/10,
+html.light .bg-violet-600\/10,
+html:not(.dark) .bg-violet-500\/15,
+html.light .bg-violet-500\/15 {
+  background-color: rgba(124, 58, 237, 0.08) !important;
+}

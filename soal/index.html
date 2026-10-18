@@ -7,19 +7,108 @@
 
   <!-- PWA & Mobile Meta Tags -->
   <meta name="theme-color" content="#09090b">
-  <!-- Script Deteksi Tema Awal (Anti-FOUC) -->
+  <!-- Script Deteksi & Pengalih Tema (Anti-FOUC & Bulletproof Theme Engine) -->
   <script>
     (function() {
+      var THEME_KEY = 'portalkimia_theme';
+
+      window.getCurrentTheme = function() {
+        try {
+          var saved = localStorage.getItem(THEME_KEY);
+          if (saved === 'light' || saved === 'dark') return saved;
+        } catch (e) {}
+        if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+          return 'light';
+        }
+        return 'dark';
+      };
+
+      window.applyTheme = function(theme) {
+        var isLight = (theme === 'light');
+        var root = document.documentElement;
+
+        if (isLight) {
+          root.classList.remove('dark');
+          root.classList.add('light');
+          root.setAttribute('data-theme', 'light');
+          root.style.colorScheme = 'light';
+        } else {
+          root.classList.remove('light');
+          root.classList.add('dark');
+          root.setAttribute('data-theme', 'dark');
+          root.style.colorScheme = 'dark';
+        }
+
+        // Update meta theme-color
+        var metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', isLight ? '#f8fafc' : '#09090b');
+
+        // Update button UI & icons
+        var sunIcon = document.getElementById('themeIconSun');
+        var moonIcon = document.getElementById('themeIconMoon');
+        var toggleBtn = document.getElementById('btnToggleTheme');
+
+        if (sunIcon && moonIcon) {
+          if (isLight) {
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+          } else {
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+          }
+        }
+
+        if (toggleBtn) {
+          toggleBtn.setAttribute('title', isLight ? 'Ganti ke Mode Gelap (Dark Mode)' : 'Ganti ke Mode Terang (Light Mode)');
+          toggleBtn.setAttribute('aria-label', isLight ? 'Mode Gelap' : 'Mode Terang');
+        }
+      };
+
+      var _lastToggleTime = 0;
+      window.toggleThemeMode = function() {
+        var now = Date.now();
+        if (now - _lastToggleTime < 250) return; // Debounce guard against accidental double-clicks or double-listeners
+        _lastToggleTime = now;
+
+        var isCurrentlyLight = document.documentElement.classList.contains('light');
+        var newTheme = isCurrentlyLight ? 'dark' : 'light';
+        try {
+          localStorage.setItem(THEME_KEY, newTheme);
+        } catch (e) {
+          console.warn('Gagal menyimpan preferensi tema:', e);
+        }
+        window.applyTheme(newTheme);
+      };
+
+      window.initThemeMode = function() {
+        var theme = window.getCurrentTheme();
+        window.applyTheme(theme);
+      };
+
+      // Jalankan langsung untuk mencegah layar berkedip (Anti-FOUC)
       try {
-        var saved = localStorage.getItem('portalkimia_theme');
-        if (saved === 'light' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+        var initialTheme = window.getCurrentTheme();
+        if (initialTheme === 'light') {
           document.documentElement.classList.remove('dark');
           document.documentElement.classList.add('light');
+          document.documentElement.setAttribute('data-theme', 'light');
+          document.documentElement.style.colorScheme = 'light';
         } else {
           document.documentElement.classList.add('dark');
           document.documentElement.classList.remove('light');
+          document.documentElement.setAttribute('data-theme', 'dark');
+          document.documentElement.style.colorScheme = 'dark';
         }
       } catch (e) {}
+
+      // Update UI icon saat DOM siap
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          window.applyTheme(window.getCurrentTheme());
+        });
+      } else {
+        window.applyTheme(window.getCurrentTheme());
+      }
     })();
   </script>
   <meta name="mobile-web-app-capable" content="yes">
@@ -85,7 +174,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Custom Design System Stylesheet -->
-  <link rel="stylesheet" href="styles.css?v=2.13">
+  <link rel="stylesheet" href="styles.css?v=2.17">
 
   <!-- Konfigurasi Terpusat PortalKimia Suite -->
   <script src="../config.js?v=2.13"></script>
@@ -124,7 +213,7 @@
                 <span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[10px] font-black tracking-wider uppercase">
                   Generator Soal AI
                 </span>
-                <span id="appVersionBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-tight shadow-sm" title="Versi Rilis Terpasang (Terupdate Otomatis)">v2.13</span>
+                <span id="appVersionBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-tight shadow-sm" title="Versi Rilis Terpasang (Terupdate Otomatis)">v2.17</span>
               </div>
               <p class="text-[10px] text-zinc-400 font-medium hidden sm:block">Otomatisasi Asesmen &amp; Bank Soal Kimia</p>
             </div>
@@ -133,12 +222,18 @@
 
         <!-- Right: Actions & API Key & Profile -->
         <div class="flex items-center gap-2 sm:gap-3">
-          <!-- Tombol Pengalih Mode Terang / Gelap (Theme Toggle) -->
+                    <!-- Tombol Pengalih Mode Terang / Gelap (Theme Toggle) -->
           <button id="btnToggleTheme" type="button"
                   class="flex items-center justify-center p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 hover:text-white transition-all shadow-sm focus:outline-none shrink-0"
                   title="Ganti Mode Tampilan (Terang / Gelap)" onclick="toggleThemeMode()">
-            <i data-lucide="sun" id="themeIconSun" class="w-4 h-4 text-amber-400 hidden"></i>
-            <i data-lucide="moon" id="themeIconMoon" class="w-4 h-4 text-violet-300"></i>
+            <!-- Sun Icon (Tampil saat Light Mode) -->
+            <span id="themeIconSun" class="hidden text-amber-500 flex items-center justify-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            </span>
+            <!-- Moon Icon (Tampil saat Dark Mode) -->
+            <span id="themeIconMoon" class="text-violet-300 flex items-center justify-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </span>
           </button>
 
           <button id="btnShowAIUsage" type="button" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 text-[11px] font-semibold" title="Lihat ringkasan pemakaian AI" onclick="openAIUsageModal()"><i data-lucide="chart-no-axes-column-increasing" class="w-3.5 h-3.5"></i><span>Pemakaian AI</span></button>
@@ -1116,6 +1211,6 @@
   </footer>
 
   <!-- Application Logic -->
-  <script src="app.js?v=2.16"></script>
+  <script src="app.js?v=2.17"></script>
 </body>
 </html>
