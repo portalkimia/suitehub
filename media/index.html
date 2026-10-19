@@ -1627,7 +1627,7 @@
       <span>&bull;</span>
       <a href="LaboratoriumVirtual.html" class="hover:text-emerald-600 dark:hover:text-tertiary transition-colors flex items-center gap-1">
         <span class="material-symbols-outlined text-[15px]">science</span>
-        <span>Lab Virtual (18 LAB)</span>
+        <span>Laboratorium Virtual</span>
       </a>
       <span>&bull;</span>
       <button 
@@ -2364,10 +2364,10 @@
 
       let topic = 'Umum';
       let pedagogicalScore = 9999;
-      let chapterId = 'umum-lab';
-      let chapterName = 'Laboratorium Virtual & Pengayaan Terbuka';
-      let chapterDesc = 'Simulasi laboratorium interaktif dan media praktikum virtual kimia mandiri lintas jenjang';
-      let chapterIcon = 'biotech';
+      let chapterId = 'umum-pengayaan';
+      let chapterName = 'Pengayaan & Literasi Terbuka';
+      let chapterDesc = 'Media pembelajaran mandiri dan pengayaan kimia kontekstual lintas jenjang';
+      let chapterIcon = 'menu_book';
       let chapterOrder = 999;
 
       // 1. KELAS 10 (FASE E)
@@ -3746,9 +3746,6 @@
       "kurva-kalibrasi-spektrofotometri-12": "Media_Pembelajaran_Kimia_Drive/Kurva_Kalibrasi_dan_Spektrofotometri_12_Fase_F.html",
       "spektrofotometri uv-vis dan kurva kalibrasi: hukum lambert-beer (a = ε": "Media_Pembelajaran_Kimia_Drive/Kurva_Kalibrasi_dan_Spektrofotometri_12_Fase_F.html",
       "spektrofotometri uv-vis dan kurva kalibrasi": "Media_Pembelajaran_Kimia_Drive/Kurva_Kalibrasi_dan_Spektrofotometri_12_Fase_F.html",
-      "laboratorium_kimia_virtual_umum.html": "Media_Pembelajaran_Kimia_Drive/Laboratorium_Kimia_Virtual_Umum.html",
-      "laboratorium_kimia_virtual_umum": "Media_Pembelajaran_Kimia_Drive/Laboratorium_Kimia_Virtual_Umum.html",
-      "laboratorium kimia virtual": "Media_Pembelajaran_Kimia_Drive/Laboratorium_Kimia_Virtual_Umum.html",
       "larutan_elektrolit_dan_nonelektrolit_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Larutan_Elektrolit_dan_Nonelektrolit_11_Fase_F.html",
       "larutan_elektrolit_dan_nonelektrolit_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Larutan_Elektrolit_dan_Nonelektrolit_11_Fase_F.html",
       "larutan elektrolit dan nonelektrolit": "Media_Pembelajaran_Kimia_Drive/Larutan_Elektrolit_dan_Nonelektrolit_11_Fase_F.html",
@@ -4349,10 +4346,10 @@
 
       if (vlab) {
         hasHandledDeepLink = true;
+        showToast('Membuka Virtual Lab: ' + vlab.title, 'biotech');
         setTimeout(() => {
-          openVirtualLabInHtmlViewer(vlab);
-          showToast(`Membuka Virtual Lab: ${vlab.title}`, 'biotech');
-        }, 350);
+          window.location.href = vlab.file || 'LaboratoriumVirtual.html';
+        }, 200);
         return;
       }
 
