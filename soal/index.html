@@ -174,7 +174,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Custom Design System Stylesheet -->
-  <link rel="stylesheet" href="styles.css?v=2.18">
+  <link rel="stylesheet" href="styles.css?v=2.19">
 
   <!-- Konfigurasi Terpusat PortalKimia Suite -->
   <script src="../config.js?v=2.13"></script>
@@ -213,7 +213,7 @@
                 <span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[10px] font-black tracking-wider uppercase">
                   Generator Soal AI
                 </span>
-                <span id="appVersionBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-tight shadow-sm" title="Versi Rilis Terpasang (Terupdate Otomatis)">v2.18</span>
+                <span id="appVersionBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-tight shadow-sm" title="Versi Rilis Terpasang (Terupdate Otomatis)">v2.19</span>
               </div>
               <p class="text-[10px] text-zinc-400 font-medium hidden sm:block">Otomatisasi Asesmen &amp; Bank Soal Kimia</p>
             </div>
@@ -821,23 +821,47 @@
         </label>
       </div>
 
-      <!-- Info Kompatibilitas Mobile / Tablet -->
-      <div class="p-3 rounded-xl bg-blue-950/40 border border-blue-500/30 text-[11px] text-blue-200 flex items-start gap-2.5">
-        <i data-lucide="info" class="w-4 h-4 text-blue-400 shrink-0 mt-0.5"></i>
-        <div class="leading-relaxed">
-          <b>Tips Tablet Samsung &amp; HP Android:</b> Berkas .doc ini dioptimalkan dibuka di Laptop/PC (MS Word/WPS). Untuk membuka dan mengedit langsung di HP/Tablet Android, disarankan menggunakan tombol <b>"Simpan ke Google Docs"</b> atau tombol <b>"Cetak / PDF"</b>.
+      <!-- Info Kompatibilitas Mobile & Solusi Balon Overlay -->
+      <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-200 space-y-1.5">
+        <div class="flex items-center gap-1.5 font-bold text-amber-300">
+          <i data-lucide="shield-check" class="w-4 h-4 text-amber-400 shrink-0"></i>
+          <span>Tips Bebas Masalah Balon Overlay / Hamparan Layar di HP &amp; Tablet:</span>
         </div>
+        <p class="text-[11px] leading-relaxed text-zinc-300">
+          Jika sistem Android memunculkan peringatan untuk mematikan balon pengatur volume/asisten melayang saat mengunduh, Anda <b>tidak perlu mematikannya</b>! Cukup tekan tombol hijau <b>"📋 Salin Naskah"</b> di bawah untuk langsung menempelkan (paste) naskah lengkap ke aplikasi Word/WPS/Docs tanpa perlu mengunduh file berkas.
+        </p>
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex items-center justify-end gap-2 pt-2 border-t border-zinc-800">
-        <button type="button" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition-colors cursor-pointer" onclick="closeWordExportModal()">
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-800">
+        <button type="button" class="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition-colors cursor-pointer" onclick="closeWordExportModal()">
           Batal
         </button>
-        <button type="button" id="btnConfirmWordExport" onclick="confirmWordExport()" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-lg shadow-violet-900/30 transition-all cursor-pointer">
-          <i data-lucide="download" class="w-4 h-4"></i>
-          <span>Unduh File Word (.doc)</span>
-        </button>
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Tombol Salin Format (Anti-Overlay) -->
+          <button type="button" id="btnCopyWordClipboard" onclick="confirmWordExport('copy')" 
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
+                  title="Salin seluruh format naskah ke clipboard (Langsung paste di Word/WPS tanpa download)">
+            <i data-lucide="clipboard-copy" class="w-4 h-4"></i>
+            <span>📋 Salin Naskah (Anti-Overlay)</span>
+          </button>
+
+          <!-- Tombol Buka Tab Baru -->
+          <button type="button" id="btnOpenWordNewTab" onclick="confirmWordExport('tab')" 
+                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-semibold text-xs transition-all cursor-pointer"
+                  title="Buka naskah di tab baru browser">
+            <i data-lucide="external-link" class="w-4 h-4 text-violet-400"></i>
+            <span>Buka Tab Baru</span>
+          </button>
+
+          <!-- Tombol Unduh File Biasa -->
+          <button type="button" id="btnConfirmWordExport" onclick="confirmWordExport('download')" 
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-lg shadow-violet-900/30 transition-all cursor-pointer"
+                  title="Unduh berkas .doc ke memori perangkat">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Unduh File (.doc)</span>
+          </button>
+        </div>
       </div>
 
     </div>
@@ -1211,6 +1235,6 @@
   </footer>
 
   <!-- Application Logic -->
-  <script src="app.js?v=2.18"></script>
+  <script src="app.js?v=2.19"></script>
 </body>
 </html>

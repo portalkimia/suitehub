@@ -5921,24 +5921,25 @@ function closeWordExportModal() {
   if (modal) modal.classList.add("hidden");
 }
 
-function confirmWordExport() {
+function confirmWordExport(actionType = 'download') {
   if (!currentPackage) {
     alert("⚠️ Data paket soal belum tersedia. Silakan buat soal terlebih dahulu.");
     return;
   }
   const selected = document.querySelector('input[name="wordExportOption"]:checked');
   const mode = selected ? selected.value : 'guru';
-  const btn = document.getElementById("btnConfirmWordExport");
+  const btnId = actionType === 'copy' ? 'btnCopyWordClipboard' : (actionType === 'tab' ? 'btnOpenWordNewTab' : 'btnConfirmWordExport');
+  const btn = document.getElementById(btnId);
   const oldHtml = btn ? btn.innerHTML : "";
   if (btn) {
-    btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-white"></i><span>Menyiapkan File Word...</span>`;
+    btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-white"></i><span>Memproses...</span>`;
     if (window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
   }
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
-      exportToWordDocx(currentPackage, mode);
+      await exportToWordDocx(currentPackage, mode, actionType);
     } catch (err) {
-      alert("❌ Gagal mengunduh file Word: " + err.message);
+      alert("❌ Gagal memproses naskah Word: " + err.message);
     } finally {
       if (btn) btn.innerHTML = oldHtml;
       if (window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
@@ -5948,6 +5949,8 @@ function confirmWordExport() {
 }
 
 // Pasang ke window agar selalu dapat dipanggil langsung dari onclick
+window.copyWordDocumentToClipboard = () => confirmWordExport('copy');
+window.openWordDocumentInNewTab = () => confirmWordExport('tab');
 window.openWordExportModal = openWordExportModal;
 window.closeWordExportModal = closeWordExportModal;
 window.confirmWordExport = confirmWordExport;
@@ -6222,7 +6225,7 @@ function formatUniqueQuestionForWord(promptText, soal) {
 }
 
 // WORD EXPORTER (.doc / .docx - STANDAR UKURAN KERTAS A4 & FONT TIMES NEW ROMAN 12PT)
-function exportToWordDocx(pkg, exportMode = 'guru') {
+async function exportToWordDocx(pkg, exportMode = 'guru', actionType = 'download') {
   if (!pkg) {
     alert("⚠️ Data paket soal belum tersedia. Silakan buat soal terlebih dahulu.");
     return;
@@ -6740,13 +6743,50 @@ function exportToWordDocx(pkg, exportMode = 'guru') {
       ? '_Versi_Siswa_A4_TNR' 
       : (exportMode === 'kunci_saja' ? '_Kunci_Pembahasan_A4_TNR' : '_Lengkap_Guru_A4_TNR');
 
-    const blob = new Blob(['\ufeff', docContent], { type: 'application/msword;charset=utf-8' });
-    const safeTitle = (pkg.judul || "Asesmen_Kimia")
-      .replace(/[/\\?%*:|"<>]/g, '-')
-      .replace(/\s+/g, '_')
-      .substring(0, 80);
-    const fileName = `${safeTitle}${exportSavedOnly ? '_Pilihan' : ''}${modeSuffix}.doc`;
+    if (actionType === 'copy') {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = docContent;
+      const plainText = tempDiv.innerText || tempDiv.textContent || "";
+      let copied = false;
+      if (navigator.clipboard && window.ClipboardItem) {
+        try {
+          const htmlBlob = new Blob([docContent], { type: "text/html" });
+          const textBlob = new Blob([plainText], { type: "text/plain" });
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              "text/html": htmlBlob,
+              "text/plain": textBlob
+            })
+          ]);
+          copied = true;
+        } catch (e) {
+          console.warn("ClipboardItem write error:", e);
+        }
+      }
+      if (!copied) {
+        const listener = function(e) {
+          e.clipboardData.setData("text/html", docContent);
+          e.clipboardData.setData("text/plain", plainText);
+          e.preventDefault();
+        };
+        document.addEventListener("copy", listener);
+        document.execCommand("copy");
+        document.removeEventListener("copy", listener);
+        copied = true;
+      }
+      alert("📋 Seluruh Naskah Berhasil Disalin ke Clipboard!\n\nAnda TIDAK PERLU mendownload berkas (bebas dari kendala balon overlay).\n\nSilakan buka aplikasi Word, WPS Office, atau Google Docs di perangkat Anda, lalu klik 'Tempel / Paste'. Format kertas A4, font Times New Roman, rumus kimia, dan tabel otomatis tertata rapi.");
+      return;
+    }
 
+    if (actionType === 'tab') {
+      const blob = new Blob(['\ufeff', docContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, "_blank");
+      if (!win) window.location.href = url;
+      return;
+    }
+
+    const blob = new Blob(['\ufeff', docContent], { type: 'application/msword;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.style.display = "none";

@@ -1356,3 +1356,6 @@ html.light .pinned-badge {
   border: 1px solid #c4b5fd !important;
   color: #5b21b6 !important;
 }
+
+html:not(.dark) #btnOpenWordNewTab, html.light #btnOpenWordNewTab { background-color: #f1f5f9 !important; color: #1e293b !important; border-color: #cbd5e1 !important; }
+html:not(.dark) #btnOpenWordNewTab:hover, html.light #btnOpenWordNewTab:hover { background-color: #e2e8f0 !important; border-color: #94a3b8 !important; }
