@@ -26,6 +26,9 @@ copy /Y "C:\Users\Tito\Desktop\PortalKimia-Suite\media\Guru.html" "C:\Users\Tito
 if not exist "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite" mkdir "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite" >nul
 if exist "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Code.gs" (
     copy /Y "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Code.gs" "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite\Media_Code.gs" >nul
+    if not exist "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite\Media_GAS" mkdir "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite\Media_GAS" >nul
+    copy /Y "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Code.gs" "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite\Media_GAS\Kode.js" >nul
+    if exist "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Guru.html" copy /Y "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Guru.html" "C:\Users\Tito\Desktop\Backend-GAS-PortalKimia-Suite\Media_GAS\Guru.html" >nul
     if not exist "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\media" mkdir "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\media" >nul
     copy /Y "C:\Users\Tito\Desktop\Portal-Bahan-Ajar-Kimia\Code.gs" "C:\Users\Tito\Desktop\PortalKimia-Suite\backup\media\Code.gs" >nul
 )
