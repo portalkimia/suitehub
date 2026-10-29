@@ -1690,17 +1690,15 @@
     const EXCLUDED_PROJECT_PATTERNS = [
       /\bicp\b/i,
       /\bpisa\b/i,
-      /hakikat\s*ilmu\s*kimia/i,
-      /perkenalan/i,
-      /nomenclature/i,
-      /tata\s*nama\s*kimia/i,
-      /alkene/i,
-      /alcohol/i,
-      /balancing/i,
+      /\bperkenalan\b/i,
+      /\bnomenclature\b/i,
+      /\balkene\b/i,
+      /\balcohol\b/i,
+      /\bbalancing\b/i,
       /exo\s*endo/i,
       /writing\s*chem/i,
       /simplyfying/i,
-      /latsos/i,
+      /\blatsos\b/i,
       /kuiz\s*kartu/i,
       /kartu\s*kuiz/i,
       /atoms\s*in\s*eng/i,
@@ -1714,7 +1712,12 @@
         const title = (item.title || '').trim();
         const desc = (item.description || '').trim();
         const url = (item.url || '').trim();
+        const topic = (item.topic || '').trim();
         const id = (item.id || '').trim();
+        // Isolasi Virtual Lab agar hanya tampil di LaboratoriumVirtual.html
+        if (/^Lab_|^LaboratoriumVirtual|DeepDive|^Virtual\s*Lab:/i.test(title) || topic === 'Laboratorium Virtual' || /Lab_[A-Za-z0-9_]+_DeepDive|LaboratoriumVirtual\.html/i.test(url)) {
+          return false;
+        }
         const combined = `${title} ${desc} ${url} ${id}`;
         for (const pat of EXCLUDED_PROJECT_PATTERNS) {
           if (pat.test(combined)) return false;
@@ -2060,13 +2063,15 @@
         }
       } catch(e) {}
 
-      // Migrasi urutan bab & alur belajar ke taksonomi Kurikulum Merdeka v2.0
+      // Migrasi urutan bab & alur belajar ke taksonomi Kurikulum Merdeka v3.0 (Sifat Koligatif Kelas 12 & Sinkronisasi Cloud Drive)
       try {
-        const curriculumVer = localStorage.getItem('chemportal_curriculum_v2');
-        if (curriculumVer !== '2.0') {
+        const curriculumVer = localStorage.getItem('chemportal_curriculum_v3');
+        if (curriculumVer !== '3.0') {
           localStorage.removeItem('chemportal_chapter_order');
           localStorage.removeItem('chemportal_learning_order');
-          localStorage.setItem('chemportal_curriculum_v2', '2.0');
+          localStorage.removeItem('chemportal_materials');
+          localStorage.setItem('chemportal_curriculum_v3', '3.0');
+          hasLocal = false;
         }
       } catch(e) {}
 
@@ -2347,12 +2352,15 @@
       let grade = item.grade || '';
       const g = grade.toLowerCase();
 
-      if (!grade || grade === 'Umum' || normalizeGradeKey(grade).key === 'umum') {
+      // Pastikan Sifat Koligatif Larutan selalu masuk Kelas 12 (Fase F) sesuai Kurikulum Merdeka terbaru
+      if (lower.match(/koligatif|tekanan uap|titik didih|titik beku|osmotik|osmosis|raoult|van't hoff/)) {
+        grade = 'Kelas 12 (Fase F)';
+      } else if (!grade || grade === 'Umum' || normalizeGradeKey(grade).key === 'umum') {
         if (lower.includes('laboratorium kimia virtual')) {
           grade = 'Semua Kelas (Umum)';
-        } else if (lower.match(/volta|elektrolisis|faraday|redoks|korosi|benzena|alkana|alkena|alkuna|hidrokarbon|haloalkana|alkohol|eter|aldehida|keton|asam karboksilat|ester|polimer|karbohidrat|lipid|asam amino|protein|dna|rna|unsur transisi|periode ketiga|senyawa kompleks|radioaktivitas|reaksi inti|gravimetri|spektrofotometri/)) {
+        } else if (lower.match(/koligatif|volta|elektrolisis|faraday|redoks|korosi|benzena|alkana|alkena|alkuna|hidrokarbon|haloalkana|alkohol|eter|aldehida|keton|asam karboksilat|ester|polimer|karbohidrat|lipid|asam amino|protein|dna|rna|unsur transisi|periode ketiga|senyawa kompleks|radioaktivitas|reaksi inti|gravimetri|spektrofotometri/)) {
           grade = 'Kelas 12 (Fase F)';
-        } else if (lower.match(/titrasi|asam basa|ph|larutan elektrolit|konsentrasi|pembuatan larutan|penyangga|buffer|hidrolisis|kelarutan|ksp|pengendapan|koloid|koligatif|termo|kalor|entalpi|hess|laju|arrhenius|orde|kesetimbangan|le chatelier|ikatan|lewis|vsepr|bentuk molekul|hibridisasi|gaya antarmolekul/)) {
+        } else if (lower.match(/titrasi|asam basa|ph|larutan elektrolit|konsentrasi|pembuatan larutan|penyangga|buffer|hidrolisis|kelarutan|ksp|pengendapan|koloid|termo|kalor|entalpi|hess|laju|arrhenius|orde|kesetimbangan|le chatelier|ikatan|lewis|vsepr|bentuk molekul|hibridisasi|gaya antarmolekul/)) {
           grade = 'Kelas 11 (Fase F)';
         } else {
           grade = 'Kelas 10 (Fase E)';
@@ -2497,21 +2505,27 @@
           else if (lower.includes('teori')) pedagogicalScore = 1153;
           else pedagogicalScore = 1154;
         } else {
-          topic = 'Sistem Koloid & Sifat Larutan';
+          topic = 'Sistem Koloid';
           chapterId = 'k11-bab7';
-          chapterName = 'Bab 7: Koloid & Sifat Larutan';
-          chapterDesc = 'Klasifikasi sistem koloid, sifat optik & kinetik koloid, serta sifat koligatif larutan';
+          chapterName = 'Bab 7: Sistem Koloid & Penerapannya';
+          chapterDesc = 'Klasifikasi sistem koloid, efek Tyndall, gerak Brown, koagulasi, dan koloid di lingkungan sekitar';
           chapterIcon = 'grain';
           chapterOrder = 207;
-          pedagogicalScore = 1170;
-          if (lower.includes('koligatif')) pedagogicalScore = 1171;
-          else pedagogicalScore = 1172;
+          pedagogicalScore = 1171;
         }
       }
 
       // 3. KELAS 12 (FASE F)
       else if (grade.includes('12')) {
-        if (lower.match(/redoks|biloks|setengah reaksi|sel volta|sel elektrolisis|faraday|korosi|titrasi redoks/)) {
+        if (lower.match(/koligatif|tekanan uap|titik didih|titik beku|osmotik|osmosis|raoult|van't hoff/)) {
+          topic = 'Sifat Koligatif Larutan';
+          chapterId = 'k12-bab0';
+          chapterName = 'Bab 1: Sifat Koligatif Larutan';
+          chapterDesc = 'Penurunan tekanan uap (Raoult), kenaikan titik didih, penurunan titik beku, tekanan osmotik, dan faktor van\'t Hoff (i)';
+          chapterIcon = 'ac_unit';
+          chapterOrder = 300;
+          pedagogicalScore = 1205;
+        } else if (lower.match(/redoks|biloks|setengah reaksi|sel volta|sel elektrolisis|faraday|korosi|titrasi redoks/)) {
           topic = 'Redoks & Elektrokimia';
           chapterId = 'k12-bab1';
           chapterName = 'Bab 1: Redoks & Sel Elektrokimia';
@@ -3861,11 +3875,14 @@
       "sifat_keperiodikan_unsur_10_fase_e": "Media_Pembelajaran_Kimia_Drive/Sifat_Keperiodikan_Unsur_10_Fase_E.html",
       "sifat keperiodikan unsur": "Media_Pembelajaran_Kimia_Drive/Sifat_Keperiodikan_Unsur_10_Fase_E.html",
       "sifat-keperiodikan": "Media_Pembelajaran_Kimia_Drive/Sifat_Keperiodikan_Unsur_10_Fase_E.html",
-      "sifat_koligatif_larutan_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_11_Fase_F.html",
-      "sifat_koligatif_larutan_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_11_Fase_F.html",
-      "sifat koligatif larutan": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_11_Fase_F.html",
-      "sifat-koligatif-larutan-11": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_11_Fase_F.html",
-      "sifat koligatif larutan: penurunan tekanan uap, kenaikan titik didih, penurunan titik beku, dan tekanan osmotik": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_11_Fase_F.html",
+      "sifat_koligatif_larutan_12_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_12_Fase_F.html",
+      "sifat_koligatif_larutan_12_fase_f": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_12_Fase_F.html",
+      "sifat_koligatif_larutan_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_12_Fase_F.html",
+      "sifat_koligatif_larutan_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_12_Fase_F.html",
+      "sifat koligatif larutan": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_12_Fase_F.html",
+      "sifat-koligatif-larutan-12": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_12_Fase_F.html",
+      "sifat-koligatif-larutan-11": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_12_Fase_F.html",
+      "sifat koligatif larutan: penurunan tekanan uap, kenaikan titik didih, penurunan titik beku, dan tekanan osmotik": "Media_Pembelajaran_Kimia_Drive/Sifat_Koligatif_Larutan_12_Fase_F.html",
       "sistem_koloid_dan_penerapannya_11_fase_f.html": "Media_Pembelajaran_Kimia_Drive/Sistem_Koloid_dan_Penerapannya_11_Fase_F.html",
       "sistem_koloid_dan_penerapannya_11_fase_f": "Media_Pembelajaran_Kimia_Drive/Sistem_Koloid_dan_Penerapannya_11_Fase_F.html",
       "sistem koloid dan penerapannya": "Media_Pembelajaran_Kimia_Drive/Sistem_Koloid_dan_Penerapannya_11_Fase_F.html",
@@ -4035,26 +4052,33 @@
     }
 
     function resolveMaterialViewUrls(item) {
-      if (!item) return { embedUrl: '', directTabUrl: '', driveViewUrl: '', downloadUrl: '', docsUrl: '', isDrive: false, localFallback: null, gasRendererUrl: '' };
+      if (!item) return { embedUrl: '', directTabUrl: '', driveViewUrl: '', downloadUrl: '', docsUrl: '', isDrive: false, localFallback: null, gasRendererUrl: '', gasFetchHtmlUrl: '', fileName: '' };
       const format = (item.format || 'HTML').toUpperCase();
       const rawUrl = (item.url || item.embedUrl || '').trim();
       const driveId = extractGoogleDriveFileId(rawUrl);
-      const isDrive = !!driveId;
       const localFallback = findLocalFallbackFile(item.title, rawUrl, item.id);
-      const isLocalHost = window.location.protocol === 'file:' || 
-                          window.location.hostname === 'localhost' || 
-                          window.location.hostname === '127.0.0.1' || 
-                          window.location.hostname === '';
+      const fileName = localFallback
+        ? localFallback.replace(/^.*\/+/g, '')
+        : (rawUrl.match(/([A-Za-z0-9_\-]+\.html?)$/i) ? rawUrl.match(/([A-Za-z0-9_\-]+\.html?)$/i)[1] : '');
+      const isVirtualLabFile = /^(Lab_|LaboratoriumVirtual)/i.test(fileName);
+      const isDrive = !!driveId || (!isVirtualLabFile && format === 'HTML');
 
       let embedUrl = rawUrl;
       let directTabUrl = rawUrl;
-      let driveViewUrl = isDrive ? `https://drive.google.com/file/d/${driveId}/view?usp=sharing` : rawUrl;
-      let downloadUrl = isDrive ? `https://drive.google.com/uc?export=download&id=${driveId}` : rawUrl;
-      let docsUrl = isDrive ? `https://docs.google.com/viewer?url=${encodeURIComponent(downloadUrl)}` : rawUrl;
-      let gasRendererUrl = isDrive ? `${GAS_API_URL}?page=drive-html&id=${driveId}` : '';
+      let driveViewUrl = driveId ? `https://drive.google.com/file/d/${driveId}/view?usp=sharing` : PORTALKIMIA_DRIVE_FOLDER_URL;
+      let downloadUrl = driveId ? `https://drive.google.com/uc?export=download&id=${driveId}` : rawUrl;
+      let docsUrl = driveId ? `https://docs.google.com/viewer?url=${encodeURIComponent(downloadUrl)}` : rawUrl;
+
+      const queryParams = new URLSearchParams();
+      if (driveId) queryParams.set('id', driveId);
+      if (fileName) queryParams.set('file', fileName);
+      if (item.title) queryParams.set('title', item.title);
+
+      const gasRendererUrl = `${GAS_API_URL}?page=drive-html&${queryParams.toString()}`;
+      const gasFetchHtmlUrl = `${GAS_API_URL}?action=fetchHtml&${queryParams.toString()}`;
 
       if (format === 'PDF') {
-        if (isDrive) {
+        if (driveId) {
           embedUrl = `https://drive.google.com/file/d/${driveId}/preview`;
           directTabUrl = `https://drive.google.com/file/d/${driveId}/preview`;
         }
@@ -4064,37 +4088,33 @@
           const slideId = slideMatch ? slideMatch[1] : driveId;
           embedUrl = `https://docs.google.com/presentation/d/${slideId}/embed?start=false&loop=false&delayms=3000`;
           directTabUrl = embedUrl;
-        } else if (isDrive) {
+        } else if (driveId) {
           embedUrl = `https://drive.google.com/file/d/${driveId}/preview`;
           directTabUrl = embedUrl;
         }
       } else { // HTML
-        if (isDrive) {
-          // Sajikan melalui Google Apps Script Web App yang me-render konten HTML secara interaktif
+        if (isVirtualLabFile && fileName) {
+          embedUrl = fileName;
+          directTabUrl = fileName;
+        } else {
+          // Seluruh 74 media pembelajaran HTML disinkronkan dan disajikan langsung dari Google Drive via GAS
           embedUrl = gasRendererUrl;
           directTabUrl = gasRendererUrl;
-
-          // Jika dijalankan dari sistem file lokal (file:///) dan berkas lokal tersedia, utamakan lokal agar instan & offline
-          if (isLocalHost && localFallback) {
-            embedUrl = localFallback;
-            directTabUrl = localFallback;
-          }
-        } else if (localFallback && (!rawUrl || !rawUrl.endsWith('.html'))) {
-          embedUrl = localFallback;
-          directTabUrl = localFallback;
         }
       }
 
       return {
         isDrive,
         driveId,
+        fileName,
         embedUrl,
         directTabUrl,
         driveViewUrl,
         downloadUrl,
         docsUrl,
         localFallback,
-        gasRendererUrl
+        gasRendererUrl,
+        gasFetchHtmlUrl
       };
     }
     window.resolveMaterialViewUrls = resolveMaterialViewUrls;
@@ -4353,19 +4373,100 @@
         return;
       }
 
-      // 3. Jika mengarah ke file lokal yang valid di LOCAL_MEDIA_MAP, buka langsung HANYA jika offline / local
-      if (mappedLocalFile && isLocalHost) {
+      // 3. Jika mengarah ke berkas materi di LOCAL_MEDIA_MAP (misalnya dari Generator RPP/Modul),
+      // tunggu hingga allMaterials selesai dimuat dari Google Sheets, atau buka langsung via Cloud Google Drive!
+      if (mappedLocalFile && (!Array.isArray(allMaterials) || allMaterials.length > 0)) {
         hasHandledDeepLink = true;
+        const cleanFileName = mappedLocalFile.replace(/^.*\/+/g, '');
+        const cleanTitle = cleanFileName.replace(/\.html?$/i, '').replace(/_+/g, ' ');
         setTimeout(() => {
-          openVirtualLabInHtmlViewer({
+          openCloudDriveMediaByItem({
             id: targetQuery,
-            title: query || hash,
-            file: mappedLocalFile,
-            grade: 'Kurikulum Merdeka',
-            topic: 'Modul Interaktif'
+            title: cleanTitle,
+            url: cleanFileName,
+            format: 'HTML',
+            grade: cleanFileName.includes('_12_') ? 'Kelas 12 (Fase F)' : (cleanFileName.includes('_11_') ? 'Kelas 11 (Fase F)' : 'Kelas 10 (Fase E)'),
+            topic: 'Media Google Drive'
           });
         }, 350);
       }
+    }
+
+    function loadHtmlIntoViewerIframe(iframe, spinner, res) {
+      if (!iframe) return;
+      if (spinner) spinner.style.display = 'flex';
+      iframe.removeAttribute('srcdoc');
+
+      // Jika di dalam lingkungan Google Apps Script native
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((data) => {
+            if (data && data.success && data.html) {
+              iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
+              iframe.srcdoc = data.html;
+            } else {
+              iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
+              iframe.src = res.gasRendererUrl || res.embedUrl;
+            }
+          })
+          .withFailureHandler(() => {
+            iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
+            iframe.src = res.gasRendererUrl || res.embedUrl;
+          })
+          .fetchHtmlContent(res.driveId || '', res.fileName || '', '');
+        return;
+      }
+
+      // Ambil HTML langsung dari Google Drive melalui endpoint fetchHtml GAS dan injeksikan ke srcdoc agar 100% interaktif
+      if (res.gasFetchHtmlUrl) {
+        fetch(res.gasFetchHtmlUrl)
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.success && data.html) {
+              iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
+              iframe.srcdoc = data.html;
+            } else {
+              iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
+              iframe.src = res.gasRendererUrl || res.embedUrl;
+            }
+          })
+          .catch(() => {
+            iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
+            iframe.src = res.gasRendererUrl || res.embedUrl;
+          });
+      } else {
+        iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
+        iframe.src = res.embedUrl;
+      }
+    }
+
+    function openCloudDriveMediaByItem(tempItem) {
+      if (!tempItem) return;
+      activeViewingMaterialId = tempItem.id;
+      const normItem = normalizeMaterialCurriculum(tempItem);
+      const res = resolveMaterialViewUrls(normItem);
+
+      document.getElementById('html-header-grade').textContent = normItem.grade || 'Fase F';
+      document.getElementById('html-header-topic').textContent = normItem.topic || 'Modul Interaktif';
+      document.getElementById('html-header-title').textContent = normItem.title;
+
+      const spinner = document.getElementById('html-spinner');
+      const iframe = document.getElementById('html-iframe');
+      const badgeText = document.getElementById('html-source-badge-text');
+      const toggleBtn = document.getElementById('html-btn-toggle-source');
+      const driveBtn = document.getElementById('html-btn-drive-source');
+
+      if (toggleBtn) toggleBtn.classList.add('hidden');
+      if (driveBtn) {
+        driveBtn.href = res.driveViewUrl || PORTALKIMIA_DRIVE_FOLDER_URL;
+        driveBtn.classList.remove('hidden');
+      }
+      if (badgeText) badgeText.textContent = 'Google Drive Cloud';
+
+      loadHtmlIntoViewerIframe(iframe, spinner, res);
+
+      document.getElementById('modal-viewer-html')?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
     }
 
     function openVirtualLabInHtmlViewer(lab) {
@@ -4386,6 +4487,7 @@
       if (driveBtn) driveBtn.classList.add('hidden');
       if (badgeText) badgeText.textContent = 'Laboratorium Interaktif';
 
+      iframe.removeAttribute('srcdoc');
       iframe.src = lab.file;
       iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
 
@@ -4407,76 +4509,38 @@
 
       const spinner = document.getElementById('html-spinner');
       const iframe = document.getElementById('html-iframe');
-      if (spinner) spinner.style.display = 'flex';
 
       // Setup source UI & toggles
       const badgeText = document.getElementById('html-source-badge-text');
       const toggleBtn = document.getElementById('html-btn-toggle-source');
-      const toggleBtnText = document.getElementById('html-btn-toggle-source-text');
       const driveBtn = document.getElementById('html-btn-drive-source');
 
-      if (res.isDrive && driveBtn) {
-        driveBtn.href = res.driveViewUrl;
+      if (driveBtn) {
+        driveBtn.href = res.driveViewUrl || PORTALKIMIA_DRIVE_FOLDER_URL;
         driveBtn.classList.remove('hidden');
-      } else if (driveBtn) {
-        driveBtn.classList.add('hidden');
       }
+      if (toggleBtn) toggleBtn.classList.add('hidden');
+      activeHtmlViewerSource = 'cloud';
+      if (badgeText) badgeText.textContent = 'Sinkronisasi Google Drive';
 
-      if (res.localFallback && res.isDrive && toggleBtn && isLocalHost) {
-        toggleBtn.classList.remove('hidden');
-        if (res.embedUrl === res.localFallback) {
-          activeHtmlViewerSource = 'local';
-          if (badgeText) badgeText.textContent = 'Berkas Lokal';
-          if (toggleBtnText) toggleBtnText.textContent = 'Beralih ke Cloud Web App';
-        } else {
-          activeHtmlViewerSource = 'cloud';
-          if (badgeText) badgeText.textContent = 'Cloud Web App';
-          if (toggleBtnText) toggleBtnText.textContent = 'Beralih ke Berkas Lokal';
-        }
-      } else {
-        if (toggleBtn) toggleBtn.classList.add('hidden');
-        if (badgeText) badgeText.textContent = res.isDrive ? 'Cloud Web App' : 'Media Interaktif';
-      }
-
-      iframe.src = res.embedUrl;
-      iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
+      loadHtmlIntoViewerIframe(iframe, spinner, res);
 
       document.getElementById('modal-viewer-html')?.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     }
 
     function toggleHtmlViewerSource() {
-      const item = allMaterials.find(m => String(m.id) === String(activeViewingMaterialId));
-      if (!item) return;
-      const res = resolveMaterialViewUrls(item);
-      if (!res.localFallback || !res.isDrive) return;
-
-      const iframe = document.getElementById('html-iframe');
-      const spinner = document.getElementById('html-spinner');
-      const badgeText = document.getElementById('html-source-badge-text');
-      const toggleBtnText = document.getElementById('html-btn-toggle-source-text');
-
-      if (spinner) spinner.style.display = 'flex';
-
-      if (activeHtmlViewerSource === 'local') {
-        activeHtmlViewerSource = 'cloud';
-        iframe.src = res.gasRendererUrl;
-        if (badgeText) badgeText.textContent = 'Cloud Web App';
-        if (toggleBtnText) toggleBtnText.textContent = 'Beralih ke Berkas Lokal';
-        showToast('Beralih ke tampilan Cloud Web App (Google Apps Script)', 'cloud');
-      } else {
-        activeHtmlViewerSource = 'local';
-        iframe.src = res.localFallback;
-        if (badgeText) badgeText.textContent = 'Berkas Lokal';
-        if (toggleBtnText) toggleBtnText.textContent = 'Beralih ke Cloud Web App';
-        showToast('Beralih ke berkas media lokal offline', 'folder');
-      }
+      reloadHtmlSession();
     }
 
     function reloadHtmlSession() {
+      const item = allMaterials.find(m => String(m.id) === String(activeViewingMaterialId));
       const iframe = document.getElementById('html-iframe');
       const spinner = document.getElementById('html-spinner');
-      if (iframe) {
+      if (item && iframe) {
+        const res = resolveMaterialViewUrls(item);
+        loadHtmlIntoViewerIframe(iframe, spinner, res);
+      } else if (iframe) {
         if (spinner) spinner.style.display = 'flex';
         iframe.src = iframe.src;
       }
@@ -4492,13 +4556,7 @@
       const item = allMaterials.find(m => String(m.id) === String(materialId));
       if (!item) return;
       const res = resolveMaterialViewUrls(item);
-
-      // Jika pengguna sedang aktif melihat versi lokal di viewer, buka versi lokal di tab baru
-      if (item.format === 'HTML' && activeHtmlViewerSource === 'local' && res.localFallback) {
-        window.open(res.localFallback, '_blank');
-      } else {
-        window.open(res.directTabUrl, '_blank');
-      }
+      window.open(res.directTabUrl, '_blank');
     }
 
     function toggleFullscreenViewer(modalId) {
@@ -4520,7 +4578,11 @@
       // Clear iframes to stop playback/resources
       document.getElementById('pdf-iframe').src = 'about:blank';
       document.getElementById('ppt-iframe').src = 'about:blank';
-      document.getElementById('html-iframe').src = 'about:blank';
+      const htmlIframe = document.getElementById('html-iframe');
+      if (htmlIframe) {
+        htmlIframe.removeAttribute('srcdoc');
+        htmlIframe.src = 'about:blank';
+      }
 
       document.body.style.overflow = 'auto';
       activeViewingMaterialId = null;
