@@ -4397,13 +4397,20 @@
       if (spinner) spinner.style.display = 'flex';
       iframe.removeAttribute('srcdoc');
 
+      const sanitizeMediaHtmlForSrcdoc = (rawHtml) => {
+        if (!rawHtml) return '';
+        return String(rawHtml)
+          .replace(/href="(?:https?:\/\/portalkimia\.github\.io\/suitehub\/media\/|\.\.\/|\.\/)*(Lab_[A-Za-z0-9_]+\.html|LaboratoriumVirtual\.html[^"]*)"/gi, 'href="https://portalkimia.github.io/suitehub/media/$1"')
+          .replace(/function\s+resolveLabUrl\s*\(\s*rawHref\s*\)\s*\{[\s\S]*?return\s+'\.\/'\s*\+\s*clean;\s*\}/, 'function resolveLabUrl(rawHref) { if (!rawHref) return rawHref; var m = String(rawHref).trim().match(/(Lab_[A-Za-z0-9_]+\\.html|LaboratoriumVirtual\\.html(?:[?#].*)?)$/i); return m ? ("https://portalkimia.github.io/suitehub/media/" + m[1]) : rawHref; }');
+      };
+
       // Jika di dalam lingkungan Google Apps Script native
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler((data) => {
             if (data && data.success && data.html) {
               iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
-              iframe.srcdoc = data.html;
+              iframe.srcdoc = sanitizeMediaHtmlForSrcdoc(data.html);
             } else {
               iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
               iframe.src = res.gasRendererUrl || res.embedUrl;
@@ -4424,7 +4431,7 @@
           .then(data => {
             if (data && data.success && data.html) {
               iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
-              iframe.srcdoc = data.html;
+              iframe.srcdoc = sanitizeMediaHtmlForSrcdoc(data.html);
             } else {
               iframe.onload = () => { if (spinner) spinner.style.display = 'none'; };
               iframe.src = res.gasRendererUrl || res.embedUrl;
