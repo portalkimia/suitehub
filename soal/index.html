@@ -116,6 +116,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Generator Soal AI">
   <link rel="icon" type="image/svg+xml" href="portalkimia-logo.svg">
+  <link rel="manifest" href="manifest.json">
 
   <!-- Google Fonts: Geist & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -174,7 +175,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Custom Design System Stylesheet -->
-  <link rel="stylesheet" href="styles.css?v=2.19">
+  <link rel="stylesheet" href="styles.css?v=2.20">
 
   <!-- Konfigurasi Terpusat PortalKimia Suite -->
   <script src="../config.js?v=2.13"></script>
@@ -213,7 +214,7 @@
                 <span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-[10px] font-black tracking-wider uppercase">
                   Generator Soal AI
                 </span>
-                <span id="appVersionBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-tight shadow-sm" title="Versi Rilis Terpasang (Terupdate Otomatis)">v2.19</span>
+                <span id="appVersionBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-tight shadow-sm" title="Versi Rilis Terpasang (Terupdate Otomatis)">v2.20</span>
               </div>
               <p class="text-[10px] text-zinc-400 font-medium hidden sm:block">Otomatisasi Asesmen &amp; Bank Soal Kimia</p>
             </div>
@@ -250,11 +251,11 @@
           <!-- User Profile Badge -->
           <div class="flex items-center space-x-2 pl-2 border-l border-zinc-800">
             <div class="w-8 h-8 rounded-full ring-2 ring-violet-500/30 overflow-hidden bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-inner">
-              <span>TV</span>
+              <span id="headerTeacherAvatar">TV</span>
             </div>
             <div class="hidden lg:flex flex-col text-left">
-              <span class="text-xs font-semibold text-zinc-200 leading-tight">Tito Vanzal, S.Pd.</span>
-              <span class="text-[10px] text-violet-400 font-medium leading-tight">Guru Kimia</span>
+              <span id="headerTeacherName" class="text-xs font-semibold text-zinc-200 leading-tight">Tito Vanzal, S.Pd.</span>
+              <span id="headerTeacherRole" class="text-[10px] text-violet-400 font-medium leading-tight">Guru Kimia</span>
             </div>
           </div>
         </div>
@@ -1235,6 +1236,6 @@
   </footer>
 
   <!-- Application Logic -->
-  <script src="app.js?v=2.19"></script>
+  <script src="app.js?v=2.20"></script>
 </body>
 </html>

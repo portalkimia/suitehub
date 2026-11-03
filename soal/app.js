@@ -96,6 +96,107 @@ function setCustomSchoolName(school, updateDom = true) {
   } catch (e) {}
 }
 
+
+// =========================================================================
+// DYNAMIC HEADER TEACHER PROFILE & GLOBAL KEYBOARD / MODAL NAVIGATION
+// =========================================================================
+function updateHeaderTeacherProfile() {
+  try {
+    const acc = (typeof window !== "undefined" && window.currentUserAccount) || (typeof getGeneratorAccountInfo === "function" ? getGeneratorAccountInfo() : null);
+    let name = (typeof getCustomTeacherName === "function" ? getCustomTeacherName() : "") || DEFAULT_TEACHER_NAME;
+    if ((!name || name === DEFAULT_TEACHER_NAME) && acc && acc.nama) {
+      name = typeof formatNamaGuru === "function" ? formatNamaGuru(acc.nama) : acc.nama;
+    }
+    if (!name) name = DEFAULT_TEACHER_NAME;
+
+    const nameEl = document.getElementById("headerTeacherName");
+    const avatarEl = document.getElementById("headerTeacherAvatar");
+    if (nameEl) nameEl.textContent = name;
+    if (avatarEl) {
+      const clean = name.replace(/,\s*[A-Za-z\.]+/g, "").trim();
+      const parts = clean.split(/\s+/).filter(Boolean);
+      let initials = "TV";
+      if (parts.length >= 2) {
+        initials = (parts[0][0] + parts[1][0]).toUpperCase();
+      } else if (parts.length === 1 && parts[0].length >= 2) {
+        initials = parts[0].substring(0, 2).toUpperCase();
+      } else if (parts.length === 1) {
+        initials = parts[0][0].toUpperCase();
+      }
+      avatarEl.textContent = initials;
+    }
+  } catch (e) {
+    console.warn("updateHeaderTeacherProfile error:", e);
+  }
+}
+
+function closeTopOpenModal() {
+  const modalConfigs = [
+    { id: "aiUsageModal", close: typeof closeAIUsageModal === "function" ? closeAIUsageModal : null },
+    { id: "modalWordExport", close: typeof closeWordExportModal === "function" ? closeWordExportModal : null },
+    { id: "questionEditorModal", close: typeof closeQuestionEditor === "function" ? closeQuestionEditor : null },
+    { id: "questionBankModal", close: () => { const el = document.getElementById("questionBankModal"); if (el) el.classList.add("hidden"); } },
+    { id: "modalConfirmGenerateSoal", close: () => { const el = document.getElementById("modalConfirmGenerateSoal"); if (el) el.classList.add("hidden"); } },
+    { id: "connectionModal", close: typeof closeConnectionModal === "function" ? closeConnectionModal : null }
+  ];
+
+  for (const item of modalConfigs) {
+    const el = document.getElementById(item.id);
+    if (el && !el.classList.contains("hidden")) {
+      try {
+        if (typeof item.close === "function") {
+          item.close();
+        } else {
+          el.classList.add("hidden");
+        }
+        return true;
+      } catch (err) {
+        el.classList.add("hidden");
+        return true;
+      }
+    }
+  }
+
+  // Generic fallback if any other modal is open
+  const genericModals = document.querySelectorAll('[id$="Modal"], [id^="modal"]');
+  for (const el of genericModals) {
+    if (!el.classList.contains("hidden")) {
+      el.classList.add("hidden");
+      return true;
+    }
+  }
+  return false;
+}
+
+function initGlobalKeyboardShortcuts() {
+  window.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" || e.keyCode === 27) {
+      closeTopOpenModal();
+    }
+  });
+
+  // Modal backdrop click-to-dismiss
+  const modalIds = [
+    "modalWordExport",
+    "connectionModal",
+    "modalConfirmGenerateSoal",
+    "questionEditorModal",
+    "questionBankModal",
+    "aiUsageModal"
+  ];
+  modalIds.forEach(id => {
+    const modalEl = document.getElementById(id);
+    if (modalEl && !modalEl._backdropBound) {
+      modalEl._backdropBound = true;
+      modalEl.addEventListener("click", function(e) {
+        if (e.target === modalEl) {
+          closeTopOpenModal();
+        }
+      });
+    }
+  });
+}
+
 function initTeacherIdentityListeners() {
   const inputGuru = document.getElementById("inputCustomNamaGuru");
   const inputSekolah = document.getElementById("inputCustomNamaSekolah");
@@ -105,6 +206,7 @@ function initTeacherIdentityListeners() {
       // Simpan langsung nilai input ke localStorage tanpa mereset input.value saat mengetik (memperbolehkan spasi)
       try {
         localStorage.setItem(TEACHER_NAME_KEY, e.target.value);
+        updateHeaderTeacherProfile();
       } catch (err) {}
     });
     inputGuru.addEventListener("blur", (e) => {
@@ -116,8 +218,10 @@ function initTeacherIdentityListeners() {
         localStorage.setItem(TEACHER_NAME_KEY, trimmed);
         e.target.value = trimmed;
       }
+      updateHeaderTeacherProfile();
     });
   }
+  updateHeaderTeacherProfile();
   if (inputSekolah) {
     inputSekolah.value = getCustomSchoolName();
     inputSekolah.addEventListener("input", (e) => {
@@ -703,6 +807,7 @@ function updateConnectionStatusUI() {
     if (connText) connText.textContent = "Token Tersimpan";
     if (panelAdmin) panelAdmin.classList.add("hidden");
   }
+  updateHeaderTeacherProfile();
   if (typeof window !== "undefined" && window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
 }
 
