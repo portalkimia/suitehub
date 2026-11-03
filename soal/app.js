@@ -459,6 +459,30 @@ PEDOMAN UTAMA:
    - FORMAT CAMPURAN SOAL UNIK:
      * Distribusikan paket butir soal secara proporsional ke dalam ketiga format di atas (Menjodohkan, Scramble, dan TTS).
      * Tuliskan format spesifik butir tersebut pada properti 'tipe_soal': 'Menjodohkan (Matching)', 'Scramble (Kata Acak)', atau 'Teka-Teki Silang (TTS)'.
+
+9. DISTRIBUSI & KESEIMBANGAN SEBARAN KUNCI JAWABAN (ANTI-CLUSTERING):
+   - Kunci jawaban pilihan ganda (A, B, C, D, E) untuk seluruh paket butir soal WAJIB terdistribusi secara acak, seimbang, dan proporsional (rata ~20% per opsi huruf).
+   - DILARANG KERAS menumpuk kunci jawaban pada opsi B atau C saja.
+   - DILARANG mengulang huruf kunci jawaban yang sama lebih dari 2 kali berturut-turut (misal: B, B, B atau C, C, C dilarang keras).
+
+10. JAMINAN DATA PENDUKUNG & TETAPAN PADA SOAL HITUNGAN ($A_r$, Tetapan Gas, dll.):
+   - Untuk setiap butir soal yang melibatkan perhitungan stoikiometri, massa zat, gas ideal, atau kesetimbangan, WAJIB mencantumkan data pendukung empiris di akhir kalimat narasi soal.
+   - Format penulisan data: '(Diketahui $A_r\\text{ C}=12, \\text{H}=1, \\text{O}=16$)' atau '(Tetapan gas $R = 0{,}082\\text{ L atm mol}^{-1}\\text{ K}^{-1}$)' atau '($K_w = 10^{-14}$)'.
+   - JANGAN berasumsi siswa hafal seluruh nilai $A_r$ atau tetapan fisika/kimia di luar tabel periodik dasar.
+
+11. KUALITAS OPSI PENGECOH (DISTRACTORS) BERBASIS MISKONSEPSI NYATA:
+   - Opsi jawaban salah (distraktor) pada pilihan ganda DILARANG berupa angka acak sembarangan tanpa dasar ilmiah.
+   - Pengecoh harus dirancang dari miskonsepsi umum siswa yang logis, seperti:
+     a) Lupa menyetarakan koefisien reaksi sebelum menghitung mol zat.
+     b) Salah memperhitungkan valensi asam/basa (misal $\\text{H}_2\\text{SO}_4$ dihitung bivalen tetapi dianggap monovalen).
+     c) Salah mengonversi satuan (misal mL belum diubah ke Liter, atau °C belum diubah ke Kelvin).
+     d) Tertukar antara konsep anoda dan katoda atau oksidasi dan reduksi.
+
+12. KESETARAAN STRUKTURAL ISOMORFIK PAKET A & PAKET B (PARALEL ANTI-CONTEK):
+   - Jika membuat Paket B (Paralel), seluruh butir soal Paket B WAJIB bersesuaian 1-ke-1 (isomorfik) dengan nomor soal yang sama pada Paket A:
+     * Memiliki Capaian Pembelajaran (CP/TP), Indikator Soal, Bentuk Soal, dan Level Kognitif yang PERSIS SAMA agar satu Matriks Kisi-Kisi Asesmen yang disusun dapat mencakup dan mewakili kedua paket sekaligus secara valid dan akuntabel.
+     * Untuk Soal Perhitungan/Numerik: Model dan alur reaksi harus sejenis, hanya bedakan besaran angka/variabel yang diuji. Penggantian angka WAJIB tetap menghasilkan angka perhitungan yang bulat atau desimal sederhana (angka ramah kalkulasi manual, misal kelipatan 0,1; 0,05; 0,5; atau bilangan bulat) agar siswa dapat menyelesaikannya dengan lancar tanpa kalkulator.
+     * Untuk Soal Teori/Konseptual: Gunakan senyawa homolog yang setara, pasangan asam-basa konjugasi yang setara, atau contoh kasus yang serupa (misal Paket A menguji alkana etana, Paket B menguji alkana propana; Paket A menguji sel volta Zn-Cu, Paket B menguji Mg-Cu).
 `;
 
 // INITIALIZATION
@@ -3396,7 +3420,12 @@ ${typeInstruction}
 4. TABEL & ILUSTRASI KIMIA: ${includeVisuals 
      ? 'Sertakan tabel data eksperimen (dalam format Markdown table rapi) atau diagram vektor SVG (pada properti ilustrasi_svg) HANYA untuk butir soal yang secara alamiah membutuhkan pengamatan data empiris / sajian visual (seperti laju reaksi, sel volta, titrasi, termokimia). JANGAN memaksakan tabel atau diagram pada seluruh butir soal jika tidak relevan, KECUALI jika catatan instruksi khusus guru di bawah secara eksplisit meminta tabel/diagram di setiap soal.' 
      : 'Tidak perlu menyertakan tabel atau diagram khusus.'}
-5. PAKET PARALEL: ${includeParallel ? 'WAJIB susun juga daftar_soal_paket_b sebanyak ' + numQuestions + ' butir soal paralel yang memiliki indikator setara dengan Paket A namun berbeda variabel/angka stoikiometrinya.' : 'Hanya susun Paket A.'}
+5. PAKET PARALEL (ISOMORFIK & SETARA 1-KE-1 DENGAN PAKET A): ${includeParallel 
+     ? 'WAJIB susun juga daftar_soal_paket_b sebanyak ' + numQuestions + ' butir soal paralel anti-contek dengan aturan kesetaraan isomorfik:\n' +
+       '   * Setiap butir nomor n pada Paket B WAJIB sejenis (isomorfik) 1-ke-1 dengan nomor n pada Paket A (memiliki Capaian Pembelajaran, Indikator Soal, Bentuk Soal, dan Level Kognitif yang persis sama) agar satu Matriks Kisi-Kisi Asesmen yang disusun dapat mencakup Paket A dan Paket B sekaligus.\n' +
+       '   * Untuk Soal Perhitungan/Numerik: Model dan alur reaksi harus sejenis, hanya bedakan besaran angka/variabel yang diuji. Penggantian angka WAJIB tetap menghasilkan perhitungan yang bulat atau desimal sederhana ramah siswa (misal kelipatan 0,1; 0,05; 0,5; atau bilangan bulat) sehingga siswa dapat menyelesaikan hitungan dengan lancar tanpa kalkulator.\n' +
+       '   * Untuk Soal Teori/Konsep: Gunakan senyawa homolog atau kasus setara yang serupa (misal: etana vs propana, asam asetat vs asam format, sel Zn-Cu vs Mg-Cu).' 
+     : 'Hanya susun Paket A.'}
 6. KISI-KISI ASESMEN: ${includeKisiKisi ? 'WAJIB susun matriks kisi_kisi_asesmen yang memetakan CP/TP, indikator soal, level kognitif Bloom/Pusmendik (L1/C2, L2/C3, L3/C4-C5), bentuk soal spesifik, kunci, dan skor.' : 'Tidak perlu menyusun matriks kisi-kisi.'}
 
 7. FORMAT NOTASI RUMUS KIMIA: SETIAP rumus kimia senyawa/ion dan persamaan reaksi kimia (\\text{...}, \\rightarrow, \\frac) WAJIB DIAPIT TANDA DOLLAR INLINE: $...$ (Contoh: $\\text{KOH}$, $\\text{C}_x\\text{H}_{2x+2}$, $\\text{O}_2$, $\\text{C}_2\\text{H}_6$, $2\\text{H}_2 + \\text{O}_2 \\rightarrow 2\\text{H}_2\\text{O}$). JANGAN PERNAH menulis \\text atau \\rightarrow tanpa tanda dollar $! Kunci jawaban dan pembahasan juga wajib menggunakan tanda dollar untuk rumus kimia. Tulis persen dan angka desimal secara biasa tanpa dollar (50,0%).
@@ -7144,7 +7173,7 @@ function looksLikeCalculationQuestion(question) {
   const text = normalizeAuditText(question && question.pertanyaan);
   return /\b(hitung|hitunglah|berapa|tentukan nilai|massa|mol|konsentrasi|molaritas|volume|ph|poh|entalpi|potensial|orde reaksi|laju reaksi|kalor|energi|ksp|ka|kb|mr|ar|faraday|elektrolisis|arus listrik|waktu reaksi|jumlah zat)\b/i.test(text);
 }
-function auditQuestionList(list, label, expectedCount, requireSolutions) {
+function auditQuestionList(list, label, expectedCount, requireSolutions, isPearson = false) {
   const issues = [];
   const questions = Array.isArray(list) ? list : [];
   if (Number.isFinite(expectedCount) && questions.length !== expectedCount) {
@@ -7158,24 +7187,41 @@ function auditQuestionList(list, label, expectedCount, requireSolutions) {
       return;
     }
     const options = Array.isArray(q.pilihan_jawaban) ? q.pilihan_jawaban : [];
-    const essay = /esai|uraian/i.test(String(q.tipe_soal || ""));
-    if (!options.length && !essay) issues.push({ tone: "warn", text: label + " nomor " + number + ": opsi jawaban belum tersedia." });
+    const tSoal = String(q.tipe_soal || "").toLowerCase();
+    // Format non-PG yang secara sengaja tidak memerlukan pilihan ganda A-E:
+    const isNonMcq = /esai|uraian|tts|silang|crossword|jodoh|matching|scramble|acak|cer|claim|kesalahan|error|rumpang|cloze|kasus|case/i.test(tSoal);
+    if (!options.length && !isNonMcq) {
+      issues.push({ tone: "warn", text: label + " nomor " + number + ": opsi jawaban belum tersedia." });
+    }
     if (options.length) {
+      const expectedOpts = isPearson ? 4 : 5;
       const labels = options.map(function(opt) { return String(opt.label || "").trim().toUpperCase(); });
-      if (options.length !== 5) issues.push({ tone: "warn", text: label + " nomor " + number + ": ada " + options.length + " opsi; standar paket ini A–E." });
-      if (new Set(labels).size !== labels.length) issues.push({ tone: "error", text: label + " nomor " + number + ": label opsi berulang." });
+      if (options.length !== expectedOpts) {
+        issues.push({ tone: "warn", text: label + " nomor " + number + ": ada " + options.length + " opsi; standar paket ini " + (isPearson ? "A–D (Pearson Edexcel)" : "A–E") + "." });
+      }
+      if (new Set(labels).size !== labels.length) {
+        issues.push({ tone: "error", text: label + " nomor " + number + ": label opsi berulang." });
+      }
       const key = String(q.kunci_jawaban || "").trim().toUpperCase();
-      if (!key || options.filter(function(opt) { return String(opt.label || "").trim().toUpperCase() === key; }).length !== 1) {
+      const isMulti = tSoal.includes("multi") || tSoal.includes("centang");
+      if (!isMulti && (!key || options.filter(function(opt) { return String(opt.label || "").trim().toUpperCase() === key; }).length !== 1)) {
         issues.push({ tone: "error", text: label + " nomor " + number + ": kunci tidak cocok dengan tepat satu opsi." });
       }
       const texts = options.map(function(opt) { return normalizeAuditText(opt.teks); });
-      if (new Set(texts).size !== texts.length) issues.push({ tone: "warn", text: label + " nomor " + number + ": ada opsi dengan teks duplikat." });
+      if (new Set(texts).size !== texts.length) {
+        issues.push({ tone: "warn", text: label + " nomor " + number + ": ada opsi dengan teks duplikat." });
+      }
     }
     const stem = normalizeAuditText(q.pertanyaan);
-    if (stem && seen.has(stem)) issues.push({ tone: "warn", text: label + " nomor " + number + ": pertanyaan sama dengan nomor " + seen.get(stem) + "." });
-    else if (stem) seen.set(stem, number);
+    if (stem && seen.has(stem)) {
+      issues.push({ tone: "warn", text: label + " nomor " + number + ": pertanyaan sama dengan nomor " + seen.get(stem) + "." });
+    } else if (stem) {
+      seen.set(stem, number);
+    }
     const explanation = Array.isArray(q.pembahasan_langkah) && q.pembahasan_langkah.some(function(step) { return String(step || "").trim(); });
-    if (requireSolutions && !explanation) issues.push({ tone: "warn", text: label + " nomor " + number + ": pembahasan diminta tetapi belum diisi." });
+    if (requireSolutions && !explanation) {
+      issues.push({ tone: "warn", text: label + " nomor " + number + ": pembahasan diminta tetapi belum diisi." });
+    }
   });
   return issues;
 }
@@ -7185,11 +7231,14 @@ function getPackageQualityIssues(pkg) {
   const settings = pkg.generator_settings || {};
   const count = Number(settings.requested_count);
   const retained = Number(settings.retained_count) || 0;
+  const isPearson = (pkg && pkg.jenjang && ((pkg.jenjang.toLowerCase().includes("pearson")) || (pkg.jenjang.toLowerCase().includes("edexcel")))) || false;
+
   issues.push.apply(issues, auditQuestionList(pkg.daftar_soal, "Paket A",
-    Number.isFinite(count) ? count + retained : NaN, settings.requested_solutions === true));
+    Number.isFinite(count) ? count + retained : NaN, settings.requested_solutions === true, isPearson));
+
   if (Array.isArray(pkg.daftar_soal_paket_b)) {
     issues.push.apply(issues, auditQuestionList(pkg.daftar_soal_paket_b, "Paket B",
-      Number.isFinite(count) && settings.requested_parallel ? count : NaN, settings.requested_solutions === true));
+      Number.isFinite(count) && settings.requested_parallel ? count : NaN, settings.requested_solutions === true, isPearson));
     const allA = pkg.daftar_soal || [], b = pkg.daftar_soal_paket_b;
     const retained = Number(settings.retained_count) || 0;
     const a = allA.slice(retained);
@@ -7199,6 +7248,8 @@ function getPackageQualityIssues(pkg) {
         issues.push({ tone: "warn", text: "Pasangan A–B nomor " + (i + 1) + ": subtopiknya berbeda." });
       if (normalizeAuditText(a[i].tingkat_kesulitan) !== normalizeAuditText(b[i].tingkat_kesulitan))
         issues.push({ tone: "warn", text: "Pasangan A–B nomor " + (i + 1) + ": label kesulitannya berbeda." });
+      if (normalizeAuditText(a[i].tipe_soal) !== normalizeAuditText(b[i].tipe_soal))
+        issues.push({ tone: "warn", text: "Pasangan A–B nomor " + (i + 1) + ": bentuk/tipe soalnya berbeda." });
       if (normalizeAuditText(a[i].pertanyaan) === normalizeAuditText(b[i].pertanyaan))
         issues.push({ tone: "error", text: "Pasangan A–B nomor " + (i + 1) + ": pertanyaannya identik." });
       const la = String(a[i].pertanyaan || "").length, lb = String(b[i].pertanyaan || "").length;
