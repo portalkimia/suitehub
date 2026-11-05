@@ -556,6 +556,75 @@ test('Format Teks: Poin langkah pembelajaran bebas dari asterisks markdown bold 
   assert.equal(boldResetCount, 2, 'Kedua poin narasi langkah pembelajaran harus direset setBold(false), sedangkan judul fase dipertahankan');
 });
 
+// TEST 11: Ekstraksi & Pelestarian Ayat Al-Qur'an per Pertemuan (DeepSeek API & Prompt Tambahan / Media Lain)
+test('Ayat Al-Quran dari DeepSeek API dan Prompt Tambahan per pertemuan terbaca serta tidak terhapus oleh normalizeAI_', () => {
+  const { context } = createHarness();
+
+  // 1. DeepSeek mengembalikan ayat lengkap (tanpa Google Search grounding) -> TIDAK BOLEH ditimpa "belum dapat diverifikasi"
+  const deepseekResponse = {
+    tujuan: 'Murid mampu menganalisis keteraturan sifat keperiodikan unsur',
+    itp1: 'Mengidentifikasi pemahaman prasyarat konfigurasi elektron',
+    asesmen1: 'Diagnostik Awal: Tanya-jawab terstruktur materi prasyarat',
+    aktivitas1: 'Review konsep prasyarat (10 menit)',
+    subTopik1: 'Jari-jari Atom dan Energi Ionisasi',
+    ayat1: 'QS. Al-Mulk (67): Ayat 3\nالَّذِي خَلَقَ سَبْعَ سَمَاوَاتٍ طِبَاقًا\nArtinya: "Yang telah menciptakan tujuh langit berlapis-lapis."\nKeterkaitan: Mencerminkan keteraturan kulit atom dan tingkat energi.',
+    zona1: 'Tebak unsur',
+    awal1: '1) Merapikan kelas.\n2) Berdoa.',
+    memahami1: '1) Murid menelaah konsep.',
+    mengaplikasi1: '1) Murid berlatih soal.',
+    merefleksi1: '1) Murid merefleksi.',
+    penutup1: '1) Menyimpulkan.\n2) Murid membaca hamdalah dan do\'a kafaratul majlis untuk menutup kegiatan pembelajaran.'
+  };
+
+  const normDeepSeek = JSON.parse(context.normalizeAI_(JSON.stringify(deepseekResponse), { topik: 'Sifat Keperiodikan', pertemuan: 1, aiProvider: 'deepseek' }, 'full'));
+  assert.ok(!normDeepSeek.ayat1.includes('belum dapat diverifikasi'), 'Ayat dari DeepSeek yang valid tidak boleh ditimpa pesan belum diverifikasi');
+  assert.ok(normDeepSeek.ayat1.includes('QS. Al-Mulk'), 'Ayat1 harus mempertahankan rujukan QS. Al-Mulk');
+  assert.ok(/[\u0600-\u06ff]/.test(normDeepSeek.ayat1), 'Ayat1 harus mempertahankan teks Arab');
+
+  // 2. Guru memasukkan ayat per pertemuan di kolom Prompt Tambahan (bahanAjar) untuk media lain (2 pertemuan)
+  const promptTambahanGuru = [
+    'Menggunakan media interaktif Canva dan LKPD Liveworksheets.',
+    'Pertemuan 1: Perkembangan Model Atom',
+    'Ayat Al-Qur\'an: QS. Yunus: 61 ("Tidak luput dari pengetahuan Tuhanmu biarpun sebesar zarrah di bumi ataupun di langit") - Keterkaitan dengan partikel subatomik.',
+    'Kegiatan: Diskusi kelompok menggunakan slide Canva.',
+    '',
+    'Pertemuan 2: Konfigurasi Elektron Bohr',
+    'Ayat Al-Qur\'an: QS. Al-Anbiya: 33 (وَهُوَ الَّذِي خَلَقَ اللَّيْلَ وَالنَّهَارَ وَالشَّمْسَ وَالْقَمَرَ ۖ كُلٌّ فِي فَلَكٍ يَسْبَحُونَ - "Masing-masing beredar pada garis edarnya") - Keterkaitan dengan orbit elektron.',
+    'Kegiatan: Mengerjakan latihan di Liveworksheets.'
+  ].join('\n');
+
+  const eks1 = context.ekstrakAyatDariBahanAjar_(promptTambahanGuru, 1);
+  const eks2 = context.ekstrakAyatDariBahanAjar_(promptTambahanGuru, 2);
+  assert.ok(eks1.includes('QS. Yunus: 61'), 'Ekstraksi pertemuan 1 harus membaca QS. Yunus: 61 dari prompt tambahan');
+  assert.ok(!eks1.includes('Slide Canva'), 'Ekstraksi ayat pertemuan 1 tidak boleh mengambil baris Kegiatan');
+  assert.ok(eks2.includes('QS. Al-Anbiya: 33'), 'Ekstraksi pertemuan 2 harus membaca QS. Al-Anbiya: 33 dari prompt tambahan');
+
+  // 3. Jika AI mengembalikan "belum dapat diverifikasi" pada ayat1 & ayat2, normalizeAI_ & harmonisasiOutputAI_ otomatis mengisi dari bahanAjar!
+  const aiFailedAyat = {
+    ...deepseekResponse,
+    ayat1: 'Kutipan ayat/hadis belum dapat diverifikasi melalui sumber tepercaya; jangan digunakan sebelum diperiksa.',
+    subTopik2: 'Konfigurasi Elektron Bohr',
+    ayat2: 'Kutipan ayat/hadis belum dapat diverifikasi melalui sumber tepercaya; jangan digunakan sebelum diperiksa.',
+    zona2: 'Brain gym',
+    awal2: '1) Merapikan kelas.\n2) Berdoa.',
+    memahami2: '1) Murid menelaah orbit Bohr.',
+    mengaplikasi2: '1) Murid mengisi LKPD.',
+    merefleksi2: '1) Murid merefleksi.',
+    penutup2: '1) Menyimpulkan.\n2) Murid membaca hamdalah dan do\'a kafaratul majlis untuk menutup kegiatan pembelajaran.'
+  };
+
+  const dataReq2Pertemuan = {
+    topik: 'Struktur Atom',
+    pertemuan: 2,
+    aiProvider: 'deepseek',
+    bahanAjar: promptTambahanGuru
+  };
+
+  const normFromPrompt = JSON.parse(context.normalizeAI_(JSON.stringify(aiFailedAyat), dataReq2Pertemuan, 'full'));
+  assert.ok(normFromPrompt.ayat1.includes('QS. Yunus: 61'), 'ayat1 harus otomatis terisi dari prompt tambahan pertemuan 1');
+  assert.ok(normFromPrompt.ayat2.includes('QS. Al-Anbiya: 33'), 'ayat2 harus otomatis terisi dari prompt tambahan pertemuan 2');
+});
+
 console.log('\nAll ' + passed + ' multi-user token ledger tests passed successfully!');
 
 
