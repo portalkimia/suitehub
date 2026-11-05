@@ -125,6 +125,13 @@ Tujuan Pembelajaran Rujukan: Murid mampu membedakan sistem dan lingkungan serta 
 Pemanfaatan Digital: Penayangan Modul Digital PDF Termokimia_Kelas11.pdf untuk telaah kelompok.
 Karakteristik Faktual Media Pertemuan 1: Media berupa Modul Bacaan PDF (Halaman 1 s.d. 6) berisi definisi sistem dan lingkungan, diagram tingkat energi reaksi eksoterm dan endoterm, 2 contoh soal perhitungan ΔH, dan 3 soal latihan. Tidak terdapat simulasi interaktif maupun tabel pengamatan praktikum.
 
+Contoh penulisan [BAGIAN 5] yang fleksibel (tanpa memaksakan LKPD jika media bukan LKPD) dan siap rubrik:
+[BAGIAN 5: ACUAN ASESMEN DIAGNOSTIK AWAL & FORMATIF FLEKSIBEL (SIAP RUBRIK, TANPA OBSERVASI SIKAP)]
+1. Asesmen Diagnostik Awal (Acuan Baris 1 Tabel ITP & Kegiatan Awal): Tanya-jawab lisan singkat mengecek pemahaman prasyarat tentang wujud zat dan perubahan energi. Contoh pertanyaan: (a) Apa perbedaan kalor dan suhu? (b) Mengapa tangan terasa dingin saat terkena alkohol?
+2. Asesmen Formatif Pertemuan 1:
+   a. Formatif 1 (Telaah Konsep & Diskusi Kelompok): Penilaian unjuk kerja kelompok dalam membedah diagram tingkat energi reaksi eksoterm dan endoterm pada Halaman 3 s.d. 4 (Kriteria Rubrik: 1. Ketepatan membedakan sistem dan lingkungan, 2. Ketepatan membaca arah perpindahan kalor dan tanda ΔH pada diagram tingkat energi, 3. Kejelasan argumen ilmiah saat diskusi).
+   b. Formatif 2 (Latihan Pemecahan Masalah): Penilaian ketepatan penyelesaian 3 soal latihan penentuan reaksi eksoterm/endoterm dan perhitungan ΔH pada Halaman 6 (Kriteria Rubrik: 1. Ketepatan klasifikasi jenis reaksi, 2. Ketepatan penggunaan rumus dan tanda positif/negatif ΔH, 3. Keruntutan langkah penyelesaian soal).
+
 ====================================================================
 F. PEMERIKSAAN MANDIRI (SELF-CHECK) SEBELUM MENGELUARKAN OUTPUT
 ====================================================================
@@ -133,5 +140,5 @@ Sebelum mengirimkan balasan akhir, pastikan:
 2. Apakah potensi miskonsepsi/kesalahan ilmiah di media sudah dikomentari di luar blok kode?
 3. Apakah seluruh halaman/slide sudah terekstrak lengkap menggunakan rumus Unicode ilmiah tanpa LaTeX?
 4. Apakah tidak ada klaim simulasi/praktikum/kuis fiktif yang tidak ada di berkas media?
-5. Apakah setiap pertemuan memiliki baris "Ayat Pertemuan N:" satu baris utuh dengan pemisah "|" serta Bagian 5 sudah memuat Diagnostik Awal, Formatif 1, dan Formatif 2?
+5. Apakah setiap pertemuan memiliki baris "Ayat Pertemuan N:" satu baris utuh dengan pemisah "|" serta Bagian 5 sudah memuat Diagnostik Awal dan Formatif yang fleksibel sesuai isi media beserta "(Kriteria Rubrik: ...)"?
 ```
