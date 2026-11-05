@@ -802,13 +802,13 @@
           
           <!-- Dropzone -->
           <div id="dropzoneArea" class="obs-dropzone" onclick="document.getElementById('fileUploadInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event)">
-            <input type="file" id="fileUploadInput" style="display: none;" accept=".html,.htm,.txt,.md,.pdf,.png,.jpg,.jpeg,.webp" onchange="handleFileSelect(event)">
+            <input type="file" id="fileUploadInput" style="display: none;" accept=".html,.htm,.txt,.md,.pdf,.pptx,.ppt,.png,.jpg,.jpeg,.webp" onchange="handleFileSelect(event)">
             <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
               <span class="material-symbols-outlined text-violet" style="font-size: 26px;">cloud_upload</span>
               <span class="fw-bold" style="font-size: 0.88rem; color: var(--obs-text-primary);">Tarik &amp; Lepas Berkas di Sini, atau <span class="text-violet text-decoration-underline">Pilih dari Komputer</span></span>
             </div>
             <div class="small" style="font-size: 0.74rem; color: var(--obs-text-muted);">
-              Mendukung berkas simulasi <code>.html</code>, teks/LKM <code>.txt</code>, dokumen <code>.pdf</code>, atau foto diagram <code>.png/.jpg</code> (Diproses Multimodal Gemini)
+              Mendukung berkas simulasi <code>.html</code>, presentasi <code>.pptx/.ppt</code>, dokumen <code>.pdf</code>, teks <code>.txt</code>, atau foto diagram <code>.png/.jpg</code> (Diekstrak Hemat Token untuk DeepSeek &amp; Gemini)
             </div>
           </div>
 
@@ -5450,13 +5450,67 @@
 
 
     // =========================================================================
-    // HELPER: EKSTRAKSI KONTEN PEDAGOGIS UNTUK BERKAS UNGGAHAN HTML
+    // HELPER: EKSTRAKSI KONTEN PEDAGOGIS UNTUK BERKAS UNGGAHAN HTML, PPTX, PPT, & PDF (HEMAT TOKEN DEEPSEEK)
     // =========================================================================
+    function formatPaketEkstraksiHematToken(fileName, mediaLabel, sections, rawLines) {
+      const cleanLines = [];
+      const seen = new Set();
+      (rawLines || []).forEach(l => {
+        const s = String(l || '').replace(/\s+/g, ' ').trim();
+        if (s.length >= 3) {
+          const k = s.toLowerCase();
+          if (!seen.has(k)) { seen.add(k); cleanLines.push(s); }
+        }
+      });
+
+      const regexAyat = /(?:[\u0600-\u06FF]{4,}|\b(?:QS\.?|Q\.S\.?|Surah\s+[A-Za-z'’-]+|Surat\s+[A-Za-z'’-]+|Al-Qur['’]?an|HR\.?\s+[A-Za-z]+|Hadis\s+Riwayat|Hadits\s+Riwayat)\b)/i;
+      let keislaman = (sections && sections.keislaman) ? String(sections.keislaman).trim() : '';
+      if (!keislaman) {
+        const ayatHits = cleanLines.filter(l => regexAyat.test(l)).slice(0, 4);
+        keislaman = ayatHits.join(' — ');
+      }
+      const fenomena = (sections && sections.fenomena) || cleanLines.filter(l => /\b(?:fenomena|apersepsi|kontekstual|tahukah kamu|mengapa|kasus nyata)\b/i.test(l)).slice(0, 5).join('\n');
+      const virtualLab = (sections && sections.virtualLab) || cleanLines.filter(l => /\b(?:simulasi|simulator|laboratorium|praktikum|percobaan|langkah kerja|eksplorasi)\b/i.test(l)).slice(0, 6).join('\n');
+      const lkpd = (sections && sections.lkpd) || cleanLines.filter(l => /\b(?:lkpd|lembar kerja|tabel pengamatan|diskusi kelompok|analisis data|latihan bersama)\b/i.test(l)).slice(0, 6).join('\n');
+      const kuis = (sections && sections.kuis) || cleanLines.filter(l => /\b(?:kuis|evaluasi|uji pemahaman|soal latihan|tes formatif|pilihan ganda)\b/i.test(l)).slice(0, 6).join('\n');
+
+      let res = `[BERKAS RUJUKAN EKSTERNAL GURU: ${fileName}]\n` +
+        `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR (MODE HEMAT TOKEN DEEPSEEK):\n` +
+        `- Berkas ini diunggah langsung oleh guru sebagai ${mediaLabel} mandiri.\n` +
+        `- Pemanfaatan Digital (digital): Deskripsikan media pembelajaran digital ini sebagai "${mediaLabel}: ${fileName}" (Fleksibel memanfaatkan Canva, Liveworksheets, atau platform digital lain sesuai kebutuhan guru).\n` +
+        `- Keselarasan Kegiatan & Fleksibel Digital: Rancang kegiatan pembelajaran (awal, memahami, mengaplikasi, merefleksi, penutup) agar SESUAI PERSIS dengan materi, fenomena, simulasi/visualisasi, LKPD, dan kuis pada berkas ini.\n`;
+
+      if (keislaman) {
+        res += `Ayat Pertemuan 1: ${keislaman.replace(/\s+/g, ' ').slice(0, 900)}\n`;
+      }
+      res += `\n`;
+
+      if (fenomena) {
+        res += `--- 1. STIMULUS FENOMENA NYATA (APERSEPSI) ---\n${fenomena.slice(0, 1500)}\n\n`;
+      }
+      if (keislaman) {
+        res += `--- 2. INTEGRASI NILAI KEISLAMAN & AYAT/HADITS ---\n${keislaman.slice(0, 1500)}\n\n`;
+      }
+      if (virtualLab) {
+        res += `--- 3. FITUR SIMULASI / KEGIATAN INTI ---\n${virtualLab.slice(0, 1800)}\n\n`;
+      }
+      if (lkpd) {
+        res += `--- 4. LEMBAR KERJA PESERTA DIDIK (LKPD) & TABEL PENGAMATAN ---\n${lkpd.slice(0, 1500)}\n\n`;
+      }
+      if (kuis) {
+        res += `--- 5. EVALUASI / KUIS FORMATIF ---\n${kuis.slice(0, 1200)}\n\n`;
+      }
+
+      res += `--- ISI RINGKAS MATERI BERKAS UNGGAHAN (TERKOMPRESI HEMAT TOKEN) ---\n`;
+      res += cleanLines.join('\n').slice(0, 4500);
+      return res;
+    }
+
     function ekstrakKontenPedagogisHTML(htmlSource, fileName) {
       try {
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlSource, 'text/html');
-        doc.querySelectorAll('script, style, svg, iframe, object, nav, footer, noscript').forEach(el => el.remove());
+        doc.querySelectorAll('script, style, svg, iframe, object, nav, footer, noscript, .material-symbols-outlined, .material-icons').forEach(el => el.remove());
 
         const getSectionText = (selector, headingRegex) => {
           let el = doc.querySelector(selector);
@@ -5473,35 +5527,148 @@
         const lkpd = getSectionText('#section-analisis, #section-penyelidikan, #section-lkpd', /lkpd|lembar kerja|tabel pengamatan|analisis data|penyelidikan/i);
         const kuis = getSectionText('#section-kuis, #section-evaluasi', /kuis|evaluasi|soal latihan|tes formatif/i);
 
-        const fullText = (doc.body.innerText || doc.body.textContent || '').replace(/\s+/g, ' ').trim();
-
-        let res = `[BERKAS RUJUKAN EKSTERNAL GURU: ${fileName}]\n` +
-          `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n` +
-          `- Berkas ini diunggah langsung oleh guru sebagai Media Pembelajaran HTML Interaktif mandiri.\n` +
-          `- Pemanfaatan Digital (digital): Deskripsikan media pembelajaran digital ini sebagai "Media Pembelajaran HTML Interaktif: ${fileName}" (Fleksibel memanfaatkan Canva, Liveworksheets, atau platform digital lain sesuai kebutuhan guru).\n` +
-          `- Keselarasan Kegiatan & Fleksibel Digital: Rancang kegiatan pembelajaran (awal, memahami, mengaplikasi, merefleksi, penutup) agar SESUAI PERSIS dengan materi, fenomena, simulasi internal, pengisian LKPD, dan kuis yang ada pada berkas ini. Pemanfaatan alat digital fleksibel (guru bebas menentukan penggunaan Canva, Liveworksheets, dll), dan DILARANG mengarang alat/bahan praktikum lab riil berbahaya di luar berkas ini!\n\n`;
-
-        if (fenomena) {
-          res += `--- 1. STIMULUS FENOMENA NYATA (APERSEPSI) ---\n${fenomena.slice(0, 3000)}\n\n`;
-        }
-        if (keislaman) {
-          res += `--- 2. INTEGRASI NILAI KEISLAMAN & AYAT/HADITS ---\n${keislaman.slice(0, 3000)}\n\n`;
-        }
-        if (virtualLab) {
-          res += `--- 3. FITUR SIMULASI LAB VIRTUAL / INTERAKTIF ---\n${virtualLab.slice(0, 3500)}\n\n`;
-        }
-        if (lkpd) {
-          res += `--- 4. LEMBAR KERJA PESERTA DIDIK (LKPD) & TABEL PENGAMATAN ---\n${lkpd.slice(0, 3000)}\n\n`;
-        }
-        if (kuis) {
-          res += `--- 5. EVALUASI / KUIS FORMATIF ---\n${kuis.slice(0, 1500)}\n\n`;
-        }
-
-        res += `--- ISI LENGKAP MATERI BERKAS UNGGAHAN ---\n`;
-        res += fullText.slice(0, 35000);
-        return res;
+        const rawLines = (doc.body.innerText || doc.body.textContent || '').split(/\r?\n/);
+        return formatPaketEkstraksiHematToken(
+          fileName,
+          'Media Pembelajaran HTML Interaktif',
+          { keislaman, fenomena, virtualLab, lkpd, kuis },
+          rawLines
+        );
       } catch (e) {
-        return `[BERKAS RUJUKAN EKSTERNAL GURU: ${fileName}]\n` + String(htmlSource || '').slice(0, 35000);
+        return `[BERKAS RUJUKAN EKSTERNAL GURU: ${fileName}]\n` + String(htmlSource || '').slice(0, 6000);
+      }
+    }
+
+    async function inflateRawBrowser(uint8Slice) {
+      if (typeof DecompressionStream === 'undefined') return null;
+      const ds = new DecompressionStream('deflate-raw');
+      const writer = ds.writable.getWriter();
+      writer.write(uint8Slice);
+      writer.close();
+      const buf = await new Response(ds.readable).arrayBuffer();
+      return new TextDecoder('utf-8').decode(buf);
+    }
+
+    async function inflateZlibBrowser(uint8Slice) {
+      if (typeof DecompressionStream === 'undefined') return null;
+      for (const fmt of ['deflate', 'deflate-raw']) {
+        try {
+          const ds = new DecompressionStream(fmt);
+          const writer = ds.writable.getWriter();
+          writer.write(uint8Slice);
+          writer.close();
+          const buf = await new Response(ds.readable).arrayBuffer();
+          return new Uint8Array(buf);
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    async function ekstrakKontenPedagogisPPTX(bytes, fileName) {
+      try {
+        const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        let eocd = -1;
+        const minOff = Math.max(0, bytes.length - 65557);
+        for (let i = bytes.length - 22; i >= minOff; i--) {
+          if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+        }
+        if (eocd < 0) throw new Error('EOCD ZIP tidak ditemukan');
+        const totalEntries = dv.getUint16(eocd + 10, true);
+        const cdSize = dv.getUint32(eocd + 12, true);
+        const cdOffset = dv.getUint32(eocd + 16, true);
+        let ptr = cdOffset;
+        const slideEntries = [];
+        for (let idx = 0; idx < totalEntries && ptr < cdOffset + cdSize; idx++) {
+          if (dv.getUint32(ptr, true) !== 0x02014b50) break;
+          const method = dv.getUint16(ptr + 10, true);
+          const compSize = dv.getUint32(ptr + 20, true);
+          const nameLen = dv.getUint16(ptr + 28, true);
+          const extraLen = dv.getUint16(ptr + 30, true);
+          const commentLen = dv.getUint16(ptr + 32, true);
+          const localOff = dv.getUint32(ptr + 42, true);
+          const entryName = new TextDecoder('utf-8').decode(bytes.subarray(ptr + 46, ptr + 46 + nameLen));
+          ptr += 46 + nameLen + extraLen + commentLen;
+          if (/^ppt\/(?:slides\/slide|notesSlides\/notesSlide)\d+\.xml$/i.test(entryName)) {
+            const lNameLen = dv.getUint16(localOff + 26, true);
+            const lExtraLen = dv.getUint16(localOff + 28, true);
+            const dataStart = localOff + 30 + lNameLen + lExtraLen;
+            slideEntries.push({ entryName, method, slice: bytes.subarray(dataStart, dataStart + compSize) });
+          }
+        }
+        slideEntries.sort((a, b) => {
+          const na = parseInt((a.entryName.match(/(\d+)\.xml/i) || [0, 0])[1], 10);
+          const nb = parseInt((b.entryName.match(/(\d+)\.xml/i) || [0, 0])[1], 10);
+          return na - nb;
+        });
+        const lines = [];
+        for (const item of slideEntries) {
+          let xml = '';
+          if (item.method === 0) xml = new TextDecoder('utf-8').decode(item.slice);
+          else if (item.method === 8) xml = (await inflateRawBrowser(item.slice)) || '';
+          if (!xml) continue;
+          const pMatches = xml.match(/<a:p\b[^>]*>[\s\S]*?<\/a:p>/gi) || [];
+          const slideTexts = [];
+          pMatches.forEach(p => {
+            const tMatches = p.match(/<a:t\b[^>]*>([\s\S]*?)<\/a:t>/gi) || [];
+            const txt = tMatches.map(t => t.replace(/<[^>]+>/g, '')).join('').replace(/\s+/g, ' ').trim();
+            if (txt) slideTexts.push(txt);
+          });
+          if (slideTexts.length) {
+            const sNum = (item.entryName.match(/(\d+)\.xml/i) || [0, 1])[1];
+            const label = /notesSlide/i.test(item.entryName) ? `Catatan Guru Slide ${sNum}` : `Slide ${sNum}`;
+            lines.push(`[${label}] ${slideTexts.join(' | ')}`);
+          }
+        }
+        return formatPaketEkstraksiHematToken(fileName, 'Presentasi Pembelajaran Interaktif (PowerPoint/Canva PPTX)', {}, lines);
+      } catch (err) {
+        return `[BERKAS RUJUKAN EKSTERNAL GURU: ${fileName}]\nPresentasi PowerPoint "${fileName}" terlampir sebagai bahan ajar mandiri.`;
+      }
+    }
+
+    function ekstrakKontenPedagogisPPT(bytes, fileName) {
+      try {
+        const utf16 = new TextDecoder('utf-16le', { fatal: false }).decode(bytes);
+        const hits = (utf16.match(/[\u0020-\u007E\u00A0-\u00FF\u0600-\u06FF\n\r]{8,}/g) || [])
+          .map(s => s.replace(/\s+/g, ' ').trim())
+          .filter(s => s.length >= 10 && /[A-Za-z]{3,}|[\u0600-\u06FF]{3,}/.test(s) && !/Microsoft|PowerPoint|Arial|Calibri|Default Design/i.test(s));
+        return formatPaketEkstraksiHematToken(fileName, 'Presentasi Pembelajaran (PowerPoint PPT)', {}, hits);
+      } catch (e) {
+        return `[BERKAS RUJUKAN EKSTERNAL GURU: ${fileName}]\nPresentasi PowerPoint "${fileName}" terlampir sebagai bahan ajar mandiri.`;
+      }
+    }
+
+    async function ekstrakKontenPedagogisPDF(bytes, fileName) {
+      try {
+        const latin = new TextDecoder('latin1').decode(bytes);
+        const streamReg = /stream\r?\n([\s\S]*?)\r?\nendstream/g;
+        const lines = [];
+        let m;
+        let count = 0;
+        while ((m = streamReg.exec(latin)) !== null && count < 45) {
+          count++;
+          const startIdx = m.index + m[0].indexOf('\n') + 1;
+          const endPos = m.index + m[0].lastIndexOf('endstream');
+          const endIdx = endPos - (latin[endPos - 2] === '\r' ? 2 : 1);
+          const slice = bytes.subarray(startIdx, endIdx);
+          const inflated = await inflateZlibBrowser(slice);
+          const str = inflated ? new TextDecoder('latin1').decode(inflated) : m[1];
+          if (!/BT[\s\S]*?ET/.test(str)) continue;
+          const tjArr = str.match(/\[([\s\S]*?)\]\s*TJ/g) || [];
+          tjArr.forEach(block => {
+            const lits = block.match(/\(((?:\\.|[^\\()])*)\)/g) || [];
+            const txt = lits.map(l => l.slice(1, -1).replace(/\\([()\\])/g, '$1')).join('').replace(/\s+/g, ' ').trim();
+            if (txt.length >= 3 && /[A-Za-z]{2,}/.test(txt)) lines.push(txt);
+          });
+          const tjSingle = str.match(/\(((?:\\.|[^\\()])*)\)\s*(?:Tj|'|")/g) || [];
+          tjSingle.forEach(block => {
+            const inner = (block.match(/\(((?:\\.|[^\\()])*)\)/) || [0, ''])[1];
+            const txt = inner.replace(/\\([()\\])/g, '$1').replace(/\s+/g, ' ').trim();
+            if (txt.length >= 3 && /[A-Za-z]{2,}/.test(txt)) lines.push(txt);
+          });
+        }
+        return formatPaketEkstraksiHematToken(fileName, 'Modul / Bahan Ajar PDF', {}, lines);
+      } catch (e) {
+        return `[BERKAS RUJUKAN EKSTERNAL GURU (LAMPIRAN): ${fileName}]\nDokumen PDF "${fileName}" diunggah sebagai bahan rujukan mandiri.`;
       }
     }
 
@@ -7357,13 +7524,16 @@ var GeneratorCore = (function () {
   function canonical(value) { if(Array.isArray(value)) return '['+value.map(canonical).join(',')+']'; if(value&&typeof value==='object') return '{'+Object.keys(value).filter(function(k){return k!=='requestId';}).sort().map(function(k){return JSON.stringify(k)+':'+canonical(value[k]);}).join(',')+'}'; return JSON.stringify(value); }
   function validateFile(name,mime,bytes) {
     var ext=String(name||'').split('.').pop().toLowerCase();
-    var types={pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',txt:'text/plain',md:'text/markdown',html:'text/html',htm:'text/html'};
+    var types={pdf:'application/pdf',pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',ppt:'application/vnd.ms-powerpoint',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',txt:'text/plain',md:'text/markdown',html:'text/html',htm:'text/html'};
     if(!types[ext]) throw Error('Jenis berkas tidak didukung.');
     var text=['txt','md','html','htm'].indexOf(ext)>=0, limit=text?1024*1024:5*1024*1024;
-    if(!bytes||!bytes.length||bytes.length>limit) throw Error(text?'Berkas teks maksimal 1 MB.':'PDF/gambar maksimal 5 MB.');
-    if(mime&&mime!==types[ext]&&!(text&&(mime==='text/plain'||mime==='text/markdown'))) throw Error('Jenis MIME tidak sesuai ekstensi berkas.');
+    if(!bytes||!bytes.length||bytes.length>limit) throw Error(text?'Berkas teks maksimal 1 MB.':'PDF/PPT/gambar maksimal 5 MB.');
+    var pptMime=(ext==='pptx'||ext==='ppt')&&(mime==='application/octet-stream'||mime==='application/zip'||mime==='application/x-zip-compressed');
+    if(mime&&mime!==types[ext]&&!pptMime&&!(text&&(mime==='text/plain'||mime==='text/markdown'))) throw Error('Jenis MIME tidak sesuai ekstensi berkas.');
     var b=Array.from(bytes).map(function(x){return x&255;}), head=String.fromCharCode.apply(null,b.slice(0,12));
     if(ext==='pdf'&&!head.startsWith('%PDF-')) throw Error('Tanda pengenal PDF tidak valid.');
+    if(ext==='pptx'&&!(b[0]===80&&b[1]===75&&b[2]===3&&b[3]===4)) throw Error('Tanda pengenal PPTX tidak valid.');
+    if(ext==='ppt'&&!((b[0]===208&&b[1]===207&&b[2]===17&&b[3]===224)||(b[0]===80&&b[1]===75&&b[2]===3&&b[3]===4))) throw Error('Tanda pengenal PPT tidak valid.');
     if(ext==='png'&&b.slice(0,8).join(',')!=='137,80,78,71,13,10,26,10') throw Error('Tanda pengenal PNG tidak valid.');
     if((ext==='jpg'||ext==='jpeg')&&!(b[0]===255&&b[1]===216&&b[2]===255)) throw Error('Tanda pengenal JPEG tidak valid.');
     if(ext==='webp'&&!(head.startsWith('RIFF')&&head.slice(8)==='WEBP')) throw Error('Tanda pengenal WebP tidak valid.');
@@ -7444,23 +7614,37 @@ if(typeof module!=='undefined') module.exports=GeneratorCore;
     var mime=GeneratorCore.validateFile(file.name,file.type,bytes),area=document.getElementById('aiBahanAjar');
     window.selectedPortalMedia=[];window.mediaTeacherNotes='';simpanUrutanMediaTerpilih();
     window.renderPortalMediaMeetings&&window.renderPortalMediaMeetings();window.renderDaftarMediaPortal&&window.renderDaftarMediaPortal();
+    var extName=String(file.name||'').split('.').pop().toLowerCase();
+    var existingNotes=(area.value||'').trim();
+    var hasCustomNotes=existingNotes&&!existingNotes.includes('[RUJUKAN PEDAGOGIS KHUSUS')&&!existingNotes.includes('[BERKAS RUJUKAN EKSTERNAL')&&!existingNotes.includes('[BERKAS EKSTRAKSI:');
     if(mime.startsWith('text/')){
-      var existingNotes=(area.value||'').trim();
-      var hasCustomNotes=existingNotes&&!existingNotes.includes('[RUJUKAN PEDAGOGIS KHUSUS')&&!existingNotes.includes('[BERKAS RUJUKAN EKSTERNAL');
       var content=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
       if(mime==='text/html'){
         area.value=ekstrakKontenPedagogisHTML(content,file.name)+(hasCustomNotes?'\n\n[CATATAN & INSTRUKSI TAMBAHAN GURU]:\n'+existingNotes:'');
       }else {
-        var instruksi='[BERKAS RUJUKAN EKSTERNAL GURU: '+file.name+']\nINSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n- Berkas ini diunggah langsung oleh guru sebagai media rujukan mandiri.\n- Rancang tujuan pembelajaran, pemanfaatan digital (digital), ITP, dan aktivitas murid secara spesifik dan akurat berdasarkan isi materi berkas "'+file.name+'" ini.\n- Pada field pemanfaatan digital, deskripsikan media dari berkas ini secara kontekstual.\n\n--- ISI MATERI BERKAS UNGGAHAN ---\n';
-        area.value=instruksi+content.slice(0,48000)+(hasCustomNotes?'\n\n[CATATAN & INSTRUKSI TAMBAHAN GURU]:\n'+existingNotes:'');
+        var instruksi='[BERKAS RUJUKAN EKSTERNAL GURU: '+file.name+']\nINSTRUKSI KHUSUS MEDIA & BAHAN AJAR (MODE HEMAT TOKEN DEEPSEEK):\n- Berkas ini diunggah langsung oleh guru sebagai media rujukan mandiri.\n- Rancang tujuan pembelajaran, pemanfaatan digital (digital), ITP, dan aktivitas murid secara spesifik dan akurat berdasarkan isi materi berkas "'+file.name+'" ini.\n- Pada field pemanfaatan digital, deskripsikan media dari berkas ini secara kontekstual.\n\n--- ISI MATERI BERKAS UNGGAHAN ---\n';
+        area.value=instruksi+content.slice(0,12000)+(hasCustomNotes?'\n\n[CATATAN & INSTRUKSI TAMBAHAN GURU]:\n'+existingNotes:'');
       }
       window.currentUploadedFile=null;
+    }else if(extName==='pptx'){
+      var pptxText=await ekstrakKontenPedagogisPPTX(bytes,file.name);
+      if(generation!==uploadGeneration)return;
+      area.value=pptxText+(hasCustomNotes?'\n\n[CATATAN & INSTRUKSI TAMBAHAN GURU]:\n'+existingNotes:'');
+      window.currentUploadedFile=null;
+    }else if(extName==='ppt'){
+      var pptText=ekstrakKontenPedagogisPPT(bytes,file.name);
+      area.value=pptText+(hasCustomNotes?'\n\n[CATATAN & INSTRUKSI TAMBAHAN GURU]:\n'+existingNotes:'');
+      window.currentUploadedFile=null;
+    }else if(extName==='pdf'){
+      var pdfText=await ekstrakKontenPedagogisPDF(bytes,file.name);
+      if(generation!==uploadGeneration)return;
+      var binaryPdf='';for(var i=0;i<bytes.length;i+=8192)binaryPdf+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));
+      window.currentUploadedFile={name:file.name,mimeType:mime,base64:btoa(binaryPdf)};
+      area.value=pdfText+(hasCustomNotes?'\n\n[CATATAN & INSTRUKSI TAMBAHAN GURU]:\n'+existingNotes:'');
     }else {
-      var existingNotesBin=(area.value||'').trim();
-      var hasCustomNotesBin=existingNotesBin&&!existingNotesBin.includes('[RUJUKAN PEDAGOGIS KHUSUS')&&!existingNotesBin.includes('[BERKAS RUJUKAN EKSTERNAL');
-      var binary='';for(var i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));
+      var binary='';for(var j=0;j<bytes.length;j+=8192)binary+=String.fromCharCode.apply(null,bytes.subarray(j,j+8192));
       window.currentUploadedFile={name:file.name,mimeType:mime,base64:btoa(binary)};
-      area.value='[BERKAS RUJUKAN EKSTERNAL GURU (LAMPIRAN): '+file.name+']\nINSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n- Berkas lampiran ini diunggah langsung oleh guru sebagai bahan rujukan mandiri.\n- Analisis berkas lampiran "'+file.name+'" ini untuk merancang tujuan pembelajaran, pemanfaatan digital, ITP, dan aktivitas murid secara spesifik.'+(hasCustomNotesBin?'\n\n[CATATAN & INSTRUKSI TAMBAHAN GURU]:\n'+existingNotesBin:'');
+      area.value='[BERKAS RUJUKAN EKSTERNAL GURU (LAMPIRAN): '+file.name+']\nINSTRUKSI KHUSUS MEDIA & BAHAN AJAR:\n- Berkas lampiran ini diunggah langsung oleh guru sebagai bahan rujukan mandiri.\n- Analisis berkas lampiran "'+file.name+'" ini untuk merancang tujuan pembelajaran, pemanfaatan digital, ITP, dan aktivitas murid secara spesifik.'+(hasCustomNotes?'\n\n[CATATAN & INSTRUKSI TAMBAHAN GURU]:\n'+existingNotes:'');
     }
     document.getElementById('filePreviewContainer').style.display='flex';document.getElementById('filePreviewName').textContent=file.name;document.getElementById('filePreviewSize').textContent=(file.size/1024).toFixed(1)+' KB • periksa privasi sebelum mengirim';
     window.hasUploadedReference=true;window.uploadedFileName=file.name;document.getElementById('privacyUploadNotice').style.display='block';document.getElementById('privacyConsent').checked=false;simpanDraft();

@@ -25,13 +25,16 @@ var GeneratorCore = (function () {
   function canonical(value) { if(Array.isArray(value)) return '['+value.map(canonical).join(',')+']'; if(value&&typeof value==='object') return '{'+Object.keys(value).filter(function(k){return k!=='requestId';}).sort().map(function(k){return JSON.stringify(k)+':'+canonical(value[k]);}).join(',')+'}'; return JSON.stringify(value); }
   function validateFile(name,mime,bytes) {
     var ext=String(name||'').split('.').pop().toLowerCase();
-    var types={pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',txt:'text/plain',md:'text/markdown',html:'text/html',htm:'text/html'};
+    var types={pdf:'application/pdf',pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',ppt:'application/vnd.ms-powerpoint',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',txt:'text/plain',md:'text/markdown',html:'text/html',htm:'text/html'};
     if(!types[ext]) throw Error('Jenis berkas tidak didukung.');
     var text=['txt','md','html','htm'].indexOf(ext)>=0, limit=text?1024*1024:5*1024*1024;
-    if(!bytes||!bytes.length||bytes.length>limit) throw Error(text?'Berkas teks maksimal 1 MB.':'PDF/gambar maksimal 5 MB.');
-    if(mime&&mime!==types[ext]&&!(text&&(mime==='text/plain'||mime==='text/markdown'))) throw Error('Jenis MIME tidak sesuai ekstensi berkas.');
+    if(!bytes||!bytes.length||bytes.length>limit) throw Error(text?'Berkas teks maksimal 1 MB.':'PDF/PPT/gambar maksimal 5 MB.');
+    var pptMime=(ext==='pptx'||ext==='ppt')&&(mime==='application/octet-stream'||mime==='application/zip'||mime==='application/x-zip-compressed');
+    if(mime&&mime!==types[ext]&&!pptMime&&!(text&&(mime==='text/plain'||mime==='text/markdown'))) throw Error('Jenis MIME tidak sesuai ekstensi berkas.');
     var b=Array.from(bytes).map(function(x){return x&255;}), head=String.fromCharCode.apply(null,b.slice(0,12));
     if(ext==='pdf'&&!head.startsWith('%PDF-')) throw Error('Tanda pengenal PDF tidak valid.');
+    if(ext==='pptx'&&!(b[0]===80&&b[1]===75&&b[2]===3&&b[3]===4)) throw Error('Tanda pengenal PPTX tidak valid.');
+    if(ext==='ppt'&&!((b[0]===208&&b[1]===207&&b[2]===17&&b[3]===224)||(b[0]===80&&b[1]===75&&b[2]===3&&b[3]===4))) throw Error('Tanda pengenal PPT tidak valid.');
     if(ext==='png'&&b.slice(0,8).join(',')!=='137,80,78,71,13,10,26,10') throw Error('Tanda pengenal PNG tidak valid.');
     if((ext==='jpg'||ext==='jpeg')&&!(b[0]===255&&b[1]===216&&b[2]===255)) throw Error('Tanda pengenal JPEG tidak valid.');
     if(ext==='webp'&&!(head.startsWith('RIFF')&&head.slice(8)==='WEBP')) throw Error('Tanda pengenal WebP tidak valid.');
