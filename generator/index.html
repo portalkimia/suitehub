@@ -6846,6 +6846,7 @@
       if (areaBahanAjar) {
         areaBahanAjar.addEventListener('input', function() {
           sinkronkanMediaTerpilihDenganBahanAjar();
+          terapkanMetadataEkstraksiKeForm();
         });
       }
     });
@@ -6891,16 +6892,21 @@
         return map[s] || 0;
       };
       const cleanLines = (teks) => {
-        return String(teks || '').split('\n').map(l => l.replace(/^\s*\*\s*(?:Rujukan Ayat\/Hadits|Teks Ayat\/Hadits\s*&\s*Hikmah Tadabbur)\s*:\s*/i, '').replace(/^\s*(?:[-*•]|\d+[.)])?\s*(?:(?:Ayat|Hadis|Hadits|Dalil|Kutipan|Integrasi(?:\s+Nilai)?\s+Keislaman|Tadabbur)\s*(?:Al-?Qur['’]?an\s*)?(?:Pertemuan\s*(?:ke-?)?\s*(?:\d+|pertama|kesatu|kedua|ketiga|keempat|kelima|keenam|ketujuh|kedelapan|kesembilan)\s*)?[:=-]\s*)/i, '').trim()).filter(l => l && !/^\*?\s*INSTRUKSI\s+(?:MUTLAK\s+)?(?:GURU\s*&\s*)?AI\s*:/i.test(l) && !/^---\s*\d+\./.test(l) && !/^---\s*ISI/i.test(l) && !/^\[(?:MEDIA\s+PERTEMUAN|BERKAS\s+RUJUKAN|RUJUKAN\s+PEDAGOGIS|CATATAN)/i.test(l) && !(/^(?:person|school|schedule|psychology|format_quote|auto_awesome|all_inclusive|badge|refresh|lightbulb|science|biotech|assignment|quiz)\b/i.test(l) && l.split(/\s+/).length <= 3)).join('\n').trim();
+        return String(teks || '').split('\n').map(l => l.replace(/\*\*/g, '').replace(/^\s*\*\s*(?:Rujukan Ayat\/Hadits|Teks Ayat\/Hadits\s*&\s*Hikmah Tadabbur)\s*:\s*/i, '').replace(/^\s*(?:[-*•#]+|\d+[.)])?\s*(?:(?:Ayat|Hadis|Hadits|Dalil|Kutipan|Integrasi(?:\s+Nilai)?\s+Keislaman|Tadabbur)\s*(?:Al-?Qur['’]?an\s*)?(?:Pertemuan\s*(?:ke-?)?\s*(?:\d+|pertama|kesatu|kedua|ketiga|keempat|kelima|keenam|ketujuh|kedelapan|kesembilan)\s*)?[:=-]\s*)/i, '').trim()).filter(l => l && !/^\*?\s*INSTRUKSI\s+(?:MUTLAK\s+)?(?:GURU\s*&\s*)?AI\s*:/i.test(l) && !/^[#*\s]*---\s*\d+\./.test(l) && !/^[#*\s]*---\s*(?:ISI|INTISARI)/i.test(l) && !/^[#*\s]*\[(?:MEDIA\s+PERTEMUAN|BERKAS\s+RUJUKAN|BERKAS\s+EKSTRAKSI|RUJUKAN\s+PEDAGOGIS|CATATAN)/i.test(l) && !(/^(?:person|school|schedule|psychology|format_quote|auto_awesome|all_inclusive|badge|refresh|lightbulb|science|biotech|assignment|quiz)\b/i.test(l) && l.split(/\s+/).length <= 3)).join('\n').trim();
       };
       const extractSlice = (irisan) => {
-        const matchSec = irisan.match(/---\s*2\.\s*INTEGRASI\s+NILAI\s+KEISLAMAN[^\n]*\n([\s\S]*?)(?=\n---\s*[3-9]\.|\n---\s*ISI|$)/i);
+        const matchAyatLine = irisan.match(/(?:^|\n)[ \t#*•-]*(?:Ayat|Hadis|Hadits|Dalil)\s+Pertemuan\s*(?:ke-?)?\s*\d+\s*\*?\*?\s*[:=-]\s*([^\n]+)/i);
+        if (matchAyatLine && matchAyatLine[1] && regexIndikator.test(matchAyatLine[1])) {
+          const cl = cleanLines(matchAyatLine[1]);
+          if (cl) return cl;
+        }
+        const matchSec = irisan.match(/(?:^|\n)[ \t#*]*---\s*2\.\s*INTEGRASI\s+NILAI\s+KEISLAMAN[^\n]*\n([\s\S]*?)(?=\n[ \t#*]*---\s*[3-9]\.|\n[ \t#*]*---\s*(?:ISI|INTISARI)|$)/i);
         if (matchSec && matchSec[1]) {
           const c = cleanLines(matchSec[1]);
           if (regexIndikator.test(c)) return c;
         }
-        const regexHeader = /^(?:\s*[-*•#]+|\s*\d+[.)])?\s*(?:ayat(?:\s+al-?qur['’]?an|\s+suci|\s+kauniyah|\s+pilihan)?|hadis|hadits|integrasi\s+(?:nilai\s+)?keislaman|tadabbur(?:\s+ayat)?|dalil|kutipan\s+ayat)\s*[:=-]/i;
-        const regexStop = /^(?:\s*[-*•#]+|\s*\d+[.)])?\s*(?:kegiatan|langkah|aktivitas|sintaks|fase|memahami|mengaplikasi|merefleksi|penutup|pendahuluan|awal|tujuan|sub\s*topik|topik|materi|model|metode|strategi|media|lkpd|lembar\s+kerja|kuis|evaluasi|asesmen|simulasi|praktikum|zona\s+alfa|ice\s+breaking)\s*[:=-]/i;
+        const regexHeader = /^(?:\s*[-*•#]+|\s*\d+[.)])?\s*\*?\*?(?:ayat(?:\s+al-?qur['’]?an|\s+suci|\s+kauniyah|\s+pilihan)?|hadis|hadits|integrasi\s+(?:nilai\s+)?keislaman|tadabbur(?:\s+ayat)?|dalil|kutipan\s+ayat)\*?\*?\s*[:=-]/i;
+        const regexStop = /^(?:\s*[-*•#]+|\s*\d+[.)])?\s*\*?\*?(?:kegiatan|langkah|aktivitas|sintaks|fase|memahami|mengaplikasi|merefleksi|penutup|pendahuluan|awal|tujuan|sub\s*[-]?topik|topik|materi|model|metode|strategi|media|berkas\s+sumber|lkpd|lembar\s+kerja|kuis|evaluasi|asesmen|simulasi|praktikum|zona\s+alfa|ice\s+breaking)\*?\*?\s*[:=-]/i;
         const rawL = irisan.split('\n');
         const col = [];
         let collecting = false;
@@ -6908,7 +6914,7 @@
           let line = rawL[i].trim();
           if (!line) { if (collecting && col.length) break; continue; }
           if (i === 0) {
-            line = line.replace(/^(?:\s*[-*•#]+|\s*\d+[.)])?\s*(?:(?:ayat|hadis|hadits|dalil|kutipan|integrasi|keislaman|tadabbur|materi|untuk)\s+(?:al-?qur['’]?an\s+)?)?pertemuan\s*(?:ke-?)?\s*(?:\d+|pertama|kesatu|kedua|ketiga|keempat|kelima|keenam|ketujuh|kedelapan|kesembilan|ix|viii|vii|vi|v|iv|iii|ii|i)\b\s*[:=.-]?\s*/i, '').trim();
+            line = line.replace(/^(?:\s*[-*•#]+|\s*\d+[.)])?\s*\*?\*?(?:(?:ayat|hadis|hadits|dalil|kutipan|integrasi|keislaman|tadabbur|materi|untuk)\s+(?:al-?qur['’]?an\s+)?)?pertemuan\s*(?:ke-?)?\s*(?:\d+|pertama|kesatu|kedua|ketiga|keempat|kelima|keenam|ketujuh|kedelapan|kesembilan|ix|viii|vii|vi|v|iv|iii|ii|i)\b\s*\*?\*?\s*[:=.-]?\s*/i, '').trim();
             if (!line) continue;
           }
           if (collecting && regexStop.test(line) && !regexIndikator.test(line)) break;
@@ -6919,7 +6925,7 @@
               if (cf) col.push(cf);
             }
           } else {
-            if (/^\*?\s*INSTRUKSI\s+(?:MUTLAK\s+)?(?:GURU\s*&\s*)?AI\s*:/i.test(line) || /^---\s*\d+\./.test(line) || /^---\s*ISI\b/i.test(line)) break;
+            if (/^\*?\s*INSTRUKSI\s+(?:MUTLAK\s+)?(?:GURU\s*&\s*)?AI\s*:/i.test(line) || /^[#*\s]*---\s*\d+\./.test(line) || /^[#*\s]*---\s*(?:ISI|INTISARI)\b/i.test(line)) break;
             col.push(line);
           }
         }
@@ -6927,7 +6933,18 @@
         return regexIndikator.test(res) ? res : '';
       };
 
-      const reBaris = /(?:^|\n)[ \t]*(?:[-*•#]+|\d+[.)])?[ \t]*(?:(?:ayat|hadis|hadits|dalil|kutipan|integrasi(?:\s+nilai)?|keislaman|tadabbur|materi|untuk|pada)\s+(?:al-?qur['’]?an\s+)?)?pertemuan\s*(?:ke-?)?\s*(\d+|pertama|kesatu|kedua|ketiga|keempat|kelima|keenam|ketujuh|kedelapan|kesembilan|ix|viii|vii|vi|v|iv|iii|ii|i)\b/gi;
+      if (/\[MEDIA PERTEMUAN\s+\d+\]/i.test(src)) {
+        const reMedia = /\[MEDIA PERTEMUAN\s+(\d+)\]([\s\S]*?)(?=\n[ \t#*]*\[MEDIA PERTEMUAN\s+\d+\]|\n[ \t#*]*\[CATATAN|$)/gi;
+        let mMatch;
+        while ((mMatch = reMedia.exec(src)) !== null) {
+          if (Number(mMatch[1]) === mNum) {
+            const b = extractSlice(mMatch[2]);
+            if (b) return b;
+          }
+        }
+      }
+
+      const reBaris = /(?:^|\n)[ \t]*(?:[-*•#]+|\d+[.)])?[ \t]*\*?\*?(?:(?:ayat|hadis|hadits|dalil|kutipan|integrasi(?:\s+nilai)?|keislaman|tadabbur|materi|untuk|pada)\s+(?:al-?qur['’]?an\s+)?)?pertemuan\s*(?:ke-?)?\s*(\d+|pertama|kesatu|kedua|ketiga|keempat|kelima|keenam|ketujuh|kedelapan|kesembilan|ix|viii|vii|vi|v|iv|iii|ii|i)\b/gi;
       const markers = [];
       let pm;
       while ((pm = reBaris.exec(src)) !== null) {
@@ -6939,10 +6956,18 @@
           const endIdx = (idx + 1 < markers.length) ? markers[idx + 1].startIndex : src.length;
           const h = extractSlice(src.slice(markers[idx].startIndex, endIdx));
           if (h) return h;
+          let diffEnd = src.length;
+          for (let nIdx = idx + 1; nIdx < markers.length; nIdx++) {
+            if (markers[nIdx].num !== mNum) { diffEnd = markers[nIdx].startIndex; break; }
+          }
+          if (diffEnd > endIdx) {
+            const hFull = extractSlice(src.slice(markers[idx].startIndex, diffEnd));
+            if (hFull) return hFull;
+          }
         }
       }
 
-      const reSec = /---\s*2\.\s*INTEGRASI\s+NILAI\s+KEISLAMAN[^\n]*\n([\s\S]*?)(?=\n---\s*[3-9]\.|\n---\s*ISI|$)/gi;
+      const reSec = /(?:^|\n)[ \t#*]*---\s*2\.\s*INTEGRASI\s+NILAI\s+KEISLAMAN[^\n]*\n([\s\S]*?)(?=\n[ \t#*]*---\s*[3-9]\.|\n[ \t#*]*---\s*(?:ISI|INTISARI)|$)/gi;
       const secList = [];
       let sm;
       while ((sm = reSec.exec(src)) !== null) {
@@ -6952,6 +6977,72 @@
       if (secList.length > 0) return secList[mNum - 1] || secList[0];
       return '';
     }
+
+    function terapkanMetadataEkstraksiKeForm() {
+      const area = document.getElementById('aiBahanAjar');
+      const val = (area ? area.value : '').trim();
+      if (!val || (window.selectedPortalMedia && window.selectedPortalMedia.length > 0)) return;
+
+      // 1. Deteksi jumlah pertemuan dari [MEDIA PERTEMUAN N] atau Sub-Topik Pertemuan N
+      const mediaMatches = [...val.matchAll(/\[MEDIA PERTEMUAN\s+(\d+)\]/gi)].map(m => Number(m[1]));
+      const subMatches = [...val.matchAll(/(?:^|\n)[ \t#*•-]*Sub-?Topik\s+Pertemuan\s*(?:ke-?)?\s*(\d+)\s*\*?\*?\s*[:=-]\s*([^\n]+)/gi)];
+      let maxPertemuan = 0;
+      mediaMatches.forEach(n => { if (n > maxPertemuan && n <= 9) maxPertemuan = n; });
+      subMatches.forEach(m => { const n = Number(m[1]); if (n > maxPertemuan && n <= 9) maxPertemuan = n; });
+
+      const elPertemuan = document.getElementById('aiPertemuan');
+      const jenisDok = document.getElementById('jenisDokumen')?.value || 'Modul Ajar';
+      const maxAllowed = jenisDok === 'Lesson Plan' ? 2 : 9;
+      if (maxPertemuan >= 1 && elPertemuan) {
+        const targetP = Math.min(maxPertemuan, maxAllowed);
+        if (Number(elPertemuan.value) < targetP) {
+          elPertemuan.value = String(targetP);
+          perbaruiLabelTombolKuotaModul();
+        }
+      }
+
+      // 2. Deteksi Topik Utama & Kelas jika disertakan oleh Skill Gemini
+      const matchTopik = val.match(/(?:^|\n)[ \t#*•-]*Topik(?:\s+Utama|\s+Modul)?\s*\*?\*?\s*[:=-]\s*([^\n]+)/i);
+      if (matchTopik && matchTopik[1]) {
+        const topikBersih = matchTopik[1].replace(/\*\*/g, '').trim();
+        const elAiTopik = document.getElementById('aiTopik');
+        if (elAiTopik && !elAiTopik.value.trim()) {
+          elAiTopik.value = topikBersih;
+          sinkronTopikKeForm();
+        }
+      }
+
+      const matchKelas = val.match(/(?:^|\n)[ \t#*•-]*Kelas(?:\s*\/\s*Fase)?\s*\*?\*?\s*[:=-]\s*(?:Kelas\s*)?(10|11|12|X|XI|XII)\b/i);
+      if (matchKelas && matchKelas[1]) {
+        const kMap = { '10': '10', 'x': '10', '11': '11', 'xi': '11', '12': '12', 'xii': '12' };
+        const kVal = kMap[matchKelas[1].toLowerCase()];
+        const elAiKelas = document.getElementById('aiKelas');
+        if (kVal && elAiKelas) {
+          elAiKelas.value = kVal;
+          sinkronKelasKeForm();
+        }
+      }
+
+      // 3. Isi otomatis Sub-Topik dan Ayat per Pertemuan ke form jika terdeteksi
+      subMatches.forEach(m => {
+        const pIdx = Number(m[1]);
+        const subText = m[2].replace(/\*\*/g, '').trim();
+        const elSub = document.getElementsByName('subTopik' + pIdx)[0];
+        if (elSub && subText && !/^\[/.test(subText)) {
+          elSub.value = subText;
+        }
+      });
+
+      const totalP = Math.max(Number(elPertemuan?.value) || 1, maxPertemuan || 1);
+      for (let j = 1; j <= Math.min(totalP, 9); j++) {
+        const ayatEkstrak = ekstrakAyatDariBahanAjarClient(val, j);
+        const elAyat = document.getElementsByName('ayat' + j)[0];
+        if (elAyat && ayatEkstrak && !/^\[WAJIB/i.test(ayatEkstrak)) {
+          elAyat.value = ayatEkstrak;
+        }
+      }
+    }
+    window.terapkanMetadataEkstraksiKeForm = terapkanMetadataEkstraksiKeForm;
 
     // =========================================================================
     // 9. LOGIKA SAKELAR DOKUMEN & BOBOT KUOTA
