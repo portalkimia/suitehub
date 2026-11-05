@@ -451,7 +451,7 @@ function analyzePedagogicalStructure(rawInfo, filePath) {
       ayatLines.push(cleanedAyat);
     }
   }
-  const keislamanText = (sections.keislaman || deduplicateLines(ayatLines).join(' — '))
+  const keislamanText = (sections.keislaman || deduplicateLines(ayatLines).join(' | '))
     .replace(/^Integrasi Nilai Keislaman\s*:\s*Tadabbur Ayat Kauniyah\s*(?:Harmonisasi Wahyu Ilahi dengan Keteraturan Hukum Sains dan Kosmos\s*)?/i, '')
     .replace(/\s*Tujuan\s*&\s*Indikator[\s\S]*$/i, '')
     .trim()
@@ -500,40 +500,41 @@ function analyzePedagogicalStructure(rawInfo, filePath) {
 function formatMeetingPrompt(analyzed, meetingNum) {
   const out = [];
   out.push(`[MEDIA PERTEMUAN ${meetingNum}]`);
-  out.push(`Berkas Sumber: ${analyzed.fileName} (${analyzed.mediaType})`);
+  out.push(`Berkas Sumber: ${analyzed.fileName} | Jenis Media: ${analyzed.mediaType}`);
   out.push(`Sub-Topik Pertemuan ${meetingNum}: ${analyzed.title}`);
 
   if (analyzed.keislaman) {
     out.push(`Ayat Pertemuan ${meetingNum}: ${analyzed.keislaman.replace(/\s+/g, ' ').trim()}`);
   } else {
-    out.push(`Ayat Pertemuan ${meetingNum}: [WAJIB DIISI OLEH GEMINI/AI: Pilih 1 Ayat Al-Qur'an lengkap Teks Arab, Terjemahan, & Tadabbur yang relevan dengan "${analyzed.title}"]`);
+    out.push(`Ayat Pertemuan ${meetingNum}: [WAJIB DIISI OLEH GEMINI/AI: Pilih 1 Ayat Al-Qur'an atau Hadits Shahih/Hasan lengkap Teks Arab, Terjemahan, & Keterkaitan Materi yang relevan dengan "${analyzed.title}"]`);
   }
 
   if (analyzed.tujuan) {
     out.push(`Tujuan Pembelajaran Rujukan: ${analyzed.tujuan}`);
   }
 
-  out.push(`\n--- 1. PENGANTAR / KONTEKS PEMANTIK YANG TERTULIS DI MEDIA (BAHAN APERSEPSI) ---`);
-  out.push(analyzed.fenomena || `Gunakan judul dan konsep pengantar "${analyzed.title}" yang tertulis di awal ${analyzed.mediaType} sebagai pertanyaan pemantik diskusi untuk menggali pengetahuan awal murid (tanpa mengarang fenomena di luar isi media).`);
+  out.push(`\n[BAGIAN 1: PENGANTAR, MATERI PRASYARAT, & PEMANTIK APERSEPSI]`);
+  out.push(analyzed.fenomena || `1. Konteks Pengantar dari Media: Judul dan konsep pengantar "${analyzed.title}" yang tertulis di awal ${analyzed.mediaType}.\n2. Pertanyaan Pemantik Diskusi Awal: Menggali pengetahuan prasyarat dan ide awal murid berdasarkan pengantar media.`);
 
-  out.push(`\n--- 2. INTEGRASI NILAI KEISLAMAN & AYAT/HADITS ---`);
+  out.push(`\n[BAGIAN 2: INTEGRASI NILAI KEISLAMAN & AYAT/HADITS]`);
   out.push(analyzed.keislaman || `Tadabbur keteraturan hukum Allah SWT pada materi ${analyzed.title}.`);
 
-  out.push(`\n--- 3. ISI LENGKAP MATERI PER SLIDE / HALAMAN (100% FAKTUAL DARI MEDIA) ---`);
+  out.push(`\n[BAGIAN 3: EKSTRAKSI LENGKAP MATERI PER SLIDE / HALAMAN (FAKTUAL DARI MEDIA)]`);
   if (analyzed.needsGeminiVision) {
-    out.push(`[CATATAN EKSTRAKTOR: PDF "${analyzed.fileName}" menggunakan encoding font khusus/halaman pindaian. Agen Gemini WAJIB membaca berkas ini menggunakan tool read_file untuk mengekstrak seluruh isi halaman secara lengkap di bawah ini.]`);
+    out.push(`[CATATAN EKSTRAKTOR: PDF "${analyzed.fileName}" menggunakan encoding font khusus/halaman pindaian. Agen Gemini wajib membaca berkas ini menggunakan tool read_file untuk mengekstrak seluruh isi halaman secara lengkap di bawah ini.]`);
   } else {
     out.push(analyzed.materiRingkas);
   }
 
-  out.push(`\n--- 4. SKENARIO TRANSFORMASI STUDENT-CENTERED (MEMAHAMI, MENGAPLIKASI, MEREFLEKSI BERBASIS ISI MEDIA) ---`);
-  out.push(`- Aktivitas Memahami (Student-Centered): ${analyzed.simulasi || `Murid secara berkelompok menelaah, mengamati, dan membedah konsep, definisi, serta rumus/bagan yang tertulis pada ${analyzed.mediaType} "${analyzed.title}" dengan pertanyaan pengarah (scaffolding) dari pendidik, lalu merumuskan penjelasannya dengan bahasa sendiri (bukan guru berceramah satu arah).`}`);
-  out.push(`- Aktivitas Mengaplikasi (Student-Centered): ${analyzed.lkpd || `Murid berkolaborasi dalam kelompok untuk menganalisis contoh soal/kasus dan mengerjakan latihan penerapan konsep yang tertera di dalam ${analyzed.mediaType} "${analyzed.title}", lalu mempresentasikan dan membandingkan hasil diskusi antar-kelompok.`}`);
-  out.push(`- Aktivitas Merefleksi (Student-Centered): Murid menyimpulkan benang merah materi "${analyzed.title}" berdasarkan slide/halaman yang telah ditelaah, melakukan verifikasi konsep bersama pendidik, dan merefleksikan makna materi.`);
+  out.push(`\n[BAGIAN 4: SKENARIO PEMBELAJARAN MENDALAM (DEEP LEARNING: STUDENT-CENTERED)]`);
+  out.push(`1. Fase Memahami (Mindful & Meaningful Exploration): ${analyzed.simulasi || `Murid secara berkelompok menelaah, mengamati, dan membedah konsep, definisi, serta rumus/bagan yang tertulis pada ${analyzed.mediaType} "${analyzed.title}" dengan pertanyaan pengarah (scaffolding) dari pendidik, lalu merumuskan penjelasannya dengan bahasa sendiri.`}`);
+  out.push(`2. Fase Mengaplikasi (Collaborative Problem Solving): ${analyzed.lkpd || `Murid berkolaborasi dalam kelompok untuk menganalisis contoh soal/kasus dan mengerjakan latihan penerapan konsep yang tertera di dalam ${analyzed.mediaType} "${analyzed.title}", lalu mempresentasikan dan membandingkan hasil diskusi antar-kelompok.`}`);
+  out.push(`3. Fase Merefleksi (Synthesis & Confirmation): Murid menyimpulkan benang merah materi "${analyzed.title}" berdasarkan slide/halaman yang telah ditelaah, melakukan verifikasi konsep bersama pendidik, dan merefleksikan makna materi.`);
 
-  out.push(`\n--- 5. ACUAN TUGAS & EVALUASI FORMATIF (SESUAI ISI MEDIA TANPA OBSERVASI SIKAP) ---`);
-  out.push(`- Acuan Formatif 1 (Diskusi / Kerja Kelompok Murid): ${analyzed.lkpd || `Penilaian hasil kerja kelompok dalam membedah konsep dan menganalisis contoh/kasus yang tertulis pada ${analyzed.mediaType} "${analyzed.title}".`}`);
-  out.push(`- Acuan Formatif 2 (Latihan / Evaluasi Mandiri): ${analyzed.kuis || `Penilaian penyelesaian soal latihan/evaluasi pemahaman konsep berdasarkan materi yang tertulis pada ${analyzed.mediaType} "${analyzed.title}".`}`);
+  out.push(`\n[BAGIAN 5: ACUAN ASESMEN DIAGNOSTIK AWAL & FORMATIF (TANPA OBSERVASI SIKAP)]`);
+  out.push(`1. Asesmen Diagnostik Awal (Acuan Baris 1 Tabel ITP & Kegiatan Awal): Tanya-jawab singkat mengecek penguasaan materi prasyarat sebelum mempelajari "${analyzed.title}".`);
+  out.push(`2. Asesmen Formatif 1 (Unjuk Kerja Kelompok / Diskusi Konsep / LKPD): ${analyzed.lkpd || `Penilaian hasil kerja kelompok dalam membedah konsep dan menganalisis contoh/kasus yang tertulis pada ${analyzed.mediaType} "${analyzed.title}".`}`);
+  out.push(`3. Asesmen Formatif 2 (Evaluasi Mandiri / Latihan Soal): ${analyzed.kuis || `Penilaian penyelesaian soal latihan/evaluasi pemahaman konsep berdasarkan materi yang tertulis pada ${analyzed.mediaType} "${analyzed.title}".`}`);
 
   return out.join('\n');
 }
@@ -595,11 +596,11 @@ if (require.main === module) {
   const blocks = [];
   const summaryHeader = [
     `[BERKAS EKSTRAKSI: ${files.map(f => path.basename(f)).join(', ')}]`,
-    `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR (ANTI-MENGARANG & STUDENT-CENTERED MAKSIMAL):`,
-    `- PENTING (DILARANG MENGARANG): Rujukan di bawah ini adalah isi faktual yang diekstraksi dari ${files.length} berkas media pembelajaran (${files.length} Pertemuan). DILARANG KERAS mengarang simulasi, praktikum, tabel pengamatan, atau kuis yang tidak tertulis di bawah ini!`,
-    `- TRANSFORMASI STUDENT-CENTERED: Walaupun media berupa slide/PDF materi paparan, rancang langkah pembelajaran (awal, memahami, mengaplikasi, merefleksi, penutup) yang 100% berpusat pada murid (murid aktif menelaah slide/halaman materi, berdiskusi membedah konsep/rumus/contoh soal yang ada di media, dan mempresentasikan temuannya) secara MENDETAIL dan MAKSIMAL.`,
-    `- Gunakan "Ayat Pertemuan 1" -> field "ayat1", "Ayat Pertemuan 2" -> field "ayat2", dst. lengkap dengan Teks Arab, Terjemahan Indonesia, dan keterkaitan materi.`,
-    `- Rancang Asesmen (1 Diagnostik Awal + Formatif sesuai latihan/contoh nyata yang ada di media tanpa observasi sikap).\n`
+    `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR:`,
+    `1. Seluruh konsep, rumus, data, contoh, dan soal pada Bagian 3 berasal dari ${files.length} berkas media pembelajaran (${files.length} Pertemuan). Jangan menambahkan simulasi, praktikum, tabel pengamatan, atau kuis yang tidak tercantum pada rincian pertemuan di bawah ini.`,
+    `2. Gunakan "Ayat Pertemuan 1" untuk mengisi field "ayat1", "Ayat Pertemuan 2" untuk mengisi field "ayat2", dan seterusnya secara utuh.`,
+    `3. Susun langkah pembelajaran mengikuti kerangka Pembelajaran Mendalam (Deep Learning: Memahami, Mengaplikasi, Merefleksi) yang berpusat pada murid sesuai Bagian 4 secara mendetail.`,
+    `4. Susun tabel ITP dan Asesmen merujuk pada Bagian 5 (Baris 1 wajib Asesmen Diagnostik Awal, diikuti Asesmen Formatif 1 dan Formatif 2 setiap pertemuan tanpa asesmen observasi sikap).\n`
   ].join('\n');
 
   blocks.push(summaryHeader);

@@ -6893,7 +6893,7 @@
         return map[s] || 0;
       };
       const cleanLines = (teks) => {
-        return String(teks || '').split('\n').map(l => l.replace(/\*\*/g, '').replace(/^\s*\*\s*(?:Rujukan Ayat\/Hadits|Teks Ayat\/Hadits\s*&\s*Hikmah Tadabbur)\s*:\s*/i, '').replace(/^\s*(?:[-*•#]+|\d+[.)])?\s*(?:(?:Ayat|Hadis|Hadits|Dalil|Kutipan|Integrasi(?:\s+Nilai)?\s+Keislaman|Tadabbur)\s*(?:Al-?Qur['’]?an\s*)?(?:Pertemuan\s*(?:ke-?)?\s*(?:\d+|pertama|kesatu|kedua|ketiga|keempat|kelima|keenam|ketujuh|kedelapan|kesembilan)\s*)?[:=-]\s*)/i, '').trim()).filter(l => l && !/^\*?\s*INSTRUKSI\s+(?:MUTLAK\s+)?(?:GURU\s*&\s*)?AI\s*:/i.test(l) && !/^[#*\s]*---\s*\d+\./.test(l) && !/^[#*\s]*---\s*(?:ISI|INTISARI)/i.test(l) && !/^[#*\s]*\[(?:MEDIA\s+PERTEMUAN|BERKAS\s+RUJUKAN|BERKAS\s+EKSTRAKSI|RUJUKAN\s+PEDAGOGIS|CATATAN)/i.test(l) && !(/^(?:person|school|schedule|psychology|format_quote|auto_awesome|all_inclusive|badge|refresh|lightbulb|science|biotech|assignment|quiz)\b/i.test(l) && l.split(/\s+/).length <= 3)).join('\n').trim();
+        return String(teks || '').split('\n').map(l => l.replace(/\*\*/g, '').replace(/^\s*\*\s*(?:Rujukan Ayat\/Hadits|Teks Ayat\/Hadits\s*&\s*Hikmah Tadabbur)\s*:\s*/i, '').replace(/^\s*(?:[-*•#]+|\d+[.)])?\s*(?:(?:Ayat|Hadis|Hadits|Dalil|Kutipan|Integrasi(?:\s+Nilai)?\s+Keislaman|Tadabbur)\s*(?:Al-?Qur['’]?an\s*)?(?:Pertemuan\s*(?:ke-?)?\s*(?:\d+|pertama|kesatu|kedua|ketiga|keempat|kelima|keenam|ketujuh|kedelapan|kesembilan)\s*)?[:=-]\s*)/i, '').trim()).filter(l => l && !/^\*?\s*INSTRUKSI\s+(?:MUTLAK\s+)?(?:GURU\s*&\s*)?AI\s*:/i.test(l) && !/^[#*\s]*---\s*\d+\./.test(l) && !/^[#*\s]*---\s*(?:ISI|INTISARI)/i.test(l) && !/^[#*\s]*\[(?:BAGIAN\s+\d+|MEDIA\s+PERTEMUAN|BERKAS\s+RUJUKAN|BERKAS\s+EKSTRAKSI|RUJUKAN\s+PEDAGOGIS|CATATAN)/i.test(l) && !(/^(?:person|school|schedule|psychology|format_quote|auto_awesome|all_inclusive|badge|refresh|lightbulb|science|biotech|assignment|quiz)\b/i.test(l) && l.split(/\s+/).length <= 3)).join('\n').trim();
       };
       const extractSlice = (irisan) => {
         const matchAyatLine = irisan.match(/(?:^|\n)[ \t#*•-]*(?:Ayat|Hadis|Hadits|Dalil)\s+Pertemuan\s*(?:ke-?)?\s*\d+\s*\*?\*?\s*[:=-]\s*([^\n]+)/i);
@@ -6901,7 +6901,7 @@
           const cl = cleanLines(matchAyatLine[1]);
           if (cl) return cl;
         }
-        const matchSec = irisan.match(/(?:^|\n)[ \t#*]*---\s*2\.\s*INTEGRASI\s+NILAI\s+KEISLAMAN[^\n]*\n([\s\S]*?)(?=\n[ \t#*]*---\s*[3-9]\.|\n[ \t#*]*---\s*(?:ISI|INTISARI)|$)/i);
+        const matchSec = irisan.match(/(?:^|\n)[ \t#*]*(?:---\s*2\.|\[BAGIAN\s+2\s*:)\s*INTEGRASI\s+NILAI\s+KEISLAMAN[^\n]*\n([\s\S]*?)(?=\n[ \t#*]*(?:---\s*[3-9]\.|\[BAGIAN\s+[3-9]\s*:|---\s*(?:ISI|INTISARI))|$)/i);
         if (matchSec && matchSec[1]) {
           const c = cleanLines(matchSec[1]);
           if (regexIndikator.test(c)) return c;
@@ -6926,7 +6926,7 @@
               if (cf) col.push(cf);
             }
           } else {
-            if (/^\*?\s*INSTRUKSI\s+(?:MUTLAK\s+)?(?:GURU\s*&\s*)?AI\s*:/i.test(line) || /^[#*\s]*---\s*\d+\./.test(line) || /^[#*\s]*---\s*(?:ISI|INTISARI)\b/i.test(line)) break;
+            if (/^\*?\s*INSTRUKSI\s+(?:MUTLAK\s+)?(?:GURU\s*&\s*)?AI\s*:/i.test(line) || /^[#*\s]*---\s*\d+\./.test(line) || /^[#*\s]*\[BAGIAN\s+\d+/i.test(line) || /^[#*\s]*---\s*(?:ISI|INTISARI)\b/i.test(line)) break;
             col.push(line);
           }
         }
@@ -6968,7 +6968,7 @@
         }
       }
 
-      const reSec = /(?:^|\n)[ \t#*]*---\s*2\.\s*INTEGRASI\s+NILAI\s+KEISLAMAN[^\n]*\n([\s\S]*?)(?=\n[ \t#*]*---\s*[3-9]\.|\n[ \t#*]*---\s*(?:ISI|INTISARI)|$)/gi;
+      const reSec = /(?:^|\n)[ \t#*]*(?:---\s*2\.|\[BAGIAN\s+2\s*:)\s*INTEGRASI\s+NILAI\s+KEISLAMAN[^\n]*\n([\s\S]*?)(?=\n[ \t#*]*(?:---\s*[3-9]\.|\[BAGIAN\s+[3-9]\s*:|---\s*(?:ISI|INTISARI))|$)/gi;
       const secList = [];
       let sm;
       while ((sm = reSec.exec(src)) !== null) {
@@ -7021,6 +7021,15 @@
         if (kVal && elAiKelas) {
           elAiKelas.value = kVal;
           sinkronKelasKeForm();
+        }
+      }
+
+      const matchWaktu = val.match(/(?:^|\n)[ \t#*•-]*Alokasi\s+Waktu\s*\*?\*?\s*[:=-]\s*([^\n]+)/i);
+      if (matchWaktu && matchWaktu[1]) {
+        const waktuBersih = matchWaktu[1].replace(/\*\*/g, '').trim();
+        const elWaktu = document.getElementsByName('waktu')[0];
+        if (elWaktu && waktuBersih && !/^\[/.test(waktuBersih)) {
+          elWaktu.value = waktuBersih;
         }
       }
 
