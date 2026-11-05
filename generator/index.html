@@ -5475,34 +5475,35 @@
       const kuis = (sections && sections.kuis) || cleanLines.filter(l => /\b(?:kuis|evaluasi|uji pemahaman|soal latihan|tes formatif|pilihan ganda)\b/i.test(l)).slice(0, 6).join('\n');
 
       let res = `[BERKAS RUJUKAN EKSTERNAL GURU: ${fileName}]\n` +
-        `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR (MODE HEMAT TOKEN DEEPSEEK):\n` +
+        `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR (ANTI-MENGARANG & STUDENT-CENTERED MAKSIMAL):\n` +
         `- Berkas ini diunggah langsung oleh guru sebagai ${mediaLabel} mandiri.\n` +
         `- Pemanfaatan Digital (digital): Deskripsikan media pembelajaran digital ini sebagai "${mediaLabel}: ${fileName}" (Fleksibel memanfaatkan Canva, Liveworksheets, atau platform digital lain sesuai kebutuhan guru).\n` +
-        `- Keselarasan Kegiatan & Fleksibel Digital: Rancang kegiatan pembelajaran (awal, memahami, mengaplikasi, merefleksi, penutup) agar SESUAI PERSIS dengan materi, fenomena, simulasi/visualisasi, LKPD, dan kuis pada berkas ini.\n`;
+        `- DILARANG KERAS MENGARANG DI LUAR MEDIA: Gunakan 100% konsep, penjelasan, rumus, data, contoh, dan soal yang BENAR-BENAR TERTULIS pada berkas ini. DILARANG mengarang adanya simulasi lab virtual, praktikum, tabel pengamatan eksperimen, atau kuis interaktif jika tidak tertulis di dalam berkas ini!\n` +
+        `- TRANSFORMASI STUDENT-CENTERED MAKSIMAL: Meskipun berkas ini terkesan seperti materi paparan/ceramah, ubah penyajian seluruh rincian materi, contoh kasus, dan soal di dalamnya menjadi aktivitas belajar aktif yang berpusat pada murid (Student-Centered) secara mendalam dan maksimal!\n`;
 
       if (keislaman) {
-        res += `Ayat Pertemuan 1: ${keislaman.replace(/\s+/g, ' ').slice(0, 900)}\n`;
+        res += `Ayat Pertemuan 1: ${keislaman.replace(/\s+/g, ' ').slice(0, 1200)}\n`;
       }
       res += `\n`;
 
       if (fenomena) {
-        res += `--- 1. STIMULUS FENOMENA NYATA (APERSEPSI) ---\n${fenomena.slice(0, 1500)}\n\n`;
+        res += `--- 1. STIMULUS FENOMENA NYATA (APERSEPSI) ---\n${fenomena.slice(0, 3000)}\n\n`;
       }
       if (keislaman) {
-        res += `--- 2. INTEGRASI NILAI KEISLAMAN & AYAT/HADITS ---\n${keislaman.slice(0, 1500)}\n\n`;
+        res += `--- 2. INTEGRASI NILAI KEISLAMAN & AYAT/HADITS ---\n${keislaman.slice(0, 3000)}\n\n`;
       }
       if (virtualLab) {
-        res += `--- 3. FITUR SIMULASI / KEGIATAN INTI ---\n${virtualLab.slice(0, 1800)}\n\n`;
+        res += `--- 3. FITUR SIMULASI / KEGIATAN INTI ---\n${virtualLab.slice(0, 3500)}\n\n`;
       }
       if (lkpd) {
-        res += `--- 4. LEMBAR KERJA PESERTA DIDIK (LKPD) & TABEL PENGAMATAN ---\n${lkpd.slice(0, 1500)}\n\n`;
+        res += `--- 4. LEMBAR KERJA PESERTA DIDIK (LKPD) & TABEL PENGAMATAN ---\n${lkpd.slice(0, 3000)}\n\n`;
       }
       if (kuis) {
-        res += `--- 5. EVALUASI / KUIS FORMATIF ---\n${kuis.slice(0, 1200)}\n\n`;
+        res += `--- 5. EVALUASI / KUIS FORMATIF ---\n${kuis.slice(0, 2000)}\n\n`;
       }
 
-      res += `--- ISI RINGKAS MATERI BERKAS UNGGAHAN (TERKOMPRESI HEMAT TOKEN) ---\n`;
-      res += cleanLines.join('\n').slice(0, 4500);
+      res += `--- ISI LENGKAP MATERI BERKAS UNGGAHAN ---\n`;
+      res += cleanLines.join('\n').slice(0, 35000);
       return res;
     }
 

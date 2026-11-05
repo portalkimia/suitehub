@@ -477,17 +477,17 @@ function analyzePedagogicalStructure(rawInfo, filePath) {
   const regexKuis = /\b(?:kuis|evaluasi|uji\s+pemahaman|soal\s+latihan|latihan\s+soal|tes\s+formatif|pilihan\s+ganda|refleksi)\b/i;
   const kuisText = (sections.kuis || lines.filter(l => regexKuis.test(l)).slice(0, 8).join('\n')).slice(0, 900);
 
-  // 7. Ringkasan Poin Materi Inti (maks 1.800 karakter agar total per pertemuan < 3.500 karakter)
+  // 7. Isi Materi Lengkap dari seluruh slide/halaman (tanpa pemotongan dangkal)
   const materiRingkas = deduplicateLines(lines)
     .join('\n')
-    .slice(0, 1800);
+    .slice(0, 28000);
 
   return {
     fileName: path.basename(filePath),
     mediaType: rawInfo.mediaType,
     title: rawInfo.title,
     needsGeminiVision: !!rawInfo.needsGeminiVision,
-    tujuan: tujuanLines.join(' | ').slice(0, 600),
+    tujuan: tujuanLines.join(' | ').slice(0, 1200),
     keislaman: keislamanText,
     fenomena: fenomenaText,
     simulasi: simulasiText,
@@ -513,27 +513,27 @@ function formatMeetingPrompt(analyzed, meetingNum) {
     out.push(`Tujuan Pembelajaran Rujukan: ${analyzed.tujuan}`);
   }
 
-  out.push(`\n--- 1. STIMULUS FENOMENA NYATA (APERSEPSI) ---`);
-  out.push(analyzed.fenomena || `Mengamati fenomena kontekstual sehari-hari yang berkaitan dengan ${analyzed.title} pada ${analyzed.mediaType}.`);
+  out.push(`\n--- 1. PENGANTAR / KONTEKS PEMANTIK YANG TERTULIS DI MEDIA (BAHAN APERSEPSI) ---`);
+  out.push(analyzed.fenomena || `Gunakan judul dan konsep pengantar "${analyzed.title}" yang tertulis di awal ${analyzed.mediaType} sebagai pertanyaan pemantik diskusi untuk menggali pengetahuan awal murid (tanpa mengarang fenomena di luar isi media).`);
 
   out.push(`\n--- 2. INTEGRASI NILAI KEISLAMAN & AYAT/HADITS ---`);
   out.push(analyzed.keislaman || `Tadabbur keteraturan hukum Allah SWT pada materi ${analyzed.title}.`);
 
-  out.push(`\n--- 3. FITUR SIMULASI / KEGIATAN INTI (MEMAHAMI & MENGAPLIKASI) ---`);
-  out.push(analyzed.simulasi || `Murid mengeksplorasi konsep dan visualisasi pada ${analyzed.mediaType} "${analyzed.title}".`);
-
-  out.push(`\n--- 4. LEMBAR KERJA PESERTA DIDIK (LKPD) & TABEL PENGAMATAN ---`);
-  out.push(analyzed.lkpd || `Murid mencatat hasil pengamatan dan mengerjakan latihan analisis konsep ${analyzed.title} secara kolaboratif.`);
-
-  out.push(`\n--- 5. EVALUASI / KUIS FORMATIF ---`);
-  out.push(analyzed.kuis || `Murid mengerjakan soal evaluasi formatif mandiri mengenai ${analyzed.title}.`);
-
-  out.push(`\n--- 6. INTISARI MATERI PERTEMUAN ${meetingNum} (TERKOMPRESI HEMAT TOKEN) ---`);
+  out.push(`\n--- 3. ISI LENGKAP MATERI PER SLIDE / HALAMAN (100% FAKTUAL DARI MEDIA) ---`);
   if (analyzed.needsGeminiVision) {
-    out.push(`[CATATAN EKSTRAKTOR: PDF "${analyzed.fileName}" menggunakan encoding font khusus/halaman pindaian. Agen Gemini WAJIB membaca berkas ini menggunakan tool read_file untuk melengkapi intisari materi di bawah ini.]`);
+    out.push(`[CATATAN EKSTRAKTOR: PDF "${analyzed.fileName}" menggunakan encoding font khusus/halaman pindaian. Agen Gemini WAJIB membaca berkas ini menggunakan tool read_file untuk mengekstrak seluruh isi halaman secara lengkap di bawah ini.]`);
   } else {
     out.push(analyzed.materiRingkas);
   }
+
+  out.push(`\n--- 4. SKENARIO TRANSFORMASI STUDENT-CENTERED (MEMAHAMI, MENGAPLIKASI, MEREFLEKSI BERBASIS ISI MEDIA) ---`);
+  out.push(`- Aktivitas Memahami (Student-Centered): ${analyzed.simulasi || `Murid secara berkelompok menelaah, mengamati, dan membedah konsep, definisi, serta rumus/bagan yang tertulis pada ${analyzed.mediaType} "${analyzed.title}" dengan pertanyaan pengarah (scaffolding) dari pendidik, lalu merumuskan penjelasannya dengan bahasa sendiri (bukan guru berceramah satu arah).`}`);
+  out.push(`- Aktivitas Mengaplikasi (Student-Centered): ${analyzed.lkpd || `Murid berkolaborasi dalam kelompok untuk menganalisis contoh soal/kasus dan mengerjakan latihan penerapan konsep yang tertera di dalam ${analyzed.mediaType} "${analyzed.title}", lalu mempresentasikan dan membandingkan hasil diskusi antar-kelompok.`}`);
+  out.push(`- Aktivitas Merefleksi (Student-Centered): Murid menyimpulkan benang merah materi "${analyzed.title}" berdasarkan slide/halaman yang telah ditelaah, melakukan verifikasi konsep bersama pendidik, dan merefleksikan makna materi.`);
+
+  out.push(`\n--- 5. ACUAN TUGAS & EVALUASI FORMATIF (SESUAI ISI MEDIA TANPA OBSERVASI SIKAP) ---`);
+  out.push(`- Acuan Formatif 1 (Diskusi / Kerja Kelompok Murid): ${analyzed.lkpd || `Penilaian hasil kerja kelompok dalam membedah konsep dan menganalisis contoh/kasus yang tertulis pada ${analyzed.mediaType} "${analyzed.title}".`}`);
+  out.push(`- Acuan Formatif 2 (Latihan / Evaluasi Mandiri): ${analyzed.kuis || `Penilaian penyelesaian soal latihan/evaluasi pemahaman konsep berdasarkan materi yang tertulis pada ${analyzed.mediaType} "${analyzed.title}".`}`);
 
   return out.join('\n');
 }
@@ -595,10 +595,11 @@ if (require.main === module) {
   const blocks = [];
   const summaryHeader = [
     `[BERKAS EKSTRAKSI: ${files.map(f => path.basename(f)).join(', ')}]`,
-    `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR (MODE HEMAT TOKEN DEEPSEEK):`,
-    `- Rujukan di bawah ini telah diekstraksi dan dipadatkan dari ${files.length} berkas media pembelajaran (${files.length} Pertemuan).`,
+    `INSTRUKSI KHUSUS MEDIA & BAHAN AJAR (ANTI-MENGARANG & STUDENT-CENTERED MAKSIMAL):`,
+    `- PENTING (DILARANG MENGARANG): Rujukan di bawah ini adalah isi faktual yang diekstraksi dari ${files.length} berkas media pembelajaran (${files.length} Pertemuan). DILARANG KERAS mengarang simulasi, praktikum, tabel pengamatan, atau kuis yang tidak tertulis di bawah ini!`,
+    `- TRANSFORMASI STUDENT-CENTERED: Walaupun media berupa slide/PDF materi paparan, rancang langkah pembelajaran (awal, memahami, mengaplikasi, merefleksi, penutup) yang 100% berpusat pada murid (murid aktif menelaah slide/halaman materi, berdiskusi membedah konsep/rumus/contoh soal yang ada di media, dan mempresentasikan temuannya) secara MENDETAIL dan MAKSIMAL.`,
     `- Gunakan "Ayat Pertemuan 1" -> field "ayat1", "Ayat Pertemuan 2" -> field "ayat2", dst. lengkap dengan Teks Arab, Terjemahan Indonesia, dan keterkaitan materi.`,
-    `- Rancang kegiatan (awal, memahami, mengaplikasi, merefleksi, penutup), pemanfaatan digital, dan asesmen (1 Diagnostik Awal + Formatif sesuai tugas nyata media tanpa observasi) secara spesifik merujuk pada intisari tiap pertemuan di bawah ini.\n`
+    `- Rancang Asesmen (1 Diagnostik Awal + Formatif sesuai latihan/contoh nyata yang ada di media tanpa observasi sikap).\n`
   ].join('\n');
 
   blocks.push(summaryHeader);
