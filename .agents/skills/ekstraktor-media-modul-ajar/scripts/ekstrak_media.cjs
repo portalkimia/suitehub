@@ -531,10 +531,10 @@ function formatMeetingPrompt(analyzed, meetingNum) {
   out.push(`2. Fase Mengaplikasi (Collaborative Problem Solving): ${analyzed.lkpd || `Murid berkolaborasi dalam kelompok untuk menganalisis contoh soal/kasus dan mengerjakan latihan penerapan konsep yang tertera di dalam ${analyzed.mediaType} "${analyzed.title}", lalu mempresentasikan dan membandingkan hasil diskusi antar-kelompok.`}`);
   out.push(`3. Fase Merefleksi (Synthesis & Confirmation): Murid menyimpulkan benang merah materi "${analyzed.title}" berdasarkan slide/halaman yang telah ditelaah, melakukan verifikasi konsep bersama pendidik, dan merefleksikan makna materi.`);
 
-  out.push(`\n[BAGIAN 5: ACUAN ASESMEN DIAGNOSTIK AWAL & FORMATIF (TANPA OBSERVASI SIKAP)]`);
+  out.push(`\n[BAGIAN 5: ACUAN ASESMEN DIAGNOSTIK AWAL & FORMATIF FLEKSIBEL (SIAP RUBRIK, TANPA OBSERVASI SIKAP)]`);
   out.push(`1. Asesmen Diagnostik Awal (Acuan Baris 1 Tabel ITP & Kegiatan Awal): Tanya-jawab singkat mengecek penguasaan materi prasyarat sebelum mempelajari "${analyzed.title}".`);
-  out.push(`2. Asesmen Formatif 1 (Unjuk Kerja Kelompok / Diskusi Konsep / LKPD): ${analyzed.lkpd || `Penilaian hasil kerja kelompok dalam membedah konsep dan menganalisis contoh/kasus yang tertulis pada ${analyzed.mediaType} "${analyzed.title}".`}`);
-  out.push(`3. Asesmen Formatif 2 (Evaluasi Mandiri / Latihan Soal): ${analyzed.kuis || `Penilaian penyelesaian soal latihan/evaluasi pemahaman konsep berdasarkan materi yang tertulis pada ${analyzed.mediaType} "${analyzed.title}".`}`);
+  out.push(`2. Formatif 1 (${analyzed.lkpd ? 'Penyelidikan & LKPD' : 'Telaah Konsep & Diskusi Kelompok'}): ${analyzed.lkpd || `Penilaian hasil kerja kelompok dalam membedah konsep dan menganalisis contoh/kasus pada ${analyzed.mediaType} "${analyzed.title}"`} (Kriteria Rubrik: ketepatan konsep ilmiah, kelogisan analisis, dan kelengkapan jawaban).`);
+  out.push(`3. Formatif 2 (${analyzed.kuis ? 'Evaluasi / Kuis Mandiri' : 'Latihan Pemecahan Masalah'}): ${analyzed.kuis || `Penilaian penyelesaian latihan penerapan konsep berdasarkan materi pada ${analyzed.mediaType} "${analyzed.title}"`} (Kriteria Rubrik: ketepatan langkah penyelesaian dan kebenaran hasil akhir).`);
 
   return out.join('\n');
 }

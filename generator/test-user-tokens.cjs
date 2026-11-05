@@ -625,6 +625,47 @@ test('Ayat Al-Quran dari DeepSeek API dan Prompt Tambahan per pertemuan terbaca 
   assert.ok(normFromPrompt.ayat2.includes('QS. Al-Anbiya: 33'), 'ayat2 harus otomatis terisi dari prompt tambahan pertemuan 2');
 });
 
+// TEST 12: Pemetaan Formatif 1..N Fleksibel & Siap Rubrik (Tidak Memaksakan LKPD/Simulasi jika Media Tidak Ada LKPD)
+test('Formatif 1..N bersifat fleksibel mengikuti isi media (tidak dipaksa LKPD) dan melestarikan Kriteria Rubrik', () => {
+  const { context } = createHarness();
+
+  // Skenario: Media berupa PPT/PDF materi konsep & latihan soal (tanpa LKPD dan tanpa simulasi)
+  // AI juga menulis asesmen2 tanpa awalan "Formatif 1" untuk menguji apakah harmonisasiOutputAI_ menimpanya menjadi LKPD
+  const nonLkpdMediaAI = {
+    topik: 'Perkembangan Model Atom dan Partikel Dasar',
+    tujuan: 'Murid mampu menganalisis perkembangan model atom Dalton hingga Mekanika Kuantum',
+    itp1: 'Mengidentifikasi pengetahuan prasyarat konsep materi dan unsur',
+    asesmen1: 'Asesmen Diagnostik Awal: Tanya-jawab lisan singkat mengecek pemahaman prasyarat unsur dan atom',
+    aktivitas1: 'Tanya-jawab diagnostik awal pada Kegiatan Awal (10 menit)',
+    itp2: 'Menganalisis kelebihan dan kelemahan model atom Dalton, Thomson, Rutherford, dan Bohr melalui diskusi kelompok',
+    asesmen2: 'Telaah Konsep & Diskusi Kelompok: Penilaian argumen perbandingan model atom (Kriteria Rubrik: 1. Ketepatan perbandingan konsep model atom, 2. Kelengkapan analisis kelemahan model, 3. Kejelasan penyampaian argumen ilmiah)',
+    aktivitas2: 'Diskusi kelompok membedah bagan model atom pada slide media (35 menit)',
+    itp3: 'Menentukan jumlah proton, elektron, dan neutron pada atom netral serta ion',
+    asesmen3: 'Formatif 2 (Latihan Pemecahan Masalah): Penilaian ketepatan perhitungan partikel subatomik dan notasi unsur (Kriteria Rubrik: 1. Ketepatan penentuan nomor atom dan nomor massa, 2. Ketepatan perhitungan jumlah elektron pada ion, 3. Keruntutan langkah penyelesaian)',
+    aktivitas3: 'Penyelesaian soal latihan notasi atom dan ion secara kolaboratif (30 menit)',
+    subTopik1: 'Model Atom dan Partikel Subatomik',
+    ayat1: 'QS. Yunus (10): Ayat 61\nوَمَا يَعْزُبُ عَن رَّبِّكَ مِن مِّثْقَالِ ذَرَّةٍ\nArtinya: "Tidak luput dari pengetahuan Tuhanmu biarpun sebesar zarrah."\nKeterkaitan: Zarrah merujuk pada partikel terkecil penyusun materi.',
+    zona1: 'Tebak ilmuwan penemu partikel atom',
+    awal1: '1) Merapikan kelas.\n2) Berdoa.',
+    memahami1: '1) Murid menelaah bagan perkembangan model atom.',
+    mengaplikasi1: '1) Murid mengerjakan soal penentuan proton, elektron, dan neutron.',
+    merefleksi1: '1) Murid menyimpulkan perkembangan model atom.',
+    penutup1: '1) Menyimpulkan.\n2) Murid membaca hamdalah dan do\'a kafaratul majlis untuk menutup kegiatan pembelajaran.',
+    listAsesmen: '1. Asesmen Diagnostik Awal: Tanya-jawab lisan materi prasyarat\n2. Formatif 1 (Telaah Konsep & Diskusi Kelompok): Penilaian perbandingan model atom (Kriteria Rubrik: Ketepatan konsep, kelengkapan analisis, kejelasan argumen)\n3. Formatif 2 (Latihan Pemecahan Masalah): Penilaian latihan notasi unsur dan ion (Kriteria Rubrik: Ketepatan jumlah proton/elektron/neutron, keruntutan langkah)'
+  };
+
+  const normFlexible = JSON.parse(context.harmonisasiOutputAI_(JSON.stringify(nonLkpdMediaAI), 1));
+
+  // 1. asesmen2 TIDAK BOLEH ditimpa menjadi "Formatif 1 (LKPD)"
+  assert.ok(!normFlexible.asesmen2.includes('(LKPD)'), 'asesmen2 tidak boleh dipaksa menjadi (LKPD) jika media bukan LKPD');
+  assert.ok(normFlexible.asesmen2.startsWith('Formatif 1: Telaah Konsep & Diskusi Kelompok'), 'asesmen2 harus diawali Formatif 1 dan melestarikan jenis tagihan asli');
+  assert.ok(normFlexible.asesmen2.includes('Kriteria Rubrik:'), 'asesmen2 harus tetap memuat Kriteria Rubrik untuk memudahkan pembuatan rubrik');
+
+  // 2. asesmen3 melestarikan Formatif 2 (Latihan Pemecahan Masalah) dan Kriteria Rubrik
+  assert.ok(normFlexible.asesmen3.startsWith('Formatif 2 (Latihan Pemecahan Masalah)'), 'asesmen3 harus mempertahankan label Formatif 2 (Latihan Pemecahan Masalah)');
+  assert.ok(normFlexible.asesmen3.includes('Kriteria Rubrik:'), 'asesmen3 harus tetap memuat Kriteria Rubrik');
+});
+
 console.log('\nAll ' + passed + ' multi-user token ledger tests passed successfully!');
 
 

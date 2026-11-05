@@ -6559,6 +6559,7 @@
             }
           });
         }
+        if (typeof perbaruiJudulAkordeonITP === 'function') perbaruiJudulAkordeonITP();
       }
 
       highlightInputFields(fieldsUpdated);
@@ -6581,6 +6582,35 @@
     // =========================================================================
     // 7. GENERATOR TAMPILAN AKORDEON DINAMIS (14 ITP & 9 Pertemuan)
     // =========================================================================
+    function labelDefaultAkordeonITP(i) {
+      if (i === 1) return `Asesmen Diagnostik Awal (Kesiapan Belajar & Materi Prasyarat)`;
+      if (i >= 2 && i <= 5) return `Formatif ${i - 1} (Fleksibel Sesuai Tagihan Pembelajaran / Media &ndash; Siap Rubrik)`;
+      return `Formatif ${i - 1} / ITP ${i} (Opsional &ndash; Terisi jika ada tagihan lanjutan)`;
+    }
+
+    function perbaruiJudulAkordeonITP() {
+      for (let i = 2; i <= 14; i++) {
+        const spanEl = document.getElementById(`labelJudulITP${i}`);
+        if (!spanEl) continue;
+        const valAses = (document.getElementsByName(`asesmen${i}`)[0]?.value || '').trim();
+        const valItp = (document.getElementsByName(`itp${i}`)[0]?.value || '').trim();
+        if (!valAses && !valItp) {
+          spanEl.innerHTML = labelDefaultAkordeonITP(i);
+          continue;
+        }
+        // Ekstrak nama bentuk tagihan di dalam kurung setelah Formatif N (...) atau teks sebelum titik dua
+        const mKurung = valAses.match(/^Formatif\s*\d+\s*\(([^)]+)\)/i);
+        if (mKurung && mKurung[1]) {
+          spanEl.textContent = `Formatif ${i - 1} (${mKurung[1].trim()})`;
+        } else {
+          const cleanShort = valAses.replace(/^Formatif\s*\d+\s*[:=-]?\s*/i, '').split(/\s*\(Kriteria/i)[0].trim();
+          const ringkas = (cleanShort || valItp).slice(0, 62);
+          spanEl.textContent = `Formatif ${i - 1} — ${ringkas}${(cleanShort || valItp).length > 62 ? '...' : ''}`;
+        }
+      }
+    }
+    window.perbaruiJudulAkordeonITP = perbaruiJudulAkordeonITP;
+
     function bangunTampilanDinamsis() {
       // Pemetaan 14 ITP
       let htmlITP = '<div class="accordion" id="accordionITP">';
@@ -6589,33 +6619,27 @@
         let isShow = (i === 1) ? 'show' : '';
         let collapsedClass = (i === 1) ? '' : 'collapsed';
 
-        let labelJudul = `Indikator Tujuan Pembelajaran ${i}`;
+        let labelJudul = labelDefaultAkordeonITP(i);
         let badgeColor = '#a78bfa';
         let badgeText = `ITP ${i}`;
         if (i === 1) {
-          labelJudul = `Asesmen Diagnostik Awal (Kesiapan Belajar & Materi Prasyarat)`;
           badgeColor = '#fbbf24';
           badgeText = `Diagnostik`;
         } else if (i === 2) {
-          labelJudul = `Formatif 1 (Tugas / Simulasi / LKPD Media 1)`;
           badgeColor = '#34d399';
           badgeText = `Formatif 1`;
         } else if (i === 3) {
-          labelJudul = `Formatif 2 (Kuis Interaktif Media 1 / Tugas Media 1)`;
           badgeColor = '#60a5fa';
           badgeText = `Formatif 2`;
         } else if (i === 4) {
-          labelJudul = `Formatif 3 (Tugas / Simulasi / LKPD Media 2)`;
           badgeColor = '#a78bfa';
           badgeText = `Formatif 3`;
         } else if (i === 5) {
-          labelJudul = `Formatif 4 (Kuis Interaktif Media 2 / Tugas Media 2)`;
           badgeColor = '#f472b6';
           badgeText = `Formatif 4`;
         } else {
-          labelJudul = `ITP ${i} (Cadangan &ndash; Dikosongkan jika media/tugas sudah selesai)`;
           badgeColor = '#71717a';
-          badgeText = `ITP ${i}`;
+          badgeText = `Formatif ${i - 1}`;
         }
 
         htmlITP += `
@@ -6623,7 +6647,7 @@
             <h2 class="accordion-header" id="headingITP${i}">
               <button class="accordion-button ${collapsedClass}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseITP${i}" aria-expanded="${isExpanded}" aria-controls="collapseITP${i}">
                 <span class="badge rounded-pill me-2 px-2.5 py-1" style="background:#18181b; border:1px solid #27272a; color:${badgeColor}; font-size:0.75rem; font-family:monospace;">${badgeText}</span>
-                ${labelJudul}
+                <span id="labelJudulITP${i}">${labelJudul}</span>
               </button>
             </h2>
             <div id="collapseITP${i}" class="accordion-collapse collapse ${isShow}" aria-labelledby="headingITP${i}" data-bs-parent="#accordionITP">
@@ -6631,11 +6655,11 @@
                 <div class="row">
                   <div class="col-md-12 mb-3">
                     <label class="form-label" style="font-size:0.78rem; color:#a1a1aa;">Rumusan Indikator</label>
-                    <input type="text" class="form-control" name="itp${i}" placeholder="Rumusan Indikator Tujuan Pembelajaran ${i}">
+                    <input type="text" class="form-control" name="itp${i}" oninput="perbaruiJudulAkordeonITP()" placeholder="Rumusan Indikator Tujuan Pembelajaran ${i}">
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label class="form-label" style="font-size:0.78rem; color:#a1a1aa;">Teknik Asesmen</label>
-                    <input type="text" class="form-control" name="asesmen${i}" placeholder="Teknik Asesmen">
+                    <label class="form-label" style="font-size:0.78rem; color:#a1a1aa;">Teknik Asesmen &amp; Kriteria Rubrik</label>
+                    <input type="text" class="form-control" name="asesmen${i}" oninput="perbaruiJudulAkordeonITP()" placeholder="Contoh: Formatif ${i > 1 ? i - 1 : 1} (Diskusi / Latihan / LKPD): ... (Kriteria Rubrik: ...)">
                   </div>
                   <div class="col-md-6 mb-2">
                     <label class="form-label" style="font-size:0.78rem; color:#a1a1aa;">Aktivitas Murid</label>
@@ -6777,6 +6801,7 @@
             }
           }
           aturTampilanDokumen(); 
+          if (typeof perbaruiJudulAkordeonITP === 'function') perbaruiJudulAkordeonITP();
         } catch (e) {
           console.log("Gagal memuat memori lokal draft.", e);
         }
@@ -6803,6 +6828,7 @@
         aturKeteranganAIProvider();
         hapusFileTerunggah();
         aturTampilanDokumen();
+        if (typeof perbaruiJudulAkordeonITP === 'function') perbaruiJudulAkordeonITP();
         renderQuickTags();
         window.renderPortalMediaMeetings && window.renderPortalMediaMeetings();
         window.renderDaftarMediaPortal && window.renderDaftarMediaPortal();
@@ -7157,7 +7183,7 @@
         document.getElementsByName('kolaborasi')[0].checked = true;
       }
       
-      // Loop Parse ITP hingga 14 (Hanya Formatif 1 & 2 yang terisi, sisanya dikosongkan)
+      // Loop Parse ITP hingga 14 (Fleksibel sesuai jumlah Formatif yang dihasilkan AI)
       for (let i = 1; i <= 14; i++) {
         ['itp', 'asesmen', 'aktivitas'].forEach(prefix => {
           const key = prefix + i;
@@ -7171,6 +7197,7 @@
           }
         });
       }
+      if (typeof perbaruiJudulAkordeonITP === 'function') perbaruiJudulAkordeonITP();
       
       // Loop Parse Pertemuan hingga 9
       for (let j = 1; j <= 9; j++) {

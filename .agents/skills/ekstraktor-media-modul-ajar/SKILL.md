@@ -63,7 +63,7 @@ Susun hasil akhir mengikuti struktur baku pada [template_prompt_deepseek.md](./r
    - `[BAGIAN 2: INTEGRASI NILAI KEISLAMAN & AYAT/HADITS]`
    - `[BAGIAN 3: EKSTRAKSI LENGKAP MATERI PER SLIDE / HALAMAN (FAKTUAL DARI MEDIA)]`
    - `[BAGIAN 4: SKENARIO PEMBELAJARAN MENDALAM (DEEP LEARNING: STUDENT-CENTERED)]`
-   - `[BAGIAN 5: ACUAN ASESMEN DIAGNOSTIK AWAL & FORMATIF (TANPA OBSERVASI SIKAP)]` (Memuat Diagnostik Awal, Formatif 1, dan Formatif 2).
+   - `[BAGIAN 5: ACUAN ASESMEN DIAGNOSTIK AWAL & FORMATIF FLEKSIBEL (SIAP RUBRIK, TANPA OBSERVASI SIKAP)]` (Memuat Diagnostik Awal serta Formatif 1..N yang jenis tagihannya fleksibel mengikuti isi nyata media—tidak memaksakan LKPD/Simulasi jika tidak ada—dilengkapi `(Kriteria Rubrik: [2-3 aspek penilaian objektif])` untuk mempermudah pembuatan rubrik penilaian guru).
 
 ---
 

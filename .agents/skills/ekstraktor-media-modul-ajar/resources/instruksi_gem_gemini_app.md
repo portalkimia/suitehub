@@ -75,7 +75,7 @@ INSTRUKSI KHUSUS MEDIA & BAHAN AJAR:
 1. Seluruh konsep, rumus, data, contoh, dan soal pada Bagian 3 berasal dari berkas media guru. Jangan menambahkan simulasi, praktikum, tabel pengamatan, atau kuis yang tidak tercantum pada rincian pertemuan di bawah ini.
 2. Gunakan "Ayat Pertemuan 1" untuk mengisi field "ayat1", "Ayat Pertemuan 2" untuk mengisi field "ayat2", dan seterusnya secara utuh.
 3. Susun langkah pembelajaran mengikuti kerangka Pembelajaran Mendalam (Deep Learning: Memahami, Mengaplikasi, Merefleksi) yang berpusat pada murid sesuai Bagian 4 secara mendetail.
-4. Susun tabel ITP dan Asesmen merujuk pada Bagian 5 (Baris 1 wajib Asesmen Diagnostik Awal, diikuti Asesmen Formatif 1 dan Formatif 2 setiap pertemuan tanpa asesmen observasi sikap).
+4. Susun tabel ITP dan Asesmen merujuk pada Bagian 5 (Baris 1 wajib Asesmen Diagnostik Awal, diikuti Asesmen Formatif yang fleksibel sesuai tagihan nyata tiap pertemuan beserta Kriteria Rubrik objektifnya tanpa asesmen observasi sikap).
 
 [MEDIA PERTEMUAN 1]
 Berkas Sumber: <Nama Berkas> | Cakupan: <Misal: Slide 1 s.d. 12 / Halaman 1 s.d. 8>
@@ -105,10 +105,11 @@ Karakteristik Faktual Media Pertemuan 1: <Tipe Media (Materi Paparan / Media Int
 2. Fase Mengaplikasi (Collaborative Problem Solving): <Rincian bagaimana murid berkolaborasi membedah contoh kasus/soal atau menjalankan LKPD/latihan pada Slide/Halaman tertentu, membandingkan strategi penyelesaian antar-kelompok, dan mempresentasikan hasilnya>
 3. Fase Merefleksi (Synthesis & Confirmation): <Rincian bagaimana murid menyimpulkan keterkaitan konsep dari seluruh slide/halaman pertemuan 1, memverifikasi kebenaran konsep bersama pendidik, dan merefleksikan makna materi>
 
-[BAGIAN 5: ACUAN ASESMEN DIAGNOSTIK AWAL & FORMATIF (TANPA OBSERVASI SIKAP)]
+[BAGIAN 5: ACUAN ASESMEN DIAGNOSTIK AWAL & FORMATIF FLEKSIBEL (SIAP RUBRIK, TANPA OBSERVASI SIKAP)]
 1. Asesmen Diagnostik Awal (Acuan Baris 1 Tabel ITP & Kegiatan Awal): <Tanya-jawab singkat mengecek penguasaan materi prasyarat pertemuan 1 beserta 2 contoh pertanyaan diagnostik>
-2. Asesmen Formatif 1 (Unjuk Kerja Kelompok / Diskusi Konsep / LKPD): <Penilaian hasil kerja kelompok dalam membedah konsep dan contoh kasus pada media pertemuan 1>
-3. Asesmen Formatif 2 (Evaluasi Mandiri / Latihan Soal): <Penilaian penyelesaian soal latihan/evaluasi pemahaman konsep dari materi pertemuan 1>
+2. Asesmen Formatif Pertemuan 1 (Fleksibel 1 atau 2 Tagihan Sesuai Aktivitas Nyata di Media, Jangan Memaksakan LKPD/Kuis jika Tidak Ada):
+   a. Formatif 1 (<Pilih Bentuk yang Sesuai: Telaah Konsep & Diskusi Kelompok / Latihan Pemecahan Masalah / Penyelidikan Simulasi & LKPD / Sintesis Konsep>): <Deskripsi penilaian> (Kriteria Rubrik: <Sebutkan 2 sampai 3 indikator penilaian objektif yang memudahkan guru membuat rubrik>)
+   b. Formatif 2 (Opsional, cantumkan jika ada tagihan kedua seperti Latihan Soal Mandiri / Kuis Evaluasi di Media): <Deskripsi penilaian> (Kriteria Rubrik: <Sebutkan 2 sampai 3 indikator penilaian objektif>)
 
 (Jika terdapat Pertemuan 2 dst., lanjutkan di bawahnya dengan blok [MEDIA PERTEMUAN 2], Sub-Topik Pertemuan 2:, Ayat Pertemuan 2:, serta [BAGIAN 1] s.d. [BAGIAN 5] dengan format yang sama).
 
