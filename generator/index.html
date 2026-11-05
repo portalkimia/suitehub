@@ -6584,8 +6584,8 @@
     // =========================================================================
     function labelDefaultAkordeonITP(i) {
       if (i === 1) return `Asesmen Diagnostik Awal (Kesiapan Belajar & Materi Prasyarat)`;
-      if (i >= 2 && i <= 5) return `Formatif ${i - 1} (Fleksibel Sesuai Tagihan Pembelajaran / Media &ndash; Siap Rubrik)`;
-      return `Formatif ${i - 1} / ITP ${i} (Opsional &ndash; Terisi jika ada tagihan lanjutan)`;
+      if (i >= 2 && i <= 5) return `Formatif ${i - 1} (Fleksibel Sesuai Tagihan Pembelajaran / Media – Siap Rubrik)`;
+      return `Formatif ${i - 1} / ITP ${i} (Opsional – Terisi jika ada tagihan lanjutan)`;
     }
 
     function perbaruiJudulAkordeonITP() {
@@ -6595,17 +6595,22 @@
         const valAses = (document.getElementsByName(`asesmen${i}`)[0]?.value || '').trim();
         const valItp = (document.getElementsByName(`itp${i}`)[0]?.value || '').trim();
         if (!valAses && !valItp) {
-          spanEl.innerHTML = labelDefaultAkordeonITP(i);
+          spanEl.textContent = labelDefaultAkordeonITP(i);
           continue;
         }
         // Ekstrak nama bentuk tagihan di dalam kurung setelah Formatif N (...) atau teks sebelum titik dua
         const mKurung = valAses.match(/^Formatif\s*\d+\s*\(([^)]+)\)/i);
-        if (mKurung && mKurung[1]) {
+        if (mKurung && mKurung[1] && !/^Kriteria\s*Rubrik/i.test(mKurung[1].trim())) {
           spanEl.textContent = `Formatif ${i - 1} (${mKurung[1].trim()})`;
         } else {
-          const cleanShort = valAses.replace(/^Formatif\s*\d+\s*[:=-]?\s*/i, '').split(/\s*\(Kriteria/i)[0].trim();
-          const ringkas = (cleanShort || valItp).slice(0, 62);
-          spanEl.textContent = `Formatif ${i - 1} — ${ringkas}${(cleanShort || valItp).length > 62 ? '...' : ''}`;
+          const withoutPrefix = valAses.replace(/^Formatif\s*\d+\s*[:=-]?\s*/i, '').split(/\s*\(Kriteria/i)[0].trim();
+          const beforeColon = withoutPrefix.includes(':') ? withoutPrefix.split(':')[0].trim() : '';
+          if (beforeColon && beforeColon.length >= 4 && beforeColon.length <= 50) {
+            spanEl.textContent = `Formatif ${i - 1} (${beforeColon})`;
+          } else {
+            const ringkas = (withoutPrefix || valItp).slice(0, 62);
+            spanEl.textContent = `Formatif ${i - 1} — ${ringkas}${(withoutPrefix || valItp).length > 62 ? '...' : ''}`;
+          }
         }
       }
     }

@@ -664,6 +664,22 @@ test('Formatif 1..N bersifat fleksibel mengikuti isi media (tidak dipaksa LKPD) 
   // 2. asesmen3 melestarikan Formatif 2 (Latihan Pemecahan Masalah) dan Kriteria Rubrik
   assert.ok(normFlexible.asesmen3.startsWith('Formatif 2 (Latihan Pemecahan Masalah)'), 'asesmen3 harus mempertahankan label Formatif 2 (Latihan Pemecahan Masalah)');
   assert.ok(normFlexible.asesmen3.includes('Kriteria Rubrik:'), 'asesmen3 harus tetap memuat Kriteria Rubrik');
+
+  // 3. listAsesmen TIDAK BOLEH terpotong baris baru di tengah "(Kriteria Rubrik: 1. ..., 2. ...)"
+  const listLines = normFlexible.listAsesmen.split('\n');
+  assert.equal(listLines.length, 3, 'listAsesmen harus tetap 3 baris utuh (tidak pecah di tengah Kriteria Rubrik: 1. ...)');
+
+  // 4. Notasi kimia Golongan 1A, 2A, 1B dan subkulit 1s, 2p, 3d pada ITP/Aktivitas TIDAK BOLEH terhapus, serta kata "prasyarat" pada Formatif tidak membuat baris terbuang
+  const chemGroupAI = {
+    ...nonLkpdMediaAI,
+    itp2: 'Menganalisis kecenderungan sifat unsur Golongan 1A, 2A, dan 1B berdasarkan konfigurasi subkulit 1s, 2p, dan 3d serta mengaitkannya dengan materi prasyarat',
+    asesmen2: 'Formatif 1 (Telaah Konsep): Penilaian tabel perbandingan Golongan 1A dan 1B (Kriteria Rubrik: 1. Ketepatan konfigurasi 3d; 2. Ketepatan analisis sifat)',
+    aktivitas2: 'Diskusi kelompok membandingkan unsur Golongan 1A, 2A, dan subkulit 3d (30 menit)'
+  };
+  const normChem = JSON.parse(context.harmonisasiOutputAI_(JSON.stringify(chemGroupAI), 1));
+  assert.ok(normChem.itp2.includes('Golongan 1A, 2A, dan 1B'), 'Notasi Golongan 1A, 2A, dan 1B tidak boleh terhapus dari itp2');
+  assert.ok(normChem.itp2.includes('subkulit 1s, 2p, dan 3d'), 'Notasi subkulit 1s, 2p, dan 3d tidak boleh terhapus dari itp2');
+  assert.ok(normChem.aktivitas2.includes('Golongan 1A, 2A, dan subkulit 3d'), 'Notasi kimia pada aktivitas2 tidak boleh terhapus');
 });
 
 console.log('\nAll ' + passed + ' multi-user token ledger tests passed successfully!');
